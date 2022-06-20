@@ -103,6 +103,7 @@ THIRD_PARTY_APPS = [
     "wagtailcaptcha",
     "wagtailmenus",
     "rest_framework",
+    "blog",
 ]
 
 LOCAL_APPS = [
