@@ -34,3 +34,21 @@ class ScholarlyArticles(models.Model):
     ]
 
 
+class Contributor(models.Model):
+    doi = models.CharField("DOI", max_length=255)
+    doi_url = models.URLField("DOI URL", max_length=255)
+    family = models.CharField("Family", max_length=255)
+    given = models.CharField("Given", max_length=255)
+    orcid = models.URLField("ORCID", max_length=255)
+    authenticated_orcid = models.BooleanField("Authenticated", max_length=255)
+    affiliation = models.CharField("Affiliation", max_length=255)
+
+    panels = [
+        FieldPanel('doi'),
+        FieldPanel('doi_url'),
+        FieldPanel('family'),
+        FieldPanel('given'),
+        FieldPanel('orcid'),
+        FieldPanel('authenticated_orcid'),
+        FieldPanel('affiliation'),
+    ]
