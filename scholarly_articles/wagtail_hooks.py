@@ -29,3 +29,25 @@ class ScholarlyArticlesAdmin(ModelAdmin):
     # search_fields = ('name', 'source_type')
 
 
+class ContributorAdmin(ModelAdmin):
+    model = Contributor
+    menu_label = 'Contributor'
+    menu_icon = 'folder'
+    menu_order = 300
+    add_to_settings_menu = False  # or True to add your model to the Settings sub-menu
+    exclude_from_explorer = False  # or True to exclude pages of this type from Wagtail's explorer view
+    list_display = (
+        'doi',
+        'doi_url',
+        'family',
+        'given',
+        'orcid',
+        'authenticated_orcid',
+        'affiliation',
+    )
+    # list_filter = ('source_type',)
+    # search_fields = ('name', 'source_type')
+
+
+modeladmin_register(ScholarlyArticlesAdmin)
+modeladmin_register(ContributorAdmin)
