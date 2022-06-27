@@ -104,6 +104,7 @@ THIRD_PARTY_APPS = [
     "wagtailmenus",
     "rest_framework",
     "blog",
+    "scholarly_articles",
 ]
 
 LOCAL_APPS = [
