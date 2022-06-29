@@ -56,7 +56,7 @@ class InfrastructureDirectoryFileAdmin(ModelAdmin):
 
 
 class InfrastructureDirectoryAdminGroup(ModelAdminGroup):
-    menu_label = _('Infraestruct Directory')
+    menu_label = _('Infraestructure Directory')
     menu_icon = 'folder-open-inverse'
     menu_order = 200
     items = (InfrastructureDirectoryAdmin, InfrastructureDirectoryFileAdmin,)
