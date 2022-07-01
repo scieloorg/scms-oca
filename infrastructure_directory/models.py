@@ -10,6 +10,9 @@ from .forms import InfrastructureDirectoryForm, InfrastructureDirectoryFileForm
 
 
 class InfrastructureDirectory(CommonControlField):
+    class Meta:
+        verbose_name_plural = _('Infraestructure Directory')
+
     title = models.CharField(_("Title"), max_length=255, null=False, blank=False)
     link = models.URLField(_("Link"), null=False, blank=False)
     description = models.TextField(_("Description"), max_length=255,
@@ -23,6 +26,8 @@ class InfrastructureDirectory(CommonControlField):
     base_form_class = InfrastructureDirectoryForm
 
 class InfrastructureDirectoryFile(CommonControlField):
+    class Meta:
+        verbose_name_plural = _('Infraestructure Directory Upload')
 
     attachment = models.ForeignKey(
         'wagtaildocs.Document',
