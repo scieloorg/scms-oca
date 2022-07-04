@@ -24,9 +24,10 @@ class ScholarlyArticlesAdmin(ModelAdmin):
         'published_date',
         'publisher',
         'title',
+        'article_json',
     )
-    # list_filter = ('source_type',)
-    # search_fields = ('name', 'source_type')
+    list_filter = ('journal_issn_l',)
+    search_fields = ('doi', 'journal_issn_l')
 
 
 class ContributorAdmin(ModelAdmin):
