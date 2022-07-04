@@ -18,6 +18,7 @@ class ScholarlyArticles(models.Model):
     published_date = models.DateTimeField("Published Date", max_length=255, null=True, blank=True)
     publisher = models.CharField("Publisher", max_length=255, null=True, blank=True)
     title = models.CharField("Title", max_length=255, null=True, blank=True)
+    article_json = models.JSONField("JSON File", null=True, blank=True)
 
     panels = [
         FieldPanel('doi'),
@@ -31,6 +32,7 @@ class ScholarlyArticles(models.Model):
         FieldPanel('published_date'),
         FieldPanel('publisher'),
         FieldPanel('title'),
+        FieldPanel('article_json'),
     ]
 
 
