@@ -36,7 +36,7 @@ class ScholarlyArticles(models.Model):
     ]
 
 
-class Contributor(models.Model):
+class Contributors(models.Model):
     doi = models.CharField("DOI", max_length=255, null=False, blank=False)
     doi_url = models.URLField("DOI URL", max_length=255, null=True, blank=True)
     family = models.CharField("Family", max_length=255, null=False, blank=False)

@@ -2,7 +2,7 @@ from django.utils.translation import gettext as _
 
 from wagtail.contrib.modeladmin.options import (ModelAdmin, modeladmin_register)
 
-from .models import (ScholarlyArticles, Contributor)
+from .models import (ScholarlyArticles, Contributors)
 
 
 class ScholarlyArticlesAdmin(ModelAdmin):
@@ -30,9 +30,9 @@ class ScholarlyArticlesAdmin(ModelAdmin):
     search_fields = ('doi', 'journal_issn_l')
 
 
-class ContributorAdmin(ModelAdmin):
-    model = Contributor
-    menu_label = 'Contributor'
+class ContributorsAdmin(ModelAdmin):
+    model = Contributors
+    menu_label = 'Contributors'
     menu_icon = 'folder'
     menu_order = 300
     add_to_settings_menu = False  # or True to add your model to the Settings sub-menu
@@ -51,4 +51,4 @@ class ContributorAdmin(ModelAdmin):
 
 
 modeladmin_register(ScholarlyArticlesAdmin)
-modeladmin_register(ContributorAdmin)
+modeladmin_register(ContributorsAdmin)
