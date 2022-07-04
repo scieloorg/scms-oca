@@ -46,8 +46,8 @@ class ContributorAdmin(ModelAdmin):
         'authenticated_orcid',
         'affiliation',
     )
-    # list_filter = ('source_type',)
-    # search_fields = ('name', 'source_type')
+    list_filter = ('orcid',)
+    search_fields = ('doi', 'orcid')
 
 
 modeladmin_register(ScholarlyArticlesAdmin)
