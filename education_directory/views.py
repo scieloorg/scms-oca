@@ -4,12 +4,11 @@ from django.shortcuts import get_object_or_404, redirect
 from django.http import HttpResponse, Http404
 from django.utils.translation import gettext as _
 
-
 from wagtail.admin import messages
 
 from core.libs import chkcsv
 
-from .models import InfrastructureDirectoryFile, InfrastructureDirectory
+from .models import EducationDirectoryFile, EducationDirectory
 
 
 def validate(request):
@@ -26,7 +25,7 @@ def validate(request):
     file_id = request.GET.get("file_id", None)
 
     if file_id:
-        file_upload = get_object_or_404(InfrastructureDirectoryFile, pk=file_id)
+        file_upload = get_object_or_404(EducationDirectoryFile, pk=file_id)
 
     if request.method == 'GET':
         try:
@@ -63,7 +62,7 @@ def import_file(request):
     file_id = request.GET.get("file_id", None)
 
     if file_id:
-        file_upload = get_object_or_404(InfrastructureDirectoryFile, pk=file_id)
+        file_upload = get_object_or_404(EducationDirectoryFile, pk=file_id)
 
     file_path = file_upload.attachment.file.path
 
@@ -72,12 +71,13 @@ def import_file(request):
             data = csv.DictReader(csvfile)
 
             for row in data:
-                isd = InfrastructureDirectory()
-                isd.title = row['Title']
-                isd.link = row['Link']
-                isd.description = row['Description']
-                isd.creator = request.user
-                isd.save()
+                ed = EducationDirectory()
+                ed.title = row['Title']
+                ed.link = row['Link']
+                ed.description = row['Description']
+                ed.institution = row['Institution']
+                ed.creator = request.user
+                ed.save()
     except Exception as ex:
         messages.error(request, _("Import error: %s") % ex)
     else:
@@ -88,9 +88,9 @@ def import_file(request):
 
 def download_sample(request):
     """
-    This view function a CSV sample for model InfraestructureDirectoryFile.
+    This view function a CSV sample for model EducationDirectoryFile.
     """
-    file_path = os.path.dirname(os.path.abspath(__file__)) + "/example_infra.csv"
+    file_path = os.path.dirname(os.path.abspath(__file__)) + "/example_education.csv"
     if os.path.exists(file_path):
         with open(file_path, 'rb') as fh:
             response = HttpResponse(fh.read(), content_type="text/csv")

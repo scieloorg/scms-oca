@@ -105,6 +105,8 @@ THIRD_PARTY_APPS = [
     "rest_framework",
     "blog",
     "scholarly_articles",
+    "infrastructure_directory",
+    "education_directory",
 ]
 
 LOCAL_APPS = [
