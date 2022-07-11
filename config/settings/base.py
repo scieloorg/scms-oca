@@ -107,6 +107,7 @@ THIRD_PARTY_APPS = [
     "scholarly_articles",
     "infrastructure_directory",
     "education_directory",
+    "policy_directory",
 ]
 
 LOCAL_APPS = [
