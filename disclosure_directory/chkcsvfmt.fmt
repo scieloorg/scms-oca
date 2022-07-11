@@ -1,0 +1,15 @@
+[Event]
+data_required=True
+type=String
+
+[Link]
+data_required=False
+type=String
+
+[Description]
+data_required=False
+type=String
+
+[Organization]
+data_required=False
+type=String
