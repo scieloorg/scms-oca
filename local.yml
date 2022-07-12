@@ -5,8 +5,8 @@ services:
     build:
       context: .
       dockerfile: ./compose/local/django/Dockerfile
-    image: core_local_django
-    container_name: core_local_django
+    image: oca_local_django
+    container_name: oca_local_django
     depends_on:
       - redis
       - postgres
@@ -26,7 +26,7 @@ services:
   pgbouncer:
     image: edoburu/pgbouncer:1.14.0
     restart: always
-    container_name: core_local_pgbouncer
+    container_name: oca_local_pgbouncer
     environment:
       - DATABASE_URL=postgres://GVRFlLmcCNfGLhsFvSnCioYOPJPYpyfj:BQ4hSUL4rdj5WZLdR8ilDLRQMvCtzo0caMaXDO0olGsmycQjlcZlTVK9DepZR8kk@postgres/core
       - MAX_CLIENT_CONN=100
@@ -41,8 +41,8 @@ services:
     build:
       context: .
       dockerfile: ./compose/production/postgres/Dockerfile
-    image: core_local_postgres
-    container_name: core_local_postgres
+    image: oca_local_postgres
+    container_name: oca_local_postgres
     volumes:
       - ../scms_data/data_dev:/var/lib/postgresql/data:Z
       - ../scms_data/data_dev_backup:/backups:z
@@ -57,8 +57,8 @@ services:
         - "8080:8080"
 
   docs:
-    image: core_local_docs
-    container_name: core_local_docs
+    image: oca_local_docs
+    container_name: oca_local_docs
     build:
       context: .
       dockerfile: ./compose/local/docs/Dockerfile
@@ -74,18 +74,18 @@ services:
 
   mailhog:
     image: mailhog/mailhog:v1.0.0
-    container_name: core_local_mailhog
+    container_name: oca_local_mailhog
     ports:
       - "8025:8025"
 
   redis:
     image: redis:6
-    container_name: core_local_redis
+    container_name: oca_local_redis
 
   celeryworker:
     <<: *django
-    image: core_local_celeryworker
-    container_name: core_local_celeryworker
+    image: oca_local_celeryworker
+    container_name: oca_local_celeryworker
     depends_on:
       - redis
       - postgres
@@ -95,8 +95,8 @@ services:
 
   celerybeat:
     <<: *django
-    image: core_local_celerybeat
-    container_name: core_local_celerybeat
+    image: oca_local_celerybeat
+    container_name: oca_local_celerybeat
     depends_on:
       - redis
       - postgres
@@ -106,8 +106,8 @@ services:
 
   flower:
     <<: *django
-    image: core_local_flower
-    container_name: core_local_flower
+    image: oca_local_flower
+    container_name: oca_local_flower
     ports:
       - "5555:5555"
     command: /start-flower
