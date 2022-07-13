@@ -53,17 +53,19 @@ class ScholarlyArticles(models.Model):
 
 
 class Contributors(models.Model):
-    doi = models.CharField("DOI", max_length=255, null=False, blank=False)
-    doi_url = models.URLField("DOI URL", max_length=255, null=True, blank=True)
-    family = models.CharField("Family", max_length=255, null=False, blank=False)
-    given = models.CharField("Given", max_length=255, null=False, blank=False)
-    orcid = models.URLField("ORCID", max_length=255, null=False, blank=False)
-    authenticated_orcid = models.BooleanField("Authenticated", max_length=255, null=False, blank=False)
-    affiliation = models.CharField("Affiliation", max_length=255, null=False, blank=False)
+    family = models.CharField(_("Family Name"), max_length=255, null=False, blank=False)
+    given = models.CharField(_("Given Name"), max_length=255, null=False, blank=False)
+    orcid = models.CharField("ORCID", max_length=255, null=False, blank=False)
+    authenticated_orcid = models.BooleanField(_("Authenticated"), max_length=20, null=False, blank=False)
+    affiliation = models.ForeignKey(_("Affiliations"), on_delete=models.CASCADE)
+
+    def __unicode__(self):
+        return self.orcid
+
+    def __str__(self):
+        return self.orcid
 
     panels = [
-        FieldPanel('doi'),
-        FieldPanel('doi_url'),
         FieldPanel('family'),
         FieldPanel('given'),
         FieldPanel('orcid'),
