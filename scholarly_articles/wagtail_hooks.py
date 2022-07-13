@@ -70,3 +70,13 @@ class AffiliationsAdmin(ModelAdmin):
     )
     list_filter = ('institution_place',)
     search_fields = ('institution_name',)
+
+
+class ScholarlyArticlesAdminGroup(ModelAdminGroup):
+    menu_label = _('Articles Directory')
+    menu_icon = 'folder-open-inverse'  # change as required
+    menu_order = 200  # will put in 3rd place (000 being 1st, 100 2nd)
+    items = (ScholarlyArticlesAdmin, ContributorsAdmin, AffiliationsAdmin,)
+
+
+modeladmin_register(ScholarlyArticlesAdminGroup)
