@@ -57,3 +57,16 @@ class ContributorsAdmin(ModelAdmin):
     search_fields = ('orcid',)
 
 
+class AffiliationsAdmin(ModelAdmin):
+    model = Affiliations
+    menu_label = _('Affiliations')
+    menu_icon = 'folder-open-inverse'
+    menu_order = 200
+    list_display = (
+        'institution_name',
+        'institution_acronym',
+        'institution_place',
+        'institution_department',
+    )
+    list_filter = ('institution_place',)
+    search_fields = ('institution_name',)
