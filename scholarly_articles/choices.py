@@ -30,3 +30,12 @@ TYPE_OF_RESOURCE = [
     ("Edited Book", "edited-book"),
     ("Standard Series", "standard-series")
 ]
+
+OA_STATUS = [
+    ("", ""),
+    ("Gold", "gold"),
+    ("Hybrid", "hybrid"),
+    ("Bronze", "bronze"),
+    ("Green", "green"),
+    ("Closed", "closed")
+]
