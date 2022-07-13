@@ -41,23 +41,19 @@ class ScholarlyArticlesAdmin(ModelAdmin):
 
 class ContributorsAdmin(ModelAdmin):
     model = Contributors
-    menu_label = 'Contributors'
-    menu_icon = 'folder'
-    menu_order = 300
+    menu_label = _('Contributors')
+    menu_icon = 'folder-open-inverse'
+    menu_order = 100
     add_to_settings_menu = False  # or True to add your model to the Settings sub-menu
     exclude_from_explorer = False  # or True to exclude pages of this type from Wagtail's explorer view
     list_display = (
-        'doi',
-        'doi_url',
         'family',
         'given',
         'orcid',
         'authenticated_orcid',
         'affiliation',
     )
-    list_filter = ('orcid',)
-    search_fields = ('doi', 'orcid')
+    list_filter = ('affiliation',)
+    search_fields = ('orcid',)
 
 
-modeladmin_register(ScholarlyArticlesAdmin)
-modeladmin_register(ContributorsAdmin)
