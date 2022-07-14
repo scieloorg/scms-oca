@@ -76,6 +76,7 @@ WAGTAIL = [
     "wagtail.core",
     "wagtail.locales",
     "wagtail.api.v2",
+    "wagtail.contrib.styleguide",
     "modelcluster",
     "taggit",
 ]
@@ -103,12 +104,16 @@ THIRD_PARTY_APPS = [
     "wagtailcaptcha",
     "wagtailmenus",
     "rest_framework",
+<<<<<<< HEAD
     "blog",
     "scholarly_articles",
     "infrastructure_directory",
     "education_directory",
     "policy_directory",
     "disclosure_directory",
+=======
+    "core",
+>>>>>>> bc63842 (Merge pull request #27 from gitnnolabs/custom_css_js)
 ]
 
 LOCAL_APPS = [
