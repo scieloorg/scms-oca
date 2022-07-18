@@ -1,7 +1,6 @@
 from django.db import models
-
+from wagtail.admin.edit_handlers import FieldPanel
 from wagtail.images.edit_handlers import ImageChooserPanel
-
 from wagtail.contrib.settings.models import BaseSetting, register_setting
 
 
@@ -13,6 +12,8 @@ class CustomSettings(BaseSetting):
     More about look:
         https://docs.wagtail.org/en/stable/reference/contrib/settings.html
     """
+    name = models.CharField(max_length=100, null=True, blank=True)
+
     favicon = models.ForeignKey(
         'wagtailimages.Image',
         null=True,
@@ -30,6 +31,7 @@ class CustomSettings(BaseSetting):
     )
 
     panels = [
+        FieldPanel('name'),
         ImageChooserPanel('favicon'),
         ImageChooserPanel('admin_logo'),
     ]

@@ -1,1 +1,5 @@
-/* your custom css go here */
+:root {
+    --color-primary: #034E8E;
+    --color-primary-darker: #023F73;
+    --color-primary-dark: #023561;
+}

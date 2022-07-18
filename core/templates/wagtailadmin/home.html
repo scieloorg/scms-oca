@@ -1,5 +1,7 @@
 {% extends "wagtailadmin/home.html" %}
-
 {% load i18n %}
+{% load wagtailsettings_tags %}
 
-{% block branding_welcome %}{% trans 'Welcome to the administrative area of CMS SciELO' %}{% endblock %}
+{% get_settings use_default_site=True %}
+
+{% block branding_welcome %}{% trans 'Welcome to the administrative area of ' %}{{ settings.core_settings.CustomSettings.name }}{% endblock %}
