@@ -1,0 +1,71 @@
+{% load wagtailcore_tags %}
+{% load wagtailsettings_tags %}
+
+{% get_settings use_default_site=True %}
+
+
+
+<!-- Top Bar -->
+<div id="top-bar">
+    <div class="container clearfix">
+
+        <div class="row justify-content-between">
+            <div class="col-12 col-md-auto">
+
+                <!-- Top Links
+                ============================================= -->
+                <div class="top-links on-click">
+                    <ul class="top-links-container">
+                        {% if settings.asettings.CustomSettings.faq_content_page %}
+                            <li class="top-links-item"><a
+                                    href="{% pageurl settings.asettings.CustomSettings.faq_content_page %}">FAQs</a></li>
+                        {% endif %}
+                        <!-- <li class="top-links-item"><a href="login-register.html">Login</a> -->
+                        <div class="top-links-section">
+                            <form id="top-login" autocomplete="off">
+                                <div class="form-group">
+                                    <label>Nome do usuário</label>
+                                    <input type="email" class="form-control" placeholder="Email">
+                                </div>
+                                <div class="form-group">
+                                    <label>Senha</label>
+                                    <input type="password" class="form-control" placeholder="Senha" required="">
+                                </div>
+                                <div class="form-group form-check">
+                                    <input class="form-check-input" type="checkbox" value="" id="top-login-checkbox">
+                                    <label class="form-check-label" for="top-login-checkbox">Lembrar senha</label>
+                                </div>
+                                <button class="btn btn-danger btn-block" type="submit">Acessar</button>
+                            </form>
+                        </div>
+                        </li>
+                    </ul>
+                </div><!-- .top-links end -->
+
+            </div>
+
+            <div class="col-12 col-md-auto">
+
+                <!-- Top Social
+                ============================================= -->
+                <ul id="top-social">
+                    <li><a href="{{ settings.asettings.CustomSettings.facebook }}" target="_blank"
+                            class="si-facebook"><span class="ts-icon"><i class="icon-facebook"></i></span><span
+                                class="ts-text">Facebook</span></a></li>
+                    <li><a href="https://www.instagram.com/{{ settings.asettings.CustomSettings.instagram }}/"
+                            target="_blank" class="si-instagram"><span class="ts-icon"><i
+                                    class="icon-instagram2"></i></span><span class="ts-text">Instagram</span></a></li>
+                    <li><a href="tel:+{{ settings.asettings.CustomSettings.telephone }}" class="si-call"><span
+                                class="ts-icon"><i class="icon-call"></i></span><span class="ts-text">+{{ settings.asettings.CustomSettings.telephone }}</span></a></li>
+                    <li><a href="mailto: {{ settings.asettings.CustomSettings.email }}" class="si-email3"><span
+                                class="ts-icon"><i class="icon-email3"></i></span><span class="ts-text">{{ settings.asettings.CustomSettings.email }}</span></a></li>
+                </ul>
+                <!-- #top-social end -->
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+<!-- #top-bar end -->

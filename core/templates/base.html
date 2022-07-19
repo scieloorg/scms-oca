@@ -1,133 +1,104 @@
-{% load static i18n wagtailuserbar compress%}
+{% load static compress %}
+{% load wagtailadmin_tags wagtailcore_tags wagtailimages_tags i18n %}
+{% load wagtailsettings_tags %}
+
+{% get_settings use_default_site=True %}
+
 <!DOCTYPE html>
-{% get_current_language as LANGUAGE_CODE %}
-<html lang="{{ LANGUAGE_CODE }}">
+<html dir="ltr" lang="en-US">
 
-<head>
-  <meta charset="utf-8">
-  <meta http-equiv="x-ua-compatible" content="ie=edge">
-  <title>{% block title %}SciELO Content Manager {% endblock title %}</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Project that contains a generic template for content management SciELO context.">
-  <meta name="author" content="Jamil Atta Junior">
+  <head>
 
-  <link rel="icon" href="{% static 'images/favicons/favicon.ico' %}">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+      <meta name="author" content="SemiColonWeb" />
 
-  {% block css %}
+      {% block css %}
 
-  <!-- Design System da SciELO. -->
-  <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}">
+        <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}" type="text/css" />
+        <link rel="stylesheet" href="{% static 'css/font-icons.css' %}" type="text/css" />
 
-  <!-- Your stuff: Third-party CSS libraries go here -->{% compress css %}
-  <!-- This file stores project-specific CSS -->
-  <link href="{% static 'css/project.css' %}" rel="stylesheet">{% endcompress %}
-  {% endblock %}
+         <!-- banner de cookie -->
+        <!-- <link rel="stylesheet" href="{% static 'css/cookiealert.css' %}"> -->
 
-  <!-- Wagtail convention -->
-  {% block extra_css %}
-  {% endblock %}
+        {% block extra_css %}
+        {% endblock %}
 
-  <!-- Le javascript
-    ================================================== -->
-  {# Placed at the top of the document so pages load faster with defer #}
-  {% block javascript %}
-  <!-- Design System da SciELO JS -->
-  <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
-  <script src="{% static 'js/scielo-ds-min.js' %}"></script>
+        {% compress css %}
+          <link href="{% static 'css/style.css' %}" rel="stylesheet">
+          <link href="{% static 'css/custom.css' %}" rel="stylesheet">
+        {% endcompress %}
 
-  <!-- Your stuff: Third-party javascript libraries go here -->
+      {% endblock %}
 
-  <!-- place project specific Javascript in this file -->
-  {% compress js %}
-    <script defer src="{% static 'js/project.js' %}"></script>
-  {% endcompress %}
+      <link href="https://fonts.googleapis.com/css?family=Lato:300,400,400i,700|Poppins:300,400,500,600,700|PT+Serif:400,400i&display=swap" rel="stylesheet" type="text/css" />
 
-  {% endblock javascript %}
+      <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-</head>
+      {% if settings.core_settings.CustomSettings.favicon %}
+        {% image settings.core_settings.CustomSettings.favicon original as favicon %}
+          <link href="{{ favicon.url }}" rel="shortcut icon" type="image/x-icon">
+          <link href="{{ favicon.url }}" rel="apple-touch-icon">
+      {% else %}
+          <link href="{% static 'images/favicons/favicon-16x16.png' %}" rel="shortcut icon" type="image/x-icon">
+          <link href="{% static 'images/favicons/apple-touch-icon.png' %}" rel="apple-touch-icon">
+      {% endif %}
 
-<body>
+      <title>{% block title %}ABEU{% endblock title %}</title>
 
-  <div class="mb-1">
-    <nav class="navbar navbar-expand-md navbar-light bg-light">
-      <div class="container-fluid">
-        <button class="navbar-toggler navbar-toggler-right" type="button" data-bs-toggle="collapse"
-          data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
-          aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <a class="navbar-brand" href="{% url 'home' %}">SciELO Content Manager </a>
+      {% block extra_head %}{% endblock extra_head %}
 
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-          <ul class="navbar-nav mr-auto">
-            <li class="nav-item active">
-              <a class="nav-link" href="{% url 'home' %}">Home <span class="visually-hidden">(current)</span></a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'about' %}">About</a>
-            </li>
-            <!-- {% if request.user.is_authenticated %}
-            <li class="nav-item">
-              {# URL provided by django-allauth/account/urls.py #}
-              <a class="nav-link"
-                href="{% url 'users:detail' request.user.username  %}">{% translate "My Profile" %}</a>
-            </li>
-            <li class="nav-item">
-              {# URL provided by django-allauth/account/urls.py #}
-              <a class="nav-link" href="{% url 'account_logout' %}">{% translate "Sign Out" %}</a>
-            </li>
-            {% else %}
-            {% if ACCOUNT_ALLOW_REGISTRATION %}
-            <li class="nav-item">
-              {# URL provided by django-allauth/account/urls.py #}
-              <a id="sign-up-link" class="nav-link" href="{% url 'account_signup' %}">{% translate "Sign Up" %}</a>
-            </li>
-            {% endif %}
-            <li class="nav-item">
-              {# URL provided by django-allauth/account/urls.py #}
-              <a id="log-in-link" class="nav-link" href="{% url 'account_login' %}">{% translate "Sign In" %}</a>
-            </li>
-            {% endif %} -->
-          </ul>
-        </div>
-      </div>
-    </nav>
+  </head>
 
-  </div>
+  <body class="{% block body_class %}stretched device-xl has-plugin-easing has-plugin-bootstrap has-plugin-swiper has-plugin-animations has-plugin-carousel has-plugin-form has-plugin-ajaxform has-plugin-subscribeform has-plugin-isotope has-plugin-html5video quick-contact-form-ready gototop-active{% endblock %}">
 
-  <div class="container">
+    <div id="wrapper" class="clearfix">
 
-    {% if messages %}
-    {% for message in messages %}
-    <div class="alert alert-dismissible {% if message.tags %}alert-{{ message.tags }}{% endif %}">
-      {{ message }}
-      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      {# {% include 'include/top_bar.html' %} #}
+
+      {% include 'include/header.html' %}
+
+      {% block content %}{% endblock content %}
+
     </div>
-    {% endfor %}
-    {% endif %}
 
-    {% if messages %}
-    {% for message in messages %}
-    <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">{{ message }}</div>
-    {% endfor %}
-    {% endif %}
+    {% block modal %}
+      {% include 'include/modal.html' %}
+      {% include 'include/modal_banner.html' %}
+    {% endblock modal %}
 
-    {% block content %}{% endblock content %}
+    {#% include 'include/alert.html' %#}
 
-    {% block modal %}{% endblock modal %}
+    {% include 'include/footer.html' %}
 
-    {% block inline_javascript %}
-    {% comment %}
-    Script tags with only code, no src (defer by default). To run
-    with a "defer" so that you run inline code:
-    <script>
-      window.addEventListener('DOMContentLoaded', () => {
-        /* Run whatever you want */
-      });
+    <div id="gotoTop" class="icon-angle-up"></div>
 
-    </script>
-    {% endcomment %}
-    {% endblock inline_javascript %}
-</body>
+    <!-- Le javascript
+    ================================================== -->
+    {% block javascript %}
 
+      <!-- JavaScripts -->
+      <script src="{% static 'js/jquery.js' %}"></script>
+      <script src="{% static 'js/plugins.min.js' %}"></script>
+
+      <!-- banner de cookie -->
+      <!-- <script src="{% static 'js/cookiealert.js' %}"></script> -->
+
+      <!-- Footer Scripts-->
+      <script src="{% static 'js/functions.js' %}"></script>
+
+      <!-- Your stuff: Third-party javascript libraries go here -->
+
+      <!-- place project specific Javascript in this file -->
+      {% compress js %}
+        <script src="{% static 'js/project.js' %}"></script>
+        <script src="{% static 'js/custom.js' %}"></script>
+      {% endcompress %}
+
+      {% block inline_javascript %}
+
+      {% endblock inline_javascript %}
+
+    {% endblock javascript %}
+  </body>
 </html>
+

@@ -1,0 +1,60 @@
+<!-- {% load widget_tweaks %}
+{% load wagtailcore_tags %}
+{% load contact_form %}
+
+{% get_contact_form as contact_form %}
+
+{% if contact_form.page %}
+
+<div class="widget quick-contact-widget form-widget clearfix">
+
+    {{ contact_form.page.specific.intro|richtext }}
+
+    <div class="form-result"></div>
+
+    <form id="quick-contact-form" name="quick-contact-form" action="{% pageurl contact_form.page %}" method="post" class="mb-0" novalidate="novalidate">
+      {% csrf_token %}
+
+      {% for field in contact_form.form %}
+        <div class="form-process">
+            <div class="css3-spinner">
+                <div class="css3-spinner-scaler"></div>
+            </div>
+        </div>
+
+        {% if field|widget_type == 'textinput' %}
+          <div class="input-group mx-auto">
+              <div class="input-group-prepend">
+                  <div class="input-group-text"><i class="icon-user"></i></div>
+              </div>
+                {% render_field field class+="required form-control" placeholder=field.help_text %}
+          </div>
+        {% endif %}
+
+        {% if field|widget_type == 'emailinput' %}
+          <div class="input-group mx-auto">
+              <div class="input-group-prepend">
+                  <div class="input-group-text"><i class="icon-email2"></i></div>
+              </div>
+                {% render_field field class+="required form-control email" placeholder=field.help_text %}
+          </div>
+        {% endif %}
+
+        {% if field|widget_type == 'textarea' %}
+          {% render_field field class+="required form-control input-block-level short-textarea" maxlength="2000" rows=4 cols=30 placeholder=field.help_text %}
+        {% endif %}
+
+        {% if field|widget_type == 'recaptchav2checkbox' %}
+          {{ field }}
+          </br>
+        {% endif %}
+
+      {% endfor %}
+
+        <button type="submit" name="" class="btn btn-purple m-0" value="submit">Enviar mensagem
+        </button>
+
+    </form>
+</div>
+
+{% endif %} -->

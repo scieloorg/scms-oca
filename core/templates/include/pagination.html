@@ -1,0 +1,33 @@
+{% if posts.paginator.num_pages > 1 %}
+
+  <div class="container">
+    <div class="pagination row justify-content-md-center">
+      <div class="col col-lg-2">
+        {% if posts.has_previous %}
+          <li class="page-item">
+            <a href="?page={{ posts.previous_page_number }}" class="page-link">
+              <span>Anterior</span>
+            </a>
+          </li>
+        {% endif %}
+      </div>
+
+      <div class="col-md-auto">
+          <li class="page-item mt-1">
+            {{posts.number}} / {{ posts.paginator.num_pages }}
+          </li>
+      </div>
+
+      <div class="col col-lg-2">
+        {% if posts.has_next %}
+          <li class="page-item">
+            <a href="?page={{ posts.next_page_number }}" class="page-link">
+              <span>Próximo</span>
+            </a>
+          </li>
+        {% endif %}
+      </div>
+
+    </div>
+  </div>
+{% endif %}

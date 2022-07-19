@@ -1,0 +1,22 @@
+{% load i18n %}
+{% load wagtailcore_tags %}
+<form action="{% url 'set_language' %}" method="post" id="form_lang">
+    {% csrf_token %}
+    {% get_current_language as LANGUAGE_CODE %}
+    {% get_available_languages as LANGUAGES %}
+    <input value="{{ LANGUAGE_CODE }}" type="hidden" id="language" name="language" />
+
+    <select id="language" name="language" class="sm-form-control lang-select">
+
+        {% for language in LANGUAGES %}
+
+            {% if language.0|lower == LANGUAGE_CODE|lower %}
+                <option value="{{language.0}}" selected>{{ language.0|upper }}</option>
+            {% else %}
+                <option value="{{language.0}}">{{ language.0|upper }}</option>
+            {% endif %}
+
+        {% endfor %}
+    </select>
+
+</form>

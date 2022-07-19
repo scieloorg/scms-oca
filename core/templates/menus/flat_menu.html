@@ -1,0 +1,48 @@
+{% load menu_tags %}
+
+<!-- menu -->
+<nav class="primary-menu">
+
+  <ul class="menu-container">
+    <ul class="menu-container">
+      <li class="menu-item">
+
+        {% if menu_items|length == 1 %}
+
+        <a class="menu-link" href="{{ menu_items.0.href }}">
+          <div>{% if menu_heading %}{{ menu_heading }}{% endif %}</div>
+        </a>
+
+        {% else %}
+
+        <a class="menu-link" href="/">
+          <div>{% if menu_heading %}{{ menu_heading }}{% endif %}</div>
+        </a>
+                  {% if menu_items %}
+                    <ul class="sub-menu-container">
+                      {% for item in menu_items %}
+                        <li class="menu-item">
+                            <a class="menu-link" href="{{ item.href }}" {% if item.handle == 'blank' %} target="_blank" {% endif %}><div>{{ item.text }}</div></a>
+                        </li>
+                      {% endfor %}
+                    </ul>
+                  {% endif %}
+
+        {% if menu_items %}
+        <ul class="sub-menu-container">
+          {% for item in menu_items %}
+          <li class="menu-item">
+            <a class="menu-link" href="{{ item.href }}" {% if item.handle == 'blank' %} target="_blank" {% endif %}>
+              <div>{{ item.text }}</div>
+            </a>
+          </li>
+          {% endfor %}
+        </ul>
+        {% endif %}
+
+        {% endif %}
+      </li>
+    </ul>
+
+</nav>
+<!-- menu -->

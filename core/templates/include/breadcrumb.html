@@ -1,0 +1,34 @@
+{% load wagtailcore_tags %}
+
+{% if page.get_ancestors|length > 1 %}
+
+    <section id="page-title">
+        <div class="container clearfix">
+            <h1>{{ page.title|truncatewords:3 }}</h1>
+
+            <ol class="breadcrumb">
+
+                {% for ancestor_page in page.get_ancestors %}
+
+                    {% if ancestor_page.is_root %}
+                        <li class="breadcrumb-item"><a href="/">Home</a></li>
+                    {% endif %}
+
+                    {% if ancestor_page.depth > 2  %}
+                        <li class="breadcrumb-item">
+                            <a href="{% pageurl ancestor_page %}" title="{{ ancestor_page.title }}">
+                                {{ ancestor_page.title|truncatewords:4 }}
+                            </a>
+                        </li>
+                    {% endif %}
+
+                    {% if forloop.last %}
+                        <li class="breadcrumb-item active" aria-current="page" title="{{ page.title|truncatewords:4 }}">{{ page.title|truncatewords:4 }}</li>
+                    {% endif %}
+
+                {% endfor %}
+
+            </ol>
+        </div>
+    </section>
+{% endif %}
