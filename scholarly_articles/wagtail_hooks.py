@@ -92,15 +92,13 @@ class AffiliationsAdmin(ModelAdmin):
     model = Affiliations
     menu_label = _('Affiliations')
     menu_icon = 'folder-open-inverse'
-    menu_order = 200
+    add_to_settings_menu = False  # or True to add your model to the Settings sub-menu
+    exclude_from_explorer = False  # or True to exclude pages of this type from Wagtail's explorer view
     list_display = (
-        'institution_name',
-        'institution_acronym',
-        'institution_place',
-        'institution_department',
+        'name',
     )
-    list_filter = ('institution_place',)
-    search_fields = ('institution_name',)
+    list_filter = ('name',)
+    search_fields = ('name',)
 
 
 class ScholarlyArticlesAdminGroup(ModelAdminGroup):
