@@ -2,28 +2,31 @@ from django.utils.translation import gettext as _
 
 from wagtail.contrib.modeladmin.options import (ModelAdmin, modeladmin_register, ModelAdminGroup)
 
-from .models import (ScholarlyArticles, Contributors, Affiliations)
+from .models import (ScholarlyArticles, Contributors, Affiliations, Journals, RawUnpaywall)
 
 
 class ScholarlyArticlesAdmin(ModelAdmin):
     model = ScholarlyArticles
     menu_label = _('Scholarly Articles')  # ditch this to use verbose_name_plural from model
     menu_icon = 'folder-open-inverse'  # change as required
-    menu_order = 000  # will put in 3rd place (000 being 1st, 100 2nd)
+    #menu_order = 100  # will put in 3rd place (000 being 1st, 100 2nd)
     add_to_settings_menu = False  # or True to add your model to the Settings sub-menu
     exclude_from_explorer = False  # or True to exclude pages of this type from Wagtail's explorer view
 
     def all_contributors(self, obj):
-        return "\n".join([str(c) for c in obj.contributors.all()])
+        return ", ".join([str(c) for c in obj.contributors.all()])
 
     list_display = (
         'doi',
-        'doi_url',
-        'resource_type',
+        'year',
         'all_contributors',
-        'is_oa',
-        'journal_is_in_doaj',
-        'journal_issns',
+        'journal',
+    )
+
+    list_filter = ('year',)
+    search_fields = ('doi',)
+
+
         'journal_issn_l',
         'journal_name',
         'oa_status',
