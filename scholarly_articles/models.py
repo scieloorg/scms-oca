@@ -27,39 +27,25 @@ class ScholarlyArticles(models.Model):
     ]
 
 
+class Journals(models.Model):
+    journal_issn_l = models.CharField(_("ISSN-L"), max_length=255, null=True, blank=True)
+    journal_issns = models.CharField(_("ISSN's"), max_length=255, null=True, blank=True)
     journal_name = models.CharField(_("Journal Name"), max_length=255, null=True, blank=True)
-    oa_status = models.CharField(_("OA Status"), max_length=20, choices=choices.OA_STATUS, null=True, blank=True)
-    published_date = models.DateTimeField(_("Published Date"), max_length=20, null=True, blank=True)
     publisher = models.CharField(_("Publisher"), max_length=255, null=True, blank=True)
-    title = models.CharField(_("Title"), max_length=255, null=True, blank=True)
-    update = models.DateTimeField(_("Update"), max_length=20, null=True, blank=True)
-    year = models.IntegerField(_("Year"), null=True, blank=True)
-    article_json = models.JSONField(_("JSON File"), null=True, blank=True)
-    contributors = models.ManyToManyField(_("Contributors"))
+    journal_is_in_doaj = models.BooleanField(_("DOAJ"), max_length=255, default=False, null=True, blank=True)
 
     def __unicode__(self):
-        return self.doi
+        return self.journal_issn_l
 
     def __str__(self):
-        return self.doi
+        return self.journal_issn_l
 
     panels = [
-        FieldPanel('doi'),
-        FieldPanel('doi_url'),
-        FieldPanel('resource_type'),
-        FieldPanel('is_oa'),
-        FieldPanel('journal_is_in_doaj'),
-        FieldPanel('journal_issns'),
         FieldPanel('journal_issn_l'),
+        FieldPanel('journal_issns'),
         FieldPanel('journal_name'),
-        FieldPanel('oa_status'),
-        FieldPanel('published_date'),
         FieldPanel('publisher'),
-        FieldPanel('title'),
-        FieldPanel('update'),
-        FieldPanel('year'),
-        FieldPanel('article_json'),
-        FieldPanel('contributors'),
+        FieldPanel('journal_is_in_doaj'),
     ]
 
 
