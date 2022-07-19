@@ -105,18 +105,19 @@ THIRD_PARTY_APPS = [
     "wagtailcaptcha",
     "wagtailmenus",
     "rest_framework",
-    "blog",
-    "scholarly_articles",
-    "infrastructure_directory",
-    "education_directory",
-    "policy_directory",
-    "disclosure_directory",
-    "core",
+    "widget_tweaks",
 ]
 
 LOCAL_APPS = [
     "core.users",
     "core_settings",
+    "scholarly_articles",
+    "infrastructure_directory",
+    "education_directory",
+    "policy_directory",
+    "disclosure_directory",
+    "blog",
+    "core",
     # Your stuff: custom apps go here
 ]
 
@@ -225,6 +226,7 @@ TEMPLATES = [
                 "core.users.context_processors.allauth_settings",
                 "wagtail.contrib.settings.context_processors.settings",
                 "wagtailmenus.context_processors.wagtailmenus",
+                "core.utils.config_context.config_context",
             ],
         },
     }
@@ -348,18 +350,18 @@ WAGTAIL_SITE_NAME = "core"
 BASE_URL = "https://core"
 
 LANGUAGES = [
+    ('pt-BR', "Portuguese"),
     ('en', "English"),
     ('es', "Spanish"),
-    ('pt-BR', "Portuguese"),
     ('it', "Italian"),
 ]
 
 WAGTAIL_I18N_ENABLED = True
 
 WAGTAIL_CONTENT_LANGUAGES =  [
+    ('pt-BR', "Portuguese"),
     ('en', "English"),
     ('es', "Spanish"),
-    ('pt-BR', "Portuguese"),
     ('it', "Italian")
 ]
 
@@ -367,3 +369,9 @@ NOCAPTCHA = True
 
 RECAPTCHA_PUBLIC_KEY = env.str("RECAPTCHA_PUBLIC_KEY", default='')
 RECAPTCHA_PRIVATE_KEY = env.str("RECAPTCHA_PRIVATE_KEY", default='')
+
+WAGTAILMENUS_FLAT_MENUS_HANDLE_CHOICES = [("oca", "OCA"),
+                                          ("sobre_projeto", _("Sobre o Projeto")),
+                                          ("metricas", _("Métricas")),
+                                          ("faq", "FAQ"),
+                                          ("noticias", _("Notícias")),]
