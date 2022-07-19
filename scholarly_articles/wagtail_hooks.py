@@ -105,7 +105,7 @@ class ScholarlyArticlesAdminGroup(ModelAdminGroup):
     menu_label = _('Articles Directory')
     menu_icon = 'folder-open-inverse'  # change as required
     menu_order = 200  # will put in 3rd place (000 being 1st, 100 2nd)
-    items = (ScholarlyArticlesAdmin, ContributorsAdmin, AffiliationsAdmin,)
+    items = (JournalsAdmin, ScholarlyArticlesAdmin, ContributorsAdmin, AffiliationsAdmin, RawUnpaywallAdmin,)
 
 
 modeladmin_register(ScholarlyArticlesAdminGroup)
