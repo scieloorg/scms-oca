@@ -50,17 +50,17 @@ class Journals(models.Model):
 
 
 class Contributors(models.Model):
-    family = models.CharField(_("Family Name"), max_length=255, null=False, blank=False)
-    given = models.CharField(_("Given Name"), max_length=255, null=False, blank=False)
-    orcid = models.CharField("ORCID", max_length=255, null=False, blank=False)
-    authenticated_orcid = models.BooleanField(_("Authenticated"), max_length=20, null=False, blank=False)
-    affiliation = models.ForeignKey(_("Affiliations"), on_delete=models.CASCADE)
+    family = models.CharField(_("Family Name"), max_length=255, null=True, blank=True)
+    given = models.CharField(_("Given Name"), max_length=255, null=True, blank=True)
+    orcid = models.CharField("ORCID", max_length=255, null=True, blank=True)
+    authenticated_orcid = models.BooleanField(_("Authenticated"), default=False, null=True, blank=True)
+    affiliation = models.ForeignKey(_("Affiliations"), on_delete=models.SET_NULL, max_length=255, null=True, blank=True)
 
     def __unicode__(self):
-        return self.orcid
+        return self.family
 
     def __str__(self):
-        return self.orcid
+        return self.family
 
     panels = [
         FieldPanel('family'),
