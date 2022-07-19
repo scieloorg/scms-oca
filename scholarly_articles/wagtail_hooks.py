@@ -73,9 +73,10 @@ class ContributorsAdmin(ModelAdmin):
     model = Contributors
     menu_label = _('Contributors')
     menu_icon = 'folder-open-inverse'
-    menu_order = 100
+    #menu_order = 200
     add_to_settings_menu = False  # or True to add your model to the Settings sub-menu
     exclude_from_explorer = False  # or True to exclude pages of this type from Wagtail's explorer view
+
     list_display = (
         'family',
         'given',
