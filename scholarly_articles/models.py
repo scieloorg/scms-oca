@@ -4,18 +4,29 @@ from django.utils.translation import gettext as _
 from wagtail.admin.edit_handlers import FieldPanel
 
 from . import choices
+from core.models import CommonControlField
 
 
 class ScholarlyArticles(models.Model):
-    doi = models.CharField(_("DOI"), max_length=255, null=False, blank=False)
-    doi_url = models.URLField(_("DOI URL"), max_length=255, null=True, blank=True)
-    # unpaywall genre
-    resource_type = models.CharField(_("Resource Type"), max_length=255, choices=choices.TYPE_OF_RESOURCE, null=False,
-                                     blank=True)
-    is_oa = models.BooleanField(_("Opens Access"), max_length=255, null=True, blank=True)
-    journal_is_in_doaj = models.BooleanField(_("DOAJ"), max_length=255, null=True, blank=True)
-    journal_issns = models.CharField(_("ISSN's"), max_length=255, null=False, blank=False)
-    journal_issn_l = models.CharField(_("ISSN-L"), max_length=255, null=False, blank=False)
+    doi = models.CharField(_("DOI"), max_length=255, null=True, blank=True)
+    year = models.CharField(_("Year"), max_length=4, null=True, blank=True)
+    contributors = models.ManyToManyField(_("Contributors"), null=True, blank=True)
+    journal = models.ForeignKey('Journals', on_delete=models.SET_NULL, max_length=255, null=True, blank=True)
+
+    def __unicode__(self):
+        return self.doi
+
+    def __str__(self):
+        return self.doi
+
+    panels = [
+        FieldPanel('doi'),
+        FieldPanel('year'),
+        FieldPanel('contributors'),
+        FieldPanel('journal'),
+    ]
+
+
     journal_name = models.CharField(_("Journal Name"), max_length=255, null=True, blank=True)
     oa_status = models.CharField(_("OA Status"), max_length=20, choices=choices.OA_STATUS, null=True, blank=True)
     published_date = models.DateTimeField(_("Published Date"), max_length=20, null=True, blank=True)
