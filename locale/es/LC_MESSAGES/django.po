@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-06-28 22:12+0000\n"
+"POT-Creation-Date: 2022-07-19 20:42+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,6 +17,18 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: config/settings/base.py:374
+msgid "Sobre o Projeto"
+msgstr ""
+
+#: config/settings/base.py:375
+msgid "Métricas"
+msgstr ""
+
+#: config/settings/base.py:377
+msgid "Notícias"
+msgstr ""
 
 #: core/models.py:23
 msgid "Creation date"
@@ -125,38 +137,36 @@ msgid ""
 msgstr ""
 
 #: core/templates/account/login.html:7 core/templates/account/login.html:11
-#: core/templates/account/login.html:56 core/templates/base.html:88
+#: core/templates/account/login.html:44
 msgid "Sign In"
 msgstr ""
 
-#: core/templates/account/login.html:17
-msgid "Please sign in with one of your existing third party accounts:"
-msgstr ""
-
-#: core/templates/account/login.html:19
+#: core/templates/account/login.html:16
 #, python-format
 msgid ""
-"Or, <a href=\"%(signup_url)s\">sign up</a> for a %(site_name)s account and "
-"sign in below:"
+"Please sign in with one\n"
+"of your existing third party accounts. Or, <a href=\"%(signup_url)s\">sign "
+"up</a>\n"
+"for a %(site_name)s account and sign in below:"
 msgstr ""
 
-#: core/templates/account/login.html:32
+#: core/templates/account/login.html:26
 msgid "or"
 msgstr ""
 
-#: core/templates/account/login.html:41
+#: core/templates/account/login.html:33
 #, python-format
 msgid ""
-"If you have not created an account yet, then please <a href=\"%(signup_url)s"
-"\">sign up</a> first."
+"If you have not created an account yet, then please\n"
+"<a href=\"%(signup_url)s\">sign up</a> first."
 msgstr ""
 
-#: core/templates/account/login.html:55
+#: core/templates/account/login.html:43
 msgid "Forgot Password?"
 msgstr ""
 
 #: core/templates/account/logout.html:5 core/templates/account/logout.html:8
-#: core/templates/account/logout.html:17 core/templates/base.html:77
+#: core/templates/account/logout.html:17
 msgid "Sign Out"
 msgstr ""
 
@@ -233,7 +243,6 @@ msgid "Signup"
 msgstr ""
 
 #: core/templates/account/signup.html:9 core/templates/account/signup.html:19
-#: core/templates/base.html:83
 msgid "Sign Up"
 msgstr ""
 
@@ -287,10 +296,6 @@ msgid ""
 "mail address</a>."
 msgstr ""
 
-#: core/templates/base.html:73
-msgid "My Profile"
-msgstr ""
-
 #: core/templates/home/welcome_page.html:53
 #: core/templates/home/welcome_page.html:56
 msgid "View the release notes"
@@ -331,6 +336,18 @@ msgstr ""
 msgid "Create your superuser first!"
 msgstr ""
 
+#: core/templates/include/header.html:50
+msgid "Buscar por conteúdo do site..."
+msgstr ""
+
+#: core/templates/wagtailadmin/home.html:7
+msgid "Welcome to the administrative area of "
+msgstr ""
+
+#: core/templates/wagtailadmin/login.html:7
+msgid "Administrative area of "
+msgstr ""
+
 #: core/users/admin.py:18
 msgid "Personal info"
 msgstr ""
@@ -359,89 +376,154 @@ msgstr ""
 msgid "Information successfully updated"
 msgstr ""
 
+#: core_settings/models.py:54
+msgid "Site settings"
+msgstr ""
+
+#: core_settings/models.py:55
+msgid "Admin settings"
+msgstr ""
+
+#: disclosure_directory/button_helper.py:15
+#: education_directory/button_helper.py:15
 #: infrastructure_directory/button_helper.py:15
-#: source_directory/button_helper.py:15
+#: policy_directory/button_helper.py:15
 msgid "Validate"
 msgstr ""
 
+#: disclosure_directory/button_helper.py:25
+#: education_directory/button_helper.py:25
 #: infrastructure_directory/button_helper.py:25
-#: source_directory/button_helper.py:25
+#: policy_directory/button_helper.py:25
 msgid "Import"
 msgstr ""
 
-#: infrastructure_directory/models.py:13
-msgid "Title"
+#: disclosure_directory/models.py:14 disclosure_directory/wagtail_hooks.py:31
+#: disclosure_directory/wagtail_hooks.py:59
+msgid "Disclosure Directory"
 msgstr ""
 
-#: infrastructure_directory/models.py:14
+#: disclosure_directory/models.py:16
+msgid "Event"
+msgstr ""
+
+#: disclosure_directory/models.py:17 education_directory/models.py:17
+#: infrastructure_directory/models.py:17 policy_directory/models.py:17
 msgid "Link"
 msgstr ""
 
-#: infrastructure_directory/models.py:15
+#: disclosure_directory/models.py:18 education_directory/models.py:18
+#: infrastructure_directory/models.py:18 policy_directory/models.py:20
 msgid "Description"
 msgstr ""
 
-#: infrastructure_directory/models.py:29
+#: disclosure_directory/models.py:20
+msgid "Organization"
+msgstr ""
+
+#: disclosure_directory/models.py:34 disclosure_directory/wagtail_hooks.py:47
+msgid "Disclosure Directory Upload"
+msgstr ""
+
+#: disclosure_directory/models.py:38 education_directory/models.py:49
+#: infrastructure_directory/models.py:34 policy_directory/models.py:41
 msgid "Attachement"
 msgstr ""
 
-#: infrastructure_directory/models.py:34
+#: disclosure_directory/models.py:43 education_directory/models.py:54
+#: infrastructure_directory/models.py:39 policy_directory/models.py:46
 msgid "Is valid?"
 msgstr ""
 
-#: infrastructure_directory/models.py:36
+#: disclosure_directory/models.py:45 education_directory/models.py:56
+#: infrastructure_directory/models.py:41 policy_directory/models.py:48
 msgid "Number of lines"
 msgstr ""
 
-#: infrastructure_directory/views.py:36
+#: disclosure_directory/templates/modeladmin/disclosure_directory/disclosuredirectoryfile/index.html:6
+#: education_directory/templates/modeladmin/education_directory/educationdirectoryfile/index.html:6
+#: infrastructure_directory/templates/modeladmin/infrastructure_directory/infrastructuredirectoryfile/index.html:6
+#: policy_directory/templates/modeladmin/policy_directory/policydirectoryfile/index.html:6
+msgid "Download CSV Example"
+msgstr ""
+
+#: disclosure_directory/views.py:37 education_directory/views.py:37
+#: infrastructure_directory/views.py:38 policy_directory/views.py:37
 msgid "Valication error"
 msgstr ""
 
-#: infrastructure_directory/views.py:43
+#: disclosure_directory/views.py:44 education_directory/views.py:44
+#: infrastructure_directory/views.py:45 policy_directory/views.py:44
 #, python-format
 msgid "Valication error: %s"
 msgstr ""
 
-#: infrastructure_directory/views.py:45
+#: disclosure_directory/views.py:46 education_directory/views.py:46
+#: infrastructure_directory/views.py:47 policy_directory/views.py:46
 msgid "File successfully validated!"
 msgstr ""
 
-#: infrastructure_directory/wagtail_hooks.py:23
+#: disclosure_directory/views.py:82 education_directory/views.py:82
+#: infrastructure_directory/views.py:82 policy_directory/views.py:82
+#, python-format
+msgid "Import error: %s"
+msgstr ""
+
+#: disclosure_directory/views.py:84 education_directory/views.py:84
+#: infrastructure_directory/views.py:84 policy_directory/views.py:84
+msgid "File imported successfully!"
+msgstr ""
+
+#: education_directory/models.py:14 education_directory/wagtail_hooks.py:31
+#: education_directory/wagtail_hooks.py:59
+msgid "Education Directory"
+msgstr ""
+
+#: education_directory/models.py:16 infrastructure_directory/models.py:16
+#: policy_directory/models.py:16
+msgid "Title"
+msgstr ""
+
+#: education_directory/models.py:20 policy_directory/models.py:18
+msgid "Institution"
+msgstr ""
+
+#: education_directory/models.py:22 policy_directory/models.py:22
+msgid "Start Date"
+msgstr ""
+
+#: education_directory/models.py:24
+msgid "End Date"
+msgstr ""
+
+#: education_directory/models.py:26
+msgid "Start Time"
+msgstr ""
+
+#: education_directory/models.py:28
+msgid "End Time"
+msgstr ""
+
+#: education_directory/models.py:45 education_directory/wagtail_hooks.py:47
+msgid "Education Directory Upload"
+msgstr ""
+
+#: infrastructure_directory/models.py:14
+#: infrastructure_directory/wagtail_hooks.py:31
+#: infrastructure_directory/wagtail_hooks.py:59
 msgid "Infraestructure Directory"
 msgstr ""
 
-#: infrastructure_directory/wagtail_hooks.py:39
+#: infrastructure_directory/models.py:30
+#: infrastructure_directory/wagtail_hooks.py:47
 msgid "Infraestructure Directory Upload"
 msgstr ""
 
-#: infrastructure_directory/wagtail_hooks.py:51
-msgid "Infraestruct Directory"
+#: policy_directory/models.py:14 policy_directory/wagtail_hooks.py:31
+#: policy_directory/wagtail_hooks.py:59
+msgid "Policy Directory"
 msgstr ""
 
-#: source_directory/models.py:13
-msgid "Name"
-msgstr ""
-
-#: source_directory/models.py:15
-msgid "Source Type"
-msgstr ""
-
-#: source_directory/models.py:34
-msgid "É valido?"
-msgstr ""
-
-#: source_directory/models.py:35
-msgid "Quantidade de linhas"
-msgstr ""
-
-#: source_directory/views.py:25
-msgid "Erro na validação"
-msgstr ""
-
-#: source_directory/views.py:32
-msgid "<b>Erro na validação:</b> <br/>"
-msgstr ""
-
-#: source_directory/views.py:35
-msgid "Arquivo validado com sucesso"
+#: policy_directory/models.py:37 policy_directory/wagtail_hooks.py:47
+msgid "Policy Directory Upload"
 msgstr ""
