@@ -49,19 +49,24 @@ class RawUnpaywallAdmin(ModelAdmin):
     search_fields = ('doi',)
 
 
+class JournalsAdmin(ModelAdmin):
+    model = Journals
+    menu_label = _('Journals')  # ditch this to use verbose_name_plural from model
+    menu_icon = 'folder-open-inverse'  # change as required
+    #menu_order = 000  # will put in 3rd place (000 being 1st, 100 2nd)
+    add_to_settings_menu = False  # or True to add your model to the Settings sub-menu
+    exclude_from_explorer = False  # or True to exclude pages of this type from Wagtail's explorer view
+
+    list_display = (
         'journal_issn_l',
+        'journal_issns',
         'journal_name',
-        'oa_status',
-        'published_date',
         'publisher',
-        'title',
-        'update',
-        'year',
-        #'article_json',
+        'journal_is_in_doaj',
     )
 
-    list_filter = ('journal_issn_l',)
-    search_fields = ('doi', 'journal_issn_l')
+    list_filter = (_('journal_issn_l'),)
+    search_fields = (_('journal_issn_l)'),)
 
 
 class ContributorsAdmin(ModelAdmin):
