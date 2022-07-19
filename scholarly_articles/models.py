@@ -72,20 +72,15 @@ class Contributors(models.Model):
 
 
 class Affiliations(models.Model):
-    institution_name = models.CharField(_("Institution Name"), max_length=100, null=False, blank=False)
-    institution_acronym = models.CharField(_("Institution Acronym"), max_length=10, null=True, blank=True)
-    institution_place = models.CharField(_("Institution Place"), max_length=255, null=True, blank=True)
-    institution_department = models.CharField(_("Institution Department"), max_length=255, null=True, blank=True)
+    name = models.CharField(_("Affiliation Name"), max_length=255, null=True, blank=True)
 
     def __unicode__(self):
-        return self.institution_name
+        return self.name
 
     def __str__(self):
-        return self.institution_name
+        return self.name
 
     panels = [
-        FieldPanel('institution_name'),
-        FieldPanel('institution_acronym'),
-        FieldPanel('institution_place'),
-        FieldPanel('institution_department'),
+        FieldPanel('name'),
+    ]
     ]
