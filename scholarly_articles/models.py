@@ -83,4 +83,31 @@ class Affiliations(models.Model):
     panels = [
         FieldPanel('name'),
     ]
+
+
+class RawUnpaywall(models.Model):
+    doi = models.CharField(_("DOI"), max_length=255, null=False, blank=False)
+    harvesting_creation = models.CharField(_("Harvesting"), max_length=255, null=False, blank=False)
+    is_paratext = models.BooleanField(_("Paratext"), default=False, null=True, blank=True)
+    year = models.CharField(_("Year"), max_length=255, null=True, blank=True)
+    # unpaywall genre
+    resource_type = models.CharField(_("Resource Type"), max_length=255, choices=choices.TYPE_OF_RESOURCE, null=False,
+                                     blank=True)
+    update = models.CharField(_("Update"), max_length=255, null=True, blank=True)
+    json = models.JSONField(_("JSON File"), null=True, blank=True)
+
+    def __unicode__(self):
+        return self.doi
+
+    def __str__(self):
+        return self.doi
+
+    panels = [
+        FieldPanel('doi'),
+        FieldPanel('harvesting_creation'),
+        FieldPanel('is_paratext'),
+        FieldPanel('year'),
+        FieldPanel('resource_type'),
+        FieldPanel('update'),
+        FieldPanel('json'),
     ]
