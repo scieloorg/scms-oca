@@ -13,10 +13,10 @@ from core.api import api_router
 from core.search import views as search_views  # noqa isort:skip
 
 urlpatterns = [
-    path("", TemplateView.as_view(template_name="home/home_page.html"), name="home"),
-    path(
-        "about/", TemplateView.as_view(template_name="pages/about.html"), name="about"
-    ),
+    # path("", TemplateView.as_view(template_name="home/home_page.html"), name="home"),
+    # path(
+    #     "about/", TemplateView.as_view(template_name="pages/about.html"), name="about"
+    # ),
     # Django Admin, use {% url "admin:index" %}
     path(settings.DJANGO_ADMIN_URL, admin.site.urls),
     # Wagtail Admin
@@ -39,6 +39,7 @@ urlpatterns += i18n_patterns(
     # User management
     path("api/v2/", api_router.urls),
     path("users/", include("core.users.urls", namespace="users")),
+    path('i18n/', include('django.conf.urls.i18n')),
     path("", include("allauth.urls")),
     path("", include(wagtail_urls)),
 )
