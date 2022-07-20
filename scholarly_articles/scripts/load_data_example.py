@@ -75,20 +75,17 @@ def get_one_contributor(author):
     return contributor
 
 
-def load_affiliation(row):
-    for author in row['z_authors']:
-        if author.get('affiliation')[0].get('name'):
-            affiliations = models.Affiliations.objects.filter(name=author.get('affiliation')[0].get('name'))
-        try:
-            affiliation = affiliations[0]
-        except IndexError:
-            affiliation = models.Affiliations()
-            if author.get('affiliation')[0].get('name'):
-                affiliation.name = author.get('affiliation')[0].get('name')
-            affiliation.save()
-        contributor = get_one_contributor(author)
-        contributor.affiliation = affiliation
-        contributor.save()
+def load_affiliation(affiliation_name):
+    if affiliation_name:
+        affiliations = models.Affiliations.objects.filter(name=affiliation_name)
+    try:
+        affiliation = affiliations[0]
+    except IndexError:
+        affiliation = models.Affiliations()
+        if affiliation_name:
+            affiliation.name = affiliation_name
+        affiliation.save()
+    return affiliation
 
 
 def run(from_year=1900, resource_type='journal-article'):
