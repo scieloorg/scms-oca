@@ -57,10 +57,10 @@ class Contributors(models.Model):
     affiliation = models.ForeignKey(_("Affiliations"), on_delete=models.SET_NULL, max_length=255, null=True, blank=True)
 
     def __unicode__(self):
-        return self.family
+        return f"{self.family}, {self.given} ({self.orcid})"
 
     def __str__(self):
-        return self.family
+        return f"{self.family}, {self.given} ({self.orcid})"
 
     panels = [
         FieldPanel('family'),
