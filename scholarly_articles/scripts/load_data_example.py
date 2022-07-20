@@ -34,31 +34,20 @@ def load_article(row):
 
 def load_journals(row):
     attribs = ['journal_issns', 'journal_issn_l', 'journal_name']
-    params = {}
+    params = get_params(row, attribs)
 
-    for att in attribs:
-        if row.get(att):
-            params[att] = row.get(att)
     journals = models.Journals.objects.filter(**params)
     try:
         journal = journals[0]
     except IndexError:
         journal = models.Journals()
-        if row.get('journal_is_in_doaj'):
-            journal.journal_is_in_doaj = row.get('journal_is_in_doaj')
-        if row.get('journal_issns'):
-            journal.journal_issns = row.get('journal_issns')
-        if row.get('journal_issn_l'):
-            journal.journal_issn_l = row.get('journal_issn_l')
-        if row.get('journal_name'):
-            journal.journal_name = row.get('journal_name')
-        if row.get('publisher'):
-            journal.publisher = row.get('publisher')
+        journal.journal_is_in_doaj = row.get('journal_is_in_doaj')
+        journal.journal_issns = row.get('journal_issns')
+        journal.journal_issn_l = row.get('journal_issn_l')
+        journal.journal_name = row.get('journal_name')
+        journal.publisher = row.get('publisher')
         journal.save()
-
-    article = load_article(row)
-    article.journal = journal
-    article.save()
+    return journal
 
 
 def get_one_contributor(author):
