@@ -75,14 +75,6 @@ def get_one_contributor(author):
     return contributor
 
 
-def load_contributors(row):
-    article = load_article(row)
-
-    for author in row['z_authors']:
-        contributor = get_one_contributor(author)
-        article.contributors.add(contributor)
-
-
 def load_affiliation(row):
     for author in row['z_authors']:
         if author.get('affiliation')[0].get('name'):
