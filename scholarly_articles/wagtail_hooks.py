@@ -14,7 +14,7 @@ class ScholarlyArticlesAdmin(ModelAdmin):
     exclude_from_explorer = False  # or True to exclude pages of this type from Wagtail's explorer view
 
     def all_contributors(self, obj):
-        return ", ".join([str(c) for c in obj.contributors.all()])
+        return " | ".join([str(c) for c in obj.contributors.all()])
 
     list_display = (
         'doi',
