@@ -94,9 +94,6 @@ def run(from_year=1900, resource_type='journal-article'):
     for item in rawunpaywall:
         if not item.is_paratext:
             load_article(item.json)
-            load_journals(item.json)
-            load_contributors(item.json)
-            load_affiliation(item.json)
 
 
 if __name__ == '__main__':
