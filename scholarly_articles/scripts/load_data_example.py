@@ -1,6 +1,14 @@
 from scholarly_articles import models
 
 
+def get_params(row, attribs):
+    params = {}
+    for att in attribs:
+        if row.get(att):
+            params[att] = row.get(att)
+    return params
+
+
 def load_article(row):
     articles = models.ScholarlyArticles.objects.filter(doi=row.get('doi'))
     try:
