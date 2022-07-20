@@ -51,26 +51,26 @@ def load_journals(row):
 
 
 def get_one_contributor(author):
-    params = {}
-    if author.get('family'):
-        params['family'] = author.get('family')
-    if author.get('given'):
-        params['given'] = author.get('given')
+    attribs = ['family', 'given']
+    params = get_params(author, attribs)
     if author.get('ORCID'):
         params['orcid'] = author.get('ORCID')
+    elif author.get('affiliation')[0].get('name'):
+        try:
+            aff = models.Affiliations.objects.filter(name=author.get('affiliation')[0].get('name'))
+            params['affiliation'] = aff[0]
+        except IndexError:
+            pass
+
     contributors = models.Contributors.objects.filter(**params)
     try:
         contributor = contributors[0]
     except IndexError:
         contributor = models.Contributors()
-        if author.get('family'):
-            contributor.family = author.get('family')
-        if author.get('given'):
-            contributor.given = author.get('given')
-        if author.get('ORCID'):
-            contributor.orcid = author.get('ORCID')
-        if author.get('authenticated_orcid'):
-            contributor.authenticated_orcid = author.get('authenticated_orcid')
+        contributor.family = author.get('family')
+        contributor.given = author.get('given')
+        contributor.orcid = author.get('ORCID')
+        contributor.authenticated_orcid = author.get('authenticated-orcid')
         contributor.save()
     return contributor
 
