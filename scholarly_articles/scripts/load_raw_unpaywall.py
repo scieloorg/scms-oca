@@ -18,7 +18,10 @@ def load(row):
         rawunpaywall.is_paratext = row.get('is_paratext')
         rawunpaywall.year = row.get('year')
         rawunpaywall.resource_type = row.get('genre')
-        rawunpaywall.update = row.get('updated')[:10]
+        try:
+            rawunpaywall.update = row.get('updated')[:10]
+        except TypeError:
+            pass
         rawunpaywall.json = row
         rawunpaywall.save()
     except KeyError:
