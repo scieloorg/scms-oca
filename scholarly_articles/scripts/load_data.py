@@ -17,7 +17,7 @@ def load_article(row):
         article = models.ScholarlyArticles()
         article.doi = row.get('doi')
         article.year = row.get('year')
-        article.journal = load_journals(row)
+        article.journal = load_journal(row)
         article.save()
         for author in row['z_authors']:
             contributor = get_one_contributor(author)
@@ -30,9 +30,10 @@ def load_article(row):
                     pass
             article.contributors.add(contributor)
         article.save()
+    return article
 
 
-def load_journals(row):
+def load_journal(row):
     attribs = ['journal_issns', 'journal_issn_l', 'journal_name']
     params = get_params(row, attribs)
 
@@ -55,7 +56,7 @@ def get_one_contributor(author):
     params = get_params(author, attribs)
     if author.get('ORCID'):
         params['orcid'] = author.get('ORCID')
-    elif author.get('affiliation')[0].get('name'):
+    elif author.get('affiliation'):
         try:
             aff = models.Affiliations.objects.filter(name=author.get('affiliation')[0].get('name'))
             params['affiliation'] = aff[0]
