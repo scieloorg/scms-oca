@@ -14,14 +14,11 @@ def load(row):
                 rawunpaywall.harvesting_creation = date.today()
             else:
                 return
-        if row.get('is_paratext'):
-            rawunpaywall.is_paratext = row['is_paratext']
-        if row.get('year'):
-            rawunpaywall.year = row['year']
-        if row.get('genre'):
-            rawunpaywall.resource_type = row['genre']
-        if row.get('updated'):
-            rawunpaywall.update = row['updated'][:10]
+
+        rawunpaywall.is_paratext = row.get('is_paratext')
+        rawunpaywall.year = row.get('year')
+        rawunpaywall.resource_type = row.get('genre')
+        rawunpaywall.update = row.get('updated')[:10]
         rawunpaywall.json = row
         rawunpaywall.save()
     except KeyError:
