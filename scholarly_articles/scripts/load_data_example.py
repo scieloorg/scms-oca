@@ -15,12 +15,21 @@ def load_article(row):
         article = articles[0]
     except IndexError:
         article = models.ScholarlyArticles()
-        if row.get('doi'):
-            article.doi = row.get('doi')
-        if row.get('year'):
-            article.year = row.get('year')
+        article.doi = row.get('doi')
+        article.year = row.get('year')
+        article.journal = load_journals(row)
         article.save()
-    return article
+        for author in row['z_authors']:
+            contributor = get_one_contributor(author)
+            if author.get('affiliation'):
+                try:
+                    aff = load_affiliation(author['affiliation'][0]['name'])
+                    contributor.affiliation = aff
+                    contributor.save()
+                except KeyError:
+                    pass
+            article.contributors.add(contributor)
+        article.save()
 
 
 def load_journals(row):
