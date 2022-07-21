@@ -21,13 +21,6 @@ def load_article(row):
         article.save()
         for author in row['z_authors']:
             contributor = get_one_contributor(author)
-            if author.get('affiliation'):
-                try:
-                    aff = load_affiliation(author['affiliation'][0]['name'])
-                    contributor.affiliation = aff
-                    contributor.save()
-                except KeyError:
-                    pass
             article.contributors.add(contributor)
         article.save()
     return article
@@ -72,6 +65,12 @@ def get_one_contributor(author):
         contributor.given = author.get('given')
         contributor.orcid = author.get('ORCID')
         contributor.authenticated_orcid = author.get('authenticated-orcid')
+        if author.get('affiliation'):
+            try:
+                aff = load_affiliation(author['affiliation'][0]['name'])
+                contributor.affiliation = aff
+            except KeyError:
+                pass
         contributor.save()
     return contributor
 
