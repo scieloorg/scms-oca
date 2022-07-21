@@ -375,3 +375,5 @@ WAGTAILMENUS_FLAT_MENUS_HANDLE_CHOICES = [("oca", "OCA"),
                                           ("metricas", _("Métricas")),
                                           ("faq", "FAQ"),
                                           ("noticias", _("Notícias")),]
+
+PAGINATION_PER_PAGE = 10
