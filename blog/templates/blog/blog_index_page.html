@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% load wagtailcore_tags %}
+
+{% block content %}
+
+  <section id="content">
+      <div class="content-wrap">
+          <div class="container clearfix">
+
+              <div class="row gutter-40 col-mb-80">
+                  <!-- Post Content
+                  ============================================= -->
+                  <div class="postcontent col-lg-9">
+
+                      <!-- Posts
+                      ============================================= -->
+                      <div id="posts" class="post-timeline">
+
+
+                        {% for post in posts %}
+
+                          <div class="entry">
+                              <div class="entry-timeline">
+                                  {{ post.specific.date|date:"d" }}<span> {{ post.specific.date|date:"M" }}</span>
+                                  <div class="timeline-divider"></div>
+                              </div>
+                              <div class="entry-title">
+                                  <h2><a href="{% pageurl post %}">{{ post.title }}</a></h2>
+                              </div>
+                              <div class="entry-content">
+                                  <p>{{ post.specific.intro|richtext|truncatewords:20 }}</p>
+                                  <a href="{% pageurl post %}" class="more-link">Leia Mais</a>
+                              </div>
+                              <br/>
+                          </div>
+
+                        {% endfor %}
+
+                      </div><!-- #posts end -->
+
+                      {% include 'include/pagination.html' %}
+
+                  </div><!-- .postcontent end -->
+
+                  <!-- Sidebar
+                  ============================================= -->
+                  <div class="sidebar col-lg-3">
+                      <div class="sidebar-widgets-wrap">
+
+                          <div class="widget clearfix">
+
+                              {% if tags %}
+                                <h4>Tag Cloud</h4>
+
+                                <div class="tagcloud">
+
+                                    <div class="tags">
+                                        {% for tag in tags %}
+                                            <a href="?tag={{ tag }}">{{ tag }}</a>
+                                        {% endfor %}
+                                    </div>
+
+                                </div>
+                              {% endif %}
+
+                          </div>
+
+                      </div>
+
+                  </div><!-- .sidebar end -->
+              </div>
+
+          </div>
+      </div>
+  </section>
+
+{% endblock content %}

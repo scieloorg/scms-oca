@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils.translation import gettext as _
 
+from wagtail.core.fields import RichTextField
 from wagtail.admin.edit_handlers import FieldPanel, TabbedInterface, ObjectList
 from wagtail.images.edit_handlers import ImageChooserPanel
 from wagtail.contrib.settings.models import BaseSetting, register_setting
@@ -14,7 +15,12 @@ class CustomSettings(BaseSetting):
     More about look:
         https://docs.wagtail.org/en/stable/reference/contrib/settings.html
     """
+
     name = models.CharField(max_length=100, null=True, blank=True)
+    email = models.EmailField(max_length=100, null=True, blank=True)
+    phone = models.CharField(max_length=100, null=True, blank=True)
+
+    footer_text = RichTextField(null=True, blank=True)
 
     favicon = models.ForeignKey(
         'wagtailimages.Image',
@@ -42,6 +48,9 @@ class CustomSettings(BaseSetting):
 
     site_panels = [
         FieldPanel('name'),
+        FieldPanel('email'),
+        FieldPanel('phone'),
+        FieldPanel('footer_text', classname="full"),
         ImageChooserPanel('favicon'),
         ImageChooserPanel('site_logo'),
     ]
