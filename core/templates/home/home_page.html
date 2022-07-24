@@ -2,7 +2,7 @@
 {% load i18n wagtailcore_tags %}
 
 {% block content %}
-    {% if page %}
+    <!-- {% if page %}
         {% for translation in page.get_translations.live %}
             {% get_language_info for translation.locale.language_code as lang %}
             <a href="{% pageurl translation %}" rel="alternate" hreflang="{{ language_code }}">
@@ -10,6 +10,6 @@
             </a>
             {% endfor %}
             {{page.specific.title}}
-    {% endif %}
+    {% endif %} -->
 
 {% endblock content %}

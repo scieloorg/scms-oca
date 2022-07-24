@@ -117,8 +117,8 @@ LOCAL_APPS = [
     "policy_directory",
     "disclosure_directory",
     "blog",
+    "freepage",
     "core",
-    # Your stuff: custom apps go here
 ]
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps

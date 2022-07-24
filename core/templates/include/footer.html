@@ -1,3 +1,7 @@
+{% load wagtailsettings_tags %}
+
+{% get_settings use_default_site=True %}
+
 <footer id="footer" class="dark"
     data-scrollto-settings="{&quot;offset&quot;:140,&quot;speed&quot;:1250,&quot;easing&quot;:&quot;easeOutQuad&quot;}">
 
@@ -5,11 +9,10 @@
         <div class="container">
             <div class="row col-mb-30">
                 <div class="col-md-6 text-center text-md-start">
-                    Copyrights © 2022 All Rights Reserved by OCABr.<br>
-                    <!-- <div class="copyright-links"><a href="#">Terms of Use</a> / <a href="#">Privacy Policy</a></div> -->
+                    {{ settings.core_settings.CustomSettings.footer_text|safe }}<br>
                 </div>
                 <div class="col-md-6 text-center text-md-end">
-                    <div class="d-flex justify-content-center justify-content-md-end">
+                    <!-- <div class="d-flex justify-content-center justify-content-md-end">
                         <a href="#" class="social-icon si-small si-borderless si-facebook">
                             <i class="icon-facebook"></i>
                             <i class="icon-facebook"></i>
@@ -42,11 +45,11 @@
                             <i class="icon-linkedin"></i>
                             <i class="icon-linkedin"></i>
                         </a>
-                    </div>
+                    </div> -->
                     <div class="clear"></div>
-                    <i class="icon-envelope2"></i> oca@ocabr.com.br <span class="middot">·</span> <i
-                        class="icon-headphones"></i> +55-11-0000-0000 <span class="middot">·</span> <i
-                        class="icon-skype2"></i> OCABr
+                    <i class="icon-envelope2"></i> {{ settings.core_settings.CustomSettings.email }} <span class="middot">·</span> <i
+                        class="icon-headphones"></i> {{ settings.core_settings.CustomSettings.phone }} <span class="middot">·</span> <i
+                        class="icon-facebook"></i> {{ settings.core_settings.CustomSettings.name }}
                 </div>
             </div>
         </div>
