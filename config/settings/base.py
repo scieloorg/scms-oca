@@ -372,8 +372,14 @@ RECAPTCHA_PRIVATE_KEY = env.str("RECAPTCHA_PRIVATE_KEY", default='')
 
 WAGTAILMENUS_FLAT_MENUS_HANDLE_CHOICES = [("oca", "OCA"),
                                           ("sobre_projeto", _("Sobre o Projeto")),
-                                          ("metricas", _("Métricas")),
                                           ("faq", "FAQ"),
                                           ("noticias", _("Notícias")),]
 
 PAGINATION_PER_PAGE = 10
+
+WAGTAILSEARCH_BACKENDS = {
+    'default': {
+        'BACKEND': 'wagtail.search.backends.database',
+        'SEARCH_CONFIG': 'english',
+    }
+}

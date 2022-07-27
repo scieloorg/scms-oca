@@ -5566,7 +5566,7 @@ body:not(.top-search-open) .top-search-parent .header-misc > *:not(#top-search) 
 	pointer-events: auto;
 }
 
-.side-panel-open:not(.device-xs):not(.device-sm):not(.device-md) .body-overlay:hover { cursor: url('images/icons/close.png') 15 15, default; }
+.side-panel-open:not(.device-xs):not(.device-sm):not(.device-md) .body-overlay:hover { cursor: url('../images/icons/close.png') 15 15, default; }
 
 
 /* ----------------------------------------------------------------
@@ -5796,7 +5796,7 @@ body:not(.has-plugin-html5video) .video-wrap video {
 	top: 0;
 	left: 0;
 	z-index: 5;
-	background: transparent url('images/grid.png') repeat;
+	background: transparent url('../images/grid.png') repeat;
 	transform: translateZ(0);
 	-webkit-backface-visibility: hidden;
 }
@@ -6476,7 +6476,7 @@ body:not(.has-plugin-html5video) .video-wrap video {
 -----------------------------------------------------------------*/
 
 .page-title-pattern {
-	background-image: url('images/pattern.png');
+	background-image: url('../images/pattern.png');
 	background-repeat: repeat;
 	background-attachment: fixed;
 }
@@ -6502,7 +6502,7 @@ body:not(.has-plugin-html5video) .video-wrap video {
 
 .page-title-parallax {
 	background-color: transparent;
-	background-image: url('images/parallax/parallax-bg.jpg');
+	background-image: url('../images/parallax/parallax-bg.jpg');
 	background-attachment: fixed;
 	background-position: 50% 0;
 	background-repeat: no-repeat;
@@ -10004,7 +10004,7 @@ body:not(.device-touch) .button.button-full strong {
 	padding: 2px;
 	z-index: -1;
 	box-shadow: none;
-	background-image: url('images/icons/iconalt.svg');
+	background-image: url('../images/icons/iconalt.svg');
 	background-position: center center;
 	background-size: 100% 100%;
 	-webkit-transition: -webkit-transform 0.5s, opacity 0.5s, background-color 0.5s;
@@ -10347,7 +10347,7 @@ body:not(.device-touch) .social-icon {
 }
 
 .i-alt {
-	background-image: url('images/icons/iconalt.svg');
+	background-image: url('../images/icons/iconalt.svg');
 	background-position: center center;
 	background-size: 100% 100%;
 }
@@ -12602,7 +12602,7 @@ blockquote.float-right {
 	top: 50%;
 	margin-left: -32px;
 	margin-top: -32px;
-	background: url("images/icons/play.png") no-repeat;
+	background: url("../images/icons/play.png") no-repeat;
 	cursor: pointer;
 	z-index: 1;
 	-webkit-backface-visibility: hidden;
