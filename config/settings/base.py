@@ -111,7 +111,7 @@ THIRD_PARTY_APPS = [
 LOCAL_APPS = [
     "core.users",
     "core_settings",
-    "scholarly_articles",
+    # "scholarly_articles",
     "infrastructure_directory",
     "education_directory",
     "policy_directory",
