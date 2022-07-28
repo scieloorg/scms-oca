@@ -19,12 +19,24 @@ class DisclosureDirectory(CommonControlField):
                                    null=True, blank=True)
     organization = models.TextField(_("Organization"), max_length=255,
                                    null=False, blank=False)
+    start_date = models.DateField(_("Start Date"), max_length=255,
+                                  null=True, blank=True)
+    end_date = models.DateField(_("End Date"), max_length=255,
+                                null=True, blank=True)
+    start_time = models.TimeField(_("Start Time"), max_length=255,
+                                  null=True, blank=True)
+    end_time = models.TimeField(_("End Time"), max_length=255,
+                                null=True, blank=True)
 
     panels = [
         FieldPanel('event'),
         FieldPanel('link'),
         FieldPanel('description'),
         FieldPanel('organization'),
+        FieldPanel('start_date'),
+        FieldPanel('end_date'),
+        FieldPanel('start_time'),
+        FieldPanel('end_time'),
 
     ]
     base_form_class = DisclosureDirectoryForm

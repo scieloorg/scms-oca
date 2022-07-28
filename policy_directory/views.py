@@ -1,5 +1,6 @@
 import os
 import csv
+from datetime import datetime
 from django.shortcuts import get_object_or_404, redirect
 from django.http import HttpResponse, Http404
 from django.utils.translation import gettext as _
@@ -76,6 +77,7 @@ def import_file(request):
                 po.link = row['Link']
                 po.description = row['Description']
                 po.institution = row['Institution']
+                po.date = datetime.strptime(row['Date'], '%d/%m/%Y')
                 po.creator = request.user
                 po.save()
     except Exception as ex:
