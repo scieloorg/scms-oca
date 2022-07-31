@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 from scholarly_articles import models
 
 import json
@@ -26,6 +27,11 @@ def load(row):
         rawunpaywall.save()
     except KeyError:
         pass
+=======
+from scholarly_articles.scripts.unpaywall import load
+
+import json
+>>>>>>> Stashed changes
 
 
 def run():
