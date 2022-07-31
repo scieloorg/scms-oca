@@ -84,8 +84,17 @@ class ContributorsAdmin(ModelAdmin):
         'authenticated_orcid',
         'affiliation',
     )
+<<<<<<< Updated upstream
     list_filter = ('affiliation',)
     search_fields = ('orcid',)
+=======
+<<<<<<< Updated upstream
+    list_filter = ('orcid',)
+    search_fields = ('doi', 'orcid')
+=======
+    # list_filter = ('orcid',)
+    search_fields = ('orcid', 'family', 'given', 'affiliation',)
+>>>>>>> Stashed changes
 
 
 class AffiliationsAdmin(ModelAdmin):
@@ -106,6 +115,10 @@ class ScholarlyArticlesAdminGroup(ModelAdminGroup):
     menu_icon = 'folder-open-inverse'  # change as required
     menu_order = 200  # will put in 3rd place (000 being 1st, 100 2nd)
     items = (JournalsAdmin, ScholarlyArticlesAdmin, ContributorsAdmin, AffiliationsAdmin, RawUnpaywallAdmin,)
+<<<<<<< Updated upstream
+=======
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
 
 
 modeladmin_register(ScholarlyArticlesAdminGroup)
