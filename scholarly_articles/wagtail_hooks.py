@@ -84,8 +84,9 @@ class ContributorsAdmin(ModelAdmin):
         'authenticated_orcid',
         'affiliation',
     )
-    list_filter = ('affiliation',)
-    search_fields = ('orcid',)
+
+    # list_filter = ('orcid',)
+    search_fields = ('orcid', 'family', 'given', 'affiliation',)
 
 
 class AffiliationsAdmin(ModelAdmin):
