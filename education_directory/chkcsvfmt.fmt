@@ -14,3 +14,19 @@ type=String
 data_required=True
 type=String
 
+[Start Date]
+data_required=False
+type=Date
+
+[End Date]
+data_required=False
+type=Date
+
+[Start Time]
+data_required=False
+type=String
+
+[End Time]
+data_required=False
+type=String
+

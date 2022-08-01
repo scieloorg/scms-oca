@@ -1,5 +1,6 @@
 import os
 import csv
+from datetime import datetime
 from django.shortcuts import get_object_or_404, redirect
 from django.http import HttpResponse, Http404
 from django.utils.translation import gettext as _
@@ -76,6 +77,10 @@ def import_file(request):
                 ed.link = row['Link']
                 ed.description = row['Description']
                 ed.institution = row['Institution']
+                ed.start_date = datetime.strptime(row['Start Date'], '%d/%m/%Y')
+                ed.end_date = datetime.strptime(row['End Date'], '%d/%m/%Y')
+                ed.start_time = row['Start Time']
+                ed.end_time = row['End Time']
                 ed.creator = request.user
                 ed.save()
     except Exception as ex:
@@ -97,3 +102,9 @@ def download_sample(request):
             response['Content-Disposition'] = 'inline; filename=' + os.path.basename(file_path)
             return response
     raise Http404
+
+
+    start_time = models.TimeField(_("Start Time"), max_length=255,
+                                  null=True, blank=True)
+    end_time = models.TimeField(_("End Time"), max_length=255,
+                                  null=True, blank=True)

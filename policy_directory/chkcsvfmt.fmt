@@ -13,3 +13,7 @@ type=String
 [Description]
 data_required=False
 type=String
+
+[Date]
+data_required=False
+type=Date
