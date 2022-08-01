@@ -346,8 +346,8 @@ INSTALLED_APPS += ["compressor"]
 STATICFILES_FINDERS += ["compressor.finders.CompressorFinder"]
 
 # Your stuff...
-WAGTAIL_SITE_NAME = "core"
-BASE_URL = "https://core"
+WAGTAIL_SITE_NAME = "OCABR"
+BASE_URL = env.str("DJANGO_BASE_URL", default='https://ocabr')
 
 LANGUAGES = [
     ('pt-BR', "Portuguese"),
