@@ -82,6 +82,7 @@ EMAIL_SUBJECT_PREFIX = env(
     "DJANGO_EMAIL_SUBJECT_PREFIX",
     default="[SciELO Content Manager ]",
 )
+EMAIL_HOST = env("EMAIL_HOST", default="")
 
 # ADMIN
 # ------------------------------------------------------------------------------
