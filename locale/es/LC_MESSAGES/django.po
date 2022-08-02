@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-07-19 20:42+0000\n"
+"POT-Creation-Date: 2022-08-02 07:59+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -22,11 +22,7 @@ msgstr ""
 msgid "Sobre o Projeto"
 msgstr ""
 
-#: config/settings/base.py:375
-msgid "Métricas"
-msgstr ""
-
-#: config/settings/base.py:377
+#: config/settings/base.py:376
 msgid "Notícias"
 msgstr ""
 
@@ -137,31 +133,33 @@ msgid ""
 msgstr ""
 
 #: core/templates/account/login.html:7 core/templates/account/login.html:11
-#: core/templates/account/login.html:44
+#: core/templates/account/login.html:56
 msgid "Sign In"
 msgstr ""
 
-#: core/templates/account/login.html:16
-#, python-format
-msgid ""
-"Please sign in with one\n"
-"of your existing third party accounts. Or, <a href=\"%(signup_url)s\">sign "
-"up</a>\n"
-"for a %(site_name)s account and sign in below:"
+#: core/templates/account/login.html:17
+msgid "Please sign in with one of your existing third party accounts:"
 msgstr ""
 
-#: core/templates/account/login.html:26
+#: core/templates/account/login.html:19
+#, python-format
+msgid ""
+"Or, <a href=\"%(signup_url)s\">sign up</a> for a %(site_name)s account and "
+"sign in below:"
+msgstr ""
+
+#: core/templates/account/login.html:32
 msgid "or"
 msgstr ""
 
-#: core/templates/account/login.html:33
+#: core/templates/account/login.html:41
 #, python-format
 msgid ""
-"If you have not created an account yet, then please\n"
-"<a href=\"%(signup_url)s\">sign up</a> first."
+"If you have not created an account yet, then please <a href=\"%(signup_url)s"
+"\">sign up</a> first."
 msgstr ""
 
-#: core/templates/account/login.html:43
+#: core/templates/account/login.html:55
 msgid "Forgot Password?"
 msgstr ""
 
@@ -376,11 +374,11 @@ msgstr ""
 msgid "Information successfully updated"
 msgstr ""
 
-#: core_settings/models.py:54
+#: core_settings/models.py:63
 msgid "Site settings"
 msgstr ""
 
-#: core_settings/models.py:55
+#: core_settings/models.py:64
 msgid "Admin settings"
 msgstr ""
 
@@ -421,21 +419,40 @@ msgstr ""
 msgid "Organization"
 msgstr ""
 
-#: disclosure_directory/models.py:34 disclosure_directory/wagtail_hooks.py:47
+#: disclosure_directory/models.py:22 education_directory/models.py:22
+#: policy_directory/models.py:22
+msgid "Start Date"
+msgstr ""
+
+#: disclosure_directory/models.py:24 education_directory/models.py:24
+msgid "End Date"
+msgstr ""
+
+#: disclosure_directory/models.py:26 education_directory/models.py:26
+#: education_directory/views.py:107
+msgid "Start Time"
+msgstr ""
+
+#: disclosure_directory/models.py:28 education_directory/models.py:28
+#: education_directory/views.py:109
+msgid "End Time"
+msgstr ""
+
+#: disclosure_directory/models.py:46 disclosure_directory/wagtail_hooks.py:47
 msgid "Disclosure Directory Upload"
 msgstr ""
 
-#: disclosure_directory/models.py:38 education_directory/models.py:49
+#: disclosure_directory/models.py:50 education_directory/models.py:49
 #: infrastructure_directory/models.py:34 policy_directory/models.py:41
 msgid "Attachement"
 msgstr ""
 
-#: disclosure_directory/models.py:43 education_directory/models.py:54
+#: disclosure_directory/models.py:55 education_directory/models.py:54
 #: infrastructure_directory/models.py:39 policy_directory/models.py:46
 msgid "Is valid?"
 msgstr ""
 
-#: disclosure_directory/models.py:45 education_directory/models.py:56
+#: disclosure_directory/models.py:57 education_directory/models.py:56
 #: infrastructure_directory/models.py:41 policy_directory/models.py:48
 msgid "Number of lines"
 msgstr ""
@@ -447,30 +464,30 @@ msgstr ""
 msgid "Download CSV Example"
 msgstr ""
 
-#: disclosure_directory/views.py:37 education_directory/views.py:37
-#: infrastructure_directory/views.py:38 policy_directory/views.py:37
+#: disclosure_directory/views.py:38 education_directory/views.py:38
+#: infrastructure_directory/views.py:38 policy_directory/views.py:38
 msgid "Valication error"
 msgstr ""
 
-#: disclosure_directory/views.py:44 education_directory/views.py:44
-#: infrastructure_directory/views.py:45 policy_directory/views.py:44
+#: disclosure_directory/views.py:45 education_directory/views.py:45
+#: infrastructure_directory/views.py:45 policy_directory/views.py:45
 #, python-format
 msgid "Valication error: %s"
 msgstr ""
 
-#: disclosure_directory/views.py:46 education_directory/views.py:46
-#: infrastructure_directory/views.py:47 policy_directory/views.py:46
+#: disclosure_directory/views.py:47 education_directory/views.py:47
+#: infrastructure_directory/views.py:47 policy_directory/views.py:47
 msgid "File successfully validated!"
 msgstr ""
 
-#: disclosure_directory/views.py:82 education_directory/views.py:82
-#: infrastructure_directory/views.py:82 policy_directory/views.py:82
+#: disclosure_directory/views.py:87 education_directory/views.py:87
+#: infrastructure_directory/views.py:82 policy_directory/views.py:84
 #, python-format
 msgid "Import error: %s"
 msgstr ""
 
-#: disclosure_directory/views.py:84 education_directory/views.py:84
-#: infrastructure_directory/views.py:84 policy_directory/views.py:84
+#: disclosure_directory/views.py:89 education_directory/views.py:89
+#: infrastructure_directory/views.py:84 policy_directory/views.py:86
 msgid "File imported successfully!"
 msgstr ""
 
@@ -486,22 +503,6 @@ msgstr ""
 
 #: education_directory/models.py:20 policy_directory/models.py:18
 msgid "Institution"
-msgstr ""
-
-#: education_directory/models.py:22 policy_directory/models.py:22
-msgid "Start Date"
-msgstr ""
-
-#: education_directory/models.py:24
-msgid "End Date"
-msgstr ""
-
-#: education_directory/models.py:26
-msgid "Start Time"
-msgstr ""
-
-#: education_directory/models.py:28
-msgid "End Time"
 msgstr ""
 
 #: education_directory/models.py:45 education_directory/wagtail_hooks.py:47
@@ -526,4 +527,104 @@ msgstr ""
 
 #: policy_directory/models.py:37 policy_directory/wagtail_hooks.py:47
 msgid "Policy Directory Upload"
+msgstr ""
+
+#: scholarly_articles/models.py:11 scholarly_articles/models.py:89
+msgid "DOI"
+msgstr ""
+
+#: scholarly_articles/models.py:12 scholarly_articles/models.py:92
+msgid "Year"
+msgstr ""
+
+#: scholarly_articles/models.py:13 scholarly_articles/wagtail_hooks.py:74
+msgid "Contributors"
+msgstr ""
+
+#: scholarly_articles/models.py:31
+msgid "ISSN-L"
+msgstr ""
+
+#: scholarly_articles/models.py:32
+msgid "ISSN's"
+msgstr ""
+
+#: scholarly_articles/models.py:33
+msgid "Journal Name"
+msgstr ""
+
+#: scholarly_articles/models.py:34
+msgid "Publisher"
+msgstr ""
+
+#: scholarly_articles/models.py:35
+msgid "DOAJ"
+msgstr ""
+
+#: scholarly_articles/models.py:53
+msgid "Family Name"
+msgstr ""
+
+#: scholarly_articles/models.py:54
+msgid "Given Name"
+msgstr ""
+
+#: scholarly_articles/models.py:56
+msgid "Authenticated"
+msgstr ""
+
+#: scholarly_articles/models.py:57 scholarly_articles/wagtail_hooks.py:94
+msgid "Affiliations"
+msgstr ""
+
+#: scholarly_articles/models.py:75
+msgid "Affiliation Name"
+msgstr ""
+
+#: scholarly_articles/models.py:90
+msgid "Harvesting date"
+msgstr ""
+
+#: scholarly_articles/models.py:91
+msgid "Paratext"
+msgstr ""
+
+#: scholarly_articles/models.py:94
+msgid "Resource Type"
+msgstr ""
+
+#: scholarly_articles/models.py:96
+msgid "Update"
+msgstr ""
+
+#: scholarly_articles/models.py:97
+msgid "JSON File"
+msgstr ""
+
+#: scholarly_articles/wagtail_hooks.py:10
+msgid "Scholarly Articles"
+msgstr ""
+
+#: scholarly_articles/wagtail_hooks.py:32
+msgid "RawUnpaywall"
+msgstr ""
+
+#: scholarly_articles/wagtail_hooks.py:48
+msgid "year"
+msgstr ""
+
+#: scholarly_articles/wagtail_hooks.py:54
+msgid "Journals"
+msgstr ""
+
+#: scholarly_articles/wagtail_hooks.py:68
+msgid "journal_issn_l"
+msgstr ""
+
+#: scholarly_articles/wagtail_hooks.py:69
+msgid "journal_issn_l)"
+msgstr ""
+
+#: scholarly_articles/wagtail_hooks.py:106
+msgid "Articles Directory"
 msgstr ""

@@ -15,6 +15,9 @@ class CustomSettings(BaseSetting):
     More about look:
         https://docs.wagtail.org/en/stable/reference/contrib/settings.html
     """
+    class Meta:
+        verbose_name = _('Configuração do site')
+        verbose_name_plural = _('Configuração do site')
 
     name = models.CharField(max_length=100, null=True, blank=True)
     email = models.EmailField(max_length=100, null=True, blank=True)
