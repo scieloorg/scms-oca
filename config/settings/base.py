@@ -353,7 +353,6 @@ LANGUAGES = [
     ('pt-BR', "Portuguese"),
     ('en', "English"),
     ('es', "Spanish"),
-    ('it', "Italian"),
 ]
 
 WAGTAIL_I18N_ENABLED = True
@@ -362,7 +361,6 @@ WAGTAIL_CONTENT_LANGUAGES =  [
     ('pt-BR', "Portuguese"),
     ('en', "English"),
     ('es', "Spanish"),
-    ('it', "Italian")
 ]
 
 NOCAPTCHA = True
