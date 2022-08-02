@@ -344,7 +344,7 @@ msgstr ""
 
 #: core/templates/wagtailadmin/login.html:7
 msgid "Administrative area of "
-msgstr ""
+msgstr "Área administrativa do "
 
 #: core/users/admin.py:18
 msgid "Personal info"
