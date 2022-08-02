@@ -5,6 +5,8 @@
 
 {% get_settings use_default_site=True %}
 
+{% block branding_title %}{{ settings.core_settings.CustomSettings.name }}{% endblock %}
+
 {% block branding_logo %}
     {% if settings.core_settings.CustomSettings.admin_logo %}
         {% image settings.core_settings.CustomSettings.admin_logo max-100x100 as logo %}
