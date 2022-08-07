@@ -1,3 +1,5 @@
+from django.db.utils import DataError
+
 from scholarly_articles import models
 
 
@@ -19,7 +21,7 @@ def load_article(row):
         article.year = row.get('year')
         article.journal = load_journal(row)
         article.save()
-        for author in row['z_authors']:
+        for author in row.get('z_authors') or []:
             contributor = get_one_contributor(author)
             article.contributors.add(contributor)
         article.save()
@@ -93,7 +95,10 @@ def run(from_year=1900, resource_type='journal-article'):
     rawunpaywall = models.RawUnpaywall.objects.filter(year__gte=from_year, resource_type=resource_type)
     for item in rawunpaywall:
         if not item.is_paratext:
-            load_article(item.json)
+            try:
+                load_article(item.json)
+            except (DataError, TypeError) as e:
+                print(f"{item} | {e}")
 
 
 if __name__ == '__main__':
