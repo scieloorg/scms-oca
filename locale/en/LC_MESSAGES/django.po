@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-02 07:59+0000\n"
+"POT-Creation-Date: 2022-08-07 23:03+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,11 +18,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: config/settings/base.py:374
+#: config/settings/base.py:373
 msgid "Sobre o Projeto"
 msgstr "About the project"
 
-#: config/settings/base.py:376
+#: config/settings/base.py:375
 msgid "Notícias"
 msgstr "News"
 
@@ -374,11 +374,15 @@ msgstr ""
 msgid "Information successfully updated"
 msgstr ""
 
-#: core_settings/models.py:63
+#: core_settings/models.py:19 core_settings/models.py:20
+msgid "Configuração do site"
+msgstr ""
+
+#: core_settings/models.py:66
 msgid "Site settings"
 msgstr ""
 
-#: core_settings/models.py:64
+#: core_settings/models.py:67
 msgid "Admin settings"
 msgstr ""
 
@@ -405,12 +409,12 @@ msgstr ""
 msgid "Event"
 msgstr ""
 
-#: disclosure_directory/models.py:17 education_directory/models.py:17
+#: disclosure_directory/models.py:17 education_directory/models.py:18
 #: infrastructure_directory/models.py:17 policy_directory/models.py:17
 msgid "Link"
 msgstr ""
 
-#: disclosure_directory/models.py:18 education_directory/models.py:18
+#: disclosure_directory/models.py:18 education_directory/models.py:19
 #: infrastructure_directory/models.py:18 policy_directory/models.py:20
 msgid "Description"
 msgstr ""
@@ -419,21 +423,21 @@ msgstr ""
 msgid "Organization"
 msgstr ""
 
-#: disclosure_directory/models.py:22 education_directory/models.py:22
+#: disclosure_directory/models.py:22 education_directory/models.py:23
 #: policy_directory/models.py:22
 msgid "Start Date"
 msgstr ""
 
-#: disclosure_directory/models.py:24 education_directory/models.py:24
+#: disclosure_directory/models.py:24 education_directory/models.py:25
 msgid "End Date"
 msgstr ""
 
-#: disclosure_directory/models.py:26 education_directory/models.py:26
+#: disclosure_directory/models.py:26 education_directory/models.py:27
 #: education_directory/views.py:107
 msgid "Start Time"
 msgstr ""
 
-#: disclosure_directory/models.py:28 education_directory/models.py:28
+#: disclosure_directory/models.py:28 education_directory/models.py:29
 #: education_directory/views.py:109
 msgid "End Time"
 msgstr ""
@@ -442,17 +446,17 @@ msgstr ""
 msgid "Disclosure Directory Upload"
 msgstr ""
 
-#: disclosure_directory/models.py:50 education_directory/models.py:49
+#: disclosure_directory/models.py:50 education_directory/models.py:50
 #: infrastructure_directory/models.py:34 policy_directory/models.py:41
 msgid "Attachement"
 msgstr ""
 
-#: disclosure_directory/models.py:55 education_directory/models.py:54
+#: disclosure_directory/models.py:55 education_directory/models.py:55
 #: infrastructure_directory/models.py:39 policy_directory/models.py:46
 msgid "Is valid?"
 msgstr ""
 
-#: disclosure_directory/models.py:57 education_directory/models.py:56
+#: disclosure_directory/models.py:57 education_directory/models.py:57
 #: infrastructure_directory/models.py:41 policy_directory/models.py:48
 msgid "Number of lines"
 msgstr ""
@@ -491,21 +495,21 @@ msgstr ""
 msgid "File imported successfully!"
 msgstr ""
 
-#: education_directory/models.py:14 education_directory/wagtail_hooks.py:31
+#: education_directory/models.py:15 education_directory/wagtail_hooks.py:31
 #: education_directory/wagtail_hooks.py:59
 msgid "Education Directory"
 msgstr ""
 
-#: education_directory/models.py:16 infrastructure_directory/models.py:16
+#: education_directory/models.py:17 infrastructure_directory/models.py:16
 #: policy_directory/models.py:16
 msgid "Title"
 msgstr ""
 
-#: education_directory/models.py:20 policy_directory/models.py:18
+#: education_directory/models.py:21 policy_directory/models.py:18
 msgid "Institution"
 msgstr ""
 
-#: education_directory/models.py:45 education_directory/wagtail_hooks.py:47
+#: education_directory/models.py:46 education_directory/wagtail_hooks.py:47
 msgid "Education Directory Upload"
 msgstr ""
 
@@ -627,6 +631,54 @@ msgstr ""
 
 #: scholarly_articles/wagtail_hooks.py:106
 msgid "Articles Directory"
+msgstr ""
+
+#: usefulmodels/models.py:15
+msgid "Name of the city"
+msgstr ""
+
+#: usefulmodels/models.py:18 usefulmodels/wagtail_hooks.py:35
+msgid "City"
+msgstr ""
+
+#: usefulmodels/models.py:19
+msgid "Cities"
+msgstr ""
+
+#: usefulmodels/models.py:39
+msgid "Name of the state"
+msgstr ""
+
+#: usefulmodels/models.py:40
+msgid "Acronym to the state"
+msgstr ""
+
+#: usefulmodels/models.py:43 usefulmodels/wagtail_hooks.py:50
+msgid "State"
+msgstr ""
+
+#: usefulmodels/models.py:44
+msgid "States"
+msgstr ""
+
+#: usefulmodels/models.py:63
+msgid "Name of the Country"
+msgstr ""
+
+#: usefulmodels/models.py:64
+msgid "Acronym to the Country"
+msgstr ""
+
+#: usefulmodels/models.py:67 usefulmodels/wagtail_hooks.py:65
+msgid "Country"
+msgstr ""
+
+#: usefulmodels/models.py:68
+msgid "Countries"
+msgstr ""
+
+#: usefulmodels/wagtail_hooks.py:78
+msgid "Useful Models"
 msgstr ""
 
 #~ msgid "Métricas"
