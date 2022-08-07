@@ -54,7 +54,7 @@ class Contributors(models.Model):
     given = models.CharField(_("Given Name"), max_length=255, null=True, blank=True)
     orcid = models.CharField("ORCID", max_length=255, null=True, blank=True)
     authenticated_orcid = models.BooleanField(_("Authenticated"), default=False, null=True, blank=True)
-    affiliation = models.ForeignKey(_("Affiliations"), on_delete=models.SET_NULL, max_length=255, null=True, blank=True)
+    affiliation = models.ForeignKey(_("Affiliations"), on_delete=models.SET_NULL, max_length=510, null=True, blank=True)
 
     def __unicode__(self):
         return f"{self.family}, {self.given} ({self.orcid})"
@@ -72,7 +72,7 @@ class Contributors(models.Model):
 
 
 class Affiliations(models.Model):
-    name = models.CharField(_("Affiliation Name"), max_length=255, null=True, blank=True)
+    name = models.CharField(_("Affiliation Name"), max_length=510, null=True, blank=True)
 
     def __unicode__(self):
         return self.name
