@@ -65,7 +65,7 @@ class JournalsAdmin(ModelAdmin):
         'journal_is_in_doaj',
     )
 
-    list_filter = (_('journal_issn_l'),)
+    #list_filter = (_('journal_issn_l'),)
     search_fields = (_('journal_issn_l)'),)
 
 
@@ -98,7 +98,7 @@ class AffiliationsAdmin(ModelAdmin):
     list_display = (
         'name',
     )
-    list_filter = ('name',)
+    #list_filter = ('name',)
     search_fields = ('name',)
 
 
