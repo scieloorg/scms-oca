@@ -1,4 +1,19 @@
+from django.db.utils import DataError
+
 from scholarly_articles import models
+
+
+class ArticleSaveError(Exception):
+    ...
+
+class JournalSaveError(Exception):
+    ...
+
+class ContributorSaveError(Exception):
+    ...
+
+class AffiliationSaveError(Exception):
+    ...
 
 
 def get_params(row, attribs):
@@ -18,11 +33,14 @@ def load_article(row):
         article.doi = row.get('doi')
         article.year = row.get('year')
         article.journal = load_journal(row)
-        article.save()
-        for author in row['z_authors']:
+        for author in row.get('z_authors') or []:
             contributor = get_one_contributor(author)
             article.contributors.add(contributor)
-        article.save()
+        try:
+            article.save()
+        except (DataError, TypeError) as e:
+            raise ArticleSaveError(e)
+
     return article
 
 
@@ -40,7 +58,11 @@ def load_journal(row):
         journal.journal_issn_l = row.get('journal_issn_l')
         journal.journal_name = row.get('journal_name')
         journal.publisher = row.get('publisher')
-        journal.save()
+        try:
+            journal.save()
+        except (DataError, TypeError) as e:
+            raise JournalSaveError(e)
+
     return journal
 
 
@@ -71,7 +93,11 @@ def get_one_contributor(author):
                 contributor.affiliation = aff
             except KeyError:
                 pass
-        contributor.save()
+        try:
+            contributor.save()
+        except (DataError, TypeError) as e:
+            raise ContributorSaveError(e)
+
     return contributor
 
 
@@ -84,7 +110,11 @@ def load_affiliation(affiliation_name):
         affiliation = models.Affiliations()
         if affiliation_name:
             affiliation.name = affiliation_name
-        affiliation.save()
+        try:
+            affiliation.save()
+        except (DataError, TypeError) as e:
+            raise AffiliationSaveError(e)
+
     return affiliation
 
 
@@ -93,7 +123,17 @@ def run(from_year=1900, resource_type='journal-article'):
     rawunpaywall = models.RawUnpaywall.objects.filter(year__gte=from_year, resource_type=resource_type)
     for item in rawunpaywall:
         if not item.is_paratext:
-            load_article(item.json)
+            try:
+                load_article(item.json)
+            except (ArticleSaveError, JournalSaveError, ContributorSaveError, AffiliationSaveError) as e:
+                error = models.ErrorLog()
+                error.document_id = item
+                error.error_type = str(type(e))
+                error.error_message = str(e)[:255]
+                try:
+                    error.save()
+                except (DataError, TypeError):
+                    pass
 
 
 if __name__ == '__main__':
