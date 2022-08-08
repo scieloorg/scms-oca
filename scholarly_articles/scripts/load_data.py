@@ -15,6 +15,9 @@ class ContributorSaveError(Exception):
 class AffiliationSaveError(Exception):
     ...
 
+class LogRecordError(Exception):
+    ...
+
 def get_params(row, attribs):
     params = {}
     for att in attribs:
@@ -127,9 +130,12 @@ def run(from_year=1900, resource_type='journal-article'):
             except (ArticleSaveError, JournalSaveError, ContributorSaveError, AffiliationSaveError) as e:
                 error = models.ErrorLog()
                 error.document_id = item
-                error.error_type = type(e)
-                error.error_message = str(e)
-                error.save()
+                error.error_type = str(type(e))
+                error.error_message = str(e)[:255]
+                try:
+                    error.save()
+                except LogRecordError:
+                    pass
 
 
 if __name__ == '__main__':
