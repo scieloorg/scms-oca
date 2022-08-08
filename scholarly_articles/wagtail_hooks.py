@@ -2,7 +2,7 @@ from django.utils.translation import gettext as _
 
 from wagtail.contrib.modeladmin.options import (ModelAdmin, modeladmin_register, ModelAdminGroup)
 
-from .models import (ScholarlyArticles, Contributors, Affiliations, Journals, RawUnpaywall)
+from .models import (ScholarlyArticles, Contributors, Affiliations, Journals, RawUnpaywall, ErrorLog)
 
 
 class ScholarlyArticlesAdmin(ModelAdmin):
@@ -102,11 +102,27 @@ class AffiliationsAdmin(ModelAdmin):
     search_fields = ('name',)
 
 
+class ErrorLogAdmin(ModelAdmin):
+    model = ErrorLog
+    menu_label = _('Errors')
+    menu_icon = 'folder-open-inverse'
+    add_to_settings_menu = False  # or True to add your model to the Settings sub-menu
+    exclude_from_explorer = False  # or True to exclude pages of this type from Wagtail's explorer view
+    list_display = (
+        'created',
+        'document_id',
+        'error_type',
+        'error_message',
+    )
+    list_filter = ('error_type',)
+    search_fields = ('document_id',)
+
+
 class ScholarlyArticlesAdminGroup(ModelAdminGroup):
     menu_label = _('Articles Directory')
     menu_icon = 'folder-open-inverse'  # change as required
     menu_order = 200  # will put in 3rd place (000 being 1st, 100 2nd)
-    items = (JournalsAdmin, ScholarlyArticlesAdmin, ContributorsAdmin, AffiliationsAdmin, RawUnpaywallAdmin,)
+    items = (JournalsAdmin, ScholarlyArticlesAdmin, ContributorsAdmin, AffiliationsAdmin, RawUnpaywallAdmin, ErrorLogAdmin)
 
 
 modeladmin_register(ScholarlyArticlesAdminGroup)
