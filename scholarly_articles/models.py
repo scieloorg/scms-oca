@@ -111,3 +111,9 @@ class RawUnpaywall(models.Model):
         FieldPanel('update'),
         FieldPanel('json'),
     ]
+
+
+class ErrorLog(CommonControlField):
+    document_id = models.ForeignKey(ScholarlyArticles, on_delete=models.SET_NULL, max_length=255, null=True, blank=True)
+    error_type = models.CharField(_("Error Type"), max_length=255, null=True, blank=True)
+    error_message = models.CharField(_("Error Message"), max_length=255, null=True, blank=True)
