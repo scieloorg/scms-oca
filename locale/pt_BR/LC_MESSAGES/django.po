@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-07 23:03+0000\n"
+"POT-Creation-Date: 2022-08-08 00:36+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,11 +18,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
-#: config/settings/base.py:373
+#: config/settings/base.py:374
 msgid "Sobre o Projeto"
 msgstr "Sobre o Projeto"
 
-#: config/settings/base.py:375
+#: config/settings/base.py:376
 msgid "Notícias"
 msgstr "Notícias"
 
@@ -501,11 +501,12 @@ msgid "Education Directory"
 msgstr "Diretório de Educação"
 
 #: education_directory/models.py:17 infrastructure_directory/models.py:16
-#: policy_directory/models.py:16
+#: institution/models.py:9 policy_directory/models.py:16
 msgid "Title"
 msgstr "Título"
 
-#: education_directory/models.py:21 policy_directory/models.py:18
+#: education_directory/models.py:21 institution/wagtail_hooks.py:21
+#: policy_directory/models.py:18
 msgid "Institution"
 msgstr "Instituição"
 
@@ -523,6 +524,21 @@ msgstr "Diretório de Infraestrutura"
 #: infrastructure_directory/wagtail_hooks.py:47
 msgid "Infraestructure Directory Upload"
 msgstr "Diretório de Infraestrutura Upload"
+
+#: institution/models.py:11 usefulmodels/models.py:18
+#: usefulmodels/wagtail_hooks.py:35
+msgid "City"
+msgstr "Cidade"
+
+#: institution/models.py:13 usefulmodels/models.py:43
+#: usefulmodels/wagtail_hooks.py:50
+msgid "State"
+msgstr "Estado"
+
+#: institution/models.py:15 usefulmodels/models.py:67
+#: usefulmodels/wagtail_hooks.py:65
+msgid "Country"
+msgstr "País"
 
 #: policy_directory/models.py:14 policy_directory/wagtail_hooks.py:31
 #: policy_directory/wagtail_hooks.py:59
@@ -637,10 +653,6 @@ msgstr ""
 msgid "Name of the city"
 msgstr "Nome da cidade"
 
-#: usefulmodels/models.py:18 usefulmodels/wagtail_hooks.py:35
-msgid "City"
-msgstr "Cidade"
-
 #: usefulmodels/models.py:19
 msgid "Cities"
 msgstr "Cidades"
@@ -653,10 +665,6 @@ msgstr "Nome do estado"
 msgid "Acronym to the state"
 msgstr "Acrônimo do estado"
 
-#: usefulmodels/models.py:43 usefulmodels/wagtail_hooks.py:50
-msgid "State"
-msgstr "Estado"
-
 #: usefulmodels/models.py:44
 msgid "States"
 msgstr "Estados"
@@ -668,10 +676,6 @@ msgstr "Nome do País"
 #: usefulmodels/models.py:64
 msgid "Acronym to the Country"
 msgstr "Acrônimo do país"
-
-#: usefulmodels/models.py:67 usefulmodels/wagtail_hooks.py:65
-msgid "Country"
-msgstr "País"
 
 #: usefulmodels/models.py:68
 msgid "Countries"

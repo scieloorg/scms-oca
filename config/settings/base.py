@@ -120,6 +120,7 @@ LOCAL_APPS = [
     "freepage",
     "core",
     "usefulmodels",
+    "institution",
 ]
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
