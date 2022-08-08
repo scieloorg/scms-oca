@@ -15,8 +15,6 @@ class ContributorSaveError(Exception):
 class AffiliationSaveError(Exception):
     ...
 
-class LogRecordError(Exception):
-    ...
 
 def get_params(row, attribs):
     params = {}
@@ -134,7 +132,7 @@ def run(from_year=1900, resource_type='journal-article'):
                 error.error_message = str(e)[:255]
                 try:
                     error.save()
-                except LogRecordError:
+                except (DataError, TypeError):
                     pass
 
 
