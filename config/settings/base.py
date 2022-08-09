@@ -119,6 +119,8 @@ LOCAL_APPS = [
     "blog",
     "freepage",
     "core",
+    "usefulmodels",
+    "location",
 ]
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
