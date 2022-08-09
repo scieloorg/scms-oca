@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
 
-class InstitutionConfig(AppConfig):
+class LocationConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'institution'
+    name = 'location'

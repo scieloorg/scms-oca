@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-08 00:36+0000\n"
+"POT-Creation-Date: 2022-08-09 12:20+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -409,12 +409,12 @@ msgstr "Diretório de Eventos"
 msgid "Event"
 msgstr "Evento"
 
-#: disclosure_directory/models.py:17 education_directory/models.py:18
+#: disclosure_directory/models.py:17 education_directory/models.py:17
 #: infrastructure_directory/models.py:17 policy_directory/models.py:17
 msgid "Link"
 msgstr "Link"
 
-#: disclosure_directory/models.py:18 education_directory/models.py:19
+#: disclosure_directory/models.py:18 education_directory/models.py:18
 #: infrastructure_directory/models.py:18 policy_directory/models.py:20
 msgid "Description"
 msgstr "Descrição"
@@ -423,21 +423,21 @@ msgstr "Descrição"
 msgid "Organization"
 msgstr "Organização"
 
-#: disclosure_directory/models.py:22 education_directory/models.py:23
+#: disclosure_directory/models.py:22 education_directory/models.py:22
 #: policy_directory/models.py:22
 msgid "Start Date"
 msgstr "Data de início"
 
-#: disclosure_directory/models.py:24 education_directory/models.py:25
+#: disclosure_directory/models.py:24 education_directory/models.py:24
 msgid "End Date"
 msgstr "Data de fim"
 
-#: disclosure_directory/models.py:26 education_directory/models.py:27
+#: disclosure_directory/models.py:26 education_directory/models.py:26
 #: education_directory/views.py:107
 msgid "Start Time"
 msgstr "Hora inicial"
 
-#: disclosure_directory/models.py:28 education_directory/models.py:29
+#: disclosure_directory/models.py:28 education_directory/models.py:28
 #: education_directory/views.py:109
 msgid "End Time"
 msgstr "Hora final"
@@ -446,17 +446,17 @@ msgstr "Hora final"
 msgid "Disclosure Directory Upload"
 msgstr "Diretório de Eventos Upload"
 
-#: disclosure_directory/models.py:50 education_directory/models.py:50
+#: disclosure_directory/models.py:50 education_directory/models.py:49
 #: infrastructure_directory/models.py:34 policy_directory/models.py:41
 msgid "Attachement"
 msgstr "Anexo"
 
-#: disclosure_directory/models.py:55 education_directory/models.py:55
+#: disclosure_directory/models.py:55 education_directory/models.py:54
 #: infrastructure_directory/models.py:39 policy_directory/models.py:46
 msgid "Is valid?"
 msgstr "É válido"
 
-#: disclosure_directory/models.py:57 education_directory/models.py:57
+#: disclosure_directory/models.py:57 education_directory/models.py:56
 #: infrastructure_directory/models.py:41 policy_directory/models.py:48
 msgid "Number of lines"
 msgstr "Número de linhas"
@@ -495,22 +495,21 @@ msgstr "Erro na importação: %s"
 msgid "File imported successfully!"
 msgstr "Arquivo importado com sucesso!"
 
-#: education_directory/models.py:15 education_directory/wagtail_hooks.py:31
+#: education_directory/models.py:14 education_directory/wagtail_hooks.py:31
 #: education_directory/wagtail_hooks.py:59
 msgid "Education Directory"
 msgstr "Diretório de Educação"
 
-#: education_directory/models.py:17 infrastructure_directory/models.py:16
-#: institution/models.py:9 policy_directory/models.py:16
+#: education_directory/models.py:16 infrastructure_directory/models.py:16
+#: policy_directory/models.py:16
 msgid "Title"
 msgstr "Título"
 
-#: education_directory/models.py:21 institution/wagtail_hooks.py:21
-#: policy_directory/models.py:18
+#: education_directory/models.py:20 policy_directory/models.py:18
 msgid "Institution"
 msgstr "Instituição"
 
-#: education_directory/models.py:46 education_directory/wagtail_hooks.py:47
+#: education_directory/models.py:45 education_directory/wagtail_hooks.py:47
 msgid "Education Directory Upload"
 msgstr "Diretório de Educação Upload"
 
@@ -525,20 +524,32 @@ msgstr "Diretório de Infraestrutura"
 msgid "Infraestructure Directory Upload"
 msgstr "Diretório de Infraestrutura Upload"
 
-#: institution/models.py:11 usefulmodels/models.py:18
+#: location/models.py:11
+msgid "Name"
+msgstr "Nome"
+
+#: location/models.py:13
+msgid "Region"
+msgstr "Região"
+
+#: location/models.py:15 usefulmodels/models.py:18
 #: usefulmodels/wagtail_hooks.py:35
 msgid "City"
 msgstr "Cidade"
 
-#: institution/models.py:13 usefulmodels/models.py:43
+#: location/models.py:17 usefulmodels/models.py:43
 #: usefulmodels/wagtail_hooks.py:50
 msgid "State"
 msgstr "Estado"
 
-#: institution/models.py:15 usefulmodels/models.py:67
+#: location/models.py:19 usefulmodels/models.py:67
 #: usefulmodels/wagtail_hooks.py:65
 msgid "Country"
 msgstr "País"
+
+#: location/wagtail_hooks.py:21
+msgid "Location"
+msgstr "Localização"
 
 #: policy_directory/models.py:14 policy_directory/wagtail_hooks.py:31
 #: policy_directory/wagtail_hooks.py:59
@@ -551,15 +562,15 @@ msgstr "Diretório de Política Upload"
 
 #: scholarly_articles/models.py:11 scholarly_articles/models.py:89
 msgid "DOI"
-msgstr ""
+msgstr "DOI"
 
 #: scholarly_articles/models.py:12 scholarly_articles/models.py:92
 msgid "Year"
-msgstr ""
+msgstr "Ano"
 
 #: scholarly_articles/models.py:13 scholarly_articles/wagtail_hooks.py:74
 msgid "Contributors"
-msgstr ""
+msgstr "Contribuidores"
 
 #: scholarly_articles/models.py:31
 msgid "ISSN-L"
@@ -571,39 +582,39 @@ msgstr ""
 
 #: scholarly_articles/models.py:33
 msgid "Journal Name"
-msgstr ""
+msgstr "Nome do periódico"
 
 #: scholarly_articles/models.py:34
 msgid "Publisher"
-msgstr ""
+msgstr "Publicador"
 
 #: scholarly_articles/models.py:35
 msgid "DOAJ"
-msgstr ""
+msgstr "DOAJ"
 
 #: scholarly_articles/models.py:53
 msgid "Family Name"
-msgstr ""
+msgstr "Sobrenome"
 
 #: scholarly_articles/models.py:54
 msgid "Given Name"
-msgstr ""
+msgstr "Nome dado"
 
 #: scholarly_articles/models.py:56
 msgid "Authenticated"
-msgstr ""
+msgstr "Autenticado"
 
 #: scholarly_articles/models.py:57 scholarly_articles/wagtail_hooks.py:94
 msgid "Affiliations"
-msgstr ""
+msgstr "Afiliações"
 
 #: scholarly_articles/models.py:75
 msgid "Affiliation Name"
-msgstr ""
+msgstr "Nome de afiliação"
 
 #: scholarly_articles/models.py:90
 msgid "Harvesting date"
-msgstr ""
+msgstr "Data da coleta"
 
 #: scholarly_articles/models.py:91
 msgid "Paratext"
@@ -611,19 +622,27 @@ msgstr ""
 
 #: scholarly_articles/models.py:94
 msgid "Resource Type"
-msgstr ""
+msgstr "Tipo de recurso"
 
 #: scholarly_articles/models.py:96
 msgid "Update"
-msgstr ""
+msgstr "Atualiza"
 
 #: scholarly_articles/models.py:97
 msgid "JSON File"
-msgstr ""
+msgstr "Arquivo JSON"
+
+#: scholarly_articles/models.py:118
+msgid "Error Type"
+msgstr "Tipo de erro"
+
+#: scholarly_articles/models.py:119
+msgid "Error Message"
+msgstr "Mensagem de erro"
 
 #: scholarly_articles/wagtail_hooks.py:10
 msgid "Scholarly Articles"
-msgstr ""
+msgstr "Artigos acadêmicos"
 
 #: scholarly_articles/wagtail_hooks.py:32
 msgid "RawUnpaywall"
@@ -631,23 +650,23 @@ msgstr ""
 
 #: scholarly_articles/wagtail_hooks.py:48
 msgid "year"
-msgstr ""
+msgstr "Ano"
 
 #: scholarly_articles/wagtail_hooks.py:54
 msgid "Journals"
-msgstr ""
-
-#: scholarly_articles/wagtail_hooks.py:68
-msgid "journal_issn_l"
-msgstr ""
+msgstr "Periódico"
 
 #: scholarly_articles/wagtail_hooks.py:69
 msgid "journal_issn_l)"
 msgstr ""
 
-#: scholarly_articles/wagtail_hooks.py:106
+#: scholarly_articles/wagtail_hooks.py:107
+msgid "Errors"
+msgstr "Erros"
+
+#: scholarly_articles/wagtail_hooks.py:122
 msgid "Articles Directory"
-msgstr ""
+msgstr "Diretório de artigos"
 
 #: usefulmodels/models.py:15
 msgid "Name of the city"
