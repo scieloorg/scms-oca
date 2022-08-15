@@ -8,6 +8,9 @@ from wagtail.documents.edit_handlers import DocumentChooserPanel
 from core.models import CommonControlField
 from .forms import EducationDirectoryForm, EducationDirectoryFileForm
 
+from location.models import Location
+from institution.models import Institution
+
 
 class EducationDirectory(CommonControlField):
     class Meta:
@@ -17,8 +20,6 @@ class EducationDirectory(CommonControlField):
     link = models.URLField(_("Link"), null=False, blank=False)
     description = models.TextField(_("Description"), max_length=255,
                                    null=True, blank=True)
-    institution = models.TextField(_("Institution"), max_length=255,
-                                   null=False, blank=False)
     start_date = models.DateField(_("Start Date"), max_length=255,
                                   null=True, blank=True)
     end_date = models.DateField(_("End Date"), max_length=255,
@@ -28,15 +29,22 @@ class EducationDirectory(CommonControlField):
     end_time = models.TimeField(_("End Time"), max_length=255,
                                   null=True, blank=True)
 
+    locations = models.ManyToManyField(Location, blank=True)
+    institutions = models.ManyToManyField(Institution, blank=True)
+
+    is_online = models.BooleanField(default=False)
+
     panels = [
         FieldPanel('title'),
         FieldPanel('link'),
         FieldPanel('description'),
-        FieldPanel('institution'),
         FieldPanel('start_date'),
         FieldPanel('end_date'),
         FieldPanel('start_time'),
         FieldPanel('end_time'),
+        FieldPanel('locations'),
+        FieldPanel('institutions'),
+        FieldPanel('is_online'),
     ]
     base_form_class = EducationDirectoryForm
 

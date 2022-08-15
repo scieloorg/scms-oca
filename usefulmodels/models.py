@@ -12,7 +12,7 @@ class City(CommonControlField):
         name
     """
 
-    name = models.CharField(_("Name of the city"), blank=True, max_length=255)
+    name = models.CharField(_("Name of the city"), blank=True, null=True, max_length=255)
 
     class Meta:
         verbose_name = _("City")
@@ -36,8 +36,8 @@ class State(CommonControlField):
         acronym
     """
 
-    name = models.CharField(_("Name of the state"), blank=True, max_length=255)
-    acronym = models.CharField(_("Acronym to the state"), blank=True, max_length=255)
+    name = models.CharField(_("Name of the state"), blank=True, null=True, max_length=255)
+    acronym = models.CharField(_("Acronym to the state"), blank=True, null=True, max_length=255)
 
     class Meta:
         verbose_name = _("State")
@@ -60,8 +60,8 @@ class Country(CommonControlField):
         acronym
     """
 
-    name = models.CharField(_("Name of the Country"), blank=True, max_length=255)
-    acronym = models.CharField(_("Acronym to the Country"), blank=True, max_length=255)
+    name = models.CharField(_("Name of the Country"), blank=True, null=True, max_length=255)
+    acronym = models.CharField(_("Acronym to the Country"), blank=True, null=True, max_length=255)
 
     class Meta:
         verbose_name = _("Country")

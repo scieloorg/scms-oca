@@ -1,7 +1,7 @@
 
 regions = (
     ('', ''),
-    ('Norte','Norte'),
+    ('Norte', 'Norte'),
     ('Nordeste', 'Nordeste'),
     ('Centro-Oeste', 'Centro-Oeste'),
     ('Sudeste', 'Sudeste' ),

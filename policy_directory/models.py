@@ -8,6 +8,7 @@ from wagtail.documents.edit_handlers import DocumentChooserPanel
 from core.models import CommonControlField
 from .forms import PolicyDirectoryForm, PolicyDirectoryFileForm
 
+from institution.models import Institution
 
 class PolicyDirectory(CommonControlField):
     class Meta:
@@ -15,20 +16,19 @@ class PolicyDirectory(CommonControlField):
 
     title = models.CharField(_("Title"), max_length=255, null=False, blank=False)
     link = models.URLField(_("Link"), null=False, blank=False)
-    institution = models.TextField(_("Institution"), max_length=255,
-                                   null=False, blank=False)
     description = models.TextField(_("Description"), max_length=255,
                                    null=True, blank=True)
     date = models.DateField(_("Start Date"), max_length=255,
                                   null=True, blank=True)
 
+    institutions = models.ManyToManyField(Institution, blank=True)
+
     panels = [
         FieldPanel('title'),
-        FieldPanel('institution'),
         FieldPanel('link'),
         FieldPanel('description'),
         FieldPanel('date'),
-
+        FieldPanel('institutions'),
     ]
     base_form_class = PolicyDirectoryForm
 

@@ -1,12 +1,14 @@
 import os
+
 from django.db import models
 from django.utils.translation import gettext as _
-
 from wagtail.admin.edit_handlers import FieldPanel
 from wagtail.documents.edit_handlers import DocumentChooserPanel
 
 from core.models import CommonControlField
-from .forms import InfrastructureDirectoryForm, InfrastructureDirectoryFileForm
+from institution.models import Institution
+
+from .forms import InfrastructureDirectoryFileForm, InfrastructureDirectoryForm
 
 
 class InfrastructureDirectory(CommonControlField):
@@ -18,10 +20,13 @@ class InfrastructureDirectory(CommonControlField):
     description = models.TextField(_("Description"), max_length=255,
                                    null=True, blank=True)
 
+    institution = models.ManyToManyField(Institution, blank=True)
+
     panels = [
         FieldPanel('title'),
         FieldPanel('link'),
-        FieldPanel('description')
+        FieldPanel('description'),
+        FieldPanel('institution'),
     ]
     base_form_class = InfrastructureDirectoryForm
 

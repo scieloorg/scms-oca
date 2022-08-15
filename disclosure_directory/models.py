@@ -8,6 +8,8 @@ from wagtail.documents.edit_handlers import DocumentChooserPanel
 from core.models import CommonControlField
 from .forms import DisclosureDirectoryForm, DisclosureDirectoryFileForm
 
+from location.models import Location
+from institution.models import Institution
 
 class DisclosureDirectory(CommonControlField):
     class Meta:
@@ -28,6 +30,12 @@ class DisclosureDirectory(CommonControlField):
     end_time = models.TimeField(_("End Time"), max_length=255,
                                 null=True, blank=True)
 
+    locations = models.ManyToManyField(Location, blank=True)
+    institutions = models.ManyToManyField(Institution, blank=True)
+
+    is_online = models.BooleanField(default=False)
+
+
     panels = [
         FieldPanel('event'),
         FieldPanel('link'),
@@ -37,7 +45,9 @@ class DisclosureDirectory(CommonControlField):
         FieldPanel('end_date'),
         FieldPanel('start_time'),
         FieldPanel('end_time'),
-
+        FieldPanel('locations'),
+        FieldPanel('institutions'),
+        FieldPanel('is_online'),
     ]
     base_form_class = DisclosureDirectoryForm
 
