@@ -22,4 +22,10 @@ class Institution(CommonControlField, ClusterableModel):
         FieldPanel('location'),
     ]
 
+    def __unicode__(self):
+        return self.name
+
+    def __str__(self):
+        return self.name
+
     base_form_class = InstitutionForm
