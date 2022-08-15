@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-02 07:59+0000\n"
+"POT-Creation-Date: 2022-08-09 12:20+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -374,11 +374,15 @@ msgstr ""
 msgid "Information successfully updated"
 msgstr "Informação atualização com sucesso"
 
-#: core_settings/models.py:63
+#: core_settings/models.py:19 core_settings/models.py:20
+msgid "Configuração do site"
+msgstr ""
+
+#: core_settings/models.py:66
 msgid "Site settings"
 msgstr "Configuração do site"
 
-#: core_settings/models.py:64
+#: core_settings/models.py:67
 msgid "Admin settings"
 msgstr "Configuração"
 
@@ -520,6 +524,33 @@ msgstr "Diretório de Infraestrutura"
 msgid "Infraestructure Directory Upload"
 msgstr "Diretório de Infraestrutura Upload"
 
+#: location/models.py:11
+msgid "Name"
+msgstr "Nome"
+
+#: location/models.py:13
+msgid "Region"
+msgstr "Região"
+
+#: location/models.py:15 usefulmodels/models.py:18
+#: usefulmodels/wagtail_hooks.py:35
+msgid "City"
+msgstr "Cidade"
+
+#: location/models.py:17 usefulmodels/models.py:43
+#: usefulmodels/wagtail_hooks.py:50
+msgid "State"
+msgstr "Estado"
+
+#: location/models.py:19 usefulmodels/models.py:67
+#: usefulmodels/wagtail_hooks.py:65
+msgid "Country"
+msgstr "País"
+
+#: location/wagtail_hooks.py:21
+msgid "Location"
+msgstr "Localização"
+
 #: policy_directory/models.py:14 policy_directory/wagtail_hooks.py:31
 #: policy_directory/wagtail_hooks.py:59
 msgid "Policy Directory"
@@ -531,15 +562,15 @@ msgstr "Diretório de Política Upload"
 
 #: scholarly_articles/models.py:11 scholarly_articles/models.py:89
 msgid "DOI"
-msgstr ""
+msgstr "DOI"
 
 #: scholarly_articles/models.py:12 scholarly_articles/models.py:92
 msgid "Year"
-msgstr ""
+msgstr "Ano"
 
 #: scholarly_articles/models.py:13 scholarly_articles/wagtail_hooks.py:74
 msgid "Contributors"
-msgstr ""
+msgstr "Contribuidores"
 
 #: scholarly_articles/models.py:31
 msgid "ISSN-L"
@@ -551,39 +582,39 @@ msgstr ""
 
 #: scholarly_articles/models.py:33
 msgid "Journal Name"
-msgstr ""
+msgstr "Nome do periódico"
 
 #: scholarly_articles/models.py:34
 msgid "Publisher"
-msgstr ""
+msgstr "Publicador"
 
 #: scholarly_articles/models.py:35
 msgid "DOAJ"
-msgstr ""
+msgstr "DOAJ"
 
 #: scholarly_articles/models.py:53
 msgid "Family Name"
-msgstr ""
+msgstr "Sobrenome"
 
 #: scholarly_articles/models.py:54
 msgid "Given Name"
-msgstr ""
+msgstr "Nome dado"
 
 #: scholarly_articles/models.py:56
 msgid "Authenticated"
-msgstr ""
+msgstr "Autenticado"
 
 #: scholarly_articles/models.py:57 scholarly_articles/wagtail_hooks.py:94
 msgid "Affiliations"
-msgstr ""
+msgstr "Afiliações"
 
 #: scholarly_articles/models.py:75
 msgid "Affiliation Name"
-msgstr ""
+msgstr "Nome de afiliação"
 
 #: scholarly_articles/models.py:90
 msgid "Harvesting date"
-msgstr ""
+msgstr "Data da coleta"
 
 #: scholarly_articles/models.py:91
 msgid "Paratext"
@@ -591,19 +622,27 @@ msgstr ""
 
 #: scholarly_articles/models.py:94
 msgid "Resource Type"
-msgstr ""
+msgstr "Tipo de recurso"
 
 #: scholarly_articles/models.py:96
 msgid "Update"
-msgstr ""
+msgstr "Atualiza"
 
 #: scholarly_articles/models.py:97
 msgid "JSON File"
-msgstr ""
+msgstr "Arquivo JSON"
+
+#: scholarly_articles/models.py:118
+msgid "Error Type"
+msgstr "Tipo de erro"
+
+#: scholarly_articles/models.py:119
+msgid "Error Message"
+msgstr "Mensagem de erro"
 
 #: scholarly_articles/wagtail_hooks.py:10
 msgid "Scholarly Articles"
-msgstr ""
+msgstr "Artigos acadêmicos"
 
 #: scholarly_articles/wagtail_hooks.py:32
 msgid "RawUnpaywall"
@@ -611,20 +650,56 @@ msgstr ""
 
 #: scholarly_articles/wagtail_hooks.py:48
 msgid "year"
-msgstr ""
+msgstr "Ano"
 
 #: scholarly_articles/wagtail_hooks.py:54
 msgid "Journals"
-msgstr ""
-
-#: scholarly_articles/wagtail_hooks.py:68
-msgid "journal_issn_l"
-msgstr ""
+msgstr "Periódico"
 
 #: scholarly_articles/wagtail_hooks.py:69
 msgid "journal_issn_l)"
 msgstr ""
 
-#: scholarly_articles/wagtail_hooks.py:106
+#: scholarly_articles/wagtail_hooks.py:107
+msgid "Errors"
+msgstr "Erros"
+
+#: scholarly_articles/wagtail_hooks.py:122
 msgid "Articles Directory"
-msgstr ""
+msgstr "Diretório de artigos"
+
+#: usefulmodels/models.py:15
+msgid "Name of the city"
+msgstr "Nome da cidade"
+
+#: usefulmodels/models.py:19
+msgid "Cities"
+msgstr "Cidades"
+
+#: usefulmodels/models.py:39
+msgid "Name of the state"
+msgstr "Nome do estado"
+
+#: usefulmodels/models.py:40
+msgid "Acronym to the state"
+msgstr "Acrônimo do estado"
+
+#: usefulmodels/models.py:44
+msgid "States"
+msgstr "Estados"
+
+#: usefulmodels/models.py:63
+msgid "Name of the Country"
+msgstr "Nome do País"
+
+#: usefulmodels/models.py:64
+msgid "Acronym to the Country"
+msgstr "Acrônimo do país"
+
+#: usefulmodels/models.py:68
+msgid "Countries"
+msgstr "Países"
+
+#: usefulmodels/wagtail_hooks.py:78
+msgid "Useful Models"
+msgstr "Modelos Úteis"

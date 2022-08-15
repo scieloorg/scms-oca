@@ -121,7 +121,10 @@ LOCAL_APPS = [
     "core",
     "usefulmodels",
     "location",
+<<<<<<< HEAD
     "django_celery_results",
+=======
+>>>>>>> 7c5856c646a1e46545e841cea751b9cb4bea254c
 ]
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
