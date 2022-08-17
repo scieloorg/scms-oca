@@ -25,9 +25,10 @@ class Location(CommonControlField):
         verbose_name_plural = _("Locations")
 
     def __unicode__(self):
-        return u'%s %s %s %s' % (self.country, self.state, self.city, self.region)
+        return u'%s: %s | %s: %s | %s: %s | %s: %s' % (_('Country'), self.country, _('Region'), self.region, _('State'),  self.state, _('City'), self.city, )
 
     def __str__(self):
-        return u'%s %s %s %s' % (self.country, self.state, self.city, self.region)
+        return u'%s: %s | %s: %s | %s: %s | %s: %s' % (_('Country'), self.country, _('Region'), self.region, _('State'),  self.state, _('City'), self.city, )
+
 
     base_form_class = LocationForm

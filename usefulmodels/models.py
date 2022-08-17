@@ -123,6 +123,18 @@ class Pratice(CommonControlField):
     name = models.CharField(_("Name of the pratice"), blank=True, null=True, max_length=255)
     code = models.CharField(_("Code of the pratice"), blank=True, null=True, max_length=4)
 
+    class Meta:
+        verbose_name = _("Pratice")
+        verbose_name_plural = _("Pratices")
+
+    def __unicode__(self):
+        return u'%s - %s' % (self.code, self.name, )
+
+    def __str__(self):
+        return u'%s - %s' % (self.code, self.name, )
+
+
+
     base_form_class = PraticeForm
 
 
@@ -136,6 +148,18 @@ class Action(CommonControlField):
     """
     name = models.CharField(_("Name of the action"), blank=True, null=True, max_length=255)
     code = models.CharField(_("Code of the action"), blank=True, null=True, max_length=4)
+
+    class Meta:
+        verbose_name = _("Action")
+        verbose_name_plural = _("Actions")
+
+    def __unicode__(self):
+        return u'%s - %s' % (self.code, self.name, )
+
+    def __str__(self):
+        return u'%s - %s' % (self.code, self.name, )
+
+
 
 
     base_form_class = ActionForm

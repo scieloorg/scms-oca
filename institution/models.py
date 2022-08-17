@@ -23,9 +23,9 @@ class Institution(CommonControlField, ClusterableModel):
     ]
 
     def __unicode__(self):
-        return self.name
+        return u'%s - %s: %s' % (self.name, _('Location'), self.location)
 
     def __str__(self):
-        return self.name
+        return u'%s - %s: %s' % (self.name, _('Location'), self.location)
 
     base_form_class = InstitutionForm
