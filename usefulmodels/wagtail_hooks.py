@@ -5,7 +5,7 @@ from wagtail.core import hooks
 from wagtail.contrib.modeladmin.views import CreateView
 from wagtail.contrib.modeladmin.options import (ModelAdmin, modeladmin_register, ModelAdminGroup)
 
-from .models import City, State, Country
+from .models import City, State, Country, ThematicArea, Pratice, Action
 
 
 class CityCreateView(CreateView):
@@ -23,6 +23,24 @@ class StateCreateView(CreateView):
 
 
 class CountryCreateView(CreateView):
+
+    def form_valid(self, form):
+        self.object = form.save_all(self.request.user)
+        return HttpResponseRedirect(self.get_success_url())
+
+class ThematicAreaCreateView(CreateView):
+
+    def form_valid(self, form):
+        self.object = form.save_all(self.request.user)
+        return HttpResponseRedirect(self.get_success_url())
+
+class PraticeCreateView(CreateView):
+
+    def form_valid(self, form):
+        self.object = form.save_all(self.request.user)
+        return HttpResponseRedirect(self.get_success_url())
+
+class ActionCreateView(CreateView):
 
     def form_valid(self, form):
         self.object = form.save_all(self.request.user)
@@ -74,11 +92,58 @@ class CountryAdmin(ModelAdmin):
     export_filename = 'countryies'
 
 
+class ThematicAreaAdmin(ModelAdmin):
+    model = ThematicArea
+    create_view_class = ThematicAreaCreateView
+    menu_label = _('Thematic Area')
+    menu_icon = 'folder'
+    menu_order = 100
+    add_to_settings_menu = False  # or True to add your model to the Settings sub-menu
+    exclude_from_explorer = False  # or True to exclude pages of this type from Wagtail's explorer view
+    list_display = ('level0', 'level1', 'level2', 'creator',
+                    'updated', 'created', )
+    search_fields = ('level0', 'level1', 'level2', )
+    list_export = ('level0', 'level1', 'level2', 'creator',
+                   'updated', 'created', )
+    export_filename = 'thematic_areas'
+
+class PraticeAdmin(ModelAdmin):
+    model = Pratice
+    create_view_class = PraticeCreateView
+    menu_label = _('Pratice')
+    menu_icon = 'folder'
+    menu_order = 100
+    add_to_settings_menu = False  # or True to add your model to the Settings sub-menu
+    exclude_from_explorer = False  # or True to exclude pages of this type from Wagtail's explorer view
+    list_display = ('name', 'code', 'creator',
+                    'updated', 'created', )
+    search_fields = ('name', 'code',)
+    list_export = ('name', 'code', 'creator',
+                   'updated', 'created', )
+    export_filename = 'pratices'
+
+class ActionAdmin(ModelAdmin):
+    model = Action
+    create_view_class = ActionCreateView
+    menu_label = _('Action')
+    menu_icon = 'folder'
+    menu_order = 100
+    add_to_settings_menu = False  # or True to add your model to the Settings sub-menu
+    exclude_from_explorer = False  # or True to exclude pages of this type from Wagtail's explorer view
+    list_display = ('name', 'code', 'creator',
+                    'updated', 'created', )
+    search_fields = ('name', 'code',)
+    list_export = ('name', 'code', 'creator',
+                   'updated', 'created', )
+    export_filename = 'actions'
+
+
 class UsefulModelsAdminGroup(ModelAdminGroup):
     menu_label = _('Useful Models')
     menu_icon = 'folder-open-inverse'
     menu_order = 200
-    items = (CityAdmin, StateAdmin, CountryAdmin)
+    items = (CityAdmin, StateAdmin, CountryAdmin, PraticeAdmin, ActionAdmin,
+             ThematicAreaAdmin)
 
 
 modeladmin_register(UsefulModelsAdminGroup)

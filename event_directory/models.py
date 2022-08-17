@@ -9,48 +9,53 @@ from wagtail.documents.edit_handlers import DocumentChooserPanel
 from core.models import CommonControlField
 from institution.models import Institution
 from location.models import Location
-from usefulmodels.models import Pratice, ThematicArea, Action
-
-from .forms import EducationDirectoryFileForm, EducationDirectoryForm
+from usefulmodels.models import ThematicArea, Pratice, Action
 
 from . import choices
+from .forms import EventDirectoryFileForm, EventDirectoryForm
 
-class EducationDirectory(CommonControlField):
+
+class EventDirectory(CommonControlField):
     class Meta:
-        verbose_name_plural = _('Education Directory')
+        verbose_name_plural = _('EventDirectory Directory')
 
-    title = models.CharField(_("Title"), max_length=255, null=False, blank=False)
+    event = models.CharField(_("Event"), max_length=255, null=False, blank=False)
     link = models.URLField(_("Link"), null=False, blank=False)
     description = models.TextField(_("Description"), max_length=255,
                                    null=True, blank=True)
+    organization = models.TextField(_("Organization"), max_length=255,
+                                   null=False, blank=False)
     start_date = models.DateField(_("Start Date"), max_length=255,
                                   null=True, blank=True)
     end_date = models.DateField(_("End Date"), max_length=255,
-                                  null=True, blank=True)
+                                null=True, blank=True)
     start_time = models.TimeField(_("Start Time"), max_length=255,
                                   null=True, blank=True)
     end_time = models.TimeField(_("End Time"), max_length=255,
-                                  null=True, blank=True)
+                                null=True, blank=True)
 
     locations = models.ManyToManyField(Location, blank=True)
     institutions = models.ManyToManyField(Institution, blank=True)
-    thematic_areas = models.ManyToManyField(ThematicArea, blank=True)
 
-    classification = models.CharField(_("Classification"), choices=choices.classification,
-                                      max_length=255, null=True, blank=True)
+    thematic_areas = models.ManyToManyField(ThematicArea, blank=True)
 
     pratice = models.ForeignKey(Pratice, null=True, blank=True, on_delete=models.SET_NULL)
     action = models.ForeignKey(Action, null=True, blank=True, on_delete=models.SET_NULL)
 
+    classification = models.CharField(_("Classification"), choices=choices.classification,
+                                      max_length=255, null=True, blank=True)
+
     keywords = TaggableManager()
 
-    is_online = models.BooleanField(default=False)
+    attendence = models.CharField(_("Attendence"), choices=choices.attendence_type, max_length=255, null=True, blank=True)
+
 
     panels = [
-        HelpPanel('Cursos livres, disciplinas de graduação e pós-graduação ministrados por instituições brasileiras – presenciais ou EAD- para promover a adoção dos princípios e práticas de ciência aberta por todos os envolvidos no processo de pesquisa.'),
-        FieldPanel('title'),
+        HelpPanel('Encontros, congressos, workshops, seminários realizados no Brasil (presenciais, virtuais ou híbridos) cujo tema principal seja a promoção da Ciência Aberta'),
+        FieldPanel('event'),
         FieldPanel('link'),
         FieldPanel('description'),
+        FieldPanel('organization'),
         FieldPanel('start_date'),
         FieldPanel('end_date'),
         FieldPanel('start_time'),
@@ -58,17 +63,18 @@ class EducationDirectory(CommonControlField):
         FieldPanel('locations'),
         FieldPanel('institutions'),
         FieldPanel('thematic_areas'),
+        FieldPanel('keywords'),
         FieldPanel('classification'),
         FieldPanel('pratice'),
         FieldPanel('action'),
-        FieldPanel('keywords'),
-        FieldPanel('is_online'),
+        FieldPanel('attendence'),
     ]
-    base_form_class = EducationDirectoryForm
+    base_form_class = EventDirectoryForm
 
-class EducationDirectoryFile(CommonControlField):
+
+class EventDirectoryFile(CommonControlField):
     class Meta:
-        verbose_name_plural = _('Education Directory Upload')
+        verbose_name_plural = _('EventDirectory Directory Upload')
 
     attachment = models.ForeignKey(
         'wagtaildocs.Document',
@@ -88,4 +94,4 @@ class EducationDirectoryFile(CommonControlField):
     panels = [
         DocumentChooserPanel('attachment')
     ]
-    base_form_class = EducationDirectoryFileForm
+    base_form_class = EventDirectoryFileForm

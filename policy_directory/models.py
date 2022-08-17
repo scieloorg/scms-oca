@@ -1,15 +1,18 @@
 import os
+
 from django.db import models
 from django.utils.translation import gettext as _
-
-from wagtail.admin.edit_handlers import FieldPanel
+from taggit.managers import TaggableManager
+from wagtail.admin.edit_handlers import FieldPanel, HelpPanel
 from wagtail.documents.edit_handlers import DocumentChooserPanel
 
 from core.models import CommonControlField
-from .forms import PolicyDirectoryForm, PolicyDirectoryFileForm
-
 from institution.models import Institution
+from usefulmodels.models import ThematicArea, Pratice, Action
 
+from .forms import PolicyDirectoryFileForm, PolicyDirectoryForm
+
+from . import choices
 class PolicyDirectory(CommonControlField):
     class Meta:
         verbose_name_plural = _('Policy Directory')
@@ -22,13 +25,28 @@ class PolicyDirectory(CommonControlField):
                                   null=True, blank=True)
 
     institutions = models.ManyToManyField(Institution, blank=True)
+    thematic_areas = models.ManyToManyField(ThematicArea, blank=True)
+
+    pratice = models.ForeignKey(Pratice, null=True, blank=True, on_delete=models.SET_NULL)
+    action = models.ForeignKey(Action, null=True, blank=True, on_delete=models.SET_NULL)
+
+    classification = models.CharField(_("Classification"), choices=choices.classification,
+                                      max_length=255, null=True, blank=True)
+
+    keywords = TaggableManager()
 
     panels = [
+        HelpPanel('Documentos de promoção, posicionamentos ou mandatos sobre Ciência Aberta elaborados e publicados por instituições brasileiras, tais como: universidades, sociedades científicas, institutos de pesquisa e agências de fomento.'),
         FieldPanel('title'),
         FieldPanel('link'),
         FieldPanel('description'),
         FieldPanel('date'),
         FieldPanel('institutions'),
+        FieldPanel('thematic_areas'),
+        FieldPanel('keywords'),
+        FieldPanel('classification'),
+        FieldPanel('pratice'),
+        FieldPanel('action'),
     ]
     base_form_class = PolicyDirectoryForm
 

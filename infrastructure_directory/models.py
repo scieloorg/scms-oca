@@ -2,12 +2,15 @@ import os
 
 from django.db import models
 from django.utils.translation import gettext as _
-from wagtail.admin.edit_handlers import FieldPanel
+from taggit.managers import TaggableManager
+from wagtail.admin.edit_handlers import FieldPanel, HelpPanel
 from wagtail.documents.edit_handlers import DocumentChooserPanel
 
 from core.models import CommonControlField
 from institution.models import Institution
+from usefulmodels.models import ThematicArea, Pratice, Action
 
+from . import choices
 from .forms import InfrastructureDirectoryFileForm, InfrastructureDirectoryForm
 
 
@@ -20,13 +23,28 @@ class InfrastructureDirectory(CommonControlField):
     description = models.TextField(_("Description"), max_length=255,
                                    null=True, blank=True)
 
-    institution = models.ManyToManyField(Institution, blank=True)
+    institutions = models.ManyToManyField(Institution, blank=True)
+    thematic_areas = models.ManyToManyField(ThematicArea, blank=True)
+
+    pratice = models.ForeignKey(Pratice, null=True, blank=True, on_delete=models.SET_NULL)
+    action = models.ForeignKey(Action, null=True, blank=True, on_delete=models.SET_NULL)
+
+    classification = models.CharField(_("Classification"), choices=choices.classification,
+                                      max_length=255, null=True, blank=True)
+
+    keywords = TaggableManager()
 
     panels = [
+        HelpPanel('Portais, plataformas, servidores, repositórios e serviços brasileiros que operam em acesso aberto objetos de comunicação de comunicação de pesquisas, recursos de apoio e resultantes de pesquisas e em acesso aberto.'),
         FieldPanel('title'),
         FieldPanel('link'),
         FieldPanel('description'),
-        FieldPanel('institution'),
+        FieldPanel('institutions'),
+        FieldPanel('thematic_areas'),
+        FieldPanel('keywords'),
+        FieldPanel('classification'),
+        FieldPanel('pratice'),
+        FieldPanel('action'),
     ]
     base_form_class = InfrastructureDirectoryForm
 
