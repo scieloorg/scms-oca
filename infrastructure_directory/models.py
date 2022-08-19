@@ -32,7 +32,7 @@ class InfrastructureDirectory(CommonControlField):
     classification = models.CharField(_("Classification"), choices=choices.classification,
                                       max_length=255, null=True, blank=True)
 
-    keywords = TaggableManager()
+    keywords = TaggableManager(blank=True)
 
     panels = [
         HelpPanel('Portais, plataformas, servidores, repositórios e serviços brasileiros que operam em acesso aberto objetos de comunicação de comunicação de pesquisas, recursos de apoio e resultantes de pesquisas e em acesso aberto.'),

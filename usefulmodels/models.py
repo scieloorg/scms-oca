@@ -108,6 +108,21 @@ class ThematicArea(CommonControlField):
     def __str__(self):
         return u'%s | %s | %s' % (self.level0, self.level1, self.level2, )
 
+    @classmethod
+    def get_or_create(cls, level0, level1, level2, user):
+
+        if ThematicArea.objects.filter(level0=level0, level1=level1, level2=level2).exists():
+            return ThematicArea.objects.get(level0=level0, level1=level1, level2=level2)
+        else:
+            the_area = ThematicArea()
+            the_area.level0 = level0
+            the_area.level1 = level1
+            the_area.level2 = level2
+            the_area.creator = user
+            the_area.save()
+
+        return the_area
+
 
     base_form_class = ThematicAreaForm
 

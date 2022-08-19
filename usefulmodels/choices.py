@@ -52,7 +52,6 @@ thematic_level2 = (
     ('História', _('História')),
     ('Psicologia', _('Psicologia')),
     ('Sociologia', _('Sociologia')),
-    ('Administração Pública e de Empresas, Ciências Contábeis e', _('Administração Pública e de Empresas, Ciências Contábeis e')),
     ('Turismo', _('Turismo')),
     ('Arquitetura, Urbanismo e Design', _('Arquitetura, Urbanismo e Design')),
     ('Comunicação e Informação', _('Comunicação e Informação')),

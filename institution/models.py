@@ -28,4 +28,26 @@ class Institution(CommonControlField, ClusterableModel):
     def __str__(self):
         return u'%s - %s: %s' % (self.name, _('Location'), self.location)
 
+    @classmethod
+    def get_or_create(cls, inst_name, location_country, location_region,
+                      location_state, location_city, user):
+
+        # Institution
+        # check if exists the institution
+        if cls.objects.filter(name=inst_name).exists():
+            return cls.objects.get(name=inst_name)
+        else:
+            institution = cls()
+            institution.name = inst_name
+            institution.creator = user
+
+            institution.location = Location.get_or_create(location_country,
+                                                          location_region,
+                                                          location_state,
+                                                          location_city,
+                                                          user)
+
+            institution.save()
+        return institution
+
     base_form_class = InstitutionForm

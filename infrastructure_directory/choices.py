@@ -2,10 +2,10 @@ from django.utils.translation import gettext as _
 
 classification = (
     ('', ''),
-    ('portal', _('portal')),
-    ('plataforma', _('plataforma')),
-    ('servidor', _('servidor')),
-    ('repositório', _('repositório')),
-    ('serviço', _('serviço')),
-    ('outras', _('outras')),
+    ('portal', _('Portal')),
+    ('plataforma', _('Plataforma')),
+    ('servidor', _('Servidor')),
+    ('repositório', _('Repositório')),
+    ('serviço', _('Serviço')),
+    ('outras', _('Outras')),
 )
