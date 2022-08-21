@@ -1,15 +1,17 @@
-import os
 import csv
+import os
 from datetime import datetime
-from django.shortcuts import get_object_or_404, redirect
-from django.http import HttpResponse, Http404
-from django.utils.translation import gettext as _
 
+from django.http import Http404, HttpResponse
+from django.shortcuts import get_object_or_404, redirect
+from django.utils.translation import gettext as _
 from wagtail.admin import messages
 
 from core.libs import chkcsv
+from institution.models import Institution
+from usefulmodels.models import Action, Pratice, ThematicArea
 
-from .models import EducationDirectoryFile, EducationDirectory
+from .models import EducationDirectory, EducationDirectoryFile
 
 
 def validate(request):
@@ -71,7 +73,7 @@ def import_file(request):
         with open(file_path, 'r') as csvfile:
             data = csv.DictReader(csvfile)
 
-            for row in data:
+            for line, row in enumerate(data):
                 ed = EducationDirectory()
                 ed.title = row['Title']
                 ed.link = row['Link']
@@ -82,6 +84,55 @@ def import_file(request):
                 ed.start_time = row['Start Time']
                 ed.end_time = row['End Time']
                 ed.creator = request.user
+                ed.save()
+
+                # Institution
+                inst_name = row['Institution Name']
+                if inst_name:
+                    inst_country = row['Institution Country']
+                    inst_region = row['Institution Region']
+                    inst_state = row['Institution State']
+                    inst_city = row['Institution City']
+
+                    institution = Institution.get_or_create(inst_name, inst_country, inst_region,
+                                                            inst_state, inst_city, request.user)
+                    ed.institutions.add(institution)
+
+                # Thematic Area
+                level0 = row['Thematic Area Level0']
+                if level0:
+                    level1 = row['Thematic Area Level1']
+                    level2 = row['Thematic Area Level2']
+                    the_area = ThematicArea.get_or_create(level0, level1, level2, request.user)
+
+                ed.thematic_areas.add(the_area)
+
+                # Keywords
+                if row['Keywords']:
+                    for key in row['Keywords'].split('|'):
+                        ed.keywords.add(key)
+
+                if row['Classification']:
+                    ed.classification = row['Classification']
+
+                # Pratice
+                if row['Pratice']:
+                    pratice_name = row['Pratice']
+                    if Pratice.objects.filter(name=pratice_name).exists():
+                        pratice = Pratice.objects.get(name=pratice_name)
+                        ed.pratice = pratice
+                    else:
+                        messages.error(request, _("Unknown pratice, line: %s") % str(line + 1))
+
+                # Action
+                if row['Action']:
+                    action_name = row['Action']
+                    if Action.objects.filter(name=action_name).exists():
+                        action = Action.objects.get(name=action_name)
+                        ed.action = action
+                    else:
+                        messages.error(request, _("Unknown action, line: %s") % str(line + 1))
+
                 ed.save()
     except Exception as ex:
         messages.error(request, _("Import error: %s") % ex)

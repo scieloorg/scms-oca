@@ -44,3 +44,45 @@ class CountryForm(WagtailAdminModelForm):
         self.save()
 
         return country
+
+class ThematicAreaForm(WagtailAdminModelForm):
+
+    def save_all(self, user):
+        thematic = super().save(commit=False)
+
+        if self.instance.pk is not None:
+            thematic.updated_by = user
+        else:
+            thematic.creator = user
+
+        self.save()
+
+        return thematic
+
+class PraticeForm(WagtailAdminModelForm):
+
+    def save_all(self, user):
+        pratice = super().save(commit=False)
+
+        if self.instance.pk is not None:
+            pratice.updated_by = user
+        else:
+            pratice.creator = user
+
+        self.save()
+
+        return pratice
+
+class ActionForm(WagtailAdminModelForm):
+
+    def save_all(self, user):
+        action = super().save(commit=False)
+
+        if self.instance.pk is not None:
+            action.updated_by = user
+        else:
+            action.creator = user
+
+        self.save()
+
+        return action

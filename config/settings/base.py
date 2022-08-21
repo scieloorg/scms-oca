@@ -106,6 +106,7 @@ THIRD_PARTY_APPS = [
     "wagtailmenus",
     "rest_framework",
     "widget_tweaks",
+    "django_celery_results",
 ]
 
 LOCAL_APPS = [
@@ -115,12 +116,13 @@ LOCAL_APPS = [
     "infrastructure_directory",
     "education_directory",
     "policy_directory",
-    "disclosure_directory",
+    "event_directory",
     "blog",
     "freepage",
     "core",
     "usefulmodels",
     "location",
+    "institution",
 ]
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps

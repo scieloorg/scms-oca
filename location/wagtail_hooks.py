@@ -23,10 +23,10 @@ class LocationAdmin(ModelAdmin):
     menu_order = 300
     add_to_settings_menu = False  # or True to add your model to the Settings sub-menu
     exclude_from_explorer = False  # or True to exclude pages of this type from Wagtail's explorer view
-    list_display = ('name', 'region', 'city', 'state', 'country', 'creator',
+    list_display = ('country', 'region', 'state', 'city', 'creator',
                     'updated', 'created', )
-    search_fields = ('name', 'region', 'city', 'state', 'country', )
-    list_export = ('name', 'region', 'city', 'state', 'country', )
+    search_fields = ('country', 'region', 'state', 'city', )
+    list_export = ('country', 'region', 'state', 'city', )
     export_filename = 'locations'
 
 modeladmin_register(LocationAdmin)

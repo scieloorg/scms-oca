@@ -1,0 +1,80 @@
+[Event]
+data_required=True
+type=String
+
+[Link]
+data_required=False
+type=String
+
+[Description]
+data_required=False
+type=String
+
+[Organization]
+data_required=False
+type=String
+
+[Start Date]
+data_required=False
+type=Date
+
+[End Date]
+data_required=False
+type=Date
+
+[Start Time]
+data_required=False
+type=String
+
+[End Time]
+data_required=False
+type=String
+
+[Institution Name]
+data_required=False
+type=String
+
+[Institution Country]
+data_required=False
+type=String
+
+[Institution Region]
+data_required=False
+type=String
+
+[Institution State]
+data_required=False
+type=String
+
+[Institution City]
+data_required=False
+type=String
+
+[Thematic Area Level0]
+data_required=False
+type=String
+
+[Thematic Area Level1]
+data_required=False
+type=String
+
+[Thematic Area Level2]
+data_required=False
+type=String
+
+[Keywords]
+data_required=False
+type=String
+
+[Classification]
+data_required=False
+type=String
+
+[Pratice]
+data_required=False
+type=String
+
+[Action]
+data_required=False
+type=String
+
