@@ -23,16 +23,18 @@ class InfrastructureDirectory(CommonControlField):
     description = models.TextField(_("Description"), max_length=255,
                                    null=True, blank=True)
 
-    institutions = models.ManyToManyField(Institution, blank=True)
-    thematic_areas = models.ManyToManyField(ThematicArea, blank=True)
+    institutions = models.ManyToManyField(Institution, verbose_name=_("Institution"), blank=True)
+    thematic_areas = models.ManyToManyField(ThematicArea, verbose_name=_("Thematic Area"), blank=True)
 
-    pratice = models.ForeignKey(Pratice, null=True, blank=True, on_delete=models.SET_NULL)
-    action = models.ForeignKey(Action, null=True, blank=True, on_delete=models.SET_NULL)
+    pratice = models.ForeignKey(Pratice, verbose_name=_("Pratice"),
+                                null=True, blank=True, on_delete=models.SET_NULL)
+    action = models.ForeignKey(Action, verbose_name=_("Action"), null=True, blank=True, on_delete=models.SET_NULL)
+
 
     classification = models.CharField(_("Classification"), choices=choices.classification,
                                       max_length=255, null=True, blank=True)
 
-    keywords = TaggableManager(blank=True)
+    keywords = TaggableManager(_("Keywords"), blank=True)
 
     panels = [
         HelpPanel('Portais, plataformas, servidores, repositórios e serviços brasileiros que operam em acesso aberto objetos de comunicação de comunicação de pesquisas, recursos de apoio e resultantes de pesquisas e em acesso aberto.'),

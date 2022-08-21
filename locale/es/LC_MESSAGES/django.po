@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-09 12:20+0000\n"
+"POT-Creation-Date: 2022-08-21 20:52+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,11 +18,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: config/settings/base.py:374
+#: config/settings/base.py:376
 msgid "Sobre o Projeto"
 msgstr ""
 
-#: config/settings/base.py:376
+#: config/settings/base.py:378
 msgid "Notícias"
 msgstr ""
 
@@ -386,177 +386,347 @@ msgstr ""
 msgid "Admin settings"
 msgstr ""
 
-#: disclosure_directory/button_helper.py:15
-#: education_directory/button_helper.py:15
+#: education_directory/button_helper.py:15 event_directory/button_helper.py:15
 #: infrastructure_directory/button_helper.py:15
 #: policy_directory/button_helper.py:15
 msgid "Validate"
 msgstr ""
 
-#: disclosure_directory/button_helper.py:25
-#: education_directory/button_helper.py:25
+#: education_directory/button_helper.py:25 event_directory/button_helper.py:25
 #: infrastructure_directory/button_helper.py:25
 #: policy_directory/button_helper.py:25
 msgid "Import"
 msgstr ""
 
-#: disclosure_directory/models.py:14 disclosure_directory/wagtail_hooks.py:31
-#: disclosure_directory/wagtail_hooks.py:59
-msgid "Disclosure Directory"
+#: education_directory/choices.py:5
+msgid "curso livre"
 msgstr ""
 
-#: disclosure_directory/models.py:16
-msgid "Event"
+#: education_directory/choices.py:6
+msgid "disciplina de graduação"
 msgstr ""
 
-#: disclosure_directory/models.py:17 education_directory/models.py:17
-#: infrastructure_directory/models.py:17 policy_directory/models.py:17
+#: education_directory/choices.py:7
+msgid "disciplina de lato sensu"
+msgstr ""
+
+#: education_directory/choices.py:8
+msgid "disciplina de stricto sensu"
+msgstr ""
+
+#: education_directory/choices.py:9 event_directory/choices.py:18
+#: institution/choices.py:12
+msgid "outros"
+msgstr ""
+
+#: education_directory/models.py:20 education_directory/wagtail_hooks.py:31
+#: education_directory/wagtail_hooks.py:59
+msgid "Education Directory"
+msgstr ""
+
+#: education_directory/models.py:22 infrastructure_directory/models.py:21
+#: policy_directory/models.py:20
+msgid "Title"
+msgstr ""
+
+#: education_directory/models.py:23 event_directory/models.py:23
+#: infrastructure_directory/models.py:22 policy_directory/models.py:21
 msgid "Link"
 msgstr ""
 
-#: disclosure_directory/models.py:18 education_directory/models.py:18
-#: infrastructure_directory/models.py:18 policy_directory/models.py:20
+#: education_directory/models.py:24 event_directory/models.py:24
+#: infrastructure_directory/models.py:23 policy_directory/models.py:22
 msgid "Description"
 msgstr ""
 
-#: disclosure_directory/models.py:20
-msgid "Organization"
-msgstr ""
-
-#: disclosure_directory/models.py:22 education_directory/models.py:22
-#: policy_directory/models.py:22
+#: education_directory/models.py:26 event_directory/models.py:28
+#: policy_directory/models.py:24
 msgid "Start Date"
 msgstr ""
 
-#: disclosure_directory/models.py:24 education_directory/models.py:24
+#: education_directory/models.py:28 event_directory/models.py:30
 msgid "End Date"
 msgstr ""
 
-#: disclosure_directory/models.py:26 education_directory/models.py:26
-#: education_directory/views.py:107
+#: education_directory/models.py:30 education_directory/views.py:158
+#: event_directory/models.py:32
 msgid "Start Time"
 msgstr ""
 
-#: disclosure_directory/models.py:28 education_directory/models.py:28
-#: education_directory/views.py:109
+#: education_directory/models.py:32 education_directory/views.py:160
+#: event_directory/models.py:34
 msgid "End Time"
 msgstr ""
 
-#: disclosure_directory/models.py:46 disclosure_directory/wagtail_hooks.py:47
-msgid "Disclosure Directory Upload"
+#: education_directory/models.py:35 event_directory/models.py:37
+#: institution/models.py:26 institution/models.py:29 location/models.py:24
+#: location/wagtail_hooks.py:21
+msgid "Location"
 msgstr ""
 
-#: disclosure_directory/models.py:50 education_directory/models.py:49
-#: infrastructure_directory/models.py:34 policy_directory/models.py:41
+#: education_directory/models.py:36 event_directory/models.py:38
+#: infrastructure_directory/models.py:26 institution/wagtail_hooks.py:20
+#: policy_directory/models.py:27
+msgid "Institution"
+msgstr ""
+
+#: education_directory/models.py:37 event_directory/models.py:39
+#: infrastructure_directory/models.py:27 policy_directory/models.py:28
+#: usefulmodels/models.py:102 usefulmodels/wagtail_hooks.py:98
+msgid "Thematic Area"
+msgstr ""
+
+#: education_directory/models.py:39 event_directory/models.py:41
+#: infrastructure_directory/models.py:29 policy_directory/models.py:30
+#: usefulmodels/models.py:142 usefulmodels/wagtail_hooks.py:113
+msgid "Pratice"
+msgstr ""
+
+#: education_directory/models.py:41 event_directory/models.py:43
+#: infrastructure_directory/models.py:31 policy_directory/models.py:32
+#: usefulmodels/models.py:167 usefulmodels/wagtail_hooks.py:128
+msgid "Action"
+msgstr ""
+
+#: education_directory/models.py:43 event_directory/models.py:45
+#: infrastructure_directory/models.py:34 policy_directory/models.py:34
+msgid "Classification"
+msgstr ""
+
+#: education_directory/models.py:46 event_directory/models.py:47
+#: infrastructure_directory/models.py:37 policy_directory/models.py:37
+msgid "Keywords"
+msgstr ""
+
+#: education_directory/models.py:48
+msgid "Is Online"
+msgstr ""
+
+#: education_directory/models.py:72 education_directory/wagtail_hooks.py:47
+msgid "Education Directory Upload"
+msgstr ""
+
+#: education_directory/models.py:76 event_directory/models.py:79
+#: infrastructure_directory/models.py:59 policy_directory/models.py:60
 msgid "Attachement"
 msgstr ""
 
-#: disclosure_directory/models.py:55 education_directory/models.py:54
-#: infrastructure_directory/models.py:39 policy_directory/models.py:46
+#: education_directory/models.py:81 event_directory/models.py:84
+#: infrastructure_directory/models.py:64 policy_directory/models.py:65
 msgid "Is valid?"
 msgstr ""
 
-#: disclosure_directory/models.py:57 education_directory/models.py:56
-#: infrastructure_directory/models.py:41 policy_directory/models.py:48
+#: education_directory/models.py:83 event_directory/models.py:86
+#: infrastructure_directory/models.py:66 policy_directory/models.py:67
 msgid "Number of lines"
 msgstr ""
 
-#: disclosure_directory/templates/modeladmin/disclosure_directory/disclosuredirectoryfile/index.html:6
 #: education_directory/templates/modeladmin/education_directory/educationdirectoryfile/index.html:6
+#: event_directory/templates/modeladmin/event_directory/eventdirectoryfile/index.html:6
 #: infrastructure_directory/templates/modeladmin/infrastructure_directory/infrastructuredirectoryfile/index.html:6
 #: policy_directory/templates/modeladmin/policy_directory/policydirectoryfile/index.html:6
 msgid "Download CSV Example"
 msgstr ""
 
-#: disclosure_directory/views.py:38 education_directory/views.py:38
-#: infrastructure_directory/views.py:38 policy_directory/views.py:38
+#: education_directory/views.py:40 event_directory/views.py:40
+#: infrastructure_directory/views.py:39 policy_directory/views.py:41
 msgid "Valication error"
 msgstr ""
 
-#: disclosure_directory/views.py:45 education_directory/views.py:45
-#: infrastructure_directory/views.py:45 policy_directory/views.py:45
+#: education_directory/views.py:47 event_directory/views.py:47
+#: infrastructure_directory/views.py:46 policy_directory/views.py:48
 #, python-format
 msgid "Valication error: %s"
 msgstr ""
 
-#: disclosure_directory/views.py:47 education_directory/views.py:47
-#: infrastructure_directory/views.py:47 policy_directory/views.py:47
+#: education_directory/views.py:49 event_directory/views.py:49
+#: infrastructure_directory/views.py:48 policy_directory/views.py:50
 msgid "File successfully validated!"
 msgstr ""
 
-#: disclosure_directory/views.py:87 education_directory/views.py:87
-#: infrastructure_directory/views.py:82 policy_directory/views.py:84
+#: education_directory/views.py:125 event_directory/views.py:125
+#: infrastructure_directory/views.py:120 policy_directory/views.py:123
+#, python-format
+msgid "Unknown pratice, line: %s"
+msgstr ""
+
+#: education_directory/views.py:134 event_directory/views.py:134
+#: infrastructure_directory/views.py:129 policy_directory/views.py:132
+#, python-format
+msgid "Unknown action, line: %s"
+msgstr ""
+
+#: education_directory/views.py:138 event_directory/views.py:139
+#: infrastructure_directory/views.py:134 policy_directory/views.py:136
 #, python-format
 msgid "Import error: %s"
 msgstr ""
 
-#: disclosure_directory/views.py:89 education_directory/views.py:89
-#: infrastructure_directory/views.py:84 policy_directory/views.py:86
+#: education_directory/views.py:140 event_directory/views.py:141
+#: infrastructure_directory/views.py:136 policy_directory/views.py:138
 msgid "File imported successfully!"
 msgstr ""
 
-#: education_directory/models.py:14 education_directory/wagtail_hooks.py:31
-#: education_directory/wagtail_hooks.py:59
-msgid "Education Directory"
+#: event_directory/choices.py:13
+msgid "encontro"
 msgstr ""
 
-#: education_directory/models.py:16 infrastructure_directory/models.py:16
-#: policy_directory/models.py:16
-msgid "Title"
+#: event_directory/choices.py:14
+msgid "conferência"
 msgstr ""
 
-#: education_directory/models.py:20 policy_directory/models.py:18
-msgid "Institution"
+#: event_directory/choices.py:15
+msgid "congresso"
 msgstr ""
 
-#: education_directory/models.py:45 education_directory/wagtail_hooks.py:47
-msgid "Education Directory Upload"
+#: event_directory/choices.py:16
+msgid "workshop"
 msgstr ""
 
-#: infrastructure_directory/models.py:14
+#: event_directory/choices.py:17
+msgid "seminário"
+msgstr ""
+
+#: event_directory/models.py:20
+msgid "EventDirectory Directory"
+msgstr ""
+
+#: event_directory/models.py:22
+msgid "Event"
+msgstr ""
+
+#: event_directory/models.py:26
+msgid "Organization"
+msgstr ""
+
+#: event_directory/models.py:49
+msgid "Attendence"
+msgstr ""
+
+#: event_directory/models.py:75
+msgid "EventDirectory Directory Upload"
+msgstr ""
+
+#: event_directory/wagtail_hooks.py:31 event_directory/wagtail_hooks.py:59
+msgid "Event Directory"
+msgstr ""
+
+#: event_directory/wagtail_hooks.py:47
+msgid "Event Directory Upload"
+msgstr ""
+
+#: infrastructure_directory/choices.py:5
+msgid "Portal"
+msgstr ""
+
+#: infrastructure_directory/choices.py:6
+msgid "Plataforma"
+msgstr ""
+
+#: infrastructure_directory/choices.py:7
+msgid "Servidor"
+msgstr ""
+
+#: infrastructure_directory/choices.py:8
+msgid "Repositório"
+msgstr ""
+
+#: infrastructure_directory/choices.py:9
+msgid "Serviço"
+msgstr ""
+
+#: infrastructure_directory/choices.py:10
+msgid "Outras"
+msgstr ""
+
+#: infrastructure_directory/models.py:19
 #: infrastructure_directory/wagtail_hooks.py:31
 #: infrastructure_directory/wagtail_hooks.py:59
 msgid "Infraestructure Directory"
 msgstr ""
 
-#: infrastructure_directory/models.py:30
+#: infrastructure_directory/models.py:55
 #: infrastructure_directory/wagtail_hooks.py:47
 msgid "Infraestructure Directory Upload"
 msgstr ""
 
-#: location/models.py:11
+#: institution/choices.py:6
+msgid "agência de apoio à pesquisa"
+msgstr ""
+
+#: institution/choices.py:7
+msgid "universidade e instâncias ligadas à universidades"
+msgstr ""
+
+#: institution/choices.py:8
+msgid "empresa ou instituto ligadas ao governo"
+msgstr ""
+
+#: institution/choices.py:9
+msgid "organização privada"
+msgstr ""
+
+#: institution/choices.py:10
+msgid "organização sem fins de lucros"
+msgstr ""
+
+#: institution/choices.py:11
+msgid "sociedade científica, associação pós-graduação, associação profissional"
+msgstr ""
+
+#: institution/models.py:14
 msgid "Name"
 msgstr ""
 
-#: location/models.py:13
+#: institution/models.py:15
+msgid "Institution Type"
+msgstr ""
+
+#: location/models.py:14 location/models.py:28 location/models.py:31
 msgid "Region"
 msgstr ""
 
-#: location/models.py:15 usefulmodels/models.py:18
-#: usefulmodels/wagtail_hooks.py:35
+#: location/models.py:16 location/models.py:28 location/models.py:31
+#: usefulmodels/models.py:20 usefulmodels/wagtail_hooks.py:53
 msgid "City"
 msgstr ""
 
-#: location/models.py:17 usefulmodels/models.py:43
-#: usefulmodels/wagtail_hooks.py:50
+#: location/models.py:18 location/models.py:28 location/models.py:31
+#: usefulmodels/models.py:45 usefulmodels/wagtail_hooks.py:68
 msgid "State"
 msgstr ""
 
-#: location/models.py:19 usefulmodels/models.py:67
-#: usefulmodels/wagtail_hooks.py:65
+#: location/models.py:20 location/models.py:28 location/models.py:31
+#: usefulmodels/models.py:70 usefulmodels/wagtail_hooks.py:83
 msgid "Country"
 msgstr ""
 
-#: location/wagtail_hooks.py:21
-msgid "Location"
+#: location/models.py:25
+msgid "Locations"
 msgstr ""
 
-#: policy_directory/models.py:14 policy_directory/wagtail_hooks.py:31
+#: policy_directory/choices.py:5
+msgid "promoção"
+msgstr ""
+
+#: policy_directory/choices.py:6
+msgid "posicionamento"
+msgstr ""
+
+#: policy_directory/choices.py:7
+msgid "mandato"
+msgstr ""
+
+#: policy_directory/choices.py:8
+msgid "geral"
+msgstr ""
+
+#: policy_directory/models.py:18 policy_directory/wagtail_hooks.py:31
 #: policy_directory/wagtail_hooks.py:59
 msgid "Policy Directory"
 msgstr ""
 
-#: policy_directory/models.py:37 policy_directory/wagtail_hooks.py:47
+#: policy_directory/models.py:56 policy_directory/wagtail_hooks.py:47
 msgid "Policy Directory Upload"
 msgstr ""
 
@@ -668,38 +838,298 @@ msgstr ""
 msgid "Articles Directory"
 msgstr ""
 
-#: usefulmodels/models.py:15
+#: usefulmodels/choices.py:5
+msgid "Ciências da Vida"
+msgstr ""
+
+#: usefulmodels/choices.py:6
+msgid "Ciências Físicas, Tecnológicas e Multidisciplinares"
+msgstr ""
+
+#: usefulmodels/choices.py:7
+msgid "Humanidades"
+msgstr ""
+
+#: usefulmodels/choices.py:12
+msgid "Ciências Agrárias"
+msgstr ""
+
+#: usefulmodels/choices.py:13
+msgid "Ciências Biológicas"
+msgstr ""
+
+#: usefulmodels/choices.py:14
+msgid "Ciências da Saúde"
+msgstr ""
+
+#: usefulmodels/choices.py:15
+msgid "Ciências Exatas e da Terra"
+msgstr ""
+
+#: usefulmodels/choices.py:16
+msgid "Ciências Humanas"
+msgstr ""
+
+#: usefulmodels/choices.py:17
+msgid "Ciências Sociais Aplicadas"
+msgstr ""
+
+#: usefulmodels/choices.py:18 usefulmodels/choices.py:62
+msgid "Engenharias"
+msgstr ""
+
+#: usefulmodels/choices.py:19
+msgid "Lingüística, Letras e Artes"
+msgstr ""
+
+#: usefulmodels/choices.py:24
+msgid "Ciência de Alimentos"
+msgstr ""
+
+#: usefulmodels/choices.py:25
+msgid "Ciências Agrárias I"
+msgstr ""
+
+#: usefulmodels/choices.py:26
+msgid "Medicina Veterinária"
+msgstr ""
+
+#: usefulmodels/choices.py:27
+msgid "Zootecnia/Recursos Pesqueiros"
+msgstr ""
+
+#: usefulmodels/choices.py:28
+msgid "Biodiversidade"
+msgstr ""
+
+#: usefulmodels/choices.py:29
+msgid "Ciências Biológicas I"
+msgstr ""
+
+#: usefulmodels/choices.py:30
+msgid "Ciências Biológicas II"
+msgstr ""
+
+#: usefulmodels/choices.py:31
+msgid "Ciências Biológicas III"
+msgstr ""
+
+#: usefulmodels/choices.py:32
+msgid "Educação Física"
+msgstr ""
+
+#: usefulmodels/choices.py:33
+msgid "Enfermagem"
+msgstr ""
+
+#: usefulmodels/choices.py:34
+msgid "Farmácia"
+msgstr ""
+
+#: usefulmodels/choices.py:35
+msgid "Medicina I"
+msgstr ""
+
+#: usefulmodels/choices.py:36
+msgid "Medicina II"
+msgstr ""
+
+#: usefulmodels/choices.py:37
+msgid "Medicina III"
+msgstr ""
+
+#: usefulmodels/choices.py:38
+msgid "Nutrição"
+msgstr ""
+
+#: usefulmodels/choices.py:39
+msgid "Odontologia"
+msgstr ""
+
+#: usefulmodels/choices.py:40
+msgid "Saúde Coletiva"
+msgstr ""
+
+#: usefulmodels/choices.py:41
+msgid "Astronomia/Física"
+msgstr ""
+
+#: usefulmodels/choices.py:42
+msgid "Ciências da Computação"
+msgstr ""
+
+#: usefulmodels/choices.py:43
+msgid "Geociências"
+msgstr ""
+
+#: usefulmodels/choices.py:44
+msgid "Matemática/Probabilidade Estatística"
+msgstr ""
+
+#: usefulmodels/choices.py:45
+msgid "Química"
+msgstr ""
+
+#: usefulmodels/choices.py:46
+msgid "Antropologia/Arqueologia"
+msgstr ""
+
+#: usefulmodels/choices.py:47
+msgid "Ciência Política e Relações Internacionais"
+msgstr ""
+
+#: usefulmodels/choices.py:48
+msgid "Ciências da Religião e Teologia"
+msgstr ""
+
+#: usefulmodels/choices.py:49
+msgid "Educação"
+msgstr ""
+
+#: usefulmodels/choices.py:50
+msgid "Filosofia"
+msgstr ""
+
+#: usefulmodels/choices.py:51
+msgid "Geografia"
+msgstr ""
+
+#: usefulmodels/choices.py:52
+msgid "História"
+msgstr ""
+
+#: usefulmodels/choices.py:53
+msgid "Psicologia"
+msgstr ""
+
+#: usefulmodels/choices.py:54
+msgid "Sociologia"
+msgstr ""
+
+#: usefulmodels/choices.py:55
+msgid "Turismo"
+msgstr ""
+
+#: usefulmodels/choices.py:56
+msgid "Arquitetura, Urbanismo e Design"
+msgstr ""
+
+#: usefulmodels/choices.py:57
+msgid "Comunicação e Informação"
+msgstr ""
+
+#: usefulmodels/choices.py:58
+msgid "Direito"
+msgstr ""
+
+#: usefulmodels/choices.py:59
+msgid "Economia"
+msgstr ""
+
+#: usefulmodels/choices.py:60
+msgid "Planejamento Urbano e Regional/Demografia"
+msgstr ""
+
+#: usefulmodels/choices.py:61
+msgid "Serviço Social"
+msgstr ""
+
+#: usefulmodels/choices.py:63
+msgid "Engenharias I"
+msgstr ""
+
+#: usefulmodels/choices.py:64
+msgid "Engenharias II"
+msgstr ""
+
+#: usefulmodels/choices.py:65
+msgid "Engenharias III"
+msgstr ""
+
+#: usefulmodels/choices.py:66
+msgid "Engenharias IV"
+msgstr ""
+
+#: usefulmodels/choices.py:67
+msgid "Artes"
+msgstr ""
+
+#: usefulmodels/choices.py:68
+msgid "Linguística e Literatura"
+msgstr ""
+
+#: usefulmodels/models.py:17
 msgid "Name of the city"
 msgstr ""
 
-#: usefulmodels/models.py:19
+#: usefulmodels/models.py:21
 msgid "Cities"
 msgstr ""
 
-#: usefulmodels/models.py:39
+#: usefulmodels/models.py:41
 msgid "Name of the state"
 msgstr ""
 
-#: usefulmodels/models.py:40
+#: usefulmodels/models.py:42
 msgid "Acronym to the state"
 msgstr ""
 
-#: usefulmodels/models.py:44
+#: usefulmodels/models.py:46
 msgid "States"
 msgstr ""
 
-#: usefulmodels/models.py:63
+#: usefulmodels/models.py:66
 msgid "Name of the Country"
 msgstr ""
 
-#: usefulmodels/models.py:64
+#: usefulmodels/models.py:67
 msgid "Acronym to the Country"
 msgstr ""
 
-#: usefulmodels/models.py:68
+#: usefulmodels/models.py:71
 msgid "Countries"
 msgstr ""
 
-#: usefulmodels/wagtail_hooks.py:78
+#: usefulmodels/models.py:92
+msgid "Level 0"
+msgstr ""
+
+#: usefulmodels/models.py:95
+msgid "Level 1"
+msgstr ""
+
+#: usefulmodels/models.py:98
+msgid "Level 2"
+msgstr ""
+
+#: usefulmodels/models.py:103
+msgid "Thematic Areas"
+msgstr ""
+
+#: usefulmodels/models.py:138
+msgid "Name of the pratice"
+msgstr ""
+
+#: usefulmodels/models.py:139
+msgid "Code of the pratice"
+msgstr ""
+
+#: usefulmodels/models.py:143
+msgid "Pratices"
+msgstr ""
+
+#: usefulmodels/models.py:163
+msgid "Name of the action"
+msgstr ""
+
+#: usefulmodels/models.py:164
+msgid "Code of the action"
+msgstr ""
+
+#: usefulmodels/models.py:168
+msgid "Actions"
+msgstr ""
+
+#: usefulmodels/wagtail_hooks.py:142
 msgid "Useful Models"
 msgstr ""

@@ -149,7 +149,6 @@ class Pratice(CommonControlField):
         return u'%s - %s' % (self.code, self.name, )
 
 
-
     base_form_class = PraticeForm
 
 
@@ -173,8 +172,5 @@ class Action(CommonControlField):
 
     def __str__(self):
         return u'%s - %s' % (self.code, self.name, )
-
-
-
 
     base_form_class = ActionForm

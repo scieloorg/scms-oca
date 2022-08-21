@@ -34,21 +34,19 @@ class EventDirectory(CommonControlField):
     end_time = models.TimeField(_("End Time"), max_length=255,
                                 null=True, blank=True)
 
-    locations = models.ManyToManyField(Location, blank=True)
-    institutions = models.ManyToManyField(Institution, blank=True)
+    locations = models.ManyToManyField(Location, verbose_name=_("Location"),  blank=True)
+    institutions = models.ManyToManyField(Institution, verbose_name=_("Institution"), blank=True)
+    thematic_areas = models.ManyToManyField(ThematicArea, verbose_name=_("Thematic Area"), blank=True)
 
-    thematic_areas = models.ManyToManyField(ThematicArea, blank=True)
-
-    pratice = models.ForeignKey(Pratice, null=True, blank=True, on_delete=models.SET_NULL)
-    action = models.ForeignKey(Action, null=True, blank=True, on_delete=models.SET_NULL)
+    pratice = models.ForeignKey(Pratice, verbose_name=_("Pratice"),
+                                null=True, blank=True, on_delete=models.SET_NULL)
+    action = models.ForeignKey(Action, verbose_name=_("Action"), null=True, blank=True, on_delete=models.SET_NULL)
 
     classification = models.CharField(_("Classification"), choices=choices.classification,
                                       max_length=255, null=True, blank=True)
-
-    keywords = TaggableManager()
+    keywords = TaggableManager(_("Keywords"), blank=True)
 
     attendence = models.CharField(_("Attendence"), choices=choices.attendence_type, max_length=255, null=True, blank=True)
-
 
     panels = [
         HelpPanel('Encontros, congressos, workshops, seminários realizados no Brasil (presenciais, virtuais ou híbridos) cujo tema principal seja a promoção da Ciência Aberta'),

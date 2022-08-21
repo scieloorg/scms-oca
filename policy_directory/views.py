@@ -131,7 +131,7 @@ def import_file(request):
                     else:
                         messages.error(request, _("Unknown action, line: %s") % str(line + 1))
 
-                di.save()
+                po.save()
     except Exception as ex:
         messages.error(request, _("Import error: %s") % ex)
     else:

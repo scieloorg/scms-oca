@@ -24,16 +24,17 @@ class PolicyDirectory(CommonControlField):
     date = models.DateField(_("Start Date"), max_length=255,
                                   null=True, blank=True)
 
-    institutions = models.ManyToManyField(Institution, blank=True)
-    thematic_areas = models.ManyToManyField(ThematicArea, blank=True)
+    institutions = models.ManyToManyField(Institution, verbose_name=_("Institution"), blank=True)
+    thematic_areas = models.ManyToManyField(ThematicArea, verbose_name=_("Thematic Area"), blank=True)
 
-    pratice = models.ForeignKey(Pratice, null=True, blank=True, on_delete=models.SET_NULL)
-    action = models.ForeignKey(Action, null=True, blank=True, on_delete=models.SET_NULL)
+    pratice = models.ForeignKey(Pratice, verbose_name=_("Pratice"),
+                                null=True, blank=True, on_delete=models.SET_NULL)
+    action = models.ForeignKey(Action, verbose_name=_("Action"), null=True, blank=True, on_delete=models.SET_NULL)
 
     classification = models.CharField(_("Classification"), choices=choices.classification,
                                       max_length=255, null=True, blank=True)
 
-    keywords = TaggableManager()
+    keywords = TaggableManager(_("Keywords"), blank=True)
 
     panels = [
         HelpPanel('Documentos de promoção, posicionamentos ou mandatos sobre Ciência Aberta elaborados e publicados por instituições brasileiras, tais como: universidades, sociedades científicas, institutos de pesquisa e agências de fomento.'),

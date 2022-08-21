@@ -32,19 +32,20 @@ class EducationDirectory(CommonControlField):
     end_time = models.TimeField(_("End Time"), max_length=255,
                                   null=True, blank=True)
 
-    locations = models.ManyToManyField(Location, blank=True)
-    institutions = models.ManyToManyField(Institution, blank=True)
-    thematic_areas = models.ManyToManyField(ThematicArea, blank=True)
+    locations = models.ManyToManyField(Location, verbose_name=_("Location"),  blank=True)
+    institutions = models.ManyToManyField(Institution, verbose_name=_("Institution"), blank=True)
+    thematic_areas = models.ManyToManyField(ThematicArea, verbose_name=_("Thematic Area"), blank=True)
+
+    pratice = models.ForeignKey(Pratice, verbose_name=_("Pratice"),
+                                null=True, blank=True, on_delete=models.SET_NULL)
+    action = models.ForeignKey(Action, verbose_name=_("Action"), null=True, blank=True, on_delete=models.SET_NULL)
 
     classification = models.CharField(_("Classification"), choices=choices.classification,
                                       max_length=255, null=True, blank=True)
 
-    pratice = models.ForeignKey(Pratice, null=True, blank=True, on_delete=models.SET_NULL)
-    action = models.ForeignKey(Action, null=True, blank=True, on_delete=models.SET_NULL)
+    keywords = TaggableManager(_("Keywords"), blank=True)
 
-    keywords = TaggableManager()
-
-    is_online = models.BooleanField(default=False)
+    is_online = models.BooleanField(verbose_name=_("Is Online"), default=False)
 
     panels = [
         HelpPanel('Cursos livres, disciplinas de graduação e pós-graduação ministrados por instituições brasileiras – presenciais ou EAD- para promover a adoção dos princípios e práticas de ciência aberta por todos os envolvidos no processo de pesquisa.'),
