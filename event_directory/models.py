@@ -67,6 +67,13 @@ class EventDirectory(CommonControlField):
         FieldPanel('action'),
         FieldPanel('attendence'),
     ]
+
+    def __unicode__(self):
+        return u'%s' % self.event
+
+    def __str__(self):
+        return u'%s' % self.event
+
     base_form_class = EventDirectoryForm
 
 

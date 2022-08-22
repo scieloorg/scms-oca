@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-21 20:52+0000\n"
+"POT-Creation-Date: 2022-08-22 13:45+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -448,18 +448,18 @@ msgstr ""
 msgid "End Date"
 msgstr ""
 
-#: education_directory/models.py:30 education_directory/views.py:158
+#: education_directory/models.py:30 education_directory/views.py:162
 #: event_directory/models.py:32
 msgid "Start Time"
 msgstr ""
 
-#: education_directory/models.py:32 education_directory/views.py:160
+#: education_directory/models.py:32 education_directory/views.py:164
 #: event_directory/models.py:34
 msgid "End Time"
 msgstr ""
 
 #: education_directory/models.py:35 event_directory/models.py:37
-#: institution/models.py:26 institution/models.py:29 location/models.py:24
+#: institution/models.py:29 institution/models.py:32 location/models.py:24
 #: location/wagtail_hooks.py:21
 msgid "Location"
 msgstr ""
@@ -544,26 +544,26 @@ msgstr ""
 msgid "File successfully validated!"
 msgstr ""
 
-#: education_directory/views.py:125 event_directory/views.py:125
-#: infrastructure_directory/views.py:120 policy_directory/views.py:123
+#: education_directory/views.py:129 event_directory/views.py:129
+#: infrastructure_directory/views.py:120 policy_directory/views.py:124
 #, python-format
 msgid "Unknown pratice, line: %s"
 msgstr ""
 
-#: education_directory/views.py:134 event_directory/views.py:134
-#: infrastructure_directory/views.py:129 policy_directory/views.py:132
+#: education_directory/views.py:138 event_directory/views.py:138
+#: infrastructure_directory/views.py:129 policy_directory/views.py:133
 #, python-format
 msgid "Unknown action, line: %s"
 msgstr ""
 
-#: education_directory/views.py:138 event_directory/views.py:139
-#: infrastructure_directory/views.py:134 policy_directory/views.py:136
+#: education_directory/views.py:142 event_directory/views.py:143
+#: infrastructure_directory/views.py:134 policy_directory/views.py:137
 #, python-format
-msgid "Import error: %s"
+msgid "Import error: %s, Line: %s"
 msgstr ""
 
-#: education_directory/views.py:140 event_directory/views.py:141
-#: infrastructure_directory/views.py:136 policy_directory/views.py:138
+#: education_directory/views.py:144 event_directory/views.py:145
+#: infrastructure_directory/views.py:136 policy_directory/views.py:139
 msgid "File imported successfully!"
 msgstr ""
 
@@ -680,6 +680,10 @@ msgstr ""
 
 #: institution/models.py:15
 msgid "Institution Type"
+msgstr ""
+
+#: institution/models.py:20 usefulmodels/models.py:42
+msgid "Acronym to the state"
 msgstr ""
 
 #: location/models.py:14 location/models.py:28 location/models.py:31
@@ -1068,10 +1072,6 @@ msgstr ""
 
 #: usefulmodels/models.py:41
 msgid "Name of the state"
-msgstr ""
-
-#: usefulmodels/models.py:42
-msgid "Acronym to the state"
 msgstr ""
 
 #: usefulmodels/models.py:46

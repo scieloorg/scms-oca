@@ -49,6 +49,12 @@ class PolicyDirectory(CommonControlField):
         FieldPanel('pratice'),
         FieldPanel('action'),
     ]
+
+    def __unicode__(self):
+        return u'%s' % self.title
+
+    def __str__(self):
+        return u'%s' % self.title
     base_form_class = PolicyDirectoryForm
 
 class PolicyDirectoryFile(CommonControlField):

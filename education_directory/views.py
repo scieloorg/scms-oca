@@ -78,7 +78,6 @@ def import_file(request):
                 ed.title = row['Title']
                 ed.link = row['Link']
                 ed.description = row['Description']
-                ed.institution = row['Institution']
                 if row['Start Date']:
                     ed.start_date = datetime.strptime(row['Start Date'], '%d/%m/%Y')
                 if row['End Date']:

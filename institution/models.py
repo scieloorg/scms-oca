@@ -16,8 +16,12 @@ class Institution(CommonControlField, ClusterableModel):
                                         max_length=255, null=True, blank=True)
 
     location = models.ForeignKey(Location, null=True, blank=True, on_delete=models.SET_NULL)
+
+    acronym = models.CharField(_("Acronym to the institution"), blank=True, null=True, max_length=255)
+
     panels = [
         FieldPanel('name'),
+        FieldPanel('acronym'),
         FieldPanel('institution_type'),
         FieldPanel('location'),
     ]
@@ -41,11 +45,11 @@ class Institution(CommonControlField, ClusterableModel):
             institution.name = inst_name
             institution.creator = user
 
-            institution.location = Location.get_or_create(location_country,
+            institution.location = Location.get_or_create(user,
+                                                          location_country,
                                                           location_region,
                                                           location_state,
-                                                          location_city,
-                                                          user)
+                                                          location_city)
 
             institution.save()
         return institution

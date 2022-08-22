@@ -10,12 +10,20 @@ User = get_user_model()
 
 SEPARATOR = ','
 
-def run(): 
+def run(*args):
+    user_id = 1
+
+    # Delete all cities
+    models.State.objects.all().delete()
+
     with open(os.path.dirname(os.path.realpath(__file__)) + "/../fixtures/states.csv", 'r') as fp:
         for line in fp.readlines():
             name, acron = line.strip().split(SEPARATOR)
 
             # User
-            creator = User.objects.get(id=1)
+            if args:
+                user_id = args[0]
+
+            creator = User.objects.get(id=user_id)
 
             models.State(name=name, acronym=acron, creator=creator).save()

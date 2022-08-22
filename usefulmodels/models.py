@@ -26,6 +26,19 @@ class City(CommonControlField):
     def __str__(self):
         return self.name
 
+    @classmethod
+    def get_or_create(cls, user, name):
+
+        if cls.objects.filter(name__icontains=name).exists():
+            return cls.objects.get(name=name)
+        else:
+            city = City()
+            city.name = name
+            city.creator = user
+            city.save()
+
+        return city
+
     base_form_class = CityForm
 
 
@@ -51,6 +64,25 @@ class State(CommonControlField):
     def __str__(self):
         return self.name
 
+    @classmethod
+    def get_or_create(cls, user, name=None, acronym=None):
+
+        if name:
+            if cls.objects.filter(name__icontains=name).exists():
+                return cls.objects.get(name=name)
+
+        if acronym:
+            if cls.objects.filter(acronym__icontains=acronym).exists():
+                return cls.objects.get(acronym__icontains=acronym)
+
+        state = State()
+        state.name = name
+        state.acronym = acronym
+        state.creator = user
+        state.save()
+
+        return state
+
     base_form_class = StateForm
 
 
@@ -75,6 +107,25 @@ class Country(CommonControlField):
 
     def __str__(self):
         return self.name
+
+    @classmethod
+    def get_or_create(cls, user, name=None, acronym=None):
+
+        if name:
+            if cls.objects.filter(name__icontains=name).exists():
+                return cls.objects.get(name=name)
+
+        if acronym:
+            if cls.objects.filter(acronym__icontains=acronym).exists():
+                return cls.objects.get(acronym__icontains=acronym)
+
+        country = Country()
+        country.name = name
+        country.acronym = acronym
+        country.creator = user
+        country.save()
+
+        return country
 
     base_form_class = CountryForm
 

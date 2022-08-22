@@ -9,12 +9,21 @@ User = get_user_model()
 # Consider that existe a user with id=1
 
 
-def run(): 
+def run(*args):
+    user_id = 1
+
+    # Delete all cities
+    models.City.objects.all().delete()
+
     with open(os.path.dirname(os.path.realpath(__file__)) + "/../fixtures/cities.csv", 'r') as fp:
         for line in fp.readlines():
             name = line.strip()
 
             # User
-            creator = User.objects.get(id=1)
+            if args:
+                user_id = args[0]
+
+            creator = User.objects.get(id=user_id)
+
 
             models.City(name=name, creator=creator).save()

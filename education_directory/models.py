@@ -65,6 +65,12 @@ class EducationDirectory(CommonControlField):
         FieldPanel('keywords'),
         FieldPanel('is_online'),
     ]
+
+    def __unicode__(self):
+        return u'%s' % self.title
+
+    def __str__(self):
+        return u'%s' % self.title
     base_form_class = EducationDirectoryForm
 
 class EducationDirectoryFile(CommonControlField):

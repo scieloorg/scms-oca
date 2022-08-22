@@ -31,19 +31,19 @@ class Location(CommonControlField):
         return u'%s: %s | %s: %s | %s: %s | %s: %s' % (_('Country'), self.country, _('Region'), self.region, _('State'),  self.state, _('City'), self.city, )
 
     @classmethod
-    def get_or_create(cls, location_country, location_region, location_state,
-                      location_city, user):
+    def get_or_create(cls, user, location_country=None, location_region=None, location_state=None,
+                      location_city=None):
 
         # check if exists the location
         if cls.objects.filter(country__name=location_country, region=location_region, state__name=location_state, city__name=location_city).exists():
             return cls.objects.get(
                 country__name=location_country, region=location_region, state__name=location_state, city__name=location_city)
         else:
-            location = location()
-            location.region = location_region
-            location.country = location_country
-            location.state = location_state
-            location.city = location_city
+            location = Location()
+            location.region = location_region if location_region else None
+            location.country = location_country if location_country else None
+            location.state = location_state if location_state else None
+            location.city = location_city if location_city else None
             location.creator = user
             location.save()
 

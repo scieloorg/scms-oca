@@ -17,10 +17,17 @@ ACTIONS = [
 ]
 
 
-def run():
+def run(*args):
+    user_id = 1
+
+    # Delete all acitions
+    models.Action.objects.all().delete()
 
     # User
-    creator = User.objects.get(id=1)
+    if args:
+        user_id = args[0]
+
+    creator = User.objects.get(id=user_id)
 
     for code, val in ACTIONS:
 

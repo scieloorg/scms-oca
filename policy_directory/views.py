@@ -80,7 +80,8 @@ def import_file(request):
                 po.link = row['Link']
                 po.description = row['Description']
                 po.institution = row['Institution']
-                po.date = datetime.strptime(row['Date'], '%d/%m/%Y')
+                if row['Date']:
+                    po.date = datetime.strptime(row['Date'], '%d/%m/%Y')
                 po.creator = request.user
                 po.save()
 

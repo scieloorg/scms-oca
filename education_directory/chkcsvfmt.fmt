@@ -10,10 +10,6 @@ type=String
 data_required=False
 type=String
 
-[Institution]
-data_required=True
-type=String
-
 [Start Date]
 data_required=False
 type=Date
