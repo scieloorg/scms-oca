@@ -21,10 +21,10 @@ class City(CommonControlField):
         verbose_name_plural = _("Cities")
 
     def __unicode__(self):
-        return self.name
+        return u'%s' % self.name
 
     def __str__(self):
-        return self.name
+        return u'%s' % self.name
 
     @classmethod
     def get_or_create(cls, user, name):
@@ -59,10 +59,10 @@ class State(CommonControlField):
         verbose_name_plural = _("States")
 
     def __unicode__(self):
-        return self.name
+        return u'%s' % self.name
 
     def __str__(self):
-        return self.name
+        return u'%s' % self.name
 
     @classmethod
     def get_or_create(cls, user, name=None, acronym=None):
@@ -103,10 +103,10 @@ class Country(CommonControlField):
         verbose_name_plural = _("Countries")
 
     def __unicode__(self):
-        return self.name
+        return u'%s' % self.name
 
     def __str__(self):
-        return self.name
+        return u'%s' % self.name
 
     @classmethod
     def get_or_create(cls, user, name=None, acronym=None):
