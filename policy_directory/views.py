@@ -103,7 +103,7 @@ def import_file(request):
                     level2 = row['Thematic Area Level2']
                     the_area = ThematicArea.get_or_create(level0, level1, level2, request.user)
 
-                po.thematic_areas.add(the_area)
+                    po.thematic_areas.add(the_area)
 
                 # Keywords
                 if row['Keywords']:
@@ -120,7 +120,7 @@ def import_file(request):
                         pratice = Pratice.objects.get(name=pratice_name)
                         po.pratice = pratice
                     else:
-                        messages.error(request, _("Unknown pratice, line: %s") % str(line + 1))
+                        messages.error(request, _("Unknown pratice, line: %s") % str(line + 2))
 
                 # Action
                 if row['Action']:
@@ -129,11 +129,11 @@ def import_file(request):
                         action = Action.objects.get(name=action_name)
                         po.action = action
                     else:
-                        messages.error(request, _("Unknown action, line: %s") % str(line + 1))
+                        messages.error(request, _("Unknown action, line: %s") % str(line + 2))
 
                 po.save()
     except Exception as ex:
-        messages.error(request, _("Import error: %s") % ex)
+        messages.error(request, _("Import error: %s, Line: %s") % (ex, str(line + 2)))
     else:
        messages.success(request, _("File imported successfully!"))
 

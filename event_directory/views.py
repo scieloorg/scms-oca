@@ -79,10 +79,14 @@ def import_file(request):
                 di.link = row['Link']
                 di.description = row['Description']
                 di.organization = row['Organization']
-                di.start_date = datetime.strptime(row['Start Date'], '%d/%m/%Y')
-                di.end_date = datetime.strptime(row['End Date'], '%d/%m/%Y')
-                di.start_time = row['Start Time']
-                di.end_time = row['End Time']
+                if row['Start Date']:
+                    di.start_date = datetime.strptime(row['Start Date'], '%d/%m/%Y')
+                if row['End Date']:
+                    di.end_date = datetime.strptime(row['End Date'], '%d/%m/%Y')
+                if row['Start Time']:
+                    di.start_time = row['Start Time']
+                if row['End Time']:
+                    di.end_time = row['End Time']
                 di.creator = request.user
                 di.save()
 
@@ -105,7 +109,7 @@ def import_file(request):
                     level2 = row['Thematic Area Level2']
                     the_area = ThematicArea.get_or_create(level0, level1, level2, request.user)
 
-                di.thematic_areas.add(the_area)
+                    di.thematic_areas.add(the_area)
 
                 # Keywords
                 if row['Keywords']:
@@ -122,7 +126,7 @@ def import_file(request):
                         pratice = Pratice.objects.get(name=pratice_name)
                         di.pratice = pratice
                     else:
-                        messages.error(request, _("Unknown pratice, line: %s") % str(line + 1))
+                        messages.error(request, _("Unknown pratice, line: %s") % str(line + 2))
 
                 # Action
                 if row['Action']:
@@ -131,12 +135,12 @@ def import_file(request):
                         action = Action.objects.get(name=action_name)
                         di.action = action
                     else:
-                        messages.error(request, _("Unknown action, line: %s") % str(line + 1))
+                        messages.error(request, _("Unknown action, line: %s") % str(line + 2))
 
                 di.save()
 
     except Exception as ex:
-        messages.error(request, _("Import error: %s") % ex)
+        messages.error(request, _("Import error: %s, Line: %s") % (ex, str(line + 2)))
     else:
        messages.success(request, _("File imported successfully!"))
 
