@@ -69,7 +69,7 @@ class State(CommonControlField):
 
         if name:
             if cls.objects.filter(name__icontains=name).exists():
-                return cls.objects.get(name=name)
+                return cls.objects.get(name__icontains=name)
 
         if acronym:
             if cls.objects.filter(acronym__icontains=acronym).exists():
@@ -113,7 +113,7 @@ class Country(CommonControlField):
 
         if name:
             if cls.objects.filter(name__icontains=name).exists():
-                return cls.objects.get(name=name)
+                return cls.objects.get(name__icontains=name)
 
         if acronym:
             if cls.objects.filter(acronym__icontains=acronym).exists():
