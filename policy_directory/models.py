@@ -19,7 +19,7 @@ class PolicyDirectory(CommonControlField):
 
     title = models.CharField(_("Title"), max_length=255, null=False, blank=False)
     link = models.URLField(_("Link"), null=False, blank=False)
-    description = models.TextField(_("Description"), max_length=255,
+    description = models.TextField(_("Description"), max_length=1000,
                                    null=True, blank=True)
     date = models.DateField(_("Start Date"), max_length=255,
                                   null=True, blank=True)

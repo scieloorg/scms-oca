@@ -1,5 +1,7 @@
 from wagtail.admin.forms import WagtailAdminModelForm
 
+from policy_directory.search_indexes import PolicyIndex
+
 
 class PolicyDirectoryForm(WagtailAdminModelForm):
 
@@ -12,6 +14,9 @@ class PolicyDirectoryForm(WagtailAdminModelForm):
             policy_direcotry.creator = user
 
         self.save()
+
+        # Update de index.
+        PolicyIndex().update_object(instance=policy_direcotry)
 
         return policy_direcotry
 
