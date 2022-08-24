@@ -1,5 +1,7 @@
 from wagtail.admin.forms import WagtailAdminModelForm
 
+from infrastructure_directory.search_indexes import InfraStrutureIndex
+
 
 class InfrastructureDirectoryForm(WagtailAdminModelForm):
 
@@ -12,6 +14,9 @@ class InfrastructureDirectoryForm(WagtailAdminModelForm):
             structure_directory.creator = user
 
         self.save()
+
+        # Update de index.
+        InfraStrutureIndex().update_object(instance=structure_directory)
 
         return structure_directory
 

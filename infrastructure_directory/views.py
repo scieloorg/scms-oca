@@ -7,6 +7,7 @@ from django.utils.translation import gettext as _
 from wagtail.admin import messages
 
 from core.libs import chkcsv
+from infrastructure_directory.search_indexes import InfraStrutureIndex
 from institution.models import Institution
 from usefulmodels.models import Action, Pratice, ThematicArea
 
@@ -129,6 +130,9 @@ def import_file(request):
                         messages.error(request, _("Unknown action, line: %s") % str(line + 1))
 
                 isd.save()
+
+                # Update de index.
+                InfraStrutureIndex().update_object(instance=isd)
 
     except Exception as ex:
         messages.error(request, _("Import error: %s, Line: %s") % (ex, str(line + 2)))
