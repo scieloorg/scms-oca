@@ -63,8 +63,15 @@
    <field name="sinopses" type="string" indexed="true" stored="true" multiValued="true"/>
    <field name="languages" type="string" indexed="true" stored="true" multiValued="true"/>
    <field name="publisher" type="string" indexed="true" stored="true" multiValued="true"/>
-   <field name="status" type="string" indexed="true" stored="true" multiValued="False"/>
-   <field name="authors" type="string" indexed="true" stored="true" multiValued="true"/> -->
+   <field name="status" type="string" indexed="true" stored="true" multiValued="False"/>-->
+
+   <!-- multivalued fields -->
+   <field name="keywords" type="string" indexed="true" stored="true" multiValued="true"/>
+   <field name="institutions" type="string" indexed="true" stored="true" multiValued="true"/>
+   <field name="countries" type="string" indexed="true" stored="true" multiValued="true"/>
+   <field name="cities" type="string" indexed="true" stored="true" multiValued="true"/>
+   <field name="states" type="string" indexed="true" stored="true" multiValued="true"/>
+   <field name="regions" type="string" indexed="true" stored="true" multiValued="true"/>
 
    <!-- Dynamic field definitions -->
    <dynamicField name="*"  type="text" indexed="true" stored="true"  multiValued="false"/>
