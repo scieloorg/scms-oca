@@ -1,17 +1,26 @@
-from django.urls import include, path
 from django.http import HttpResponseRedirect
+from django.urls import include, path
 from django.utils.translation import gettext as _
-
+from wagtail.contrib.modeladmin.options import (
+    ModelAdmin,
+    ModelAdminGroup,
+    modeladmin_register,
+)
+from wagtail.contrib.modeladmin.views import CreateView, EditView
 from wagtail.core import hooks
-from wagtail.contrib.modeladmin.views import CreateView
-from wagtail.contrib.modeladmin.options import (ModelAdmin, modeladmin_register, ModelAdminGroup)
 
-from .models import EducationDirectory, EducationDirectoryFile
 from .button_helper import EducationDirectoryHelper
-from .views import validate, import_file
+from .models import EducationDirectory, EducationDirectoryFile
 
 
 class EducationDirectoryCreateView(CreateView):
+
+    def form_valid(self, form):
+        self.object = form.save_all(self.request.user)
+        return HttpResponseRedirect(self.get_success_url())
+
+
+class EducationDirectoryEditView(EditView):
 
     def form_valid(self, form):
         self.object = form.save_all(self.request.user)
@@ -27,7 +36,9 @@ class EducationDirectoryFileCreateView(CreateView):
 
 class EducationDirectoryAdmin(ModelAdmin):
     model = EducationDirectory
+    ordering = ('-updated',)
     create_view_class = EducationDirectoryCreateView
+    edit_view_class = EducationDirectoryEditView
     menu_label = _('Education Directory')
     menu_icon = 'folder'
     menu_order = 100
@@ -42,6 +53,7 @@ class EducationDirectoryAdmin(ModelAdmin):
 
 class EducationDirectoryFileAdmin(ModelAdmin):
     model = EducationDirectoryFile
+    ordering = ('-updated',)
     create_view_class=EducationDirectoryFileCreateView
     button_helper_class = EducationDirectoryHelper
     menu_label = _('Education Directory Upload')
