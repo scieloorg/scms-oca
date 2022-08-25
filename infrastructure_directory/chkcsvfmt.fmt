@@ -50,7 +50,7 @@ type=String
 data_required=False
 type=String
 
-[Pratice]
+[Practice]
 data_required=False
 type=String
 

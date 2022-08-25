@@ -9,7 +9,7 @@ from wagtail.documents.edit_handlers import DocumentChooserPanel
 from core.models import CommonControlField
 from institution.models import Institution
 from location.models import Location
-from usefulmodels.models import Pratice, ThematicArea, Action
+from usefulmodels.models import Practice, ThematicArea, Action
 
 from .forms import EducationDirectoryFileForm, EducationDirectoryForm
 
@@ -36,7 +36,7 @@ class EducationDirectory(CommonControlField):
     institutions = models.ManyToManyField(Institution, verbose_name=_("Institution"), blank=True)
     thematic_areas = models.ManyToManyField(ThematicArea, verbose_name=_("Thematic Area"), blank=True)
 
-    pratice = models.ForeignKey(Pratice, verbose_name=_("Pratice"),
+    practice = models.ForeignKey(Practice, verbose_name=_("Practice"),
                                 null=True, blank=True, on_delete=models.SET_NULL)
     action = models.ForeignKey(Action, verbose_name=_("Action"), null=True, blank=True, on_delete=models.SET_NULL)
 
@@ -60,7 +60,7 @@ class EducationDirectory(CommonControlField):
         FieldPanel('institutions'),
         FieldPanel('thematic_areas'),
         FieldPanel('classification'),
-        FieldPanel('pratice'),
+        FieldPanel('practice'),
         FieldPanel('action'),
         FieldPanel('keywords'),
         FieldPanel('is_online'),
@@ -71,6 +71,7 @@ class EducationDirectory(CommonControlField):
 
     def __str__(self):
         return u'%s' % self.title
+
     base_form_class = EducationDirectoryForm
 
 class EducationDirectoryFile(CommonControlField):

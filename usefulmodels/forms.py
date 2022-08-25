@@ -59,7 +59,7 @@ class ThematicAreaForm(WagtailAdminModelForm):
 
         return thematic
 
-class PraticeForm(WagtailAdminModelForm):
+class PracticeForm(WagtailAdminModelForm):
 
     def save_all(self, user):
         pratice = super().save(commit=False)

@@ -1,4 +1,4 @@
-import os
+
 from usefulmodels import models
 from django.contrib.auth import get_user_model
 
@@ -29,7 +29,7 @@ def run(*args):
     user_id = 1
 
     # Delete all pratices
-    models.Pratice.objects.all().delete()
+    models.Practice.objects.all().delete()
 
     # User
     if args:
@@ -39,4 +39,4 @@ def run(*args):
 
     for code, val in PRATICES:
 
-        models.Pratice(code=code, name=val, creator=creator).save()
+        models.Practice(code=code, name=val, creator=creator).save()

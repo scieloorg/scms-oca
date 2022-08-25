@@ -12,7 +12,7 @@ from core.libs import chkcsv
 from .models import PolicyDirectoryFile, PolicyDirectory
 
 from institution.models import Institution
-from usefulmodels.models import Action, Pratice, ThematicArea
+from usefulmodels.models import Action, Practice, ThematicArea
 
 
 def validate(request):
@@ -114,14 +114,14 @@ def import_file(request):
                 if row['Classification']:
                     po.classification = row['Classification']
 
-                # Pratice
-                if row['Pratice']:
-                    pratice_name = row['Pratice']
-                    if Pratice.objects.filter(name=pratice_name).exists():
-                        pratice = Pratice.objects.get(name=pratice_name)
-                        po.pratice = pratice
+                # Practice
+                if row['Practice']:
+                    practice_name = row['Practice']
+                    if Practice.objects.filter(name=practice_name).exists():
+                        practice = Practice.objects.get(name=practice_name)
+                        po.practice = practice
                     else:
-                        messages.error(request, _("Unknown pratice, line: %s") % str(line + 2))
+                        messages.error(request, _("Unknown Practice, line: %s") % str(line + 2))
 
                 # Action
                 if row['Action']:

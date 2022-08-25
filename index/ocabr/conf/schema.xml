@@ -72,6 +72,7 @@
    <field name="cities" type="string" indexed="true" stored="true" multiValued="true"/>
    <field name="states" type="string" indexed="true" stored="true" multiValued="true"/>
    <field name="regions" type="string" indexed="true" stored="true" multiValued="true"/>
+   <field name="thematic_areas" type="string" indexed="true" stored="true" multiValued="true"/>
 
    <!-- Dynamic field definitions -->
    <dynamicField name="*"  type="text" indexed="true" stored="true"  multiValued="false"/>

@@ -2,7 +2,7 @@ from django.db import models
 from django.utils.translation import gettext as _
 from core.models import CommonControlField
 from usefulmodels.forms import (CityForm, CountryForm, StateForm, ThematicAreaForm,
-                                PraticeForm, ActionForm)
+                                PracticeForm, ActionForm)
 
 from . import choices
 
@@ -178,9 +178,9 @@ class ThematicArea(CommonControlField):
     base_form_class = ThematicAreaForm
 
 
-class Pratice(CommonControlField):
+class Practice(CommonControlField):
     """
-    Represent Pratices
+    Represent Practices
 
     Fields:
         name
@@ -190,8 +190,8 @@ class Pratice(CommonControlField):
     code = models.CharField(_("Code of the pratice"), blank=True, null=True, max_length=4)
 
     class Meta:
-        verbose_name = _("Pratice")
-        verbose_name_plural = _("Pratices")
+        verbose_name = _("Practice")
+        verbose_name_plural = _("Practices")
 
     def __unicode__(self):
         return u'%s - %s' % (self.code, self.name, )
@@ -200,7 +200,7 @@ class Pratice(CommonControlField):
         return u'%s - %s' % (self.code, self.name, )
 
 
-    base_form_class = PraticeForm
+    base_form_class = PracticeForm
 
 
 class Action(CommonControlField):
