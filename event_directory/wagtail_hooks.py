@@ -41,10 +41,10 @@ class EventDirectoryAdmin(ModelAdmin):
     menu_order = 100
     add_to_settings_menu = False  # or True to add your model to the Settings sub-menu
     exclude_from_explorer = False  # or True to exclude pages of this type from Wagtail's explorer view
-    list_display = ('event', 'link', 'description', 'creator',
+    list_display = ('title', 'link', 'description', 'creator',
                     'updated', 'created')
-    search_fields = ('event', 'description')
-    list_export = ('event', 'link', 'description')
+    search_fields = ('title', 'description')
+    list_export = ('title', 'link', 'description')
     export_filename = 'Event_directory'
 
 
