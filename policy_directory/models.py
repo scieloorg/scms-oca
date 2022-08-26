@@ -45,6 +45,7 @@ class PolicyDirectory(CommonControlField):
         HelpPanel('Documentos de promoção, posicionamentos ou mandatos sobre Ciência Aberta elaborados e publicados por instituições brasileiras, tais como: universidades, sociedades científicas, institutos de pesquisa e agências de fomento.'),
         FieldPanel('title'),
         FieldPanel('link'),
+        FieldPanel('source'),
 
         FieldPanel('description'),
         FieldPanel('institutions'),

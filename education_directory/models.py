@@ -57,6 +57,7 @@ class EducationDirectory(CommonControlField):
 
         FieldPanel('title'),
         FieldPanel('link'),
+        FieldPanel('source'),
 
         FieldPanel('description'),
         FieldPanel('institutions'),

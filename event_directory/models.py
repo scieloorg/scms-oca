@@ -55,6 +55,7 @@ class EventDirectory(CommonControlField):
         HelpPanel('Encontros, congressos, workshops, seminários realizados no Brasil (presenciais, virtuais ou híbridos) cujo tema principal seja a promoção da Ciência Aberta'),
         FieldPanel('title'),
         FieldPanel('link'),
+        FieldPanel('source'),
 
         FieldPanel('description'),
         FieldPanel('organization'),
@@ -72,7 +73,6 @@ class EventDirectory(CommonControlField):
         FieldPanel('classification'),
         FieldPanel('practice'),
 
-        FieldPanel('source'),
         FieldPanel('record_status'),
     ]
 

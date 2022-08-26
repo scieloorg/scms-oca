@@ -45,6 +45,7 @@ class InfrastructureDirectory(CommonControlField):
         HelpPanel('Portais, plataformas, servidores, repositórios e serviços brasileiros que operam em acesso aberto objetos de comunicação de comunicação de pesquisas, recursos de apoio e resultantes de pesquisas e em acesso aberto.'),
         FieldPanel('title'),
         FieldPanel('link'),
+        FieldPanel('source'),
 
         FieldPanel('description'),
         FieldPanel('institutions'),
