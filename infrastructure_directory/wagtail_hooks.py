@@ -8,7 +8,8 @@ from wagtail.contrib.modeladmin.options import (ModelAdmin, modeladmin_register,
 
 from .models import InfrastructureDirectory, InfrastructureDirectoryFile
 from .button_helper import InfrastructureDirectoryHelper
-from .views import validate, import_file
+
+from usefulmodels.models import Practice
 
 
 class InfrastructureDirectoryCreateView(CreateView):
@@ -16,6 +17,15 @@ class InfrastructureDirectoryCreateView(CreateView):
     def form_valid(self, form):
         self.object = form.save_all(self.request.user)
         return HttpResponseRedirect(self.get_success_url())
+
+    def get_instance(self):
+
+        instance = super().get_instance()
+
+        if Practice.objects.filter(name__icontains="infraestrutura").exists():
+            instance.practice = Practice.objects.get(name__icontains="infraestrutura")
+
+        return instance
 
 class InfrastructureDirectoryEditView(EditView):
 
