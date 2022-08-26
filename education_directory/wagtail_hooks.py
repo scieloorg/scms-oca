@@ -56,6 +56,7 @@ class EducationDirectoryAdmin(ModelAdmin):
     exclude_from_explorer = False  # or True to exclude pages of this type from Wagtail's explorer view
     list_display = ('title', 'link', 'description', 'creator',
                     'updated', 'created')
+    list_filter = ('practice', 'classification', 'thematic_areas', 'record_status')
     search_fields = ('title', 'description')
     list_export = ('title', 'link', 'description')
     export_filename = 'education_directory'

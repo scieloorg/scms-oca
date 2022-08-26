@@ -36,6 +36,9 @@ class PolicyDirectory(CommonControlField):
 
     keywords = TaggableManager(_("Keywords"), blank=True)
 
+    record_status = models.CharField(_("Record status"), choices=choices.status,
+                                     max_length=255, null=True, blank=True)
+
     panels = [
         HelpPanel('Documentos de promoção, posicionamentos ou mandatos sobre Ciência Aberta elaborados e publicados por instituições brasileiras, tais como: universidades, sociedades científicas, institutos de pesquisa e agências de fomento.'),
         FieldPanel('title'),
@@ -48,6 +51,7 @@ class PolicyDirectory(CommonControlField):
         FieldPanel('classification'),
         FieldPanel('practice'),
         FieldPanel('action'),
+        FieldPanel('record_status'),
     ]
 
     def __unicode__(self):

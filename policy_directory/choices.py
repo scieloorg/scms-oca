@@ -8,4 +8,9 @@ classification = (
     ('geral', _('geral')),
 )
 
-
+status = (
+    ('', ''),
+    ('WIP', 'WIP'),
+    ('TO_MODERATE', 'TO_MODERATE'),
+    ('PUBLISHED', 'PUBLISHED'),
+)

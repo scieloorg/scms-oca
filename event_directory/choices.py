@@ -17,3 +17,10 @@ classification = (
     ('seminário', _('seminário')),
     ('outros', _('outros')),
 )
+
+status = (
+    ('', ''),
+    ('WIP', 'WIP'),
+    ('TO_MODERATE', 'TO_MODERATE'),
+    ('PUBLISHED', 'PUBLISHED'),
+)

@@ -47,6 +47,9 @@ class EventDirectory(CommonControlField):
 
     attendence = models.CharField(_("Attendence"), choices=choices.attendence_type, max_length=255, null=True, blank=True)
 
+    record_status = models.CharField(_("Record status"), choices=choices.status,
+                                     max_length=255, null=True, blank=True)
+
     panels = [
         HelpPanel('Encontros, congressos, workshops, seminários realizados no Brasil (presenciais, virtuais ou híbridos) cujo tema principal seja a promoção da Ciência Aberta'),
         FieldPanel('title'),
@@ -67,6 +70,9 @@ class EventDirectory(CommonControlField):
         FieldPanel('keywords'),
         FieldPanel('classification'),
         FieldPanel('practice'),
+
+        FieldPanel('attendence'),
+        FieldPanel('record_status'),
     ]
 
     def __unicode__(self):
