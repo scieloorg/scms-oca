@@ -33,6 +33,8 @@ class InfraStructureIndex(indexes.SearchIndex, indexes.Indexable):
     regions = indexes.MultiValueField(null=True)
     thematic_areas = indexes.MultiValueField(null=True)
 
+    source = indexes.CharField(model_attr="action", null=True)
+
     def prepare_institutions(self, obj):
         if obj.institutions:
             return [institution.name for institution in obj.institutions.all()]

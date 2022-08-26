@@ -49,6 +49,7 @@ class EventDirectory(CommonControlField):
 
     record_status = models.CharField(_("Record status"), choices=choices.status,
                                      max_length=255, null=True, blank=True)
+    source = models.CharField(_("Source"), max_length=255, null=True, blank=True)
 
     panels = [
         HelpPanel('Encontros, congressos, workshops, seminários realizados no Brasil (presenciais, virtuais ou híbridos) cujo tema principal seja a promoção da Ciência Aberta'),
@@ -71,7 +72,7 @@ class EventDirectory(CommonControlField):
         FieldPanel('classification'),
         FieldPanel('practice'),
 
-        FieldPanel('attendence'),
+        FieldPanel('source'),
         FieldPanel('record_status'),
     ]
 
