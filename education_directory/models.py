@@ -54,7 +54,6 @@ class EducationDirectory(CommonControlField):
     panels = [
         HelpPanel('Cursos livres, disciplinas de graduação e pós-graduação ministrados por instituições brasileiras – presenciais ou EAD- para promover a adoção dos princípios e práticas de ciência aberta por todos os envolvidos no processo de pesquisa.'),
         FieldPanel('title'),
-        FieldPanel('source'),
         FieldPanel('link'),
         FieldPanel('description'),
         FieldPanel('start_date'),
@@ -67,7 +66,7 @@ class EducationDirectory(CommonControlField):
 
         FieldPanel('thematic_areas'),
         FieldPanel('classification'),
-        FieldPanel('pratice'),
+        FieldPanel('practice'),
         FieldPanel('action'),
         FieldPanel('keywords'),
     ]
