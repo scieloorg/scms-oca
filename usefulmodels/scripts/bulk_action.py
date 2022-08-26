@@ -7,25 +7,7 @@ User = get_user_model()
 # This script add bulk of actions
 # Consider that existe a user with id=1
 
-
-ACTIONS = [
-    ('100', 'menção genérica à CA ou todas as práticas'),
-    ('210', 'preprints'),
-    ('220', 'version of record indexados - periódicos, documentos, artigos'),
-    ('230', 'livros, capítulo de livros'),
-    ('240', 'teses, dissertações, TCC'),
-    ('250', 'projetos de pesquisa'),
-    ('260', 'declarações'),
-    ('270', 'outros docs'),
-    ('280', 'repositórios tipo verde – documentos em geral, ..'),
-    ('300', 'dados genéricos'),
-    ('310', 'códigos'),
-    ('400', 'peer review'),
-    ('500', 'ciência cidadã'),
-    ('600', 'recursos educacionais'),
-    ('900', 'outra'),
-]
-
+SEPARATOR = ';'
 
 def run(*args):
     user_id = 1
@@ -39,6 +21,8 @@ def run(*args):
 
     creator = User.objects.get(id=user_id)
 
-    for code, val in ACTIONS:
+    with open(os.path.dirname(os.path.realpath(__file__)) + "/../fixtures/actions.csv", 'r') as fp:
+        for line in fp.readlines():
+            code, val = line.strip().split(SEPARATOR)
 
-        models.Action(code=code, name=val, creator=creator).save()
+            models.Action(code=code, name=val, creator=creator).save()
