@@ -46,7 +46,7 @@ class EventDirectory(CommonControlField):
                                       max_length=255, null=True, blank=True)
     keywords = TaggableManager(_("Keywords"), blank=True)
 
-    attendence = models.CharField(_("Attendence"), choices=choices.attendence_type, max_length=255, null=True, blank=True)
+    attendence = models.CharField(_("Attendence"), choices=choices.attendance_type, max_length=255, null=True, blank=True)
 
     record_status = models.CharField(_("Record status"), choices=choices.status,
                                      max_length=255, null=True, blank=True)

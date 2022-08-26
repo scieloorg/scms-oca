@@ -15,3 +15,10 @@ status = (
     ('TO_MODERATE', 'TO_MODERATE'),
     ('PUBLISHED', 'PUBLISHED'),
 )
+
+attendance_type = (
+    ('', ''),
+    ('live', 'Presencial'),  # All attendees are physically present in one location
+    ('virtual', 'Remoto'),  # People attend the event entirely online
+    ('hybrid', 'Híbrido'),  # Some people attend in person, others online
+)
