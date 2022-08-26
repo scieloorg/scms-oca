@@ -390,7 +390,7 @@ WAGTAILSEARCH_BACKENDS = {
 HAYSTACK_CONNECTIONS = {
     "default": {
         "ENGINE": "haystack.backends.solr_backend.SolrEngine",
-        "URL": env("SOLR_URL", default="http://192.168.15.73:8983/solr/ocabr/"),
+        "URL": env("SOLR_URL", default="http://solr:8983/solr/ocabr/"),
         "SILENTLY_FAIL": False,
         "SOLR_TIMEOUT": 10
     }
