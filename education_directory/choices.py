@@ -8,3 +8,10 @@ classification = (
     ('disciplina de stricto sensu', _('disciplina de stricto sensu')),
     ('outros', _('outros')),
 )
+
+status = (
+    ('', ''),
+    ('WIP', 'WIP'),
+    ('TO_MODERATE', 'TO_MODERATE'),
+    ('PUBLISHED', 'PUBLISHED'),
+)

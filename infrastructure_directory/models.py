@@ -36,6 +36,9 @@ class InfrastructureDirectory(CommonControlField):
 
     keywords = TaggableManager(_("Keywords"), blank=True)
 
+    record_status = models.CharField(_("Record status"), choices=choices.status,
+                                     max_length=255, null=True, blank=True)
+
     panels = [
         HelpPanel('Portais, plataformas, servidores, repositórios e serviços brasileiros que operam em acesso aberto objetos de comunicação de comunicação de pesquisas, recursos de apoio e resultantes de pesquisas e em acesso aberto.'),
         FieldPanel('title'),
@@ -47,6 +50,7 @@ class InfrastructureDirectory(CommonControlField):
         FieldPanel('classification'),
         FieldPanel('practice'),
         FieldPanel('action'),
+        FieldPanel('record_status'),
     ]
 
     def __unicode__(self):
