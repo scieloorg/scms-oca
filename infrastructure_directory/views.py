@@ -7,8 +7,9 @@ from django.utils.translation import gettext as _
 from wagtail.admin import messages
 
 from core.libs import chkcsv
+from infrastructure_directory.search_indexes import InfraStructureIndex
 from institution.models import Institution
-from usefulmodels.models import Action, Pratice, ThematicArea
+from usefulmodels.models import Action, Practice, ThematicArea
 
 from .models import InfrastructureDirectory, InfrastructureDirectoryFile
 
@@ -110,14 +111,14 @@ def import_file(request):
                 if row['Classification']:
                     isd.classification = row['Classification']
 
-                # Pratice
-                if row['Pratice']:
-                    pratice_name = row['Pratice']
-                    if Pratice.objects.filter(name=pratice_name).exists():
-                        pratice = Pratice.objects.get(name=pratice_name)
-                        isd.pratice = pratice
+                # Practice
+                if row['Practice']:
+                    practice_name = row['Practice']
+                    if Practice.objects.filter(name=practice_name).exists():
+                        pratice = Practice.objects.get(name=practice_name)
+                        isd.practice = pratice
                     else:
-                        messages.error(request, _("Unknown pratice, line: %s") % str(line + 1))
+                        messages.error(request, _("Unknown Practice, line: %s") % str(line + 1))
 
                 # Action
                 if row['Action']:
@@ -129,6 +130,9 @@ def import_file(request):
                         messages.error(request, _("Unknown action, line: %s") % str(line + 1))
 
                 isd.save()
+
+                # Update de index.
+                InfraStructureIndex().update_object(instance=isd)
 
     except Exception as ex:
         messages.error(request, _("Import error: %s, Line: %s") % (ex, str(line + 2)))

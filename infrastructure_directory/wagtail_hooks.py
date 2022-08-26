@@ -3,7 +3,7 @@ from django.http import HttpResponseRedirect
 from django.utils.translation import gettext as _
 
 from wagtail.core import hooks
-from wagtail.contrib.modeladmin.views import CreateView
+from wagtail.contrib.modeladmin.views import CreateView, EditView
 from wagtail.contrib.modeladmin.options import (ModelAdmin, modeladmin_register, ModelAdminGroup)
 
 from .models import InfrastructureDirectory, InfrastructureDirectoryFile
@@ -12,6 +12,12 @@ from .views import validate, import_file
 
 
 class InfrastructureDirectoryCreateView(CreateView):
+
+    def form_valid(self, form):
+        self.object = form.save_all(self.request.user)
+        return HttpResponseRedirect(self.get_success_url())
+
+class InfrastructureDirectoryEditView(EditView):
 
     def form_valid(self, form):
         self.object = form.save_all(self.request.user)
@@ -27,7 +33,9 @@ class InfrastructureDirectoryFileCreateView(CreateView):
 
 class InfrastructureDirectoryAdmin(ModelAdmin):
     model = InfrastructureDirectory
+    ordering = ('-updated',)
     create_view_class = InfrastructureDirectoryCreateView
+    edit_view_class = InfrastructureDirectoryEditView
     menu_label = _('Infraestructure Directory')
     menu_icon = 'folder'
     menu_order = 100
@@ -42,6 +50,7 @@ class InfrastructureDirectoryAdmin(ModelAdmin):
 
 class InfrastructureDirectoryFileAdmin(ModelAdmin):
     model = InfrastructureDirectoryFile
+    ordering = ('-updated',)
     create_view_class=InfrastructureDirectoryFileCreateView
     button_helper_class = InfrastructureDirectoryHelper
     menu_label = _('Infraestructure Directory Upload')

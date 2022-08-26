@@ -9,7 +9,7 @@ from wagtail.admin import messages
 
 from core.libs import chkcsv
 from institution.models import Institution
-from usefulmodels.models import Action, Pratice, ThematicArea
+from usefulmodels.models import Action, Practice, ThematicArea
 
 from .models import EventDirectory, EventDirectoryFile
 
@@ -119,14 +119,14 @@ def import_file(request):
                 if row['Classification']:
                     di.classification = row['Classification']
 
-                # Pratice
-                if row['Pratice']:
-                    pratice_name = row['Pratice']
-                    if Pratice.objects.filter(name=pratice_name).exists():
-                        pratice = Pratice.objects.get(name=pratice_name)
-                        di.pratice = pratice
+                # Practice
+                if row['Practice']:
+                    pratice_name = row['Practice']
+                    if Practice.objects.filter(name=pratice_name).exists():
+                        practice = Practice.objects.get(name=pratice_name)
+                        di.practice = practice
                     else:
-                        messages.error(request, _("Unknown pratice, line: %s") % str(line + 2))
+                        messages.error(request, _("Unknown Practice, line: %s") % str(line + 2))
 
                 # Action
                 if row['Action']:

@@ -5,7 +5,7 @@ from wagtail.core import hooks
 from wagtail.contrib.modeladmin.views import CreateView
 from wagtail.contrib.modeladmin.options import (ModelAdmin, modeladmin_register, ModelAdminGroup)
 
-from .models import City, State, Country, ThematicArea, Pratice, Action
+from .models import City, State, Country, ThematicArea, Practice, Action
 
 
 class CityCreateView(CreateView):
@@ -34,7 +34,7 @@ class ThematicAreaCreateView(CreateView):
         self.object = form.save_all(self.request.user)
         return HttpResponseRedirect(self.get_success_url())
 
-class PraticeCreateView(CreateView):
+class PracticeCreateView(CreateView):
 
     def form_valid(self, form):
         self.object = form.save_all(self.request.user)
@@ -107,10 +107,10 @@ class ThematicAreaAdmin(ModelAdmin):
                    'updated', 'created', )
     export_filename = 'thematic_areas'
 
-class PraticeAdmin(ModelAdmin):
-    model = Pratice
-    create_view_class = PraticeCreateView
-    menu_label = _('Pratice')
+class PracticeAdmin(ModelAdmin):
+    model = Practice
+    create_view_class = PracticeCreateView
+    menu_label = _('Practice')
     menu_icon = 'folder'
     menu_order = 100
     add_to_settings_menu = False  # or True to add your model to the Settings sub-menu
@@ -142,7 +142,7 @@ class UsefulModelsAdminGroup(ModelAdminGroup):
     menu_label = _('Useful Models')
     menu_icon = 'folder-open-inverse'
     menu_order = 200
-    items = (CityAdmin, StateAdmin, CountryAdmin, PraticeAdmin, ActionAdmin,
+    items = (CityAdmin, StateAdmin, CountryAdmin, PracticeAdmin, ActionAdmin,
              ThematicAreaAdmin)
 
 

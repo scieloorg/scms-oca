@@ -107,6 +107,7 @@ THIRD_PARTY_APPS = [
     "rest_framework",
     "widget_tweaks",
     "django_celery_results",
+    "haystack",
 ]
 
 LOCAL_APPS = [
@@ -385,3 +386,14 @@ WAGTAILSEARCH_BACKENDS = {
         'SEARCH_CONFIG': 'english',
     }
 }
+
+HAYSTACK_CONNECTIONS = {
+    "default": {
+        "ENGINE": "haystack.backends.solr_backend.SolrEngine",
+        "URL": env("SOLR_URL", default="http://solr:8983/solr/ocabr/"),
+        "SILENTLY_FAIL": False,
+        "SOLR_TIMEOUT": 10
+    }
+}
+
+HAYSTACK_SIGNAL_PROCESSOR = "haystack.signals.RealtimeSignalProcessor"
