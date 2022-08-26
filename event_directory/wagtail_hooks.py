@@ -9,7 +9,7 @@ from wagtail.contrib.modeladmin.options import (ModelAdmin, modeladmin_register,
 from .models import EventDirectory, EventDirectoryFile
 from .button_helper import EventDirectoryHelper
 
-from usefulmodels.models import Practice
+from usefulmodels.models import Action
 
 
 class EventDirectoryEditView(EditView):
@@ -28,8 +28,8 @@ class EventDirectoryCreateView(CreateView):
 
         instance = super().get_instance()
 
-        if Practice.objects.filter(name__icontains="divulgação").exists():
-            instance.practice = Practice.objects.get(name__icontains="divulgação")
+        if Action.objects.filter(name__icontains="divulgação").exists():
+            instance.practice = Action.objects.get(name__icontains="divulgação")
 
         return instance
 

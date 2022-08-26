@@ -9,7 +9,7 @@ from wagtail.contrib.modeladmin.options import (ModelAdmin, modeladmin_register,
 from .models import PolicyDirectory, PolicyDirectoryFile
 from .button_helper import PolicyDirectoryHelper
 
-from usefulmodels.models import Practice
+from usefulmodels.models import Action
 
 class PolicyDirectoryEditView(EditView):
 
@@ -28,8 +28,8 @@ class PolicyDirectoryCreateView(CreateView):
 
         instance = super().get_instance()
 
-        if Practice.objects.filter(name__icontains="política, recomendação etc.").exists():
-            instance.practice = Practice.objects.get(name__icontains="política, recomendação etc.")
+        if Action.objects.filter(name__icontains="política, recomendação etc.").exists():
+            instance.practice = Action.objects.get(name__icontains="política, recomendação etc.")
 
         return instance
 
