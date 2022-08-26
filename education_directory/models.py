@@ -47,6 +47,9 @@ class EducationDirectory(CommonControlField):
 
     is_online = models.BooleanField(verbose_name=_("Is Online"), default=False)
 
+    record_status = models.CharField(_("Record status"), choices=choices.status,
+                                      max_length=255, null=True, blank=True)
+
     panels = [
         HelpPanel('Cursos livres, disciplinas de graduação e pós-graduação ministrados por instituições brasileiras – presenciais ou EAD- para promover a adoção dos princípios e práticas de ciência aberta por todos os envolvidos no processo de pesquisa.'),
         FieldPanel('title'),
@@ -64,6 +67,7 @@ class EducationDirectory(CommonControlField):
         FieldPanel('action'),
         FieldPanel('keywords'),
         FieldPanel('is_online'),
+        FieldPanel('record_status'),
     ]
 
     def __unicode__(self):
