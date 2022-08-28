@@ -1,11 +1,11 @@
 from django.utils.translation import gettext as _
 
 
-attendence_type = (
+attendance_type = (
     ('', ''),
-    ('live', 'Live'),  # All attendees are physically present in one location
-    ('virtual', 'Virtual'),  # People attend the event entirely online
-    ('hybrid', 'Hybrid'),  # Some people attend in person, others online
+    ('live', 'Presencial'),  # All attendees are physically present in one location
+    ('virtual', 'Remoto'),  # People attend the event entirely online
+    ('hybrid', 'Híbrido'),  # Some people attend in person, others online
 )
 
 classification = (

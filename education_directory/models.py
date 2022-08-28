@@ -45,7 +45,8 @@ class EducationDirectory(CommonControlField):
 
     keywords = TaggableManager(_("Keywords"), blank=True)
 
-    is_online = models.BooleanField(verbose_name=_("Is Online"), default=False)
+    attendance = models.CharField(_("Attendance"), choices=choices.attendance_type,
+                                  max_length=255, null=True, blank=True)
 
     record_status = models.CharField(_("Record status"), choices=choices.status,
                                       max_length=255, null=True, blank=True)
@@ -59,15 +60,15 @@ class EducationDirectory(CommonControlField):
         FieldPanel('end_date'),
         FieldPanel('start_time'),
         FieldPanel('end_time'),
-        FieldPanel('locations'),
         FieldPanel('institutions'),
+        FieldPanel('attendance'),
+        FieldPanel('locations'),
+
         FieldPanel('thematic_areas'),
         FieldPanel('classification'),
         FieldPanel('practice'),
         FieldPanel('action'),
         FieldPanel('keywords'),
-        FieldPanel('is_online'),
-        FieldPanel('record_status'),
     ]
 
     def __unicode__(self):
