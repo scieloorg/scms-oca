@@ -9,7 +9,7 @@ from wagtail.contrib.modeladmin.options import (ModelAdmin, modeladmin_register,
 from .models import InfrastructureDirectory, InfrastructureDirectoryFile
 from .button_helper import InfrastructureDirectoryHelper
 
-from usefulmodels.models import Practice
+from usefulmodels.models import Action
 
 
 class InfrastructureDirectoryCreateView(CreateView):
@@ -22,8 +22,8 @@ class InfrastructureDirectoryCreateView(CreateView):
 
         instance = super().get_instance()
 
-        if Practice.objects.filter(name__icontains="infraestrutura").exists():
-            instance.practice = Practice.objects.get(name__icontains="infraestrutura")
+        if Action.objects.filter(name__icontains="infraestrutura").exists():
+            instance.practice = Action.objects.get(name__icontains="infraestrutura")
 
         return instance
 

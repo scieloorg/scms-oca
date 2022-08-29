@@ -12,7 +12,7 @@ from wagtail.core import hooks
 from .button_helper import EducationDirectoryHelper
 from .models import EducationDirectory, EducationDirectoryFile
 
-from usefulmodels.models import Practice
+from usefulmodels.models import Action
 
 
 class EducationDirectoryCreateView(CreateView):
@@ -25,8 +25,8 @@ class EducationDirectoryCreateView(CreateView):
 
         instance = super().get_instance()
 
-        if Practice.objects.filter(name__icontains="educação").exists():
-            instance.practice = Practice.objects.get(name__icontains="educação")
+        if Action.objects.filter(name__icontains="educação").exists():
+            instance.practice = Action.objects.get(name__icontains="educação")
 
         return instance
 
