@@ -8,8 +8,8 @@ from wagtail.contrib.modeladmin.options import (ModelAdmin, modeladmin_register,
 
 from .models import PolicyDirectory, PolicyDirectoryFile
 from .button_helper import PolicyDirectoryHelper
-from .views import validate, import_file
 
+from usefulmodels.models import Action
 
 class PolicyDirectoryEditView(EditView):
 
@@ -23,6 +23,15 @@ class PolicyDirectoryCreateView(CreateView):
     def form_valid(self, form):
         self.object = form.save_all(self.request.user)
         return HttpResponseRedirect(self.get_success_url())
+
+    def get_instance(self):
+
+        instance = super().get_instance()
+
+        if Action.objects.filter(name__icontains="política, recomendação etc.").exists():
+            instance.practice = Action.objects.get(name__icontains="política, recomendação etc.")
+
+        return instance
 
 
 class PolicyDirectoryFileCreateView(CreateView):

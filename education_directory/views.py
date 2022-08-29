@@ -136,6 +136,9 @@ def import_file(request):
                     else:
                         messages.error(request, _("Unknown action, line: %s") % str(line + 2))
 
+                if row['Source']:
+                    ed.source = row['Source']
+
                 ed.save()
     except Exception as ex:
         messages.error(request, _("Import error: %s, Line: %s") % (ex, str(line + 2)))
