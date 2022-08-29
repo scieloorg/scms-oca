@@ -29,7 +29,7 @@ class PolicyDirectoryCreateView(CreateView):
         instance = super().get_instance()
 
         if Action.objects.filter(name__icontains="política, recomendação etc.").exists():
-            instance.practice = Action.objects.get(name__icontains="política, recomendação etc.")
+            instance.action = Action.objects.get(name__icontains="política, recomendação etc.")
 
         return instance
 

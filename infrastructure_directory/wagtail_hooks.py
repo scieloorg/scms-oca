@@ -23,7 +23,7 @@ class InfrastructureDirectoryCreateView(CreateView):
         instance = super().get_instance()
 
         if Action.objects.filter(name__icontains="infraestrutura").exists():
-            instance.practice = Action.objects.get(name__icontains="infraestrutura")
+            instance.action = Action.objects.get(name__icontains="infraestrutura")
 
         return instance
 

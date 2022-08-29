@@ -13,6 +13,9 @@ class EducationDirectoryForm(WagtailAdminModelForm):
         else:
             education_directory.creator = user
 
+        self.save()
+        self.save_m2m()
+
         # Update de index.
         EducationIndex().update_object(instance=education_directory)
 

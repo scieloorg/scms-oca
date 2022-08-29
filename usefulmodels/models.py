@@ -194,11 +194,10 @@ class Practice(CommonControlField):
         verbose_name_plural = _("Practices")
 
     def __unicode__(self):
-        return u'%s - %s' % (self.code, self.name, )
+        return u'%s' % (self.name, )
 
     def __str__(self):
-        return u'%s - %s' % (self.code, self.name, )
-
+        return u'%s' % (self.name, )
 
     base_form_class = PracticeForm
 
@@ -219,9 +218,9 @@ class Action(CommonControlField):
         verbose_name_plural = _("Actions")
 
     def __unicode__(self):
-        return u'%s - %s' % (self.code, self.name, )
+        return u'%s' % (self.name, )
 
     def __str__(self):
-        return u'%s - %s' % (self.code, self.name, )
+        return u'%s' % (self.name, )
 
     base_form_class = ActionForm

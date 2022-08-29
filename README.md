@@ -81,6 +81,28 @@ Note that the stack is configured with 2 files docker-compose environment develo
 
 Below are some actions you must follow for properly running applications.
 
+## Clean migrations
+
+```
+find . -path "*/migrations/*.py" -not -name "__init__.py" -not -path "./core/*" -delete
+find . -path "*/migrations/*.pyc"  -delete
+```
+
+Drop database! Remove in this case the postgres files.
+
+Stop the postgres
+
+```
+rm -rf scms_data
+```
+
+Restart the postgres
+
+```
+python manage.py makemigrations
+python manage.py migrate
+```
+
 ## Settings
 
 Moved to [settings](http://cookiecutter-django.readthedocs.io/en/latest/settings.html).

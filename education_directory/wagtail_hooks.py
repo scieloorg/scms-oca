@@ -26,7 +26,7 @@ class EducationDirectoryCreateView(CreateView):
         instance = super().get_instance()
 
         if Action.objects.filter(name__icontains="educação").exists():
-            instance.practice = Action.objects.get(name__icontains="educação")
+            instance.action = Action.objects.get(name__icontains="educação")
 
         return instance
 
@@ -48,7 +48,7 @@ class EducationDirectoryAdmin(ModelAdmin):
     model = EducationDirectory
     ordering = ('-updated',)
     create_view_class = EducationDirectoryCreateView
-    edit_view_class = EducationDirectoryEditView
+    # edit_view_class = EducationDirectoryEditView
     menu_label = _('Education Directory')
     menu_icon = 'folder'
     menu_order = 100

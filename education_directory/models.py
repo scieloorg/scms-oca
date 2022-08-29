@@ -75,10 +75,8 @@ class EducationDirectory(CommonControlField):
         FieldPanel('classification'),
         FieldPanel('practice'),
 
-        FieldPanel('source'),
-
+        FieldPanel('attendance'),
         FieldPanel('record_status'),
-        FieldPanel('is_online'),
     ]
 
     def __unicode__(self):
