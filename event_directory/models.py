@@ -34,7 +34,7 @@ class EventDirectory(CommonControlField):
 
     locations = models.ManyToManyField(Location, verbose_name=_("Location"),  blank=True)
     organization = models.ManyToManyField(Institution, verbose_name=_(
-        "Institution"), blank=True, help_text=_('Instituições responsáveis pela organização do evento.'))
+        "Organization"), blank=True, help_text=_('Instituições responsáveis pela organização do evento.'))
     thematic_areas = models.ManyToManyField(ThematicArea, verbose_name=_("Thematic Area"), blank=True)
 
     practice = models.ForeignKey(Practice, verbose_name=_("Practice"),
