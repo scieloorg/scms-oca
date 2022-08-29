@@ -93,7 +93,7 @@ def import_file(request):
                     inst_state = row['Institution State']
                     inst_city = row['Institution City']
 
-                    institution = Institution.get_or_create(inst_name, inst_country, inst_region,
+                    institution = Institution.get_or_create(inst_name, inst_country,
                                                             inst_state, inst_city, request.user)
                     po.institutions.add(institution)
 

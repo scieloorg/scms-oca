@@ -93,11 +93,11 @@ def import_file(request):
                 inst_name = row['Institution Name']
                 if inst_name:
                     inst_country = row['Institution Country']
-                    inst_region = row['Institution Region']
+
                     inst_state = row['Institution State']
                     inst_city = row['Institution City']
 
-                    institution = Institution.get_or_create(inst_name, inst_country, inst_region,
+                    institution = Institution.get_or_create(inst_name, inst_country,
                                                             inst_state, inst_city, request.user)
                     ed.institutions.add(institution)
 

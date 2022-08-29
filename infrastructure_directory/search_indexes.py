@@ -87,7 +87,7 @@ class InfraStructureIndex(indexes.SearchIndex, indexes.Indexable):
         if obj.institutions.all():
             for inst in obj.institutions.all():
                 try:
-                    regions.add(inst.location.region.name)
+                    regions.add(inst.location.state.region)
                 except AttributeError:
                     continue
             return regions
