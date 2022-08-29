@@ -1,7 +1,7 @@
 from django.utils.translation import gettext as _
 
 
-attendence_type = (
+attendance_type = (
     ('', ''),
     ('live', 'Live'),  # All attendees are physically present in one location
     ('virtual', 'Virtual'),  # People attend the event entirely online

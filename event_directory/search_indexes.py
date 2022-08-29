@@ -28,6 +28,7 @@ class EventIndex(indexes.SearchIndex, indexes.Indexable):
     thematic_areas = indexes.MultiValueField(null=True)
 
     source = indexes.CharField(model_attr="action", null=True)
+    attendance = indexes.CharField(model_attr="attendance", null=True)
 
     def prepare_organization(self, obj):
         if obj.organization:
