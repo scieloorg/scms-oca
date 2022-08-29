@@ -31,7 +31,6 @@ def run(*args):
                 inst.institution_type = row['Institution Type']
                 inst.acronym = row['Acronym']
                 inst.location = Location.get_or_create(user=creator,
-                                                       location_region=None,
                                                        location_country=Country.get_or_create(user=creator, name="Brasil", acronym='BR'),
                                                        location_state=State.get_or_create(user=creator, acronym=row['State Acronym']),
                                                        location_city=None)
