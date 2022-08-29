@@ -8,7 +8,8 @@ from wagtail.contrib.modeladmin.options import (ModelAdmin, modeladmin_register,
 
 from .models import EventDirectory, EventDirectoryFile
 from .button_helper import EventDirectoryHelper
-from .views import validate, import_file
+
+from usefulmodels.models import Action
 
 
 class EventDirectoryEditView(EditView):
@@ -22,6 +23,15 @@ class EventDirectoryCreateView(CreateView):
     def form_valid(self, form):
         self.object = form.save_all(self.request.user)
         return HttpResponseRedirect(self.get_success_url())
+
+    def get_instance(self):
+
+        instance = super().get_instance()
+
+        if Action.objects.filter(name__icontains="divulgação").exists():
+            instance.practice = Action.objects.get(name__icontains="divulgação")
+
+        return instance
 
 
 class EventDirectoryFileCreateView(CreateView):
@@ -46,7 +56,7 @@ class EventDirectoryAdmin(ModelAdmin):
     list_filter = ('practice', 'classification', 'thematic_areas', 'record_status')
     search_fields = ('title', 'description')
     list_export = ('title', 'link', 'description')
-    export_filename = 'Event_directory'
+    export_filename = 'event_directory'
 
 
 class EventDirectoryFileAdmin(ModelAdmin):

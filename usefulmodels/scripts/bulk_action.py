@@ -9,21 +9,12 @@ User = get_user_model()
 
 
 ACTIONS = [
-    ('100', 'menção genérica à CA ou todas as práticas'),
-    ('210', 'preprints'),
-    ('220', 'version of record indexados - periódicos, documentos, artigos'),
-    ('230', 'livros, capítulo de livros'),
-    ('240', 'teses, dissertações, TCC'),
-    ('250', 'projetos de pesquisa'),
-    ('260', 'declarações'),
-    ('270', 'outros docs'),
-    ('280', 'repositórios tipo verde – documentos em geral, ..'),
-    ('300', 'dados genéricos'),
-    ('310', 'códigos'),
-    ('400', 'peer review'),
-    ('500', 'ciência cidadã'),
-    ('600', 'recursos educacionais'),
-    ('900', 'outra'),
+    ('10', 'política, recomendação etc.'),
+    ('20', 'desempenho'),
+    ('30', 'infraestrutura'),
+    ('40', 'educação'),
+    ('50', 'divulgação'),
+    ('90', 'outras'),
 ]
 
 
