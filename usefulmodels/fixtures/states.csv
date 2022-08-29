@@ -1,27 +1,26 @@
-São Paulo;SP
-Paraná;PR
-Santa Catarina;SC
-Rio Grande do Sul;RS
-Mato Grosso do Sul;MS
-Rondônia;RO
-Acre;AC
-Amazonas;AM
-Roraima;RR
-Pará;PA
-Amapá;AP
-Tocantins;TO
-Maranhão;MA
-Rio Grande do Norte;RN
-Paraíba;PB
-Pernambuco;PE
-Alagoas;AL
-Sergipe;SE
-Bahia;BA
-Minas Gerais;MG
-Rio de Janeiro;RJ
-Mato Grosso;MT
-Goiás;GO
-Distrito Federal;DF
-Piauí;PI
-Ceará;CE
-Espírito Santo;ES
+Acre;AC;Norte
+Amapá;AP;Norte
+Amazonas;AM;Norte
+Pará;PA;Norte
+Rondônia;RO;Norte
+Roraima;RR;Norte
+Tocantins;TO;Norte
+Maranhão;MA;Nordeste
+Piauí;PI;Nordeste
+Ceará;CE;Nordeste
+Rio Grande do Norte;RN;Nordeste
+Pernambuco;PE;Nordeste
+Paraíba;PB;Nordeste
+Sergipe;SE;Nordeste
+Alagoas;AL;Nordeste
+Bahia;BA;Nordeste
+Mato Grosso;MT;Centro-oeste
+Mato Grosso do Sul;MS;Centro-oeste
+Goiás;GO;Centro-oeste
+Paraná;PR;Sul
+Rio Grande do Sul;RS;Sul
+Santa Catarina;SC;Sul
+São Paulo;SP;Sudeste
+Rio de Janeiro;RJ;Sudeste
+Espírito Santo;ES;Sudeste
+Minas Gerais;MG;Sudeste

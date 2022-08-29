@@ -53,6 +53,8 @@ class State(CommonControlField):
 
     name = models.CharField(_("Name of the state"), blank=True, null=True, max_length=255)
     acronym = models.CharField(_("Acronym to the state"), blank=True, null=True, max_length=255)
+    region = models.CharField(_("Region"), choices=choices.regions, max_length=255, null=True, blank=True)
+
 
     class Meta:
         verbose_name = _("State")
