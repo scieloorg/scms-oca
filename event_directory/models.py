@@ -45,15 +45,17 @@ class EventDirectory(CommonControlField):
                                       max_length=255, null=True, blank=True)
     keywords = TaggableManager(_("Keywords"), blank=True)
 
-    attendence = models.CharField(_("Attendence"), choices=choices.attendance_type, max_length=255, null=True, blank=True)
+    attendance = models.CharField(_("Attendance"), choices=choices.attendance_type, max_length=255, null=True, blank=True)
 
     record_status = models.CharField(_("Record status"), choices=choices.status,
                                      max_length=255, null=True, blank=True)
+    source = models.CharField(_("Source"), max_length=255, null=True, blank=True)
 
     panels = [
         HelpPanel('Encontros, congressos, workshops, seminários realizados no Brasil (presenciais, virtuais ou híbridos) cujo tema principal seja a promoção da Ciência Aberta'),
         FieldPanel('title'),
         FieldPanel('link'),
+        FieldPanel('source'),
 
         FieldPanel('description'),
         FieldPanel('organization'),
@@ -63,17 +65,15 @@ class EventDirectory(CommonControlField):
         FieldPanel('start_time'),
         FieldPanel('end_time'),
 
-        FieldPanel('attendence'),
+        FieldPanel('attendance'),
         FieldPanel('locations'),
 
         FieldPanel('thematic_areas'),
         FieldPanel('keywords'),
         FieldPanel('classification'),
         FieldPanel('practice'),
-        
-        FieldPanel('attendence'),
-        FieldPanel('record_status'),
 
+        FieldPanel('record_status'),
     ]
 
     def __unicode__(self):

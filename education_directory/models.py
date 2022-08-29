@@ -51,24 +51,34 @@ class EducationDirectory(CommonControlField):
     record_status = models.CharField(_("Record status"), choices=choices.status,
                                       max_length=255, null=True, blank=True)
 
+    source = models.CharField(_("Source"), max_length=255, null=True, blank=True)
+
     panels = [
         HelpPanel('Cursos livres, disciplinas de graduação e pós-graduação ministrados por instituições brasileiras – presenciais ou EAD- para promover a adoção dos princípios e práticas de ciência aberta por todos os envolvidos no processo de pesquisa.'),
+
         FieldPanel('title'),
         FieldPanel('link'),
+        FieldPanel('source'),
+
         FieldPanel('description'),
+        FieldPanel('institutions'),
+
         FieldPanel('start_date'),
         FieldPanel('end_date'),
         FieldPanel('start_time'),
         FieldPanel('end_time'),
-        FieldPanel('institutions'),
-        FieldPanel('attendance'),
+
         FieldPanel('locations'),
 
         FieldPanel('thematic_areas'),
+        FieldPanel('keywords'),
         FieldPanel('classification'),
         FieldPanel('practice'),
-        FieldPanel('action'),
-        FieldPanel('keywords'),
+
+        FieldPanel('source'),
+
+        FieldPanel('record_status'),
+        FieldPanel('is_online'),
     ]
 
     def __unicode__(self):
