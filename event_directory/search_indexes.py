@@ -82,7 +82,7 @@ class EventIndex(indexes.SearchIndex, indexes.Indexable):
         if obj.organization.all():
             for org in obj.organization.all():
                 try:
-                    regions.add(org.location.region.name)
+                    regions.add(org.location.state.region)
                 except AttributeError:
                     continue
             return regions
