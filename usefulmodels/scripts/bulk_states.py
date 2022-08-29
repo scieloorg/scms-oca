@@ -8,7 +8,7 @@ User = get_user_model()
 # This presuppose a fixtures/states.csv file exists.
 # Consider that existe a user with id=1
 
-SEPARATOR = ','
+SEPARATOR = ';'
 
 def run(*args):
     user_id = 1
