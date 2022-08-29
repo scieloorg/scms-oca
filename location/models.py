@@ -11,7 +11,6 @@ from .forms import LocationForm
 
 
 class Location(CommonControlField):
-    region = models.CharField(_("Region"), choices=choices.regions, max_length=255, null=True, blank=True)
 
     city = models.ForeignKey(City, verbose_name=_("City"), on_delete=models.CASCADE,
                              null=True, blank=True)
@@ -25,24 +24,21 @@ class Location(CommonControlField):
         verbose_name_plural = _("Locations")
 
     def __unicode__(self):
-        return u'%s: %s | %s: %s | %s: %s | %s: %s' % (_('Country'), self.country, _('Region'), self.region, _('State'),  self.state, _('City'), self.city, )
+        return u'%s: %s | %s: %s | %s: %s' % (_('Country'), self.country, _('State'),  self.state, _('City'), self.city, )
 
     def __str__(self):
-        return u'%s: %s | %s: %s | %s: %s | %s: %s' % (_('Country'), self.country, _('Region'), self.region, _('State'),  self.state, _('City'), self.city, )
+        return u'%s: %s | %s: %s | %s: %s' % (_('Country'), self.country, _('State'),  self.state, _('City'), self.city, )
 
     @classmethod
-    def get_or_create(cls, user, location_country, location_region, location_state,
+    def get_or_create(cls, user, location_country, location_state,
                       location_city):
 
         # check if exists the location
-        if cls.objects.filter(country=location_country, region=location_region, state=location_state, city=location_city).exists():
+        if cls.objects.filter(country=location_country, state=location_state, city=location_city).exists():
             return cls.objects.get(
-                country=location_country, region=location_region, state=location_state, city=location_city)
+                country=location_country, state=location_state, city=location_city)
         else:
-
             location = Location()
-            if location_region:
-                location.region = location_region
             if location_country:
                 location.country = location_country
             if location_state:
