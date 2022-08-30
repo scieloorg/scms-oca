@@ -67,3 +67,13 @@ thematic_level2 = (
     ('Artes', _('Artes')),
     ('Linguística e Literatura', _('Linguística e Literatura')),
 )
+
+
+regions = (
+    ('', ''),
+    ('Norte', 'Norte'),
+    ('Nordeste', 'Nordeste'),
+    ('Centro-Oeste', 'Centro-Oeste'),
+    ('Sudeste', 'Sudeste'),
+    ('Sul', 'Sul'),
+)

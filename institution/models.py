@@ -48,7 +48,7 @@ class Institution(CommonControlField, ClusterableModel):
         return u'%s - %s: %s' % (self.name, _('Location'), self.location)
 
     @classmethod
-    def get_or_create(cls, inst_name, location_country, location_region,
+    def get_or_create(cls, inst_name, location_country,
                       location_state, location_city, user):
 
         # Institution
@@ -62,7 +62,6 @@ class Institution(CommonControlField, ClusterableModel):
 
             institution.location = Location.get_or_create(user,
                                                           location_country,
-                                                          location_region,
                                                           location_state,
                                                           location_city)
 

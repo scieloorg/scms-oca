@@ -34,7 +34,6 @@ def run(*args):
                 inst.level_2 = row['Level_2']
                 inst.level_3 = row['Level_3']
                 inst.location = Location.get_or_create(user=creator,
-                                                       location_region=None,
                                                        location_country=Country.get_or_create(user=creator, name="Brasil", acronym='BR'),
                                                        location_state=State.get_or_create(user=creator, acronym=row['State Acronym']),
                                                        location_city=None)

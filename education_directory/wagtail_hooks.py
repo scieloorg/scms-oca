@@ -12,6 +12,8 @@ from wagtail.core import hooks
 from .button_helper import EducationDirectoryHelper
 from .models import EducationDirectory, EducationDirectoryFile
 
+from usefulmodels.models import Action
+
 
 class EducationDirectoryCreateView(CreateView):
 
@@ -19,6 +21,14 @@ class EducationDirectoryCreateView(CreateView):
         self.object = form.save_all(self.request.user)
         return HttpResponseRedirect(self.get_success_url())
 
+    def get_instance(self):
+
+        instance = super().get_instance()
+
+        if Action.objects.filter(name__icontains="educação").exists():
+            instance.action = Action.objects.get(name__icontains="educação")
+
+        return instance
 
 class EducationDirectoryEditView(EditView):
 
@@ -38,7 +48,7 @@ class EducationDirectoryAdmin(ModelAdmin):
     model = EducationDirectory
     ordering = ('-updated',)
     create_view_class = EducationDirectoryCreateView
-    edit_view_class = EducationDirectoryEditView
+    # edit_view_class = EducationDirectoryEditView
     menu_label = _('Education Directory')
     menu_icon = 'folder'
     menu_order = 100
@@ -46,6 +56,7 @@ class EducationDirectoryAdmin(ModelAdmin):
     exclude_from_explorer = False  # or True to exclude pages of this type from Wagtail's explorer view
     list_display = ('title', 'link', 'description', 'creator',
                     'updated', 'created')
+    list_filter = ('practice', 'classification', 'thematic_areas', 'record_status')
     search_fields = ('title', 'description')
     list_export = ('title', 'link', 'description')
     export_filename = 'education_directory'

@@ -70,10 +70,10 @@ class StateAdmin(ModelAdmin):
     menu_order = 100
     add_to_settings_menu = False  # or True to add your model to the Settings sub-menu
     exclude_from_explorer = False  # or True to exclude pages of this type from Wagtail's explorer view
-    list_display = ('name', 'acronym', 'creator',
-                    'updated', 'created')
-    search_fields = ('name', 'acronym')
-    list_export = ('name', 'acronym')
+    list_display = ('name', 'acronym', 'region', 'creator',
+                    'updated', 'created',)
+    search_fields = ('name', 'acronym',)
+    list_export = ('name', 'acronym', 'region',)
     export_filename = 'states'
 
 

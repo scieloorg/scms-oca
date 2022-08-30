@@ -133,6 +133,9 @@ def import_file(request):
                     else:
                         messages.error(request, _("Unknown action, line: %s") % str(line + 1))
 
+                if row['Source']:
+                    isd.source = row['Source']
+
                 isd.save()
 
                 # Update de index.
