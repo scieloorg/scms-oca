@@ -108,12 +108,13 @@ THIRD_PARTY_APPS = [
     "widget_tweaks",
     "django_celery_results",
     "haystack",
+    "indicator",
 ]
 
 LOCAL_APPS = [
     "core.users",
     "core_settings",
-    # "scholarly_articles",
+    "scholarly_articles",
     "infrastructure_directory",
     "education_directory",
     "policy_directory",
