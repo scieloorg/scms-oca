@@ -7,6 +7,7 @@ User = get_user_model()
 # This script add bulk of actions
 # Consider that existe a user with id=1
 
+SEPARATOR = ';'
 
 def run(*args):
     user_id = 1
