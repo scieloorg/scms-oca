@@ -33,6 +33,7 @@ def load_article(row):
         article.doi = row.get('doi')
         article.year = row.get('year')
         article.journal = load_journal(row)
+        article.save()
         for author in row.get('z_authors') or []:
             contributor = get_one_contributor(author)
             article.contributors.add(contributor)
@@ -118,8 +119,15 @@ def load_affiliation(affiliation_name):
     return affiliation
 
 
-def run(from_year=1900, resource_type='journal-article'):
-    #pagination
+def load(from_year, resource_type):
+    """
+    Load all data with a specific resource_type and year from RawUnpaywall model
+    to ScholarlyArticles model.
+
+    Param from_year: Is a interger, example: 2000
+    Param resource_type: Is a string, that represent a type in RawUnpaywall
+    """
+
     rawunpaywall = models.RawUnpaywall.objects.filter(year__gte=from_year, resource_type=resource_type)
     for item in rawunpaywall:
         if not item.is_paratext:
@@ -134,6 +142,10 @@ def run(from_year=1900, resource_type='journal-article'):
                     error.save()
                 except (DataError, TypeError):
                     pass
+
+
+def run(from_year=1900, resource_type='journal-article'):
+    load(from_year, resource_type)
 
 
 if __name__ == '__main__':

@@ -45,7 +45,7 @@ class RawUnpaywallAdmin(ModelAdmin):
         'json',
     )
 
-    list_filter = (_('year'),)
+    list_filter = ('year',)
     search_fields = ('doi',)
 
 
