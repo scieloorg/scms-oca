@@ -10,7 +10,7 @@ from core.models import CommonControlField
 class ScholarlyArticles(models.Model):
     doi = models.CharField(_("DOI"), max_length=255, null=True, blank=True)
     year = models.CharField(_("Year"), max_length=4, null=True, blank=True)
-    contributors = models.ManyToManyField(_("Contributors"), null=True, blank=True)
+    contributors = models.ManyToManyField("Contributors", null=True, blank=True)
     journal = models.ForeignKey('Journals', on_delete=models.SET_NULL, max_length=255, null=True, blank=True)
 
     def __unicode__(self):
@@ -54,7 +54,7 @@ class Contributors(models.Model):
     given = models.CharField(_("Given Name"), max_length=255, null=True, blank=True)
     orcid = models.CharField("ORCID", max_length=255, null=True, blank=True)
     authenticated_orcid = models.BooleanField(_("Authenticated"), default=False, null=True, blank=True)
-    affiliation = models.ForeignKey(_("Affiliations"), on_delete=models.SET_NULL, max_length=510, null=True, blank=True)
+    affiliation = models.ForeignKey('Affiliations', on_delete=models.SET_NULL, max_length=510, null=True, blank=True)
 
     def __unicode__(self):
         return f"{self.family}, {self.given} ({self.orcid})"
