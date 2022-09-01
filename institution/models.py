@@ -19,11 +19,26 @@ class Institution(CommonControlField, ClusterableModel):
 
     acronym = models.CharField(_("Acronym to the institution"), blank=True, null=True, max_length=255)
 
+    level_1 = models.CharField(_("Level 1 organization"), blank=True, null=True, max_length=255)
+
+    level_2 = models.CharField(_("Level 2 organization"), blank=True, null=True, max_length=255)
+
+    level_3 = models.CharField(_("Level 3 organization"), blank=True, null=True, max_length=255)
+
+    url = models.URLField("url", blank=True, null=True)
+
+    logo = models.ImageField(_("Logo"), blank=True, null=True)
+
     panels = [
         FieldPanel('name'),
         FieldPanel('acronym'),
         FieldPanel('institution_type'),
         FieldPanel('location'),
+        FieldPanel('level_1'),
+        FieldPanel('level_2'),
+        FieldPanel('level_3'),
+        FieldPanel('url'),
+        FieldPanel('logo'),
     ]
 
     def __unicode__(self):
@@ -33,7 +48,7 @@ class Institution(CommonControlField, ClusterableModel):
         return u'%s - %s: %s' % (self.name, _('Location'), self.location)
 
     @classmethod
-    def get_or_create(cls, inst_name, location_country, location_region,
+    def get_or_create(cls, inst_name, location_country,
                       location_state, location_city, user):
 
         # Institution
@@ -47,7 +62,6 @@ class Institution(CommonControlField, ClusterableModel):
 
             institution.location = Location.get_or_create(user,
                                                           location_country,
-                                                          location_region,
                                                           location_state,
                                                           location_city)
 

@@ -100,7 +100,6 @@ THIRD_PARTY_APPS = [
     "allauth",
     "allauth.account",
     "allauth.socialaccount",
-    "django_celery_beat",
     "captcha",
     "wagtailcaptcha",
     "wagtailmenus",
@@ -108,13 +107,11 @@ THIRD_PARTY_APPS = [
     "widget_tweaks",
     "django_celery_results",
     "haystack",
-    "indicator",
 ]
 
 LOCAL_APPS = [
     "core.users",
     "core_settings",
-    "scholarly_articles",
     "infrastructure_directory",
     "education_directory",
     "policy_directory",
@@ -125,6 +122,9 @@ LOCAL_APPS = [
     "usefulmodels",
     "location",
     "institution",
+    "scholarly_articles",
+    "django_celery_beat",
+     "indicator",
 ]
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
@@ -325,9 +325,17 @@ CELERY_RESULT_SERIALIZER = "json"
 CELERY_TASK_TIME_LIMIT = 5 * 60
 # http://docs.celeryproject.org/en/latest/userguide/configuration.html#task-soft-time-limit
 # TODO: set to whatever value is adequate in your circumstances
-CELERY_TASK_SOFT_TIME_LIMIT = 60
+CELERY_TASK_SOFT_TIME_LIMIT = 36000
 # http://docs.celeryproject.org/en/latest/userguide/configuration.html#beat-scheduler
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
+
+# Celery Results
+# ------------------------------------------------------------------------------
+# https: // django-celery-results.readthedocs.io/en/latest/getting_started.html
+CELERY_RESULT_BACKEND = 'django-db'
+CELERY_CACHE_BACKEND = 'django-cache'
+CELERY_RESULT_EXTENDED = True
+
 # django-allauth
 # ------------------------------------------------------------------------------
 ACCOUNT_ALLOW_REGISTRATION = env.bool("DJANGO_ACCOUNT_ALLOW_REGISTRATION", True)

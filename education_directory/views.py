@@ -92,12 +92,17 @@ def import_file(request):
                 # Institution
                 inst_name = row['Institution Name']
                 if inst_name:
+                    inst_level_1 = row['Level_1']
+                    inst_level_2 = row['Level_2']
+                    inst_level_3 = row['Level_3']
                     inst_country = row['Institution Country']
-                    inst_region = row['Institution Region']
+
                     inst_state = row['Institution State']
                     inst_city = row['Institution City']
 
-                    institution = Institution.get_or_create(inst_name, inst_country, inst_region,
+
+                    institution = Institution.get_or_create(inst_name, inst_level_1, inst_level_2, inst_level_3,
+                                                            inst_country, inst_region,
                                                             inst_state, inst_city, request.user)
                     ed.institutions.add(institution)
 
@@ -135,6 +140,9 @@ def import_file(request):
                         ed.action = action
                     else:
                         messages.error(request, _("Unknown action, line: %s") % str(line + 2))
+
+                if row['Source']:
+                    ed.source = row['Source']
 
                 ed.save()
     except Exception as ex:
