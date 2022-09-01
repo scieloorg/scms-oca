@@ -124,6 +124,7 @@ LOCAL_APPS = [
     "institution",
     "scholarly_articles",
     "django_celery_beat",
+     "indicator",
 ]
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
