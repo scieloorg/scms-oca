@@ -18,9 +18,16 @@ class ScholarlyArticlesAdmin(ModelAdmin):
 
     list_display = (
         'doi',
+        'title',
+        'volume',
+        'number',
         'year',
+        'open_access_status',
+        'use_license',
+        'apc',
         'all_contributors',
         'journal',
+        'source',
     )
 
     list_filter = ('year',)

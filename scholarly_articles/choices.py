@@ -41,3 +41,23 @@ OA_STATUS = [
     ("green", _("Green")),
     ("closed", _("Closed")),
 ]
+
+LICENSE = [
+    ("", ""),
+    ("CC0", "CC0"),
+    ("CC-BY", "CC-BY"),
+    ("CC-BYNC", "CC-BYNC"),
+    ("CC-BYND", "CC-BYND"),
+    ("CC-BYNCND", "CC-BYNCND"),
+]
+
+APC = [
+    ("", ""),
+    ("YES", "YES"),
+    ("NO", "NO"),
+]
+
+SOURCE = [
+    ("", ""),
+    ("UNPAYWALL", "UNPAYWALL"),
+]

@@ -31,8 +31,16 @@ def load_article(row):
     except IndexError:
         article = models.ScholarlyArticles()
         article.doi = row.get('doi')
+        article.title = row.get('title')
+        article.volume = row.get('volume') #attrib volume is not in unpaywall
+        article.number = row.get('number') #attrib number is not in unpaywall
         article.year = row.get('year')
+        article.open_access_status = row.get('oa_status')
+        if len(row.get('oa_locations')) > 0:
+            article.use_license = row.get('oa_locations')[0].get('license')
+        article.apc = row.get('apc') #attrib apc is not in unpaywall
         article.journal = load_journal(row)
+        article.source = 'Unpaywall'
         article.save()
         for author in row.get('z_authors') or []:
             contributor = get_one_contributor(author)
