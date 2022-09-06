@@ -13,7 +13,7 @@ class ScholarlyArticles(models.Model):
     volume = models.CharField(_("Volume"), max_length=255, null=True, blank=True)
     number = models.CharField(_("Number"), max_length=255, null=True, blank=True)
     year = models.CharField(_("Year"), max_length=4, null=True, blank=True)
-    qualification = models.CharField(_("Open Access Qualification"), max_length=25, choices=choices.OA_STATUS,
+    open_access_status = models.CharField(_("Open Access Status"), max_length=25, choices=choices.OA_STATUS,
                                      null=True,
                                      blank=True)
     use_license = models.CharField(_("Use License"), max_length=25, choices=choices.LICENSE, null=True, blank=True)
@@ -34,7 +34,7 @@ class ScholarlyArticles(models.Model):
         FieldPanel('volume'),
         FieldPanel('number'),
         FieldPanel('year'),
-        FieldPanel('qualification'),
+        FieldPanel('open_access_status'),
         FieldPanel('use_license'),
         FieldPanel('apc'),
         FieldPanel('contributors'),
