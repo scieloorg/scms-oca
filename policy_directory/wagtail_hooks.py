@@ -28,8 +28,8 @@ class PolicyDirectoryCreateView(CreateView):
 
         instance = super().get_instance()
 
-        if Action.objects.filter(name__icontains="política, recomendação etc.").exists():
-            instance.action = Action.objects.get(name__icontains="política, recomendação etc.")
+        if Action.objects.filter(name__icontains="políticas públicas e institucionais").exists():
+            instance.action = Action.objects.get(name__icontains="políticas públicas e institucionais")
 
         return instance
 
