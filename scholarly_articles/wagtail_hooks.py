@@ -22,7 +22,7 @@ class ScholarlyArticlesAdmin(ModelAdmin):
         'volume',
         'number',
         'year',
-        'qualification',
+        'open_access_status',
         'use_license',
         'apc',
         'all_contributors',
