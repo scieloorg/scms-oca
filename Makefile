@@ -38,7 +38,7 @@ build_date: ## Show build date
 build:  ## Build app using $(compose)
 	@docker-compose -f $(compose) build
 
-build_no_cache:  ## Build app using $(compose)
+build_no_cache:  ## Build app using $(compose) --no-cache
 	@docker-compose -f $(compose) build --no-cache
 
 up:  ## Start app using $(compose)
