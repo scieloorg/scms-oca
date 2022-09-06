@@ -12,8 +12,8 @@ classification = (
 status = (
     ('', ''),
     ('WIP', 'WIP'),
-    ('TO_MODERATE', 'TO_MODERATE'),
-    ('PUBLISHED', 'PUBLISHED'),
+    ('TO MODERATE', _('TO MODERATE')),
+    ('PUBLISHED', _('PUBLISHED')),
 )
 
 attendance_type = (

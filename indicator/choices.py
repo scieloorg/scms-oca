@@ -11,20 +11,21 @@ languages = (
 status = (
     ('', ''),
     ('WIP', 'WIP'),
-    ('TO_MODERATE', 'TO_MODERATE'),
-    ('PUBLISHED', 'PUBLISHED'),
+    ('TO MODERATE', _('TO MODERATE')),
+    ('PUBLISHED', _('PUBLISHED')),
 )
 
 availability = (
     ('', ''),
-    ('CURRENT', 'CURRENT'),
-    ('DEACTIVATED', 'DEACTIVATED'),
+    ('CURRENT', _('CURRENT')),
+    ('DEACTIVATED', _('DEACTIVATED')),
 )
 
 open_access = (
     ('', ''),
-    ('0', 'não'),
-    ('1', 'sim'),
-    ('2', 'ign'),
-    ('3', 'all'),
+    ('NOT', _('NOT')),
+    ('YES', _('YES')),
+    ('ALL', _('ALL')),
+    ('NOT APPLICABLE', _('NOT APPLICABLE')),
+    ('UNDEFINED', _('UNDEFINED')),
 )

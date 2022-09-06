@@ -10,4 +10,7 @@ inst_type = (
     ('organização sem fins de lucros', _('organização sem fins de lucros')),
     ('sociedade científica, associação pós-graduação, associação profissional', _('sociedade científica, associação pós-graduação, associação profissional')),
     ('outros', _('outros')),
+    ('ALL', _('ALL')),
+    ('NOT APPLICABLE', _('NOT_APPLICABLE')),
+    ('UNDEFINED', _('UNDEFINED')),
 )
