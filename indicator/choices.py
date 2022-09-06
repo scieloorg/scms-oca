@@ -23,8 +23,9 @@ availability = (
 
 open_access = (
     ('', ''),
-    ('0', 'não'),
-    ('1', 'sim'),
-    ('2', 'ign'),
-    ('3', 'all'),
+    ('NOT', 'NOT'),
+    ('YES', 'YES'),
+    ('ALL', 'ALL'),
+    ('NOT_APPLICABLE', 'NOT_APPLICABLE'),
+    ('UNDEFINED', 'UNDEFINED'),
 )
