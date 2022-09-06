@@ -28,8 +28,8 @@ class EventDirectoryCreateView(CreateView):
 
         instance = super().get_instance()
 
-        if Action.objects.filter(name__icontains="divulgação").exists():
-            instance.action = Action.objects.get(name__icontains="divulgação")
+        if Action.objects.filter(name__icontains="disseminação").exists():
+            instance.action = Action.objects.get(name__icontains="disseminação")
 
         return instance
 

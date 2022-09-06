@@ -25,8 +25,8 @@ class EducationDirectoryCreateView(CreateView):
 
         instance = super().get_instance()
 
-        if Action.objects.filter(name__icontains="educação").exists():
-            instance.action = Action.objects.get(name__icontains="educação")
+        if Action.objects.filter(name__icontains="educação / capacitação").exists():
+            instance.action = Action.objects.get(name__icontains="educação / capacitação")
 
         return instance
 
