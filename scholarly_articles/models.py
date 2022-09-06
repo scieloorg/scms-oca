@@ -102,6 +102,13 @@ class RawUnpaywall(models.Model):
     def __str__(self):
         return self.doi
 
+    class Meta:
+        indexes = [
+            models.Index(fields=['doi', ]),
+            models.Index(fields=['year', ]),
+            models.Index(fields=['resource_type', ]),
+        ]
+
     panels = [
         FieldPanel('doi'),
         FieldPanel('harvesting_creation'),

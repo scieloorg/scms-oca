@@ -1,20 +1,9 @@
-import json
+import orjson
+import gzip
 
 from config import celery_app
 from scholarly_articles.unpaywall import unpaywall
 from scholarly_articles.unpaywall import load_data
-
-
-@celery_app.task()
-def load_unpaywall_row(row):
-    """
-    Load each row of unpaywall data.
-
-    Sync or Async function
-
-    Param row: JSON
-    """
-    unpaywall.load(row)
 
 
 @celery_app.task()
@@ -24,11 +13,20 @@ def load_unpaywall(file_path):
 
     Sync or Async function
 
-    Param file_path: String with the path of the JSON like file.
+    Param file_path: String with the path of the JSON like file compressed or not.
     """
-    with open(file_path) as fp:
-        for row in fp.readlines():
-            load_unpaywall_row(json.loads(row))
+    try:
+        with gzip.open(file_path, "rb") as f:
+            for line, row in enumerate(f):
+                row = orjson.loads(row)
+                print("Line: %s, id: %s" % (line+1, row['doi']))
+                unpaywall.load(row)
+    except OSError:
+        with open(file_path, "rb") as f:
+            for line, row in enumerate(f):
+                row = orjson.loads(row)
+                print("Line: %s, id: %s" % (line+1, row['doi']))
+                unpaywall.load(row)
 
 
 @celery_app.task()
