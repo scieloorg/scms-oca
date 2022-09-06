@@ -1,4 +1,5 @@
 from scholarly_articles import models
+from django.db.utils import DataError
 
 from datetime import date
 
@@ -61,7 +62,6 @@ def load(row):
                 rawunpaywall.harvesting_creation = date.today()
             else:
                 return
-
         rawunpaywall.is_paratext = row.get('is_paratext')
         rawunpaywall.year = row.get('year')
         rawunpaywall.resource_type = row.get('genre')
@@ -71,5 +71,13 @@ def load(row):
             pass
         rawunpaywall.json = row
         rawunpaywall.save()
-    except KeyError:
-        pass
+    except Exception as e:
+        error = models.ErrorLog()
+        error.document_id = row['doi']
+        error.error_type = str(type(e))
+        error.error_message = str(e)[:255]
+        try:
+            error.save()
+        except (DataError, TypeError):
+            pass
+
