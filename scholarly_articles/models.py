@@ -3,6 +3,7 @@ from django.utils.translation import gettext as _
 
 from wagtail.admin.edit_handlers import FieldPanel
 
+from institution.models import Institution
 from . import choices
 from core.models import CommonControlField
 
@@ -89,6 +90,7 @@ class Contributors(models.Model):
 
 class Affiliations(models.Model):
     name = models.CharField(_("Affiliation Name"), max_length=510, null=True, blank=True)
+    official = models.ForeignKey(Institution, verbose_name=_("Official Affiliation Name"), on_delete=models.SET_NULL, max_length=1020, null=True, blank=True)
 
     def __unicode__(self):
         return self.name
@@ -98,6 +100,7 @@ class Affiliations(models.Model):
 
     panels = [
         FieldPanel('name'),
+        FieldPanel('official'),
     ]
 
 
