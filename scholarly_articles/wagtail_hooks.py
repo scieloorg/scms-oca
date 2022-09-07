@@ -104,9 +104,10 @@ class AffiliationsAdmin(ModelAdmin):
     exclude_from_explorer = False  # or True to exclude pages of this type from Wagtail's explorer view
     list_display = (
         'name',
+        'official',
     )
     #list_filter = ('name',)
-    search_fields = ('name',)
+    search_fields = ('name', 'official',)
 
 
 class ErrorLogAdmin(ModelAdmin):
