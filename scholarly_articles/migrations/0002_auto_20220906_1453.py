@@ -11,6 +11,18 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.AddIndex(
+            model_name='rawunpaywall',
+            index=models.Index(fields=['doi'], name='scholarly_a_doi_e75c1d_idx'),
+        ),
+        migrations.AddIndex(
+            model_name='rawunpaywall',
+            index=models.Index(fields=['year'], name='scholarly_a_year_c2349f_idx'),
+        ),
+        migrations.AddIndex(
+            model_name='rawunpaywall',
+            index=models.Index(fields=['resource_type'], name='scholarly_a_resourc_0d5bcb_idx'),
+        ),
         migrations.AddField(
             model_name='scholarlyarticles',
             name='apc',
