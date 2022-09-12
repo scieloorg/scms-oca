@@ -1,4 +1,3 @@
-import orjson
 import gzip
 
 from config import celery_app
@@ -18,15 +17,11 @@ def load_unpaywall(file_path):
     try:
         with gzip.open(file_path, "rb") as f:
             for line, row in enumerate(f):
-                row = orjson.loads(row)
-                print("Line: %s, id: %s" % (line+1, row['doi']))
-                unpaywall.load(row)
+                unpaywall.load(line, row)
     except OSError:
         with open(file_path, "rb") as f:
             for line, row in enumerate(f):
-                row = orjson.loads(row)
-                print("Line: %s, id: %s" % (line+1, row['doi']))
-                unpaywall.load(row)
+                unpaywall.load(line, row)
 
 
 @celery_app.task()
