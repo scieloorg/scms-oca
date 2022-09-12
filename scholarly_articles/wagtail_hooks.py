@@ -121,6 +121,7 @@ class ErrorLogAdmin(ModelAdmin):
         'document_id',
         'error_type',
         'error_message',
+        'error_line',
     )
     list_filter = ('error_type',)
     search_fields = ('document_id',)
