@@ -1,10 +1,12 @@
+import orjson
+
 from scholarly_articles import models
 from django.db.utils import DataError
 
 from datetime import date
 
 
-def load(row):
+def load(line, row):
     """
     Create the record of a unpaywall.
 
@@ -54,6 +56,8 @@ def load(row):
 
     """
     try:
+        row = orjson.loads(row)
+        print("Line: %s, id: %s" % (line + 1, row['doi']))
         if row.get('doi'):
             rawunpaywall = models.RawUnpaywall.objects.filter(doi=row['doi'])
             if len(rawunpaywall) == 0:
@@ -76,6 +80,7 @@ def load(row):
         error.document_id = row['doi']
         error.error_type = str(type(e))
         error.error_message = str(e)[:255]
+        error.error_line = str(line + 1)
         try:
             error.save()
         except (DataError, TypeError):
