@@ -29,6 +29,11 @@ class ScholarlyArticles(models.Model):
     def __str__(self):
         return self.doi
 
+    class Meta:
+        indexes = [
+            models.Index(fields=['doi', ]),
+        ]
+
     panels = [
         FieldPanel('doi'),
         FieldPanel('title'),
@@ -57,6 +62,13 @@ class Journals(models.Model):
     def __str__(self):
         return self.journal_issn_l
 
+    class Meta:
+        indexes = [
+            models.Index(fields=['journal_issn_l', ]),
+            models.Index(fields=['journal_issns', ]),
+            models.Index(fields=['journal_name', ]),
+        ]
+
     panels = [
         FieldPanel('journal_issn_l'),
         FieldPanel('journal_issns'),
@@ -79,6 +91,14 @@ class Contributors(models.Model):
     def __str__(self):
         return f"{self.family}, {self.given} ({self.orcid})"
 
+    class Meta:
+        indexes = [
+            models.Index(fields=['family', ]),
+            models.Index(fields=['given', ]),
+            models.Index(fields=['orcid', ]),
+            models.Index(fields=['affiliation', ]),
+        ]
+
     panels = [
         FieldPanel('family'),
         FieldPanel('given'),
@@ -97,6 +117,11 @@ class Affiliations(models.Model):
 
     def __str__(self):
         return self.name
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['name', ]),
+        ]
 
     panels = [
         FieldPanel('name'),
