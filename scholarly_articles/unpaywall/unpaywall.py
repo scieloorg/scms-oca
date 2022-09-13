@@ -1,10 +1,12 @@
+import orjson
+
 from scholarly_articles import models
 from django.db.utils import DataError
 
 from datetime import date
 
 
-def load(row):
+def load(line, row):
     """
     Create the record of a unpaywall.
 
@@ -54,30 +56,33 @@ def load(row):
 
     """
     try:
-        if row.get('doi'):
-            rawunpaywall = models.RawUnpaywall.objects.filter(doi=row['doi'])
+        row = orjson.loads(row)
+        doi = row.get('doi')
+        if doi:
+            print("Line: %s, id: %s" % (line + 1, doi))
+            rawunpaywall = models.RawUnpaywall.objects.filter(doi=doi)
             if len(rawunpaywall) == 0:
                 rawunpaywall = models.RawUnpaywall()
-                rawunpaywall.doi = row['doi']
+                rawunpaywall.doi = doi
                 rawunpaywall.harvesting_creation = date.today()
             else:
-                return
-        rawunpaywall.is_paratext = row.get('is_paratext')
-        rawunpaywall.year = row.get('year')
-        rawunpaywall.resource_type = row.get('genre')
-        try:
-            rawunpaywall.update = row.get('updated')[:10]
-        except TypeError:
-            pass
-        rawunpaywall.json = row
-        rawunpaywall.save()
+                rawunpaywall = rawunpaywall[0]
+            rawunpaywall.is_paratext = row.get('is_paratext')
+            rawunpaywall.year = row.get('year')
+            rawunpaywall.resource_type = row.get('genre')
+            try:
+                rawunpaywall.update = row.get('updated')[:10]
+            except TypeError:
+                pass
+            rawunpaywall.json = row
+            rawunpaywall.save()
     except Exception as e:
         error = models.ErrorLog()
-        error.document_id = row['doi']
+        error.document_id = row.get('doi')
         error.error_type = str(type(e))
         error.error_message = str(e)[:255]
+        error.error_line = str(line + 1)
         try:
             error.save()
         except (DataError, TypeError):
             pass
-
