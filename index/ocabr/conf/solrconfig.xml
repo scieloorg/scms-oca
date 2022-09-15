@@ -187,8 +187,13 @@
      <lst name="invariants">
          <str name="facet">true</str>
 
-         <!-- <str name="facet.field">publisher</str>
-         <str name="facet.field">status</str> -->
+         <str name="facet.field">record_type</str>
+         <str name="facet.field">institutions</str>
+         <str name="facet.field">countries</str>
+         <str name="facet.field">cities</str>
+         <str name="facet.field">states</str>
+         <str name="facet.field">regions</str>
+         <str name="facet.field">thematic_areas</str>
 
          <str name="facet.limit">30</str>
          <str name="facet.mincount">1</str>

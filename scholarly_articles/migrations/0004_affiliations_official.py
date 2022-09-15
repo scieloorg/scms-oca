@@ -7,7 +7,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('institution', '0003_alter_institution_institution_type'),
+        ('institution', '0002_auto_20220826_1504'),
         ('scholarly_articles', '0003_auto_20220907_1749'),
     ]
 

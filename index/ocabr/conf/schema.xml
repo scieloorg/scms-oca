@@ -57,13 +57,7 @@
    <field name="django_ct" type="string" indexed="true" stored="true" multiValued="false"/>
    <field name="django_id" type="string" indexed="true" stored="true" multiValued="false"/>
 
-   <!-- multivalued fields -->
-   <!-- <field name="subjects" type="string" indexed="true" stored="true" multiValued="true"/>
-   <field name="sales_territories" type="string" indexed="true" stored="true" multiValued="true"/>
-   <field name="sinopses" type="string" indexed="true" stored="true" multiValued="true"/>
-   <field name="languages" type="string" indexed="true" stored="true" multiValued="true"/>
-   <field name="publisher" type="string" indexed="true" stored="true" multiValued="true"/>
-   <field name="status" type="string" indexed="true" stored="true" multiValued="False"/>-->
+   <field name="record_type" type="string" indexed="true" stored="true" multiValued="false"/>
 
    <!-- multivalued fields -->
    <field name="keywords" type="string" indexed="true" stored="true" multiValued="true"/>

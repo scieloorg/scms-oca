@@ -1,0 +1,2 @@
+{% for row in search_results %}"{{ row.name }}"; "{{ row.cpf }}"; "{{ row.responsible_rg }}"; "{{ row.date_of_birth }}"; "{{ row.address }}"; "{{ row.cel }}"; "{{ row.personal_tel }}"; "{{ row.message_tel }}"; "{{ row.civil_status }}"; "{{ row.nis }}"; "{{ row.ocupation }}"; "{{ row.is_ocupation_formal }}"; "{{ row.program|join:"|" }}"; "{{ row.manufactory|join:"|" }}"; "{{ row.health|join:"|" }}"; "{{ row.escolarity|join:"|" }}"; "{{ row.period }}"; "{{ row.responsible_name }}";
+{% endfor %}

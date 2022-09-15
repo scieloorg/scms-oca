@@ -10,7 +10,7 @@ from wagtail.core import urls as wagtail_urls
 from wagtail.documents import urls as wagtaildocs_urls
 
 from core.api import api_router
-from core.search import views as search_views  # noqa isort:skip
+from core.search_site import views as search_views  # noqa isort:skip
 
 urlpatterns = [
     # path("", TemplateView.as_view(template_name="home/home_page.html"), name="home"),
@@ -35,7 +35,10 @@ urlpatterns = [
 # Translatable URLs
 # These will be available under a language code prefix. For example /en/search/
 urlpatterns += i18n_patterns(
-    re_path(r"^search/$", search_views.search, name="search"),
+    # Site search
+    re_path(r"^search_site/$", search_views.search, name="search_site"),
+    # Index search
+    re_path(r"^search/$", include("search.urls")),
     # User management
     path("api/v2/", api_router.urls),
     path("users/", include("core.users.urls", namespace="users")),

@@ -8,7 +8,7 @@
 {% block content %}
     <h1>Search</h1>
 
-    <form action="{% url 'search' %}" method="get">
+    <form action="{% url 'search_site' %}" method="get">
         <input type="text" name="query"{% if search_query %} value="{{ search_query }}"{% endif %}>
         <input type="submit" value="Search" class="button">
     </form>
@@ -26,11 +26,11 @@
         </ul>
 
         {% if search_results.has_previous %}
-            <a href="{% url 'search' %}?query={{ search_query|urlencode }}&amp;page={{ search_results.previous_page_number }}">Previous</a>
+            <a href="{% url 'search_site' %}?query={{ search_query|urlencode }}&amp;page={{ search_results.previous_page_number }}">Previous</a>
         {% endif %}
 
         {% if search_results.has_next %}
-            <a href="{% url 'search' %}?query={{ search_query|urlencode }}&amp;page={{ search_results.next_page_number }}">Next</a>
+            <a href="{% url 'search_site' %}?query={{ search_query|urlencode }}&amp;page={{ search_results.next_page_number }}">Next</a>
         {% endif %}
     {% elif search_query %}
         No results found

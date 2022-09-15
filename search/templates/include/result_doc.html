@@ -1,0 +1,47 @@
+{% load translate %}
+{% load humanize %}
+{% load i18n %}
+{% load static %}
+{% load translate %}
+{% load l10n %}
+{% load auth_extras %}
+
+<div class="product col-12 col-sm-6 col-lg-12">
+  <div class="grid-inner row no-gutters">
+
+    <div class="col-md-12 pe-md-12">
+
+      <div class="entry-title title-sm">
+        <h2><a href="">{{ item.title }}</a> <a href="{{ item.link }}"><i class="icon-line-external-link"></i></a></h2>
+      </div>
+      <div class="entry-meta">
+        <ul>
+          <li><i class="icon-calendar3"></i> 16th Feb 2021</li>
+          <li><a href="#"><i class="icon-group"></i>{{ item.organization }}</a></li>
+          <li><i class="icon-folder-open"></i> <a href="#">Videos</a>, <a href="#">News</a></li>
+          <li><a href="#"><i class="icon-film"></i></a></li>
+          <li><span class="badge bg-secondary">{{ item.record_type|translate_data }}</span></li>
+        </ul>
+      </div>
+      <div class="entry-content">
+        <p>{{ item.description }}</p>
+        <ul class="iconlist d-none d-xl-block mt-md-3">
+          <li><i class="icon-caret-right"></i> {% trans "Country" %}: {{ item.countries|join:", " }}</li>
+          <li><i class="icon-caret-right"></i> {% trans "Regions" %}: {{ item.regions|join:", " }}</li>
+          <li><i class="icon-caret-right"></i> {% trans "States" %}: {{ item.states|join:", " }}</li>
+          <li><i class="icon-caret-right"></i> {% trans "Cities" %}: {{ item.cities|join:", " }}</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-body">
+          <span><b>Practice: </b>{{ item.practice }} </span>
+          <span><b>Action: </b>{{ item.action }}</span>
+        </div>
+      </div>
+
+
+    </div>
+
+  </div>
+</div>
