@@ -19,7 +19,7 @@ class ScholarlyArticles(models.Model):
                                      blank=True)
     use_license = models.CharField(_("Use License"), max_length=25, choices=choices.LICENSE, null=True, blank=True)
     apc = models.CharField(_("Article Processing Charge"), max_length=25, choices=choices.APC, null=True, blank=True)
-    contributors = models.ManyToManyField("Contributors", verbose_name=_("Contributors"), null=True, blank=True)
+    contributors = models.ManyToManyField("Contributors", verbose_name=_("Contributors"), blank=True)
     journal = models.ForeignKey("Journals", verbose_name=_("Journals"), on_delete=models.SET_NULL, max_length=255, null=True, blank=True)
     source = models.CharField(_("Record Source"), max_length=255, choices=choices.SOURCE, null=True, blank=True)
 
