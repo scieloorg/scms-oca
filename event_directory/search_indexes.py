@@ -9,12 +9,17 @@ class EventIndex(indexes.SearchIndex, indexes.Indexable):
     Fields:
         text
     """
-
+    record_type = indexes.CharField(null=False)
     text = indexes.CharField(document=True, use_template=True)
     title = indexes.CharField(model_attr="title", null=True)
 
     link = indexes.CharField(model_attr="link", null=True)
     description = indexes.CharField(model_attr="description", null=True)
+
+    start_date = indexes.CharField(model_attr="start_date", null=True)
+    end_date = indexes.CharField(model_attr="end_date", null=True)
+    start_time = indexes.CharField(model_attr="start_time", null=True)
+    end_time = indexes.CharField(model_attr="end_time", null=True)
 
     organization = indexes.MultiValueField(null=True)
     practice = indexes.CharField(model_attr="practice", null=True)
@@ -29,6 +34,9 @@ class EventIndex(indexes.SearchIndex, indexes.Indexable):
 
     source = indexes.CharField(model_attr="action", null=True)
     attendance = indexes.CharField(model_attr="attendance", null=True)
+
+    def prepare_record_type(self, obj):
+        return "event_directory"
 
     def prepare_organization(self, obj):
         if obj.organization:
@@ -91,4 +99,4 @@ class EventIndex(indexes.SearchIndex, indexes.Indexable):
         return models.EventDirectory
 
     def index_queryset(self, using=None):
-        return self.get_model().objects.all()
+        return self.get_model().objects.filter(record_status="PUBLISHED")

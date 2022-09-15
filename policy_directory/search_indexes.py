@@ -9,7 +9,7 @@ class PolicyIndex(indexes.SearchIndex, indexes.Indexable):
     Fields:
         text
     """
-
+    record_type = indexes.CharField(null=False)
     text = indexes.CharField(document=True, use_template=True)
     title = indexes.CharField(model_attr="title", null=True)
 
@@ -28,6 +28,9 @@ class PolicyIndex(indexes.SearchIndex, indexes.Indexable):
     thematic_areas = indexes.MultiValueField(null=True)
 
     source = indexes.CharField(model_attr="action", null=True)
+
+    def prepare_record_type(self, obj):
+        return "policy_directory"
 
     def prepare_institutions(self, obj):
         if obj.institutions:
@@ -90,4 +93,4 @@ class PolicyIndex(indexes.SearchIndex, indexes.Indexable):
         return models.PolicyDirectory
 
     def index_queryset(self, using=None):
-        return self.get_model().objects.all()
+        return self.get_model().objects.filter(record_status="PUBLISHED")
