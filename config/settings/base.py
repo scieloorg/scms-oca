@@ -58,7 +58,7 @@ WSGI_APPLICATION = "config.wsgi.application"
 # wagtail apps
 WAGTAIL = [
     "core.home",
-    "core.search",
+    "core.search_site",
     "wagtail.contrib.forms",
     "wagtail.contrib.redirects",
     "wagtail.contrib.modeladmin",
@@ -89,7 +89,7 @@ DJANGO_APPS = [
     "django.contrib.sites",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    # "django.contrib.humanize", # Handy template tags
+    "django.contrib.humanize",  # Handy template tags
     "django.contrib.admin",
     "django.forms",
 ]
@@ -124,7 +124,8 @@ LOCAL_APPS = [
     "institution",
     "scholarly_articles",
     "django_celery_beat",
-     "indicator",
+    "indicator",
+    "search",
 ]
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
@@ -371,7 +372,7 @@ LANGUAGES = [
 
 WAGTAIL_I18N_ENABLED = True
 
-WAGTAIL_CONTENT_LANGUAGES =  [
+WAGTAIL_CONTENT_LANGUAGES = [
     ('pt-BR', "Portuguese"),
     ('en', "English"),
     ('es', "Spanish"),
@@ -385,7 +386,7 @@ RECAPTCHA_PRIVATE_KEY = env.str("RECAPTCHA_PRIVATE_KEY", default='')
 WAGTAILMENUS_FLAT_MENUS_HANDLE_CHOICES = [("oca", "OCA"),
                                           ("sobre_projeto", _("Sobre o Projeto")),
                                           ("faq", "FAQ"),
-                                          ("noticias", _("Notícias")),]
+                                          ("noticias", _("Notícias")), ]
 
 PAGINATION_PER_PAGE = 10
 
@@ -406,3 +407,14 @@ HAYSTACK_CONNECTIONS = {
 }
 
 HAYSTACK_SIGNAL_PROCESSOR = "haystack.signals.RealtimeSignalProcessor"
+
+SEARCH_PAGINATION_ITEMS_PER_PAGE = 10
+
+SEARCH_FACET_ITEMS_PER_MORE = 5
+
+SEARCH_FACET_LIST = ['record_type',
+                     'countries',
+                     'regions',
+                     'states',
+                     'cities',
+                     'thematic_areas']
