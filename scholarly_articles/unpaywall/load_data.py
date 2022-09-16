@@ -1,6 +1,7 @@
 from django.db.utils import DataError
 
 from scholarly_articles import models
+from . import affiliation_predictor
 
 
 class ArticleSaveError(Exception):
@@ -115,14 +116,17 @@ def load_affiliation(affiliation_name):
         affiliations = models.Affiliations.objects.filter(name=affiliation_name)
     try:
         affiliation = affiliations[0]
+        if float(affiliation.score) < 1.0:
+            affiliation.official, affiliation.score = affiliation_predictor.official(affiliation_name)
     except IndexError:
         affiliation = models.Affiliations()
         if affiliation_name:
             affiliation.name = affiliation_name
-        try:
-            affiliation.save()
-        except (DataError, TypeError) as e:
-            raise AffiliationSaveError(e)
+            affiliation.official, affiliation.score = affiliation_predictor.official(affiliation_name)
+    try:
+        affiliation.save()
+    except (DataError, TypeError) as e:
+        raise AffiliationSaveError(e)
 
     return affiliation
 
