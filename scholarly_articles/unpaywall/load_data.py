@@ -142,7 +142,12 @@ def load(from_year, resource_type):
 
     rawunpaywall = models.RawUnpaywall.objects.filter(year__gte=from_year, resource_type=resource_type)
     for item in rawunpaywall:
-        if not item.is_paratext:
+        brazil = False
+        for author in item.json.get('z_authors') or []:
+            if author.get('affiliation'):
+                if affiliation_predictor.is_brazil(author['affiliation'][0]['name']) == 'brasil':
+                    brazil = True
+        if not item.is_paratext and brazil:
             try:
                 load_article(item.json)
             except (ArticleSaveError, JournalSaveError, ContributorSaveError, AffiliationSaveError) as e:
