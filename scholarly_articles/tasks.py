@@ -1,12 +1,14 @@
 import gzip
 
-from config import celery_app
-from scholarly_articles.unpaywall import unpaywall
-from scholarly_articles.unpaywall import load_data
+from django.contrib.auth import get_user_model
 
+from config import celery_app
+from scholarly_articles.unpaywall import load_data, unpaywall
+
+User = get_user_model()
 
 @celery_app.task()
-def load_unpaywall(file_path):
+def load_unpaywall(file_path, user_id):
     """
     Load the data from unpaywall file.
 
@@ -14,14 +16,16 @@ def load_unpaywall(file_path):
 
     Param file_path: String with the path of the JSON like file compressed or not.
     """
+    user = User.objects.get(id=user_id)
+
     try:
         with gzip.open(file_path, "rb") as f:
             for line, row in enumerate(f):
-                unpaywall.load(line, row)
+                unpaywall.load(line, row, user)
     except OSError:
         with open(file_path, "rb") as f:
             for line, row in enumerate(f):
-                unpaywall.load(line, row)
+                unpaywall.load(line, row, user)
 
 
 @celery_app.task()
