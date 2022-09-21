@@ -28,16 +28,14 @@ class City(CommonControlField):
 
     @classmethod
     def get_or_create(cls, user, name):
-        try:
-            if cls.objects.filter(name__iexact=name).exists():
-                return cls.objects.get(name__iexact=name)
-            else:
-                city = City()
-                city.name = name
-                city.creator = user
-                city.save()
-        except Exception as ex:
-            import pdb; pdb.set_trace()
+
+        if cls.objects.filter(name__iexact=name).exists():
+            return cls.objects.get(name__iexact=name)
+        else:
+            city = City()
+            city.name = name
+            city.creator = user
+            city.save()
 
         return city
 
