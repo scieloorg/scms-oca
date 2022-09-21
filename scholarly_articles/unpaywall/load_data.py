@@ -127,13 +127,14 @@ def load_affiliation(affiliation_name):
     return affiliation
 
 
-def load(from_year, resource_type):
+def load(from_year, resource_type, user):
     """
     Load all data with a specific resource_type and year from RawUnpaywall model
     to ScholarlyArticles model.
 
     Param from_year: Is a interger, example: 2000
     Param resource_type: Is a string, that represent a type in RawUnpaywall
+    Param user: The user instance
     """
 
     rawunpaywall = models.RawUnpaywall.objects.filter(year__gte=from_year, resource_type=resource_type)
@@ -142,11 +143,15 @@ def load(from_year, resource_type):
             try:
                 load_article(item.json)
             except (ArticleSaveError, JournalSaveError, ContributorSaveError, AffiliationSaveError) as e:
-                error = models.ErrorLog()
-                error.document_id = item
-                error.error_type = str(type(e))
-                error.error_message = str(e)[:255]
                 try:
+                    error = models.ErrorLog()
+                    error.error_type = str(type(e))
+                    error.error_message = str(e)[:255]
+                    error.error_description = "Erro on processing the RawUnpaywall to ScholarlyArticles."
+                    error.data_reference = "id:%s" % str(item.id)
+                    error.data = item.json
+                    error.data_type = "ScholarlyArticles"
+                    error.creator = user
                     error.save()
                 except (DataError, TypeError):
                     pass
