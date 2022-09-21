@@ -36,9 +36,9 @@ urlpatterns = [
 # These will be available under a language code prefix. For example /en/search/
 urlpatterns += i18n_patterns(
     # Site search
-    re_path(r"^search_site/$", search_views.search, name="search_site"),
+    re_path(r"^search_site/", search_views.search, name="search_site"),
     # Index search
-    re_path(r"^search/$", include("search.urls")),
+    re_path(r"^search/", include("search.urls")),
     # User management
     path("api/v2/", api_router.urls),
     path("users/", include("core.users.urls", namespace="users")),
