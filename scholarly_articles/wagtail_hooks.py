@@ -118,10 +118,8 @@ class ErrorLogAdmin(ModelAdmin):
     exclude_from_explorer = False  # or True to exclude pages of this type from Wagtail's explorer view
     list_display = (
         'created',
-        'document_id',
         'error_type',
         'error_message',
-        'error_line',
     )
     list_filter = ('error_type',)
     search_fields = ('document_id',)

@@ -6,7 +6,7 @@ from django.db.utils import DataError
 from datetime import date
 
 
-def load(line, row):
+def load(line, row, user):
     """
     Create the record of a unpaywall.
 
@@ -77,12 +77,15 @@ def load(line, row):
             rawunpaywall.json = row
             rawunpaywall.save()
     except Exception as e:
-        error = models.ErrorLog()
-        error.document_id = row.get('doi')
-        error.error_type = str(type(e))
-        error.error_message = str(e)[:255]
-        error.error_line = str(line + 1)
         try:
+            error = models.ErrorLog()
+            error.error_type = str(type(e))
+            error.error_message = str(e)[:255]
+            error.error_description = "Erro on processing the lines from a .json file to rawunpaywall model."
+            error.data_reference = "line:%s" % str(line + 1)
+            error.data = row
+            error.data_type = "Unpaywall JSON"
+            error.creator = user
             error.save()
         except (DataError, TypeError):
             pass

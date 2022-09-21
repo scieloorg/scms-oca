@@ -165,7 +165,13 @@ class RawUnpaywall(models.Model):
 
 
 class ErrorLog(CommonControlField):
-    document_id = models.ForeignKey(ScholarlyArticles, on_delete=models.SET_NULL, max_length=255, null=True, blank=True)
-    error_type = models.CharField(_("Error Type"), max_length=50, null=True, blank=True)
-    error_message = models.CharField(_("Error Message"), max_length=255, null=True, blank=True)
-    error_line = models.CharField(_("Error Line"), max_length=10, null=True, blank=True)
+    error_type = models.CharField(_("Error Type"), max_length=50, null=True, blank=True, help_text=_("Type of python error."))
+    error_message = models.CharField(_("Error Message"), max_length=255, null=True, blank=True, help_text=_("Message of python error."))
+    error_description = models.TextField(_("Error description"), max_length=255,
+                                         null=True, blank=True, help_text=_("More context about the error"))
+
+    data_reference = models.CharField(_("Reference data"), max_length=10, null=True,
+                                      blank=True, help_text=_("Reference to the data, can be id, line. Use line:10 or id:452 to to differ between id|line."))
+    data = models.TextField(_("Data"), max_length=10, null=True, blank=True, help_text=_("Data when the error happened."))
+    data_type = models.CharField(_("Data type"), max_length=255, null=True,
+                                 blank=True, help_text=_("Data type, can the the model, ex.: models.RawUnpaywall"))
