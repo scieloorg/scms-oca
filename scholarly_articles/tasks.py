@@ -8,13 +8,14 @@ from scholarly_articles.unpaywall import load_data, unpaywall
 User = get_user_model()
 
 @celery_app.task()
-def load_unpaywall(file_path, user_id):
+def load_unpaywall(user_id, file_path):
     """
     Load the data from unpaywall file.
 
     Sync or Async function
 
     Param file_path: String with the path of the JSON like file compressed or not.
+    Param user: The user id passed by kwargs on tasks.kwargs
     """
     user = User.objects.get(id=user_id)
 
@@ -29,10 +30,14 @@ def load_unpaywall(file_path, user_id):
 
 
 @celery_app.task()
-def load_journal_articles(from_year=1900, resource_type='journal-article'):
+def load_journal_articles(user_id, from_year=1900, resource_type='journal-article'):
     """
     Load the data from unpaywall model to ScholarlyArticles.
 
     Sync or Async function
+
+    Param user: The user id passed by kwargs on tasks.kwargs
     """
-    load_data.load(from_year, resource_type)
+    user = User.objects.get(id=user_id)
+
+    load_data.load(from_year, resource_type, user)
