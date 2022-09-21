@@ -74,6 +74,7 @@ class EducationDirectory(CommonControlField):
         FieldPanel('keywords'),
         FieldPanel('classification'),
         FieldPanel('practice'),
+        FieldPanel('action'),
 
         FieldPanel('attendance'),
         FieldPanel('record_status'),

@@ -71,7 +71,7 @@ def import_file(request):
 
     try:
         with open(file_path, 'r') as csvfile:
-            data = csv.DictReader(csvfile)
+            data = csv.DictReader(csvfile, delimiter=";")
 
             for line, row in enumerate(data):
                 ed = EducationDirectory()
@@ -92,18 +92,11 @@ def import_file(request):
                 # Institution
                 inst_name = row['Institution Name']
                 if inst_name:
-                    inst_level_1 = row['Level_1']
-                    inst_level_2 = row['Level_2']
-                    inst_level_3 = row['Level_3']
                     inst_country = row['Institution Country']
-
                     inst_state = row['Institution State']
                     inst_city = row['Institution City']
 
-
-                    institution = Institution.get_or_create(inst_name, inst_level_1, inst_level_2, inst_level_3,
-                                                            inst_country, inst_region,
-                                                            inst_state, inst_city, request.user)
+                    institution = Institution.get_or_create(inst_name, inst_country, inst_state, inst_city, request.user)
                     ed.institutions.add(institution)
 
                 # Thematic Area
@@ -132,14 +125,10 @@ def import_file(request):
                     else:
                         messages.error(request, _("Unknown Practice, line: %s") % str(line + 2))
 
-                # Action
+                # Action = educação / capacitação"
                 if row['Action']:
-                    action_name = row['Action']
-                    if Action.objects.filter(name=action_name).exists():
-                        action = Action.objects.get(name=action_name)
-                        ed.action = action
-                    else:
-                        messages.error(request, _("Unknown action, line: %s") % str(line + 2))
+                    if Action.objects.filter(name__icontains="educação / capacitação").exists():
+                        ed.action = Action.objects.get(name__icontains="educação / capacitação")
 
                 if row['Source']:
                     ed.source = row['Source']

@@ -34,17 +34,17 @@ class Location(CommonControlField):
                       location_city):
 
         # check if exists the location
-        if cls.objects.filter(country=location_country, state=location_state, city=location_city).exists():
+        if cls.objects.filter(country__name=location_country, state__name=location_state, city__name=location_city).exists():
             return cls.objects.get(
-                country=location_country, state=location_state, city=location_city)
+                country__name=location_country, state__name=location_state, city__name=location_city)
         else:
             location = Location()
             if location_country:
-                location.country = location_country
+                location.country = Country.get_or_create(user, location_country)
             if location_state:
-                location.state = location_state
+                location.state = State.get_or_create(user, location_state)
             if location_city:
-                location.city = location_city
+                location.city = City.get_or_create(user, location_city)
             location.creator = user
             location.save()
 
