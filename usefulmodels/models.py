@@ -29,8 +29,8 @@ class City(CommonControlField):
     @classmethod
     def get_or_create(cls, user, name):
 
-        if cls.objects.filter(name__icontains=name).exists():
-            return cls.objects.get(name=name)
+        if cls.objects.filter(name__iexact=name).exists():
+            return cls.objects.get(name__iexact=name)
         else:
             city = City()
             city.name = name
@@ -70,12 +70,12 @@ class State(CommonControlField):
     def get_or_create(cls, user, name=None, acronym=None):
 
         if name:
-            if cls.objects.filter(name__icontains=name).exists():
-                return cls.objects.get(name__icontains=name)
+            if cls.objects.filter(name__iexact=name).exists():
+                return cls.objects.get(name__iexact=name)
 
         if acronym:
-            if cls.objects.filter(acronym__icontains=acronym).exists():
-                return cls.objects.get(acronym__icontains=acronym)
+            if cls.objects.filter(acronym__iexact=acronym).exists():
+                return cls.objects.get(acronym__iexact=acronym)
 
         state = State()
         state.name = name
@@ -114,12 +114,12 @@ class Country(CommonControlField):
     def get_or_create(cls, user, name=None, acronym=None):
 
         if name:
-            if cls.objects.filter(name__icontains=name).exists():
-                return cls.objects.get(name__icontains=name)
+            if cls.objects.filter(name__iexact=name).exists():
+                return cls.objects.get(name__iexact=name)
 
         if acronym:
-            if cls.objects.filter(acronym__icontains=acronym).exists():
-                return cls.objects.get(acronym__icontains=acronym)
+            if cls.objects.filter(acronym__iexact=acronym).exists():
+                return cls.objects.get(acronym__iexact=acronym)
 
         country = Country()
         country.name = name
