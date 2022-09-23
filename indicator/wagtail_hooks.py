@@ -27,7 +27,7 @@ class IndicatorAdmin(ModelAdmin):
     ordering = ('-updated',)
     create_view_class = IndicatorDirectoryCreateView
     edit_view_class = IndicatorDirectoryEditView
-    menu_label = _('Indicator')  # ditch this to use verbose_name_plural from model
+    menu_label = _('Indicator Directory')  # ditch this to use verbose_name_plural from model
     menu_icon = 'folder-open-inverse'  # change as required
     menu_order = 100  # will put in 3rd place (000 being 1st, 100 2nd)
     add_to_settings_menu = False  # or True to add your model to the Settings sub-menu
@@ -35,23 +35,20 @@ class IndicatorAdmin(ModelAdmin):
 
     list_display = (
         'name',
+        'post',
+        'versioning',
         'action',
         'practice',
-        'identifier',
-        'generation_date',
-        'registered_by',
-        'record_status',
-        'availability_status',
-        'previous_record',
-        'open_access',
-        'qualifier',
-        'source',
+        'thematic_area',
         'institutional_context',
         'geographic_context',
     )
 
-    #list_filter = ('year',)
-    #search_fields = ('doi',)
+    list_filter = ('action',)
+    search_fields = ('name',
+                     'action',
+                     'practice',
+                     )
 
 
 modeladmin_register(IndicatorAdmin)
