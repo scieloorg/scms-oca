@@ -2,10 +2,6 @@
 data_required=True
 type=String
 
-[Institution]
-data_required=True
-type=String
-
 [Link]
 data_required=False
 type=String
@@ -18,16 +14,11 @@ type=String
 data_required=False
 type=Date
 
-
 [Institution Name]
 data_required=False
 type=String
 
 [Institution Country]
-data_required=False
-type=String
-
-[Institution Region]
 data_required=False
 type=String
 
