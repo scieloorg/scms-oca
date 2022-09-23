@@ -69,87 +69,77 @@ def import_file(request):
 
     file_path = file_upload.attachment.file.path
 
-    try:
-        with open(file_path, 'r') as csvfile:
-            data = csv.DictReader(csvfile)
+    # try:
+    with open(file_path, 'r') as csvfile:
+        data = csv.DictReader(csvfile, delimiter=";")
 
-            for line, row in enumerate(data):
-                di = EventDirectory()
-                di.event = row['Title']
-                di.link = row['Link']
-                di.description = row['Description']
-                if row['Start Date']:
-                    di.start_date = datetime.strptime(row['Start Date'], '%d/%m/%Y')
-                if row['End Date']:
-                    di.end_date = datetime.strptime(row['End Date'], '%d/%m/%Y')
-                if row['Start Time']:
-                    di.start_time = row['Start Time']
-                if row['End Time']:
-                    di.end_time = row['End Time']
-                di.creator = request.user
-                di.save()
+        for line, row in enumerate(data):
+            di = EventDirectory()
+            di.title = row['Title']
+            di.link = row['Link']
+            di.description = row['Description']
+            if row['Start Date']:
+                di.start_date = datetime.strptime(row['Start Date'], '%d/%m/%Y')
+            if row['End Date']:
+                di.end_date = datetime.strptime(row['End Date'], '%d/%m/%Y')
+            if row['Start Time']:
+                di.start_time = row['Start Time']
+            if row['End Time']:
+                di.end_time = row['End Time']
+            di.creator = request.user
+            di.save()
 
-                # Institution
-                inst_name = row['Institution Name']
-                if inst_name:
-                    inst_level_1 = row['Level_1']
-                    inst_level_2 = row['Level_2']
-                    inst_level_3 = row['Level_3']
-                    inst_country = row['Institution Country']
-                    inst_region = row['Institution Region']
-                    inst_state = row['Institution State']
-                    inst_city = row['Institution City']
+            # Institution
+            inst_name = row['Institution Name']
+            if inst_name:
+                inst_country = row['Institution Country']
+                inst_state = row['Institution State']
+                inst_city = row['Institution City']
 
+                institution = Institution.get_or_create(inst_name, inst_country,
+                                                        inst_state, inst_city, request.user)
+                di.organization.add(institution)
 
-                    institution = Institution.get_or_create(inst_name, inst_level_1, inst_level_2, inst_level_3,
-                                                            inst_country, inst_region,
-                                                            inst_state, inst_city, request.user)
-                    di.organization.add(institution)
+            # Thematic Area
+            level0 = row['Thematic Area Level0'].strip()
+            if level0:
+                level1 = row['Thematic Area Level1'].strip()
+                level2 = row['Thematic Area Level2'].strip()
+                the_area = ThematicArea.get_or_create(level0, level1, level2, request.user)
 
-                # Thematic Area
-                level0 = row['Thematic Area Level0']
-                if level0:
-                    level1 = row['Thematic Area Level1']
-                    level2 = row['Thematic Area Level2']
-                    the_area = ThematicArea.get_or_create(level0, level1, level2, request.user)
+                di.thematic_areas.add(the_area)
 
-                    di.thematic_areas.add(the_area)
+            # Keywords
+            if row['Keywords']:
+                for key in row['Keywords'].split('|'):
+                    di.keywords.add(key)
 
-                # Keywords
-                if row['Keywords']:
-                    for key in row['Keywords'].split('|'):
-                        di.keywords.add(key)
+            if row['Classification']:
+                di.classification = row['Classification']
 
-                if row['Classification']:
-                    di.classification = row['Classification']
+            # Practice
+            if row['Practice']:
+                pratice_name = row['Practice']
+                if Practice.objects.filter(name=pratice_name).exists():
+                    practice = Practice.objects.get(name=pratice_name)
+                    di.practice = practice
+                else:
+                    messages.error(request, _("Unknown Practice, line: %s") % str(line + 2))
 
-                # Practice
-                if row['Practice']:
-                    pratice_name = row['Practice']
-                    if Practice.objects.filter(name=pratice_name).exists():
-                        practice = Practice.objects.get(name=pratice_name)
-                        di.practice = practice
-                    else:
-                        messages.error(request, _("Unknown Practice, line: %s") % str(line + 2))
+            # Action
+            if row['Action']:
+                if Action.objects.filter(name__icontains="disseminação").exists():
+                    di.action = Action.objects.get(name__icontains="disseminação")
 
-                # Action
-                if row['Action']:
-                    action_name = row['Action']
-                    if Action.objects.filter(name=action_name).exists():
-                        action = Action.objects.get(name=action_name)
-                        di.action = action
-                    else:
-                        messages.error(request, _("Unknown action, line: %s") % str(line + 2))
+            if row['Source']:
+                di.source = row['Source']
 
-                if row['Source']:
-                    di.source = row['Source']
+            di.save()
 
-                di.save()
-
-    except Exception as ex:
-        messages.error(request, _("Import error: %s, Line: %s") % (ex, str(line + 2)))
-    else:
-       messages.success(request, _("File imported successfully!"))
+    # except Exception as ex:
+    #     messages.error(request, _("Import error: %s, Line: %s") % (ex, str(line + 2)))
+    # else:
+    #    messages.success(request, _("File imported successfully!"))
 
     return redirect(request.META.get('HTTP_REFERER'))
 
