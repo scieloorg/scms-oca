@@ -30,8 +30,7 @@ class Location(CommonControlField):
         return u'%s: %s | %s: %s | %s: %s' % (_('Country'), self.country, _('State'),  self.state, _('City'), self.city, )
 
     @classmethod
-    def get_or_create(cls, user, location_country, location_state,
-                      location_city):
+    def get_or_create(cls, user, location_country, location_state, location_city):
 
         # check if exists the location
         if cls.objects.filter(country__name=location_country, state__name=location_state, city__name=location_city).exists():
@@ -49,6 +48,5 @@ class Location(CommonControlField):
             location.save()
 
         return location
-
 
     base_form_class = LocationForm
