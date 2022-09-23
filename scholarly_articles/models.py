@@ -9,19 +9,19 @@ from core.models import CommonControlField
 
 
 class ScholarlyArticles(models.Model):
-    doi = models.CharField(_("DOI"), max_length=255, null=True, blank=True)
-    title = models.CharField(_("Title"), max_length=255, null=True, blank=True)
-    volume = models.CharField(_("Volume"), max_length=255, null=True, blank=True)
-    number = models.CharField(_("Number"), max_length=255, null=True, blank=True)
-    year = models.CharField(_("Year"), max_length=4, null=True, blank=True)
-    open_access_status = models.CharField(_("Open Access Status"), max_length=25, choices=choices.OA_STATUS,
+    doi = models.CharField(_("DOI"), max_length=100, null=True, blank=True)
+    title = models.CharField(_("Title"), max_length=510, null=True, blank=True)
+    volume = models.CharField(_("Volume"), max_length=20, null=True, blank=True)
+    number = models.CharField(_("Number"), max_length=20, null=True, blank=True)
+    year = models.CharField(_("Year"), max_length=20, null=True, blank=True)
+    open_access_status = models.CharField(_("Open Access Status"), max_length=50, choices=choices.OA_STATUS,
                                      null=True,
                                      blank=True)
-    use_license = models.CharField(_("Use License"), max_length=25, choices=choices.LICENSE, null=True, blank=True)
-    apc = models.CharField(_("Article Processing Charge"), max_length=25, choices=choices.APC, null=True, blank=True)
+    use_license = models.CharField(_("Use License"), max_length=50, choices=choices.LICENSE, null=True, blank=True)
+    apc = models.CharField(_("Article Processing Charge"), max_length=20, choices=choices.APC, null=True, blank=True)
     contributors = models.ManyToManyField("Contributors", verbose_name=_("Contributors"), blank=True)
     journal = models.ForeignKey("Journals", verbose_name=_("Journals"), on_delete=models.SET_NULL, max_length=255, null=True, blank=True)
-    source = models.CharField(_("Record Source"), max_length=255, choices=choices.SOURCE, null=True, blank=True)
+    source = models.CharField(_("Record Source"), max_length=50, choices=choices.SOURCE, null=True, blank=True)
 
     def __unicode__(self):
         return self.doi
@@ -50,11 +50,11 @@ class ScholarlyArticles(models.Model):
 
 
 class Journals(models.Model):
-    journal_issn_l = models.CharField(_("ISSN-L"), max_length=255, null=True, blank=True)
-    journal_issns = models.CharField(_("ISSN's"), max_length=255, null=True, blank=True)
+    journal_issn_l = models.CharField(_("ISSN-L"), max_length=50, null=True, blank=True)
+    journal_issns = models.CharField(_("ISSN's"), max_length=50, null=True, blank=True)
     journal_name = models.CharField(_("Journal Name"), max_length=255, null=True, blank=True)
     publisher = models.CharField(_("Publisher"), max_length=255, null=True, blank=True)
-    journal_is_in_doaj = models.BooleanField(_("DOAJ"), max_length=255, default=False, null=True, blank=True)
+    journal_is_in_doaj = models.BooleanField(_("DOAJ"), default=False, null=True, blank=True)
 
     def __unicode__(self):
         return self.journal_issn_l
@@ -81,7 +81,7 @@ class Journals(models.Model):
 class Contributors(models.Model):
     family = models.CharField(_("Family Name"), max_length=255, null=True, blank=True)
     given = models.CharField(_("Given Name"), max_length=255, null=True, blank=True)
-    orcid = models.CharField("ORCID", max_length=255, null=True, blank=True)
+    orcid = models.CharField("ORCID", max_length=50, null=True, blank=True)
     authenticated_orcid = models.BooleanField(_("Authenticated"), default=False, null=True, blank=True)
     affiliation = models.ForeignKey('Affiliations', on_delete=models.SET_NULL, max_length=510, null=True, blank=True)
 
@@ -110,7 +110,8 @@ class Contributors(models.Model):
 
 class Affiliations(models.Model):
     name = models.CharField(_("Affiliation Name"), max_length=510, null=True, blank=True)
-    official = models.ForeignKey(Institution, verbose_name=_("Official Affiliation Name"), on_delete=models.SET_NULL, max_length=1020, null=True, blank=True)
+    official = models.ForeignKey(Institution, verbose_name=_("Official Affiliation Name"), on_delete=models.SET_NULL,
+                                 max_length=1020, null=True, blank=True)
 
     def __unicode__(self):
         return self.name
@@ -130,14 +131,14 @@ class Affiliations(models.Model):
 
 
 class RawUnpaywall(models.Model):
-    doi = models.CharField(_("DOI"), max_length=255, null=False, blank=False)
-    harvesting_creation = models.CharField(_("Harvesting date"), max_length=255, null=False, blank=False)
+    doi = models.CharField(_("DOI"), max_length=100, null=False, blank=False)
+    harvesting_creation = models.CharField(_("Harvesting date"), max_length=20, null=False, blank=False)
     is_paratext = models.BooleanField(_("Paratext"), default=False, null=True, blank=True)
-    year = models.CharField(_("Year"), max_length=255, null=True, blank=True)
+    year = models.CharField(_("Year"), max_length=10, null=True, blank=True)
     # unpaywall genre
-    resource_type = models.CharField(_("Resource Type"), max_length=255, choices=choices.TYPE_OF_RESOURCE, null=False,
+    resource_type = models.CharField(_("Resource Type"), max_length=50, choices=choices.TYPE_OF_RESOURCE, null=False,
                                      blank=True)
-    update = models.CharField(_("Update"), max_length=255, null=True, blank=True)
+    update = models.CharField(_("Update"), max_length=20, null=True, blank=True)
     json = models.JSONField(_("JSON File"), null=True, blank=True)
 
     def __unicode__(self):
