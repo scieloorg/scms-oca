@@ -26,6 +26,8 @@ class Indicator(CommonControlField):
                                               on_delete=models.SET_NULL, max_length=255, null=True, blank=True)
     geographic_context = models.ForeignKey(Location, verbose_name=_("Geographic context"), on_delete=models.SET_NULL,
                                            max_length=255, null=True, blank=True)
+    file_csv = models.FileField(_("CSV File"), null=True, blank=True)
+    file_json = models.JSONField(_("JSON File"), null=True, blank=True)
 
     class Meta:
         indexes = [
@@ -43,6 +45,8 @@ class Indicator(CommonControlField):
         FieldPanel('thematic_area'),
         FieldPanel('institutional_context'),
         FieldPanel('geographic_context'),
+        FieldPanel('file_csv'),
+        FieldPanel('file_json'),
     ]
 
     def __unicode__(self):
