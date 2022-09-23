@@ -71,7 +71,7 @@ def import_file(request):
 
     try:
         with open(file_path, 'r') as csvfile:
-            data = csv.DictReader(csvfile)
+            data = csv.DictReader(csvfile, delimiter=";")
 
             for line, row in enumerate(data):
                 isd = InfrastructureDirectory()
@@ -85,24 +85,19 @@ def import_file(request):
                 # Institution
                 inst_name = row['Institution Name']
                 if inst_name:
-                    inst_level_1 = row['Level_1']
-                    inst_level_2 = row['Level_2']
-                    inst_level_3 = row['Level_3']
                     inst_country = row['Institution Country']
-                    inst_region = row['Institution Region']
                     inst_state = row['Institution State']
                     inst_city = row['Institution City']
 
-                    institution = Institution.get_or_create(inst_name, inst_level_1, inst_level_2, inst_level_3,
-                                                            inst_country, inst_region,
+                    institution = Institution.get_or_create(inst_name, inst_country,
                                                             inst_state, inst_city, request.user)
                     isd.institutions.add(institution)
 
                 # Thematic Area
-                level0 = row['Thematic Area Level0']
+                level0 = row['Thematic Area Level0'].strip()
                 if level0:
-                    level1 = row['Thematic Area Level1']
-                    level2 = row['Thematic Area Level2']
+                    level1 = row['Thematic Area Level1'].strip()
+                    level2 = row['Thematic Area Level2'].strip()
                     the_area = ThematicArea.get_or_create(level0, level1, level2, request.user)
 
                     isd.thematic_areas.add(the_area)
@@ -126,12 +121,8 @@ def import_file(request):
 
                 # Action
                 if row['Action']:
-                    action_name = row['Action']
-                    if Action.objects.filter(name=action_name).exists():
-                        action = Action.objects.get(name=action_name)
-                        isd.action = action
-                    else:
-                        messages.error(request, _("Unknown action, line: %s") % str(line + 1))
+                    if Action.objects.filter(name__icontains="infraestrutura").exists():
+                        isd.action = Action.objects.get(name__icontains="infraestrutura")
 
                 if row['Source']:
                     isd.source = row['Source']

@@ -18,10 +18,6 @@ type=String
 data_required=False
 type=String
 
-[Institution Region]
-data_required=False
-type=String
-
 [Institution State]
 data_required=False
 type=String

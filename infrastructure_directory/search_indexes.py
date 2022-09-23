@@ -47,9 +47,9 @@ class InfraStructureIndex(indexes.SearchIndex, indexes.Indexable):
         thematic_areas = set()
         if obj.thematic_areas:
             for thematic_area in obj.thematic_areas.all():
-                thematic_areas.add(thematic_area.level0)
-                thematic_areas.add(thematic_area.level1)
-                thematic_areas.add(thematic_area.level2)
+                thematic_areas.add(thematic_area.level0.strip())
+                thematic_areas.add(thematic_area.level1.strip())
+                thematic_areas.add(thematic_area.level2.strip())
             return thematic_areas
 
     def prepare_keywords(self, obj):
