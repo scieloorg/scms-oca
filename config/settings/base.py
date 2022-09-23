@@ -413,7 +413,6 @@ SEARCH_PAGINATION_ITEMS_PER_PAGE = 10
 SEARCH_FACET_ITEMS_PER_MORE = 5
 
 SEARCH_FACET_LIST = ['record_type',
-                     'countries',
                      'regions',
                      'states',
                      'cities',
