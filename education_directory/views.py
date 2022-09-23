@@ -90,20 +90,20 @@ def import_file(request):
                 ed.save()
 
                 # Institution
-                inst_name = row['Institution Name']
+                inst_name = row['Institution Name'].strip()
                 if inst_name:
-                    inst_country = row['Institution Country']
-                    inst_state = row['Institution State']
-                    inst_city = row['Institution City']
+                    inst_country = row['Institution Country'].strip()
+                    inst_state = row['Institution State'].strip()
+                    inst_city = row['Institution City'].strip()
 
                     institution = Institution.get_or_create(inst_name, inst_country, inst_state, inst_city, request.user)
                     ed.institutions.add(institution)
 
                 # Thematic Area
-                level0 = row['Thematic Area Level0']
+                level0 = row['Thematic Area Level0'].strip()
                 if level0:
-                    level1 = row['Thematic Area Level1']
-                    level2 = row['Thematic Area Level2']
+                    level1 = row['Thematic Area Level1'].strip()
+                    level2 = row['Thematic Area Level2'].strip()
                     the_area = ThematicArea.get_or_create(level0, level1, level2, request.user)
 
                     ed.thematic_areas.add(the_area)
