@@ -33,9 +33,10 @@ def run(*args):
                 inst.level_1 = row['Level_1']
                 inst.level_2 = row['Level_2']
                 inst.level_3 = row['Level_3']
+                state_name = State.get_or_create(acronym=row['State Acronym'], user=creator).name
                 inst.location = Location.get_or_create(user=creator,
                                                        location_country="Brasil",
-                                                       location_state=row['State Acronym'],
+                                                       location_state=state_name,
                                                        location_city=None)
                 inst.creator = creator
                 inst.save()
