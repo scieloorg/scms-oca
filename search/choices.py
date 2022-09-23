@@ -10,4 +10,5 @@ translates = {
     'states': _('States'),
     'cities': _('Cities'),
     'regions': _('Regions'),
+    'thematic_areas': _('Thematic Areas'),
 }

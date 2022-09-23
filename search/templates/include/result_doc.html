@@ -12,7 +12,7 @@
     <div class="col-md-12 pe-md-12">
 
       <div class="entry-title title-sm">
-        <h2><a href="">{{ item.title }}</a> <a href="{{ item.link }}"><i class="icon-line-external-link"></i></a></h2>
+        <h2><a href="{{ item.link }}" target="_blank">{{ item.title }}</a> <a href="{{ item.link }}"><i class="icon-line-external-link"></i></a></h2>
       </div>
       <div class="entry-meta">
         <ul>
@@ -27,9 +27,9 @@
         <p>{{ item.description }}</p>
         <ul class="iconlist d-none d-xl-block mt-md-3">
           <li><i class="icon-caret-right"></i> {% trans "Country" %}: {{ item.countries|join:", " }}</li>
-          <li><i class="icon-caret-right"></i> {% trans "Regions" %}: {{ item.regions|join:", " }}</li>
-          <li><i class="icon-caret-right"></i> {% trans "States" %}: {{ item.states|join:", " }}</li>
-          <li><i class="icon-caret-right"></i> {% trans "Cities" %}: {{ item.cities|join:", " }}</li>
+          <li><i class="icon-caret-right"></i> {% trans "Region" %}: {{ item.regions|join:", " }}</li>
+          <li><i class="icon-caret-right"></i> {% trans "State" %}: {{ item.states|join:", " }}</li>
+          <li><i class="icon-caret-right"></i> {% trans "City" %}: {{ item.cities|join:", " }}</li>
         </ul>
       </div>
 
