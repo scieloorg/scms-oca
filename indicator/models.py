@@ -91,16 +91,16 @@ class Versioning(CommonControlField):
         FieldPanel('posterior_record'),
     ]
 
-    str = ''
+    s = ''
     if record_status:
-        str += record_status + ' - '
+        s += str(record_status) + ' - '
     if previous_record:
-        str += previous_record + ' - '
+        s += str(previous_record) + ' - '
     if posterior_record:
-        str += posterior_record
+        s += str(posterior_record)
 
     def __unicode__(self):
-        return str
+        return s
 
     def __str__(self):
-        return str
+        return s
