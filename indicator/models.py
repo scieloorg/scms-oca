@@ -26,6 +26,7 @@ class Indicator(CommonControlField):
                                               on_delete=models.SET_NULL, max_length=255, null=True, blank=True)
     geographic_context = models.ForeignKey(Location, verbose_name=_("Geographic context"), on_delete=models.SET_NULL,
                                            max_length=255, null=True, blank=True)
+    chronology = models.DateField(_("Date"), max_length=255, null=True, blank=True)
     file_csv = models.FileField(_("CSV File"), null=True, blank=True)
     file_json = models.JSONField(_("JSON File"), null=True, blank=True)
 
@@ -45,6 +46,7 @@ class Indicator(CommonControlField):
         FieldPanel('thematic_area'),
         FieldPanel('institutional_context'),
         FieldPanel('geographic_context'),
+        FieldPanel('chronology'),
         FieldPanel('file_csv'),
         FieldPanel('file_json'),
     ]
@@ -89,8 +91,16 @@ class Versioning(CommonControlField):
         FieldPanel('posterior_record'),
     ]
 
+    str = ''
+    if record_status:
+        str += record_status + ' - '
+    if previous_record:
+        str += previous_record + ' - '
+    if posterior_record:
+        str += posterior_record
+
     def __unicode__(self):
-        return u'%s - (%s / %s)' % (self.record_status, self.previous_record, self.posterior_record)
+        return str
 
     def __str__(self):
-        return u'%s - (%s / %s)' % (self.record_status, self.previous_record, self.posterior_record)
+        return str
