@@ -34,22 +34,31 @@ class IndicatorAdmin(ModelAdmin):
     exclude_from_explorer = False  # or True to exclude pages of this type from Wagtail's explorer view
 
     list_display = (
-        'name',
-        'post',
-        'versioning',
-        'action',
-        'practice',
-        'thematic_area',
-        'institutional_context',
-        'geographic_context',
-        'chronology',
+        'title',
+        'record_status',
+        'updated',
     )
 
-    list_filter = ('action',)
-    search_fields = ('name',
-                     'action',
-                     'practice',
-                     )
+    list_filter = (
+        'action',
+        'practice',
+        )
+
+    search_fields = (
+        'title',
+        'description',
+        'versioning',
+        'action',
+        'classification',
+        'practice',
+        'thematic_areas',
+        'institutions',
+        'locations',
+        'start_date',
+        'end_date',
+        'record_status',
+        'source',
+    )
 
 
 modeladmin_register(IndicatorAdmin)
