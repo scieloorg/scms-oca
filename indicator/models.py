@@ -27,7 +27,7 @@ class Indicator(CommonControlField):
     locations = models.ManyToManyField(Location, verbose_name=_("Location"),  blank=True)
     start_date = models.DateField(_("Start Date"), max_length=255, null=True, blank=True)
     end_date = models.DateField(_("End Date"), max_length=255, null=True, blank=True)
-    link = models.URLField(_("Link"), null=False, blank=False)
+    link = models.URLField(_("Link"), null=True, blank=True)
     file_csv = models.FileField(_("CSV File"), null=True, blank=True)
     file_json = models.JSONField(_("JSON File"), null=True, blank=True)
     keywords = TaggableManager(_("Keywords"), blank=True)
@@ -61,10 +61,10 @@ class Indicator(CommonControlField):
     # ]
 
     def __unicode__(self):
-        return u'%s - %s' % (self.identifier, self.name)
+        return u'%s' % (self.title,)
 
     def __str__(self):
-        return u'%s - %s' % (self.identifier, self.name)
+        return u'%s' % (self.title,)
 
     base_form_class = IndicatorDirectoryForm
 
