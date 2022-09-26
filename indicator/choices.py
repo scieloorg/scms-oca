@@ -29,3 +29,13 @@ open_access = (
     ('NOT APPLICABLE', _('NOT APPLICABLE')),
     ('UNDEFINED', _('UNDEFINED')),
 )
+
+classification = (
+    ('', ''),
+    ('encontro', _('encontro')),
+    ('conferência', _('conferência')),
+    ('congresso', _('congresso')),
+    ('workshop', _('workshop')),
+    ('seminário', _('seminário')),
+    ('outros', _('outros')),
+)
