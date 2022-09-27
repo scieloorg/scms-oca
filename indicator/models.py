@@ -40,7 +40,7 @@ class Indicator(CommonControlField):
 
     keywords = TaggableManager(_("Keywords"), blank=True)
 
-    record_status = models.CharField(_("Record status"), choices=choices.status,
+    record_status = models.CharField(_("Record status"), choices=choices.availability,
                                      max_length=255, null=True, blank=True)
     source = models.CharField(_("Source"), max_length=255, null=True, blank=True)
 

@@ -15,10 +15,13 @@ status = (
     ('PUBLISHED', _('PUBLISHED')),
 )
 
+CURRENT = 'CURRENT'
+DEACTIVATED = 'DEACTIVATED'
+
 availability = (
     ('', ''),
-    ('CURRENT', _('CURRENT')),
-    ('DEACTIVATED', _('DEACTIVATED')),
+    (CURRENT, _('CURRENT')),
+    (DEACTIVATED, _('DEACTIVATED')),
 )
 
 open_access = (
