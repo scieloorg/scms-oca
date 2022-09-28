@@ -357,7 +357,7 @@ def get_kwargs(
     )
     kwargs = {}
     for item in items:
-        if hasattr(model, item['attribute']):
+        if hasattr(model, item['attribute']) and item['value']:
             kwargs[item['attribute']] = item['value']
     return kwargs
 
