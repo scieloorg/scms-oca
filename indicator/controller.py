@@ -1,9 +1,15 @@
+import csv
+import io
+import json
+
+from django.utils.translation import gettext as _
+
 from education_directory.models import EducationDirectory
 from event_directory.models import EventDirectory
 from infrastructure_directory.models import InfrastructureDirectory
 from policy_directory.models import PolicyDirectory
 
-from .models import Indicator, Results
+from .models import Indicator, Results, Versioning
 from .choices import CURRENT, DEACTIVATED
 
 
@@ -46,8 +52,6 @@ def generate_indicator(
         thematic_area,
         start_date, end_date,
         location,
-        return_data,
-        return_rows,
     )
     # cria uma instância de Indicator
     indicator = create_indicator(name)
@@ -115,6 +119,7 @@ def add_indicator_results(
     if return_data:
         json_data = []
     indicator.results = Results()
+    indicator.results.save()
     attributes = (
         indicator.results.education_results,
         indicator.results.event_results,
@@ -142,10 +147,17 @@ def add_indicator_results(
             rows.extend(result['rows'])
         if return_data:
             json_data.extend(result['data'])
-    # FIXME gerar arquivo com conteúdo rows
-    indicator.file_csv = rows
-    # FIXME gerar arquivo com conteúdo json_data
-    indicator.file_json = json_data
+
+    if return_rows:
+        csv_file = io.StringIO()
+        csv.writer(csv_file).writerows(rows)
+        indicator.file_csv = csv_file
+
+    if return_data:
+        json_data = json.dumps(rows, indent=4)
+        indicator.file_json = json_data
+
+    indicator.results.save()
 
 
 def generate_indicator_title(
@@ -176,8 +188,24 @@ def generate_indicator_title(
     -------
     str
     """
-    # TODO
-    return _('Número ...')
+    args = (
+        practice,
+        action,
+        classification,
+        institution,
+        thematic_area,
+        start_date,
+        end_date,
+        location,
+    )
+
+    #Considerando que um indicador é composto exatamente por dois args
+    name = "Número de "
+    for attrib in args:
+        if attrib:
+            name += attrib
+
+    return _(name)
 
 
 def create_indicator(title):
@@ -196,15 +224,20 @@ def create_indicator(title):
         seq = 1
         previous = None
 
+    versioning = Versioning()
+    versioning.seq = seq
+    versioning.previous_record = previous
+    versioning.posterior_record = None
+    versioning.save()
+
     indicator = Indicator()
     indicator.title = title
-    indicator.versioning.seq = seq
-    indicator.versioning.previous_record = previous
+    indicator.versioning = versioning
     indicator.record_status = CURRENT
-    indicator.save()
 
     if previous:
-        previous.versioning.posterior_record = indicator
+        versioning.posterior_record = indicator
+        previous.versioning = versioning
         previous.save()
 
     return indicator
