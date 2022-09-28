@@ -129,7 +129,7 @@ def add_indicator_results(
     models = (EducationDirectory, EventDirectory, InfrastructureDirectory,
               PolicyDirectory)
     for index, model in enumerate(models):
-        result = get_model_indicator(
+        result = get_model_results(
             model,
             practice,
             action,
@@ -243,7 +243,7 @@ def create_indicator(title):
     return indicator
 
 
-def get_model_indicator(
+def get_model_results(
         model,
         practice,
         action,
