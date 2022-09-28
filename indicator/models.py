@@ -1,3 +1,5 @@
+import os
+
 from django.db import models
 from django.utils.translation import gettext as _
 from taggit.managers import TaggableManager
@@ -6,7 +8,7 @@ from wagtail.admin.edit_handlers import FieldPanel, InlinePanel
 from core.models import CommonControlField
 
 from . import choices
-from .forms import IndicatorDirectoryForm
+from . forms import IndicatorDirectoryForm, VersioningForm
 from usefulmodels.models import Action, Practice, ThematicArea
 from institution.models import Institution
 from location.models import Location
@@ -36,7 +38,7 @@ class Indicator(CommonControlField):
     link = models.URLField(_("Link"), null=True, blank=True)
     file_csv = models.FileField(_("CSV File"), null=True, blank=True)
     file_json = models.JSONField(_("JSON File"), null=True, blank=True)
-    results = models.ForeignKey('Results', on_delete=models.SET_NULL, blank=True)
+    results = models.ForeignKey('Results', on_delete=models.SET_NULL, null=True)
 
     keywords = TaggableManager(_("Keywords"), blank=True)
 
@@ -77,14 +79,14 @@ class Indicator(CommonControlField):
     base_form_class = IndicatorDirectoryForm
 
 
-class Versioning(CommonControlField):
+class Versioning(models.Model):
     previous_record = models.ForeignKey(Indicator, verbose_name=_("Previous Record"), related_name="predecessor_register",
                                         on_delete=models.SET_NULL,
                                         max_length=255, null=True, blank=True)
     posterior_record = models.ForeignKey(Indicator, verbose_name=_("Posterior Record"), related_name="successor_register",
                                         on_delete=models.SET_NULL,
                                         max_length=255, null=True, blank=True)
-    seq = models.IntField(_('Sequential number'), null=True, blank=True)
+    seq = models.IntegerField(_('Sequential number'), null=True, blank=True)
 
     panels = [
         FieldPanel('previous_record'),
