@@ -743,6 +743,7 @@ def generate_indicators_in_institutional_context(title, action, creator_id):
         # cria o registro indicador
         create_indicator_action_classification_and_practice(
             action=action,
+            scope=choices.INSTITUTIONAL,
             title=title,
             data=results,
             creator_id=creator_id,
@@ -823,13 +824,12 @@ def count_occurences_in_context(items, context_attribute, standardized_name):
             ).annotate(
                 count=Count(context_attribute)
             ).order_by('-count'):
-        if standardized_name:
-            item['category_label'] = standardized_name
-            item['category_value'] = str(item.pop(context_attribute))
+        item['category_label'] = standardized_name or context_attribute
+        item['category_value'] = str(item.pop(context_attribute))
         yield json.dumps(item)
 
 
-def create_indicator_action_classification_and_practice(action, title, data, creator_id):
+def create_indicator_action_classification_and_practice(action, scope, title, data, creator_id):
 
     # cria uma instância de Indicator
 
@@ -845,7 +845,7 @@ def create_indicator_action_classification_and_practice(action, title, data, cre
         action=action,
         classification=labels['classification'],
         practice=practice,
-        scope=INSTITUTIONAL,
+        scope=scope,
     )
     indicator.action = action
     indicator.classification = labels['classification']
@@ -874,3 +874,91 @@ def create_indicator_action_classification_and_practice(action, title, data, cre
 
     indicator.save()
     return indicator
+
+
+#########################################################################
+
+
+def generate_indicators_in_geographic_context(title, action, creator_id):
+    """
+    Generate indicator according to the provided parameters
+
+    Parameters
+    ----------
+    title : str
+    action : Action
+
+    Returns
+    -------
+    Indicator
+
+    """
+
+    indicators_data = {}
+    for classification_and_practice, results in get_results_grouped_by_action_classification_and_practice(
+            action, EducationDirectory, 'locations'):
+        indicators_data.setdefault(classification_and_practice, {})
+        indicators_data[classification_and_practice]['education'] = results
+
+    for classification_and_practice, results in get_results_grouped_by_action_classification_and_practice(
+            action, EventDirectory, 'locations'):
+        indicators_data.setdefault(classification_and_practice, {})
+        indicators_data[classification_and_practice]['event'] = results
+
+    for classification_and_practice, results in get_results_grouped_by_action_classification_and_practice(
+            action, InfrastructureDirectory, 'locations'):
+        indicators_data.setdefault(classification_and_practice, {})
+        indicators_data[classification_and_practice]['infrastructure'] = results
+
+    for classification_and_practice, results in get_results_grouped_by_action_classification_and_practice(
+            action, PolicyDirectory, 'locations'):
+        indicators_data.setdefault(classification_and_practice, {})
+        indicators_data[classification_and_practice]['policy'] = results
+
+    # registra um indicador por categoria e pratica resultante
+    # da junção de todos os resultados de todos os diretórios
+    for classification_and_practice, results in indicators_data.items():
+
+        text = f"{results['labels']['classification']} {results['labels']['practice__name']}"
+
+        # cria o registro indicador
+        create_indicator_action_classification_and_practice(
+            action=action,
+            scope=choices.GEOGRAPHIC,
+            title=title,
+            data=results,
+            creator_id=creator_id,
+        )
+
+
+def count_locations_occurences_in_context(items):
+    """
+    Parameters
+    ----------
+    items : QuerySet
+    context_attribute : str (ex.: 'organization')
+    standardized_name : str (ex.: 'institutions')
+
+    """
+
+    # https://docs.djangoproject.com/en/4.1/ref/models/querysets/#values
+    #
+    # >>> from django.db.models import Count
+    # >>> Blog.objects.values('entry__authors', entries=Count('entry'))
+    # <QuerySet [{'entry__authors': 1, 'entries': 20}, {'entry__authors': 1, 'entries': 13}]>
+    # >>> Blog.objects.values('entry__authors').annotate(entries=Count('entry'))
+    # <QuerySet [{'entry__authors': 1, 'entries': 33}]>
+
+    for item in items.values(
+                'locations__state',
+                'institutions__location__state',
+            ).annotate(
+                count=Count('id')
+            ).order_by('-count'):
+        item['category_label'] = 'state'
+        item['category_value'] = (
+            item.get('locations__state') or
+            item.get('institutions__location__state')
+        )
+        yield json.dumps(item)
+
