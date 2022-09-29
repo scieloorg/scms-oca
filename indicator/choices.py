@@ -8,17 +8,25 @@ languages = (
     ('En', 'En'),
 )
 
+
+WIP = 'WIP',
+TO_MODERATE = 'TO MODERATE'
+PUBLISHED = 'PUBLISHED'
+
 status = (
     ('', ''),
-    ('WIP', 'WIP'),
-    ('TO MODERATE', _('TO MODERATE')),
-    ('PUBLISHED', _('PUBLISHED')),
+    (WIP, _('WORK IN PROGRESS')),
+    (TO_MODERATE, _('TO MODERATE')),
+    (PUBLISHED, _('PUBLISHED')),
 )
 
-availability = (
+CURRENT = 'CURRENT'
+OUTDATED = 'OUTDATED'
+
+VALIDITY = (
     ('', ''),
-    ('CURRENT', _('CURRENT')),
-    ('DEACTIVATED', _('DEACTIVATED')),
+    (CURRENT, _('CURRENT')),
+    (OUTDATED, _('OUTDATED')),
 )
 
 open_access = (
@@ -38,4 +46,18 @@ classification = (
     ('workshop', _('workshop')),
     ('seminário', _('seminário')),
     ('outros', _('outros')),
+)
+
+
+INSTITUTIONAL = 'INSTITUTIONAL'
+THEMATIC = 'THEMATIC'
+GEOGRAPHIC = 'GEOGRAPHIC'
+CHRONOLOGICAL = 'CHRONOLOGICAL'
+
+SCOPE = (
+    ('', ''),
+    (INSTITUTIONAL, _('Instituticional')),
+    (GEOGRAPHIC, _('Geográfico')),
+    (CHRONOLOGICAL, _('Cronológico')),
+    (THEMATIC, _('Temático')),
 )
