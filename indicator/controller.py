@@ -723,6 +723,7 @@ def generate_indicators_in_institutional_context(title, action, creator_id):
 
         # cria o registro indicador
         create_indicator_action_classification_and_practice(
+            action=action,
             title=title,
             data=results,
             creator_id,
@@ -805,11 +806,12 @@ def count_occurences_in_context(items, context_attribute, standardized_name):
                 count=Count(context_attribute)
             ).order_by('-count'):
         if standardized_name:
-            item[standardized_name] = str(item.pop(context_attribute))
+            item['category_label'] = standardized_name
+            item['category_value'] = str(item.pop(context_attribute))
         yield item
 
 
-def create_indicator_action_classification_and_practice(title, data, creator_id):
+def create_indicator_action_classification_and_practice(action, title, data, creator_id):
 
     # cria uma instância de Indicator
 
@@ -819,20 +821,20 @@ def create_indicator_action_classification_and_practice(title, data, creator_id)
     text = f"{labels['classification']} {labels['practice__name']}"
     title = title.replace("[QUALIFICATION_AND_PRACTICE]", text)
     indicator = create_indicator(title)
+    indicator.action = action
+    indicator.classification = labels['classification']
+    indicator.practice = Practice.get(code=labels['practice_code'])
+
     csv_file = io.StringIO()
     writer = csv.writer(csv_file)
     for data_ in data.values():
         writer.writedata(data_['data'])
     indicator.file_csv = csv_file
 
-    indicator.results = Results()
-    indicator.results.save()
-
-    indicator.results.education_results = data['education']['items']
-    indicator.results.event_results = data['event']['items']
-    indicator.results.infrastructure_results = data['infrastructure']['items']
-    indicator.results.policy_results = data['policy']['items']
-    indicator.results.save()
+    indicator.education_results = data['education']['items']
+    indicator.event_results = data['event']['items']
+    indicator.infrastructure_results = data['infrastructure']['items']
+    indicator.policy_results = data['policy']['items']
 
     # json_data = json.dumps(rows, indent=4)
     # indicator.file_json = json.dumps(rows, indent=4)

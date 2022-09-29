@@ -38,7 +38,11 @@ class Indicator(CommonControlField):
     link = models.URLField(_("Link"), null=True, blank=True)
     file_csv = models.FileField(_("CSV File"), null=True, blank=True)
     file_json = models.JSONField(_("JSON File"), null=True, blank=True)
-    results = models.ForeignKey('Results', on_delete=models.SET_NULL, null=True)
+
+    event_results = models.ManyToManyField(EventDirectory, blank=True)
+    education_results = models.ManyToManyField(EducationDirectory, blank=True)
+    infrastructure_results = models.ManyToManyField(InfrastructureDirectory, blank=True)
+    policy_results = models.ManyToManyField(PolicyDirectory, blank=True)
 
     keywords = TaggableManager(_("Keywords"), blank=True)
 
@@ -104,10 +108,3 @@ class Versioning(models.Model):
 
     def __str__(self):
         return self.s
-
-
-class Results(models.Model):
-    event_results = models.ManyToManyField(EventDirectory, blank=True)
-    education_results = models.ManyToManyField(EducationDirectory, blank=True)
-    infrastructure_results = models.ManyToManyField(InfrastructureDirectory, blank=True)
-    policy_results = models.ManyToManyField(PolicyDirectory, blank=True)
