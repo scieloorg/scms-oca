@@ -21,6 +21,8 @@ class IndicatorIndex(indexes.SearchIndex, indexes.Indexable):
     record_status = indexes.CharField(model_attr="record_status", null=True)
     source = indexes.CharField(model_attr="source", null=True)
 
+    file_csv = indexes.CharField(null=True)
+
     # ForeignKeys
     versioning = indexes.CharField(model_attr="versioning", null=True)
     action = indexes.CharField(model_attr="action", null=True)
@@ -37,6 +39,9 @@ class IndicatorIndex(indexes.SearchIndex, indexes.Indexable):
     cities = indexes.MultiValueField(null=True)
     states = indexes.MultiValueField(null=True)
     regions = indexes.MultiValueField(null=True)
+
+    def prepare_file_csv(self, obj):
+        return obj.file_csv.url
 
     def prepare_record_type(self, obj):
         return "indicator"

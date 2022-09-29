@@ -58,6 +58,9 @@
    <field name="django_id" type="string" indexed="true" stored="true" multiValued="false"/>
 
    <field name="record_type" type="string" indexed="true" stored="true" multiValued="false"/>
+   <field name="directory_type" type="string" indexed="true" stored="true" multiValued="false"/>
+   <field name="practice" type="string" indexed="true" stored="true" multiValued="false"/>
+   <field name="action" type="string" indexed="true" stored="true" multiValued="false"/>
 
    <!-- multivalued fields -->
    <field name="keywords" type="string" indexed="true" stored="true" multiValued="true"/>
