@@ -19,6 +19,7 @@ class InfraStructureIndex(indexes.SearchIndex, indexes.Indexable):
     record_type = indexes.CharField(null=False)
     text = indexes.CharField(document=True, use_template=True)
     title = indexes.CharField(model_attr="title", null=True)
+    directory_type = indexes.CharField(null=False)
 
     link = indexes.CharField(model_attr="link", null=True)
     description = indexes.CharField(model_attr="description", null=True)
@@ -37,7 +38,11 @@ class InfraStructureIndex(indexes.SearchIndex, indexes.Indexable):
     source = indexes.CharField(model_attr="action", null=True)
 
     def prepare_record_type(self, obj):
+        return "directory"
+
+    def prepare_directory_type(self, obj):
         return "infrastructure_directory"
+
 
     def prepare_institutions(self, obj):
         if obj.institutions:
