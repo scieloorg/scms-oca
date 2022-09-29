@@ -11,7 +11,7 @@ from infrastructure_directory.models import InfrastructureDirectory
 from policy_directory.models import PolicyDirectory
 
 from .models import Indicator, Results, Versioning
-from .choices import CURRENT, DEACTIVATED
+from . import choices
 
 
 # def generate_indicator(
@@ -209,18 +209,32 @@ from .choices import CURRENT, DEACTIVATED
 #     return _(name)
 
 
-def create_indicator(title):
+def create_indicator(
+        action,
+        classification,
+        practice,
+        scope):
     """
     Cria uma nova instância de Indicator,
     adicionando / atualizando os atributos `seq` e outros relacionados com
     a versão do indicador
 
+    Parameters
+    ----------
+    action : Action
+    classification : str
+    practice : Practice
+    scope : choices.SCOPE
     """
     try:
         previous = Indicator.objects.filter(
-            title=title, versioning__posterior_record=None)[0]
+            action=action,
+            practice=practice,
+            classification=classification,
+            scope=scope,
+            versioning__posterior_record=None)[0]
         seq = previous.seq + 1
-        previous.record_status = DEACTIVATED
+        previous.validity = choices.OUTDATED
     except IndexError:
         seq = 1
         previous = None
@@ -234,13 +248,18 @@ def create_indicator(title):
     indicator = Indicator()
     indicator.title = title
     indicator.versioning = versioning
-    indicator.record_status = CURRENT
+    indicator.validity = choices.CURRENT
+    indicator.action = action
+    indicator.practice = practice
+    indicator.classification = classification
+    indicator.scope = scope
 
     if previous:
         versioning.posterior_record = indicator
         previous.versioning = versioning
         previous.save()
 
+    indicator.record_status = choices.PUBLISHED
     return indicator
 
 
@@ -726,7 +745,7 @@ def generate_indicators_in_institutional_context(title, action, creator_id):
             action=action,
             title=title,
             data=results,
-            creator_id,
+            creator_id=creator_id,
         )
 
 
@@ -774,7 +793,6 @@ def get_rows_grouped_by__classification_and_practice(model, action):
       '...(remaining elements truncated)...'
     ]
     """
-
     return model.objects.filter(action=action).values(
         'classification',
         'practice__code',
@@ -808,7 +826,7 @@ def count_occurences_in_context(items, context_attribute, standardized_name):
         if standardized_name:
             item['category_label'] = standardized_name
             item['category_value'] = str(item.pop(context_attribute))
-        yield item
+        yield json.dumps(item)
 
 
 def create_indicator_action_classification_and_practice(action, title, data, creator_id):
@@ -820,10 +838,18 @@ def create_indicator_action_classification_and_practice(action, title, data, cre
         break
     text = f"{labels['classification']} {labels['practice__name']}"
     title = title.replace("[QUALIFICATION_AND_PRACTICE]", text)
-    indicator = create_indicator(title)
+
+    practice = Practice.get(code=labels['practice__code'])
+
+    indicator = create_indicator(
+        action=action,
+        classification=labels['classification'],
+        practice=practice,
+        scope=INSTITUTIONAL,
+    )
     indicator.action = action
     indicator.classification = labels['classification']
-    indicator.practice = Practice.get(code=labels['practice_code'])
+    indicator.practice = practice
 
     csv_file = io.StringIO()
     writer = csv.writer(csv_file)
