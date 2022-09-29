@@ -30,5 +30,14 @@ def generate_institutions_indicators():
             title, action, creator_id)
 
 
+def generate_geographical_indicators():
+    creator_id = 1
+    for action in Action.objects.all():
+        title = f"Número de {action} [QUALIFICATION_AND_PRACTICE] no contexto geográfico"
+        controller.generate_indicators_in_geographic_context(
+            title, action, creator_id)
+
+
 def run():
     generate_institutions_indicators()
+    generate_geographical_indicators()
