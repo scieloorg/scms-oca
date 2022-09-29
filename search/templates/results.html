@@ -5,7 +5,15 @@
 <div id="shop" class="shop row grid-container gutter-30 has-init-isotope" data-layout="fitRows">
 
   {% for item in search_results %}
-    {% include 'include/result_doc.html' %}
+
+    {% if item.record_type == 'indicator' %}
+      {% include 'include/result_doc_indicator.html' %}
+    {% endif %}
+
+    {% if item.record_type == 'directory' %}
+      {% include 'include/result_doc_directory.html' %}
+    {% endif %}
+
   {% endfor %}
 
 </div>
