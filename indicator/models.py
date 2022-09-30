@@ -40,7 +40,8 @@ class Indicator(CommonControlField):
 
     thematic_areas = models.ManyToManyField(ThematicArea, verbose_name=_("Thematic Area"), blank=True)
     institutions = models.ManyToManyField(Institution, verbose_name=_("Institution"), blank=True)
-    locations = models.ManyToManyField(Location, verbose_name=_("Location"),  blank=True)    start_date = models.DateField(_("Start Date"), max_length=255, null=True, blank=True)
+    locations = models.ManyToManyField(Location, verbose_name=_("Location"),  blank=True)
+    start_date = models.DateField(_("Start Date"), max_length=255, null=True, blank=True)
     end_date = models.DateField(_("End Date"), max_length=255, null=True, blank=True)
 
     link = models.URLField(_("Link"), null=True, blank=True)
