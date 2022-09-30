@@ -9,7 +9,7 @@ languages = (
 )
 
 
-WIP = 'WIP',
+WIP = 'WIP'
 TO_MODERATE = 'TO MODERATE'
 PUBLISHED = 'PUBLISHED'
 
