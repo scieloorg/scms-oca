@@ -740,8 +740,6 @@ def generate_indicators_in_institutional_context(title, action, creator_id):
     # da junção de todos os resultados de todos os diretórios
     for classification_and_practice, results in indicators_data.items():
 
-        text = f"{results['labels']['classification']} {results['labels']['practice__name']}"
-
         # cria o registro indicador
         create_indicator_action_classification_and_practice(
             action=action,
@@ -920,8 +918,6 @@ def generate_indicators_in_geographic_context(title, action, creator_id):
     # registra um indicador por categoria e pratica resultante
     # da junção de todos os resultados de todos os diretórios
     for classification_and_practice, results in indicators_data.items():
-
-        text = f"{results['labels']['classification']} {results['labels']['practice__name']}"
 
         # cria o registro indicador
         create_indicator_action_classification_and_practice(
