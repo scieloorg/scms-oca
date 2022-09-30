@@ -211,6 +211,7 @@ from . import choices
 
 
 def create_indicator(
+        title,
         action,
         classification,
         practice,
@@ -843,6 +844,7 @@ def create_indicator_action_classification_and_practice(action, scope, title, da
     practice = Practice.get(code=labels['practice__code'])
 
     indicator = create_indicator(
+        title=title,
         action=action,
         classification=labels['classification'],
         practice=practice,
