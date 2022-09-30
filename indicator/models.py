@@ -1,14 +1,12 @@
-import os
-
 from django.db import models
 from django.utils.translation import gettext as _
 from taggit.managers import TaggableManager
-from wagtail.admin.edit_handlers import FieldPanel, InlinePanel
+from wagtail.admin.edit_handlers import FieldPanel
 
 from core.models import CommonControlField
 
 from . import choices
-from . forms import IndicatorDirectoryForm, VersioningForm
+from . forms import IndicatorDirectoryForm
 from usefulmodels.models import Action, Practice, ThematicArea
 from institution.models import Institution
 from location.models import Location
