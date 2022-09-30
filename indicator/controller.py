@@ -778,7 +778,6 @@ def get_results_grouped_by_action_classification_and_practice(
             "data": count_occurences_in_context(
                 items, context_attribute, standardized_name),
         }
-        groups
     return groups
 
 
