@@ -841,7 +841,7 @@ def create_indicator_action_classification_and_practice(action, scope, title, da
     text = f"{labels['classification']} {labels['practice__name']}"
     title = title.replace("[QUALIFICATION_AND_PRACTICE]", text)
 
-    practice = Practice.get(code=labels['practice__code'])
+    practice = Practice.objects.get(code=labels['practice__code'])
 
     indicator = create_indicator(
         title=title,
