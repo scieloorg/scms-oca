@@ -854,7 +854,7 @@ def create_indicator_action_classification_and_practice(action, scope, title, da
     csv_file = io.StringIO()
     writer = csv.writer(csv_file)
     for data_ in data.values():
-        writer.writedata(data_['data'])
+        writer.writerows(data_['data'])
     indicator.file_csv = csv_file
 
     indicator.education_results = data['education']['items']
