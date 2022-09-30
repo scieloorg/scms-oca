@@ -9,8 +9,9 @@ from education_directory.models import EducationDirectory
 from event_directory.models import EventDirectory
 from infrastructure_directory.models import InfrastructureDirectory
 from policy_directory.models import PolicyDirectory
+from usefulmodels.models import Practice
 
-from .models import Indicator, Results, Versioning
+from .models import Indicator, Versioning
 from . import choices
 
 
