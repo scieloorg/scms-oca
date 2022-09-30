@@ -764,7 +764,7 @@ def get_results_grouped_by_action_classification_and_practice(
         items = model.objects.filter(
             action=action,
             classification=row['classification'],
-            practice_code=row['practice__code'],
+            practice__code=row['practice__code'],
         )
 
         groups.setdefault(key, {})
