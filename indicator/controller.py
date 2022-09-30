@@ -717,22 +717,22 @@ def generate_indicators_in_institutional_context(title, action, creator_id):
 
     indicators_data = {}
     for classification_and_practice, results in get_results_grouped_by_action_classification_and_practice(
-            action, EducationDirectory, 'institutions'):
+            action, EducationDirectory, 'institutions').items():
         indicators_data.setdefault(classification_and_practice, {})
         indicators_data[classification_and_practice]['education'] = results
 
     for classification_and_practice, results in get_results_grouped_by_action_classification_and_practice(
-            action, EventDirectory, 'organization', 'institutions'):
+            action, EventDirectory, 'organization', 'institutions').items():
         indicators_data.setdefault(classification_and_practice, {})
         indicators_data[classification_and_practice]['event'] = results
 
     for classification_and_practice, results in get_results_grouped_by_action_classification_and_practice(
-            action, InfrastructureDirectory, 'institutions'):
+            action, InfrastructureDirectory, 'institutions').items():
         indicators_data.setdefault(classification_and_practice, {})
         indicators_data[classification_and_practice]['infrastructure'] = results
 
     for classification_and_practice, results in get_results_grouped_by_action_classification_and_practice(
-            action, PolicyDirectory, 'institutions'):
+            action, PolicyDirectory, 'institutions').items():
         indicators_data.setdefault(classification_and_practice, {})
         indicators_data[classification_and_practice]['policy'] = results
 
@@ -899,22 +899,22 @@ def generate_indicators_in_geographic_context(title, action, creator_id):
 
     indicators_data = {}
     for classification_and_practice, results in get_results_grouped_by_action_classification_and_practice(
-            action, EducationDirectory, 'locations'):
+            action, EducationDirectory, 'locations').items():
         indicators_data.setdefault(classification_and_practice, {})
         indicators_data[classification_and_practice]['education'] = results
 
     for classification_and_practice, results in get_results_grouped_by_action_classification_and_practice(
-            action, EventDirectory, 'locations'):
+            action, EventDirectory, 'locations').items():
         indicators_data.setdefault(classification_and_practice, {})
         indicators_data[classification_and_practice]['event'] = results
 
     for classification_and_practice, results in get_results_grouped_by_action_classification_and_practice(
-            action, InfrastructureDirectory, 'locations'):
+            action, InfrastructureDirectory, 'locations').items():
         indicators_data.setdefault(classification_and_practice, {})
         indicators_data[classification_and_practice]['infrastructure'] = results
 
     for classification_and_practice, results in get_results_grouped_by_action_classification_and_practice(
-            action, PolicyDirectory, 'locations'):
+            action, PolicyDirectory, 'locations').items():
         indicators_data.setdefault(classification_and_practice, {})
         indicators_data[classification_and_practice]['policy'] = results
 
