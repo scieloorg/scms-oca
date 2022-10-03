@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-14 17:21+0000\n"
+"POT-Creation-Date: 2022-09-28 15:05+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -508,7 +508,7 @@ msgstr ""
 msgid "Home"
 msgstr ""
 
-#: django_celery_beat/views.py:28
+#: django_celery_beat/views.py:32
 #, python-brace-format
 msgid "Task {0} was successfully run"
 msgstr ""
