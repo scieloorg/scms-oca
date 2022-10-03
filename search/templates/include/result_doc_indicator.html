@@ -1,0 +1,61 @@
+{% load translate %}
+{% load humanize %}
+{% load i18n %}
+{% load static %}
+{% load translate %}
+{% load l10n %}
+{% load auth_extras %}
+
+<div class="col-12 col-sm-6 col-lg-12 m-2">
+  <div class="grid-inner row no-gutters">
+
+    <div class="col-md-12 pe-md-12">
+
+      <div class="entry-title title-sm">
+        <h2><a href="{{ item.file_csv }}" target="_blank">{{ item.title }}</a> <a href="{{ item.file_csv }}" target="_blank"><i class="icon-line-arrow-down-circle"></i></a></h2>
+      </div>
+      <div class="entry-meta">
+        <ul>
+          <li><i class="icon-calendar3"></i> {{ item.start_date }} - {{ item.end_date }}</li>
+          <li><i class="icon-graph"></i></li>
+          <li><span class="badge bg-secondary" style="color:#fff;">{{ item.record_type|translate_data }}</span></li>
+        </ul>
+      </div>
+
+      <div class="entry-content">
+        <p>{{ item.description }}</p>
+        <ul class="iconlist d-none d-xl-block mt-md-3">
+          {% if item.countries %}
+            <li><i class="icon-caret-right"></i> {% trans "Country" %}: {{ item.countries|join:", " }}</li>
+          {% endif %}
+          {% if item.regions %}
+            <li><i class="icon-caret-right"></i> {% trans "Region" %}: {{ item.regions|join:", " }}</li>
+          {% endif %}
+          {% if item.states %}
+            <li><i class="icon-caret-right"></i> {% trans "State" %}: {{ item.states|join:", " }}</li>
+          {% endif %}
+          {% if item.cities %}
+          <li><i class="icon-caret-right"></i> {% trans "City" %}: {{ item.cities|join:", " }}</li>
+          {% endif %}
+          {% if item.classification %}
+          <li><i class="icon-caret-right"></i> <b>{% trans "Classification" %}</b>: {{ item.classification }}</li>
+          {% endif %}
+          {% if item.link %}
+          <li><i class="icon-caret-right"></i> <b>{% trans "Link" %}</b>: {{ item.link }}</li>
+          {% endif %}
+        </ul>
+      </div>
+
+      {% if item.practice or item.action %}
+        <div class="card">
+          <div class="card-body">
+            <span><b>Practice: </b>{{ item.practice }} </span>
+            <span><b>Action: </b>{{ item.action }}</span>
+          </div>
+        </div>
+      {% endif%}
+
+    </div>
+
+  </div>
+</div>

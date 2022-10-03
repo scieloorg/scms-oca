@@ -1,40 +1,50 @@
 # coding: utf-8
 from haystack import indexes
 
-from education_directory import models
+from indicator import models
 
 
-class EducationIndex(indexes.SearchIndex, indexes.Indexable):
+class IndicatorIndex(indexes.SearchIndex, indexes.Indexable):
     """
     Fields:
         text
     """
-    record_type = indexes.CharField(null=False)
     text = indexes.CharField(document=True, use_template=True)
+    record_type = indexes.CharField(null=False)
+
     title = indexes.CharField(model_attr="title", null=True)
-    directory_type = indexes.CharField(null=False)
-
-    link = indexes.CharField(model_attr="link", null=True)
     description = indexes.CharField(model_attr="description", null=True)
-
-    institutions = indexes.MultiValueField(null=True)
-    practice = indexes.CharField(model_attr="practice", null=True)
-    action = indexes.CharField(model_attr="action", null=True)
     classification = indexes.CharField(model_attr="classification", null=True)
+    start_date = indexes.CharField(model_attr="start_date", null=True)
+    end_date = indexes.CharField(model_attr="end_date", null=True)
+    link = indexes.CharField(model_attr="link", null=True)
+    record_status = indexes.CharField(model_attr="record_status", null=True)
+    source = indexes.CharField(model_attr="source", null=True)
+
+    file_csv = indexes.CharField(null=True)
+
+    # ForeignKeys
+    versioning = indexes.CharField(model_attr="versioning", null=True)
+    action = indexes.CharField(model_attr="action", null=True)
+    practice = indexes.CharField(model_attr="practice", null=True)
+
+    # ManyToMany
     keywords = indexes.MultiValueField(null=True)
+    thematic_areas = indexes.MultiValueField(null=True)
+    institutions = indexes.MultiValueField(null=True)
+    locations = indexes.MultiValueField(null=True)
+
+    # Location
     countries = indexes.MultiValueField(null=True)
     cities = indexes.MultiValueField(null=True)
     states = indexes.MultiValueField(null=True)
     regions = indexes.MultiValueField(null=True)
-    thematic_areas = indexes.MultiValueField(null=True)
 
-    source = indexes.CharField(model_attr="action", null=True)
+    def prepare_file_csv(self, obj):
+        return obj.file_csv.url
 
     def prepare_record_type(self, obj):
-        return "directory"
-
-    def prepare_directory_type(self, obj):
-        return "education_directory"
+        return "indicator"
 
     def prepare_institutions(self, obj):
         if obj.institutions:
@@ -44,9 +54,9 @@ class EducationIndex(indexes.SearchIndex, indexes.Indexable):
         thematic_areas = set()
         if obj.thematic_areas:
             for thematic_area in obj.thematic_areas.all():
-                thematic_areas.add(thematic_area.level0.strip())
-                thematic_areas.add(thematic_area.level1.strip())
-                thematic_areas.add(thematic_area.level2.strip())
+                thematic_areas.add(thematic_area.level0)
+                thematic_areas.add(thematic_area.level1)
+                thematic_areas.add(thematic_area.level2)
             return thematic_areas
 
     def prepare_keywords(self, obj):
@@ -55,6 +65,12 @@ class EducationIndex(indexes.SearchIndex, indexes.Indexable):
 
     def prepare_countries(self, obj):
         countries = set()
+        if obj.locations.all():
+            for loc in obj.locations.all():
+                try:
+                    countries.add(loc.country.name)
+                except AttributeError:
+                    continue
         if obj.institutions.all():
             for inst in obj.institutions.all():
                 try:
@@ -65,6 +81,12 @@ class EducationIndex(indexes.SearchIndex, indexes.Indexable):
 
     def prepare_cities(self, obj):
         cities = set()
+        if obj.locations.all():
+            for loc in obj.locations.all():
+                try:
+                    cities.add(loc.city.name)
+                except AttributeError:
+                    continue
         if obj.institutions.all():
             for inst in obj.institutions.all():
                 try:
@@ -75,6 +97,12 @@ class EducationIndex(indexes.SearchIndex, indexes.Indexable):
 
     def prepare_states(self, obj):
         states = set()
+        if obj.locations.all():
+            for loc in obj.locations.all():
+                try:
+                    states.add(loc.state.name)
+                except AttributeError:
+                    continue
         if obj.institutions.all():
             for inst in obj.institutions.all():
                 try:
@@ -85,17 +113,22 @@ class EducationIndex(indexes.SearchIndex, indexes.Indexable):
 
     def prepare_regions(self, obj):
         regions = set()
+        if obj.locations.all():
+            for loc in obj.locations.all():
+                try:
+                    regions.add(loc.state.region)
+                except AttributeError:
+                    continue
         if obj.institutions.all():
             for inst in obj.institutions.all():
                 try:
-                    regions.add(inst.location.state.region)
+                    regions.add(inst.location.states.region)
                 except AttributeError:
                     continue
             return regions
 
-
     def get_model(self):
-        return models.EducationDirectory
+        return models.Indicator
 
     def index_queryset(self, using=None):
         return self.get_model().objects.filter(record_status="PUBLISHED")

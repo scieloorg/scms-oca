@@ -32,7 +32,16 @@
 
               <div class="col-sm-3 col-md-4 col-lg-2">
                   <div class="form-group m-0">
+                    <select class="form-control">
+                      <option>{% trans "Tipo de registro" %} </option>
+                      <option>{% trans "Diretórios" %}</option>
+                      <option>{% trans "Indicadores" %}</option>
+                    </select>
+                  </div>
+                </div>
 
+              <div class="col-sm-3 col-md-4 col-lg-2">
+                  <div class="form-group m-0">
                     <select class="form-control" id="keys">
                       <option>{% trans "Procurar por" %} </option>
                       <option>{% trans "Instituição" %}</option>
@@ -41,7 +50,7 @@
                 </div>
 
               <!-- col 6 -->
-              <div class="col-sm-8 col-md-8 col-lg-8">
+              <div class="col-sm-6 col-md-6 col-lg-6">
                 <input class="form-control" id="q" name="q" value="{{ search_query }}"
                   placeholder="{% trans 'Digite sua pesquisa...' %}">
               </div>
