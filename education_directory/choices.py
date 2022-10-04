@@ -9,13 +9,6 @@ classification = (
     ('outros', _('outros')),
 )
 
-status = (
-    ('', ''),
-    ('WIP', 'WIP'),
-    ('TO MODERATE', _('TO MODERATE')),
-    ('PUBLISHED', _('PUBLISHED')),
-)
-
 attendance_type = (
     ('', ''),
     ('live', 'Presencial'),  # All attendees are physically present in one location
