@@ -14,7 +14,7 @@ from .forms import EducationDirectoryFileForm, EducationDirectoryForm
 
 from . import choices
 
-class EducationDirectory(CommonFields, CommonControlField):
+class EducationDirectory(CommonFields):
     class Meta:
         verbose_name_plural = _('Education Directory')
 
