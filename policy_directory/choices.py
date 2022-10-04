@@ -7,10 +7,3 @@ classification = (
     ('mandato', _('mandato')),
     ('geral', _('geral')),
 )
-
-status = (
-    ('', ''),
-    ('WIP', 'WIP'),
-    ('TO MODERATE', _('TO MODERATE')),
-    ('PUBLISHED', _('PUBLISHED')),
-)
