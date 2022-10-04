@@ -12,7 +12,7 @@ from .forms import PolicyDirectoryFileForm, PolicyDirectoryForm
 from . import choices
 
 
-class PolicyDirectory(CommonFields, CommonControlField):
+class PolicyDirectory(CommonFields):
     class Meta:
         verbose_name_plural = _('Policy Directory')
 
@@ -24,9 +24,8 @@ class PolicyDirectory(CommonFields, CommonControlField):
         HelpPanel('Documentos de promoção, posicionamentos ou mandatos sobre Ciência Aberta elaborados e publicados por instituições brasileiras, tais como: universidades, sociedades científicas, institutos de pesquisa e agências de fomento.'),
         FieldPanel('title'),
         FieldPanel('link'),
-        FieldPanel('source'),
-
         FieldPanel('description'),
+        FieldPanel('start_date', heading=_("Date")),
         FieldPanel('institutions'),
 
         FieldPanel('thematic_areas'),
