@@ -11,7 +11,7 @@ from .forms import IndicatorDirectoryForm
 from location.models import Location
 
 
-class Indicator(CommonFields, CommonControlField):
+class Indicator(CommonFields):
     classification = models.CharField(_("Classification"), choices=choices.classification,
                                       max_length=255, null=True, blank=True)
     versioning = models.ForeignKey("Versioning", verbose_name=_("Versioning"), on_delete=models.SET_NULL,
