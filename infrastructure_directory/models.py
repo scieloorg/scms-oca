@@ -12,7 +12,7 @@ from . import choices
 from .forms import InfrastructureDirectoryFileForm, InfrastructureDirectoryForm
 
 
-class InfrastructureDirectory(CommonFields, CommonControlField):
+class InfrastructureDirectory(CommonFields):
     class Meta:
         verbose_name_plural = _('Infraestructure Directory')
 
