@@ -14,7 +14,7 @@ from . import choices
 from .forms import EventDirectoryFileForm, EventDirectoryForm
 
 
-class EventDirectory(CommonFields, CommonControlField):
+class EventDirectory(CommonFields):
     class Meta:
         verbose_name_plural = _('EventDirectory Directory')
 
