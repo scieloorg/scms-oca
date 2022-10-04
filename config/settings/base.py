@@ -385,6 +385,7 @@ RECAPTCHA_PRIVATE_KEY = env.str("RECAPTCHA_PRIVATE_KEY", default='')
 
 WAGTAILMENUS_FLAT_MENUS_HANDLE_CHOICES = [("oca", "OCA"),
                                           ("sobre_projeto", _("Sobre o Projeto")),
+                                          ("busca", _("Busca")),
                                           ("faq", "FAQ"),
                                           ("noticias", _("Notícias")), ]
 
