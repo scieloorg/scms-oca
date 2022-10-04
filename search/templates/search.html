@@ -12,33 +12,13 @@
 <section id="content">
   <div class="content-wrap pt-0">
     <div class="container clearfix">
-      <div class="section m-1 p-1">
+      <div class="section m-1 p-1 mt-4">
 
         <form action="." method="GET" class="form busca m-1 mt-2" id="search">
           <div class="container">
 
             <!-- row 1 -->
             <div class="row">
-              <!-- col 2 -->
-              {% comment %} <div class="col-sm-3 col-md-4 col-lg-2">
-                  <div class="form-group m-0">
-                    <select class="form-control">
-                      <option>{% trans "Tipo de registro" %} </option>
-                      <option>{% trans "Diretórios" %}</option>
-                      <option>{% trans "Indicadores" %}</option>
-                    </select>
-                  </div>
-                </div> {% endcomment %}
-
-              <div class="col-sm-3 col-md-4 col-lg-2">
-                  <div class="form-group m-0">
-                    <select class="form-control">
-                      <option>{% trans "Tipo de registro" %} </option>
-                      <option>{% trans "Diretórios" %}</option>
-                      <option>{% trans "Indicadores" %}</option>
-                    </select>
-                  </div>
-                </div>
 
               <div class="col-sm-3 col-md-4 col-lg-2">
                   <div class="form-group m-0">
@@ -50,7 +30,7 @@
                 </div>
 
               <!-- col 6 -->
-              <div class="col-sm-6 col-md-6 col-lg-6">
+              <div class="col-sm-8 col-md-8 col-lg-8">
                 <input class="form-control" id="q" name="q" value="{{ search_query }}"
                   placeholder="{% trans 'Digite sua pesquisa...' %}">
               </div>
