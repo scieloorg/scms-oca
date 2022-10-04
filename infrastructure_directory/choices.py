@@ -9,11 +9,3 @@ classification = (
     ('serviço', _('Serviço')),
     ('outras', _('Outras')),
 )
-
-status = (
-    ('', ''),
-    ('WIP', 'WIP'),
-    ('TO MODERATE', _('TO MODERATE')),
-    ('PUBLISHED', _('PUBLISHED')),
-)
-
