@@ -8,13 +8,6 @@ languages = (
     ('En', 'En'),
 )
 
-status = (
-    ('', ''),
-    ('WIP', 'WIP'),
-    ('TO MODERATE', _('TO MODERATE')),
-    ('PUBLISHED', _('PUBLISHED')),
-)
-
 availability = (
     ('', ''),
     ('CURRENT', _('CURRENT')),
