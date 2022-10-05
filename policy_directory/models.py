@@ -9,6 +9,7 @@ from core.models import CommonControlField
 from core_oca.models import CommonFields
 
 from .forms import PolicyDirectoryFileForm, PolicyDirectoryForm
+from institution.models import Institution
 from . import choices
 
 
@@ -16,8 +17,12 @@ class PolicyDirectory(CommonFields):
     class Meta:
         verbose_name_plural = _('Policy Directory')
 
+    institutions = models.ManyToManyField(Institution, verbose_name=_("Institution"), blank=True)
+
     classification = models.CharField(_("Classification"), choices=choices.classification,
                                       max_length=255, null=True, blank=True)
+
+    date = models.DateField(_("Date"), max_length=255, null=True, blank=True)
 
 
     panels = [
@@ -25,7 +30,7 @@ class PolicyDirectory(CommonFields):
         FieldPanel('title'),
         FieldPanel('link'),
         FieldPanel('description'),
-        FieldPanel('start_date', heading=_("Date")),
+        FieldPanel('date'),
         FieldPanel('institutions'),
 
         FieldPanel('thematic_areas'),
