@@ -9,6 +9,7 @@ from core.models import CommonControlField
 from core_oca.models import CommonFields
 
 from location.models import Location
+from institution.models import Institution
 
 from . import choices
 from .forms import EventDirectoryFileForm, EventDirectoryForm
@@ -20,10 +21,17 @@ class EventDirectory(CommonFields):
 
     locations = models.ManyToManyField(Location, verbose_name=_("Location"),  blank=True)
 
+    institutions = models.ManyToManyField(Institution, verbose_name=_("Organization"), blank=True)
+
     classification = models.CharField(_("Classification"), choices=choices.classification,
                                       max_length=255, null=True, blank=True)
 
     attendance = models.CharField(_("Attendance"), choices=choices.attendance_type, max_length=255, null=True, blank=True)
+
+    start_date = models.DateField(_("Start Date"), max_length=255, null=True, blank=True)
+    end_date = models.DateField(_("End Date"), max_length=255, null=True, blank=True)
+    start_time = models.TimeField(_("Start Time"), max_length=255, null=True, blank=True)
+    end_time = models.TimeField(_("End Time"), max_length=255, null=True, blank=True)
 
     panels = [
         HelpPanel('Encontros, congressos, workshops, seminários realizados no Brasil (presenciais, virtuais ou híbridos) cujo tema principal seja a promoção da Ciência Aberta'),
@@ -32,7 +40,7 @@ class EventDirectory(CommonFields):
         FieldPanel('source'),
 
         FieldPanel('description'),
-        FieldPanel('institutions', heading=_("Organization")),
+        FieldPanel('institutions'),
 
         FieldPanel('start_date'),
         FieldPanel('end_date'),
