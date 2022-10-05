@@ -9,6 +9,7 @@ from core.models import CommonControlField
 from core_oca.models import CommonFields
 
 from location.models import Location
+from institution.models import Institution
 
 from .forms import EducationDirectoryFileForm, EducationDirectoryForm
 
@@ -20,11 +21,18 @@ class EducationDirectory(CommonFields):
 
     locations = models.ManyToManyField(Location, verbose_name=_("Location"),  blank=True)
 
+    institutions = models.ManyToManyField(Institution, verbose_name=_("Institution"), blank=True)
+
     classification = models.CharField(_("Classification"), choices=choices.classification,
                                       max_length=255, null=True, blank=True)
 
     attendance = models.CharField(_("Attendance"), choices=choices.attendance_type,
                                   max_length=255, null=True, blank=True)
+
+    start_date = models.DateField(_("Start Date"), max_length=255, null=True, blank=True)
+    end_date = models.DateField(_("End Date"), max_length=255, null=True, blank=True)
+    start_time = models.TimeField(_("Start Time"), max_length=255, null=True, blank=True)
+    end_time = models.TimeField(_("End Time"), max_length=255, null=True, blank=True)
 
     panels = [
         HelpPanel('Cursos livres, disciplinas de graduação e pós-graduação ministrados por instituições brasileiras – presenciais ou EAD- para promover a adoção dos princípios e práticas de ciência aberta por todos os envolvidos no processo de pesquisa.'),
