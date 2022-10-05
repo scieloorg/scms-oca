@@ -9,12 +9,15 @@ from core.models import CommonControlField
 from core_oca.models import CommonFields
 
 from . import choices
+from institution.models import Institution
 from .forms import InfrastructureDirectoryFileForm, InfrastructureDirectoryForm
 
 
 class InfrastructureDirectory(CommonFields):
     class Meta:
         verbose_name_plural = _('Infraestructure Directory')
+
+    institutions = models.ManyToManyField(Institution, verbose_name=_("Institution"), blank=True)
 
     classification = models.CharField(_("Classification"), choices=choices.classification,
                                       max_length=255, null=True, blank=True)
