@@ -9,6 +9,7 @@ from . import choices
 from .forms import IndicatorDirectoryForm
 
 from location.models import Location
+from institution.models import Institution
 
 
 class Indicator(CommonFields):
@@ -17,8 +18,14 @@ class Indicator(CommonFields):
     versioning = models.ForeignKey("Versioning", verbose_name=_("Versioning"), on_delete=models.SET_NULL,
                                    max_length=255, null=True, blank=True)
     locations = models.ManyToManyField(Location, verbose_name=_("Location"),  blank=True)
+    institutions = models.ManyToManyField(Institution, verbose_name=_("Institution"), blank=True)
     file_csv = models.FileField(_("CSV File"), null=True, blank=True)
     file_json = models.JSONField(_("JSON File"), null=True, blank=True)
+
+    start_date = models.DateField(_("Start Date"), max_length=255, null=True, blank=True)
+    end_date = models.DateField(_("End Date"), max_length=255, null=True, blank=True)
+    start_time = models.TimeField(_("Start Time"), max_length=255, null=True, blank=True)
+    end_time = models.TimeField(_("End Time"), max_length=255, null=True, blank=True)
 
     class Meta:
         indexes = [
