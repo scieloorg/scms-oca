@@ -21,7 +21,7 @@ class EventDirectory(CommonFields):
 
     locations = models.ManyToManyField(Location, verbose_name=_("Location"),  blank=True)
 
-    institutions = models.ManyToManyField(Institution, verbose_name=_("Organization"), blank=True)
+    organization = models.ManyToManyField(Institution, verbose_name=_("Organization"), blank=True)
 
     classification = models.CharField(_("Classification"), choices=choices.classification,
                                       max_length=255, null=True, blank=True)
@@ -40,7 +40,7 @@ class EventDirectory(CommonFields):
         FieldPanel('source'),
 
         FieldPanel('description'),
-        FieldPanel('institutions'),
+        FieldPanel('organization'),
 
         FieldPanel('start_date'),
         FieldPanel('end_date'),
