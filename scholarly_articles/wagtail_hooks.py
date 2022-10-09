@@ -2,7 +2,7 @@ from django.utils.translation import gettext as _
 
 from wagtail.contrib.modeladmin.options import (ModelAdmin, modeladmin_register, ModelAdminGroup)
 
-from .models import (ScholarlyArticles, Contributors, Affiliations, Journals, RawUnpaywall, ErrorLog)
+from .models import (ScholarlyArticles, Contributors, Affiliations, Journals, RawUnpaywall, SupplementaryData, ErrorLog)
 
 
 class ScholarlyArticlesAdmin(ModelAdmin):
@@ -110,6 +110,21 @@ class AffiliationsAdmin(ModelAdmin):
     search_fields = ('name', 'official',)
 
 
+class SupplementaryDataAdmin(ModelAdmin):
+    model = SupplementaryData
+    menu_label = _('Supplementary Data')
+    menu_icon = 'folder-open-inverse'
+    add_to_settings_menu = False  # or True to add your model to the Settings sub-menu
+    exclude_from_explorer = False  # or True to exclude pages of this type from Wagtail's explorer view
+    list_display = (
+        'doi',
+        'year',
+        'json',
+    )
+    #list_filter = ('name',)
+    search_fields = ('doi', )
+
+
 class ErrorLogAdmin(ModelAdmin):
     model = ErrorLog
     menu_label = _('Errors')
@@ -129,7 +144,13 @@ class ScholarlyArticlesAdminGroup(ModelAdminGroup):
     menu_label = _('Articles Directory')
     menu_icon = 'folder-open-inverse'  # change as required
     menu_order = 200  # will put in 3rd place (000 being 1st, 100 2nd)
-    items = (JournalsAdmin, ScholarlyArticlesAdmin, ContributorsAdmin, AffiliationsAdmin, RawUnpaywallAdmin, ErrorLogAdmin)
+    items = (JournalsAdmin,
+             ScholarlyArticlesAdmin,
+             ContributorsAdmin,
+             AffiliationsAdmin,
+             RawUnpaywallAdmin,
+             SupplementaryDataAdmin,
+             ErrorLogAdmin)
 
 
 modeladmin_register(ScholarlyArticlesAdminGroup)
