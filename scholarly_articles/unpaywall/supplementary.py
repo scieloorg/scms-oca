@@ -8,7 +8,7 @@ from datetime import date
 
 def load(line, row, user):
     """
-    Create the record of a unpaywall.
+    Create the record of a supplementary data.
 
     Param row is a dict content the data to create each supplementary records.
 
