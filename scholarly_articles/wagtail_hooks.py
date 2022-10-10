@@ -114,12 +114,12 @@ class SupplementaryDataAdmin(ModelAdmin):
     model = SupplementaryData
     menu_label = _('Supplementary Data')
     menu_icon = 'folder-open-inverse'
+    inspect_view_enabled = True
     add_to_settings_menu = False  # or True to add your model to the Settings sub-menu
     exclude_from_explorer = False  # or True to exclude pages of this type from Wagtail's explorer view
     list_display = (
         'doi',
         'year',
-        'json',
     )
     #list_filter = ('name',)
     search_fields = ('doi', )
