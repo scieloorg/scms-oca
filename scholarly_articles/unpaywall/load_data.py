@@ -29,23 +29,25 @@ def load_article(row):
     try:
         article = articles[0]
     except IndexError:
-        article = models.ScholarlyArticles()
-        article.doi = row.get('doi')
-        article.title = row.get('title')
-        article.volume = row.get('volume') #attrib volume is not in unpaywall
-        article.number = row.get('number') #attrib number is not in unpaywall
-        article.year = row.get('year')
-        article.open_access_status = row.get('oa_status')
-        if len(row.get('oa_locations')) > 0:
-            article.use_license = row.get('oa_locations')[0].get('license')
-        article.apc = row.get('apc') #attrib apc is not in unpaywall
-        article.journal = load_journal(row)
-        article.source = 'Unpaywall'
-        article.save()
-        for author in row.get('z_authors') or []:
-            contributor = get_one_contributor(author)
-            article.contributors.add(contributor)
         try:
+            article = models.ScholarlyArticles()
+            article.doi = row.get('doi')
+            article.title = row.get('title')
+            article.volume = row.get('volume') #attrib volume is not in unpaywall
+            article.number = row.get('number') #attrib number is not in unpaywall
+            article.year = row.get('year')
+            article.open_access_status = row.get('oa_status')
+            if len(row.get('oa_locations')) > 0:
+                article.use_license = row.get('oa_locations')[0].get('license')
+            article.apc = row.get('apc') #attrib apc is not in unpaywall
+            article.journal = load_journal(row)
+            article.source = 'Unpaywall'
+            article.save()
+
+            for author in row.get('z_authors') or []:
+                contributor = get_one_contributor(author)
+                article.contributors.add(contributor)
+
             article.save()
         except (DataError, TypeError) as e:
             raise ArticleSaveError(e)
@@ -137,7 +139,9 @@ def load(from_year, resource_type, user):
     Param user: The user instance
     """
 
-    rawunpaywall = models.RawUnpaywall.objects.filter(year__gte=from_year, resource_type=resource_type)
+    # About iterator: https://docs.djangoproject.com/en/3.2/ref/models/querysets/#django.db.models.query.QuerySet.iterator
+    rawunpaywall = models.RawUnpaywall.objects.filter(year__gte=from_year, resource_type=resource_type).iterator()
+    # rawunpaywall = models.RawUnpaywall.objects.filter(year__gte=from_year, resource_type=resource_type)
     for item in rawunpaywall:
         if not item.is_paratext:
             try:
