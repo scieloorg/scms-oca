@@ -114,17 +114,17 @@ def get_one_contributor(author):
 
 def load_affiliation(affiliation_name):
     if affiliation_name:
-        affiliations = models.Affiliations.objects.filter(name=affiliation_name)
-    try:
-        affiliation = affiliations[0]
-    except IndexError:
-        affiliation = models.Affiliations()
-        if affiliation_name:
-            affiliation.name = affiliation_name
         try:
-            affiliation.save()
-        except (DataError, TypeError) as e:
-            raise AffiliationSaveError(e)
+            affiliations = models.Affiliations.objects.filter(name=affiliation_name)
+            affiliation = affiliations[0]
+        except IndexError:
+            affiliation = models.Affiliations()
+            if affiliation_name:
+                affiliation.name = affiliation_name
+            try:
+                affiliation.save()
+            except (DataError, TypeError) as e:
+                raise AffiliationSaveError(e)
 
     return affiliation
 
