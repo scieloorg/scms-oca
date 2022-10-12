@@ -126,7 +126,7 @@ def load_affiliation(affiliation_name):
             except (DataError, TypeError) as e:
                 raise AffiliationSaveError(e)
 
-    return affiliation
+        return affiliation
 
 
 def load(from_year, resource_type, user):
