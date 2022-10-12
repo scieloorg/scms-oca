@@ -24,10 +24,10 @@ class ScholarlyArticles(models.Model):
     source = models.CharField(_("Record Source"), max_length=50, choices=choices.SOURCE, null=True, blank=True)
 
     def __unicode__(self):
-        return self.doi
+        return self.doi if self.doi else ""
 
     def __str__(self):
-        return self.doi
+        return self.doi if self.doi else ""
 
     class Meta:
         indexes = [
@@ -57,10 +57,10 @@ class Journals(models.Model):
     journal_is_in_doaj = models.BooleanField(_("DOAJ"), default=False, null=True, blank=True)
 
     def __unicode__(self):
-        return self.journal_issn_l
+        return self.journal_issn_l if self.journal_issn_l else ""
 
     def __str__(self):
-        return self.journal_issn_l
+        return self.journal_issn_l if self.journal_issn_l else ""
 
     class Meta:
         indexes = [
@@ -114,10 +114,10 @@ class Affiliations(models.Model):
                                  max_length=1020, null=True, blank=True)
 
     def __unicode__(self):
-        return self.name
+        return self.name if self.name else ""
 
     def __str__(self):
-        return self.name
+        return self.name if self.name else ""
 
     class Meta:
         indexes = [
