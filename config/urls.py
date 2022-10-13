@@ -4,10 +4,11 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path, re_path
 from django.views import defaults as default_views
-from django.views.generic import TemplateView
 from wagtail.admin import urls as wagtailadmin_urls
 from wagtail.core import urls as wagtail_urls
 from wagtail.documents import urls as wagtaildocs_urls
+from django.conf.urls import include
+from wagtailautocomplete.urls.admin import urlpatterns as autocomplete_admin_urls
 
 from core.api import api_router
 from core.search_site import views as search_views  # noqa isort:skip
@@ -39,6 +40,8 @@ urlpatterns += i18n_patterns(
     re_path(r"^search_site/", search_views.search, name="search_site"),
     # Index search
     re_path(r"^search/", include("search.urls")),
+    # Auto complete endpoint
+    path("admin/autocomplete/", include(autocomplete_admin_urls)),
     # User management
     path("api/v2/", api_router.urls),
     path("users/", include("core.users.urls", namespace="users")),
