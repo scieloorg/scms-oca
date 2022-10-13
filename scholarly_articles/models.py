@@ -2,6 +2,7 @@ from django.db import models
 from django.utils.translation import gettext as _
 
 from wagtail.admin.edit_handlers import FieldPanel
+from wagtailautocomplete.edit_handlers import AutocompletePanel
 
 from institution.models import Institution
 from . import choices
@@ -43,8 +44,8 @@ class ScholarlyArticles(models.Model):
         FieldPanel('open_access_status'),
         FieldPanel('use_license'),
         FieldPanel('apc'),
-        FieldPanel('contributors'),
-        FieldPanel('journal'),
+        AutocompletePanel('contributors'),
+        AutocompletePanel('journal'),
         FieldPanel('source'),
     ]
 
@@ -55,6 +56,11 @@ class Journals(models.Model):
     journal_name = models.CharField(_("Journal Name"), max_length=255, null=True, blank=True)
     publisher = models.CharField(_("Publisher"), max_length=255, null=True, blank=True)
     journal_is_in_doaj = models.BooleanField(_("DOAJ"), default=False, null=True, blank=True)
+
+    autocomplete_search_field = 'journal_name'
+
+    def autocomplete_label(self):
+        return self.journal_name
 
     def __unicode__(self):
         return self.journal_issn_l if self.journal_issn_l else ""
@@ -84,6 +90,11 @@ class Contributors(models.Model):
     orcid = models.CharField("ORCID", max_length=50, null=True, blank=True)
     authenticated_orcid = models.BooleanField(_("Authenticated"), default=False, null=True, blank=True)
     affiliation = models.ForeignKey('Affiliations', on_delete=models.SET_NULL, max_length=510, null=True, blank=True)
+
+    autocomplete_search_field = 'given'
+
+    def autocomplete_label(self):
+        return self.given + self.family
 
     def __unicode__(self):
         return f"{self.family}, {self.given} ({self.orcid})"
