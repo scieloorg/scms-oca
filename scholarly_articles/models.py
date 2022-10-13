@@ -176,6 +176,30 @@ class RawUnpaywall(models.Model):
     ]
 
 
+class SupplementaryData(models.Model):
+    doi = models.CharField(_("DOI"), max_length=100, null=False, blank=False)
+    year = models.CharField(_("Year"), max_length=10, null=True, blank=True)
+    json = models.JSONField(_("JSON File"), null=True, blank=True)
+
+    def __unicode__(self):
+        return self.doi
+
+    def __str__(self):
+        return self.doi
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['doi', ]),
+            models.Index(fields=['year', ]),
+        ]
+
+    panels = [
+        FieldPanel('doi'),
+        FieldPanel('year'),
+        FieldPanel('json'),
+    ]
+
+
 class ErrorLog(CommonControlField):
     error_type = models.CharField(_("Error Type"), max_length=50, null=True, blank=True, help_text=_("Type of python error."))
     error_message = models.CharField(_("Error Message"), max_length=255, null=True, blank=True, help_text=_("Message of python error."))
