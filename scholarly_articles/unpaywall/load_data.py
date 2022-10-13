@@ -140,8 +140,9 @@ def load(from_year, resource_type, user):
     """
 
     # About iterator: https://docs.djangoproject.com/en/3.2/ref/models/querysets/#django.db.models.query.QuerySet.iterator
+    # Mysql and Maria DB dont have the iterator() method available, because dont have the server-side cursor.
+    # Fortunately we choose Postgres.
     rawunpaywall = models.RawUnpaywall.objects.filter(year__gte=from_year, resource_type=resource_type).iterator()
-    # rawunpaywall = models.RawUnpaywall.objects.filter(year__gte=from_year, resource_type=resource_type)
     for item in rawunpaywall:
         if not item.is_paratext:
             try:
