@@ -126,6 +126,7 @@ LOCAL_APPS = [
     "django_celery_beat",
     "indicator",
     "search",
+    "wagtailautocomplete",
 ]
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
