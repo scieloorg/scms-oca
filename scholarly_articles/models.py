@@ -115,7 +115,7 @@ class Contributors(models.Model):
         FieldPanel('given'),
         FieldPanel('orcid'),
         FieldPanel('authenticated_orcid'),
-        FieldPanel('affiliation'),
+        AutocompletePanel('affiliation'),
     ]
 
 
@@ -124,12 +124,16 @@ class Affiliations(models.Model):
     official = models.ForeignKey(Institution, verbose_name=_("Official Affiliation Name"), on_delete=models.SET_NULL,
                                  max_length=1020, null=True, blank=True)
 
+    autocomplete_search_field = 'name'
+
     def __unicode__(self):
         return self.name if self.name else ""
 
     def __str__(self):
         return self.name if self.name else ""
 
+    def autocomplete_label(self):
+        return str(self)
     class Meta:
         indexes = [
             models.Index(fields=['name', ]),
