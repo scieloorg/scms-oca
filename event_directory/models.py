@@ -5,6 +5,7 @@ from django.utils.translation import gettext as _
 from taggit.managers import TaggableManager
 from wagtail.admin.edit_handlers import FieldPanel, HelpPanel
 from wagtail.documents.edit_handlers import DocumentChooserPanel
+from wagtailautocomplete.edit_handlers import AutocompletePanel
 
 from core.models import CommonControlField
 from institution.models import Institution
@@ -58,7 +59,7 @@ class EventDirectory(CommonControlField):
         FieldPanel('source'),
 
         FieldPanel('description'),
-        FieldPanel('organization'),
+        AutocompletePanel('organization'),
 
         FieldPanel('start_date'),
         FieldPanel('end_date'),
@@ -66,9 +67,9 @@ class EventDirectory(CommonControlField):
         FieldPanel('end_time'),
 
         FieldPanel('attendance'),
-        FieldPanel('locations'),
+        AutocompletePanel('locations'),
 
-        FieldPanel('thematic_areas'),
+        AutocompletePanel('thematic_areas'),
         FieldPanel('keywords'),
         FieldPanel('classification'),
         FieldPanel('practice'),
