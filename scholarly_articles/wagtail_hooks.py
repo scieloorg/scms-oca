@@ -141,7 +141,7 @@ class ErrorLogAdmin(ModelAdmin):
 
 
 class ScholarlyArticlesAdminGroup(ModelAdminGroup):
-    menu_label = _('Articles Directory')
+    menu_label = _('Articles')
     menu_icon = 'folder-open-inverse'  # change as required
     menu_order = 200  # will put in 3rd place (000 being 1st, 100 2nd)
     items = (JournalsAdmin,
