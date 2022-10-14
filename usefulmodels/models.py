@@ -16,6 +16,8 @@ class City(CommonControlField):
 
     name = models.CharField(_("Name of the city"), blank=True, null=True, max_length=255)
 
+    autocomplete_search_field = 'name'
+
     class Meta:
         verbose_name = _("City")
         verbose_name_plural = _("Cities")
@@ -25,6 +27,9 @@ class City(CommonControlField):
 
     def __str__(self):
         return u'%s' % self.name
+
+    def autocomplete_label(self):
+        return str(self)
 
     @classmethod
     def get_or_create(cls, user, name):
@@ -55,6 +60,7 @@ class State(CommonControlField):
     acronym = models.CharField(_("Acronym to the state"), blank=True, null=True, max_length=255)
     region = models.CharField(_("Region"), choices=choices.regions, max_length=255, null=True, blank=True)
 
+    autocomplete_search_field = 'name'
 
     class Meta:
         verbose_name = _("State")
@@ -65,6 +71,9 @@ class State(CommonControlField):
 
     def __str__(self):
         return u'%s' % self.name
+
+    def autocomplete_label(self):
+        return str(self)
 
     @classmethod
     def get_or_create(cls, user, name=None, acronym=None):
@@ -100,6 +109,8 @@ class Country(CommonControlField):
     name = models.CharField(_("Name of the Country"), blank=True, null=True, max_length=255)
     acronym = models.CharField(_("Acronym to the Country"), blank=True, null=True, max_length=255)
 
+    autocomplete_search_field = 'name'
+
     class Meta:
         verbose_name = _("Country")
         verbose_name_plural = _("Countries")
@@ -109,6 +120,9 @@ class Country(CommonControlField):
 
     def __str__(self):
         return u'%s' % self.name
+
+    def autocomplete_label(self):
+        return str(self)
 
     @classmethod
     def get_or_create(cls, user, name=None, acronym=None):
@@ -151,6 +165,8 @@ class ThematicArea(CommonControlField):
     level2 = models.CharField(_("Level 2"), choices=choices.thematic_level2,
                               max_length=255, null=True, blank=True, help_text="Here the thematic colleges of CAPES must be registered, more about these areas access: https://www.gov.br/capes/pt-br/acesso-a-informacao/acoes-e-programas/avaliacao/sobre-a-avaliacao/areas-avaliacao/sobre-as-areas-de-avaliacao")
 
+    autocomplete_search_field = 'level0'
+
     class Meta:
         verbose_name = _("Thematic Area")
         verbose_name_plural = _("Thematic Areas")
@@ -160,6 +176,9 @@ class ThematicArea(CommonControlField):
 
     def __str__(self):
         return u'%s | %s | %s' % (self.level0, self.level1, self.level2, )
+
+    def autocomplete_label(self):
+        return str(self)
 
     @classmethod
     def get_or_create(cls, level0, level1, level2, user):
