@@ -5,6 +5,7 @@ from wagtail.core.models import Orderable
 
 from core.models import CommonControlField
 from usefulmodels.models import City, Country, State
+from wagtailautocomplete.edit_handlers import AutocompletePanel
 
 from . import choices
 from .forms import LocationForm
@@ -19,9 +20,19 @@ class Location(CommonControlField):
     country = models.ForeignKey(Country, verbose_name=_("Country"), on_delete=models.CASCADE,
                                 null=True, blank=True)
 
+    autocomplete_search_field = 'state__name'
+
+    def autocomplete_label(self):
+        return str(self)
     class Meta:
         verbose_name = _("Location")
         verbose_name_plural = _("Locations")
+
+    panels = [
+        AutocompletePanel('city'),
+        AutocompletePanel('state'),
+        AutocompletePanel('country'),
+    ]
 
     def __unicode__(self):
         return u'%s: %s | %s: %s | %s: %s' % (_('Country'), self.country, _('State'),  self.state, _('City'), self.city, )
