@@ -1,7 +1,8 @@
 from django.db import models
 from django.utils.translation import gettext as _
 from modelcluster.models import ClusterableModel
-from wagtail.admin.edit_handlers import FieldPanel, InlinePanel
+from wagtail.admin.edit_handlers import FieldPanel
+from wagtailautocomplete.edit_handlers import AutocompletePanel
 
 from core.models import CommonControlField
 from location.models import Location
@@ -29,11 +30,13 @@ class Institution(CommonControlField, ClusterableModel):
 
     logo = models.ImageField(_("Logo"), blank=True, null=True)
 
+    autocomplete_search_field = 'name'
+
     panels = [
         FieldPanel('name'),
         FieldPanel('acronym'),
         FieldPanel('institution_type'),
-        FieldPanel('location'),
+        AutocompletePanel('location'),
         FieldPanel('level_1'),
         FieldPanel('level_2'),
         FieldPanel('level_3'),
@@ -46,6 +49,9 @@ class Institution(CommonControlField, ClusterableModel):
 
     def __str__(self):
         return u'%s - %s: %s' % (self.name, _('Location'), self.location)
+
+    def autocomplete_label(self):
+        return self.name
 
     @classmethod
     def get_or_create(cls, inst_name, location_country,
