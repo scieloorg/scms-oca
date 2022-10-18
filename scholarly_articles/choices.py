@@ -56,8 +56,3 @@ APC = [
     ("YES", "YES"),
     ("NO", "NO"),
 ]
-
-SOURCE = [
-    ("", ""),
-    ("UNPAYWALL", "UNPAYWALL"),
-]
