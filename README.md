@@ -83,24 +83,33 @@ Below are some actions you must follow for properly running applications.
 
 ## Clean migrations
 
+##### Stop the project
+```
+make stop
+```
+
+##### Find and delete migrations scripts
 ```
 find . -path "*/migrations/*.py" -not -name "__init__.py" -not -path "./core/*" -delete
 find . -path "*/migrations/*.pyc"  -delete
 ```
 
-Drop database! Remove in this case the postgres files.
-
-Stop the postgres
-
+##### Drop database - remove in this case the postgres files
 ```
+cd ..
 rm -rf scms_data
+cd -
 ```
 
-Restart the postgres
-
+##### Restart the project
 ```
-python manage.py makemigrations
-python manage.py migrate
+make up
+```
+
+##### Run migrations
+```
+make django_makemigrations
+make django_migrate
 ```
 
 ## Settings
