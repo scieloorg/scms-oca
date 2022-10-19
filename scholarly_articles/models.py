@@ -133,6 +133,16 @@ class Affiliation(models.Model):
     ]
 
 
+class Source(models.Model):
+    source = models.CharField(_("Source"), max_length=50, null=True, blank=True)
+
+    def __unicode__(self):
+        return self.source or ""
+
+    def __str__(self):
+        return self.source or ""
+
+
 class RawRecord(models.Model):
     doi = models.CharField(_("DOI"), max_length=100, null=False, blank=False)
     harvesting_creation = models.CharField(_("Harvesting date"), max_length=20, null=False, blank=False)
