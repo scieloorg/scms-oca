@@ -17,13 +17,16 @@ class ScholarlyArticleAdmin(ModelAdmin):
     def all_contributors(self, obj):
         return " | ".join([str(c) for c in obj.contributors.all()])
 
+    def all_sources(self, obj):
+        return " | ".join([str(s) for s in obj.sources.all()])
+
     list_display = (
         'doi',
         'title',
         'year',
         'all_contributors',
         'journal',
-        'source',
+        'all_sources',
     )
 
     list_filter = ('year',)
@@ -59,13 +62,16 @@ class JournalAdmin(ModelAdmin):
     add_to_settings_menu = False  # or True to add your model to the Settings sub-menu
     exclude_from_explorer = False  # or True to exclude pages of this type from Wagtail's explorer view
 
+    def all_sources(self, obj):
+        return " | ".join([str(s) for s in obj.sources.all()])
+
     list_display = (
         'journal_issn_l',
         'journal_issns',
         'journal_name',
         'publisher',
         'journal_is_in_doaj',
-        'source',
+        'all_sources',
     )
 
     #list_filter = (_('journal_issn_l'),)
@@ -83,13 +89,16 @@ class ContributorAdmin(ModelAdmin):
     def all_affiliations(self, obj):
         return " | ".join([str(c) for c in obj.affiliation.all()])
 
+    def all_sources(self, obj):
+        return " | ".join([str(s) for s in obj.sources.all()])
+
     list_display = (
         'family',
         'given',
         'orcid',
         'authenticated_orcid',
         'all_affiliations',
-        'source',
+        'all_sources',
     )
 
     # list_filter = ('orcid',)
@@ -102,10 +111,14 @@ class AffiliationAdmin(ModelAdmin):
     menu_icon = 'folder-open-inverse'
     add_to_settings_menu = False  # or True to add your model to the Settings sub-menu
     exclude_from_explorer = False  # or True to exclude pages of this type from Wagtail's explorer view
+
+    def all_sources(self, obj):
+        return " | ".join([str(s) for s in obj.sources.all()])
+
     list_display = (
         'name',
         'official',
-        'source',
+        'all_sources',
     )
     #list_filter = ('name',)
     search_fields = ('name', 'official',)
