@@ -31,14 +31,11 @@ def load_article(row, source):
     except IndexError:
         article = models.ScholarlyArticle()
         article.doi = row.get('doi')
-    if(
-        not article.title or
-        not article.volume or
-        not article.open_access_status or
-        not article.apc or
-        not article.journal
-    ):
-        change = True;
+
+    registered_data = (article.title, article.volume, article.open_access_status, article.apc, article.journal)
+    row_data = (row.get("title"), row.get("volume"), row.get("open_access_status"), row.get("apc"), row.get("journal"))
+    change = registered_data != row_data
+
     article.title = article.title or row.get('title')
     article.volume = article.volume or row.get('volume')
     article.number = article.number or row.get('number')
