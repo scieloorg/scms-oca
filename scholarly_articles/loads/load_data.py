@@ -26,6 +26,15 @@ def get_params(row, attribs):
             params[att] = row.get(att)
     return params
 
+def get_source(source):
+    source_model = models.Source()
+    source_model.source = source
+    try:
+        source_model.save()
+    except (DataError, TypeError) as e:
+        raise SourceSaveError(e)
+    return source_model
+
 
 def load_article(row, source):
     articles = models.ScholarlyArticle.objects.filter(doi=row.get('doi'))
