@@ -145,7 +145,7 @@ class Source(models.Model):
 
 class RawRecord(models.Model):
     doi = models.CharField(_("DOI"), max_length=100, null=False, blank=False)
-    harvesting_creation = models.CharField(_("Harvesting date"), max_length=20, null=False, blank=False)
+    harvesting_creation = models.DateField(_("Harvesting date"), max_length=255, null=True, blank=True)
     year = models.CharField(_("Year"), max_length=10, null=True, blank=True)
     resource_type = models.CharField(_("Resource Type"), max_length=50, choices=choices.TYPE_OF_RESOURCE, null=False,
                                      blank=True)
