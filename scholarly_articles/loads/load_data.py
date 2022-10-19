@@ -118,17 +118,24 @@ def get_one_contributor(author, source):
         contributor = contributors[0]
     except IndexError:
         contributor = models.Contributor()
+
+    registered_data = (contributor.family, contributor.given, contributor.orcid, contributor.authenticated_orcid)
+    row_data = (author.get('family'), author.get('given'), author.get('ORCID'), author.get('authenticated-orcid'))
+    change = registered_data != row_data
+
     contributor.family = contributor.family or author.get('family')
     contributor.given = contributor.given or author.get('given')
     contributor.orcid = contributor.orcid or author.get('ORCID')
     contributor.authenticated_orcid = contributor.authenticated_orcid or author.get('authenticated-orcid')
-    contributor.source = " | ".join([contributor.source, source]) \
-        if contributor.source and contributor.source != source and len(str(contributor.source).split(' | ')) == 1 \
-        else source
+
     try:
         contributor.save()
     except (DataError, TypeError) as e:
         raise ContributorSaveError(e)
+
+    if change:
+        contributor.sources.add(get_source(source))
+        contributor.save()
 
     if author.get('affiliation'):
         aff = load_affiliation(author.get('affiliation')[0].get('name'), source)
