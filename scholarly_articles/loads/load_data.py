@@ -83,18 +83,26 @@ def load_journal(row, source):
         journal = journals[0]
     except IndexError:
         journal = models.Journal()
+
+    registered_data = (journal.journal_is_in_doaj, journal.journal_issns, journal.journal_issn_l,
+                       journal.journal_name, journal.publisher)
+    row_data = (row.get('journal_is_in_doaj'), row.get('journal_issns'), row.get('journal_issn_l'),
+                row.get('journal_name'), row.get('publisher'))
+    change = registered_data != row_data
+
     journal.journal_is_in_doaj = journal.journal_is_in_doaj or row.get('journal_is_in_doaj')
     journal.journal_issns = journal.journal_issns or row.get('journal_issns')
     journal.journal_issn_l = journal.journal_issn_l or row.get('journal_issn_l')
     journal.journal_name = journal.journal_name or row.get('journal_name')
-    journal.publisher = journal.journal_name or row.get('publisher')
-    journal.source = " | ".join([journal.source, source]) \
-        if journal.source and journal.source != source and len(str(journal.source).split(' | ')) == 1 \
-        else source
+    journal.publisher = journal.publisher or row.get('publisher')
     try:
         journal.save()
     except (DataError, TypeError) as e:
         raise JournalSaveError(e)
+
+    if change:
+        journal.sources.add(get_source(source))
+        journal.save()
 
     return journal
 
