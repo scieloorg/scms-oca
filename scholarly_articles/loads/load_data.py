@@ -153,11 +153,12 @@ def load_affiliation(affiliation_name, source):
         except IndexError:
             affiliation = models.Affiliation()
             affiliation.name = affiliation_name
-            affiliation.source = source
-        try:
+            try:
+                affiliation.save()
+            except (DataError, TypeError) as e:
+                raise AffiliationSaveError(e)
+            affiliation.sources.add(get_source(source))
             affiliation.save()
-        except (DataError, TypeError) as e:
-            raise AffiliationSaveError(e)
 
         return affiliation
 
