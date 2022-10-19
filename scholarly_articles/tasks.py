@@ -31,7 +31,7 @@ def load_data_raw_json(user_id, file_path, file_source='Unpaywall'):
 
 
 @celery_app.task()
-def load_articles_data(user_id):
+def load_articles_data(from_year, user_id):
     """
     Load the data from loads file.
 
@@ -42,4 +42,4 @@ def load_articles_data(user_id):
     """
     user = User.objects.get(id=user_id)
 
-    load_data.load(from_year=0, user=user)
+    load_data.load(from_year=from_year, user=user)
