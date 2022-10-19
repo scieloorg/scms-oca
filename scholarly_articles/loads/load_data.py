@@ -57,13 +57,14 @@ def load_article(row, source):
         article.use_license = article.use_license or row.get('oa_locations')[0].get('license')
     article.apc = article.apc or row.get('apc')
     article.journal = article.journal or load_journal(row, source)
-    article.source = " | ".join([article.source, source]) \
-        if change and article.source and article.source != source and len(str(article.source).split(' | ')) == 1 \
-        else source
     try:
         article.save()
     except (DataError, TypeError) as e:
         raise ArticleSaveError(e)
+
+    if change:
+        article.sources.add(get_source(source))
+        article.save()
 
     for author in row.get('z_authors') or []:
         contributor = get_one_contributor(author, source)
