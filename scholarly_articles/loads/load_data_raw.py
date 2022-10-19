@@ -3,7 +3,7 @@ import orjson
 from scholarly_articles import models
 from django.db.utils import DataError
 
-from datetime import date
+from datetime import datetime
 
 
 def load(line, row, user, file_source):
@@ -65,7 +65,11 @@ def load(line, row, user, file_source):
             if len(raw_record) == 0:
                 raw_record = models.RawRecord()
                 raw_record.doi = doi
-                raw_record.harvesting_creation = date.today()
+                try:
+                    updated = datetime.fromisoformat(row.get('updated')).strftime("%Y-%m-%d")
+                    raw_record.harvesting_creation = updated
+                except ValueError:
+                    pass
             else:
                 raw_record = raw_record[0]
             raw_record.year = row.get('year')
