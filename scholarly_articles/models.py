@@ -21,7 +21,7 @@ class ScholarlyArticle(models.Model):
     apc = models.CharField(_("Article Processing Charge"), max_length=20, choices=choices.APC, null=True, blank=True)
     contributors = models.ManyToManyField("Contributor", verbose_name=_("Contributor"), blank=True)
     journal = models.ForeignKey("Journal", verbose_name=_("Journals"), on_delete=models.SET_NULL, max_length=255, null=True, blank=True)
-    source = models.CharField(_("Record Source"), max_length=50, null=True, blank=True)
+    sources = models.ManyToManyField("Source", verbose_name=_("Record Source"), blank=True)
 
     def __unicode__(self):
         return self.doi or ""
@@ -55,7 +55,7 @@ class Journal(models.Model):
     journal_name = models.CharField(_("Journal Name"), max_length=255, null=True, blank=True)
     publisher = models.CharField(_("Publisher"), max_length=255, null=True, blank=True)
     journal_is_in_doaj = models.BooleanField(_("DOAJ"), default=False, null=True, blank=True)
-    source = models.CharField(_("Source"), max_length=50, null=True, blank=True)
+    sources = models.ManyToManyField("Source", verbose_name=_("Source"), blank=True)
 
     def __unicode__(self):
         return self.journal_issn_l or ""
@@ -86,7 +86,7 @@ class Contributor(models.Model):
     orcid = models.CharField("ORCID", max_length=50, null=True, blank=True)
     authenticated_orcid = models.BooleanField(_("Authenticated"), default=False, null=True, blank=True)
     affiliation = models.ManyToManyField('Affiliation', blank=True)
-    source = models.CharField(_("Source"), max_length=50, null=True, blank=True)
+    sources = models.ManyToManyField("Source", verbose_name=_("Source"), blank=True)
 
     def __unicode__(self):
         return f"{self.family}, {self.given} ({self.orcid})" or ""
@@ -112,7 +112,7 @@ class Contributor(models.Model):
 
 class Affiliation(models.Model):
     name = models.CharField(_("Affiliation Name"), max_length=510, null=True, blank=True)
-    source = models.CharField(_("Source"), max_length=50, null=True, blank=True)
+    sources = models.ManyToManyField("Source", verbose_name=_("Source"), blank=True)
     official = models.ForeignKey(Institution, verbose_name=_("Official Affiliation Name"), on_delete=models.SET_NULL,
                                  max_length=1020, null=True, blank=True)
 
