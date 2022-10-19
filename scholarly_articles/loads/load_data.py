@@ -15,6 +15,9 @@ class ContributorSaveError(Exception):
 class AffiliationSaveError(Exception):
     ...
 
+class SourceSaveError(Exception):
+    ...
+
 
 def get_params(row, attribs):
     params = {}
