@@ -120,11 +120,6 @@ def load_affiliation(affiliation_name):
         except IndexError:
             affiliation = models.Affiliations()
             affiliation.name = affiliation_name
-            for institution in models.Institution.objects.all():
-                if affiliation_name.lower().find(institution.name.lower()) > -1:
-                    affiliation.official = institution
-                    affiliation.source = 'MEC'
-                    break
             try:
                 affiliation.save()
             except (DataError, TypeError) as e:
