@@ -123,7 +123,6 @@ class Affiliations(models.Model):
     name = models.CharField(_("Affiliation Name"), max_length=510, null=True, blank=True)
     official = models.ForeignKey(Institution, verbose_name=_("Official Affiliation Name"), on_delete=models.SET_NULL,
                                  max_length=1020, null=True, blank=True)
-    source = models.CharField(_("Affiliation Source"), max_length=255, null=True, blank=True)
 
     autocomplete_search_field = 'name'
 
