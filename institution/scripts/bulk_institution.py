@@ -12,9 +12,6 @@ from usefulmodels.models import Country, State
 def run(*args):
     user_id = 1
 
-    # Delete all actions
-    models.Institution.objects.all().delete()
-
     # User
     if args:
         user_id = args[0]
@@ -26,20 +23,21 @@ def run(*args):
 
         try:
             for line, row in enumerate(data):
-                inst = models.Institution()
-                inst.name = row['Name']
-                inst.institution_type = row['Institution Type']
-                inst.acronym = row['Acronym']
-                inst.level_1 = row['Level_1']
-                inst.level_2 = row['Level_2']
-                inst.level_3 = row['Level_3']
-                state_name = State.get_or_create(acronym=row['State Acronym'], user=creator).name
-                inst.location = Location.get_or_create(user=creator,
-                                                       location_country="Brasil",
-                                                       location_state=state_name,
-                                                       location_city=None)
-                inst.creator = creator
-                inst.save()
+                if not models.Institution.objects.filter(name=row['Name'], acronym = row['Acronym']).exists():
+                    inst = models.Institution()
+                    inst.name = row['Name']
+                    inst.institution_type = row['Institution Type']
+                    inst.acronym = row['Acronym']
+                    inst.level_1 = row['Level_1']
+                    inst.level_2 = row['Level_2']
+                    inst.level_3 = row['Level_3']
+                    state_name = State.get_or_create(acronym=row['State Acronym'], user=creator).name
+                    inst.location = Location.get_or_create(user=creator,
+                                                           location_country="Brasil",
+                                                           location_state=state_name,
+                                                           location_city=None)
+                    inst.creator = creator
+                    inst.save()
 
         except Exception as ex:
             print("Import error: %s, Line: %s" % (ex, str(line + 2)))
