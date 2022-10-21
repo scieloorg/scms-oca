@@ -28,6 +28,7 @@ def run(*args):
                     inst.name = row['Name']
                     inst.institution_type = row['Institution Type']
                     inst.acronym = row['Acronym']
+                    inst.source = 'MEC'
                     inst.level_1 = row['Level_1']
                     inst.level_2 = row['Level_2']
                     inst.level_3 = row['Level_3']
