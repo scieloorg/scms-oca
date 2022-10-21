@@ -119,8 +119,7 @@ def load_affiliation(affiliation_name):
             affiliation = affiliations[0]
         except IndexError:
             affiliation = models.Affiliations()
-            if affiliation_name:
-                affiliation.name = affiliation_name
+            affiliation.name = affiliation_name
             try:
                 affiliation.save()
             except (DataError, TypeError) as e:

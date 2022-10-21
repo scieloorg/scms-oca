@@ -167,6 +167,7 @@ class RawUnpaywall(models.Model):
             models.Index(fields=['doi', ]),
             models.Index(fields=['year', ]),
             models.Index(fields=['resource_type', ]),
+            models.Index(fields=['is_paratext', ]),
         ]
 
     panels = [
