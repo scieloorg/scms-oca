@@ -20,6 +20,8 @@ class Institution(CommonControlField, ClusterableModel):
 
     acronym = models.CharField(_("Acronym to the institution"), blank=True, null=True, max_length=255)
 
+    source = models.CharField(_("Institution Source"), max_length=255, null=True, blank=True)
+
     level_1 = models.CharField(_("Level 1 organization"), blank=True, null=True, max_length=255)
 
     level_2 = models.CharField(_("Level 2 organization"), blank=True, null=True, max_length=255)
@@ -37,6 +39,7 @@ class Institution(CommonControlField, ClusterableModel):
         FieldPanel('acronym'),
         FieldPanel('institution_type'),
         AutocompletePanel('location'),
+        FieldPanel('source'),
         FieldPanel('level_1'),
         FieldPanel('level_2'),
         FieldPanel('level_3'),
