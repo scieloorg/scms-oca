@@ -30,7 +30,7 @@ def load_unpaywall(user_id, file_path):
 
 
 @celery_app.task()
-def load_journal_articles(user_id, from_year=1900, resource_type='journal-article'):
+def load_journal_articles(user_id, from_year=1900, resource_type='journal-article', is_paratext=False):
     """
     Load the data from unpaywall model to ScholarlyArticles.
 
@@ -40,7 +40,7 @@ def load_journal_articles(user_id, from_year=1900, resource_type='journal-articl
     """
     user = User.objects.get(id=user_id)
 
-    load_data.load(from_year, resource_type, user)
+    load_data.load(from_year, resource_type, is_paratext, user)
 
 
 @celery_app.task()
