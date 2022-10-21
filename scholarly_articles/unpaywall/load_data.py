@@ -129,7 +129,7 @@ def load_affiliation(affiliation_name):
         return affiliation
 
 
-def load(from_year, resource_type, user):
+def load(from_year, resource_type, is_paratext, user):
     """
     Load all data with a specific resource_type and year from RawUnpaywall model
     to ScholarlyArticles model.
@@ -142,24 +142,27 @@ def load(from_year, resource_type, user):
     # About iterator: https://docs.djangoproject.com/en/3.2/ref/models/querysets/#django.db.models.query.QuerySet.iterator
     # Mysql and Maria DB dont have the iterator() method available, because dont have the server-side cursor.
     # Fortunately we choose Postgres.
-    rawunpaywall = models.RawUnpaywall.objects.filter(year__gte=from_year, resource_type=resource_type).iterator()
+    rawunpaywall = models.RawUnpaywall.objects.filter(
+        year__gte=from_year,
+        resource_type=resource_type,
+        is_paratext=is_paratext
+    ).iterator()
     for item in rawunpaywall:
-        if not item.is_paratext:
+        try:
+            load_article(item.json)
+        except (ArticleSaveError, JournalSaveError, ContributorSaveError, AffiliationSaveError) as e:
             try:
-                load_article(item.json)
-            except (ArticleSaveError, JournalSaveError, ContributorSaveError, AffiliationSaveError) as e:
-                try:
-                    error = models.ErrorLog()
-                    error.error_type = str(type(e))
-                    error.error_message = str(e)[:255]
-                    error.error_description = "Erro on processing the RawUnpaywall to ScholarlyArticles."
-                    error.data_reference = "id:%s" % str(item.id)
-                    error.data = item.json
-                    error.data_type = "ScholarlyArticles"
-                    error.creator = user
-                    error.save()
-                except (DataError, TypeError):
-                    pass
+                error = models.ErrorLog()
+                error.error_type = str(type(e))
+                error.error_message = str(e)[:255]
+                error.error_description = "Erro on processing the RawUnpaywall to ScholarlyArticles."
+                error.data_reference = "id:%s" % str(item.id)
+                error.data = item.json
+                error.data_type = "ScholarlyArticles"
+                error.creator = user
+                error.save()
+            except (DataError, TypeError):
+                pass
 
 
 def run(from_year=1900, resource_type='journal-article'):
