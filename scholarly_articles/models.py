@@ -33,6 +33,15 @@ class ScholarlyArticles(models.Model):
     class Meta:
         indexes = [
             models.Index(fields=['doi', ]),
+            models.Index(fields=['title', ]),
+            models.Index(fields=['volume', ]),
+            models.Index(fields=['number', ]),
+            models.Index(fields=['year', ]),
+            models.Index(fields=['open_access_status', ]),
+            models.Index(fields=['use_license', ]),
+            models.Index(fields=['apc', ]),
+            models.Index(fields=['journal', ]),
+            models.Index(fields=['source', ]),
         ]
 
     panels = [
@@ -73,6 +82,8 @@ class Journals(models.Model):
             models.Index(fields=['journal_issn_l', ]),
             models.Index(fields=['journal_issns', ]),
             models.Index(fields=['journal_name', ]),
+            models.Index(fields=['publisher', ]),
+            models.Index(fields=['journal_is_in_doaj', ]),
         ]
 
     panels = [
@@ -107,6 +118,7 @@ class Contributors(models.Model):
             models.Index(fields=['family', ]),
             models.Index(fields=['given', ]),
             models.Index(fields=['orcid', ]),
+            models.Index(fields=['authenticated_orcid', ]),
             models.Index(fields=['affiliation', ]),
         ]
 
@@ -165,9 +177,11 @@ class RawUnpaywall(models.Model):
     class Meta:
         indexes = [
             models.Index(fields=['doi', ]),
+            models.Index(fields=['harvesting_creation', ]),
+            models.Index(fields=['is_paratext', ]),
             models.Index(fields=['year', ]),
             models.Index(fields=['resource_type', ]),
-            models.Index(fields=['is_paratext', ]),
+            models.Index(fields=['update', ]),
         ]
 
     panels = [
