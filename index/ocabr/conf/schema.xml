@@ -65,6 +65,7 @@
    <!-- multivalued fields -->
    <field name="keywords" type="string" indexed="true" stored="true" multiValued="true"/>
    <field name="institutions" type="string" indexed="true" stored="true" multiValued="true"/>
+   <field name="organization" type="string" indexed="true" stored="true" multiValued="true"/>
    <field name="countries" type="string" indexed="true" stored="true" multiValued="true"/>
    <field name="cities" type="string" indexed="true" stored="true" multiValued="true"/>
    <field name="states" type="string" indexed="true" stored="true" multiValued="true"/>

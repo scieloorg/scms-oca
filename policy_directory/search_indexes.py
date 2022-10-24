@@ -15,6 +15,7 @@ class PolicyIndex(indexes.SearchIndex, indexes.Indexable):
     directory_type = indexes.CharField(null=False)
 
     link = indexes.CharField(model_attr="link", null=True)
+    date = indexes.CharField(model_attr="date", null=True)
     description = indexes.CharField(model_attr="description", null=True)
 
     institutions = indexes.MultiValueField(null=True)

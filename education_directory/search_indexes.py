@@ -17,6 +17,11 @@ class EducationIndex(indexes.SearchIndex, indexes.Indexable):
     link = indexes.CharField(model_attr="link", null=True)
     description = indexes.CharField(model_attr="description", null=True)
 
+    start_date = indexes.CharField(model_attr="start_date", null=True)
+    end_date = indexes.CharField(model_attr="end_date", null=True)
+    start_time = indexes.CharField(model_attr="start_time", null=True)
+    end_time = indexes.CharField(model_attr="end_time", null=True)
+
     institutions = indexes.MultiValueField(null=True)
     practice = indexes.CharField(model_attr="practice", null=True)
     action = indexes.CharField(model_attr="action", null=True)
