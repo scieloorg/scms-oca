@@ -45,7 +45,7 @@ def search(request):
         filters['f.' + facet_name + '.facet.limit'] = facet_count
 
     if fqfilters:
-        fqs = fqfilters.split(',')
+        fqs = fqfilters.split('|')
 
     fqs = ['%s:"%s"' % (fq.split(":")[0], fq.split(":")[1]) for fq in fqs]
 

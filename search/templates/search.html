@@ -554,7 +554,7 @@
 
         if (filters) {
 
-          var filters_array = filters.split(',');
+          var filters_array = filters.split('|');
 
           for (filter in filters_array) {
 
@@ -583,7 +583,7 @@
 
         if (filters) {
 
-          var filters_array = filters.split(',');
+          var filters_array = filters.split('|');
 
           if ($(this).is(':checked')) { // checked
 
@@ -596,7 +596,7 @@
             filters_array.splice(index, 1);
           }
 
-          store.setItem("filters", filters_array.join(","));
+          store.setItem("filters", filters_array.join("|"));
 
         } else {
           store.setItem("filters", filter);
