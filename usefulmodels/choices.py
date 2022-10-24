@@ -5,9 +5,9 @@ thematic_level0 = (
     ('Ciências da Vida', _('Ciências da Vida')),
     ('Ciências Físicas, Tecnológicas e Multidisciplinares', _('Ciências Físicas, Tecnológicas e Multidisciplinares')),
     ('humanidades', _('Humanidades')),
-    ('ALL', 'ALL'),
-    ('NOT_APPLICABLE', 'NOT_APPLICABLE'),
-    ('UNDEFINED', 'UNDEFINED'),
+    ('ALL', _('ALL')),
+    ('NOT_APPLICABLE', _('NOT_APPLICABLE')),
+    ('UNDEFINED', _('UNDEFINED')),
 )
 
 thematic_level1 = (
@@ -20,9 +20,9 @@ thematic_level1 = (
     ('Ciências Sociais Aplicadas', _('Ciências Sociais Aplicadas')),
     ('Engenharias', _('Engenharias')),
     ('Lingüística, Letras e Artes', _('Lingüística, Letras e Artes')),
-    ('ALL', 'ALL'),
-    ('NOT_APPLICABLE', 'NOT_APPLICABLE'),
-    ('UNDEFINED', 'UNDEFINED'),
+    ('ALL', _('ALL')),
+    ('NOT_APPLICABLE', _('NOT_APPLICABLE')),
+    ('UNDEFINED', _('UNDEFINED')),
 )
 
 thematic_level2 = (
@@ -72,9 +72,9 @@ thematic_level2 = (
     ('Engenharias IV', _('Engenharias IV')),
     ('Artes', _('Artes')),
     ('Linguística e Literatura', _('Linguística e Literatura')),
-    ('ALL', 'ALL'),
-    ('NOT_APPLICABLE', 'NOT_APPLICABLE'),
-    ('UNDEFINED', 'UNDEFINED'),
+    ('ALL', _('ALL')),
+    ('NOT_APPLICABLE', _('NOT_APPLICABLE')),
+    ('UNDEFINED', _('UNDEFINED')),
 )
 
 
@@ -82,7 +82,7 @@ regions = (
     ('', ''),
     ('Norte', 'Norte'),
     ('Nordeste', 'Nordeste'),
-    ('Centro-Oeste', 'Centro-Oeste'),
+    ('Centro-oeste', 'Centro-Oeste'),
     ('Sudeste', 'Sudeste'),
     ('Sul', 'Sul'),
     ('ALL', _('ALL')),
