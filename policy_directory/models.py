@@ -14,6 +14,7 @@ from usefulmodels.models import ThematicArea, Practice, Action
 from .forms import PolicyDirectoryFileForm, PolicyDirectoryForm
 
 from . import choices
+
 class PolicyDirectory(CommonControlField):
     class Meta:
         verbose_name_plural = _('Policy Directory')
@@ -49,6 +50,7 @@ class PolicyDirectory(CommonControlField):
         FieldPanel('source'),
 
         FieldPanel('description'),
+        FieldPanel('date'),
         AutocompletePanel('institutions'),
 
         AutocompletePanel('thematic_areas'),
