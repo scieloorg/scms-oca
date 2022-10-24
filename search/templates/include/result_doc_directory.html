@@ -16,34 +16,53 @@
       </div>
       <div class="entry-meta">
         <ul>
-          <li><i class="icon-calendar3"></i> 16th Feb 2021</li>
+          {% if item.start_date and item.end_date %} 
+          <li>
+            <i class="icon-calendar3"></i> 
+                {{ item.start_date }}
+              {% if item.start_time %} {{ item.start_time}} {% endif %} 
+                - 
+                {{ item.end_date }}
+              {% if item.end_time %} {{ item.end_time}} {% endif %} 
+          </li>
+          {% elif item.date %}
+            <li>
+              <i class="icon-calendar3"></i> 
+              {{ item.date }}
+            </li>
+          {% endif %}
           <li><i class="icon-folder2"></i></li>
-          <li><span class="badge bg-secondary" style="color:#fff;">{{ item.record_type|translate_data }}</span></li>
+          {% if item.record_type %}<li><span class="badge bg-secondary" style="color:#fff;">{{ item.record_type|translate_data }}</span></li>{% endif %}
+          {% if item.institutions %}<li><span>{{ item.institutions|join:", " }}</span></li>{% endif %}
+          {% if item.organization %}<li><span>{{ item.organization|join:", " }}</span></li>{% endif %}
+          {% if item.classification %}<li><span>{{ item.classification }}</span></li>{% endif %}
         </ul>
       </div>
       <div class="entry-content">
         <p>{{ item.description }}</p>
         <ul class="iconlist d-none d-xl-block mt-md-3">
           {% if item.countries %}
-            <li><i class="icon-caret-right"></i> {% trans "Country" %}: {{ item.countries|join:", " }}</li>
+          <li><i class="icon-caret-right"></i> {% trans "Country" %}: {{ item.countries|join:", " }}</li>
           {% endif %}
           {% if item.regions %}
-            <li><i class="icon-caret-right"></i> {% trans "Region" %}: {{ item.regions|join:", " }}</li>
+          <li><i class="icon-caret-right"></i> {% trans "Region" %}: {{ item.regions|join:", " }}</li>
           {% endif %}
           {% if item.states %}
-            <li><i class="icon-caret-right"></i> {% trans "State" %}: {{ item.states|join:", " }}</li>
+          <li><i class="icon-caret-right"></i> {% trans "State" %}: {{ item.states|join:", " }}</li>
           {% endif %}
           {% if item.cities %}
-            <li><i class="icon-caret-right"></i> {% trans "City" %}: {{ item.cities|join:", " }}</li>
+          <li><i class="icon-caret-right"></i> {% trans "City" %}: {{ item.cities|join:", " }}</li>
           {% endif %}
         </ul>
       </div>
-
+      
       {% if item.practice or item.action %}
-        <div class="card">
-          <div class="card-body">
-            <span><b>Practice: </b>{{ item.practice }} </span>
-            <span><b>Action: </b>{{ item.action }}</span>
+      <div class="card">
+        <div class="card-body">
+          {% if item.practice %}<span><b> {% trans "Practice" %}: </b>{{ item.practice }} </span>{% endif %}</br>
+          {% if item.action %}<span><b>{% trans "Action" %}: </b>{{ item.action }}</span>{% endif %}</br>
+          {% if item.thematic_areas %}<span><b>{% trans "Thematic Areas" %}:  </b>{{ item.thematic_areas|join:", " }}</span>{% endif %}
+          <span>{{ item.thematic_areas|join:", " }}</span>
           </div>
         </div>
       {% endif%}
