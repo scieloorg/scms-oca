@@ -123,6 +123,7 @@ class Affiliations(models.Model):
     name = models.CharField(_("Affiliation Name"), max_length=510, null=True, blank=True)
     official = models.ForeignKey(Institution, verbose_name=_("Official Affiliation Name"), on_delete=models.SET_NULL,
                                  max_length=1020, null=True, blank=True)
+    country = models.CharField(_("Country"), max_length=255, null=True, blank=True)
 
     autocomplete_search_field = 'name'
 
@@ -142,6 +143,7 @@ class Affiliations(models.Model):
     panels = [
         FieldPanel('name'),
         FieldPanel('official'),
+        FieldPanel('country'),
     ]
 
 
