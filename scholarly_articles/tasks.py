@@ -4,6 +4,7 @@ from django.contrib.auth import get_user_model
 
 from config import celery_app
 from scholarly_articles.unpaywall import load_data, unpaywall, supplementary
+from scholarly_articles.scripts import set_official_affiliation
 
 User = get_user_model()
 
@@ -63,3 +64,14 @@ def load_supplementary(user_id, file_path):
         with open(file_path, "rb") as f:
             for line, row in enumerate(f):
                 supplementary.load(line, row, user)
+
+
+@celery_app.task()
+def set_official(user_id):
+    """
+    Correlates declared institution name with official institution name.
+
+    Sync or Async function
+    """
+
+    set_official_affiliation.load_official_name()
