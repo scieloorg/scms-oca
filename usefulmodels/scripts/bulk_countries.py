@@ -26,4 +26,4 @@ def run(*args):
 
             creator = User.objects.get(id=user_id)
 
-            models.Country(name_pt=name_pt, name_en=name_en, acron3=acron3, acron2=acron2, creator=creator).save()
+            models.Country(name_pt=name_pt, name_en=name_en, acronym=acron3, acronym2=acron2, creator=creator).save()
