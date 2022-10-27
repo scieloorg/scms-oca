@@ -108,7 +108,8 @@ class Country(CommonControlField):
 
     name_pt = models.CharField(_("Name of the Country (pt)"), blank=True, null=True, max_length=255)
     name_en = models.CharField(_("Name of the Country (en)"), blank=True, null=True, max_length=255)
-    acronym = models.CharField(_("Acronym to the Country"), blank=True, null=True, max_length=255)
+    acron3 = models.CharField(_("Acronym to the Country (3 char)"), blank=True, null=True, max_length=255)
+    acron2 = models.CharField(_("Acronym to the Country (2 char)"), blank=True, null=True, max_length=255)
 
     autocomplete_search_field = 'name_pt'
 
@@ -136,14 +137,19 @@ class Country(CommonControlField):
             if cls.objects.filter(name_en__exact=name_en).exists():
                 return cls.objects.get(name_en__exact=name_en)
 
-        if acronym:
-            if cls.objects.filter(acronym__exact=acronym).exists():
-                return cls.objects.get(acronym__exact=acronym)
+        if acron3:
+            if cls.objects.filter(acron3__exact=acron3).exists():
+                return cls.objects.get(acron3__exact=acron3)
+
+        if acron2:
+            if cls.objects.filter(acron2__exact=acron2).exists():
+                return cls.objects.get(acron2__exact=acron2)
 
         country = Country()
         country.name_pt = name_pt
         country.name_en = name_en
-        country.acronym = acronym
+        country.acron3 = acron3
+        country.acron2 = acron2
         country.creator = user
         country.save()
 
