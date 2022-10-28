@@ -105,8 +105,9 @@ class AffiliationsAdmin(ModelAdmin):
     list_display = (
         'name',
         'official',
+        'country',
     )
-    #list_filter = ('name',)
+    list_filter = ('country',)
     search_fields = ('name', 'official',)
 
 
