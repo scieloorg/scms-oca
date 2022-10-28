@@ -85,10 +85,10 @@ class CountryAdmin(ModelAdmin):
     menu_order = 100
     add_to_settings_menu = False  # or True to add your model to the Settings sub-menu
     exclude_from_explorer = False  # or True to exclude pages of this type from Wagtail's explorer view
-    list_display = ('name_pt', 'name_en', 'acronym', 'acronym2', 'creator',
+    list_display = ('name_pt', 'name_en', 'capital', 'acron3', 'acron2', 'creator',
                     'updated', 'created')
-    search_fields = ('name_pt', 'acronym')
-    list_export = ('name_pt', 'acronym')
+    search_fields = ('name_pt', 'acron3')
+    list_export = ('name_pt', 'acron3')
     export_filename = 'countryies'
 
 
