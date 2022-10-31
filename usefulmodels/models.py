@@ -106,38 +106,44 @@ class Country(CommonControlField):
         acronym
     """
 
-    name = models.CharField(_("Name of the Country"), blank=True, null=True, max_length=255)
-    acronym = models.CharField(_("Acronym to the Country"), blank=True, null=True, max_length=255)
+    name_pt = models.CharField(_("Name of the Country (pt)"), blank=True, null=True, max_length=255)
+    name_en = models.CharField(_("Name of the Country (en)"), blank=True, null=True, max_length=255)
+    capital = models.CharField(_("Capital of the Country"), blank=True, null=True, max_length=255)
+    acron3 = models.CharField(_("Acronym to the Country (3 char)"), blank=True, null=True, max_length=255)
+    acron2 = models.CharField(_("Acronym to the Country (2 char)"), blank=True, null=True, max_length=255)
 
-    autocomplete_search_field = 'name'
+    autocomplete_search_field = 'name_pt'
 
     class Meta:
         verbose_name = _("Country")
         verbose_name_plural = _("Countries")
 
     def __unicode__(self):
-        return u'%s' % self.name
+        return u'%s' % self.name_pt
 
     def __str__(self):
-        return u'%s' % self.name
+        return u'%s' % self.name_pt
 
     def autocomplete_label(self):
         return str(self)
 
     @classmethod
-    def get_or_create(cls, user, name=None, acronym=None):
+    def get_or_create(cls, user, name_pt=None, name_en=None, capital=None, acron3=None, acron2=None):
 
-        if name:
-            if cls.objects.filter(name__exact=name).exists():
-                return cls.objects.get(name__exact=name)
+        if name_pt:
+            if cls.objects.filter(name_pt__exact=name_pt).exists():
+                return cls.objects.get(name_pt__exact=name_pt)
 
-        if acronym:
-            if cls.objects.filter(acronym__exact=acronym).exists():
-                return cls.objects.get(acronym__exact=acronym)
+        if name_en:
+            if cls.objects.filter(name_en__exact=name_en).exists():
+                return cls.objects.get(name_en__exact=name_en)
 
         country = Country()
-        country.name = name
-        country.acronym = acronym
+        country.name_pt = name_pt
+        country.name_en = name_en
+        country.capital = capital
+        country.acron3 = acron3
+        country.acron2 = acron2
         country.creator = user
         country.save()
 

@@ -5,6 +5,7 @@ from wagtail.admin.edit_handlers import FieldPanel
 from wagtailautocomplete.edit_handlers import AutocompletePanel
 
 from institution.models import Institution
+from usefulmodels.models import Country
 from . import choices
 from core.models import CommonControlField
 
@@ -135,6 +136,8 @@ class Affiliations(models.Model):
     name = models.CharField(_("Affiliation Name"), max_length=510, null=True, blank=True)
     official = models.ForeignKey(Institution, verbose_name=_("Official Affiliation Name"), on_delete=models.SET_NULL,
                                  max_length=1020, null=True, blank=True)
+    country = models.ForeignKey(Country, verbose_name=_("Country"), on_delete=models.SET_NULL,
+                                 max_length=255, null=True, blank=True)
 
     autocomplete_search_field = 'name'
 
@@ -146,6 +149,7 @@ class Affiliations(models.Model):
 
     def autocomplete_label(self):
         return str(self)
+
     class Meta:
         indexes = [
             models.Index(fields=['name', ]),
@@ -154,6 +158,7 @@ class Affiliations(models.Model):
     panels = [
         FieldPanel('name'),
         FieldPanel('official'),
+        FieldPanel('country'),
     ]
 
 
