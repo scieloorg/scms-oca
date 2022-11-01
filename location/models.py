@@ -40,6 +40,17 @@ class Location(CommonControlField):
     def __str__(self):
         return u'%s: %s | %s: %s | %s: %s' % (_('Country'), self.country, _('State'),  self.state, _('City'), self.city, )
 
+    @property
+    def data(self):
+        d = {}
+        if self.country:
+            d.update(self.country.data)
+        if self.state:
+            d.update(self.state.data)
+        if self.city:
+            d.update(self.city.data)
+        return d
+
     @classmethod
     def get_or_create(cls, user, location_country, location_state, location_city):
 
