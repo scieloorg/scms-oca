@@ -31,6 +31,10 @@ class City(CommonControlField):
     def autocomplete_label(self):
         return str(self)
 
+    @property
+    def data(self):
+        return {"city__name": self.name}
+
     @classmethod
     def get_or_create(cls, user, name):
 
@@ -74,6 +78,14 @@ class State(CommonControlField):
 
     def autocomplete_label(self):
         return str(self)
+
+    @property
+    def data(self):
+        return {
+            "state__name": self.name,
+            "state__acronym": self.acronym,
+            "state__region": self.region
+        }
 
     @classmethod
     def get_or_create(cls, user, name=None, acronym=None):
@@ -126,6 +138,16 @@ class Country(CommonControlField):
 
     def autocomplete_label(self):
         return str(self)
+
+    @property
+    def data(self):
+        return {
+            "country__name_pt": self.name_pt,
+            "country__name_en": self.name_en,
+            "country__capital": self.capital,
+            "country__acron3": self.acron3,
+            "country__acron2": self.acron2
+        }
 
     @classmethod
     def get_or_create(cls, user, name_pt=None, name_en=None, capital=None, acron3=None, acron2=None):
@@ -186,6 +208,14 @@ class ThematicArea(CommonControlField):
     def autocomplete_label(self):
         return str(self)
 
+    @property
+    def data(self):
+        return {
+            "thematic_area__level_0": self.level0,
+            "thematic_area__level_1": self.level1,
+            "thematic_area__level_2": self.level2
+        }
+
     @classmethod
     def get_or_create(cls, level0, level1, level2, user):
 
@@ -226,6 +256,13 @@ class Practice(CommonControlField):
     def __str__(self):
         return u'%s' % (self.name, )
 
+    @property
+    def data(self):
+        return {
+            "practice__name": self.name,
+            "practice__code": self.code
+        }
+
     base_form_class = PracticeForm
 
 
@@ -249,5 +286,12 @@ class Action(CommonControlField):
 
     def __str__(self):
         return u'%s' % (self.name, )
+
+    @property
+    def data(self):
+        return {
+            "action__name": self.name,
+            "action__code": self.code
+        }
 
     base_form_class = ActionForm
