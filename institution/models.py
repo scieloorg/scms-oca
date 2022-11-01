@@ -56,6 +56,22 @@ class Institution(CommonControlField, ClusterableModel):
     def autocomplete_label(self):
         return self.name
 
+    @property
+    def data(self):
+        d = {
+            "institution__name": self.name,
+            "institution__type": self.institution_type,
+            "institution__acronym": self.acronym,
+            "institution__source": self.source,
+            "institution__level_1": self.level_1,
+            "institution__level_2": self.level_2,
+            "institution__level_3": self.level_3,
+            "institution__url": self.url
+        }
+        if self.location:
+            d.update(self.location.data)
+        return d
+
     @classmethod
     def get_or_create(cls, inst_name, location_country,
                       location_state, location_city, user):
