@@ -61,11 +61,11 @@ class Location(CommonControlField):
         else:
             location = Location()
             if location_country:
-                location.country = Country.get_or_create(user, location_country)
+                location.country = Country.get_or_create(user, name_pt=location_country)
             if location_state:
-                location.state = State.get_or_create(user, location_state)
+                location.state = State.get_or_create(user, name=location_state)
             if location_city:
-                location.city = City.get_or_create(user, location_city)
+                location.city = City.get_or_create(user, name=location_city)
             location.creator = user
             location.save()
 
