@@ -14,7 +14,6 @@ def run():
             aff.save()
 
     #second iteration to identify country by acronym with 3 char
-    for country in Country.objects.all():
         for aff in models.Affiliations.objects.filter(
                 name__icontains=country.acron3,
                 country__isnull=True,
