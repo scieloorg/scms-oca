@@ -83,6 +83,48 @@ class EventDirectory(CommonControlField):
     def __str__(self):
         return u'%s' % self.title
 
+    @property
+    def data(self):
+        d = {
+            "event__title": self.title,
+            "event__link": self.link,
+            "event__description": self.description,
+            "event__start_date": self.start_date,
+            "event__end_date": self.end_date,
+            "event__start_time": self.start_time,
+            "event__end_time": self.end_time,
+            "event__classification": self.classification,
+            "event__keywords": [keyword for keyword in self.keywords.iterator()],
+            "event__attendance": self.attendance,
+            "event__record_status": self.record_status,
+            "event__source": self.source
+        }
+        if self.locations:
+            loc = []
+            for location in self.locations.iterator():
+                loc.append(location.data)
+            d.update({"event__locations": loc})
+
+        if self.organization:
+            org_list = []
+            for org in self.organization.iterator():
+                org_list.append(org.data)
+            d.update({"event__organization": org_list})
+
+        if self.thematic_areas:
+            area = []
+            for thematic_area in self.thematic_areas.iterator():
+                area.append(thematic_area.data)
+            d.update({"event__thematic_areas": area})
+
+        if self.practice:
+            d.update(self.practice.data)
+
+        if self.action:
+            d.update(self.action.data)
+
+        return d
+
     base_form_class = EventDirectoryForm
 
 
