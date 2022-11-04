@@ -32,11 +32,13 @@ def load_or_up_date(inst, row, creator, source):
 
 def load_official_institution(creator, row, line, source):
     try:
-        for inst in models.Institution.objects.filter(name=row.get('Name'), acronym=row.get('Acronym')).iterator():
+        for inst in models.Institution.objects.filter(name=row.get('Name'), acronym=row.get('Acronym'),
+                                                      source__isnull=True).iterator():
             load_or_up_date(inst, row, creator, source)
             inst.save()
 
-        if not models.Institution.objects.filter(name=row.get('Name'), acronym=row.get('Acronym')).exists():
+        if not models.Institution.objects.filter(name=row.get('Name'), acronym=row.get('Acronym'),
+                                                 source__isnull=True).exists():
             inst = models.Institution()
             load_or_up_date(inst, row, creator, source)
             inst.save()
