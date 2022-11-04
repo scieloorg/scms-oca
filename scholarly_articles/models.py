@@ -115,6 +115,17 @@ class Journals(models.Model):
         FieldPanel('journal_is_in_doaj'),
     ]
 
+    @property
+    def data(self):
+        d = {
+            "journal__issn_l": self.journal_issn_l,
+            "journal__issns": self.journal_issns,
+            "journal__name": self.journal_name,
+            "journal__publisher": self.publisher,
+            "journal__is_in_doaj": self.journal_is_in_doaj
+        }
+        return d
+
 
 class Contributors(models.Model):
     family = models.CharField(_("Family Name"), max_length=255, null=True, blank=True)
