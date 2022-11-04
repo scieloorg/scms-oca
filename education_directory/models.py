@@ -98,7 +98,7 @@ class EducationDirectory(CommonControlField):
             "education__start_time": self.start_time,
             "education__end_time": self.end_time,
             "education__classification": self.classification,
-            "education__keywords": [keyword for keyword in self.keywords.iterator()],
+            "education__keywords": [keyword for keyword in self.keywords.names()],
             "education__attendance": self.attendance,
             "education__record_status": self.record_status,
             "education__source": self.source
