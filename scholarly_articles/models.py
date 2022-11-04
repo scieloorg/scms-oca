@@ -5,7 +5,7 @@ from wagtail.admin.edit_handlers import FieldPanel
 from wagtailautocomplete.edit_handlers import AutocompletePanel
 
 from institution.models import Institution
-from usefulmodels.models import Country
+from usefulmodels.models import Country, ThematicArea
 from . import choices
 from core.models import CommonControlField
 
