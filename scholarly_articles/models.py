@@ -162,6 +162,20 @@ class Contributors(models.Model):
         AutocompletePanel('affiliation'),
     ]
 
+    @property
+    def data(self):
+        d = {
+            "contributor__family": self.family,
+            "contributor__given": self.given,
+            "contributor__orcid": self.orcid,
+            "contributor__authenticated_orcid": self.authenticated_orcid
+        }
+
+        if self.affiliation:
+            d.update(self.affiliation.data)
+
+        return d
+
 
 class Affiliations(models.Model):
     name = models.CharField(_("Affiliation Name"), max_length=510, null=True, blank=True)
