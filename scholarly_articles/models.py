@@ -111,8 +111,9 @@ class Journals(models.Model):
         FieldPanel('journal_issn_l'),
         FieldPanel('journal_issns'),
         FieldPanel('journal_name'),
-        FieldPanel('publisher'),
+        AutocompletePanel('publisher'),
         FieldPanel('journal_is_in_doaj'),
+        AutocompletePanel('thematic_areas'),
     ]
 
     @property
