@@ -202,8 +202,8 @@ class Affiliations(models.Model):
 
     panels = [
         FieldPanel('name'),
-        FieldPanel('official'),
-        FieldPanel('country'),
+        AutocompletePanel('official'),
+        AutocompletePanel('country'),
     ]
 
     @property
