@@ -122,8 +122,9 @@ class Journals(models.Model):
             "journal__issn_l": self.journal_issn_l,
             "journal__issns": self.journal_issns,
             "journal__name": self.journal_name,
-            "journal__publisher": self.publisher,
-            "journal__is_in_doaj": self.journal_is_in_doaj
+            "journal__publisher": [publisher.data for publisher in self.publisher.iterator()],
+            "journal__is_in_doaj": self.journal_is_in_doaj,
+            "journal__thematic_areas": [thematic_area.data for thematic_area in self.thematic_areas.iterator()]
         }
         return d
 
