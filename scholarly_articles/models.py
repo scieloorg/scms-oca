@@ -84,8 +84,9 @@ class Journals(models.Model):
     journal_issn_l = models.CharField(_("ISSN-L"), max_length=50, null=True, blank=True)
     journal_issns = models.CharField(_("ISSN's"), max_length=50, null=True, blank=True)
     journal_name = models.CharField(_("Journal Name"), max_length=255, null=True, blank=True)
-    publisher = models.CharField(_("Publisher"), max_length=255, null=True, blank=True)
+    publisher = models.ManyToManyField(Institution, verbose_name=_("Publisher"), blank=True)
     journal_is_in_doaj = models.BooleanField(_("DOAJ"), default=False, null=True, blank=True)
+    thematic_areas = models.ManyToManyField(ThematicArea, verbose_name=_("Thematic Area"), blank=True)
 
     autocomplete_search_field = 'journal_name'
 
