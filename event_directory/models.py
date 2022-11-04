@@ -94,7 +94,7 @@ class EventDirectory(CommonControlField):
             "event__start_time": self.start_time,
             "event__end_time": self.end_time,
             "event__classification": self.classification,
-            "event__keywords": [keyword for keyword in self.keywords.iterator()],
+            "event__keywords": [keyword for keyword in self.keywords.names()],
             "event__attendance": self.attendance,
             "event__record_status": self.record_status,
             "event__source": self.source

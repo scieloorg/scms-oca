@@ -73,7 +73,7 @@ class InfrastructureDirectory(CommonControlField):
             "infrastructure__link": self.link,
             "infrastructure__description": self.description,
             "infrastructure__classification": self.classification,
-            "infrastructure__keywords": [keyword for keyword in self.keywords.iterator()],
+            "infrastructure__keywords": [keyword for keyword in self.keywords.names()],
             "infrastructure__record_status": self.record_status,
             "infrastructure__source": self.source
         }
