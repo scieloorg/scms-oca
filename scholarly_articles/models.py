@@ -59,6 +59,26 @@ class ScholarlyArticles(models.Model):
         FieldPanel('source'),
     ]
 
+    @property
+    def data(self):
+        d = {
+            "article__doi": self.doi,
+            "article__title": self.title,
+            "article__volume": self.volume,
+            "article__number": self.number,
+            "article__year": self.year,
+            "article__open_access_status": self.open_access_status,
+            "article__use_license": self.use_license,
+            "article__apc": self.apc,
+            "article__contributors": [contributor.data for contributor in self.contributors.iterator()],
+            "article__source": self.source
+        }
+
+        if self.journal:
+            d.update(self.journal.data)
+
+        return d
+
 
 class Journals(models.Model):
     journal_issn_l = models.CharField(_("ISSN-L"), max_length=50, null=True, blank=True)
