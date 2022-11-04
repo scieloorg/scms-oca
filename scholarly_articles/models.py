@@ -104,7 +104,6 @@ class Journals(models.Model):
             models.Index(fields=['journal_issn_l', ]),
             models.Index(fields=['journal_issns', ]),
             models.Index(fields=['journal_name', ]),
-            models.Index(fields=['publisher', ]),
             models.Index(fields=['journal_is_in_doaj', ]),
         ]
 
