@@ -64,12 +64,19 @@ class JournalsAdmin(ModelAdmin):
     add_to_settings_menu = False  # or True to add your model to the Settings sub-menu
     exclude_from_explorer = False  # or True to exclude pages of this type from Wagtail's explorer view
 
+    def all_publishers(self, obj):
+        return " | ".join([str(c) for c in obj.publisher.all()])
+
+    def all_thematic_areas(self, obj):
+        return " | ".join([str(c) for c in obj.thematic_areas.all()])
+
     list_display = (
         'journal_issn_l',
         'journal_issns',
         'journal_name',
-        'publisher',
+        'all_publishers',
         'journal_is_in_doaj',
+        'all_thematic_areas',
     )
 
     #list_filter = (_('journal_issn_l'),)
