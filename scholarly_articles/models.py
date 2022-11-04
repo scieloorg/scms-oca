@@ -206,6 +206,20 @@ class Affiliations(models.Model):
         FieldPanel('country'),
     ]
 
+    @property
+    def data(self):
+        d = {
+            "affiliation__name": self.name
+        }
+
+        if self.official:
+            d.update(self.official.data)
+
+        if self.country:
+            d.update(self.country.data)
+
+        return d
+
 
 class RawUnpaywall(models.Model):
     doi = models.CharField(_("DOI"), max_length=100, null=False, blank=False)
