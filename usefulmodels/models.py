@@ -39,7 +39,10 @@ class City(CommonControlField):
     def get_or_create(cls, user, name):
 
         if cls.objects.filter(name__exact=name).exists():
-            return cls.objects.get(name__exact=name)
+            try:
+                return cls.objects.get(name__exact=name)
+            except:
+                return cls.objects.filter(name__exact=name).first()
         else:
             city = City()
             city.name = name
@@ -295,3 +298,51 @@ class Action(CommonControlField):
         }
 
     base_form_class = ActionForm
+
+
+class ActionAndPractice(models.Model):
+    action = models.ForeignKey(
+        Action, verbose_name=_("Action"),
+        null=True, blank=True, on_delete=models.SET_NULL)
+    classification = models.CharField(
+        _("Classification"),
+        choices=choices.classification,
+        max_length=255, null=True, blank=True)
+    practice = models.ForeignKey(
+        Practice, verbose_name=_("Practice"),
+        null=True, blank=True, on_delete=models.SET_NULL)
+
+    def __unicode__(self):
+        return u'%s' % (self.classification, )
+
+    def __str__(self):
+        return u'%s' % (self.classification, )
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['practice']),
+            models.Index(fields=['action']),
+            models.Index(fields=['classification']),
+        ]
+
+    @classmethod
+    def get_or_create(cls, action, classification, practice):
+        try:
+            return ActionAndPractice.objects.get(
+                action=action,
+                practice=practice,
+                classification=classification,
+            )
+        except ActionAndPractice.DoesNotExist:
+            obj = ActionAndPractice()
+            obj.action = action
+            obj.practice = practice
+            obj.classification = classification
+            obj.save()
+            return obj
+        except ActionAndPractice.MultipleObjectsReturned:
+            return ActionAndPractice.objects.filter(
+                action=action,
+                practice=practice,
+                classification=classification,
+            ).first()
