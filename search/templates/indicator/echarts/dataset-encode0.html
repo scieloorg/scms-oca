@@ -1,0 +1,62 @@
+{% load static %}
+{% block content %}
+<script src="{% static 'js/echarts.js' %}"></script>
+<div>
+    <div id="graph1" style="width: 100%;height:{{ graphic_height | safe }}px;"></div>
+    <!-- https://echarts.apache.org/examples/en/editor.html?c=dataset-encode0 -->
+    <script type="text/javascript">
+        var myChart = echarts.init(document.getElementById('graph1'));
+        option = {
+          title: {
+            text: '{{ object.title | safe}}'
+          },
+          tooltip: {
+            trigger: 'axis',
+            axisPointer: {
+              type: 'shadow'
+            }
+          },
+          grid: { containLabel: true },
+          /*
+           grid: {
+            top: 80,
+            bottom: 30
+          },
+          */
+          xAxis: {
+            type: 'value',
+            position: 'top',
+            splitLine: {
+              lineStyle: {
+                type: 'dashed'
+              }
+            }
+          },
+          yAxis: {
+            type: 'category',
+            axisLine: { show: false },
+            axisLabel: {
+                width: 250,
+                overflow: "truncate",
+            },
+            axisTick: { show: false },
+            splitLine: { show: false },
+            data: {{ names | safe }}
+          },
+          series: [
+            {
+              name: 'Quantidade',
+              type: 'bar',
+              stack: 'Total',
+              
+              barGap: '20%',
+              barCategoryGap: '40%',
+              data: {{ values | safe }}
+            }
+          ]
+        };
+
+        myChart.setOption(option);
+    </script>
+</div>
+{% endblock %}
