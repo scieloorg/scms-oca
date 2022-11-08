@@ -34,6 +34,7 @@ class InfraStructureIndex(indexes.SearchIndex, indexes.Indexable):
     states = indexes.MultiValueField(null=True)
     regions = indexes.MultiValueField(null=True)
     thematic_areas = indexes.MultiValueField(null=True)
+    record_status = indexes.CharField(model_attr="record_status", null=True)
 
     source = indexes.CharField(model_attr="action", null=True)
 

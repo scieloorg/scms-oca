@@ -158,7 +158,7 @@ blockquote,
 address,
 table,
 fieldset,
-form { margin-bottom: 30px; }
+form { margin-bottom: 10px; }
 
 small { font-family: 'Lato', sans-serif; }
 
@@ -6601,7 +6601,7 @@ body:not(.has-plugin-html5video) .video-wrap video {
 	background-color: #FFF;
 }
 
-#content p { line-height: 1.8; }
+/* #content p { line-height: 1.8; } */
 
 .content-wrap {
 	position: relative;
