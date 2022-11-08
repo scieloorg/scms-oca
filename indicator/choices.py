@@ -8,17 +8,25 @@ languages = (
     ('En', 'En'),
 )
 
+
+WIP = 'WIP'
+TO_MODERATE = 'TO MODERATE'
+PUBLISHED = 'PUBLISHED'
+
 status = (
     ('', ''),
-    ('WIP', 'WIP'),
-    ('TO MODERATE', _('TO MODERATE')),
-    ('PUBLISHED', _('PUBLISHED')),
+    (WIP, _('WORK IN PROGRESS')),
+    (TO_MODERATE, _('TO MODERATE')),
+    (PUBLISHED, _('PUBLISHED')),
 )
 
-availability = (
+CURRENT = 'CURRENT'
+OUTDATED = 'OUTDATED'
+
+VALIDITY = (
     ('', ''),
-    ('CURRENT', _('CURRENT')),
-    ('DEACTIVATED', _('DEACTIVATED')),
+    (CURRENT, _('CURRENT')),
+    (OUTDATED, _('OUTDATED')),
 )
 
 open_access = (
@@ -30,12 +38,66 @@ open_access = (
     ('UNDEFINED', _('UNDEFINED')),
 )
 
-classification = (
+
+
+# Valores no unpaywall para `genre`
+COMMUNICATION_OBJECTS = (
+    ('', _('NOT APPLICABLE')),
+    ("book", _("Book")),
+    ("book-chapter", _("Book Chapter")),
+    ("book-part", _("Part")),
+    ("book-section", _("Book Section")),
+    ("book-series", _("Book Series")),
+    ("book-set", _("Book Set")),
+    ("book-track", _("Book Track")),
+    ("component", _("Component")),
+    ("database", _("Database")),
+    ("dataset", _("Dataset")),
+    ("dissertation", _("Dissertation")),
+    ("edited-book", _("Edited Book")),
+    ("grant", _("Grant")),
+    ("journal", _("Journal")),
+    ("journal-article", _("Journal Article")),
+    ("journal-issue", _("Journal Issue")),
+    ("journal-volume", _("Journal Volume")),
+    ("monograph", _("Monograph")),
+    ("other", _("Other")),
+    ("peer-review", _("Peer Review")),
+    ("posted-content", _("Posted Content")),
+    ("proceedings", _("Proceedings")),
+    ("proceedings-article", _("Proceedings Article")),
+    ("proceedings-series", _("Proceedings Series")),
+    ("reference-book", _("Reference Book")),
+    ("reference-entry", _("Reference Entry")),
+    ("report", _("Report")),
+    ("report-component", _("Report Component")),
+    ("report-series", _("Report Series")),
+    ("standard", _("Standard")),
+)
+
+
+INSTITUTIONAL = 'INSTITUTIONAL'
+THEMATIC = 'THEMATIC'
+GEOGRAPHIC = 'GEOGRAPHIC'
+CHRONOLOGICAL = 'CHRONOLOGICAL'
+GENERAL = 'GENERAL'
+SCOPE = (
+    (GENERAL, _('Geral')),
+    (INSTITUTIONAL, _('Instituticional')),
+    (GEOGRAPHIC, _('Geográfico')),
+    (CHRONOLOGICAL, _('Cronológico')),
+    (THEMATIC, _('Temático')),
+)
+
+FREQUENCY = 'FREQUENCY'
+RELATIVE_FREQUENCY = 'RELATIVE_FREQUENCY'
+EVOLUTION = 'EVOLUTION'
+AVERAGE = 'AVERAGE'
+
+MEASUREMENT_TYPE = (
     ('', ''),
-    ('encontro', _('encontro')),
-    ('conferência', _('conferência')),
-    ('congresso', _('congresso')),
-    ('workshop', _('workshop')),
-    ('seminário', _('seminário')),
-    ('outros', _('outros')),
+    (FREQUENCY, _('Frequência')),
+    (EVOLUTION, _('Evolução')),
+    (AVERAGE, _('Média')),
+    (RELATIVE_FREQUENCY, _('Frequência relativa')),
 )
