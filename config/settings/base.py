@@ -367,16 +367,16 @@ BASE_URL = env.str("DJANGO_BASE_URL", default='https://ocabr')
 
 LANGUAGES = [
     ('pt-BR', "Portuguese"),
-    ('en', "English"),
-    ('es', "Spanish"),
+    # ('en', "English"),
+    # ('es', "Spanish"),
 ]
 
 WAGTAIL_I18N_ENABLED = True
 
 WAGTAIL_CONTENT_LANGUAGES = [
     ('pt-BR', "Portuguese"),
-    ('en', "English"),
-    ('es', "Spanish"),
+    # ('en', "English"),
+    # ('es', "Spanish"),
 ]
 
 NOCAPTCHA = True
@@ -385,7 +385,7 @@ RECAPTCHA_PUBLIC_KEY = env.str("RECAPTCHA_PUBLIC_KEY", default='')
 RECAPTCHA_PRIVATE_KEY = env.str("RECAPTCHA_PRIVATE_KEY", default='')
 
 WAGTAILMENUS_FLAT_MENUS_HANDLE_CHOICES = [("oca", "OCA"),
-                                          ("sobre_projeto", _("Sobre o Projeto")),
+                                          ("comite", _("Comitê")),
                                           ("busca", _("Busca")),
                                           ("faq", "FAQ"),
                                           ("noticias", _("Notícias")), ]
