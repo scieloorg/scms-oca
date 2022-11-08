@@ -49,7 +49,7 @@ def search(request):
 
     fqs = ['%s:"%s"' % (fq.split(":")[0], fq.split(":")[1]) for fq in fqs]
 
-    # fqs.append('status:"Ativo"')
+    fqs.append('record_status:"PUBLISHED"')
 
     # Adiciona o Solr na pesquisa
     search_results = solr.search(search_query, fq=fqs, sort=sort_by, **filters)
