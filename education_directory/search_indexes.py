@@ -21,6 +21,7 @@ class EducationIndex(indexes.SearchIndex, indexes.Indexable):
     end_date = indexes.CharField(model_attr="end_date", null=True)
     start_time = indexes.CharField(model_attr="start_time", null=True)
     end_time = indexes.CharField(model_attr="end_time", null=True)
+    record_status = indexes.CharField(model_attr="record_status", null=True)
 
     institutions = indexes.MultiValueField(null=True)
     practice = indexes.CharField(model_attr="practice", null=True)
