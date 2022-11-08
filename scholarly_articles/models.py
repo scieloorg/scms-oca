@@ -59,6 +59,26 @@ class ScholarlyArticles(models.Model):
         FieldPanel('source'),
     ]
 
+    @property
+    def data(self):
+        d = {
+            "article__doi": self.doi,
+            "article__title": self.title,
+            "article__volume": self.volume,
+            "article__number": self.number,
+            "article__year": self.year,
+            "article__open_access_status": self.open_access_status,
+            "article__use_license": self.use_license,
+            "article__apc": self.apc,
+            "article__contributors": [contributor.data for contributor in self.contributors.iterator()],
+            "article__source": self.source
+        }
+
+        if self.journal:
+            d.update(self.journal.data)
+
+        return d
+
 
 class Journals(models.Model):
     journal_issn_l = models.CharField(_("ISSN-L"), max_length=50, null=True, blank=True)
@@ -94,6 +114,17 @@ class Journals(models.Model):
         FieldPanel('publisher'),
         FieldPanel('journal_is_in_doaj'),
     ]
+
+    @property
+    def data(self):
+        d = {
+            "journal__issn_l": self.journal_issn_l,
+            "journal__issns": self.journal_issns,
+            "journal__name": self.journal_name,
+            "journal__publisher": self.publisher,
+            "journal__is_in_doaj": self.journal_is_in_doaj
+        }
+        return d
 
 
 class Contributors(models.Model):
@@ -131,6 +162,20 @@ class Contributors(models.Model):
         AutocompletePanel('affiliation'),
     ]
 
+    @property
+    def data(self):
+        d = {
+            "contributor__family": self.family,
+            "contributor__given": self.given,
+            "contributor__orcid": self.orcid,
+            "contributor__authenticated_orcid": self.authenticated_orcid
+        }
+
+        if self.affiliation:
+            d.update(self.affiliation.data)
+
+        return d
+
 
 class Affiliations(models.Model):
     name = models.CharField(_("Affiliation Name"), max_length=510, null=True, blank=True)
@@ -157,9 +202,23 @@ class Affiliations(models.Model):
 
     panels = [
         FieldPanel('name'),
-        FieldPanel('official'),
-        FieldPanel('country'),
+        AutocompletePanel('official'),
+        AutocompletePanel('country'),
     ]
+
+    @property
+    def data(self):
+        d = {
+            "affiliation__name": self.name
+        }
+
+        if self.official:
+            d.update(self.official.data)
+
+        if self.country:
+            d.update(self.country.data)
+
+        return d
 
 
 class RawUnpaywall(models.Model):

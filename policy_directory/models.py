@@ -68,6 +68,39 @@ class PolicyDirectory(CommonControlField):
 
     def __str__(self):
         return u'%s' % self.title
+
+    @property
+    def data(self):
+        d = {
+            "policy__title": self.title,
+            "policy__link": self.link,
+            "policy__description": self.description,
+            "policy__date": self.date,
+            "policy__classification": self.classification,
+            "policy__keywords": [keyword for keyword in self.keywords.names()],
+            "policy__record_status": self.record_status,
+            "policy__source": self.source
+        }
+        if self.institutions:
+            inst = []
+            for institution in self.institutions.iterator():
+                inst.append(institution.data)
+            d.update({"policy__institutions": inst})
+
+        if self.thematic_areas:
+            area = []
+            for thematic_area in self.thematic_areas.iterator():
+                area.append(thematic_area.data)
+            d.update({"policy__thematic_areas": area})
+
+        if self.practice:
+            d.update(self.practice.data)
+
+        if self.action:
+            d.update(self.action.data)
+
+        return d
+
     base_form_class = PolicyDirectoryForm
 
 class PolicyDirectoryFile(CommonControlField):

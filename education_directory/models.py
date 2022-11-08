@@ -87,6 +87,48 @@ class EducationDirectory(CommonControlField):
     def __str__(self):
         return u'%s' % self.title
 
+    @property
+    def data(self):
+        d = {
+            "education__title": self.title,
+            "education__link": self.link,
+            "education__description": self.description,
+            "education__start_date": self.start_date,
+            "education__end_date": self.end_date,
+            "education__start_time": self.start_time,
+            "education__end_time": self.end_time,
+            "education__classification": self.classification,
+            "education__keywords": [keyword for keyword in self.keywords.names()],
+            "education__attendance": self.attendance,
+            "education__record_status": self.record_status,
+            "education__source": self.source
+        }
+        if self.locations:
+            loc = []
+            for location in self.locations.iterator():
+                loc.append(location.data)
+            d.update({"education__locations": loc})
+
+        if self.institutions:
+            inst = []
+            for institution in self.institutions.iterator():
+                inst.append(institution.data)
+            d.update({"education__institutions": inst})
+
+        if self.thematic_areas:
+            area = []
+            for thematic_area in self.thematic_areas.iterator():
+                area.append(thematic_area.data)
+            d.update({"education__thematic_areas": area})
+
+        if self.practice:
+            d.update(self.practice.data)
+
+        if self.action:
+            d.update(self.action.data)
+
+        return d
+
     base_form_class = EducationDirectoryForm
 
 class EducationDirectoryFile(CommonControlField):

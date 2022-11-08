@@ -66,6 +66,38 @@ class InfrastructureDirectory(CommonControlField):
     def __str__(self):
         return u'%s' % self.title
 
+    @property
+    def data(self):
+        d = {
+            "infrastructure__title": self.title,
+            "infrastructure__link": self.link,
+            "infrastructure__description": self.description,
+            "infrastructure__classification": self.classification,
+            "infrastructure__keywords": [keyword for keyword in self.keywords.names()],
+            "infrastructure__record_status": self.record_status,
+            "infrastructure__source": self.source
+        }
+
+        if self.institutions:
+            inst = []
+            for institution in self.institutions.iterator():
+                inst.append(institution.data)
+            d.update({"infrastructure__institutions": inst})
+
+        if self.thematic_areas:
+            area = []
+            for thematic_area in self.thematic_areas.iterator():
+                area.append(thematic_area.data)
+            d.update({"infrastructure__thematic_areas": area})
+
+        if self.practice:
+            d.update(self.practice.data)
+
+        if self.action:
+            d.update(self.action.data)
+
+        return d
+
     base_form_class = InfrastructureDirectoryForm
 
 class InfrastructureDirectoryFile(CommonControlField):

@@ -40,21 +40,32 @@ class Location(CommonControlField):
     def __str__(self):
         return u'%s: %s | %s: %s | %s: %s' % (_('Country'), self.country, _('State'),  self.state, _('City'), self.city, )
 
+    @property
+    def data(self):
+        d = {}
+        if self.country:
+            d.update(self.country.data)
+        if self.state:
+            d.update(self.state.data)
+        if self.city:
+            d.update(self.city.data)
+        return d
+
     @classmethod
     def get_or_create(cls, user, location_country, location_state, location_city):
 
         # check if exists the location
-        if cls.objects.filter(country__name=location_country, state__name=location_state, city__name=location_city).exists():
+        if cls.objects.filter(country__name_pt=location_country, state__name=location_state, city__name=location_city).exists():
             return cls.objects.get(
-                country__name=location_country, state__name=location_state, city__name=location_city)
+                country__name_pt=location_country, state__name=location_state, city__name=location_city)
         else:
             location = Location()
             if location_country:
-                location.country = Country.get_or_create(user, location_country)
+                location.country = Country.get_or_create(user, name_pt=location_country)
             if location_state:
-                location.state = State.get_or_create(user, location_state)
+                location.state = State.get_or_create(user, name=location_state)
             if location_city:
-                location.city = City.get_or_create(user, location_city)
+                location.city = City.get_or_create(user, name=location_city)
             location.creator = user
             location.save()
 
