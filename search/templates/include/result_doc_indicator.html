@@ -12,11 +12,12 @@
     <div class="col-md-12 pe-md-12">
 
       <div class="entry-title title-sm">
-        <h2><i class="icon-line-bar-graph"></i> <a href="{{ item.file_csv }}" target="_blank">{{ item.title }}</a> <a href="{{ item.file_csv }}" target="_blank"><i class="icon-line-arrow-down-circle"></i></a></h2>
+        <h2><i class="icon-line-bar-graph"></i> <a href="{% url 'search:indicator_detail' item.django_id %}" target="_blank">{{ item.title }}</a> </h2>
       </div>
       <div class="entry-meta">
         <ul>
-          <li><i class="icon-calendar3"></i> {{ item.start_date }} - {{ item.end_date }}</li>
+          <li><i class="icon-calendar3"></i> {{ item.created }} {% trans item.validity %}
+          </li>
           <li><i class="icon-line-bar-graph"></i></li>
           <li><span class="badge bg-secondary" style="color:#fff;">{{ item.record_type|translate_data }}</span></li>
         </ul>
