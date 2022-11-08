@@ -1,0 +1,142 @@
+{% load static %}
+{% block content %}
+<script src="{% static 'js/echarts.js' %}"></script>
+<div>
+    <div id="main" style="width: 1200px;height:2400px;"></div>
+    <!-- https://echarts.apache.org/examples/en/editor.html?c=bar-label-rotation -->
+    <script type="text/javascript">
+// import * as echarts from 'echarts';
+
+var app = {};
+
+var chartDom = document.getElementById('main');
+var myChart = echarts.init(chartDom);
+var option;
+
+const posList = [
+  'left',
+  'right',
+  'top',
+  'bottom',
+  'inside',
+  'insideTop',
+  'insideLeft',
+  'insideRight',
+  'insideBottom',
+  'insideTopLeft',
+  'insideTopRight',
+  'insideBottomLeft',
+  'insideBottomRight'
+];
+app.configParameters = {
+  rotate: {
+    min: -90,
+    max: 90
+  },
+  align: {
+    options: {
+      left: 'left',
+      center: 'center',
+      right: 'right'
+    }
+  },
+  verticalAlign: {
+    options: {
+      top: 'top',
+      middle: 'middle',
+      bottom: 'bottom'
+    }
+  },
+  position: {
+    options: posList.reduce(function (map, pos) {
+      map[pos] = pos;
+      return map;
+    }, {})
+  },
+  distance: {
+    min: 0,
+    max: 100
+  }
+};
+app.config = {
+  rotate: 90,
+  align: 'left',
+  verticalAlign: 'middle',
+  position: 'insideBottom',
+  distance: 15,
+  onChange: function () {
+    const labelOption = {
+      rotate: app.config.rotate,
+      align: app.config.align,
+      verticalAlign: app.config.verticalAlign,
+      position: app.config.position,
+      distance: app.config.distance
+    };
+    myChart.setOption({
+      series: {{ label_options | safe }}
+    });
+  }
+};
+const labelOption = {
+  show: true,
+  position: app.config.position,
+  distance: app.config.distance,
+  align: app.config.align,
+  verticalAlign: app.config.verticalAlign,
+  rotate: app.config.rotate,
+  formatter: '{c}  {name|{a}}',
+  fontSize: 16,
+  rich: {
+    name: {}
+  }
+};
+option = {
+  tooltip: {
+    trigger: 'axis',
+    axisPointer: {
+      type: 'shadow'
+    }
+  },
+  legend: {
+    data: {{ cat2_values | safe }}
+  },
+  toolbox: {
+    show: true,
+    orient: 'vertical',
+    left: 'right',
+    top: 'center',
+    feature: {
+      mark: { show: true },
+      dataView: { show: true, readOnly: false },
+      magicType: { show: true, type: ['line', 'bar', 'stack'] },
+      restore: { show: true },
+      saveAsImage: { show: true }
+    }
+  },
+  grid: { containLabel: true },
+  yAxis: [
+    {
+      type: 'category',
+      axisTick: { show: false },
+      data: {{ cat1_values | safe }},
+      axisLabel: {
+        interval: 0, rotate: 90, ellipsis : '...',
+        width: 200, overflow: "truncate", margin: 20
+      }
+
+    }
+  ],
+  xAxis: [
+    {
+      type: 'value',
+
+    }
+  ],
+  series: {{ cat2_data | safe }}
+};
+
+option && myChart.setOption(option);
+
+    </script>
+</div>
+{% endblock %}
