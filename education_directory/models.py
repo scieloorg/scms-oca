@@ -93,10 +93,10 @@ class EducationDirectory(CommonControlField):
             "education__title": self.title,
             "education__link": self.link,
             "education__description": self.description,
-            "education__start_date": self.start_date,
-            "education__end_date": self.end_date,
-            "education__start_time": self.start_time,
-            "education__end_time": self.end_time,
+            "education__start_date": self.start_date.isoformat(),
+            "education__end_date": self.end_date.isoformat(),
+            "education__start_time": self.start_time.isoformat(),
+            "education__end_time": self.end_time.isoformat(),
             "education__classification": self.classification,
             "education__keywords": [keyword for keyword in self.keywords.names()],
             "education__attendance": self.attendance,
@@ -130,6 +130,7 @@ class EducationDirectory(CommonControlField):
         return d
 
     base_form_class = EducationDirectoryForm
+
 
 class EducationDirectoryFile(CommonControlField):
     class Meta:
