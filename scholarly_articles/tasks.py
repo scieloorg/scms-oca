@@ -4,9 +4,11 @@ from django.contrib.auth import get_user_model
 
 from config import celery_app
 from scholarly_articles.unpaywall import load_data, unpaywall, supplementary
-from scholarly_articles.scripts import set_official_affiliation
+from scholarly_articles import models as article_models
+from institution import models as institution_models
 
 User = get_user_model()
+
 
 @celery_app.task()
 def load_unpaywall(user_id, file_path):
@@ -66,12 +68,16 @@ def load_supplementary(user_id, file_path):
                 supplementary.load(line, row, user)
 
 
-@celery_app.task()
-def set_official(user_id):
+@celery_app.task(bind=True, name="Set official institution to affiliation")
+def set_official(self):
     """
     Correlates declared institution name with official institution name.
 
     Sync or Async function
     """
-
-    set_official_affiliation.load_official_name()
+    for institution in institution_models.Institution.objects.filter(source='MEC').iterator():
+        for aff in article_models.Affiliations.objects.filter(
+                official__isnull=True,
+                name__icontains=institution.name).iterator():
+            aff.official = institution
+            aff.save()
