@@ -56,7 +56,6 @@ class InfrastructureDirectory(CommonControlField):
         FieldPanel('classification'),
         FieldPanel('practice'),
 
-        FieldPanel('source'),
         FieldPanel('record_status'),
     ]
 
