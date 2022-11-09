@@ -3,9 +3,12 @@ import gzip
 from django.contrib.auth import get_user_model
 
 from config import celery_app
-from scholarly_articles.unpaywall import load_data, unpaywall, supplementary
-from scholarly_articles import models as article_models
-from institution import models as institution_models
+from scholarly_articles.unpaywall import (
+    load_data,
+    unpaywall,
+    supplementary,
+    affiliation,
+)
 
 User = get_user_model()
 
@@ -68,16 +71,11 @@ def load_supplementary(user_id, file_path):
                 supplementary.load(line, row, user)
 
 
-@celery_app.task(bind=True, name="Set official institution to affiliation")
-def set_official(self):
+@celery_app.task(bind=True, name="Set official institution or country to affiliation")
+def complete_affiliation_data(self):
     """
     Correlates declared institution name with official institution name.
 
     Sync or Async function
     """
-    for institution in institution_models.Institution.objects.filter(source='MEC').iterator():
-        for aff in article_models.Affiliations.objects.filter(
-                official__isnull=True,
-                name__icontains=institution.name).iterator():
-            aff.official = institution
-            aff.save()
+    return affiliation.complete_affiliation_data()
