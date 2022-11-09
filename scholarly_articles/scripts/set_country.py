@@ -12,17 +12,25 @@ def run():
                                                       country__isnull=True).iterator():
             aff.country = institution_ror.location.country
 
-    #second iteration to identify country by declared name
     for country in Country.objects.all():
+        #second iteration to identify country by declared name
         for aff in models.Affiliations.objects.filter(
                 Q(name__icontains=country.name_en) | Q(name__icontains=country.name_pt),
                   country__isnull=True, official__isnull=True).iterator():
             aff.country = country
             aff.save()
 
-        #second iteration to identify country by declared acronym with 3 char
+        #third iteration to identify country by declared acronym with 3 char
         for aff in models.Affiliations.objects.filter(
-                Q(name__contains=" "+country.acron3+" ") | Q(name__contains=" "+country.acron3),
+                Q(name__contains=", "+country.acron3+", ") | Q(name__endswith=", "+country.acron3),
+                country__isnull=True,
+                official__isnull=True).iterator():
+            aff.country = country
+            aff.save()
+
+        #fourth iteration to identify country by declared acronym with 2 char
+        for aff in models.Affiliations.objects.filter(
+                Q(name__contains=", " + country.acron2 + ", ") | Q(name__endswith=", " + country.acron2),
                 country__isnull=True,
                 official__isnull=True).iterator():
             aff.country = country
