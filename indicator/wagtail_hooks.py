@@ -65,11 +65,3 @@ class IndicatorAdmin(ModelAdmin):
 
 
 modeladmin_register(IndicatorAdmin)
-
-
-@hooks.register('register_admin_urls')
-def register_disclosure_url():
-    return [
-        path('indicator/',
-        include('indicator.urls', namespace='indicator')),
-    ]
