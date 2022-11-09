@@ -11,6 +11,7 @@ def run():
         for aff in models.Affiliations.objects.filter(name__icontains=institution_ror.name,
                                                       country__isnull=True).iterator():
             aff.country = institution_ror.location.country
+            aff.save()
 
     for country in Country.objects.all():
         #second iteration to identify country by declared name
