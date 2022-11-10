@@ -74,7 +74,7 @@ class PolicyDirectory(CommonControlField):
             "policy__title": self.title,
             "policy__link": self.link,
             "policy__description": self.description,
-            "policy__date": self.date,
+            "policy__date": self.date.isoformat(),
             "policy__classification": self.classification,
             "policy__keywords": [keyword for keyword in self.keywords.names()],
             "policy__record_status": self.record_status,
