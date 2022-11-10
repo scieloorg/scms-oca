@@ -3,10 +3,15 @@ import gzip
 from django.contrib.auth import get_user_model
 
 from config import celery_app
-from scholarly_articles.unpaywall import load_data, unpaywall, supplementary
-from scholarly_articles.scripts import set_official_affiliation
+from scholarly_articles.unpaywall import (
+    load_data,
+    unpaywall,
+    supplementary,
+    affiliation,
+)
 
 User = get_user_model()
+
 
 @celery_app.task()
 def load_unpaywall(user_id, file_path):
@@ -66,12 +71,11 @@ def load_supplementary(user_id, file_path):
                 supplementary.load(line, row, user)
 
 
-@celery_app.task()
-def set_official(user_id):
+@celery_app.task(bind=True, name="Set official institution or country to affiliation")
+def complete_affiliation_data(self):
     """
     Correlates declared institution name with official institution name.
 
     Sync or Async function
     """
-
-    set_official_affiliation.load_official_name()
+    return affiliation.complete_affiliation_data()
