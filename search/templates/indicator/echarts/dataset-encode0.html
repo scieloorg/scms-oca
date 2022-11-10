@@ -2,7 +2,7 @@
 {% block content %}
 <script src="{% static 'js/echarts.js' %}"></script>
 <div>
-    <div id="graph1" style="width: 100%;height:{{ graphic_height | safe }}px;"></div>
+    <div id="graph1" style="width: 800px;height:{{ graphic_height | safe }}px;"></div>
     <!-- https://echarts.apache.org/examples/en/editor.html?c=dataset-encode0 -->
     <script type="text/javascript">
         var myChart = echarts.init(document.getElementById('graph1'));

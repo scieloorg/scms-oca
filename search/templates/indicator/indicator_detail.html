@@ -78,13 +78,14 @@
         </div>
         <div class="container">
             <p>
-                <a href="{% url 'search:indicator_raw_data' object.id %}">{% trans 'download dados brutos' %}</a>
+                {% if object.record_status == 'WIP' %}
+                    <a href="#">{% trans 'download dados brutos' %}{% trans 'em processamento' %}</a>
+                |
+                {% else %}
+                    <a href="{% url 'search:indicator_raw_data' object.id %}">{% trans 'download dados brutos' %}</a>
                 | 
+                {% endif %}
                 <a href="{% url 'search:indicator_summarized' object.id %}">{% trans 'download dados computados' %}</a>
-                | 
-                <a href="#graphic">{% trans 'ver gráfico' %}</a>
-                | 
-                <a href="#summarized">{% trans 'ver dados computados' %}</a>
             </p>
         </div>
         <div class="container">{% include 'indicator/abas.html' %}</div>
