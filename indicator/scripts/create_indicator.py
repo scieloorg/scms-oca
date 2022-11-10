@@ -14,8 +14,11 @@ def directory_numbers(creator_id):
     tasks.task_directory_numbers_all.apply_async(args=(creator_id, ))
 
 
-def run():
-    controller.delete()
-    directory_numbers(1)
-    evolution_of_scientific_production_all(1)
+def run(indicator_type):
+    if indicator_type == "action":
+        directory_numbers(1)
+    elif indicator_type == "sciprod":
+        evolution_of_scientific_production_all(1)
+    else:
+        print("Expected action or sciprod")
     # journals_numbers(creator_id=1)
