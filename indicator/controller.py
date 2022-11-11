@@ -23,6 +23,10 @@ from .models import Indicator, ActionAndPractice, ScientificProduction
 from . import choices
 
 
+class CreateIndicatorRecordError(Exception):
+    ...
+
+
 User = get_user_model()
 
 
@@ -227,74 +231,17 @@ def _add_param_for_locations(params, locations):
         _add_param(params, "locations", None)
 
 
-def get_indicator_parameters(indicator):
-    if indicator:
-        d = dict(
-            title=indicator.title,
-            scope=indicator.scope,
-            measurement=indicator.measurement,
-            creator_id=indicator.creator_id,
-            scientific_production=indicator.scientific_production,
-            keywords=indicator.keywords,
-            start_date_year=indicator.start_date_year,
-            end_date_year=indicator.end_date_year,
-            action=None,
-            classification=None,
-            practice=None,
-        )
-        if indicator.action_and_practice:
-            d.update(dict(
-                action=indicator.action_and_practice.action,
-                classification=indicator.action_and_practice.classification,
-                practice=indicator.action_and_practice.practice,
-            ))
-        return d
-
-
-def get_latest_version(
-        title,
-        action,
-        classification,
-        practice,
-        scope,
-        measurement,
-        creator_id,
-        scientific_production=None,
-        keywords=None,
-        start_date_year=None,
-        end_date_year=None,
-        ):
+def get_latest_version(code):
     """
     Obtém a versão mais recente de uma instância de Indicator,
 
     Parameters
     ----------
-    action : Action
-    classification : str
-    practice : Practice
-    scope : choices.SCOPE
-    measurement : choices.MEASUREMENT_TYPE
+    code : str
     """
-
-    params = dict(
-        scope=scope,
-        measurement=measurement,
-        posterior_record__isnull=True
-    )
-    _add_param(params, 'title', title)
-    _add_param(params, 'scientific_production', scientific_production)
-    _add_param(params, 'start_date_year', start_date_year)
-    _add_param(params, 'end_date_year', end_date_year)
-
-    if any([action, classification, practice]):
-        action_and_practice = ActionAndPractice.get_or_create(
-            action, classification, practice
-        )
-    else:
-        action_and_practice = None
-
     try:
-        return Indicator.objects.filter(**params)[0]
+        return Indicator.objects.filter(
+            code=code, posterior_record__isnull=True)[0]
     except Exception as e:
         return None
 
@@ -310,7 +257,9 @@ def create_record(
         scientific_production=None,
         start_date_year=None,
         end_date_year=None,
-        keywords=None,
+        category1=None,
+        category2=None,
+        context=None,
         ):
     """
     Cria uma nova instância de Indicator,
@@ -325,27 +274,31 @@ def create_record(
     scope : choices.SCOPE
     measurement : choices.MEASUREMENT_TYPE
     """
-    latest = get_latest_version(
-            title,
-            action,
-            classification,
-            practice,
-            scope,
-            measurement,
-            creator_id,
-            scientific_production,
-            keywords,
-            start_date_year,
-            end_date_year,
-        )
+    code = build_code(
+        action,
+        classification,
+        practice,
+        scope,
+        measurement,
+        scientific_production,
+        start_date_year,
+        end_date_year,
+        category1,
+        category2,
+        context,
+    )
+    latest = get_latest_version(code)
     if latest:
-        previous = latest
-        seq = (previous.seq or 0) + 1
-        previous.validity = choices.OUTDATED
+        if latest.record_status == choices.WIP:
+            raise CreateIndicatorRecordError(
+                "There is already a new record being created {} {} {}".format(
+                    latest.code, latest.seq, latest.created
+                )
+            )
+        seq = latest.seq + 1
         action_and_practice = latest.action_and_practice
     else:
         seq = 1
-        previous = None
         if any([action, classification, practice]):
             action_and_practice = ActionAndPractice.get_or_create(
                 action, classification, practice
@@ -355,8 +308,11 @@ def create_record(
 
     logging.info("Create Indicator")
     indicator = Indicator()
+    indicator.code = code
     indicator.seq = seq
-    indicator.previous_record = previous
+    indicator.record_status = choices.WIP
+    if latest:
+        indicator.previous_record = latest
     indicator.posterior_record = None
     indicator.title = title
     indicator.validity = choices.CURRENT
@@ -366,21 +322,40 @@ def create_record(
     indicator.scientific_production = scientific_production
     indicator.start_date_year = start_date_year
     indicator.end_date_year = end_date_year
-    indicator.record_status = choices.PUBLISHED
     indicator.creator_id = creator_id
     indicator.save()
-
-    if keywords:
-        indicator.keywords.add(*keywords)
-    indicator.save()
-
-    if previous:
-        previous.posterior_record = indicator
-        previous.save()
-
-    #indicator.code = build_code(indicator)
-    indicator.save()
+    logging.info("Created {} {} {}".format(code, seq, indicator.record_status))
     return indicator
+
+
+def build_code(
+        action,
+        classification,
+        practice,
+        scope,
+        measurement,
+        scientific_production,
+        start_date_year,
+        end_date_year,
+        category1,
+        category2,
+        context,
+    ):
+    items = [
+        action and action.code,
+        classification,
+        practice and practice.code,
+        scope,
+        measurement,
+        scientific_production and scientific_production.communication_object,
+        scientific_production and scientific_production.open_access_status,
+        scientific_production and scientific_production.use_license,
+        scientific_production and scientific_production.apc,
+        str(start_date_year or ''),
+        str(end_date_year or ''),
+    ] + (category1 or []) + (category2 or []) + (context or [])
+
+    return "_".join([item or '' for item in items])
 
 
 ##############################################################################
@@ -390,7 +365,7 @@ def directory_numbers(
         category2_id=None,
         ):
 
-    preposition = _("no Brasil")
+    preposition = _("Brasil")
 
     category_title = CATEGORIES[category_id]['title']
     category_name = CATEGORIES[category_id]['name']
@@ -407,7 +382,7 @@ def directory_numbers(
         title = "Número de {} em Ciência Aberta por {}".format(category_title, category2_title)
         cat_attributes += category2_attributes
 
-    title += f" {preposition} "
+    title += f" - {preposition} "
 
     scope = choices.GENERAL
     measurement = choices.FREQUENCY
@@ -417,6 +392,7 @@ def directory_numbers(
     items.extend(_directory_numbers(EventDirectory.objects, cat_attributes))
     items.extend(_directory_numbers(InfrastructureDirectory.objects, cat_attributes))
     items.extend(_directory_numbers(PolicyDirectory.objects, cat_attributes))
+    keywords = [_('Brasil')]
     indicator = create_record(
         title=title,
         action=None,
@@ -425,13 +401,9 @@ def directory_numbers(
         scope=scope,
         measurement=measurement,
         creator_id=creator_id,
-        keywords=[_('Brasil')],
-    )
-    indicator.save_raw_data(
-        list(EducationDirectory.objects.iterator()) +
-        list(EventDirectory.objects.iterator()) +
-        list(InfrastructureDirectory.objects.iterator()) +
-        list(PolicyDirectory.objects.iterator())
+        category1=category_attributes,
+        category2=category2_id and category2_attributes,
+        context=keywords,
     )
     if category2_id:
         # cat1 = variável cujo valor é comum nos registros
@@ -452,8 +424,29 @@ def directory_numbers(
             "cat1_name": category_name,
         }
     # indicator.total = len(items)
-    indicator.creator_id = creator_id
+    save_indicator(indicator, keywords)
+    indicator.save_raw_data(
+        list(EducationDirectory.objects.iterator()) +
+        list(EventDirectory.objects.iterator()) +
+        list(InfrastructureDirectory.objects.iterator()) +
+        list(PolicyDirectory.objects.iterator())
+    )
+
+
+def save_indicator(indicator, keywords=None):
+    # indicator.creator_id = creator_id
+    indicator.record_status = choices.PUBLISHED
     indicator.save()
+
+    if keywords:
+        indicator.keywords.add(*keywords)
+        indicator.save()
+
+    if indicator.previous_record:
+        indicator.previous_record.posterior_record = indicator
+        indicator.previous_record.validity = choices.OUTDATED
+        indicator.previous_record.save()
+    logging.info("Created {} {} {}".format(indicator.code, indicator.seq, indicator.record_status))
 
 
 def _get_directory_contexts(context_id):
@@ -484,6 +477,8 @@ def directory_numbers_in_context(
         category2_id=None,
         context_id=None,
         ):
+    logging.info((category_id, category2_id, context_id))
+    category2_attributes = None
     category_title = CATEGORIES[category_id]['title']
     category_name = CATEGORIES[category_id]['name']
     category_attributes = CATEGORIES[category_id]['category_attributes']
@@ -502,39 +497,44 @@ def directory_numbers_in_context(
     scope = choices.GENERAL
     measurement = choices.FREQUENCY
 
-    for models_contexts in _get_directory_contexts(context_id).values():
+    # obtém contexto de todos os diretórios
+    for directories_context in _get_directory_contexts(context_id).values():
         datasets = []
         items = []
         keywords = []
-        for model, context_params in models_contexts:
-            filters = {}
-            for name, value in context_params.items():
-                _add_param(filters, name, value)
-            dataset = model.objects.filter(**filters)
-            datasets.append(dataset)
-            items.extend(_directory_numbers(dataset, cat_attributes))
-
-            logging.info(context_params)
-            keywords = list([v for v in context_params.values() if v])
-
-        indicator_title = title
-        if keywords:
-            indicator_title += (
-                " " + CONTEXTS[context_id]['preposition'] +
-                " " + ", ".join(keywords)
-            )
-        indicator = create_record(
-            title=indicator_title,
-            action=None,
-            classification=None,
-            practice=None,
-            scope=scope,
-            measurement=measurement,
-            creator_id=creator_id,
-            keywords=keywords
+        _get_directory_numbers_data(
+            directories_context,
+            context_id,
+            cat_attributes,
+            datasets,
+            items,
+            keywords,
         )
-        indicator.save_raw_data(datasets_iterator(datasets))
-
+        logging.info((len(datasets), len(items), len(keywords)))
+        if not datasets:
+            logging.info("Not found directory records for {}".format(
+                directories_context))
+            continue
+        # tenta criar indicador
+        try:
+            indicator_title = title
+            if keywords:
+                indicator_title += (
+                    " " + CONTEXTS[context_id]['preposition'] +
+                    " " + ", ".join(keywords)
+                )
+            logging.info(indicator_title)
+            indicator = create_record(
+                title=indicator_title,
+                action=None, classification=None, practice=None,
+                scope=scope, measurement=measurement, creator_id=creator_id,
+                category1=category_attributes,
+                category2=category2_attributes,
+                context=keywords,
+            )
+        except CreateIndicatorRecordError:
+            # já está em progresso de criação
+            continue
         if category2_id:
             # cat2: variável em comum nos diretórios
             # por ex: year, practice__name
@@ -556,8 +556,40 @@ def directory_numbers_in_context(
                 'cat1_name': category_name,
             }
         # indicator.total = len(items)
-        indicator.creator_id = creator_id
-        indicator.save()
+        save_indicator(indicator, keywords)
+        indicator.save_raw_data(datasets_iterator(datasets))
+
+
+def _get_directory_numbers_data(
+        directories_context,
+        context_id,
+        cat_attributes,
+        datasets,
+        items,
+        keywords,
+        ):
+
+    # para cada diretório, obtém seus ítens contextualizados
+    for directory, dir_ctxt_params in directories_context:
+        logging.info((directory, dir_ctxt_params))
+
+        if not all(dir_ctxt_params.values()):
+            continue
+
+        if not keywords:
+            keywords.extend([v for v in dir_ctxt_params.values() if v])
+        logging.info(keywords)
+        # obtém de um diretório, seu dataset contextualizado
+        filters = {}
+        for name, value in dir_ctxt_params.items():
+            _add_param(filters, name, value)
+        dataset = directory.objects.filter(**filters)
+
+        # adiciona o dataset do diretório no conjunto de datasets do contexto
+        datasets.append(dataset)
+
+        # adiciona os ítens sumarizados no conjuntos de ítens do contexto
+        items.extend(_directory_numbers(dataset, cat_attributes))
 
 
 def datasets_iterator(datasets):
@@ -565,7 +597,7 @@ def datasets_iterator(datasets):
         yield from dataset.iterator()
 
 
-def _directory_numbers_contexts(model, context_id):
+def _directory_numbers_contexts(directory, context_id):
     """
     Obtém dados do contexto (INSTITUTION, LOCATION, THEMATIC_AREA, ...)
     de registros do tipo Directory, ou seja, uma lista de dicionários com dados
@@ -576,7 +608,7 @@ def _directory_numbers_contexts(model, context_id):
         [CONTEXTS[context_id]['category_attributes']])
     for category_attributes_option in category_attributes_options:
         try:
-            for item in model.objects.values(
+            for item in directory.objects.values(
                         *category_attributes_option
                     ).annotate(
                         count=Count('id', distinct=True)
@@ -638,14 +670,13 @@ def journals_numbers(
     )
 
     dataset, summarized = _journals_numbers(category_attributes)
-    indicator.save_raw_data(dataset.iterator())
     indicator.summarized = {
         "items": list(_add_category_name(
                 summarized, category_attributes)),
     }
     # indicator.total = len(indicator.summarized['items'])
-    indicator.creator_id = creator_id
-    indicator.save()
+    save_indicator(indicator)
+    indicator.save_raw_data(dataset.iterator())
 
 
 def _journals_numbers(
@@ -710,17 +741,16 @@ def evolution_of_scientific_production_in_context(
             CONTEXTS[context_id]['category_attributes'], years_as_str):
         context_items.pop('count')
         context_params = context_items
-
-        context_data = _get_context_data(
-            context_params, CONTEXTS[context_id]['type'])
-
-        evolution_of_scientific_production(
-            creator_id,
-            category_id,
-            years_range,
-            context_params,
-            context_id,
-        )
+        try:
+            evolution_of_scientific_production(
+                creator_id,
+                category_id,
+                years_range,
+                context_params,
+                context_id,
+            )
+        except CreateIndicatorRecordError:
+            continue
 
 
 def _get_context_items(context_params, years_as_str):
@@ -734,29 +764,6 @@ def _get_context_items(context_params, years_as_str):
         ).annotate(
             count=Count('id', distinct=True)
         ).iterator()
-
-
-def _get_context_data(context_params, context_type):
-    # thematic_areas=thematic_areas,
-    # institutions=institutions,
-    # locations=locations,
-    thematic_areas = {}
-    institutions = {}
-    locations = {}
-    params = {}
-
-    # if context_type == choices.THEMATIC:
-    #     # TODO
-    #     continue
-
-    # if context_type == choices.GEOGRAPHIC:
-    #     # TODO
-    #     continue
-
-    # if context_type == choices.INSTITUTIONAL:
-    #     # TODO
-    #     continue
-    # return params
 
 
 def evolution_of_scientific_production(
@@ -821,10 +828,9 @@ def evolution_of_scientific_production(
         scientific_production=scientific_production,
         start_date_year=years_range[0] if years_range else None,
         end_date_year=years_range[-1] if years_range else None,
-        keywords=keywords
+        category1=category_attributes,
+        context=keywords
     )
-    indicator.save_raw_data(dataset.iterator())
-
     args = []
     args.extend(category_attributes)
     # args.extend(context_params.keys())
@@ -841,11 +847,8 @@ def evolution_of_scientific_production(
         'cat2_name': 'year',
         'cat2_values': years_as_str,
     }
+    save_indicator(indicator, keywords=keywords)
     indicator.save_raw_data(dataset.iterator())
-    logging.info(keywords)
-    # indicator.description = " | ".join(keywords)
-    indicator.creator_id = creator_id
-    indicator.save()
 
 
 def _get_scientific_production_indicator_title(category_title,
