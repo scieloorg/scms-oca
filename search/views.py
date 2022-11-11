@@ -103,13 +103,13 @@ def search(request):
 def indicator_detail(request, indicator_id):
     try:
         indicator = Indicator.objects.get(
-            pk=indicator_id, record_status='PUBLISHED')
+            pk=indicator_id)
     except Indicator.DoesNotExist:
         raise Http404("Indicator does not exist")
 
-    latest_params = indicator_controller.get_indicator_parameters(indicator)
-    if latest_params:
-        indicator.latest = indicator_controller.get_latest_version(**latest_params).id
+    indicator.latest = (
+    	indicator_controller.get_latest_version(indicator.code).id
+    )
     parameters = controller.indicator_detail(request, indicator)
     return render(request, 'indicator/indicator_detail.html', parameters)
 
