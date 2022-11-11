@@ -60,8 +60,10 @@ def _parameters_for_categories_indicator(indicator, graphic_type, cat1_name):
     else:
         rows = _format_data_as_table(cat1_name, **data)
         if graphic_type == "categories_1_grid":
+            # dataset-simple0
             rows = _format_data_as_table("year", **data)
-            texts = _get_texts_for_1_grid(len(data['cat2_values']))
+            rows = [rows[0]] + sorted(rows[1:])
+            texts = _get_texts_for_1_grid(len(data['cat1_values']))
         else:
             texts = _get_texts_for_2_grids(
                 len(data['cat1_values']), len(data['cat2_values']))
