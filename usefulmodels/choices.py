@@ -89,3 +89,28 @@ regions = (
     ('NOT APPLICABLE', _('NOT_APPLICABLE')),
     ('UNDEFINED', _('UNDEFINED')),
 )
+
+
+classification = (
+    ('', ''),
+    ('curso livre', _('curso livre')),
+    ('disciplina de graduação', _('disciplina de graduação')),
+    ('disciplina de lato sensu', _('disciplina de lato sensu')),
+    ('disciplina de stricto sensu', _('disciplina de stricto sensu')),
+    ('encontro', _('encontro')),
+    ('conferência', _('conferência')),
+    ('congresso', _('congresso')),
+    ('workshop', _('workshop')),
+    ('seminário', _('seminário')),
+    ('outros', _('outros')),
+    ('portal', _('Portal')),
+    ('plataforma', _('Plataforma')),
+    ('servidor', _('Servidor')),
+    ('repositório', _('Repositório')),
+    ('serviço', _('Serviço')),
+    ('promoção', _('promoção')),
+    ('posicionamento', _('posicionamento')),
+    ('mandato', _('mandato')),
+    ('geral', _('geral')),
+    ('outras', _('Outras')),
+)

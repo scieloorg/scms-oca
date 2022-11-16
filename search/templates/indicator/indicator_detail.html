@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% load static %}
+{% load i18n %}
+{% load wagtailsettings_tags %}
+
+{% get_settings use_default_site=True %}
+
+{% block title %}
+    {{ object.title }}
+{% endblock title %}
+
+{% block content %}
+<section id="content">
+  <div class="content-wrap pt-0">
+    <div class="container clearfix">
+      <div class="section m-1 p-1 mt-4">
+                
+        <h1>{{ object.title }}</h1>
+                
+        <!-- Navegação entre as versões -->
+        <div class="container">
+            <nav aria-label="...">
+                <ul class="pagination">
+                    
+                    <li class="page-item" aria-current="page">
+                        {% if object.previous_record.id %}
+                            <a class="page-link" href="{% url 'search:indicator_detail' object.previous_record.id %}">
+                                < {% trans 'versões anteriores' %}
+                            </a>
+                        {% endif %}
+                    </li>
+                    <li class="page-item active">
+                        {% if object.seq %}
+                        <a class="page-link" href="#">
+                            {% trans object.validity %} |
+                            {% trans 'Generated' %}: {{ object.created |date:"r" }}
+                        </a>
+                        {% endif %}
+                    </li> 
+                    <li class="page-item">
+                        {% if object.posterior_record.seq %}
+                            <a class="page-link" href="{% url 'search:indicator_detail' object.posterior_record.id %}">
+                                {% trans 'versões posteriores' %} >
+                            </a>
+                        {% endif %}
+                    </li>
+                    <li class="page-item">
+                        {% if object.latest != object.id %}
+                            <a class="page-link" href="{% url 'search:indicator_detail' object.latest %}">
+                                {% trans 'ir para a versão mais recente' %}
+                            </a>
+                        {% endif %}
+                    </li>
+                    
+                </ul>
+            </nav>
+            <p>
+                <span class="badge badge-primary">{{ object.action_and_practice.action }}</span>
+                <span class="badge badge-secondary">{{ object.action_and_practice.classification }}</span>
+                <span class="badge badge-success">{{ object.action_and_practice.practice }}</span>
+                <span class="badge badge-danger">{{ object.scope }}</span>
+                <span class="badge badge-warning">{{ object.measurement }}</span>
+            </p>
+        </div>
+
+        <div class="container">
+            {% if object.keywords.all %}
+                <p>{% trans 'Palavras-chave' %}:
+                    {% for item in object.keywords.all %}
+                        <span class="badge badge-info">{{ item.name }}</span>
+                    {% endfor %}
+                </p>
+            {% endif %}
+            {% if object.description %}
+                <p>{{ object.description }}</p>
+            {% endif %}
+        </div>
+        <div class="container">
+            <p>
+                {% if object.record_status == 'WIP' %}
+                    <a href="#">{% trans 'download dados brutos' %}{% trans 'em processamento' %}</a>
+                |
+                {% else %}
+                    <a href="{% url 'search:indicator_raw_data' object.id %}">{% trans 'download dados brutos' %}</a>
+                | 
+                {% endif %}
+                <a href="{% url 'search:indicator_summarized' object.id %}">{% trans 'download dados computados' %}</a>
+            </p>
+        </div>
+        <div class="container">{% include 'indicator/abas.html' %}</div>
+    </div>
+  </div>
+</section>
+
+<!-- content -->
+{% endblock %}

@@ -1,3 +1,5 @@
+import csv
+import os
 import datetime
 import math
 from collections import OrderedDict
@@ -7,6 +9,11 @@ from django.conf import settings
 from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.template import loader
+
+from indicator.models import Indicator
+from indicator import controller as indicator_controller
+from . import controller
+
 
 solr = pysolr.Solr(settings.HAYSTACK_CONNECTIONS["default"]["URL"],
                    timeout=settings.HAYSTACK_CONNECTIONS["default"]["SOLR_TIMEOUT"])
@@ -45,11 +52,11 @@ def search(request):
         filters['f.' + facet_name + '.facet.limit'] = facet_count
 
     if fqfilters:
-        fqs = fqfilters.split('|')
+        fqs = fqfilters.split(',')
 
     fqs = ['%s:"%s"' % (fq.split(":")[0], fq.split(":")[1]) for fq in fqs]
 
-    fqs.append('record_status:"PUBLISHED"')
+    # fqs.append('status:"Ativo"')
 
     # Adiciona o Solr na pesquisa
     search_results = solr.search(search_query, fq=fqs, sort=sort_by, **filters)
@@ -91,3 +98,59 @@ def search(request):
         'total_pages': total_pages,
         'selectSortKey': sort_by
     })
+
+
+def indicator_detail(request, indicator_id):
+    try:
+        indicator = Indicator.objects.get(
+            pk=indicator_id)
+    except Indicator.DoesNotExist:
+        raise Http404("Indicator does not exist")
+
+    indicator.latest = (
+    	indicator_controller.get_latest_version(indicator.code).id
+    )
+    parameters = controller.indicator_detail(request, indicator)
+    return render(request, 'indicator/indicator_detail.html', parameters)
+
+
+def indicator_summarized(request, indicator_id):
+    try:
+        indicator = Indicator.objects.get(
+            pk=indicator_id, record_status='PUBLISHED')
+    except Indicator.DoesNotExist:
+        raise Http404("Indicator does not exist")
+
+    filename, ext = os.path.splitext(os.path.basename(indicator.raw_data.name))
+    filename = filename + ".csv"
+
+    response = HttpResponse(
+        content_type='text/csv',
+        headers={'Content-Disposition': 'attachment; filename="%s"' % filename},
+    )
+
+    for item in indicator.summarized['items']:
+        fieldnames = item.keys()
+        break
+
+    writer = csv.DictWriter(response, fieldnames=fieldnames)
+
+    writer.writeheader()
+    for item in indicator.summarized['items']:
+        writer.writerow(item)
+    return response
+
+
+def indicator_raw_data(request, indicator_id):
+    try:
+        indicator = Indicator.objects.get(
+            pk=indicator_id, record_status='PUBLISHED')
+    except Indicator.DoesNotExist:
+        raise Http404("Indicator does not exist")
+
+    filename = os.path.basename(indicator.raw_data.name)
+    response = HttpResponse(
+        indicator.raw_data,
+        content_type="application/zip")
+    response['Content-Disposition'] = "attachment; filename=%s" % filename
+    return response

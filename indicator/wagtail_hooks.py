@@ -8,6 +8,7 @@ from wagtail.contrib.modeladmin.options import (ModelAdmin, modeladmin_register,
 
 from .models import (Indicator,)
 
+
 class IndicatorDirectoryEditView(EditView):
 
     def form_valid(self, form):
@@ -32,32 +33,34 @@ class IndicatorAdmin(ModelAdmin):
     menu_order = 100  # will put in 3rd place (000 being 1st, 100 2nd)
     add_to_settings_menu = False  # or True to add your model to the Settings sub-menu
     exclude_from_explorer = False  # or True to exclude pages of this type from Wagtail's explorer view
+    inspect_view_enabled = True
 
     list_display = (
         'title',
         'record_status',
+        'validity',
         'updated',
     )
 
     list_filter = (
-        'action',
-        'practice',
+        'action_and_practice__action__name',
+        'action_and_practice__classification',
+        'action_and_practice__practice__name',
+        'record_status',
+        'validity',
+        'scope',
+        'measurement',
+        'scientific_production__communication_object',
+        'scientific_production__open_access_status',
+        'scientific_production__use_license',
+        'scientific_production__apc',
         )
 
     search_fields = (
         'title',
-        'description',
-        'versioning',
-        'action',
-        'classification',
-        'practice',
-        'thematic_areas',
-        'institutions',
-        'locations',
-        'start_date',
-        'end_date',
-        'record_status',
-        'source',
+        'action_and_practice__action__name',
+        'action_and_practice__classification',
+        'action_and_practice__practice__name',
     )
 
 
