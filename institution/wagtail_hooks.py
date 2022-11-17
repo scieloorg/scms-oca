@@ -23,7 +23,7 @@ class InstitutionAdmin(ModelAdmin):
     add_to_settings_menu = False  # or True to add your model to the Settings sub-menu
     exclude_from_explorer = False  # or True to exclude pages of this type from Wagtail's explorer view
     list_display = ('name', 'acronym', 'location', 'source', 'updated')
-    search_fields = ('name', 'institution_type', 'creator', 'updated', 'created', 'updated_by')
+    search_fields = ('name', 'institution_type')
     list_export = ('name', 'institution_type', 'level_1', 'level_2', 'level_3', 'creator', 'updated', 'created', 'updated_by')
     export_filename = 'institutions'
 
