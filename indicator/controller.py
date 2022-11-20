@@ -1,3 +1,4 @@
+from random import randint
 from datetime import datetime
 import logging
 import csv
@@ -10,6 +11,8 @@ from django.db.models import Count, Sum, Q
 from django.utils.translation import gettext as _
 from django.core.exceptions import FieldError
 
+from django_celery_beat.models import PeriodicTask, CrontabSchedule
+
 from education_directory.models import EducationDirectory
 from event_directory.models import EventDirectory
 from infrastructure_directory.models import InfrastructureDirectory
@@ -21,6 +24,10 @@ from institution.models import Institution
 from usefulmodels.models import Practice, State, Action, Country, ThematicArea
 from .models import Indicator, ActionAndPractice, ScientificProduction
 from . import choices
+
+
+class GetOrCreateCrontabScheduleError(Exception):
+    ...
 
 
 class CreateIndicatorRecordError(Exception):
@@ -156,6 +163,177 @@ CONTEXTS = {
 
 }
 
+##########################################################################
+def schedule_evolution_of_scientific_production_tasks(
+        creator_id,
+        years_range,
+        ):
+    years_as_str = str_years_list(years_range)
+
+    for category_id in ('OPEN_ACCESS_STATUS', 'USE_LICENSE'):
+        logging.info(category_id)
+        try:
+            _schedule_evolution_of_scientific_production_task(
+                creator_id,
+                category_id,
+                list(years_range),
+            )
+        except Exception as e:
+            logging.exception(e)
+            continue
+
+    for context_id in ("AFFILIATION_UF", "AFFILIATION"):
+        logging.info(context_id)
+        for context_params in _get_context_items(
+                CONTEXTS[context_id]['category_attributes'], years_as_str):
+            context_params.pop('count')
+            for category_id in ('OPEN_ACCESS_STATUS', 'USE_LICENSE'):
+                logging.info(context_params)
+                try:
+                    _schedule_evolution_of_scientific_production_task(
+                        creator_id,
+                        category_id,
+                        list(years_range),
+                        context_params,
+                        context_id,
+                    )
+                except Exception as e:
+                    logging.exception(e)
+                    continue
+
+
+def _schedule_evolution_of_scientific_production_task(
+        creator_id,
+        category_id,
+        years_range,
+        context_params=None,
+        context_id=None,
+        ):
+    task = _("Geração de indicadores de artigos científicos em acesso aberto")
+    context = list((context_params or {}).values())
+    name = f'{category_id} | {context} | {years_range[0]}-{years_range[-1]}'
+    kwargs = dict(
+        creator_id=creator_id,
+        category_id=category_id,
+        initial_year=years_range[0],
+        final_year=years_range[-1],
+        context_params=context_params,
+        context_id=context_id,
+    )
+    hours_after_now = 0
+    minutes_after_now = randint(2, 60)
+    priority = randint(1, 9)
+    get_or_create_periodic_task(
+        name, task, kwargs,
+        hours_after_now, minutes_after_now, priority,
+    )
+
+##########################################################################
+def schedule_directory_numbers_tasks(
+        creator_id,
+        ):
+    for category2_id in (None, 'CA_PRACTICE', 'THEMATIC_AREA'):
+        _schedule_directory_numbers_without_context_task(
+            creator_id, category2_id)
+    for context_id in ('THEMATIC_AREA', 'LOCATION', 'INSTITUTION', ):
+        _schedule_directory_numbers_with_context_task(creator_id, context_id)
+
+
+def _schedule_directory_numbers_without_context_task(
+        creator_id,
+        category2_id,
+        ):
+    task = _("Geração de indicadores de ações em Ciência Aberta sem contexto")
+    name = _('Ações em CA {}').format(category2_id)
+    kwargs = dict(
+        creator_id=creator_id,
+        category2_id=category2_id,
+    )
+    hours_after_now = 0
+    minutes_after_now = randint(2, 60)
+    priority = 1
+    get_or_create_periodic_task(
+        name, task, kwargs,
+        hours_after_now, minutes_after_now, priority,
+    )
+
+
+def _schedule_directory_numbers_with_context_task(
+        creator_id,
+        context_id,
+        ):
+    task = _("Geração de indicadores de ações em Ciência Aberta")
+    name = _('Ações em CA {}').format(context_id)
+    kwargs = dict(
+        creator_id=creator_id,
+        context_id=context_id,
+    )
+    hours_after_now = 0
+    minutes_after_now = randint(2, 60)
+    priority = 1
+    get_or_create_periodic_task(
+        name, task, kwargs,
+        hours_after_now, minutes_after_now, priority,
+    )
+
+
+##########################################################################
+def sum_hours_and_minutes(hours_after_now, minutes_after_now, now=None):
+    """
+    Retorna a soma dos minutos / horas a partir da hora atual
+    """
+    now = now or datetime.utcnow()
+    hours = now.hour + hours_after_now
+    minutes = now.minute + minutes_after_now
+    if minutes > 59:
+        hours += 1
+    hours = hours % 24
+    minutes = minutes % 60
+    return hours, minutes
+
+
+def get_or_create_crontab_schedule(day_of_week=None, hour=None, minute=None):
+    try:
+        crontab_schedule, status = CrontabSchedule.objects.get_or_create(
+            day_of_week=day_of_week or '*',
+            hour=hour or '*',
+            minute=minute or '*',
+        )
+    except Exception as e:
+        raise GetOrCreateCrontabScheduleError(
+            _('Unable to get_or_create_crontab_schedule {} {} {} {} {}').format(
+                day_of_week, hour, minute, type(e), e
+            )
+        )
+    return crontab_schedule
+
+
+def get_or_create_periodic_task(
+        name, task, kwargs,
+        hours_after_now, minutes_after_now, priority,
+        ):
+    try:
+        periodic_task = PeriodicTask.objects.get(name=name)
+    except PeriodicTask.DoesNotExist:
+        hours, minutes = sum_hours_and_minutes(
+            hours_after_now, minutes_after_now)
+
+        periodic_task = PeriodicTask()
+        periodic_task.name = name
+        periodic_task.task = task
+        periodic_task.kwargs = json.dumps(kwargs)
+        periodic_task.priority = priority
+        periodic_task.enabled = True
+        periodic_task.one_off = True
+        periodic_task.crontab = get_or_create_crontab_schedule(
+            hour=hours,
+            minute=minutes,
+        )
+        periodic_task.save()
+        logging.info(
+            _('Scheduled %s %s %s %s') % (name, hours, minutes, priority))
+
+##########################################################################
 
 def _add_category_name(items, cat1_attributes, cat1_name=None, cat2_attributes=None, cat2_name=None):
     cat1_name = cat1_name or "name"
@@ -191,44 +369,6 @@ def _add_param(params, name, value):
         params[name] = value
     else:
         params[f'{name}__isnull'] = True
-
-
-def _add_param_for_action_and_practice(params, action_and_practice):
-    if action_and_practice:
-        _add_param(params, "action_and_practice__action", action_and_practice.action)
-        _add_param(params, "action_and_practice__classification", action_and_practice.classification)
-        _add_param(params, "action_and_practice__practice", action_and_practice.practice)
-    else:
-        _add_param(params, "action_and_practice", None)
-
-
-def _add_param_for_thematic_areas(params, thematic_areas):
-    if thematic_areas:
-        for item in thematic_areas.iterator():
-            _add_param(params, "thematic_areas__level0", item.level0)
-            _add_param(params, "thematic_areas__level1", item.level1)
-            _add_param(params, "thematic_areas__level2", item.level2)
-            break
-    else:
-        _add_param(params, "thematic_areas", None)
-
-
-def _add_param_for_institutions(params, institutions):
-    if institutions:
-        for item in institutions.iterator():
-            _add_param(params, "institutions__name", item.name)
-    else:
-        _add_param(params, "institutions", None)
-
-
-def _add_param_for_locations(params, locations):
-    if locations:
-        for item in locations.iterator():
-            _add_param(params, "locations__city__name", item.city__name)
-            _add_param(params, "locations__state__acronym", item.state__acronym)
-            _add_param(params, "locations__country__acron2", item.country__acron2)
-    else:
-        _add_param(params, "locations", None)
 
 
 def get_latest_version(code):
@@ -358,81 +498,6 @@ def build_code(
     return "_".join([item or '' for item in items])
 
 
-##############################################################################
-def directory_numbers(
-        creator_id,
-        category_id,
-        category2_id=None,
-        ):
-
-    preposition = _("Brasil")
-
-    category_title = CATEGORIES[category_id]['title']
-    category_name = CATEGORIES[category_id]['name']
-    category_attributes = CATEGORIES[category_id]['category_attributes']
-    category_attributes_options = CATEGORIES[category_id].get('category_attributes_options')
-    title = "Número de {} em Ciência Aberta".format(category_title)
-    cat_attributes = category_attributes.copy()
-
-    if category2_id:
-        category2_title = CATEGORIES[category2_id]['title']
-        category2_name = CATEGORIES[category2_id]['name']
-        category2_attributes = CATEGORIES[category2_id]['category_attributes']
-        category2_attributes_options = CATEGORIES[category2_id].get('category_attributes_options')
-        title = "Número de {} em Ciência Aberta por {}".format(category_title, category2_title)
-        cat_attributes += category2_attributes
-
-    title += f" - {preposition} "
-
-    scope = choices.GENERAL
-    measurement = choices.FREQUENCY
-
-    items = []
-    items.extend(_directory_numbers(EducationDirectory.objects, cat_attributes))
-    items.extend(_directory_numbers(EventDirectory.objects, cat_attributes))
-    items.extend(_directory_numbers(InfrastructureDirectory.objects, cat_attributes))
-    items.extend(_directory_numbers(PolicyDirectory.objects, cat_attributes))
-    keywords = [_('Brasil')]
-    indicator = create_record(
-        title=title,
-        action=None,
-        classification=None,
-        practice=None,
-        scope=scope,
-        measurement=measurement,
-        creator_id=creator_id,
-        category1=category_attributes,
-        category2=category2_id and category2_attributes,
-        context=keywords,
-    )
-    if category2_id:
-        # cat1 = variável cujo valor é comum nos registros
-        # por ex, year, practice__name
-        indicator.summarized = {
-            'items': list(_add_category_name(
-                items,
-                category_attributes, category_name,
-                category2_attributes, category2_name)),
-            'cat1_name': category_name,
-            'cat2_name': category2_name,
-        }
-    else:
-        indicator.summarized = {
-            "items": list(
-                _add_category_name(
-                    items, category_attributes, category_name)),
-            "cat1_name": category_name,
-        }
-    # indicator.total = len(items)
-    save_indicator(indicator, keywords)
-    indicator.save_raw_data(
-        list(EducationDirectory.objects.iterator()) +
-        list(EventDirectory.objects.iterator()) +
-        list(InfrastructureDirectory.objects.iterator()) +
-        list(PolicyDirectory.objects.iterator())
-    )
-
-
 def save_indicator(indicator, keywords=None):
     # indicator.creator_id = creator_id
     indicator.record_status = choices.PUBLISHED
@@ -449,14 +514,191 @@ def save_indicator(indicator, keywords=None):
     logging.info("Created {} {} {}".format(indicator.code, indicator.seq, indicator.record_status))
 
 
-def _get_directory_contexts(context_id):
+##############################################################################
+def generate_directory_numbers_without_context(
+        creator_id,
+        category2_id=None,
+        ):
+
+    preposition = _("Brasil")
+
+    category_id = "CA_ACTION"
+    cat1 = CATEGORIES[category_id]
+    cat1_title = cat1['title']
+    cat1_name = cat1['name']
+    cat1_attrs = cat1['category_attributes']
+    cat1_attrs_options = cat1.get('category_attributes_options')
+    title = "Número de {} em Ciência Aberta".format(cat1_title)
+    cats_attrs = cat1_attrs.copy()
+
+    cat2_attrs = None
+    if category2_id:
+        cat2 = CATEGORIES[category2_id]
+        cat2_title = cat2['title']
+        cat2_name = cat2['name']
+        cat2_attrs = cat2['category_attributes']
+        cat2_attrs_options = cat2.get('category_attributes_options')
+        title = "Número de {} em Ciência Aberta por {}".format(cat1_title, cat2_title)
+        cats_attrs += cat2_attrs
+
+    title += f" - {preposition} "
+
+    scope = choices.GENERAL
+    measurement = choices.FREQUENCY
+
+    items = []
+    items.extend(_directory_numbers(EducationDirectory.objects, cats_attrs))
+    items.extend(_directory_numbers(EventDirectory.objects, cats_attrs))
+    items.extend(_directory_numbers(InfrastructureDirectory.objects, cats_attrs))
+    items.extend(_directory_numbers(PolicyDirectory.objects, cats_attrs))
+    keywords = [_('Brasil')]
+    indicator = create_record(
+        title=title,
+        action=None,
+        classification=None,
+        practice=None,
+        scope=scope,
+        measurement=measurement,
+        creator_id=creator_id,
+        category1=cat1_attrs,
+        category2=cat2_attrs,
+        context=keywords,
+    )
+    if category2_id:
+        # cat1 = variável cujo valor é comum nos registros
+        # por ex, year, practice__name
+        indicator.summarized = {
+            'items': list(_add_cat1_name(
+                items,
+                cat1_attrs, cat1_name,
+                cat2_attrs, cat2_name)),
+            'cat1_name': cat1_name,
+            'cat2_name': cat2_name,
+        }
+    else:
+        indicator.summarized = {
+            "items": list(
+                _add_cat1_name(
+                    items, cat1_attrs, cat1_name)),
+            "cat1_name": cat1_name,
+        }
+    # indicator.total = len(items)
+    save_indicator(indicator, keywords)
+    indicator.save_raw_data(
+        list(EducationDirectory.objects.iterator()) +
+        list(EventDirectory.objects.iterator()) +
+        list(InfrastructureDirectory.objects.iterator()) +
+        list(PolicyDirectory.objects.iterator())
+    )
+
+###############################################################################
+def generate_directory_numbers_with_context(
+        creator_id,
+        context_id,
+        ):
+    # obtém contexto de todos os diretórios
+    for group, directories_and_contexts in _get_directories_contexts(context_id).items():
+        for category2_id in ('CA_PRACTICE', 'THEMATIC_AREA'):
+            if category2_id != context_id:
+                _generate_directory_numbers_for_category(
+                    directories_and_contexts,
+                    context_id,
+                    category2_id,
+                )
+
+
+def _generate_directory_numbers_for_category(
+        directories_and_contexts,
+        context_id,
+        category2_id,
+        ):
+
+    category_id = "CA_ACTION"
+
+    logging.info((category_id, category2_id, context_id))
+
+    cat2_attrs = None
+
+    cat1 = CATEGORIES[category_id]
+    cats_attributes = cat1_attrs.copy()
+    title = "Número de {} em Ciência Aberta".format(cat1['title'])
+    cat1_attrs = cat1['category_attributes']
+
+    if category2_id:
+        cat2 = CATEGORIES[category2_id]
+        cats_attributes += cat2_attrs
+        title = "Número de {} em Ciência Aberta por {}".format(
+            cat1['title'], cat2['title'])
+        cat2_attrs = cat2['category_attributes']
+
+    datasets, items, keywords = _get_directory__dataset_and_items_and_keywords(
+        directories_and_contexts,
+        cats_attributes,
+    )
+    logging.info((len(datasets), len(items), len(keywords)))
+    if not datasets:
+        logging.info("Not found directory records for {}".format(
+            directories_context))
+        return
+
+    # tenta criar indicador
+    scope = choices.GENERAL
+    measurement = choices.FREQUENCY
+
+    try:
+        indicator_title = title
+        if keywords:
+            indicator_title += (
+                " " + CONTEXTS[context_id]['preposition'] +
+                " " + ", ".join(keywords)
+            )
+        indicator = create_record(
+            title=indicator_title,
+            action=None, classification=None, practice=None,
+            scope=scope, measurement=measurement, creator_id=creator_id,
+            category1=cat1_attrs,
+            category2=cat2_attrs,
+            context=keywords,
+        )
+    except CreateIndicatorRecordError:
+        # já está em progresso de criação
+        return
+
+    if category2_id:
+        # cat2: variável em comum nos diretórios
+        # por ex: year, practice__name
+        indicator.summarized = {
+            'items': list(_add_category_name(
+                items,
+                cat1_attrs, cat1['name'],
+                cat2_attrs, cat2['name'],
+                )),
+            'cat1_name': cat1['name'],
+            'cat2_name': cat2['name'],
+        }
+    else:
+        indicator.summarized = {
+            'items': list(_add_category_name(
+                items,
+                cat1_attrs, cat1['name'],
+                )),
+            'cat1_name': cat1['name'],
+        }
+    # indicator.total = len(items)
+    save_indicator(indicator, keywords)
+    indicator.save_raw_data(datasets_iterator(datasets))
+
+
+###########################################################################
+
+def _get_directories_contexts(context_id):
     """
     Obtém os dados dos contextos (lista de instituições ou UF ou áreas temáticas)
     coletados de todos os diretórios
     """
     contexts = {}
     for model in (EducationDirectory, EventDirectory, InfrastructureDirectory, PolicyDirectory):
-        for context_item in _directory_numbers_contexts(model, context_id):
+        for context_item in _directory_context_items(model, context_id):
             key = tuple(context_item.values())
             contexts.setdefault(key, [])
             contexts[key].append((model, context_item))
@@ -471,103 +713,14 @@ def _directory_numbers(dataset, category_attributes):
         ).order_by('count').iterator()
 
 
-def directory_numbers_in_context(
-        creator_id,
-        category_id,
-        category2_id=None,
-        context_id=None,
-        ):
-    logging.info((category_id, category2_id, context_id))
-    category2_attributes = None
-    category_title = CATEGORIES[category_id]['title']
-    category_name = CATEGORIES[category_id]['name']
-    category_attributes = CATEGORIES[category_id]['category_attributes']
-    category_attributes_options = CATEGORIES[category_id].get('category_attributes_options')
-    title = "Número de {} em Ciência Aberta".format(category_title)
-    cat_attributes = category_attributes.copy()
-
-    if category2_id:
-        category2_title = CATEGORIES[category2_id]['title']
-        category2_name = CATEGORIES[category2_id]['name']
-        category2_attributes = CATEGORIES[category2_id]['category_attributes']
-        category2_attributes_options = CATEGORIES[category2_id].get('category_attributes_options')
-        title = "Número de {} em Ciência Aberta por {}".format(category_title, category2_title)
-        cat_attributes += category2_attributes
-
-    scope = choices.GENERAL
-    measurement = choices.FREQUENCY
-
-    # obtém contexto de todos os diretórios
-    for directories_context in _get_directory_contexts(context_id).values():
-        datasets = []
-        items = []
-        keywords = []
-        _get_directory_numbers_data(
-            directories_context,
-            context_id,
-            cat_attributes,
-            datasets,
-            items,
-            keywords,
-        )
-        logging.info((len(datasets), len(items), len(keywords)))
-        if not datasets:
-            logging.info("Not found directory records for {}".format(
-                directories_context))
-            continue
-        # tenta criar indicador
-        try:
-            indicator_title = title
-            if keywords:
-                indicator_title += (
-                    " " + CONTEXTS[context_id]['preposition'] +
-                    " " + ", ".join(keywords)
-                )
-            logging.info(indicator_title)
-            indicator = create_record(
-                title=indicator_title,
-                action=None, classification=None, practice=None,
-                scope=scope, measurement=measurement, creator_id=creator_id,
-                category1=category_attributes,
-                category2=category2_attributes,
-                context=keywords,
-            )
-        except CreateIndicatorRecordError:
-            # já está em progresso de criação
-            continue
-        if category2_id:
-            # cat2: variável em comum nos diretórios
-            # por ex: year, practice__name
-            indicator.summarized = {
-                'items': list(_add_category_name(
-                    items,
-                    category_attributes, category_name,
-                    category2_attributes, category2_name,
-                    )),
-                'cat1_name': category_name,
-                'cat2_name': category2_name,
-            }
-        else:
-            indicator.summarized = {
-                'items': list(_add_category_name(
-                    items,
-                    category_attributes, category_name,
-                    )),
-                'cat1_name': category_name,
-            }
-        # indicator.total = len(items)
-        save_indicator(indicator, keywords)
-        indicator.save_raw_data(datasets_iterator(datasets))
-
-
-def _get_directory_numbers_data(
+def _get_directory__dataset_and_items_and_keywords(
         directories_context,
-        context_id,
         cat_attributes,
-        datasets,
-        items,
-        keywords,
         ):
+
+    datasets = []
+    items = []
+    keywords = []
 
     # para cada diretório, obtém seus ítens contextualizados
     for directory, dir_ctxt_params in directories_context:
@@ -590,6 +743,7 @@ def _get_directory_numbers_data(
 
         # adiciona os ítens sumarizados no conjuntos de ítens do contexto
         items.extend(_directory_numbers(dataset, cat_attributes))
+    return (datasets, items, keywords)
 
 
 def datasets_iterator(datasets):
@@ -597,7 +751,7 @@ def datasets_iterator(datasets):
         yield from dataset.iterator()
 
 
-def _directory_numbers_contexts(directory, context_id):
+def _directory_context_items(directory, context_id):
     """
     Obtém dados do contexto (INSTITUTION, LOCATION, THEMATIC_AREA, ...)
     de registros do tipo Directory, ou seja, uma lista de dicionários com dados
@@ -618,16 +772,8 @@ def _directory_numbers_contexts(directory, context_id):
         except FieldError:
             continue
 
-
-def _standardize_item(items):
-    for item in items:
-        for k, v in item.items():
-            if 'organization' in k:
-                item[k.replace('organization', 'institutions')] = v
-            yield item
-
-
 ##########################################################################
+
 
 def journals_numbers(
         creator_id,
@@ -754,6 +900,7 @@ def evolution_of_scientific_production_in_context(
 
 
 def _get_context_items(context_params, years_as_str):
+    logging.info("_get_context_items %s %s" % (context_params, years_as_str))
     return ScholarlyArticles.objects.filter(
             Q(contributors__affiliation__official__location__country__acron2='BR') |
             Q(contributors__affiliation__country__acron2='BR'),
