@@ -22,7 +22,7 @@ from scholarly_articles.models import ScholarlyArticles, Affiliations
 from location.models import Location
 from institution.models import Institution
 from usefulmodels.models import Practice, State, Action, Country, ThematicArea
-from .models import Indicator, ActionAndPractice, ScientificProduction
+from .models import Indicator, ActionAndPractice
 from . import choices
 
 
@@ -394,7 +394,8 @@ def create_record(
         scope,
         measurement,
         creator_id,
-        scientific_production=None,
+        object_name,
+        category_title=None,
         start_date_year=None,
         end_date_year=None,
         category1=None,
@@ -414,13 +415,20 @@ def create_record(
     scope : choices.SCOPE
     measurement : choices.MEASUREMENT_TYPE
     """
+    title = generate_title(
+        measurement,
+        object_name,
+        start_date_year,
+        end_date_year,
+        category_title,
+        context,
+        )
     code = build_code(
         action,
         classification,
         practice,
-        scope,
         measurement,
-        scientific_production,
+        object_name,
         start_date_year,
         end_date_year,
         category1,
@@ -459,7 +467,9 @@ def create_record(
     indicator.action_and_practice = action_and_practice
     indicator.scope = scope
     indicator.measurement = measurement
-    indicator.scientific_production = scientific_production
+    indicator.object_name = object_name
+    indicator.category = category_title
+    indicator.context = " | ".join(context)
     indicator.start_date_year = start_date_year
     indicator.end_date_year = end_date_year
     indicator.creator_id = creator_id
@@ -472,30 +482,47 @@ def build_code(
         action,
         classification,
         practice,
-        scope,
         measurement,
-        scientific_production,
+        object_name,
         start_date_year,
         end_date_year,
         category1,
         category2,
         context,
-    ):
+        ):
     items = [
         action and action.code,
         classification,
         practice and practice.code,
-        scope,
         measurement,
-        scientific_production and scientific_production.communication_object,
-        scientific_production and scientific_production.open_access_status,
-        scientific_production and scientific_production.use_license,
-        scientific_production and scientific_production.apc,
+        object_name,
         str(start_date_year or ''),
         str(end_date_year or ''),
     ] + (category1 or []) + (category2 or []) + (context or [])
 
-    return "_".join([item or '' for item in items])
+    return "_".join([item.replace(" ", "_") or '' for item in items]).upper()
+
+
+def generate_title(
+        measurement,
+        object_name,
+        start_date_year=None,
+        end_date_year=None,
+        category=None,
+        context=None,
+        ):
+    parts = []
+    if start_date_year and end_date_year:
+        parts += ['Evolução do']
+    if measurement == choices.FREQUENCY:
+        parts += ['Número de']
+    parts += [object_name]
+    if category:
+        parts += [f"por {category}"]
+    if start_date_year and end_date_year:
+        parts += [f'- {start_date_year}-{end_date_year}']
+    parts += (context or [_('no Brasil')])
+    return " ".join(parts)
 
 
 def save_indicator(indicator, keywords=None):
@@ -560,6 +587,8 @@ def generate_directory_numbers_without_context(
         scope=scope,
         measurement=measurement,
         creator_id=creator_id,
+        object_name=_('ações em Ciência Aberta'),
+        category_title=category2_id and CATEGORIES[category2_id]['title'],
         category1=cat1_attrs,
         category2=cat2_attrs,
         context=keywords,
@@ -646,16 +675,12 @@ def _generate_directory_numbers_for_category(
     measurement = choices.FREQUENCY
 
     try:
-        indicator_title = title
-        if keywords:
-            indicator_title += (
-                " " + CONTEXTS[context_id]['preposition'] +
-                " " + ", ".join(keywords)
-            )
         indicator = create_record(
-            title=indicator_title,
+            title='',
             action=None, classification=None, practice=None,
             scope=scope, measurement=measurement, creator_id=creator_id,
+            object_name=_('ações em Ciência Aberta'),
+            category_title=category2_id and CATEGORIES[category2_id]['title'],
             category1=cat1_attrs,
             category2=cat2_attrs,
             context=keywords,
@@ -793,13 +818,6 @@ def journals_numbers(
     # scope = choices.INSTITUTIONAL
     # measurement = choices.FREQUENCY
 
-    scientific_production = ScientificProduction.get_or_create(
-        communication_object='journal',
-        open_access_status=None,
-        use_license=None,
-        apc=None,
-    )
-
     title = "Número de periódicos em acesso aberto por {}".format(
         category_title,
     )
@@ -811,7 +829,8 @@ def journals_numbers(
         scope=choices.GENERAL,
         measurement=choices.FREQUENCY,
         creator_id=creator_id,
-        scientific_production=scientific_production,
+        object_name=_('artigos científicos em acesso aberto'),
+        category_title=CATEGORIES[category_id]['title'],
         start_date_year=datetime.now().year,
     )
 
@@ -940,15 +959,6 @@ def evolution_of_scientific_production(
     # características do indicador
     scope = choices.CHRONOLOGICAL
     measurement = choices.EVOLUTION
-    observation = 'journal-article'
-
-    # característica da produção científica
-    scientific_production = ScientificProduction.get_or_create(
-        communication_object='journal-article',
-        open_access_status=None,
-        use_license=None,
-        apc=None,
-    )
 
     # seleção do intervalo de anos
     years_range = years_range or get_years_range()
@@ -964,15 +974,15 @@ def evolution_of_scientific_production(
         **context_params,
     )
     indicator = create_record(
-        title=_get_scientific_production_indicator_title(
-            category_title, context_id, keywords, years_range),
+        title='',
         action=action,
         classification=classification,
         practice=practice,
         scope=scope,
         measurement=measurement,
         creator_id=creator_id,
-        scientific_production=scientific_production,
+        object_name=_('artigos científicos em acesso aberto'),
+        category_title=CATEGORIES[category_id]['title'],
         start_date_year=years_range[0] if years_range else None,
         end_date_year=years_range[-1] if years_range else None,
         category1=category_attributes,
@@ -996,20 +1006,3 @@ def evolution_of_scientific_production(
     }
     save_indicator(indicator, keywords=keywords)
     indicator.save_raw_data(dataset.iterator())
-
-
-def _get_scientific_production_indicator_title(category_title,
-                                               context_id,
-                                               keywords,
-                                               years_range):
-    context = " - " + _('Brasil')
-    if context_id:
-        context = f" {CONTEXTS[context_id]['preposition']} {', '.join(keywords)}"
-
-    return (
-        'Evolução do número de artigos em acesso aberto por {} - {}-{} {}'.format(
-            category_title,
-            years_range[0], years_range[-1],
-            context,
-        )
-    )
