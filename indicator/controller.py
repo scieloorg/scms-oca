@@ -568,7 +568,7 @@ def generate_directory_numbers_without_context(
         # cat1 = variável cujo valor é comum nos registros
         # por ex, year, practice__name
         indicator.summarized = {
-            'items': list(_add_cat1_name(
+            'items': list(_add_category_name(
                 items,
                 cat1_attrs, cat1_name,
                 cat2_attrs, cat2_name)),
@@ -578,7 +578,7 @@ def generate_directory_numbers_without_context(
     else:
         indicator.summarized = {
             "items": list(
-                _add_cat1_name(
+                _add_category_name(
                     items, cat1_attrs, cat1_name)),
             "cat1_name": cat1_name,
         }
