@@ -71,4 +71,30 @@ class Location(CommonControlField):
 
         return location
 
+    @classmethod
+    def get_or_create_state(cls, user, state_name, state_acronym):
+        try:
+            location = Location.objects.get(
+                state__name=state_name,
+                state__acronym=state_acronym,
+                city__isnull=True,
+                country__isnull=False,
+            )
+        except Location.DoesNotExist:
+            try:
+                location = Location.objects.get(
+                    state__name=state_name,
+                    state__acronym=state_acronym,
+                    city__isnull=True,
+                    country__isnull=True,
+                )
+            except Location.DoesNotExist:
+                location = Location()
+                location.state = State.get_or_create(
+                    user, state_name, state_acronym)
+                location.creator = user
+                location.save()
+
+        return location
+
     base_form_class = LocationForm
