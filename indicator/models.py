@@ -75,6 +75,25 @@ class Indicator(CommonControlField):
     category = models.CharField(_("Categoria"), max_length=255, null=True, blank=False)
     context = models.CharField(_("Contexto"), max_length=255, null=True, blank=False)
 
+    @property
+    def header(self):
+        d = dict(
+            title=self.title,
+            description=self.description,
+            validity=self.validity,
+            link=self.link,
+            source='OCABr',
+            updated=self.updated.isoformat(),
+            creator=self.creator or 'SciELO',
+        )
+        indicator = {}
+        indicator['indicator'] = {
+            k: v
+            for k, v in d.items()
+            if v
+        }
+        return indicator
+
     def save_raw_data(self, items):
         with TemporaryDirectory() as tmpdirname:
             temp_zip_file_path = os.path.join(tmpdirname, self.filename + ".zip")
@@ -83,9 +102,9 @@ class Indicator(CommonControlField):
                 zf.writestr(
                     self.filename + ".jsonl",
                     "".join(self._raw_data_rows(items)))
-            shutil.move(temp_zip_file_path, file_path)
-            self.raw_data.name = file_path
-            self.save()
+        shutil.move(temp_zip_file_path, file_path)
+        self.raw_data.name = file_path
+        self.save()
 
     def _raw_data_rows(self, items):
         for item in items:
@@ -93,6 +112,7 @@ class Indicator(CommonControlField):
                 data = item.data
             except:
                 data = {"teste": "teste"}
+            data.update(self.header)
             yield f"{json.dumps(data)}\n"
 
     class Meta:
