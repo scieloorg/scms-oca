@@ -81,10 +81,11 @@ class Indicator(CommonControlField):
             title=self.title,
             description=self.description,
             validity=self.validity,
+            version=self.seq,
             link=self.link,
             source='OCABr',
             updated=self.updated.isoformat(),
-            creator=self.creator or 'SciELO',
+            creator='SciELO',
         )
         indicator = {}
         indicator['indicator'] = {
@@ -102,7 +103,7 @@ class Indicator(CommonControlField):
                 zf.writestr(
                     self.filename + ".jsonl",
                     "".join(self._raw_data_rows(items)))
-        shutil.move(temp_zip_file_path, file_path)
+            shutil.move(temp_zip_file_path, file_path)
         self.raw_data.name = file_path
         self.save()
 
@@ -112,8 +113,9 @@ class Indicator(CommonControlField):
                 data = item.data
             except:
                 data = {"teste": "teste"}
-            data.update(self.header)
-            yield f"{json.dumps(data)}\n"
+            else:
+                data.update(self.header)
+                yield f"{json.dumps(data)}\n"
 
     class Meta:
         indexes = [

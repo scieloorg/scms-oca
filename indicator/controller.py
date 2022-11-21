@@ -41,8 +41,8 @@ OA_STATUS_ITEMS = ('gold', 'bronze', 'green', 'hybrid', )
 
 CATEGORIES = {
     'OPEN_ACCESS_STATUS': {
-        'title': 'tipo',
-        'name': 'tipo de acesso aberto',
+        'title': 'categoria de acesso aberto',
+        'name': 'categoria de acesso aberto',
         'category_attributes': ['open_access_status']},
     'USE_LICENSE': {
         'title': 'licença de uso',
@@ -170,7 +170,7 @@ def schedule_evolution_of_scientific_production_tasks(
         ):
     years_as_str = str_years_list(years_range)
 
-    for category_id in ('OPEN_ACCESS_STATUS', 'USE_LICENSE'):
+    for category_id in ('OPEN_ACCESS_STATUS', 'USE_LICENSE', ):
         logging.info(category_id)
         try:
             _schedule_evolution_of_scientific_production_task(
@@ -221,7 +221,7 @@ def _schedule_evolution_of_scientific_production_task(
         context_id=context_id,
     )
     hours_after_now = 0
-    minutes_after_now = randint(2, 60)
+    minutes_after_now = randint(1, 30)
     priority = randint(1, 9)
     get_or_create_periodic_task(
         name, task, kwargs,
@@ -250,7 +250,7 @@ def _schedule_directory_numbers_without_context_task(
         category2_id=category2_id,
     )
     hours_after_now = 0
-    minutes_after_now = randint(2, 60)
+    minutes_after_now = randint(1, 5)
     priority = 1
     get_or_create_periodic_task(
         name, task, kwargs,
@@ -269,7 +269,7 @@ def _schedule_directory_numbers_with_context_task(
         context_id=context_id,
     )
     hours_after_now = 0
-    minutes_after_now = randint(2, 60)
+    minutes_after_now = randint(2, 10)
     priority = 1
     get_or_create_periodic_task(
         name, task, kwargs,
@@ -348,7 +348,7 @@ def _add_category_name(items, cat1_attributes, cat1_name=None, cat2_attributes=N
                 item[cat2_name] = _concat_values(cat2_attributes, item.copy(), " | ")
             yield item
 
-
+#########################################################################
 def delete():
     for item in Indicator.objects.iterator():
         try:
@@ -364,11 +364,31 @@ def delete():
             logging.exception(e)
 
 
+def delete_tasks():
+    for item in PeriodicTask.objects.filter(name__contains='indicadores').iterator():
+        try:
+            item.delete()
+        except Exception as e:
+            logging.exception(e)
+
+
+#########################################################################
+
 def _add_param(params, name, value):
     if value:
         params[name] = value
     else:
         params[f'{name}__isnull'] = True
+
+
+def fix_params(params):
+    args = {}
+    for name, value in params.items():
+        if value:
+            args[name] = value
+        else:
+            args[f'{name}__isnull'] = True
+    return args
 
 
 def get_latest_version(code):
@@ -500,7 +520,7 @@ def build_code(
         str(end_date_year or ''),
     ] + (category1 or []) + (category2 or []) + (context or [])
 
-    return "_".join([item.replace(" ", "_") or '' for item in items]).upper()
+    return "_".join([item.replace(" ", "_") or '' for item in items if item]).upper()
 
 
 def generate_title(
@@ -555,7 +575,6 @@ def generate_directory_numbers_without_context(
     cat1_name = cat1['name']
     cat1_attrs = cat1['category_attributes']
     cat1_attrs_options = cat1.get('category_attributes_options')
-    title = "Número de {} em Ciência Aberta".format(cat1_title)
     cats_attrs = cat1_attrs.copy()
 
     cat2_attrs = None
@@ -565,10 +584,7 @@ def generate_directory_numbers_without_context(
         cat2_name = cat2['name']
         cat2_attrs = cat2['category_attributes']
         cat2_attrs_options = cat2.get('category_attributes_options')
-        title = "Número de {} em Ciência Aberta por {}".format(cat1_title, cat2_title)
         cats_attrs += cat2_attrs
-
-    title += f" - {preposition} "
 
     scope = choices.GENERAL
     measurement = choices.FREQUENCY
@@ -580,7 +596,7 @@ def generate_directory_numbers_without_context(
     items.extend(_directory_numbers(PolicyDirectory.objects, cats_attrs))
     keywords = [_('Brasil')]
     indicator = create_record(
-        title=title,
+        title='',
         action=None,
         classification=None,
         practice=None,
@@ -649,16 +665,16 @@ def _generate_directory_numbers_for_category(
     cat2_attrs = None
 
     cat1 = CATEGORIES[category_id]
-    cats_attributes = cat1_attrs.copy()
     title = "Número de {} em Ciência Aberta".format(cat1['title'])
     cat1_attrs = cat1['category_attributes']
+    cats_attributes = cat1_attrs.copy()
 
     if category2_id:
         cat2 = CATEGORIES[category2_id]
-        cats_attributes += cat2_attrs
         title = "Número de {} em Ciência Aberta por {}".format(
             cat1['title'], cat2['title'])
         cat2_attrs = cat2['category_attributes']
+        cats_attributes += cat2_attrs
 
     datasets, items, keywords = _get_directory__dataset_and_items_and_keywords(
         directories_and_contexts,
@@ -667,7 +683,7 @@ def _generate_directory_numbers_for_category(
     logging.info((len(datasets), len(items), len(keywords)))
     if not datasets:
         logging.info("Not found directory records for {}".format(
-            directories_context))
+            directories_and_contexts))
         return
 
     # tenta criar indicador
@@ -1004,26 +1020,32 @@ def evolution_of_scientific_production(
 
 
 def _add_context(indicator, context_id, context_params):
+    logging.info("Adding context %s %s %s" % (indicator, context_id, context_params))
     if context_id in ('AFFILIATION', 'INSTITUTION'):
         try:
             name = (
                 context_params.get('contributors__affiliation__official__name') or
                 context_params.get("institutions__name") or
-                context_params.get("organizations__name")
+                context_params.get("organization__name")
             )
             location__state__name = (
-                context_params.get('contributors__affiliation__official__state__name') or
-                context_params.get("institutions__state__name") or
-                context_params.get("organizations__state__name")
+                context_params.get('contributors__affiliation__official__location__state__name') or
+                context_params.get("institutions__location__state__name") or
+                context_params.get("organization__location__state__name")
             )
+            logging.info("Adding context %s %s" % (name, location__state__name))
             inst = Institution.objects.get(
-                name=name,
-                location__state__name=location__state__name,
+                **fix_params(
+                    dict(
+                        name=name,
+                        location__state__name=location__state__name,
+                    )
+                )
             )
         except Institution.DoesNotExist:
-            pass
+            logging.info("Adding context DoesNotExist")
         except Institution.MultipleObjectsReturned:
-            pass
+            logging.info("Adding context MultipleObjectsReturned")
         else:
             indicator.institutions.add(inst)
     elif context_id in ('AFFILIATION_UF', 'LOCATION'):
@@ -1034,9 +1056,9 @@ def _add_context(indicator, context_id, context_params):
                 context_params.get(
                     'institutions__location__state__name') or
                 context_params.get(
-                    'organizations__location__state__name') or
+                    'organization__location__state__name') or
                 context_params.get(
-                    'location__state__name')
+                    'locations__state__name')
             )
             state__acronym = (
                 context_params.get(
@@ -1044,19 +1066,27 @@ def _add_context(indicator, context_id, context_params):
                 context_params.get(
                     'institutions__location__state__acronym') or
                 context_params.get(
-                    'organizations__location__state__acronym') or
+                    'organization__location__state__acronym') or
                 context_params.get(
-                    'location__state__acronym')
+                    'locations__state__acronym')
             )
+            logging.info("Adding context %s %s" % (state__name, state__acronym))
+
+            args = fix_params(
+                dict(
+                    state__name=state__name,
+                    state__acronym=state__acronym,
+                )
+            )
+
             location = Location.get_or_create_state(
                 indicator.creator_id,
-                state__name,
-                state__acronym,
+                **args,
             )
         except Location.DoesNotExist:
-            pass
+            logging.info("Adding context DoesNotExist")
         except Location.MultipleObjectsReturned:
-            pass
+            logging.info("Adding context MultipleObjectsReturned")
         else:
             indicator.locations.add(location)
     elif context_id in ('THEMATIC_AREA', ):
@@ -1064,8 +1094,10 @@ def _add_context(indicator, context_id, context_params):
                 context_params.get(
                     'thematic_areas__level1')
             )
-            for item in ThematicArea.objects.filter(
-                    thematic_areas__level1=thematic_areas__level1).iterator():
-                indicator.locations.add(item)
+            logging.info("Adding context %s" % (thematic_areas__level1, ))
+            if thematic_areas__level1:
+                for item in ThematicArea.objects.filter(
+                        level1=thematic_areas__level1).iterator():
+                    indicator.thematic_areas.add(item)
     else:
         return
