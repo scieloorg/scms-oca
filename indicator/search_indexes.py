@@ -23,16 +23,16 @@ class IndicatorIndex(indexes.SearchIndex, indexes.Indexable):
     record_status = indexes.CharField(model_attr="record_status", null=True)
     source = indexes.CharField(model_attr="source", null=True)
 
+    object_name = indexes.CharField(model_attr="object_name", null=True)
+    category = indexes.CharField(model_attr="category", null=True)
+    context = indexes.CharField(model_attr="context", null=True)
+
     # raw_data = indexes.CharField(null=True)
 
     # ForeignKeys
     classification = indexes.CharField(null=True)
     action = indexes.CharField(null=True)
     practice = indexes.CharField(null=True)
-    communication_object = indexes.CharField(null=True)
-    open_access_status = indexes.CharField(null=True)
-    use_license = indexes.CharField(null=True)
-    apc = indexes.CharField(null=True)
 
     # ManyToMany
     keywords = indexes.MultiValueField(null=True)
@@ -55,26 +55,6 @@ class IndicatorIndex(indexes.SearchIndex, indexes.Indexable):
     def prepare_practice(self, obj):
         return obj.action_and_practice and obj.action_and_practice.practice.name
 
-    def prepare_communication_object(self, obj):
-        return (
-            obj.scientific_production and
-            obj.scientific_production.communication_object)
-
-    def prepare_apc(self, obj):
-        return (
-            obj.scientific_production and
-            obj.scientific_production.apc)
-
-    def prepare_use_license(self, obj):
-        return (
-            obj.scientific_production and
-            obj.scientific_production.use_license)
-
-    def prepare_open_access_status(self, obj):
-        return (
-            obj.scientific_production and
-            obj.scientific_production.open_access_status)
-
     # def prepare_file_csv(self, obj):
     #     return obj.raw_data and obj.raw_data.url
 
@@ -85,8 +65,11 @@ class IndicatorIndex(indexes.SearchIndex, indexes.Indexable):
         return ""
 
     def prepare_institutions(self, obj):
+        institutions = set()
         if obj.institutions:
-            return [institution.name for institution in obj.institutions.all()]
+            for institution in obj.institutions.all():
+                institutions.add(institution)
+            return institutions
 
     def prepare_thematic_areas(self, obj):
         thematic_areas = set()
