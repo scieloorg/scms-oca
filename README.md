@@ -112,6 +112,15 @@ make django_makemigrations
 make django_migrate
 ```
 
+## Instant backup 
+
+`` docker exec -t oca_local_postgres pg_dumpall -c -U GVRFlLmcCNfGLhsFvSnCioYOPJPYpyfj > oca.sql``
+
+## Instant restore
+
+``cat oca.sql | docker exec -i oca_local_postgres psql -U GVRFlLmcCNfGLhsFvSnCioYOPJPYpyfj core``
+
+
 ## Settings
 
 Moved to [settings](http://cookiecutter-django.readthedocs.io/en/latest/settings.html).
