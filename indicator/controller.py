@@ -60,7 +60,7 @@ CATEGORIES = {
         'name': 'área temática',
         'title': 'área temática',
         'category_attributes': [
-            'thematic_areas__level0',
+            'thematic_areas__level1',
         ]},
 }
 
@@ -94,7 +94,7 @@ CONTEXTS = {
         'type': choices.THEMATIC,
         'preposition': "-",
         'category_attributes': [
-            'thematic_areas__level0',
+            'thematic_areas__level1',
         ]},
     'LOCATION': {
         'title': '',
@@ -710,6 +710,7 @@ def _generate_directory_numbers_for_category(
             'cat1_name': cat1['name'],
         }
     # indicator.total = len(items)
+    _add_context(indicator, context_id, context_params)
     save_indicator(indicator, keywords)
     indicator.save_raw_data(datasets_iterator(datasets))
 
@@ -979,7 +980,7 @@ def evolution_of_scientific_production(
         start_date_year=years_range[0] if years_range else None,
         end_date_year=years_range[-1] if years_range else None,
         category1=category_attributes,
-        context=keywords
+        context=keywords,
     )
     args = []
     args.extend(category_attributes)
@@ -997,5 +998,74 @@ def evolution_of_scientific_production(
         'cat2_name': 'year',
         'cat2_values': years_as_str,
     }
+    _add_context(indicator, context_id, context_params)
     save_indicator(indicator, keywords=keywords)
     indicator.save_raw_data(dataset.iterator())
+
+
+def _add_context(indicator, context_id, context_params):
+    if context_id in ('AFFILIATION', 'INSTITUTION'):
+        try:
+            name = (
+                context_params.get('contributors__affiliation__official__name') or
+                context_params.get("institutions__name") or
+                context_params.get("organizations__name")
+            )
+            location__state__name = (
+                context_params.get('contributors__affiliation__official__state__name') or
+                context_params.get("institutions__state__name") or
+                context_params.get("organizations__state__name")
+            )
+            inst = Institution.objects.get(
+                name=name,
+                location__state__name=location__state__name,
+            )
+        except Institution.DoesNotExist:
+            pass
+        except Institution.MultipleObjectsReturned:
+            pass
+        else:
+            indicator.institutions.add(inst)
+    elif context_id in ('AFFILIATION_UF', 'LOCATION'):
+        try:
+            state__name = (
+                context_params.get(
+                    'contributors__affiliation__official__location__state__name') or
+                context_params.get(
+                    'institutions__location__state__name') or
+                context_params.get(
+                    'organizations__location__state__name') or
+                context_params.get(
+                    'location__state__name')
+            )
+            state__acronym = (
+                context_params.get(
+                    'contributors__affiliation__official__location__state__acronym') or
+                context_params.get(
+                    'institutions__location__state__acronym') or
+                context_params.get(
+                    'organizations__location__state__acronym') or
+                context_params.get(
+                    'location__state__acronym')
+            )
+            location = Location.get_or_create_state(
+                indicator.creator_id,
+                state__name,
+                state__acronym,
+            )
+        except Location.DoesNotExist:
+            pass
+        except Location.MultipleObjectsReturned:
+            pass
+        else:
+            indicator.locations.add(location)
+    elif context_id in ('THEMATIC_AREA', ):
+            thematic_areas__level1 = (
+                context_params.get(
+                    'thematic_areas__level1')
+            )
+            for item in ThematicArea.objects.filter(
+                    thematic_areas__level1=thematic_areas__level1).iterator():
+                indicator.locations.add(item)
+    else:
+        return
