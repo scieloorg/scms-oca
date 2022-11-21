@@ -262,7 +262,7 @@ def _schedule_directory_numbers_with_context_task(
         creator_id,
         context_id,
         ):
-    task = _("Geração de indicadores de ações em Ciência Aberta")
+    task = _("Geração de indicadores de ações em Ciência Aberta com contexto")
     name = _('Ações em CA {}').format(context_id)
     kwargs = dict(
         creator_id=creator_id,
@@ -315,23 +315,23 @@ def get_or_create_periodic_task(
     try:
         periodic_task = PeriodicTask.objects.get(name=name)
     except PeriodicTask.DoesNotExist:
-        hours, minutes = sum_hours_and_minutes(
-            hours_after_now, minutes_after_now)
-
         periodic_task = PeriodicTask()
         periodic_task.name = name
         periodic_task.task = task
         periodic_task.kwargs = json.dumps(kwargs)
-        periodic_task.priority = priority
-        periodic_task.enabled = True
-        periodic_task.one_off = True
-        periodic_task.crontab = get_or_create_crontab_schedule(
-            hour=hours,
-            minute=minutes,
-        )
-        periodic_task.save()
-        logging.info(
-            _('Scheduled %s %s %s %s') % (name, hours, minutes, priority))
+
+    hours, minutes = sum_hours_and_minutes(
+        hours_after_now, minutes_after_now)
+    periodic_task.priority = priority
+    periodic_task.enabled = True
+    periodic_task.one_off = True
+    periodic_task.crontab = get_or_create_crontab_schedule(
+        hour=hours,
+        minute=minutes,
+    )
+    periodic_task.save()
+    logging.info(
+        _('Scheduled %s %s %s %s') % (name, hours, minutes, priority))
 
 ##########################################################################
 
@@ -513,7 +513,7 @@ def generate_title(
         ):
     parts = []
     if start_date_year and end_date_year:
-        parts += ['Evolução do']
+        parts += ['Evolução do número de']
     if measurement == choices.FREQUENCY:
         parts += ['Número de']
     parts += [object_name]
@@ -814,22 +814,15 @@ def journals_numbers(
 
     observation = 'journal'
 
-    # seleciona produção científica brasileira e de acesso aberto
-    # scope = choices.INSTITUTIONAL
-    # measurement = choices.FREQUENCY
-
-    title = "Número de periódicos em acesso aberto por {}".format(
-        category_title,
-    )
     indicator = create_record(
-        title=title,
+        title='',
         action=action,
         classification=classification,
         practice=practice,
         scope=choices.GENERAL,
         measurement=choices.FREQUENCY,
         creator_id=creator_id,
-        object_name=_('artigos científicos em acesso aberto'),
+        object_name=_('periódicos em acesso aberto'),
         category_title=CATEGORIES[category_id]['title'],
         start_date_year=datetime.now().year,
     )
