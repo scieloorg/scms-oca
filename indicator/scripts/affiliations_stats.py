@@ -1,3 +1,12 @@
+import os
+from tempfile import TemporaryDirectory
+from zipfile import ZipFile
+import json
+import shutil
+
+from django.conf import settings
+from django.db.models import Count
+
 from institution.models import Institution
 from scholarly_articles.models import Affiliations
 
@@ -17,6 +26,8 @@ def affiliations_numbers():
     stats['institution__state'] = inst__state.count()
     stats['institution__country'] = inst__country.count()
     stats['institution__country__BR'] = inst__country__BR.count()
+    stats['institution__MEC'] = Institution.objects.filter(
+        source='MEC').count()
 
     stats['aff__total'] = Affiliations.objects.count()
     official = Affiliations.objects.filter(
@@ -42,13 +53,39 @@ def affiliations_numbers():
     stats['aff__country__BR'] = Affiliations.objects.filter(
             country__acron2='BR',
         ).count()
-    return {
-        "items": [
-            {"name": k, "count": v}
-            for k, v in stats.items()
-        ]
-    }
+    stats['aff sem país e sem official'] = Affiliations.objects.filter(
+            country__isnull=True, official__isnull=True,
+        ).count()
+    return stats
+
+
+def generate_unmatched_affilition_countries_report():
+    filename = 'unmatched_affilition_countries'
+    with TemporaryDirectory() as tmpdirname:
+        temp_zip_file_path = os.path.join(tmpdirname, filename + ".zip")
+        file_path = os.path.join(settings.MEDIA_ROOT, filename + ".zip")
+        with ZipFile(temp_zip_file_path, "w") as zf:
+            zf.writestr(
+                file_path + ".jsonl",
+                "".join(unmatched_affilition_countries()))
+        print(file_path)
+        shutil.move(temp_zip_file_path, file_path)
+
+
+def unmatched_affilition_countries():
+    for aff in Affiliations.objects.filter(
+                official__isnull=True,
+                country__isnull=True,
+            ).values(
+                'name'
+            ).annotate(
+                count=Count('id')
+            ).order_by('-count').iterator():
+        yield f"{json.dumps(aff)}\n"
 
 
 def run():
-    print(affiliations_numbers())
+    for k, v in affiliations_numbers().items():
+        print(f"{k}\t{v}")
+
+    generate_unmatched_affilition_countries_report()
