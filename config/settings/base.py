@@ -421,4 +421,6 @@ SEARCH_FACET_LIST = ['record_type',
                      'regions',
                      'states',
                      'cities',
-                     'thematic_areas']
+                     'thematic_areas',
+                     'category',
+                     ]
