@@ -244,7 +244,7 @@ def _schedule_directory_numbers_without_context_task(
         category2_id,
         ):
     task = _("Geração de indicadores de ações em Ciência Aberta sem contexto")
-    name = _('Ações em CA {}').format(category2_id)
+    name = _('Ações em CA categoria={}').format(category2_id)
     kwargs = dict(
         creator_id=creator_id,
         category2_id=category2_id,
@@ -263,7 +263,7 @@ def _schedule_directory_numbers_with_context_task(
         context_id,
         ):
     task = _("Geração de indicadores de ações em Ciência Aberta com contexto")
-    name = _('Ações em CA {}').format(context_id)
+    name = _('Ações em CA contexto={}').format(context_id)
     kwargs = dict(
         creator_id=creator_id,
         context_id=context_id,
@@ -365,7 +365,7 @@ def delete():
 
 
 def delete_tasks():
-    for item in PeriodicTask.objects.filter(name__contains='indicadores').iterator():
+    for item in PeriodicTask.objects.filter(task__contains='indicadores').iterator():
         try:
             item.delete()
         except Exception as e:
@@ -646,6 +646,7 @@ def generate_directory_numbers_with_context(
         for category2_id in ('CA_PRACTICE', 'THEMATIC_AREA'):
             if category2_id != context_id:
                 _generate_directory_numbers_for_category(
+                	creator_id,
                     directories_and_contexts,
                     context_id,
                     category2_id,
@@ -653,6 +654,7 @@ def generate_directory_numbers_with_context(
 
 
 def _generate_directory_numbers_for_category(
+		creator_id,
         directories_and_contexts,
         context_id,
         category2_id,
@@ -726,6 +728,9 @@ def _generate_directory_numbers_for_category(
             'cat1_name': cat1['name'],
         }
     # indicator.total = len(items)
+    for model, context_params in directories_and_contexts:
+        if context_params:
+            break
     _add_context(indicator, context_id, context_params)
     save_indicator(indicator, keywords)
     indicator.save_raw_data(datasets_iterator(datasets))
