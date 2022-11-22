@@ -106,8 +106,8 @@ def indicator_detail(request, indicator_id):
             pk=indicator_id)
     except Indicator.DoesNotExist:
         raise Http404("Indicator does not exist")
-    if not indicator.link:
-        indicator.link = request.get_full_path()
+    if indicator.link != request.build_absolute_uri():
+        indicator.link = request.build_absolute_uri()
         indicator.save()
     indicator.latest = (
         indicator_controller.get_latest_version(indicator.code).id
@@ -149,7 +149,6 @@ def indicator_raw_data(request, indicator_id):
             pk=indicator_id, record_status='PUBLISHED')
     except Indicator.DoesNotExist:
         raise Http404("Indicator does not exist")
-
 
     filename = os.path.basename(indicator.raw_data.name)
     response = HttpResponse(
