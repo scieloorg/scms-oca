@@ -50,10 +50,9 @@ class IndicatorAdmin(ModelAdmin):
         'validity',
         'scope',
         'measurement',
-        'scientific_production__communication_object',
-        'scientific_production__open_access_status',
-        'scientific_production__use_license',
-        'scientific_production__apc',
+        'object_name',
+        'category',
+        'context',
         )
 
     search_fields = (

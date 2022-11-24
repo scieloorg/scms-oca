@@ -1,3 +1,5 @@
+import logging
+
 from django.db.models import Q
 
 from scholarly_articles.models import Affiliations
@@ -18,6 +20,7 @@ def complete_affiliation_data():
                 name__icontains=institution.name).iterator():
             aff.official = institution
             aff.save()
+            logging.info(aff.name)
 
     # first iteration to identify country by institution ROR
     for institution_ror in Institution.objects.filter(source="ROR").iterator():
@@ -28,8 +31,11 @@ def complete_affiliation_data():
                 ).iterator():
             aff.country = institution_ror.location.country
             aff.save()
+            logging.info(aff.name)
 
-    for country in Country.objects.all():
+    for country in Country.objects.iterator():
+        logging.info((country.name_en, country.name_pt, country.acron3))
+
         # second iteration to identify country by declared name
         for aff in Affiliations.objects.filter(
                 Q(name__icontains=country.name_en) |
@@ -39,23 +45,30 @@ def complete_affiliation_data():
                 ).iterator():
             aff.country = country
             aff.save()
+            logging.info(aff.name)
 
         # third iteration to identify country by declared acronym with 3 char
         for aff in Affiliations.objects.filter(
-                Q(name__contains=", "+country.acron3+", ") |
-                Q(name__endswith=", "+country.acron3),
+                Q(name__contains=" "+country.acron3+",") |
+                Q(name__contains=" "+country.acron3+";") |
+                Q(name__contains=" "+country.acron3+".") |
+                Q(name__endswith=" "+country.acron3),
                 country__isnull=True,
                 official__isnull=True,
                 ).iterator():
             aff.country = country
             aff.save()
+            logging.info(aff.name)
 
         # fourth iteration to identify country by declared acronym with 2 char
         for aff in Affiliations.objects.filter(
-                Q(name__contains=", "+country.acron2+", ") |
-                Q(name__endswith=", "+country.acron2),
+                Q(name__contains=" "+country.acron2+",") |
+                Q(name__contains=" "+country.acron2+";") |
+                Q(name__contains=" "+country.acron2+".") |
+                Q(name__endswith=" "+country.acron2),
                 country__isnull=True,
                 official__isnull=True,
                 ).iterator():
             aff.country = country
             aff.save()
+            logging.info(aff.name)

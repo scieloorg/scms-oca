@@ -7,8 +7,8 @@ translates = {
     'policy_directory': _('Diretório de Política'),
     'record_type': _('Tipo de registro'),
     'directory_type': _('Diretórios'),
-    'countries': _('Pais'),
-    'states': _('Estato'),
+    'countries': _('País'),
+    'states': _('Estado'),
     'cities': _('Cidade'),
     'regions': _('Região'),
     'thematic_areas': _('Áreas temáticas'),
@@ -16,4 +16,5 @@ translates = {
     'indicator': _('Indicadores'),
     'practice': _('Práticas'),
     'action': _('Ações'),
+    'category': _('Categoria'),
 }

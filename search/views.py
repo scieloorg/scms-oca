@@ -106,9 +106,11 @@ def indicator_detail(request, indicator_id):
             pk=indicator_id)
     except Indicator.DoesNotExist:
         raise Http404("Indicator does not exist")
-
+    if indicator.link != request.build_absolute_uri():
+        indicator.link = request.build_absolute_uri()
+        indicator.save()
     indicator.latest = (
-    	indicator_controller.get_latest_version(indicator.code).id
+        indicator_controller.get_latest_version(indicator.code).id
     )
     parameters = controller.indicator_detail(request, indicator)
     return render(request, 'indicator/indicator_detail.html', parameters)

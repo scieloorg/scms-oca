@@ -28,53 +28,6 @@ from infrastructure_directory.models import InfrastructureDirectory
 from policy_directory.models import PolicyDirectory
 
 
-class ScientificProduction(models.Model):
-    communication_object = models.CharField(
-        _("Communication object"),
-        max_length=25, null=True, blank=True)
-    open_access_status = models.CharField(
-        _("Open Access Status"), max_length=50,
-        null=True, blank=True)
-    use_license = models.CharField(
-        _("Use License"), max_length=50,
-        null=True, blank=True)
-    apc = models.CharField(
-        _("Article Processing Charge"), max_length=20,
-        null=True, blank=True)
-
-    class Meta:
-        indexes = [
-            models.Index(fields=['communication_object']),
-            models.Index(fields=['open_access_status']),
-            models.Index(fields=['use_license']),
-            models.Index(fields=['apc']),
-        ]
-
-    @classmethod
-    def get_or_create(cls, communication_object, open_access_status, use_license, apc):
-        try:
-            return ScientificProduction.objects.get(
-                communication_object=communication_object,
-                open_access_status=open_access_status,
-                use_license=use_license,
-                apc=apc,
-            )
-        except ScientificProduction.DoesNotExist:
-            return ScientificProduction(
-                    communication_object=communication_object,
-                    open_access_status=open_access_status,
-                    use_license=use_license,
-                    apc=apc,
-                ).save()
-        except ScientificProduction.MultipleObjectsReturned:
-            return ScientificProduction.objects.filter(
-                    communication_object=communication_object,
-                    open_access_status=open_access_status,
-                    use_license=use_license,
-                    apc=apc,
-                ).first()
-
-
 class Indicator(CommonControlField):
 
     title = models.CharField(_("Title"), max_length=255, null=False, blank=False)
@@ -117,10 +70,30 @@ class Indicator(CommonControlField):
     scope = models.CharField(_('Scope'), choices=choices.SCOPE, max_length=20, null=True)
     measurement = models.CharField(_('Measurement'), choices=choices.MEASUREMENT_TYPE, max_length=25, null=True)
     code = models.CharField(_("Code"), max_length=555, null=False, blank=False)
-    scientific_production = models.ForeignKey(
-        'ScientificProduction', on_delete=models.SET_NULL,
-        null=True, blank=False,
-    )
+
+    object_name = models.CharField(_("Observação"), max_length=255, null=True, blank=False)
+    category = models.CharField(_("Categoria"), max_length=255, null=True, blank=False)
+    context = models.CharField(_("Contexto"), max_length=255, null=True, blank=False)
+
+    @property
+    def header(self):
+        d = dict(
+            title=self.title,
+            description=self.description,
+            validity=self.validity,
+            version=self.seq,
+            link=self.link,
+            source='OCABr',
+            updated=self.updated.isoformat(),
+            creator='SciELO',
+        )
+        indicator = {}
+        indicator['indicator'] = {
+            k: v
+            for k, v in d.items()
+            if v
+        }
+        return indicator
 
     def save_raw_data(self, items):
         with TemporaryDirectory() as tmpdirname:
@@ -131,8 +104,8 @@ class Indicator(CommonControlField):
                     self.filename + ".jsonl",
                     "".join(self._raw_data_rows(items)))
             shutil.move(temp_zip_file_path, file_path)
-            self.raw_data.name = file_path
-            self.save()
+        self.raw_data.name = file_path
+        self.save()
 
     def _raw_data_rows(self, items):
         for item in items:
@@ -140,7 +113,9 @@ class Indicator(CommonControlField):
                 data = item.data
             except:
                 data = {"teste": "teste"}
-            yield f"{json.dumps(data)}\n"
+            else:
+                data.update(self.header)
+                yield f"{json.dumps(data)}\n"
 
     class Meta:
         indexes = [
@@ -153,7 +128,9 @@ class Indicator(CommonControlField):
             models.Index(fields=['posterior_record']),
             models.Index(fields=['previous_record']),
             models.Index(fields=['record_status']),
-            models.Index(fields=['scientific_production']),
+            models.Index(fields=['object_name']),
+            models.Index(fields=['category']),
+            models.Index(fields=['context']),
             models.Index(fields=['scope']),
             models.Index(fields=['seq']),
             models.Index(fields=['source']),
