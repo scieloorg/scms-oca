@@ -32,7 +32,9 @@ def load_or_up_date(inst, row, creator, source):
 
 def load_official_institution(creator, row, line, source):
     try:
-        for inst in models.Institution.objects.filter(name=row.get('Name'), acronym=row.get('Acronym'),
+        if not row.get('Name'):
+            raise ValueError("'Name' is absent")
+        for inst in models.Institution.objects.filter(name=row.get('Name'),
                                                       source__isnull=True).iterator():
             load_or_up_date(inst, row, creator, source)
             inst.save()
