@@ -9,6 +9,7 @@ from usefulmodels.models import State, City, Country
 
 User = get_user_model()
 
+
 def load_or_up_date(inst, row, creator, source):
     inst.name = row.get('Name')
     inst.institution_type = row.get('Institution Type')
