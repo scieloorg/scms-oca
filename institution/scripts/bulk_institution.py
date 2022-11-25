@@ -63,7 +63,7 @@ def run(*args):
 
     user = User.objects.get(id=user_id)
 
-    for item in [['mec', ';', 'MEC'], ['ror', ',', 'ROR']]:
+    for item in [['mec', ';', 'MEC'], ['ror_brazil', ';', 'ROR'], ['ror_others', ';', 'ROR']]:
         with open(os.path.dirname(os.path.realpath(__file__)) + f"/../fixtures/institutions_{item[0]}.csv", 'r') as csvfile:
             data = csv.DictReader(csvfile, delimiter=item[1])
 
