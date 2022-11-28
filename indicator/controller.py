@@ -545,20 +545,23 @@ def generate_title(
     return " ".join(parts)
 
 
-def save_indicator(indicator, keywords=None):
-    # indicator.creator_id = creator_id
-    indicator.record_status = choices.PUBLISHED
-    indicator.save()
-
+def save_indicator(indicator, items, keywords=None):
     if keywords:
         indicator.keywords.add(*keywords)
         indicator.save()
+
+    indicator.save_raw_data(items)
+    indicator.record_status = choices.PUBLISHED
+    indicator.save()
 
     if indicator.previous_record:
         indicator.previous_record.posterior_record = indicator
         indicator.previous_record.validity = choices.OUTDATED
         indicator.previous_record.save()
-    logging.info("Created {} {} {}".format(indicator.code, indicator.seq, indicator.record_status))
+
+    logging.info(
+        "Created {} {} {}".format(
+            indicator.code, indicator.seq, indicator.record_status))
 
 
 ##############################################################################
@@ -628,13 +631,14 @@ def generate_directory_numbers_without_context(
             "cat1_name": cat1_name,
         }
     # indicator.total = len(items)
-    save_indicator(indicator, keywords)
-    indicator.save_raw_data(
+    items = (
         list(EducationDirectory.objects.iterator()) +
         list(EventDirectory.objects.iterator()) +
         list(InfrastructureDirectory.objects.iterator()) +
         list(PolicyDirectory.objects.iterator())
     )
+    save_indicator(indicator, items, keywords)
+    
 
 ###############################################################################
 def generate_directory_numbers_with_context(
@@ -646,7 +650,7 @@ def generate_directory_numbers_with_context(
         for category2_id in ('CA_PRACTICE', 'THEMATIC_AREA'):
             if category2_id != context_id:
                 _generate_directory_numbers_for_category(
-                	creator_id,
+                    creator_id,
                     directories_and_contexts,
                     context_id,
                     category2_id,
@@ -654,7 +658,7 @@ def generate_directory_numbers_with_context(
 
 
 def _generate_directory_numbers_for_category(
-		creator_id,
+        creator_id,
         directories_and_contexts,
         context_id,
         category2_id,
@@ -732,8 +736,7 @@ def _generate_directory_numbers_for_category(
         if context_params:
             break
     _add_context(indicator, context_id, context_params)
-    save_indicator(indicator, keywords)
-    indicator.save_raw_data(datasets_iterator(datasets))
+    save_indicator(indicator, datasets_iterator(datasets), keywords)
 
 
 ###########################################################################
@@ -855,8 +858,7 @@ def journals_numbers(
                 summarized, category_attributes)),
     }
     # indicator.total = len(indicator.summarized['items'])
-    save_indicator(indicator)
-    indicator.save_raw_data(dataset.iterator())
+    save_indicator(indicator, dataset.iterator())
 
 
 def _journals_numbers(
@@ -1020,8 +1022,7 @@ def evolution_of_scientific_production(
         'cat2_values': years_as_str,
     }
     _add_context(indicator, context_id, context_params)
-    save_indicator(indicator, keywords=keywords)
-    indicator.save_raw_data(dataset.iterator())
+    save_indicator(indicator, dataset.iterator(), keywords=keywords)
 
 
 def _add_context(indicator, context_id, context_params):
