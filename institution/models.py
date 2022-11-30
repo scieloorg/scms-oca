@@ -48,13 +48,13 @@ class Institution(CommonControlField, ClusterableModel):
     ]
 
     def __unicode__(self):
-        return u'%s - %s: %s' % (self.name, _('Location'), self.location)
+        return u'%s - %s: %s' % (self.name, self.source, self.location)
 
     def __str__(self):
-        return u'%s - %s: %s' % (self.name, _('Location'), self.location)
+        return u'%s - %s: %s' % (self.name, self.source, self.location)
 
     def autocomplete_label(self):
-        return self.name
+        return '%s (%s): %s' % (self.name, self.source, self.location)
 
     @property
     def data(self):
