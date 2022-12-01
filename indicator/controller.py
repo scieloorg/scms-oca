@@ -806,17 +806,13 @@ def _get_directory__dataset_and_items_and_keywords(
     # para cada diretório, obtém seus ítens contextualizados
     for directory, dir_ctxt_params in directories_context:
 
-        if not all(dir_ctxt_params.values()):
+        if not any(dir_ctxt_params.values()):
             continue
 
         if not keywords:
             keywords.extend([v for v in dir_ctxt_params.values() if v])
 
-        # obtém de um diretório, seu dataset contextualizado
-        filters = {}
-        for name, value in dir_ctxt_params.items():
-            _add_param(filters, name, value)
-        dataset = directory.objects.filter(**filters)
+        dataset = directory.objects.filter(**dir_ctxt_params)
 
         # adiciona o dataset do diretório no conjunto de datasets do contexto
         datasets.append(dataset)
