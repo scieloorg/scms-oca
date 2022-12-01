@@ -106,11 +106,14 @@ class Indicator(CommonControlField):
         with TemporaryDirectory() as tmpdirname:
             temp_zip_file_path = os.path.join(tmpdirname, self.filename + ".zip")
             file_path = os.path.join(settings.MEDIA_ROOT, self.filename + ".zip")
+            logging.info("TemporaryDirectory %s" % tmpdirname)
+            logging.info("file_path %s" % file_path)
             with ZipFile(temp_zip_file_path, "w") as zf:
                 zf.writestr(
                     self.filename + ".jsonl",
                     "".join(self._raw_data_rows(items)))
             shutil.move(temp_zip_file_path, file_path)
+            logging.info("existe file_path? %s" % os.path.isfile(file_path))
         self.raw_data.name = file_path
         self.save()
 
