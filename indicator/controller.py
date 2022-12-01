@@ -171,7 +171,8 @@ def schedule_evolution_of_scientific_production_tasks(
     years_as_str = str_years_list(years_range)
 
     for category_id in ('OPEN_ACCESS_STATUS', 'USE_LICENSE', ):
-        logging.info(category_id)
+        logging.info(
+            f"Agendamento de tarefa de Geração de indicadores {category_id} sem contexto")
         try:
             _schedule_evolution_of_scientific_production_task(
                 creator_id,
@@ -183,12 +184,12 @@ def schedule_evolution_of_scientific_production_tasks(
             continue
 
     for context_id in ("AFFILIATION_UF", "AFFILIATION"):
-        logging.info(context_id)
         for context_params in _get_context_items(
                 CONTEXTS[context_id]['category_attributes'], years_as_str):
             context_params.pop('count')
             for category_id in ('OPEN_ACCESS_STATUS', 'USE_LICENSE'):
-                logging.info(context_params)
+                logging.info(
+                    f"Agendamento de tarefa de Geração de indicadores {category_id} {context_params}")
                 try:
                     _schedule_evolution_of_scientific_production_task(
                         creator_id,
@@ -331,14 +332,14 @@ def get_or_create_periodic_task(
     )
     periodic_task.save()
     logging.info(
-        _('Scheduled %s %s %s %s') % (name, hours, minutes, priority))
+        _('Agendado %s às %s:%s prioridade: %s') %
+        (name, hours, str(minutes).zfill(2), priority))
 
 ##########################################################################
 
 def _add_category_name(items, cat1_attributes, cat1_name=None, cat2_attributes=None, cat2_name=None):
     cat1_name = cat1_name or "name"
     for item in items:
-        logging.info(item)
         if item['count']:
             item.update({
                 cat1_name: _concat_values(cat1_attributes, item.copy(), " | "),
@@ -474,7 +475,6 @@ def create_record(
         else:
             action_and_practice = None
 
-    logging.info("Create Indicator")
     indicator = Indicator()
     indicator.code = code
     indicator.seq = seq
@@ -494,7 +494,6 @@ def create_record(
     indicator.end_date_year = end_date_year
     indicator.creator_id = creator_id
     indicator.save()
-    logging.info("Created {} {} {}".format(code, seq, indicator.record_status))
     return indicator
 
 
@@ -545,20 +544,21 @@ def generate_title(
     return " ".join(parts)
 
 
-def save_indicator(indicator, keywords=None):
-    # indicator.creator_id = creator_id
-    indicator.record_status = choices.PUBLISHED
-    indicator.save()
-
+def save_indicator(indicator, items, keywords=None):
     if keywords:
         indicator.keywords.add(*keywords)
         indicator.save()
+
+    logging.info(f"Saving raw data {indicator.code}")
+    indicator.save_raw_data(items)
+    logging.info(f"Saved raw data {indicator.code}")
+    indicator.record_status = choices.PUBLISHED
+    indicator.save()
 
     if indicator.previous_record:
         indicator.previous_record.posterior_record = indicator
         indicator.previous_record.validity = choices.OUTDATED
         indicator.previous_record.save()
-    logging.info("Created {} {} {}".format(indicator.code, indicator.seq, indicator.record_status))
 
 
 ##############################################################################
@@ -628,13 +628,14 @@ def generate_directory_numbers_without_context(
             "cat1_name": cat1_name,
         }
     # indicator.total = len(items)
-    save_indicator(indicator, keywords)
-    indicator.save_raw_data(
+    items = (
         list(EducationDirectory.objects.iterator()) +
         list(EventDirectory.objects.iterator()) +
         list(InfrastructureDirectory.objects.iterator()) +
         list(PolicyDirectory.objects.iterator())
     )
+    save_indicator(indicator, items, keywords)
+
 
 ###############################################################################
 def generate_directory_numbers_with_context(
@@ -646,7 +647,7 @@ def generate_directory_numbers_with_context(
         for category2_id in ('CA_PRACTICE', 'THEMATIC_AREA'):
             if category2_id != context_id:
                 _generate_directory_numbers_for_category(
-                	creator_id,
+                    creator_id,
                     directories_and_contexts,
                     context_id,
                     category2_id,
@@ -654,7 +655,7 @@ def generate_directory_numbers_with_context(
 
 
 def _generate_directory_numbers_for_category(
-		creator_id,
+        creator_id,
         directories_and_contexts,
         context_id,
         category2_id,
@@ -662,7 +663,9 @@ def _generate_directory_numbers_for_category(
 
     category_id = "CA_ACTION"
 
-    logging.info((category_id, category2_id, context_id))
+    logging.info(
+        "Generate indicator for categories %s x %s and context %s" %
+        (category_id, category2_id, context_id))
 
     cat2_attrs = None
 
@@ -682,7 +685,6 @@ def _generate_directory_numbers_for_category(
         directories_and_contexts,
         cats_attributes,
     )
-    logging.info((len(datasets), len(items), len(keywords)))
     if not datasets:
         logging.info("Not found directory records for {}".format(
             directories_and_contexts))
@@ -732,8 +734,7 @@ def _generate_directory_numbers_for_category(
         if context_params:
             break
     _add_context(indicator, context_id, context_params)
-    save_indicator(indicator, keywords)
-    indicator.save_raw_data(datasets_iterator(datasets))
+    save_indicator(indicator, datasets_iterator(datasets), keywords)
 
 
 ###########################################################################
@@ -771,14 +772,13 @@ def _get_directory__dataset_and_items_and_keywords(
 
     # para cada diretório, obtém seus ítens contextualizados
     for directory, dir_ctxt_params in directories_context:
-        logging.info((directory, dir_ctxt_params))
 
         if not all(dir_ctxt_params.values()):
             continue
 
         if not keywords:
             keywords.extend([v for v in dir_ctxt_params.values() if v])
-        logging.info(keywords)
+
         # obtém de um diretório, seu dataset contextualizado
         filters = {}
         for name, value in dir_ctxt_params.items():
@@ -855,8 +855,7 @@ def journals_numbers(
                 summarized, category_attributes)),
     }
     # indicator.total = len(indicator.summarized['items'])
-    save_indicator(indicator)
-    indicator.save_raw_data(dataset.iterator())
+    save_indicator(indicator, dataset.iterator())
 
 
 def _journals_numbers(
@@ -934,7 +933,6 @@ def evolution_of_scientific_production_in_context(
 
 
 def _get_context_items(context_params, years_as_str):
-    logging.info("_get_context_items %s %s" % (context_params, years_as_str))
     return ScholarlyArticles.objects.filter(
             Q(contributors__affiliation__official__location__country__acron2='BR') |
             Q(contributors__affiliation__country__acron2='BR'),
@@ -1020,8 +1018,7 @@ def evolution_of_scientific_production(
         'cat2_values': years_as_str,
     }
     _add_context(indicator, context_id, context_params)
-    save_indicator(indicator, keywords=keywords)
-    indicator.save_raw_data(dataset.iterator())
+    save_indicator(indicator, dataset.iterator(), keywords=keywords)
 
 
 def _add_context(indicator, context_id, context_params):
