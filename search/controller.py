@@ -1,6 +1,7 @@
 from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.template import loader
+from django.utils.translation import gettext as _
 
 from indicator.models import Indicator
 from indicator import choices as indicator_choices
@@ -61,9 +62,12 @@ def _parameters_for_categories_indicator(indicator, graphic_type, cat1_name):
         rows = _format_data_as_table(cat1_name, **data)
         if graphic_type == "categories_1_grid":
             # dataset-simple0
+            number = len(data['cat1_values'])
             rows = _format_data_as_table("year", **data)
             rows = [rows[0]] + sorted(rows[1:])
-            texts = _get_texts_for_1_grid(len(data['cat1_values']))
+            texts = _get_texts_for_1_grid(number)
+            if number > 10:
+                graphic_type = "categories_1_grid_larger"
         else:
             texts = _get_texts_for_2_grids(
                 len(data['cat1_values']), len(data['cat2_values']))
@@ -124,7 +128,8 @@ def _format_data_as_table(cat1_name, matrix, cat1_values, cat2_values):
         cat2_name = "classification"
     """
     rows = [
-        [cat1_name] + cat1_values,
+        [cat1_name] + [v or _('não informado') for v in cat1_values],
+        # [cat1_name] + cat1_values
     ]
     for c2_value in cat2_values:
         row = [c2_value]

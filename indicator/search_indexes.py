@@ -2,6 +2,7 @@
 from haystack import indexes
 
 from indicator import models
+from indicator.controller import CATEGORIES
 
 
 class IndicatorIndex(indexes.SearchIndex, indexes.Indexable):
@@ -49,6 +50,10 @@ class IndicatorIndex(indexes.SearchIndex, indexes.Indexable):
     def prepare_action(self, obj):
         return obj.action_and_practice and obj.action_and_practice.action.name
 
+    def prepare_category(self, obj):
+        if obj.category:
+            return CATEGORIES[obj.category]['title']
+
     def prepare_classification(self, obj):
         return obj.action_and_practice and obj.action_and_practice.classification
 
@@ -75,9 +80,10 @@ class IndicatorIndex(indexes.SearchIndex, indexes.Indexable):
         thematic_areas = set()
         if obj.thematic_areas:
             for thematic_area in obj.thematic_areas.all():
-                thematic_areas.add(thematic_area.level0)
+                # manter granularidade média, ou seja, level1
+                # thematic_areas.add(thematic_area.level0)
                 thematic_areas.add(thematic_area.level1)
-                thematic_areas.add(thematic_area.level2)
+                # thematic_areas.add(thematic_area.level2)
             return thematic_areas
 
     def prepare_keywords(self, obj):
@@ -98,7 +104,7 @@ class IndicatorIndex(indexes.SearchIndex, indexes.Indexable):
                     countries.add(inst.location.country.name)
                 except AttributeError:
                     continue
-            return countries
+        return countries
 
     def prepare_cities(self, obj):
         cities = set()
@@ -114,7 +120,7 @@ class IndicatorIndex(indexes.SearchIndex, indexes.Indexable):
                     cities.add(inst.location.city.name)
                 except AttributeError:
                     continue
-            return cities
+        return cities
 
     def prepare_states(self, obj):
         states = set()
@@ -130,7 +136,7 @@ class IndicatorIndex(indexes.SearchIndex, indexes.Indexable):
                     states.add(inst.location.state.name)
                 except AttributeError:
                     continue
-            return states
+        return states
 
     def prepare_regions(self, obj):
         regions = set()
@@ -146,10 +152,10 @@ class IndicatorIndex(indexes.SearchIndex, indexes.Indexable):
                     regions.add(inst.location.states.region)
                 except AttributeError:
                     continue
-            return regions
+        return regions
 
     def get_model(self):
         return models.Indicator
 
     def index_queryset(self, using=None):
-        return self.get_model().objects.filter(record_status="PUBLISHED")
+        return self.get_model().objects.filter(validity="CURRENT", record_status="PUBLISHED")
