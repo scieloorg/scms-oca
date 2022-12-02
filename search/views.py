@@ -52,11 +52,11 @@ def search(request):
         filters['f.' + facet_name + '.facet.limit'] = facet_count
 
     if fqfilters:
-        fqs = fqfilters.split(',')
+        fqs = fqfilters.split('|')
 
     fqs = ['%s:"%s"' % (fq.split(":")[0], fq.split(":")[1]) for fq in fqs]
 
-    # fqs.append('status:"Ativo"')
+    fqs.append('record_status:"PUBLISHED"')
 
     # Adiciona o Solr na pesquisa
     search_results = solr.search(search_query, fq=fqs, sort=sort_by, **filters)
