@@ -52,12 +52,14 @@
             {% endif %}
         </div>
         <div class="tab-content clearfix ui-tabs-panel ui-corner-bottom ui-widget-content" id="tabs-39" aria-labelledby="ui-id-27" role="tabpanel" aria-hidden="true" style="display: none;">
-                {% if graphic_type == 'bar-label-rotation' %}
-                    {% include 'indicator/echarts/bar-label-rotation.html' %}
-                {% elif graphic_type == 'categories_1_grid' %}
+                {% if graphic_type == 'categories_1_grid' %}
                     {% include 'indicator/echarts/dataset-simple0.html' %}
+                {% elif graphic_type == 'categories_1_grid_larger' %}
+                    {% include 'indicator/echarts/dataset-simple0-larger.html' %}
                 {% elif graphic_type == 'categories_2_grids' %}
                     {% include 'indicator/echarts/dataset-series-layout-by.html' %}
+                {% elif graphic_type == 'bar-label-rotation' %}
+                    {% include 'indicator/echarts/bar-label-rotation.html' %}
                 {% else %}
                     {% include 'indicator/echarts/dataset-encode0.html' %}
                 {% endif %}

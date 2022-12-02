@@ -11,6 +11,7 @@ import json
 from django.conf import settings
 from django.db import models
 from django.utils.translation import gettext as _
+from django.utils.text import slugify
 from taggit.managers import TaggableManager
 from wagtail.admin.edit_handlers import FieldPanel
 
@@ -77,15 +78,21 @@ class Indicator(CommonControlField):
 
     @property
     def header(self):
+        link = 'https://ocabr.org/search/indicator/{}/detail/'.format(
+            self.id,
+        )
         d = dict(
             title=self.title,
             description=self.description,
             validity=self.validity,
             version=self.seq,
-            link=self.link,
+            link=link,
             source='OCABr',
             updated=self.updated.isoformat(),
-            creator='SciELO',
+            contributors=['SciELO'],
+            action=self.action_and_practice and self.action_and_practice.action.name,
+            practice=self.action_and_practice and self.action_and_practice.action.name,
+            qualification=self.action_and_practice and self.action_and_practice.classification,
         )
         indicator = {}
         indicator['indicator'] = {
@@ -99,11 +106,14 @@ class Indicator(CommonControlField):
         with TemporaryDirectory() as tmpdirname:
             temp_zip_file_path = os.path.join(tmpdirname, self.filename + ".zip")
             file_path = os.path.join(settings.MEDIA_ROOT, self.filename + ".zip")
+            logging.info("TemporaryDirectory %s" % tmpdirname)
+            logging.info("file_path %s" % file_path)
             with ZipFile(temp_zip_file_path, "w") as zf:
                 zf.writestr(
                     self.filename + ".jsonl",
                     "".join(self._raw_data_rows(items)))
             shutil.move(temp_zip_file_path, file_path)
+            logging.info("existe file_path? %s" % os.path.isfile(file_path))
         self.raw_data.name = file_path
         self.save()
 
@@ -155,19 +165,18 @@ class Indicator(CommonControlField):
     # ID melhorado:
     #    action + classification + practice + scope + seq
     def __unicode__(self):
-        return f"{self.title} {self.seq} {self.validity} {self.created}"
+        return f"{self.title} {self.seq} {self.validity} {self.updated}"
 
     def __str__(self):
-        return f"{self.title} {self.seq} {self.validity} {self.created}"
+        return f"{self.title} {self.seq} {self.validity} {self.updated}"
 
     @property
     def filename(self):
-        name = "".join([c if c.isalnum() else '_' for c in self.title])
-        items = name.lower().split() + [
-            self.created.isoformat().replace(':', '')[:15], str(self.seq)]
-        return "_".join([
-            item or ''
-            for item in items
-        ])
+        items = [
+            self.title,
+            str(self.seq),
+            self.updated.isoformat().replace(':', '')[:15],
+        ]
+        return slugify("_".join(items).lower())
 
     base_form_class = IndicatorDirectoryForm

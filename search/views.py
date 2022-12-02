@@ -52,11 +52,11 @@ def search(request):
         filters['f.' + facet_name + '.facet.limit'] = facet_count
 
     if fqfilters:
-        fqs = fqfilters.split(',')
+        fqs = fqfilters.split('|')
 
     fqs = ['%s:"%s"' % (fq.split(":")[0], fq.split(":")[1]) for fq in fqs]
 
-    # fqs.append('status:"Ativo"')
+    fqs.append('record_status:"PUBLISHED"')
 
     # Adiciona o Solr na pesquisa
     search_results = solr.search(search_query, fq=fqs, sort=sort_by, **filters)
@@ -102,13 +102,10 @@ def search(request):
 
 def indicator_detail(request, indicator_id):
     try:
-        indicator = Indicator.objects.get(
-            pk=indicator_id)
+        indicator = Indicator.objects.get(pk=indicator_id)
     except Indicator.DoesNotExist:
         raise Http404("Indicator does not exist")
-    if indicator.link != request.build_absolute_uri():
-        indicator.link = request.build_absolute_uri()
-        indicator.save()
+
     indicator.latest = (
         indicator_controller.get_latest_version(indicator.code).id
     )

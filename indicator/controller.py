@@ -4,13 +4,13 @@ import logging
 import csv
 import io
 import json
-
+from hashlib import sha256
 from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
 from django.db.models import Count, Sum, Q
 from django.utils.translation import gettext as _
 from django.core.exceptions import FieldError
-
+from django.utils.text import slugify
 from django_celery_beat.models import PeriodicTask, CrontabSchedule
 
 from education_directory.models import EducationDirectory
@@ -41,24 +41,24 @@ OA_STATUS_ITEMS = ('gold', 'bronze', 'green', 'hybrid', )
 
 CATEGORIES = {
     'OPEN_ACCESS_STATUS': {
-        'title': 'categoria de acesso aberto',
-        'name': 'categoria de acesso aberto',
+        'title': _('categoria de acesso aberto'),
+        'name':  _('categoria de acesso aberto'),
         'category_attributes': ['open_access_status']},
     'USE_LICENSE': {
-        'title': 'licença de uso',
-        'name': 'licença de uso',
+        'title':  _('licença de uso'),
+        'name':  _('licença de uso'),
         'category_attributes': ['use_license']},
     'CA_ACTION': {
-        'title': 'ações',
-        'name': 'ação',
+        'title': _('ações'),
+        'name': _('ação'),
         'category_attributes': ['action__name', 'classification']},
     'CA_PRACTICE': {
-        'title': 'prática',
-        'name': 'prática',
+        'title': _('prática'),
+        'name': _('prática'),
         'category_attributes': ['practice__name']},
     'THEMATIC_AREA': {
-        'name': 'área temática',
-        'title': 'área temática',
+        'name': _('área temática'),
+        'title': _('área temática'),
         'category_attributes': [
             'thematic_areas__level1',
         ]},
@@ -416,11 +416,10 @@ def create_record(
         measurement,
         creator_id,
         object_name,
-        category_title=None,
         start_date_year=None,
         end_date_year=None,
-        category1=None,
-        category2=None,
+        category1_id=None,
+        category2_id=None,
         context=None,
         ):
     """
@@ -436,6 +435,10 @@ def create_record(
     scope : choices.SCOPE
     measurement : choices.MEASUREMENT_TYPE
     """
+    category_title = (
+        category2_id and CATEGORIES[category2_id]['title'] or
+        category1_id and CATEGORIES[category1_id]['title']
+    )
     title = generate_title(
         measurement,
         object_name,
@@ -452,8 +455,8 @@ def create_record(
         object_name,
         start_date_year,
         end_date_year,
-        category1,
-        category2,
+        category1_id,
+        category2_id,
         context,
     )
     latest = get_latest_version(code)
@@ -488,13 +491,37 @@ def create_record(
     indicator.scope = scope
     indicator.measurement = measurement
     indicator.object_name = object_name
-    indicator.category = category_title
+    indicator.category = category2_id or category1_id
     indicator.context = " | ".join(context)
     indicator.start_date_year = start_date_year
     indicator.end_date_year = end_date_year
     indicator.creator_id = creator_id
     indicator.save()
     return indicator
+
+
+CLASSIFICATIONS = {
+    'encontro': 'ENCONTRO',
+    'conferência': 'CONFERENCIA',
+    'congresso': 'CONGRESSO',
+    'workshop': 'WORKSHOP',
+    'seminário': 'SEMINARIO',
+    'outros': 'OUTROS',
+    'curso livre': 'CURSO-LIVRE',
+    'disciplina de graduação': 'DISCIPLINA-DE-GRADUACAO',
+    'disciplina de lato sensu': 'DISCIPLINA-DE-LATO-SENSU',
+    'disciplina de stricto sensu': 'DISCIPLINA-DE-STRICTO-SENSU',
+    'portal': 'PORTAL',
+    'plataforma': 'PLATAFORMA',
+    'servidor': 'SERVIDOR',
+    'repositório': 'REPOSITORIO',
+    'serviço': 'SERVICO',
+    'outras': 'OUTRAS',
+    'promoção': 'PROMOCAO',
+    'posicionamento': 'POSICIONAMENTO',
+    'mandato': 'MANDATO',
+    'geral': 'GERAL',
+}
 
 
 def build_code(
@@ -505,21 +532,22 @@ def build_code(
         object_name,
         start_date_year,
         end_date_year,
-        category1,
-        category2,
+        category1_id,
+        category2_id,
         context,
         ):
     items = [
-        action and action.code,
-        classification,
-        practice and practice.code,
+        action and action.code or '',
+        CLASSIFICATIONS.get(classification) or '',
+        practice and practice.code or '',
         measurement,
         object_name,
+        category2_id or category1_id or '',
         str(start_date_year or ''),
         str(end_date_year or ''),
-    ] + (category1 or []) + (category2 or []) + (context or [])
+    ] + (context or [])
 
-    return "_".join([item.replace(" ", "_") or '' for item in items if item]).upper()
+    return _str_with_64_char(slugify("_".join(items)).upper())
 
 
 def generate_title(
@@ -530,17 +558,23 @@ def generate_title(
         category=None,
         context=None,
         ):
+    OBJECTS = {
+        'action': _('ações em Ciência Aberta'),
+        'journal': _('periódicos em acesso aberto'),
+        'journal-article': _('artigos científicos em acesso aberto'),
+    }
+
     parts = []
     if start_date_year and end_date_year:
-        parts += ['Evolução do número de']
+        parts += [_('Evolução do número de')]
     if measurement == choices.FREQUENCY:
-        parts += ['Número de']
-    parts += [object_name]
+        parts += [_('Número de')]
+    parts += [OBJECTS.get(object_name)]
     if category:
-        parts += [f"por {category}"]
+        parts += [_("por {}").format(category)]
     if start_date_year and end_date_year:
         parts += [f'- {start_date_year}-{end_date_year}']
-    parts += (context or [_('no Brasil')])
+    parts += ['-'] + (context or [_('Brasil')])
     return " ".join(parts)
 
 
@@ -549,9 +583,9 @@ def save_indicator(indicator, items, keywords=None):
         indicator.keywords.add(*keywords)
         indicator.save()
 
-    logging.info(f"Saving raw data {indicator.code}")
+    logging.info(f"Saving raw data {indicator.code} {indicator.object_name} {indicator.category} {indicator.context}")
     indicator.save_raw_data(items)
-    logging.info(f"Saved raw data {indicator.code}")
+    logging.info(f"Saved raw data {indicator.code} {indicator.object_name} {indicator.category} {indicator.context}")
     indicator.record_status = choices.PUBLISHED
     indicator.save()
 
@@ -603,10 +637,8 @@ def generate_directory_numbers_without_context(
         scope=scope,
         measurement=measurement,
         creator_id=creator_id,
-        object_name=_('ações em Ciência Aberta'),
-        category_title=category2_id and CATEGORIES[category2_id]['title'],
-        category1=cat1_attrs,
-        category2=cat2_attrs,
+        object_name='action',
+        category2_id=category2_id,
         context=keywords,
     )
     if category2_id:
@@ -633,6 +665,9 @@ def generate_directory_numbers_without_context(
         list(EventDirectory.objects.iterator()) +
         list(InfrastructureDirectory.objects.iterator()) +
         list(PolicyDirectory.objects.iterator())
+    )
+    indicator.description = (
+        _("Gerado automaticamente usando dados coletados e registrados manualmente por SciELO")
     )
     save_indicator(indicator, items, keywords)
 
@@ -670,14 +705,11 @@ def _generate_directory_numbers_for_category(
     cat2_attrs = None
 
     cat1 = CATEGORIES[category_id]
-    title = "Número de {} em Ciência Aberta".format(cat1['title'])
     cat1_attrs = cat1['category_attributes']
     cats_attributes = cat1_attrs.copy()
 
     if category2_id:
         cat2 = CATEGORIES[category2_id]
-        title = "Número de {} em Ciência Aberta por {}".format(
-            cat1['title'], cat2['title'])
         cat2_attrs = cat2['category_attributes']
         cats_attributes += cat2_attrs
 
@@ -699,10 +731,8 @@ def _generate_directory_numbers_for_category(
             title='',
             action=None, classification=None, practice=None,
             scope=scope, measurement=measurement, creator_id=creator_id,
-            object_name=_('ações em Ciência Aberta'),
-            category_title=category2_id and CATEGORIES[category2_id]['title'],
-            category1=cat1_attrs,
-            category2=cat2_attrs,
+            object_name='action',
+            category2_id=category2_id,
             context=keywords,
         )
     except CreateIndicatorRecordError:
@@ -734,6 +764,9 @@ def _generate_directory_numbers_for_category(
         if context_params:
             break
     _add_context(indicator, context_id, context_params)
+    indicator.description = (
+        _("Gerado automaticamente usando dados coletados e registrados manualmente por SciELO")
+    )
     save_indicator(indicator, datasets_iterator(datasets), keywords)
 
 
@@ -773,17 +806,13 @@ def _get_directory__dataset_and_items_and_keywords(
     # para cada diretório, obtém seus ítens contextualizados
     for directory, dir_ctxt_params in directories_context:
 
-        if not all(dir_ctxt_params.values()):
+        if not any(dir_ctxt_params.values()):
             continue
 
         if not keywords:
             keywords.extend([v for v in dir_ctxt_params.values() if v])
 
-        # obtém de um diretório, seu dataset contextualizado
-        filters = {}
-        for name, value in dir_ctxt_params.items():
-            _add_param(filters, name, value)
-        dataset = directory.objects.filter(**filters)
+        dataset = directory.objects.filter(**dir_ctxt_params)
 
         # adiciona o dataset do diretório no conjunto de datasets do contexto
         datasets.append(dataset)
@@ -844,8 +873,8 @@ def journals_numbers(
         scope=choices.GENERAL,
         measurement=choices.FREQUENCY,
         creator_id=creator_id,
-        object_name=_('periódicos em acesso aberto'),
-        category_title=CATEGORIES[category_id]['title'],
+        object_name='journal',
+        category1_id=category_id,
         start_date_year=datetime.now().year,
     )
 
@@ -855,6 +884,9 @@ def journals_numbers(
                 summarized, category_attributes)),
     }
     # indicator.total = len(indicator.summarized['items'])
+    indicator.description = (
+        _("Gerado automaticamente usando dados obtidos da base de dados Unpaywall. Os dados das instituições das afiliações foram enriquecidos usando lista de países com nome em português e em inglês, lista de instituições do MEC e do ROR")
+    )
     save_indicator(indicator, dataset.iterator())
 
 
@@ -928,8 +960,11 @@ def evolution_of_scientific_production_in_context(
                 context_params,
                 context_id,
             )
-        except CreateIndicatorRecordError:
-            continue
+        except CreateIndicatorRecordError as e:
+            logging.exception(
+                "Unable to generate evolution sciprod %s %s %s %s" %
+                (category_id, context_params, type(e), e)
+            )
 
 
 def _get_context_items(context_params, years_as_str):
@@ -994,11 +1029,10 @@ def evolution_of_scientific_production(
         scope=scope,
         measurement=measurement,
         creator_id=creator_id,
-        object_name=_('artigos científicos em acesso aberto'),
-        category_title=CATEGORIES[category_id]['title'],
+        object_name='journal-article',
+        category1_id=category_id,
         start_date_year=years_range[0] if years_range else None,
         end_date_year=years_range[-1] if years_range else None,
-        category1=category_attributes,
         context=keywords,
     )
     args = []
@@ -1018,88 +1052,90 @@ def evolution_of_scientific_production(
         'cat2_values': years_as_str,
     }
     _add_context(indicator, context_id, context_params)
+    indicator.description = (
+        _("Gerado automaticamente usando dados obtidos da base de dados Unpaywall. Os dados das instituições das afiliações foram enriquecidos usando lista de países com nome em português e em inglês, lista de instituições do MEC e do ROR")
+    )
     save_indicator(indicator, dataset.iterator(), keywords=keywords)
 
 
 def _add_context(indicator, context_id, context_params):
-    logging.info("Adding context %s %s %s" % (indicator, context_id, context_params))
     if context_id in ('AFFILIATION', 'INSTITUTION'):
-        try:
-            name = (
-                context_params.get('contributors__affiliation__official__name') or
-                context_params.get("institutions__name") or
-                context_params.get("organization__name")
-            )
-            location__state__name = (
-                context_params.get('contributors__affiliation__official__location__state__name') or
-                context_params.get("institutions__location__state__name") or
-                context_params.get("organization__location__state__name")
-            )
-            logging.info("Adding context %s %s" % (name, location__state__name))
-            inst = Institution.objects.get(
-                **fix_params(
-                    dict(
-                        name=name,
-                        location__state__name=location__state__name,
-                    )
+        name = (
+            context_params.get('contributors__affiliation__official__name') or
+            context_params.get("institutions__name") or
+            context_params.get("organization__name")
+        )
+        location__state__name = (
+            context_params.get('contributors__affiliation__official__location__state__name') or
+            context_params.get("institutions__location__state__name") or
+            context_params.get("organization__location__state__name")
+        )
+        institutions = Institution.objects.filter(
+            **fix_params(
+                dict(
+                    name=name,
+                    location__state__name=location__state__name,
                 )
             )
-        except Institution.DoesNotExist:
-            logging.info("Adding context DoesNotExist")
-        except Institution.MultipleObjectsReturned:
-            logging.info("Adding context MultipleObjectsReturned")
-        else:
+        )
+        for inst in institutions:
             indicator.institutions.add(inst)
     elif context_id in ('AFFILIATION_UF', 'LOCATION'):
-        try:
-            state__name = (
-                context_params.get(
-                    'contributors__affiliation__official__location__state__name') or
-                context_params.get(
-                    'institutions__location__state__name') or
-                context_params.get(
-                    'organization__location__state__name') or
-                context_params.get(
-                    'locations__state__name')
-            )
-            state__acronym = (
-                context_params.get(
-                    'contributors__affiliation__official__location__state__acronym') or
-                context_params.get(
-                    'institutions__location__state__acronym') or
-                context_params.get(
-                    'organization__location__state__acronym') or
-                context_params.get(
-                    'locations__state__acronym')
-            )
-            logging.info("Adding context %s %s" % (state__name, state__acronym))
+        state__name = (
+            context_params.get(
+                'contributors__affiliation__official__location__state__name') or
+            context_params.get(
+                'institutions__location__state__name') or
+            context_params.get(
+                'organization__location__state__name') or
+            context_params.get(
+                'locations__state__name')
+        )
+        state__acronym = (
+            context_params.get(
+                'contributors__affiliation__official__location__state__acronym') or
+            context_params.get(
+                'institutions__location__state__acronym') or
+            context_params.get(
+                'organization__location__state__acronym') or
+            context_params.get(
+                'locations__state__acronym')
+        )
 
-            args = fix_params(
-                dict(
-                    state__name=state__name,
-                    state__acronym=state__acronym,
-                )
-            )
-
-            location = Location.get_or_create_state(
-                indicator.creator_id,
-                **args,
-            )
-        except Location.DoesNotExist:
-            logging.info("Adding context DoesNotExist")
-        except Location.MultipleObjectsReturned:
-            logging.info("Adding context MultipleObjectsReturned")
-        else:
-            indicator.locations.add(location)
+        args = dict(
+            state_name=state__name,
+            state_acronym=state__acronym,
+        )
+        location = Location.get_or_create_state(
+            indicator.creator_id,
+            **args,
+        )
+        indicator.locations.add(location)
     elif context_id in ('THEMATIC_AREA', ):
-            thematic_areas__level1 = (
-                context_params.get(
-                    'thematic_areas__level1')
-            )
-            logging.info("Adding context %s" % (thematic_areas__level1, ))
-            if thematic_areas__level1:
-                for item in ThematicArea.objects.filter(
-                        level1=thematic_areas__level1).iterator():
-                    indicator.thematic_areas.add(item)
+        thematic_areas__level1 = (
+            context_params.get(
+                'thematic_areas__level1')
+        )
+        if thematic_areas__level1:
+            for item in ThematicArea.objects.filter(
+                    level1=thematic_areas__level1).iterator():
+                indicator.thematic_areas.add(item)
     else:
         return
+
+
+def _str_with_64_char(text):
+    """
+    >>> import hashlib
+    >>> m = hashlib.sha256()
+    >>> m.update(b"Nobody inspects")
+    >>> m.update(b" the spammish repetition")
+    >>> m.digest()
+    b'\x03\x1e\xdd}Ae\x15\x93\xc5\xfe\\\x00o\xa5u+7\xfd\xdf\xf7\xbcN\x84:\xa6\xaf\x0c\x95\x0fK\x94\x06'
+    >>> m.digest_size
+    32
+    >>> m.block_size
+    64
+    hashlib.sha224(b"Nobody inspects the spammish repetition").hexdigest()
+    """
+    return sha256((text or '').strip().upper().encode("utf-8")).hexdigest()
