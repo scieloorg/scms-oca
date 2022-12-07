@@ -4,14 +4,13 @@ from education_directory.models import EducationDirectory
 from event_directory.models import EventDirectory
 from infrastructure_directory.models import InfrastructureDirectory
 from policy_directory.models import PolicyDirectory
-from scholarly_articles.models import ScholarlyArticles
 
 import csv
 import os
 
 
 def check_values():
-    models = (EducationDirectory, EventDirectory, InfrastructureDirectory, PolicyDirectory, ScholarlyArticles)
+    models = (EducationDirectory, EventDirectory, InfrastructureDirectory, PolicyDirectory)
     fields = ('locations', 'institutions', 'attendance', 'description')
     d = []
     for model in models:
