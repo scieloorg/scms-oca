@@ -15,14 +15,14 @@
   <div class="content-wrap pt-0">
     <div class="container clearfix">
       <div class="section m-1 p-1 mt-4">
-                
+
         <h1>{{ object.title }}</h1>
-                
+
         <!-- Navegação entre as versões -->
         <div class="container">
             <nav aria-label="...">
                 <ul class="pagination">
-                    
+
                     <li class="page-item" aria-current="page">
                         {% if object.previous_record.id %}
                             <a class="page-link" href="{% url 'search:indicator_detail' object.previous_record.id %}">
@@ -37,7 +37,7 @@
                             {% trans 'Generated' %}: {{ object.created |date:"r" }}
                         </a>
                         {% endif %}
-                    </li> 
+                    </li>
                     <li class="page-item">
                         {% if object.posterior_record.seq %}
                             <a class="page-link" href="{% url 'search:indicator_detail' object.posterior_record.id %}">
@@ -52,7 +52,7 @@
                             </a>
                         {% endif %}
                     </li>
-                    
+
                 </ul>
             </nav>
             <p>
@@ -83,12 +83,16 @@
                 |
                 {% else %}
                     <a href="{% url 'search:indicator_raw_data' object.id %}">{% trans 'download dados brutos' %}</a>
-                | 
+                |
                 {% endif %}
                 <a href="{% url 'search:indicator_summarized' object.id %}">{% trans 'download dados computados' %}</a>
             </p>
         </div>
         <div class="container">{% include 'indicator/abas.html' %}</div>
+        <div class="container">
+            <a rel="license" href="https://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" src="//i.creativecommons.org/l/by/4.0/88x31.png"></a>
+            <p>This work is licensed under a <a rel="license" href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+        </div>
     </div>
   </div>
 </section>

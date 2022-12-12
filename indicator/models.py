@@ -93,6 +93,7 @@ class Indicator(CommonControlField):
             action=self.action_and_practice and self.action_and_practice.action.name,
             practice=self.action_and_practice and self.action_and_practice.action.name,
             qualification=self.action_and_practice and self.action_and_practice.classification,
+            license='CC-BY',
         )
         indicator = {}
         indicator['indicator'] = {
