@@ -5,7 +5,7 @@ from wagtail.admin.edit_handlers import FieldPanel
 from wagtailautocomplete.edit_handlers import AutocompletePanel
 
 from institution.models import Institution
-from usefulmodels.models import Country
+from usefulmodels.models import Country, ThematicArea
 from . import choices
 from core.models import CommonControlField
 
@@ -84,8 +84,9 @@ class Journals(models.Model):
     journal_issn_l = models.CharField(_("ISSN-L"), max_length=50, null=True, blank=True)
     journal_issns = models.CharField(_("ISSN's"), max_length=50, null=True, blank=True)
     journal_name = models.CharField(_("Journal Name"), max_length=255, null=True, blank=True)
-    publisher = models.CharField(_("Publisher"), max_length=255, null=True, blank=True)
+    publisher = models.ManyToManyField(Institution, verbose_name=_("Publisher"), blank=True)
     journal_is_in_doaj = models.BooleanField(_("DOAJ"), default=False, null=True, blank=True)
+    thematic_areas = models.ManyToManyField(ThematicArea, verbose_name=_("Thematic Area"), blank=True)
 
     autocomplete_search_field = 'journal_name'
 
@@ -103,7 +104,6 @@ class Journals(models.Model):
             models.Index(fields=['journal_issn_l', ]),
             models.Index(fields=['journal_issns', ]),
             models.Index(fields=['journal_name', ]),
-            models.Index(fields=['publisher', ]),
             models.Index(fields=['journal_is_in_doaj', ]),
         ]
 
@@ -111,8 +111,9 @@ class Journals(models.Model):
         FieldPanel('journal_issn_l'),
         FieldPanel('journal_issns'),
         FieldPanel('journal_name'),
-        FieldPanel('publisher'),
+        AutocompletePanel('publisher'),
         FieldPanel('journal_is_in_doaj'),
+        AutocompletePanel('thematic_areas'),
     ]
 
     @property
@@ -121,8 +122,9 @@ class Journals(models.Model):
             "journal__issn_l": self.journal_issn_l,
             "journal__issns": self.journal_issns,
             "journal__name": self.journal_name,
-            "journal__publisher": self.publisher,
-            "journal__is_in_doaj": self.journal_is_in_doaj
+            "journal__publisher": [publisher.data for publisher in self.publisher.iterator()],
+            "journal__is_in_doaj": self.journal_is_in_doaj,
+            "journal__thematic_areas": [thematic_area.data for thematic_area in self.thematic_areas.iterator()]
         }
         return d
 

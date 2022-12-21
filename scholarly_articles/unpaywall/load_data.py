@@ -24,7 +24,7 @@ def get_params(row, attribs):
     return params
 
 
-def load_article(row):
+def load_article(row, user):
     articles = models.ScholarlyArticles.objects.filter(doi=row.get('doi'))
     try:
         article = articles[0]
@@ -40,7 +40,7 @@ def load_article(row):
             if len(row.get('oa_locations')) > 0:
                 article.use_license = row.get('oa_locations')[0].get('license')
             article.apc = row.get('apc') #attrib apc is not in unpaywall
-            article.journal = load_journal(row)
+            article.journal = load_journal(row, user)
             article.source = 'Unpaywall'
             article.save()
 
@@ -55,7 +55,7 @@ def load_article(row):
     return article
 
 
-def load_journal(row):
+def load_journal(row, user):
     attribs = ['journal_issns', 'journal_issn_l', 'journal_name']
     params = get_params(row, attribs)
 
@@ -68,8 +68,17 @@ def load_journal(row):
         journal.journal_issns = row.get('journal_issns')
         journal.journal_issn_l = row.get('journal_issn_l')
         journal.journal_name = row.get('journal_name')
-        journal.publisher = row.get('publisher')
+        publishers = models.Institution.objects.filter(name=row.get('publisher'))
         try:
+            publisher = publishers[0]
+        except IndexError:
+            publisher = models.Institution()
+            publisher.name = row.get('publisher')
+            publisher.creator = user
+            publisher.save()
+        try:
+            journal.save()
+            journal.publisher.add(publisher)
             journal.save()
         except (DataError, TypeError) as e:
             raise JournalSaveError(e)
@@ -148,7 +157,7 @@ def load(from_year, resource_type, is_paratext, user):
     ).iterator()
     for item in rawunpaywall:
         try:
-            load_article(item.json)
+            load_article(item.json, user)
         except (ArticleSaveError, JournalSaveError, ContributorSaveError, AffiliationSaveError) as e:
             try:
                 error = models.ErrorLog()
