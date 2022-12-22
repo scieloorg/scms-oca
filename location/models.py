@@ -13,11 +13,11 @@ from .forms import LocationForm
 
 class Location(CommonControlField):
 
-    city = models.ForeignKey(City, verbose_name=_("City"), on_delete=models.CASCADE,
+    city = models.ForeignKey(City, verbose_name=_("City"), on_delete=models.SET_NULL,
                              null=True, blank=True)
-    state = models.ForeignKey(State, verbose_name=_("State"), on_delete=models.CASCADE,
+    state = models.ForeignKey(State, verbose_name=_("State"), on_delete=models.SET_NULL,
                               null=True, blank=True)
-    country = models.ForeignKey(Country, verbose_name=_("Country"), on_delete=models.CASCADE,
+    country = models.ForeignKey(Country, verbose_name=_("Country"), on_delete=models.SET_NULL,
                                 null=True, blank=True)
 
     autocomplete_search_field = 'state__name'
