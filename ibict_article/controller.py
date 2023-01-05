@@ -154,3 +154,38 @@ def load_conference(user, record):
         pass
 
 
+def load_article(user, record):
+    json = record.json
+
+    # attribs to GenericArticle
+    entity_id, keyword, document_title, authors, publication_date, document_type, language, research_area, start_page, \
+        end_page, volume = get_generic_article_values(user=user, json=json)
+
+    # attribs to JournalArticle
+    series = get_value_in_a_list(json.get('fields').get('series'))
+    issn = []
+    journal_title = []
+    for item in json.get('relations').get('PublisherJournal') or []:
+        issn.extend(item.get('fields').get('identifier.issn'))
+        journal_title.extend(item.get('fields').get('title'))
+
+    try:
+        JournalArticle.journal_get_or_create(
+            user=user,
+            entity_id=entity_id,
+            keyword=keyword,
+            document_title=document_title,
+            authors=authors,
+            publication_date=publication_date,
+            document_type=document_type,
+            language=language,
+            research_area=research_area,
+            start_page=start_page,
+            end_page=end_page,
+            volume=volume,
+            series=series,
+            issn=issn,
+            journal_title=journal_title
+        )
+    except:
+        pass
