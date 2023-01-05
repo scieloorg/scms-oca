@@ -152,3 +152,48 @@ class Authorship(models.Model):
     base_form_class = CoreAdminModelForm
 
 
+class GenericArticle(CommonControlField):
+    entity_id = models.CharField(_("Entity ID"), max_length=100, null=True, blank=True)
+    keyword = models.ManyToManyField("GenericField", verbose_name=_("Keywords"), related_name='+', blank=True)
+    document_title = models.ManyToManyField("GenericField", verbose_name=_("Titles"), related_name='+', blank=True)
+    authors = models.ManyToManyField("Authorship", verbose_name=_("Authors"), blank=True)
+    publication_date = models.CharField(_("Publication Date"), max_length=100, null=True, blank=True)
+    document_type = models.CharField(_("Document type"), choices=TYPES, max_length=100, null=True, blank=True)
+    language = models.CharField(_("Language"), max_length=100, null=True, blank=True)
+    research_area = models.ManyToManyField(GenericField, verbose_name=_("Research area"), related_name='+', blank=True)
+    start_page = models.CharField(_("Start page"), max_length=100, null=True, blank=True)
+    end_page = models.CharField(_("End page"), max_length=100, null=True, blank=True)
+    volume = models.CharField(_("Volume"), max_length=100, null=True, blank=True)
+
+    def __unicode__(self):
+        return f'{self.research_area}'
+
+    def __str__(self):
+        return f'{self.research_area}'
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['entity_id', ]),
+            models.Index(fields=['publication_date', ]),
+            models.Index(fields=['document_type', ]),
+            models.Index(fields=['language', ]),
+            models.Index(fields=['start_page', ]),
+            models.Index(fields=['end_page', ]),
+            models.Index(fields=['volume', ]),
+        ]
+
+    panels = [
+        FieldPanel('entity_id'),
+        AutocompletePanel('keyword'),
+        AutocompletePanel('document_title'),
+        AutocompletePanel('authors'),
+        FieldPanel('publication_date'),
+        FieldPanel('document_type'),
+        FieldPanel('language'),
+        AutocompletePanel('research_area'),
+        FieldPanel('start_page'),
+        FieldPanel('end_page'),
+        FieldPanel('volume'),
+    ]
+
+    base_form_class = CoreAdminModelForm
