@@ -251,3 +251,15 @@ class Thesis(GenericArticle):
         return thesis
 
     base_form_class = CoreAdminModelForm
+
+
+class RawArticle(CommonControlField):
+    document_type = models.CharField(_("Document type"), choices=TYPES, max_length=50, null=True, blank=True)
+    entity_id = models.CharField(_("Entity ID"), max_length=50, null=True, blank=True)
+    json = models.JSONField(_("JSON File"), null=True, blank=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['document_type', ]),
+            models.Index(fields=['entity_id', ]),
+        ]
