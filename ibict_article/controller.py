@@ -71,3 +71,60 @@ def get_generic_article_values(user, json):
 
     return entity_id, keyword, document_title, authors, publication_date, document_type, language, research_area, \
         start_page, end_page, volume
+
+
+def load_thesis(user, record):
+    json = record.json
+
+    # attribs to GenericArticle
+    entity_id, keyword, document_title, authors, publication_date, document_type, language, research_area, start_page, \
+        end_page, volume = get_generic_article_values(user=user, json=json)
+
+    # attribs to Thesis
+    advisors = []
+    for advisor in json.get('relations').get('Adivisoring') or []:
+        orcid = get_value_in_a_list(advisor.get('fields').get('identifier.orcid'))
+        id_lattes = get_value_in_a_list(advisor.get('fields').get('identifier.lattes'))
+        names = advisor.get('fields').get('name')  # it's a list
+        citation_names = advisor.get('fields').get('citationName')  # it's a list
+        research_areas = advisor.get('fields').get('researchArea')  # it's a list
+        birth_city = get_value_in_a_list(advisor.get('fields').get('birthCity'))
+        birth_state = get_value_in_a_list(advisor.get('fields').get('birthState'))
+        birth_country = get_value_in_a_list(advisor.get('fields').get('birthCountry'))
+        try:
+            advisors.append(
+                Authorship.authorship_get_or_create(
+                    user=user,
+                    orcid=orcid,
+                    id_lattes=id_lattes,
+                    names=names,
+                    citation_names=citation_names,
+                    research_areas=research_areas,
+                    birth_city=birth_city,
+                    birth_state=birth_state,
+                    birth_country=birth_country
+                )
+            )
+        except:
+            pass
+
+    try:
+        Thesis.thesis_get_or_create(
+            user=user,
+            entity_id=entity_id,
+            keyword=keyword,
+            document_title=document_title,
+            authors=authors,
+            publication_date=publication_date,
+            document_type=document_type,
+            language=language,
+            research_area=research_area,
+            start_page=start_page,
+            end_page=end_page,
+            volume=volume,
+            advisors=advisors
+        )
+    except:
+        pass
+
+
