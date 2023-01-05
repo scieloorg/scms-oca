@@ -175,3 +175,79 @@ class ConferenceProceedings(GenericArticle):
     base_form_class = CoreAdminModelForm
 
 
+class Thesis(GenericArticle):
+    advisor = models.ManyToManyField(Authorship, verbose_name=_("Advisors"), blank=True)
+
+    def __unicode__(self):
+        return f'{self.document_title}'
+
+    def __str__(self):
+        return f'{self.document_title}'
+
+    panels = GenericArticle.panels + [
+                 AutocompletePanel('advisor'),
+             ]
+
+    @property
+    def data(self):
+        return {
+            'generic_article__entity_id': self.entity_id,
+            'generic_article__keyword': [k.data for k in self.keyword.iterator()],
+            'generic_article__document_title': [t.data for t in self.title.iterator()],
+            'generic_article__authors': [a.data for a in self.author.iterator()],
+            'generic_article__publication_date': self.publication_date,
+            'generic_article__document_type': self.document_type,
+            'generic_article__language': self.language,
+            'generic_article__research_area': [r.data for r in self.research_area.iterator()],
+            'generic_article__start_page': self.start_page,
+            'generic_article__end_page': self.end_page,
+            'generic_article__volume': self.volume,
+            'thesis__advisor': [ad.data for ad in self.advisor.iterator()]
+        }
+
+    @classmethod
+    def thesis_get_or_create(
+            cls,
+            user,
+            entity_id,
+            keyword,
+            document_title,
+            authors,
+            publication_date,
+            document_type,
+            language,
+            research_area,
+            start_page,
+            end_page,
+            volume,
+            advisors
+    ):
+        try:
+            theses = cls.objects.filter(entity_id=entity_id)
+            thesis = theses[0]
+        except IndexError:
+            thesis = cls()
+            thesis.creator = user
+            thesis.save()
+            thesis.entity_id = entity_id
+            for item in keyword or []:
+                thesis.keyword.add(GenericField.get_or_create(item))
+            for item in document_title or []:
+                thesis.document_title.add(GenericField.get_or_create(item))
+            for item in authors or []:
+                thesis.authors.add(item)
+            thesis.publication_date = publication_date
+            thesis.document_type = document_type
+            thesis.language = language
+            for item in research_area or []:
+                thesis.research_area.add(GenericField.get_or_create(item))
+            thesis.start_page = start_page
+            thesis.end_page = end_page
+            thesis.volume = volume
+            for item in advisors or []:
+                thesis.advisor.add(item)
+            thesis.save()
+
+        return thesis
+
+    base_form_class = CoreAdminModelForm
