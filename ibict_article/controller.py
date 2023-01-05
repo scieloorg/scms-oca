@@ -128,3 +128,29 @@ def load_thesis(user, record):
         pass
 
 
+def load_conference(user, record):
+    json = record.json
+
+    # attribs to GenericArticle
+    entity_id, keyword, document_title, authors, publication_date, document_type, language, research_area, start_page, \
+        end_page, volume = get_generic_article_values(user=user, json=json)
+
+    try:
+        ConferenceProceedings.conference_get_or_create(
+            user=user,
+            entity_id=entity_id,
+            keyword=keyword,
+            document_title=document_title,
+            authors=authors,
+            publication_date=publication_date,
+            document_type=document_type,
+            language=language,
+            research_area=research_area,
+            start_page=start_page,
+            end_page=end_page,
+            volume=volume
+        )
+    except:
+        pass
+
+
