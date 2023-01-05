@@ -22,3 +22,12 @@ def load_raw_ibict(row, user):
             rawrecord.save()
     except Exception as e:
         print(str(e))
+
+
+def get_value_in_a_list(list_of_values):
+    try:
+        return list_of_values[0]
+    except (IndexError, TypeError):
+        return
+
+
