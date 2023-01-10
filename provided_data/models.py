@@ -143,3 +143,77 @@ class ConferenceProceedings(CommonPublicationData):
     base_form_class = CoreAdminModelForm
 
 
+class Thesis(CommonPublicationData):
+    advisors = models.ManyToManyField(Authorship, verbose_name=_("Advisors"), blank=True)
+
+    def __unicode__(self):
+        return f'{self.document_titles}'
+
+    def __str__(self):
+        return f'{self.document_titles}'
+
+    panels = CommonPublicationData.panels + [
+                 AutocompletePanel('advisors'),
+             ]
+
+    @property
+    def data(self):
+        _data = super().data
+        _data.update({
+            'thesis__advisors': [ad.data for ad in self.advisors.iterator()]
+        })
+        return _data
+
+    @classmethod
+    def thesis_get_or_create(
+            cls,
+            user,
+            entity_id,
+            keywords,
+            document_titles,
+            authors,
+            publication_date,
+            document_type,
+            language,
+            research_areas,
+            start_page,
+            end_page,
+            volume,
+            advisors
+    ):
+        try:
+            thesis = cls.objects.filter(entity_id=entity_id)[0]
+        except IndexError:
+            thesis = super().get_or_create(
+                user=user,
+                entity_id=entity_id,
+                keywords=keywords,
+                document_titles=document_titles,
+                authors=authors,
+                publication_date=publication_date,
+                document_type=document_type,
+                language=language,
+                research_areas=research_areas,
+                start_page=start_page,
+                end_page=end_page,
+                volume=volume
+            )
+            for advisor in advisors or []:
+                thesis.advisors.add(advisor)
+            thesis.save()
+
+        return thesis
+
+    base_form_class = CoreAdminModelForm
+
+
+class RawArticle(CommonControlField):
+    document_type = models.CharField(_("Document type"), choices=TYPES, max_length=50, null=True, blank=True)
+    entity_id = models.CharField(_("Entity ID"), max_length=50, null=True, blank=True)
+    json = models.JSONField(_("JSON File"), null=True, blank=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['document_type', ]),
+            models.Index(fields=['entity_id', ]),
+        ]
