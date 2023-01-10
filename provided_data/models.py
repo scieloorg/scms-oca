@@ -88,3 +88,58 @@ class JournalArticle(CommonPublicationData):
         return article
 
     base_form_class = CoreAdminModelForm
+
+
+class ConferenceProceedings(CommonPublicationData):
+
+    def __unicode__(self):
+        return f'{self.entity_id}'
+
+    def __str__(self):
+        return f'{self.entity_id}'
+
+    panels = CommonPublicationData.panels
+
+    @property
+    def data(self):
+        return super().data
+
+    @classmethod
+    def conference_get_or_create(
+            cls,
+            user,
+            entity_id,
+            keywords,
+            document_titles,
+            authors,
+            publication_date,
+            document_type,
+            language,
+            research_areas,
+            start_page,
+            end_page,
+            volume
+    ):
+        try:
+            conference = cls.objects.filter(entity_id=entity_id)[0]
+        except IndexError:
+            conference = super().get_or_create(
+                user=user,
+                entity_id=entity_id,
+                keywords=keywords,
+                document_titles=document_titles,
+                authors=authors,
+                publication_date=publication_date,
+                document_type=document_type,
+                language=language,
+                research_areas=research_areas,
+                start_page=start_page,
+                end_page=end_page,
+                volume=volume
+            )
+
+        return conference
+
+    base_form_class = CoreAdminModelForm
+
+
