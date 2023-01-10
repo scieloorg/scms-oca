@@ -148,3 +148,105 @@ class Authorship(models.Model):
     base_form_class = CoreAdminModelForm
 
 
+class CommonPublicationData(CommonControlField):
+    entity_id = models.CharField(_("Entity ID"), max_length=50, null=True, blank=True)
+    keywords = TaggableManager(_("Keywords"), blank=True)
+    document_titles = models.ManyToManyField("CommonTextField", verbose_name=_("Titles"), related_name='+', blank=True)
+    authors = models.ManyToManyField("Authorship", verbose_name=_("Authors"), blank=True)
+    publication_date = models.CharField(_("Publication Date"), max_length=10, null=True, blank=True)
+    document_type = models.CharField(_("Document type"), choices=TYPES, max_length=50, null=True, blank=True)
+    language = models.CharField(_("Language"), max_length=50, null=True, blank=True)
+    research_areas = models.ManyToManyField(CommonTextField, verbose_name=_("Research area"), related_name='+', blank=True)
+    start_page = models.CharField(_("Start page"), max_length=10, null=True, blank=True)
+    end_page = models.CharField(_("End page"), max_length=10, null=True, blank=True)
+    volume = models.CharField(_("Volume"), max_length=50, null=True, blank=True)
+
+    def __unicode__(self):
+        return ' | '.join(str(document_title) for document_title in self.document_titles)
+
+    def __str__(self):
+        return ' | '.join(str(document_title) for document_title in self.document_titles)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['entity_id', ]),
+            models.Index(fields=['publication_date', ]),
+            models.Index(fields=['document_type', ]),
+            models.Index(fields=['language', ]),
+            models.Index(fields=['start_page', ]),
+            models.Index(fields=['end_page', ]),
+            models.Index(fields=['volume', ]),
+        ]
+
+    panels = [
+        FieldPanel('entity_id'),
+        FieldPanel('keywords'),
+        AutocompletePanel('document_titles'),
+        AutocompletePanel('authors'),
+        FieldPanel('publication_date'),
+        FieldPanel('document_type'),
+        FieldPanel('language'),
+        AutocompletePanel('research_areas'),
+        FieldPanel('start_page'),
+        FieldPanel('end_page'),
+        FieldPanel('volume'),
+    ]
+
+    @property
+    def data(self):
+        return {
+            'common_publication_data__entity_id': self.entity_id,
+            'common_publication_data__keywords': [k.data for k in self.keywords.names()],
+            'common_publication_data__document_titles': [t.data for t in self.document_titles.iterator()],
+            'common_publication_data__authors': [a.data for a in self.authors.iterator()],
+            'common_publication_data__publication_date': self.publication_date,
+            'common_publication_data__document_type': self.document_type,
+            'common_publication_data__language': self.language,
+            'common_publication_data__research_areas': [r.data for r in self.research_areas.iterator()],
+            'common_publication_data__start_page': self.start_page,
+            'common_publication_data__end_page': self.end_page,
+            'common_publication_data__volume': self.volume,
+        }
+
+    @classmethod
+    def get_or_create(
+            cls,
+            user,
+            entity_id,
+            keywords,
+            document_titles,
+            authors,
+            publication_date,
+            document_type,
+            language,
+            research_areas,
+            start_page,
+            end_page,
+            volume
+    ):
+        try:
+            common_publication = cls.objects.filter(entity_id=entity_id)[0]
+        except IndexError:
+            common_publication = cls()
+            common_publication.creator = user
+            common_publication.save()
+            common_publication.entity_id = entity_id
+            for keyword in keywords or []:
+                common_publication.keywords.add(keyword)
+            for document_title in document_titles or []:
+                common_publication.document_titles.add(CommonTextField.create(document_title))
+            for author in authors or []:
+                common_publication.authors.add(author)
+            common_publication.publication_date = publication_date
+            common_publication.document_type = document_type
+            common_publication.language = language
+            for research_area in research_areas or []:
+                common_publication.research_areas.add(CommonTextField.create(research_area))
+            common_publication.start_page = start_page
+            common_publication.end_page = end_page
+            common_publication.volume = volume
+            common_publication.save()
+
+        return common_publication
+
+    base_form_class = CoreAdminModelForm
