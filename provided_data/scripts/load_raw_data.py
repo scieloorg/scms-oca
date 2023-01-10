@@ -1,4 +1,4 @@
-from ibict_article.tasks import load_raw_data
+from provided_data.tasks import load_raw_data
 
 
 def run(*args):

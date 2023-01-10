@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 
 from config import celery_app
 
-from .controller import load_raw_ibict, load_article, load_conference, load_thesis
+from .controller import load_raw_data, load_article, load_conference, load_thesis
 from .models import RawArticle
 
 
@@ -10,7 +10,7 @@ User = get_user_model()
 
 
 @celery_app.task()
-def load_raw_data(file_path):
+def load_data_raw(file_path):
     """
     Load the data from IBICT files.
 
@@ -23,7 +23,7 @@ def load_raw_data(file_path):
 
     with open(file_path, "rb") as f:
         for row in f:
-            load_raw_ibict(row, user)
+            load_raw_data(row, user)
 
 
 @celery_app.task()
