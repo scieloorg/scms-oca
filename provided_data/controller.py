@@ -68,13 +68,14 @@ def get_common_publication_data_values(user, json):
             )
         except:
             pass
-    publication_date = get_value_in_a_list(json.get('fields').get('publicationDate'))
-    document_type = get_value_in_a_list(json.get('fields').get('type'))
-    language = get_value_in_a_list(json.get('fields').get('language'))
-    research_areas = json.get('fields').get('researchArea.cnpq')  # it's a list
-    start_page = get_value_in_a_list(json.get('fields').get('starPage'))
-    end_page = get_value_in_a_list(json.get('fields').get('endPage'))
-    volume = get_value_in_a_list(json.get('fields').get('volume'))
+
+    publication_date = get_value_in_a_list(fields.get('publicationDate'))
+    document_type = get_value_in_a_list(fields.get('type'))
+    language = get_value_in_a_list(fields.get('language'))
+    research_areas = fields.get('researchArea.cnpq')  # it's a list
+    start_page = get_value_in_a_list(fields.get('starPage'))
+    end_page = get_value_in_a_list(fields.get('endPage'))
+    volume = get_value_in_a_list(fields.get('volume'))
 
     return entity_id, keywords, document_titles, authors, publication_date, document_type, language, research_areas, \
         start_page, end_page, volume
