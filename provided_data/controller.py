@@ -29,6 +29,20 @@ def get_value_in_a_list(list_of_values):
         return
 
 
+def get_common_person_data_values(person):
+    orcid = get_value_in_a_list(person.get('identifier.orcid'))
+    id_lattes = get_value_in_a_list(person.get('identifier.lattes'))
+    names = person.get('name')  # it's a list
+    citation_names = person.get('citationName')  # it's a list
+    person_research_areas = person.get('researchArea')  # it's a list
+    birth_city = get_value_in_a_list(person.get('birthCity'))
+    birth_state = get_value_in_a_list(person.get('birthState'))
+    birth_country = get_value_in_a_list(person.get('birthCountry'))
+
+    return orcid, id_lattes, names, citation_names, person_research_areas, \
+        birth_city, birth_state, birth_country
+
+
 def get_common_publication_data_values(user, json):
     entity_id = json.get('entity_id')
     keywords = json.get('fields').get('keyword')  # it's a list
