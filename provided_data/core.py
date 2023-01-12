@@ -8,7 +8,7 @@ from taggit.managers import TaggableManager
 from core.models import CommonControlField
 from core.forms import CoreAdminModelForm
 
-from .choices import TYPES
+from .choices import DOCUMENT_TYPES, NAME_TYPES, LEVELS
 from usefulmodels.models import City, State, Country
 
 
