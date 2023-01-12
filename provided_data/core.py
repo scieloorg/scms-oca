@@ -148,9 +148,9 @@ class ResearchArea(models.Model):
 
 
 class Authorship(models.Model):
-    names = models.ManyToManyField("CommonTextField", verbose_name=_("Name"), blank=True)
-    citation_names = models.ManyToManyField("CommonTextField", verbose_name=_("Citation name"), related_name='+', blank=True)
-    person_research_areas = models.ManyToManyField("CommonTextField", verbose_name=_("Research area"), related_name='+', blank=True)
+    names = models.ManyToManyField("Name", verbose_name=_("Name"), blank=True)
+    citation_names = models.ManyToManyField("Name", verbose_name=_("Citation name"), related_name='+', blank=True)
+    person_research_areas = models.ManyToManyField("ResearchArea", verbose_name=_("Research area"), related_name='+', blank=True)
     birth_city = models.ForeignKey(City, verbose_name=_("Birth city"), on_delete=models.SET_NULL, max_length=100,
                                    null=True, blank=True)
     birth_state = models.ForeignKey(State, verbose_name=_("Birth state"), on_delete=models.SET_NULL, max_length=100,
@@ -227,11 +227,11 @@ class Authorship(models.Model):
             authorship.orcid = orcid
             authorship.id_lattes = id_lattes
             for name in names or []:
-                authorship.names.add(CommonTextField.create(name))
+                authorship.names.add(Name.create(text=name, type='name'))
             for citation_name in citation_names or []:
-                authorship.citation_names.add(CommonTextField.create(citation_name))
+                authorship.citation_names.add(Name.create(text=citation_name, type='citation name'))
             for research_area in person_research_areas or []:
-                authorship.person_research_areas.add(CommonTextField.create(research_area))
+                authorship.person_research_areas.add(ResearchArea.get_or_create(text=research_area))
             authorship.birth_city = City.get_or_create(user=user, name=birth_city)
             authorship.birth_state = State.get_or_create(user=user, name=birth_state)
             authorship.birth_country = Country.get_or_create(user=user, name_pt=birth_country, name_en=birth_country)
