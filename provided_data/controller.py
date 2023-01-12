@@ -91,14 +91,8 @@ def load_thesis(user, record):
     # attribs to Thesis
     advisors = []
     for advisor in json.get('relations').get('Adivisoring') or []:
-        orcid = get_value_in_a_list(advisor.get('fields').get('identifier.orcid'))
-        id_lattes = get_value_in_a_list(advisor.get('fields').get('identifier.lattes'))
-        names = advisor.get('fields').get('name')  # it's a list
-        citation_names = advisor.get('fields').get('citationName')  # it's a list
-        person_research_areas = advisor.get('fields').get('researchArea')  # it's a list
-        birth_city = get_value_in_a_list(advisor.get('fields').get('birthCity'))
-        birth_state = get_value_in_a_list(advisor.get('fields').get('birthState'))
-        birth_country = get_value_in_a_list(advisor.get('fields').get('birthCountry'))
+        orcid, id_lattes, names, citation_names, person_research_areas, \
+            birth_city, birth_state, birth_country = get_common_person_data_values(advisor.get('fields'))
         try:
             advisors.append(
                 Authorship.authorship_get_or_create(
