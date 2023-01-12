@@ -6,7 +6,7 @@ from wagtailautocomplete.edit_handlers import AutocompletePanel
 
 from core.forms import CoreAdminModelForm
 from core.models import CommonControlField
-from .choices import TYPES
+from .choices import DOCUMENT_TYPES
 from .core import CommonTextField, CommonPublicationData, Authorship
 
 
@@ -208,7 +208,7 @@ class Thesis(CommonPublicationData):
 
 
 class RawArticle(CommonControlField):
-    document_type = models.CharField(_("Document type"), choices=TYPES, max_length=50, null=True, blank=True)
+    document_type = models.CharField(_("Document type"), choices=DOCUMENT_TYPES, max_length=50, null=True, blank=True)
     entity_id = models.CharField(_("Entity ID"), max_length=50, null=True, blank=True)
     json = models.JSONField(_("JSON File"), null=True, blank=True)
 
