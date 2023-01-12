@@ -244,13 +244,13 @@ class Authorship(models.Model):
 
 class CommonPublicationData(CommonControlField):
     entity_id = models.CharField(_("Entity ID"), max_length=50, null=True, blank=True)
-    keywords = TaggableManager(_("Keywords"), blank=True)
+    keywords = models.ManyToManyField("CommonTextField", verbose_name=_("Keywords"), blank=True)
     document_titles = models.ManyToManyField("CommonTextField", verbose_name=_("Titles"), related_name='+', blank=True)
     authors = models.ManyToManyField("Authorship", verbose_name=_("Authors"), blank=True)
     publication_date = models.CharField(_("Publication Date"), max_length=10, null=True, blank=True)
-    document_type = models.CharField(_("Document type"), choices=TYPES, max_length=50, null=True, blank=True)
+    document_type = models.CharField(_("Document type"), choices=DOCUMENT_TYPES, max_length=50, null=True, blank=True)
     language = models.CharField(_("Language"), max_length=50, null=True, blank=True)
-    research_areas = models.ManyToManyField(CommonTextField, verbose_name=_("Research area"), related_name='+', blank=True)
+    research_areas = models.ManyToManyField(ResearchArea, verbose_name=_("Research area"), related_name='+', blank=True)
     start_page = models.CharField(_("Start page"), max_length=10, null=True, blank=True)
     end_page = models.CharField(_("End page"), max_length=10, null=True, blank=True)
     volume = models.CharField(_("Volume"), max_length=50, null=True, blank=True)
