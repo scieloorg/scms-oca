@@ -274,7 +274,7 @@ class CommonPublicationData(CommonControlField):
 
     panels = [
         FieldPanel('entity_id'),
-        FieldPanel('keywords'),
+        AutocompletePanel('keywords'),
         AutocompletePanel('document_titles'),
         AutocompletePanel('authors'),
         FieldPanel('publication_date'),
@@ -290,7 +290,7 @@ class CommonPublicationData(CommonControlField):
     def data(self):
         return {
             'common_publication_data__entity_id': self.entity_id,
-            'common_publication_data__keywords': [k.data for k in self.keywords.names()],
+            'common_publication_data__keywords': [k.data for k in self.keywords.iterator()],
             'common_publication_data__document_titles': [t.data for t in self.document_titles.iterator()],
             'common_publication_data__authors': [a.data for a in self.authors.iterator()],
             'common_publication_data__publication_date': self.publication_date,
@@ -326,7 +326,7 @@ class CommonPublicationData(CommonControlField):
             common_publication.save()
             common_publication.entity_id = entity_id
             for keyword in keywords or []:
-                common_publication.keywords.add(keyword)
+                common_publication.keywords.add(CommonTextField.create(keyword))
             for document_title in document_titles or []:
                 common_publication.document_titles.add(CommonTextField.create(document_title))
             for author in authors or []:
@@ -335,7 +335,7 @@ class CommonPublicationData(CommonControlField):
             common_publication.document_type = document_type
             common_publication.language = language
             for research_area in research_areas or []:
-                common_publication.research_areas.add(CommonTextField.create(research_area))
+                common_publication.research_areas.add(ResearchArea.get_or_create(text=research_area))
             common_publication.start_page = start_page
             common_publication.end_page = end_page
             common_publication.volume = volume
