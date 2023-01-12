@@ -53,6 +53,50 @@ class CommonTextField(models.Model):
     base_form_class = CoreAdminModelForm
 
 
+class Name(models.Model):
+    text = models.CharField(_("Text"), max_length=255, null=True, blank=True)
+    type = models.CharField(_("Type"), choices=NAME_TYPES, max_length=20, null=True, blank=True)
+
+    autocomplete_search_field = 'text'
+
+    def autocomplete_label(self):
+        return self.text
+
+    def __unicode__(self):
+        return f'{self.text}'
+
+    def __str__(self):
+        return f'{self.text}'
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['text', ]),
+            models.Index(fields=['type', ]),
+        ]
+
+    panels = [
+        FieldPanel('text'),
+        FieldPanel('type'),
+    ]
+
+    @property
+    def data(self):
+        return {
+            'name__text': self.text,
+            'name__type': self.type,
+        }
+
+    @classmethod
+    def create(cls, text, type):
+
+        name = cls()
+        name.text = text
+        name.type = type
+        name.save()
+
+        return name
+
+    base_form_class = CoreAdminModelForm
 class Authorship(models.Model):
     names = models.ManyToManyField("CommonTextField", verbose_name=_("Name"), blank=True)
     citation_names = models.ManyToManyField("CommonTextField", verbose_name=_("Citation name"), related_name='+', blank=True)
