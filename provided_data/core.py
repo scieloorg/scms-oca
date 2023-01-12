@@ -44,7 +44,7 @@ class CommonTextField(models.Model):
     @classmethod
     def create(cls, text):
 
-        common_text_field = CommonTextField()
+        common_text_field = cls()
         common_text_field.text = text
         common_text_field.save()
 
