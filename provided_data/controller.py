@@ -44,19 +44,14 @@ def get_common_person_data_values(person):
 
 
 def get_common_publication_data_values(user, json):
+    fields = json['fields']
     entity_id = json.get('entity_id')
-    keywords = json.get('fields').get('keyword')  # it's a list
-    document_titles = json.get('fields').get('title')  # it's a list
+    keywords = fields.get('keyword')  # it's a list
+    document_titles = fields.get('title')  # it's a list
     authors = []
     for author in json.get('relations').get('Authorship') or []:
-        orcid = get_value_in_a_list(author.get('fields').get('identifier.orcid'))
-        id_lattes = get_value_in_a_list(author.get('fields').get('identifier.lattes'))
-        names = author.get('fields').get('name')  # it's a list
-        citation_names = author.get('fields').get('citationName')  # it's a list
-        person_research_areas = author.get('fields').get('researchArea')  # it's a list
-        birth_city = get_value_in_a_list(author.get('fields').get('birthCity'))
-        birth_state = get_value_in_a_list(author.get('fields').get('birthState'))
-        birth_country = get_value_in_a_list(author.get('fields').get('birthCountry'))
+        orcid, id_lattes, names, citation_names, person_research_areas, \
+            birth_city, birth_state, birth_country = get_common_person_data_values(author.get('fields'))
         try:
             authors.append(
                 Authorship.authorship_get_or_create(
