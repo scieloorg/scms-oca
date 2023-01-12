@@ -12,7 +12,7 @@ User = get_user_model()
 @celery_app.task()
 def load_data_raw(file_path):
     """
-    Load the data from IBICT files.
+    Load the data from provided data files.
 
     Sync or Async function
 
