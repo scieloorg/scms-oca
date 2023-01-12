@@ -127,6 +127,7 @@ LOCAL_APPS = [
     "indicator",
     "search",
     "wagtailautocomplete",
+    "provided_data",
 ]
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
