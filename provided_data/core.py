@@ -97,6 +97,56 @@ class Name(models.Model):
         return name
 
     base_form_class = CoreAdminModelForm
+
+
+class ResearchArea(models.Model):
+    text = models.CharField(_("Text"), max_length=100, null=True, blank=True)
+    level = models.CharField(_("Level"), choices=LEVELS, max_length=20, null=True, blank=True, default="UNDEFINED")
+
+    autocomplete_search_field = 'text'
+
+    def autocomplete_label(self):
+        return self.text
+
+    def __unicode__(self):
+        return f'{self.text}'
+
+    def __str__(self):
+        return f'{self.text}'
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['text', ]),
+            models.Index(fields=['level', ]),
+        ]
+
+    panels = [
+        FieldPanel('text'),
+        FieldPanel('level'),
+    ]
+
+    @property
+    def data(self):
+        return {
+            'research_area__text': self.text,
+            'research_area__level': self.level,
+        }
+
+    @classmethod
+    def get_or_create(cls, text, level):
+        try:
+            research_area = cls.objects.filter(text=text, level=level)[0]
+        except IndexError:
+            research_area = cls()
+            research_area.text = text
+            research_area.type = level
+            research_area.save()
+
+        return research_area
+
+    base_form_class = CoreAdminModelForm
+
+
 class Authorship(models.Model):
     names = models.ManyToManyField("CommonTextField", verbose_name=_("Name"), blank=True)
     citation_names = models.ManyToManyField("CommonTextField", verbose_name=_("Citation name"), related_name='+', blank=True)
