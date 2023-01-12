@@ -1,7 +1,7 @@
 import orjson
 
 from .models import RawArticle, JournalArticle, Thesis, ConferenceProceedings
-from .core import Authorship, CommonPublicationData
+from .core import Authorship
 
 
 def load_raw_data(row, user):
@@ -10,18 +10,16 @@ def load_raw_data(row, user):
     document_id = row.get('entity_id')
 
     try:
-        rawrecord = RawArticle.objects.filter(entity_id=document_id, document_type=document_type)
-        if rawrecord:
-            pass
-        else:
-            rawrecord = RawArticle()
-            rawrecord.document_type = document_type
-            rawrecord.entity_id = document_id
-            rawrecord.json = row
-            rawrecord.creator = user
-            rawrecord.save()
-    except Exception as e:
-        print(str(e))
+        rawrecord = RawArticle.objects.filter(entity_id=document_id, document_type=document_type)[0]
+    except IndexError:
+        rawrecord = RawArticle()
+        rawrecord.document_type = document_type
+        rawrecord.entity_id = document_id
+        rawrecord.json = row
+        rawrecord.creator = user
+        rawrecord.save()
+
+    return rawrecord
 
 
 def get_value_in_a_list(list_of_values):
