@@ -325,6 +325,35 @@ class Authorship(CommonControlField, ClusterableModel):
         return authorship
 
     base_form_class = CoreAdminModelForm
+
+
+class AuthorJournalArticles(Orderable):
+    author = ParentalKey(Authorship, on_delete=models.CASCADE, related_name='journal_article')
+    document = models.ForeignKey(JournalArticle, verbose_name=_("Journal Article"),
+                                 on_delete=models.SET_NULL, max_length=255, null=True, blank=True)
+    registered = models.CharField(_("Registered"), max_length=50,
+                                  choices=REGISTERED, null=True, blank=True)
+    is_oa = models.BooleanField(_("Open Access"), null=True, blank=True)
+
+
+class AuthorConferenceProceedings(Orderable):
+    author = ParentalKey(Authorship, on_delete=models.CASCADE, related_name='conference_proceedings')
+    document = models.ForeignKey(ConferenceProceedings, verbose_name=_("Conference Proceedings"),
+                                 on_delete=models.SET_NULL, max_length=255, null=True, blank=True)
+    registered = models.CharField(_("Registered"), max_length=50,
+                                  choices=REGISTERED, null=True, blank=True)
+    is_oa = models.BooleanField(_("Open Access"), null=True, blank=True)
+
+
+class AuthorThesis(Orderable):
+    author = ParentalKey(Authorship, on_delete=models.CASCADE, related_name='thesis')
+    document = models.ForeignKey(Thesis, verbose_name=_("Thesis"),
+                                 on_delete=models.SET_NULL, max_length=255, null=True, blank=True)
+    registered = models.CharField(_("Registered"), max_length=50,
+                                  choices=REGISTERED, null=True, blank=True)
+    is_oa = models.BooleanField(_("Open Access"), null=True, blank=True)
+
+
 class RawArticle(CommonControlField):
     document_type = models.CharField(_("Document type"), choices=DOCUMENT_TYPES, max_length=50, null=True, blank=True)
     entity_id = models.CharField(_("Entity ID"), max_length=50, null=True, blank=True)
