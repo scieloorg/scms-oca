@@ -22,3 +22,9 @@ LEVELS = [
     ('2', _('Level 2')),
     ('3', _('Level 3')),
 ]
+
+REGISTERED = [
+    ('', ''),
+    ('manually', _('Manually')),
+    ('automatically', _('Automatically')),
+]
