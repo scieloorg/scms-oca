@@ -3,8 +3,7 @@ from django.utils.translation import gettext as _
 from wagtail.contrib.modeladmin.options import ModelAdmin, modeladmin_register, ModelAdminGroup
 from wagtail.contrib.modeladmin.views import CreateView
 
-from .models import JournalArticle, Thesis, RawArticle, ConferenceProceedings
-from .core import Authorship
+from .models import JournalArticle, Thesis, RawArticle, ConferenceProceedings, Authorship
 
 
 class JournalArticleCreateView(CreateView):
@@ -117,17 +116,17 @@ class ThesisAdmin(ModelAdmin):
     )
 
 
-class AuthorshipCreateView(CreateView):
+class AuthorCreateView(CreateView):
     def form_valid(self, form):
         self.object = form.save_all(self.request.user)
         return HttpResponseRedirect(self.get_success_url())
 
 
-class AuthorshipAdmin(ModelAdmin):
+class AuthorAdmin(ModelAdmin):
     model = Authorship
     inspect_view_enabled = True
     menu_label = _('Persons')
-    create_view_class = AuthorshipCreateView
+    create_view_class = AuthorCreateView
     menu_icon = 'folder'
     menu_order = 400
     add_to_settings_menu = False
@@ -138,6 +137,7 @@ class AuthorshipAdmin(ModelAdmin):
 
     def areas(self, obj):
         return " | ".join([str(c) for c in obj.person_research_areas.all()])
+
 
     list_display = (
         'all_names',
@@ -183,7 +183,7 @@ class ArticlesAdminGroup(ModelAdminGroup):
     menu_label = _('Provided data')
     menu_icon = 'folder-open-inverse'  # change as required
     menu_order = 100  # will put in 3rd place (000 being 1st, 100 2nd)
-    items = (JournalArticleAdmin, ConferenceProceedingsAdmin, ThesisAdmin, AuthorshipAdmin, RawArticleAdmin)
+    items = (JournalArticleAdmin, ConferenceProceedingsAdmin, ThesisAdmin, AuthorAdmin, RawArticleAdmin)
 
 
 modeladmin_register(ArticlesAdminGroup)
