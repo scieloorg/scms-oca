@@ -112,7 +112,7 @@ class IndicatorIndex(indexes.SearchIndex, indexes.Indexable):
             if number:
                 scope = scopes[i]
                 if number > 1:
-                    scope = "INTER " + scope
+                    scope = "INTER" + scope
                 logging.info(scope)
                 return scope
 
