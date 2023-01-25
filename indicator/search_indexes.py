@@ -1,4 +1,5 @@
 # coding: utf-8
+import logging
 from haystack import indexes
 
 from indicator import models
@@ -47,6 +48,103 @@ class IndicatorIndex(indexes.SearchIndex, indexes.Indexable):
     states = indexes.MultiValueField(null=True)
     regions = indexes.MultiValueField(null=True)
 
+    # prioridade do mais amplo para o mais restrito
+    # nacional -> municipal
+    geo_priority = indexes.IntegerField(null=True)
+    thematic_priority = indexes.IntegerField(null=True)
+    priority = indexes.FloatField(null=True)
+
+    # scopes
+    # por enquanto deixar apenas geo_scope, traduzir apenas como "âmbito"
+    geo_scope = indexes.CharField(null=True)
+    thematic_scope = indexes.CharField(null=True)
+
+    def prepare_geo_priority(self, obj):
+        n_institutions = obj.institutions.count()
+
+        cities = set()
+        states = set()
+        regions = set()
+
+        for item in obj.institutions.iterator():
+            cities.add(item.location.city)
+            states.add(item.location.state)
+            regions.add(item.location.state.region)
+
+        for item in obj.locations.iterator():
+            cities.add(item.city)
+            states.add(item.state)
+            regions.add(item.state.region)
+
+        n_cities = len(cities)
+        n_states = len(states)
+        n_regions = len(regions)
+        n_country = 1
+        return (
+            n_country*1000000 + n_regions*100000 + n_states*10000 +
+            n_cities*1000 + n_institutions*100
+        )
+
+    def prepare_geo_scope(self, obj):
+        cities = set()
+        states = set()
+        regions = set()
+
+        n_institutions = obj.institutions.count()
+        for item in obj.institutions.iterator():
+            cities.add(item.location.city)
+            states.add(item.location.state)
+            regions.add(item.location.state.region)
+
+        for item in obj.locations.iterator():
+            cities.add(item.city)
+            states.add(item.state)
+            regions.add(item.state.region)
+
+        n_cities = len(cities)
+        n_states = len(states)
+        n_regions = len(regions)
+
+        scopes = ["INSTITUCIONAL", "MUNICIPAL", "ESTADUAL", "REGIONAL", "NACIONAL"]
+        numbers = [n_institutions, n_cities, n_states, n_regions, 1]
+        logging.info(numbers)
+        for i, number in enumerate(numbers):
+            if number:
+                scope = scopes[i]
+                if number > 1:
+                    scope = "INTER " + scope
+                logging.info(scope)
+                return scope
+
+    def prepare_thematic_priority(self, obj):
+        if obj.thematic_areas:
+            level0 = set()
+            level1 = set()
+            level2 = set()
+            for thematic_area in obj.thematic_areas.all():
+                level0.add(thematic_area.level0)
+                level1.add(thematic_area.level1)
+                level2.add(thematic_area.level2)
+            n_thematic_level2 = len(level2)
+            n_thematic_level1 = len(level1)
+            n_thematic_level0 = len(level0)
+            return (
+                n_thematic_level0*1000000 + n_thematic_level1*100000 +
+                n_thematic_level2*10000
+            )
+
+    def prepare_thematic_scope(self, obj):
+        for thematic_area in obj.thematic_areas.iterator():
+            if thematic_area.level2:
+                return 'level2'
+            if thematic_area.level1:
+                return 'level1'
+            if thematic_area.level0:
+                return 'level0'
+
+    def prepare_priority(self, obj):
+        return obj.raw_data and obj.raw_data.size
+
     def prepare_action(self, obj):
         return obj.action_and_practice and obj.action_and_practice.action.name
 
@@ -76,19 +174,19 @@ class IndicatorIndex(indexes.SearchIndex, indexes.Indexable):
                 institutions.add(institution)
             return institutions
 
-    def prepare_thematic_areas(self, obj):
-        thematic_areas = set()
-        if obj.thematic_areas:
-            for thematic_area in obj.thematic_areas.all():
-                # manter granularidade média, ou seja, level1
-                # thematic_areas.add(thematic_area.level0)
-                thematic_areas.add(thematic_area.level1)
-                # thematic_areas.add(thematic_area.level2)
-            return thematic_areas
-
     def prepare_keywords(self, obj):
         if obj.keywords.names():
             return [name for name in obj.keywords.names()]
+
+    def prepare_thematic_areas(self, obj):
+        if obj.thematic_areas:
+            thematic_areas = set()
+            for thematic_area in obj.thematic_areas.all():
+                # manter granularidade média, ou seja, level1
+                thematic_areas.add(thematic_area.level0)
+                thematic_areas.add(thematic_area.level1)
+                thematic_areas.add(thematic_area.level2)
+            return thematic_areas
 
     def prepare_countries(self, obj):
         countries = set()
