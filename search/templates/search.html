@@ -36,13 +36,13 @@
               </div>
 
               <!-- col 2 -->
-              {% comment %} <div class="col-sm-2 col-md-2 col-lg-2">
+              <div class="col-sm-2 col-md-2 col-lg-2">
                 <button class="btn btn-primary" id="search-button" for="search" type="submit">{% trans "Buscar" %}</button>
-                <a href="#" class="ml-3">
+                <!-- <a href="#" class="ml-3">
                     {% trans "Help" %}
                     <i class="icon-line-help-circle"></i>
-                  </a>
-              </div> {% endcomment %}
+                  </a> -->
+              </div> 
 
               <!-- col 2 -->
               <div class="col-sm-2 col-md-2 col-lg-2 pl-0 text-right">
@@ -79,7 +79,7 @@
       <div class="section pb-0 pt-2 mb-2 mt-3 bg-transparent">
         <div class="container">
 
-          <div class="row">
+          <div class="row flex-row justify-content-end p-1">
 
             <div class="col-xl-2 col-sm-2 col-md-2">
               {% trans "Ordenar por" %}:
@@ -127,7 +127,12 @@
 
       </div>
 
+      
       <div class="row gutter-40 col-mb-80">
+        <!-- cluster ============================================= -->
+        {% include 'cluster.html' %}
+        <!-- cluster ============================================= -->
+         
         <!-- Catalog content -->
         <div class="postcontent col-lg-9">
 
@@ -146,12 +151,6 @@
           </div>
 
         </div><!-- End Catalog content -->
-
-
-        <!-- cluster ============================================= -->
-        {% include 'cluster.html' %}
-        <!-- cluster ============================================= -->
-
       </div>
 
 
