@@ -1051,10 +1051,10 @@ def evolution_of_scientific_production(
         'cat2_name': 'year',
         'cat2_values': years_as_str,
     }
-    _add_context(indicator, context_id, context_params)
     indicator.description = (
         _("Gerado automaticamente usando dados obtidos da base de dados Unpaywall. Os dados das instituições das afiliações foram enriquecidos usando lista de países com nome em português e em inglês, lista de instituições do MEC e do ROR")
     )
+    _add_context(indicator, context_id, context_params)
     save_indicator(indicator, dataset.iterator(), keywords=keywords)
 
 
@@ -1080,6 +1080,7 @@ def _add_context(indicator, context_id, context_params):
         )
         for inst in institutions:
             indicator.institutions.add(inst)
+        indicator.save()
     elif context_id in ('AFFILIATION_UF', 'LOCATION'):
         state__name = (
             context_params.get(
@@ -1107,10 +1108,11 @@ def _add_context(indicator, context_id, context_params):
             state_acronym=state__acronym,
         )
         location = Location.get_or_create_state(
-            indicator.creator_id,
+            indicator.creator,
             **args,
         )
         indicator.locations.add(location)
+        indicator.save()
     elif context_id in ('THEMATIC_AREA', ):
         thematic_areas__level1 = (
             context_params.get(
@@ -1120,6 +1122,7 @@ def _add_context(indicator, context_id, context_params):
             for item in ThematicArea.objects.filter(
                     level1=thematic_areas__level1).iterator():
                 indicator.thematic_areas.add(item)
+            indicator.save()
     else:
         return
 

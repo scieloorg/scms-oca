@@ -193,10 +193,15 @@
          <str name="facet.field">action</str>
          <!-- melhor ficar só na pesquisa -->
          <!-- str name="facet.field">institutions</str -->
-         <str name="facet.field">countries</str>
+
          <str name="facet.field">cities</str>
          <str name="facet.field">states</str>
          <str name="facet.field">regions</str>
+         <!-- Por enquanto, traduzir como âmbito para ficar genérico -->
+         <str name="facet.field">geo_scope</str>
+         <!-- Traduzir como âmbito temático -->
+         <str name="facet.field">thematic_scope</str>
+
          <str name="facet.field">thematic_areas</str>
          <str name="facet.field">category</str>
 

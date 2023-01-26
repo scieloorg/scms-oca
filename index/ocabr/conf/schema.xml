@@ -62,6 +62,13 @@
    <field name="practice" type="string" indexed="true" stored="true" multiValued="false"/>
    <field name="action" type="string" indexed="true" stored="true" multiValued="false"/>
    <field name="category" type="string" indexed="true" stored="true" multiValued="false"/>
+   <!-- traduzir geo_scope como "âmbito" somente, por enquanto -->
+   <field name="geo_scope" type="string" indexed="true" stored="true" multiValued="false"/>
+   <field name="thematic_scope" type="string" indexed="true" stored="true" multiValued="false"/>
+   <!-- ajudará a ordenar (para indicadores, será gerado baseado no tamanho do raw_data) -->
+   <field name="priority" type="string" indexed="true" stored="true" multiValued="false"/>
+   <field name="geo_priority" type="string" indexed="true" stored="true" multiValued="false"/>
+   <field name="thematic_priority" type="string" indexed="true" stored="true" multiValued="false"/>
 
    <!-- multivalued fields -->
    <field name="keywords" type="string" indexed="true" stored="true" multiValued="true"/>
