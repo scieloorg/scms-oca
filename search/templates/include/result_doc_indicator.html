@@ -47,8 +47,8 @@
       {% if item.practice or item.action %}
         <div class="card">
           <div class="card-body">
-            <span><b>Practice: </b>{{ item.practice }} </span>
-            <span><b>Action: </b>{{ item.action }}</span>
+            <span><b>{% trans "Action" %}: </b>{{ item.action }} </span>
+            <span><b>{% trans "Practice" %}: </b>{{ item.practice }}</span>
           </div>
         </div>
       {% endif%}
