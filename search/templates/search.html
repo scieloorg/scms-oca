@@ -96,7 +96,10 @@
             <div class="col-xl-2 col-sm-2 col-md-2">
               {% trans "Ordenar por" %}:
               <select id="selectSortKey" class="selector ordem form-control form-control-sm">
-                <option value="score asc">{% trans "Relevância" %} </option>
+                <option value="geo_priority asc">{% trans "Por âmbito geográfico" %} </option>
+                <option value="thematic_priority asc">{% trans "Por âmbito temático" %} </option>
+                <!-- <option value="created desc">{% trans "Ordem descrecente de criação" %} </option> -->
+                <!-- <option value="score asc">{% trans "Relevância" %} </option> -->
               </select>
             </div>
 

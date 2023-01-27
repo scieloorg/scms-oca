@@ -67,14 +67,18 @@ class IndicatorIndex(indexes.SearchIndex, indexes.Indexable):
         regions = set()
 
         for item in obj.institutions.iterator():
-            cities.add(item.location.city)
-            states.add(item.location.state)
-            regions.add(item.location.state.region)
+            if item.location: 
+                cities.add(item.location.city)
+            if item.location and item.location.state: 
+                states.add(item.location.state)
+                regions.add(item.location.state.region)
 
         for item in obj.locations.iterator():
-            cities.add(item.city)
-            states.add(item.state)
-            regions.add(item.state.region)
+            if item.city:
+                cities.add(item.city)
+            if item.state:
+                states.add(item.state)
+                regions.add(item.state.region)
 
         n_cities = len(cities)
         n_states = len(states)
@@ -92,14 +96,18 @@ class IndicatorIndex(indexes.SearchIndex, indexes.Indexable):
 
         n_institutions = obj.institutions.count()
         for item in obj.institutions.iterator():
-            cities.add(item.location.city)
-            states.add(item.location.state)
-            regions.add(item.location.state.region)
+            if item.location: 
+                cities.add(item.location.city)
+            if item.location and item.location.state: 
+                states.add(item.location.state)
+                regions.add(item.location.state.region)
 
         for item in obj.locations.iterator():
-            cities.add(item.city)
-            states.add(item.state)
-            regions.add(item.state.region)
+            if item.city:
+                cities.add(item.city)
+            if item.state:
+                states.add(item.state)
+                regions.add(item.state.region)
 
         n_cities = len(cities)
         n_states = len(states)
@@ -163,9 +171,6 @@ class IndicatorIndex(indexes.SearchIndex, indexes.Indexable):
 
     def prepare_record_type(self, obj):
         return "indicator"
-
-    def prepare_directory_type(self, obj):
-        return ""
 
     def prepare_institutions(self, obj):
         institutions = set()

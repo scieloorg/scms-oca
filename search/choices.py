@@ -17,4 +17,6 @@ translates = {
     'practice': _('Práticas'),
     'action': _('Ações'),
     'category': _('Categoria'),
+    'geo_scope': _('Escobo geográfico'),
+    'thematic_scope': _('Escobo temático'),
 }
