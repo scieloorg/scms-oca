@@ -424,4 +424,6 @@ SEARCH_FACET_LIST = ['record_type',
                      'cities',
                      'thematic_areas',
                      'category',
+                     'geo_scope',
+                     'thematic_scope',
                      ]
