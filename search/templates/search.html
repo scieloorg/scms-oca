@@ -603,12 +603,10 @@
     // Check select filters (clusters)
     if (!$.isEmptyObject(selected_items)) {
       
-      // $(".selected").fadeIn();
       $('#filter_label').show();
       $('#filter_items').show();
       $('#filter_clean').show();
-      //str = JSON.stringify(selected_items);
-      //alert(str);  
+
       for (var item in selected_items) {
         // Get the id of selected item.
         id = selected_items[item]["key"];
@@ -644,7 +642,7 @@
 
     });
 
-    /*// See more cluster
+    // See more cluster
     $('.filter-showall').each(function () {
       more = parseInt("{{ settings.SEARCH_FACET_ITEMS_PER_MORE }}")
       facet_name = $(this).data('ix');
@@ -667,7 +665,7 @@
 
     });
 
-    highlight("{{search_query}}", ".result-doc"); */
+    highlight("{{search_query}}", ".result-doc"); 
 
   });
 
