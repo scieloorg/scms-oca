@@ -12,15 +12,7 @@
     <div class="col-md-12 pe-md-12">
 
       <div class="entry-title title-sm">
-        <h2><i class="icon-line-bar-graph"></i> <a href="{% url 'search:indicator_detail' item.django_id %}" target="_blank">{{ item.title }}</a> </h2>
-      </div>
-      <div class="entry-meta">
-        <ul>
-          <li><i class="icon-calendar3"></i> {{ item.created }} {% trans item.validity %} {% trans item.record_status %}
-          </li>
-          <li><i class="icon-line-bar-graph"></i></li>
-          <li><span class="badge bg-secondary" style="color:#fff;">{{ item.record_type|translate_data }}</span></li>
-        </ul>
+        <h2><i class="icon-line-bar-graph" data-toggle="tooltip" data-placement="top" title="{% trans 'Indicadores' %}"></i> <a href="{% url 'search:indicator_detail' item.django_id %}" target="_blank">{{ item.title }}</a> </h2>
       </div>
 
       <div class="entry-content">
@@ -45,13 +37,22 @@
       </div>
 
       {% if item.practice or item.action %}
-        <div class="card">
-          <div class="card-body">
-            <span><b>{% trans "Action" %}: </b>{{ item.action }} </span>
-            <span><b>{% trans "Practice" %}: </b>{{ item.practice }}</span>
-          </div>
+      <div class="card">
+        <div class="card-body">
+          <span><b>{% trans "Action" %}: </b>{{ item.action }} </span>
+          <span><b>{% trans "Practice" %}: </b>{{ item.practice }}</span>
         </div>
+      </div>
       {% endif%}
+      
+      <div class="entry-meta">
+        <ul>
+          <li><i class="icon-calendar3" data-toggle="tooltip" data-placement="top" title="{% trans 'Data de criação' %}"></i> {{ item.created }} {% trans item.validity %} {% trans item.record_status %}
+          </li>
+          <!-- <li><i class="icon-line-bar-graph"></i></li>
+          <li><span class="badge bg-secondary" style="color:#fff;">{{ item.record_type|translate_data }}</span></li> -->
+        </ul>
+      </div>
 
     </div>
 
