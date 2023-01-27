@@ -557,9 +557,10 @@
               key = $(this).attr('id');
 
               if (cluster_name in selected_items) {
-                selected_items[cluster_name].push({"name": [item_name], "key": key});
+                selected_items[cluster_name]["name"].push(item_name);
+                selected_items[cluster_name]["key"].push(key);
               } else {
-                selected_items[cluster_name] = {"name": [item_name], "key": key};
+                selected_items[cluster_name] = {"name": [item_name], "key": [key]};
               }
 
             }
@@ -602,7 +603,8 @@
     
     // Check select filters (clusters)
     if (!$.isEmptyObject(selected_items)) {
-      
+      //str = JSON.stringify(selected_items)
+
       $('#filter_label').show();
       $('#filter_items').show();
       $('#filter_clean').show();
@@ -611,11 +613,15 @@
         // Get the id of selected item.
         id = selected_items[item]["key"];
 
-        $("#filter_items").append(
-          `<a href="#" data-id="${id}" class="selected_filters">
-            <i class="icon-remove" style="vertical-align: -2px;"></i> ${item} 
-          </a> `    
-        );
+        for (var i in id){
+            name = selected_items[item]["name"][i]
+            key = selected_items[item]["key"][i]
+            $("#filter_items").append(
+              `<a href="#" data-id="${key}" class="selected_filters ml-2">
+                <i class="icon-remove" style="vertical-align: -2px;"></i> ${name} 
+              </a>`   
+            ); 
+        }
       }
     } 
 
