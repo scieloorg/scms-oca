@@ -12,11 +12,11 @@
     <div class="col-md-12 pe-md-12">
 
       <div class="entry-title title-sm">
-        <h2><i class="icon-folder2"></i> <a href="{{ item.link }}" target="_blank">{{ item.title }}</a> <a href="{{ item.link }}" target="_blank"><i class="icon-line-external-link"></i></a></h2>
+        <h2><i class="icon-folder2" data-toggle="tooltip" data-placement="top" title="{% trans 'Diretórios' %}"></i> <a href="{{ item.link }}" target="_blank">{{ item.title }}</a> <a href="{{ item.link }}" target="_blank"><i class="icon-line-external-link"></i></a></h2>
       </div>
       <div class="entry-meta">
         <ul>
-          {% if item.start_date and item.end_date %} 
+          <!-- {% if item.start_date and item.end_date %} 
           <li>
             <i class="icon-calendar3"></i> 
                 {{ item.start_date }}
@@ -32,7 +32,7 @@
             </li>
           {% endif %}
           <li><i class="icon-folder2"></i></li>
-          {% if item.record_type %}<li><span class="badge bg-secondary" style="color:#fff;">{{ item.record_type|translate_data }}</span></li>{% endif %}
+          {% if item.record_type %}<li><span class="badge bg-secondary" style="color:#fff;">{{ item.record_type|translate_data }}</span></li>{% endif %} -->
           {% if item.institutions %}<li><span>{{ item.institutions|join:", " }}</span></li>{% endif %}
           {% if item.organization %}<li><span>{{ item.organization|join:", " }}</span></li>{% endif %}
           {% if item.classification %}<li><span>{{ item.classification }}</span></li>{% endif %}

@@ -127,7 +127,7 @@ LOCAL_APPS = [
     "indicator",
     "search",
     "wagtailautocomplete",
-    "provided_data",
+    # "provided_data",
 ]
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
@@ -425,5 +425,5 @@ SEARCH_FACET_LIST = ['record_type',
                      'thematic_areas',
                      'category',
                      'geo_scope',
-                     'thematic_scope',
+                    #  'thematic_scope',
                      ]
