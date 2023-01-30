@@ -27,7 +27,7 @@ def search(request):
     fqfilters = request.GET.get('filters', None)
     facet_name = request.GET.get('more_facet_name', None)
     facet_count = request.GET.get('more_facet_count', None)
-    sort_by = request.GET.get('selectSortKey', 'score asc')
+    sort_by = request.GET.get('selectSortKey', 'geo_priority asc')
 
     if search_query == "" or not search_query:
         search_query = "*:*"
