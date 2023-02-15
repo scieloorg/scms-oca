@@ -16,6 +16,14 @@ from .forms import EducationDirectoryFileForm, EducationDirectoryForm
 
 from . import choices
 
+
+def get_default_action():
+    try:
+        return Action.objects.get(name__icontains="educa")
+    except Action.DoesNotExist:
+        return None
+
+
 class EducationDirectory(CommonControlField):
     class Meta:
         verbose_name_plural = _('Education Directory')
@@ -39,7 +47,14 @@ class EducationDirectory(CommonControlField):
 
     practice = models.ForeignKey(Practice, verbose_name=_("Practice"),
                                 null=True, blank=True, on_delete=models.SET_NULL)
-    action = models.ForeignKey(Action, verbose_name=_("Action"), null=True, blank=True, on_delete=models.SET_NULL)
+    action = models.ForeignKey(
+        Action,
+        verbose_name=_("Action"),
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        default=get_default_action,
+    )
 
     classification = models.CharField(_("Classification"), choices=choices.classification,
                                       max_length=255, null=True, blank=True)
@@ -75,7 +90,6 @@ class EducationDirectory(CommonControlField):
         FieldPanel('keywords'),
         FieldPanel('classification'),
         FieldPanel('practice'),
-        FieldPanel('action'),
 
         FieldPanel('attendance'),
         FieldPanel('record_status'),

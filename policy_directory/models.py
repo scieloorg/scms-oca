@@ -15,6 +15,14 @@ from .forms import PolicyDirectoryFileForm, PolicyDirectoryForm
 
 from . import choices
 
+
+def get_default_action():
+    try:
+        return Action.objects.get(name__icontains="políticas")
+    except Action.DoesNotExist:
+        return None
+
+
 class PolicyDirectory(CommonControlField):
     class Meta:
         verbose_name_plural = _('Policy Directory')
@@ -31,7 +39,14 @@ class PolicyDirectory(CommonControlField):
 
     practice = models.ForeignKey(Practice, verbose_name=_("Practice"),
                                 null=True, blank=True, on_delete=models.SET_NULL)
-    action = models.ForeignKey(Action, verbose_name=_("Action"), null=True, blank=True, on_delete=models.SET_NULL)
+    action = models.ForeignKey(
+        Action,
+        verbose_name=_("Action"),
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        default=get_default_action,
+    )
 
     classification = models.CharField(_("Classification"), choices=choices.classification,
                                       max_length=255, null=True, blank=True)
