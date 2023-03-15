@@ -2,16 +2,15 @@ from django.db import models
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.conf import settings
 
-from wagtail.core.models import Page, Orderable
+from wagtail.models import Page, Orderable
 
-from wagtail.core.fields import RichTextField
-from wagtail.admin.edit_handlers import FieldPanel, InlinePanel, MultiFieldPanel
+from wagtail.fields import RichTextField
+from wagtail.admin.panels import FieldPanel, InlinePanel, MultiFieldPanel
 
 from modelcluster.fields import ParentalKey
 from modelcluster.contrib.taggit import ClusterTaggableManager
 from taggit.models import TaggedItemBase
 
-from wagtail.images.edit_handlers import ImageChooserPanel
 from wagtail.search import index
 
 
@@ -20,11 +19,11 @@ class BlogIndexPage(Page):
 
     def get_context(self, request):
         context = super().get_context(request)
-        all_posts = self.get_children().live().order_by('-blogpage__date')
+        all_posts = self.get_children().live().order_by("-blogpage__date")
         all_tags = set()
 
-        if request.GET.get('tag'):
-            all_posts = all_posts.filter(blogpage__tags__slug=request.GET.get('tag'))
+        if request.GET.get("tag"):
+            all_posts = all_posts.filter(blogpage__tags__slug=request.GET.get("tag"))
 
         for post in all_posts.exclude(blogpage__tags=None)[0:100]:
             for tag in post.specific.tags.all():
@@ -46,21 +45,17 @@ class BlogIndexPage(Page):
             # Then return the last page
             posts = paginator.page(paginator.num_pages)
 
-        context['posts'] = posts
-        context['tags'] = all_tags
+        context["posts"] = posts
+        context["tags"] = all_tags
 
         return context
 
-    content_panels = Page.content_panels + [
-        FieldPanel('intro', classname="full")
-    ]
+    content_panels = Page.content_panels + [FieldPanel("intro", classname="full")]
 
 
 class BlogPageTag(TaggedItemBase):
     content_object = ParentalKey(
-        'BlogPage',
-        related_name='tagged_items',
-        on_delete=models.CASCADE
+        "BlogPage", related_name="tagged_items", on_delete=models.CASCADE
     )
 
 
@@ -78,29 +73,34 @@ class BlogPage(Page):
             return None
 
     search_fields = Page.search_fields + [
-        index.SearchField('intro'),
-        index.SearchField('body'),
+        index.SearchField("intro"),
+        index.SearchField("body"),
     ]
 
     content_panels = Page.content_panels + [
-        MultiFieldPanel([
-            FieldPanel('date'),
-            FieldPanel('tags'),
-        ], heading="Blog information"),
-        FieldPanel('intro'),
-        FieldPanel('body'),
-        InlinePanel('gallery_images', label="Gallery images"),
+        MultiFieldPanel(
+            [
+                FieldPanel("date"),
+                FieldPanel("tags"),
+            ],
+            heading="Blog information",
+        ),
+        FieldPanel("intro"),
+        FieldPanel("body"),
+        InlinePanel("gallery_images", label="Gallery images"),
     ]
 
 
 class BlogPageGalleryImage(Orderable):
-    page = ParentalKey(BlogPage, on_delete=models.CASCADE, related_name='gallery_images')
+    page = ParentalKey(
+        BlogPage, on_delete=models.CASCADE, related_name="gallery_images"
+    )
     image = models.ForeignKey(
-        'wagtailimages.Image', on_delete=models.CASCADE, related_name='+'
+        "wagtailimages.Image", on_delete=models.CASCADE, related_name="+"
     )
     caption = models.CharField(blank=True, max_length=250)
 
     panels = [
-        ImageChooserPanel('image'),
-        FieldPanel('caption'),
+        FieldPanel("image"),
+        FieldPanel("caption"),
     ]

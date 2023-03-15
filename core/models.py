@@ -19,14 +19,10 @@ class CommonControlField(models.Model):
     """
 
     # Creation date
-    created = models.DateTimeField(
-        verbose_name=_("Creation date"), auto_now_add=True
-    )
+    created = models.DateTimeField(verbose_name=_("Creation date"), auto_now_add=True)
 
     # Update date
-    updated = models.DateTimeField(
-        verbose_name=_("Last update date"), auto_now=True
-    )
+    updated = models.DateTimeField(verbose_name=_("Last update date"), auto_now=True)
 
     # Creator user
     creator = models.ForeignKey(

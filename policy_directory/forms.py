@@ -4,7 +4,6 @@ from policy_directory.search_indexes import PolicyIndex
 
 
 class PolicyDirectoryForm(WagtailAdminModelForm):
-
     def save_all(self, user):
         policy_direcotry = super().save(commit=False)
 
@@ -22,7 +21,6 @@ class PolicyDirectoryForm(WagtailAdminModelForm):
 
 
 class PolicyDirectoryFileForm(WagtailAdminModelForm):
-
     def save_all(self, user):
         policy_direcotry_file = super().save(commit=False)
 

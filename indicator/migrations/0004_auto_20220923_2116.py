@@ -4,20 +4,21 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('indicator', '0003_auto_20220923_2036'),
+        ("indicator", "0003_auto_20220923_2036"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='indicator',
-            name='file_csv',
-            field=models.FileField(blank=True, null=True, upload_to='', verbose_name='CSV File'),
+            model_name="indicator",
+            name="file_csv",
+            field=models.FileField(
+                blank=True, null=True, upload_to="", verbose_name="CSV File"
+            ),
         ),
         migrations.AddField(
-            model_name='indicator',
-            name='file_json',
-            field=models.JSONField(blank=True, null=True, verbose_name='Arquivo JSON'),
+            model_name="indicator",
+            name="file_json",
+            field=models.JSONField(blank=True, null=True, verbose_name="Arquivo JSON"),
         ),
     ]

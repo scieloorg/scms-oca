@@ -30,12 +30,17 @@ def validate(request):
     if file_id:
         file_upload = get_object_or_404(InfrastructureDirectoryFile, pk=file_id)
 
-    if request.method == 'GET':
+    if request.method == "GET":
         try:
             upload_path = file_upload.attachment.file.path
             cols = chkcsv.read_format_specs(
-                os.path.dirname(os.path.abspath(__file__)) + "/chkcsvfmt.fmt", True, False)
-            errorlist = chkcsv.check_csv_file(upload_path, cols, True, True, True, False)
+                os.path.dirname(os.path.abspath(__file__)) + "/chkcsvfmt.fmt",
+                True,
+                False,
+            )
+            errorlist = chkcsv.check_csv_file(
+                upload_path, cols, True, True, True, False
+            )
             if errorlist:
                 raise Exception(_("Valication error"))
             else:
@@ -48,7 +53,7 @@ def validate(request):
         else:
             messages.success(request, _("File successfully validated!"))
 
-    return redirect(request.META.get('HTTP_REFERER'))
+    return redirect(request.META.get("HTTP_REFERER"))
 
 
 def import_file(request):
@@ -70,62 +75,69 @@ def import_file(request):
     file_path = file_upload.attachment.file.path
 
     try:
-        with open(file_path, 'r') as csvfile:
+        with open(file_path, "r") as csvfile:
             data = csv.DictReader(csvfile, delimiter=";")
 
             for line, row in enumerate(data):
                 isd = InfrastructureDirectory()
-                isd.title = row['Title']
-                isd.link = row['Link']
-                isd.description = row['Description']
+                isd.title = row["Title"]
+                isd.link = row["Link"]
+                isd.description = row["Description"]
 
                 isd.creator = request.user
                 isd.save()
 
                 # Institution
-                inst_name = row['Institution Name']
+                inst_name = row["Institution Name"]
                 if inst_name:
-                    inst_country = row['Institution Country']
-                    inst_state = row['Institution State']
-                    inst_city = row['Institution City']
+                    inst_country = row["Institution Country"]
+                    inst_state = row["Institution State"]
+                    inst_city = row["Institution City"]
 
-                    institution = Institution.get_or_create(inst_name, inst_country,
-                                                            inst_state, inst_city, request.user)
+                    institution = Institution.get_or_create(
+                        inst_name, inst_country, inst_state, inst_city, request.user
+                    )
                     isd.institutions.add(institution)
 
                 # Thematic Area
-                level0 = row['Thematic Area Level0'].strip()
+                level0 = row["Thematic Area Level0"].strip()
                 if level0:
-                    level1 = row['Thematic Area Level1'].strip()
-                    level2 = row['Thematic Area Level2'].strip()
-                    the_area = ThematicArea.get_or_create(level0, level1, level2, request.user)
+                    level1 = row["Thematic Area Level1"].strip()
+                    level2 = row["Thematic Area Level2"].strip()
+                    the_area = ThematicArea.get_or_create(
+                        level0, level1, level2, request.user
+                    )
 
                     isd.thematic_areas.add(the_area)
 
                 # Keywords
-                if row['Keywords']:
-                    for key in row['Keywords'].split('|'):
+                if row["Keywords"]:
+                    for key in row["Keywords"].split("|"):
                         isd.keywords.add(key)
 
-                if row['Classification']:
-                    isd.classification = row['Classification']
+                if row["Classification"]:
+                    isd.classification = row["Classification"]
 
                 # Practice
-                if row['Practice']:
-                    practice_name = row['Practice']
+                if row["Practice"]:
+                    practice_name = row["Practice"]
                     if Practice.objects.filter(name=practice_name).exists():
                         pratice = Practice.objects.get(name=practice_name)
                         isd.practice = pratice
                     else:
-                        messages.error(request, _("Unknown Practice, line: %s") % str(line + 1))
+                        messages.error(
+                            request, _("Unknown Practice, line: %s") % str(line + 1)
+                        )
 
                 # Action
-                if row['Action']:
+                if row["Action"]:
                     if Action.objects.filter(name__icontains="infraestrutura").exists():
-                        isd.action = Action.objects.get(name__icontains="infraestrutura")
+                        isd.action = Action.objects.get(
+                            name__icontains="infraestrutura"
+                        )
 
-                if row['Source']:
-                    isd.source = row['Source']
+                if row["Source"]:
+                    isd.source = row["Source"]
 
                 isd.save()
 
@@ -137,7 +149,7 @@ def import_file(request):
     else:
         messages.success(request, _("File imported successfully!"))
 
-    return redirect(request.META.get('HTTP_REFERER'))
+    return redirect(request.META.get("HTTP_REFERER"))
 
 
 def download_sample(request):
@@ -146,8 +158,10 @@ def download_sample(request):
     """
     file_path = os.path.dirname(os.path.abspath(__file__)) + "/example_infra.csv"
     if os.path.exists(file_path):
-        with open(file_path, 'rb') as fh:
+        with open(file_path, "rb") as fh:
             response = HttpResponse(fh.read(), content_type="text/csv")
-            response['Content-Disposition'] = 'inline; filename=' + os.path.basename(file_path)
+            response["Content-Disposition"] = "inline; filename=" + os.path.basename(
+                file_path
+            )
             return response
     raise Http404

@@ -4,15 +4,25 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('education_directory', '0001_initial'),
+        ("education_directory", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='educationdirectory',
-            name='record_status',
-            field=models.CharField(blank=True, choices=[('', ''), ('WIP', 'WIP'), ('TO MODERATE', 'TO MODERATE'), ('PUBLISHED', 'PUBLISHED')], max_length=255, null=True, verbose_name='Record status'),
+            model_name="educationdirectory",
+            name="record_status",
+            field=models.CharField(
+                blank=True,
+                choices=[
+                    ("", ""),
+                    ("WIP", "WIP"),
+                    ("TO MODERATE", "TO MODERATE"),
+                    ("PUBLISHED", "PUBLISHED"),
+                ],
+                max_length=255,
+                null=True,
+                verbose_name="Record status",
+            ),
         ),
     ]

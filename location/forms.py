@@ -2,7 +2,6 @@ from wagtail.admin.forms import WagtailAdminModelForm
 
 
 class LocationForm(WagtailAdminModelForm):
-
     def save_all(self, user):
         location = super().save(commit=False)
 

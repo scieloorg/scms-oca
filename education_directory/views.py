@@ -30,12 +30,17 @@ def validate(request):
     if file_id:
         file_upload = get_object_or_404(EducationDirectoryFile, pk=file_id)
 
-    if request.method == 'GET':
+    if request.method == "GET":
         try:
             upload_path = file_upload.attachment.file.path
             cols = chkcsv.read_format_specs(
-                os.path.dirname(os.path.abspath(__file__)) + "/chkcsvfmt.fmt", True, False)
-            errorlist = chkcsv.check_csv_file(upload_path, cols, True, True, True, False)
+                os.path.dirname(os.path.abspath(__file__)) + "/chkcsvfmt.fmt",
+                True,
+                False,
+            )
+            errorlist = chkcsv.check_csv_file(
+                upload_path, cols, True, True, True, False
+            )
             if errorlist:
                 raise Exception(_("Valication error"))
             else:
@@ -48,7 +53,7 @@ def validate(request):
         else:
             messages.success(request, _("File successfully validated!"))
 
-    return redirect(request.META.get('HTTP_REFERER'))
+    return redirect(request.META.get("HTTP_REFERER"))
 
 
 def import_file(request):
@@ -70,76 +75,86 @@ def import_file(request):
     file_path = file_upload.attachment.file.path
 
     try:
-        with open(file_path, 'r') as csvfile:
+        with open(file_path, "r") as csvfile:
             data = csv.DictReader(csvfile, delimiter=";")
 
             for line, row in enumerate(data):
                 ed = EducationDirectory()
-                ed.title = row['Title']
-                ed.link = row['Link']
-                ed.description = row['Description']
-                if row['Start Date']:
-                    ed.start_date = datetime.strptime(row['Start Date'], '%d/%m/%Y')
-                if row['End Date']:
-                    ed.end_date = datetime.strptime(row['End Date'], '%d/%m/%Y')
-                if row['Start Time']:
-                    ed.start_time = row['Start Time']
-                if row['End Time']:
-                    ed.end_time = row['End Time']
+                ed.title = row["Title"]
+                ed.link = row["Link"]
+                ed.description = row["Description"]
+                if row["Start Date"]:
+                    ed.start_date = datetime.strptime(row["Start Date"], "%d/%m/%Y")
+                if row["End Date"]:
+                    ed.end_date = datetime.strptime(row["End Date"], "%d/%m/%Y")
+                if row["Start Time"]:
+                    ed.start_time = row["Start Time"]
+                if row["End Time"]:
+                    ed.end_time = row["End Time"]
                 ed.creator = request.user
                 ed.save()
 
                 # Institution
-                inst_name = row['Institution Name'].strip()
+                inst_name = row["Institution Name"].strip()
                 if inst_name:
-                    inst_country = row['Institution Country'].strip()
-                    inst_state = row['Institution State'].strip()
-                    inst_city = row['Institution City'].strip()
+                    inst_country = row["Institution Country"].strip()
+                    inst_state = row["Institution State"].strip()
+                    inst_city = row["Institution City"].strip()
 
-                    institution = Institution.get_or_create(inst_name, inst_country, inst_state, inst_city, request.user)
+                    institution = Institution.get_or_create(
+                        inst_name, inst_country, inst_state, inst_city, request.user
+                    )
                     ed.institutions.add(institution)
 
                 # Thematic Area
-                level0 = row['Thematic Area Level0'].strip()
+                level0 = row["Thematic Area Level0"].strip()
                 if level0:
-                    level1 = row['Thematic Area Level1'].strip()
-                    level2 = row['Thematic Area Level2'].strip()
-                    the_area = ThematicArea.get_or_create(level0, level1, level2, request.user)
+                    level1 = row["Thematic Area Level1"].strip()
+                    level2 = row["Thematic Area Level2"].strip()
+                    the_area = ThematicArea.get_or_create(
+                        level0, level1, level2, request.user
+                    )
 
                     ed.thematic_areas.add(the_area)
 
                 # Keywords
-                if row['Keywords']:
-                    for key in row['Keywords'].split('|'):
+                if row["Keywords"]:
+                    for key in row["Keywords"].split("|"):
                         ed.keywords.add(key)
 
-                if row['Classification']:
-                    ed.classification = row['Classification']
+                if row["Classification"]:
+                    ed.classification = row["Classification"]
 
                 # Practice
-                if row['Practice']:
-                    practice_name = row['Practice']
+                if row["Practice"]:
+                    practice_name = row["Practice"]
                     if Practice.objects.filter(name=practice_name).exists():
                         practice = Practice.objects.get(name=practice_name)
                         ed.practice = practice
                     else:
-                        messages.error(request, _("Unknown Practice, line: %s") % str(line + 2))
+                        messages.error(
+                            request, _("Unknown Practice, line: %s") % str(line + 2)
+                        )
 
                 # Action = educação / capacitação"
-                if row['Action']:
-                    if Action.objects.filter(name__icontains="educação / capacitação").exists():
-                        ed.action = Action.objects.get(name__icontains="educação / capacitação")
+                if row["Action"]:
+                    if Action.objects.filter(
+                        name__icontains="educação / capacitação"
+                    ).exists():
+                        ed.action = Action.objects.get(
+                            name__icontains="educação / capacitação"
+                        )
 
-                if row['Source']:
-                    ed.source = row['Source']
+                if row["Source"]:
+                    ed.source = row["Source"]
 
                 ed.save()
     except Exception as ex:
         messages.error(request, _("Import error: %s, Line: %s") % (ex, str(line + 2)))
     else:
-       messages.success(request, _("File imported successfully!"))
+        messages.success(request, _("File imported successfully!"))
 
-    return redirect(request.META.get('HTTP_REFERER'))
+    return redirect(request.META.get("HTTP_REFERER"))
 
 
 def download_sample(request):
@@ -148,14 +163,15 @@ def download_sample(request):
     """
     file_path = os.path.dirname(os.path.abspath(__file__)) + "/example_education.csv"
     if os.path.exists(file_path):
-        with open(file_path, 'rb') as fh:
+        with open(file_path, "rb") as fh:
             response = HttpResponse(fh.read(), content_type="text/csv")
-            response['Content-Disposition'] = 'inline; filename=' + os.path.basename(file_path)
+            response["Content-Disposition"] = "inline; filename=" + os.path.basename(
+                file_path
+            )
             return response
     raise Http404
 
-
-    start_time = models.TimeField(_("Start Time"), max_length=255,
-                                  null=True, blank=True)
-    end_time = models.TimeField(_("End Time"), max_length=255,
-                                  null=True, blank=True)
+    start_time = models.TimeField(
+        _("Start Time"), max_length=255, null=True, blank=True
+    )
+    end_time = models.TimeField(_("End Time"), max_length=255, null=True, blank=True)

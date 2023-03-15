@@ -4,18 +4,21 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('scholarly_articles', '0009_merge_20221108_2355'),
+        ("scholarly_articles", "0009_merge_20221108_2355"),
     ]
 
     operations = [
         migrations.AddIndex(
-            model_name='affiliations',
-            index=models.Index(fields=['country'], name='scholarly_a_country_19e75a_idx'),
+            model_name="affiliations",
+            index=models.Index(
+                fields=["country"], name="scholarly_a_country_19e75a_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='affiliations',
-            index=models.Index(fields=['official'], name='scholarly_a_officia_f7bfc4_idx'),
+            model_name="affiliations",
+            index=models.Index(
+                fields=["official"], name="scholarly_a_officia_f7bfc4_idx"
+            ),
         ),
     ]

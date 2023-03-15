@@ -24,11 +24,13 @@ def task_run(request):
     kwargs = json.loads(p_task.kwargs)
     # kwargs["user_id"] = request.user.id
 
-    task.apply_async(args=json.loads(p_task.args),
-                     kwargs=kwargs,
-                     queue=p_task.queue,
-                     periodic_task_name=p_task.name)
+    task.apply_async(
+        args=json.loads(p_task.args),
+        kwargs=kwargs,
+        queue=p_task.queue,
+        periodic_task_name=p_task.name,
+    )
 
     messages.success(request, _("Task {0} was successfully run").format(p_task.name))
 
-    return redirect(request.META.get('HTTP_REFERER'))
+    return redirect(request.META.get("HTTP_REFERER"))

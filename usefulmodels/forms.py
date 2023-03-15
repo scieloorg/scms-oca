@@ -2,7 +2,6 @@ from wagtail.admin.forms import WagtailAdminModelForm
 
 
 class CityForm(WagtailAdminModelForm):
-
     def save_all(self, user):
         city = super().save(commit=False)
 
@@ -17,7 +16,6 @@ class CityForm(WagtailAdminModelForm):
 
 
 class StateForm(WagtailAdminModelForm):
-
     def save_all(self, user):
         state = super().save(commit=False)
 
@@ -32,7 +30,6 @@ class StateForm(WagtailAdminModelForm):
 
 
 class CountryForm(WagtailAdminModelForm):
-
     def save_all(self, user):
         country = super().save(commit=False)
 
@@ -45,8 +42,8 @@ class CountryForm(WagtailAdminModelForm):
 
         return country
 
-class ThematicAreaForm(WagtailAdminModelForm):
 
+class ThematicAreaForm(WagtailAdminModelForm):
     def save_all(self, user):
         thematic = super().save(commit=False)
 
@@ -59,8 +56,8 @@ class ThematicAreaForm(WagtailAdminModelForm):
 
         return thematic
 
-class PracticeForm(WagtailAdminModelForm):
 
+class PracticeForm(WagtailAdminModelForm):
     def save_all(self, user):
         pratice = super().save(commit=False)
 
@@ -73,8 +70,8 @@ class PracticeForm(WagtailAdminModelForm):
 
         return pratice
 
-class ActionForm(WagtailAdminModelForm):
 
+class ActionForm(WagtailAdminModelForm):
     def save_all(self, user):
         action = super().save(commit=False)
 

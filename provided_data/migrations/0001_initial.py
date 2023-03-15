@@ -6,251 +6,588 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('usefulmodels', '0011_auto_20221108_2356'),
+        ("usefulmodels", "0011_auto_20221108_2356"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Authorship',
+            name="Authorship",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('id_lattes', models.CharField(blank=True, max_length=50, null=True, verbose_name='Lattes ID')),
-                ('orcid', models.CharField(blank=True, max_length=50, null=True, verbose_name='ORCID')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "id_lattes",
+                    models.CharField(
+                        blank=True, max_length=50, null=True, verbose_name="Lattes ID"
+                    ),
+                ),
+                (
+                    "orcid",
+                    models.CharField(
+                        blank=True, max_length=50, null=True, verbose_name="ORCID"
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='CommonPublicationData',
+            name="CommonPublicationData",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created', models.DateTimeField(auto_now_add=True, verbose_name='Data de criação')),
-                ('updated', models.DateTimeField(auto_now=True, verbose_name='Data da última atualização')),
-                ('entity_id', models.CharField(blank=True, max_length=50, null=True, verbose_name='Entity ID')),
-                ('publication_date', models.CharField(blank=True, max_length=10, null=True, verbose_name='Publication Date')),
-                ('document_type', models.CharField(blank=True, choices=[('', ''), ('conference proceedings', 'Conference Proceedings'), ('journal article', 'Journal Article'), ('master thesis', 'Master Thesis'), ('doctoral thesis', 'Doctoral Thesis')], max_length=50, null=True, verbose_name='Document type')),
-                ('language', models.CharField(blank=True, max_length=50, null=True, verbose_name='Idioma')),
-                ('start_page', models.CharField(blank=True, max_length=10, null=True, verbose_name='Start page')),
-                ('end_page', models.CharField(blank=True, max_length=10, null=True, verbose_name='End page')),
-                ('volume', models.CharField(blank=True, max_length=50, null=True, verbose_name='Volume')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "created",
+                    models.DateTimeField(
+                        auto_now_add=True, verbose_name="Data de criação"
+                    ),
+                ),
+                (
+                    "updated",
+                    models.DateTimeField(
+                        auto_now=True, verbose_name="Data da última atualização"
+                    ),
+                ),
+                (
+                    "entity_id",
+                    models.CharField(
+                        blank=True, max_length=50, null=True, verbose_name="Entity ID"
+                    ),
+                ),
+                (
+                    "publication_date",
+                    models.CharField(
+                        blank=True,
+                        max_length=10,
+                        null=True,
+                        verbose_name="Publication Date",
+                    ),
+                ),
+                (
+                    "document_type",
+                    models.CharField(
+                        blank=True,
+                        choices=[
+                            ("", ""),
+                            ("conference proceedings", "Conference Proceedings"),
+                            ("journal article", "Journal Article"),
+                            ("master thesis", "Master Thesis"),
+                            ("doctoral thesis", "Doctoral Thesis"),
+                        ],
+                        max_length=50,
+                        null=True,
+                        verbose_name="Document type",
+                    ),
+                ),
+                (
+                    "language",
+                    models.CharField(
+                        blank=True, max_length=50, null=True, verbose_name="Idioma"
+                    ),
+                ),
+                (
+                    "start_page",
+                    models.CharField(
+                        blank=True, max_length=10, null=True, verbose_name="Start page"
+                    ),
+                ),
+                (
+                    "end_page",
+                    models.CharField(
+                        blank=True, max_length=10, null=True, verbose_name="End page"
+                    ),
+                ),
+                (
+                    "volume",
+                    models.CharField(
+                        blank=True, max_length=50, null=True, verbose_name="Volume"
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='CommonTextField',
+            name="CommonTextField",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('text', models.CharField(blank=True, max_length=510, null=True, verbose_name='Texto')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "text",
+                    models.CharField(
+                        blank=True, max_length=510, null=True, verbose_name="Texto"
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='Name',
+            name="Name",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('text', models.CharField(blank=True, max_length=255, null=True, verbose_name='Texto')),
-                ('type', models.CharField(blank=True, choices=[('', ''), ('name', 'Nome'), ('citation name', 'Citation Name')], max_length=20, null=True, verbose_name='Tipo')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "text",
+                    models.CharField(
+                        blank=True, max_length=255, null=True, verbose_name="Texto"
+                    ),
+                ),
+                (
+                    "type",
+                    models.CharField(
+                        blank=True,
+                        choices=[
+                            ("", ""),
+                            ("name", "Nome"),
+                            ("citation name", "Citation Name"),
+                        ],
+                        max_length=20,
+                        null=True,
+                        verbose_name="Tipo",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='RawArticle',
+            name="RawArticle",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created', models.DateTimeField(auto_now_add=True, verbose_name='Data de criação')),
-                ('updated', models.DateTimeField(auto_now=True, verbose_name='Data da última atualização')),
-                ('document_type', models.CharField(blank=True, choices=[('', ''), ('conference proceedings', 'Conference Proceedings'), ('journal article', 'Journal Article'), ('master thesis', 'Master Thesis'), ('doctoral thesis', 'Doctoral Thesis')], max_length=50, null=True, verbose_name='Document type')),
-                ('entity_id', models.CharField(blank=True, max_length=50, null=True, verbose_name='Entity ID')),
-                ('json', models.JSONField(blank=True, null=True, verbose_name='Arquivo JSON')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "created",
+                    models.DateTimeField(
+                        auto_now_add=True, verbose_name="Data de criação"
+                    ),
+                ),
+                (
+                    "updated",
+                    models.DateTimeField(
+                        auto_now=True, verbose_name="Data da última atualização"
+                    ),
+                ),
+                (
+                    "document_type",
+                    models.CharField(
+                        blank=True,
+                        choices=[
+                            ("", ""),
+                            ("conference proceedings", "Conference Proceedings"),
+                            ("journal article", "Journal Article"),
+                            ("master thesis", "Master Thesis"),
+                            ("doctoral thesis", "Doctoral Thesis"),
+                        ],
+                        max_length=50,
+                        null=True,
+                        verbose_name="Document type",
+                    ),
+                ),
+                (
+                    "entity_id",
+                    models.CharField(
+                        blank=True, max_length=50, null=True, verbose_name="Entity ID"
+                    ),
+                ),
+                (
+                    "json",
+                    models.JSONField(
+                        blank=True, null=True, verbose_name="Arquivo JSON"
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='ResearchArea',
+            name="ResearchArea",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('text', models.CharField(blank=True, max_length=100, null=True, verbose_name='Texto')),
-                ('level', models.CharField(blank=True, choices=[('', ''), ('UNDEFINED', 'UNDEFINED'), ('0', 'Nível 0'), ('1', 'Nível 1'), ('2', 'Nível 2'), ('3', 'Level 3')], default='UNDEFINED', max_length=20, null=True, verbose_name='Nível')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "text",
+                    models.CharField(
+                        blank=True, max_length=100, null=True, verbose_name="Texto"
+                    ),
+                ),
+                (
+                    "level",
+                    models.CharField(
+                        blank=True,
+                        choices=[
+                            ("", ""),
+                            ("UNDEFINED", "UNDEFINED"),
+                            ("0", "Nível 0"),
+                            ("1", "Nível 1"),
+                            ("2", "Nível 2"),
+                            ("3", "Level 3"),
+                        ],
+                        default="UNDEFINED",
+                        max_length=20,
+                        null=True,
+                        verbose_name="Nível",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='ConferenceProceedings',
+            name="ConferenceProceedings",
             fields=[
-                ('commonpublicationdata_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='provided_data.commonpublicationdata')),
+                (
+                    "commonpublicationdata_ptr",
+                    models.OneToOneField(
+                        auto_created=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        parent_link=True,
+                        primary_key=True,
+                        serialize=False,
+                        to="provided_data.commonpublicationdata",
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
-            bases=('provided_data.commonpublicationdata',),
+            bases=("provided_data.commonpublicationdata",),
         ),
         migrations.CreateModel(
-            name='JournalArticle',
+            name="JournalArticle",
             fields=[
-                ('commonpublicationdata_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='provided_data.commonpublicationdata')),
-                ('series', models.CharField(blank=True, max_length=50, null=True, verbose_name='Series')),
+                (
+                    "commonpublicationdata_ptr",
+                    models.OneToOneField(
+                        auto_created=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        parent_link=True,
+                        primary_key=True,
+                        serialize=False,
+                        to="provided_data.commonpublicationdata",
+                    ),
+                ),
+                (
+                    "series",
+                    models.CharField(
+                        blank=True, max_length=50, null=True, verbose_name="Series"
+                    ),
+                ),
             ],
-            bases=('provided_data.commonpublicationdata',),
+            bases=("provided_data.commonpublicationdata",),
         ),
         migrations.CreateModel(
-            name='Thesis',
+            name="Thesis",
             fields=[
-                ('commonpublicationdata_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='provided_data.commonpublicationdata')),
+                (
+                    "commonpublicationdata_ptr",
+                    models.OneToOneField(
+                        auto_created=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        parent_link=True,
+                        primary_key=True,
+                        serialize=False,
+                        to="provided_data.commonpublicationdata",
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
-            bases=('provided_data.commonpublicationdata',),
+            bases=("provided_data.commonpublicationdata",),
         ),
         migrations.AddIndex(
-            model_name='researcharea',
-            index=models.Index(fields=['text'], name='provided_da_text_355b46_idx'),
+            model_name="researcharea",
+            index=models.Index(fields=["text"], name="provided_da_text_355b46_idx"),
         ),
         migrations.AddIndex(
-            model_name='researcharea',
-            index=models.Index(fields=['level'], name='provided_da_level_9999b3_idx'),
+            model_name="researcharea",
+            index=models.Index(fields=["level"], name="provided_da_level_9999b3_idx"),
         ),
         migrations.AddField(
-            model_name='rawarticle',
-            name='creator',
-            field=models.ForeignKey(editable=False, on_delete=django.db.models.deletion.CASCADE, related_name='rawarticle_creator', to=settings.AUTH_USER_MODEL, verbose_name='Criador'),
+            model_name="rawarticle",
+            name="creator",
+            field=models.ForeignKey(
+                editable=False,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="rawarticle_creator",
+                to=settings.AUTH_USER_MODEL,
+                verbose_name="Criador",
+            ),
         ),
         migrations.AddField(
-            model_name='rawarticle',
-            name='updated_by',
-            field=models.ForeignKey(blank=True, editable=False, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='rawarticle_last_mod_user', to=settings.AUTH_USER_MODEL, verbose_name='Atualizador'),
+            model_name="rawarticle",
+            name="updated_by",
+            field=models.ForeignKey(
+                blank=True,
+                editable=False,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="rawarticle_last_mod_user",
+                to=settings.AUTH_USER_MODEL,
+                verbose_name="Atualizador",
+            ),
         ),
         migrations.AddIndex(
-            model_name='name',
-            index=models.Index(fields=['text'], name='provided_da_text_6f086c_idx'),
+            model_name="name",
+            index=models.Index(fields=["text"], name="provided_da_text_6f086c_idx"),
         ),
         migrations.AddIndex(
-            model_name='name',
-            index=models.Index(fields=['type'], name='provided_da_type_99d041_idx'),
+            model_name="name",
+            index=models.Index(fields=["type"], name="provided_da_type_99d041_idx"),
         ),
         migrations.AddIndex(
-            model_name='commontextfield',
-            index=models.Index(fields=['text'], name='provided_da_text_ce1ba1_idx'),
+            model_name="commontextfield",
+            index=models.Index(fields=["text"], name="provided_da_text_ce1ba1_idx"),
         ),
         migrations.AddField(
-            model_name='commonpublicationdata',
-            name='authors',
-            field=models.ManyToManyField(blank=True, to='provided_data.Authorship', verbose_name='Authors'),
+            model_name="commonpublicationdata",
+            name="authors",
+            field=models.ManyToManyField(
+                blank=True, to="provided_data.Authorship", verbose_name="Authors"
+            ),
         ),
         migrations.AddField(
-            model_name='commonpublicationdata',
-            name='creator',
-            field=models.ForeignKey(editable=False, on_delete=django.db.models.deletion.CASCADE, related_name='commonpublicationdata_creator', to=settings.AUTH_USER_MODEL, verbose_name='Criador'),
+            model_name="commonpublicationdata",
+            name="creator",
+            field=models.ForeignKey(
+                editable=False,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="commonpublicationdata_creator",
+                to=settings.AUTH_USER_MODEL,
+                verbose_name="Criador",
+            ),
         ),
         migrations.AddField(
-            model_name='commonpublicationdata',
-            name='document_titles',
-            field=models.ManyToManyField(blank=True, related_name='_provided_data_commonpublicationdata_document_titles_+', to='provided_data.CommonTextField', verbose_name='Titles'),
+            model_name="commonpublicationdata",
+            name="document_titles",
+            field=models.ManyToManyField(
+                blank=True,
+                related_name="_provided_data_commonpublicationdata_document_titles_+",
+                to="provided_data.CommonTextField",
+                verbose_name="Titles",
+            ),
         ),
         migrations.AddField(
-            model_name='commonpublicationdata',
-            name='keywords',
-            field=models.ManyToManyField(blank=True, to='provided_data.CommonTextField', verbose_name='Palavra-chave'),
+            model_name="commonpublicationdata",
+            name="keywords",
+            field=models.ManyToManyField(
+                blank=True,
+                to="provided_data.CommonTextField",
+                verbose_name="Palavra-chave",
+            ),
         ),
         migrations.AddField(
-            model_name='commonpublicationdata',
-            name='research_areas',
-            field=models.ManyToManyField(blank=True, related_name='_provided_data_commonpublicationdata_research_areas_+', to='provided_data.ResearchArea', verbose_name='Research area'),
+            model_name="commonpublicationdata",
+            name="research_areas",
+            field=models.ManyToManyField(
+                blank=True,
+                related_name="_provided_data_commonpublicationdata_research_areas_+",
+                to="provided_data.ResearchArea",
+                verbose_name="Research area",
+            ),
         ),
         migrations.AddField(
-            model_name='commonpublicationdata',
-            name='updated_by',
-            field=models.ForeignKey(blank=True, editable=False, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='commonpublicationdata_last_mod_user', to=settings.AUTH_USER_MODEL, verbose_name='Atualizador'),
+            model_name="commonpublicationdata",
+            name="updated_by",
+            field=models.ForeignKey(
+                blank=True,
+                editable=False,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="commonpublicationdata_last_mod_user",
+                to=settings.AUTH_USER_MODEL,
+                verbose_name="Atualizador",
+            ),
         ),
         migrations.AddField(
-            model_name='authorship',
-            name='birth_city',
-            field=models.ForeignKey(blank=True, max_length=100, null=True, on_delete=django.db.models.deletion.SET_NULL, to='usefulmodels.city', verbose_name='Birth city'),
+            model_name="authorship",
+            name="birth_city",
+            field=models.ForeignKey(
+                blank=True,
+                max_length=100,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="usefulmodels.city",
+                verbose_name="Birth city",
+            ),
         ),
         migrations.AddField(
-            model_name='authorship',
-            name='birth_country',
-            field=models.ForeignKey(blank=True, max_length=100, null=True, on_delete=django.db.models.deletion.SET_NULL, to='usefulmodels.country', verbose_name='Birth country'),
+            model_name="authorship",
+            name="birth_country",
+            field=models.ForeignKey(
+                blank=True,
+                max_length=100,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="usefulmodels.country",
+                verbose_name="Birth country",
+            ),
         ),
         migrations.AddField(
-            model_name='authorship',
-            name='birth_state',
-            field=models.ForeignKey(blank=True, max_length=100, null=True, on_delete=django.db.models.deletion.SET_NULL, to='usefulmodels.state', verbose_name='Birth state'),
+            model_name="authorship",
+            name="birth_state",
+            field=models.ForeignKey(
+                blank=True,
+                max_length=100,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="usefulmodels.state",
+                verbose_name="Birth state",
+            ),
         ),
         migrations.AddField(
-            model_name='authorship',
-            name='citation_names',
-            field=models.ManyToManyField(blank=True, related_name='_provided_data_authorship_citation_names_+', to='provided_data.Name', verbose_name='Citation name'),
+            model_name="authorship",
+            name="citation_names",
+            field=models.ManyToManyField(
+                blank=True,
+                related_name="_provided_data_authorship_citation_names_+",
+                to="provided_data.Name",
+                verbose_name="Citation name",
+            ),
         ),
         migrations.AddField(
-            model_name='authorship',
-            name='names',
-            field=models.ManyToManyField(blank=True, to='provided_data.Name', verbose_name='Nome'),
+            model_name="authorship",
+            name="names",
+            field=models.ManyToManyField(
+                blank=True, to="provided_data.Name", verbose_name="Nome"
+            ),
         ),
         migrations.AddField(
-            model_name='authorship',
-            name='person_research_areas',
-            field=models.ManyToManyField(blank=True, related_name='_provided_data_authorship_person_research_areas_+', to='provided_data.ResearchArea', verbose_name='Research area'),
+            model_name="authorship",
+            name="person_research_areas",
+            field=models.ManyToManyField(
+                blank=True,
+                related_name="_provided_data_authorship_person_research_areas_+",
+                to="provided_data.ResearchArea",
+                verbose_name="Research area",
+            ),
         ),
         migrations.AddField(
-            model_name='thesis',
-            name='advisors',
-            field=models.ManyToManyField(blank=True, to='provided_data.Authorship', verbose_name='Advisors'),
+            model_name="thesis",
+            name="advisors",
+            field=models.ManyToManyField(
+                blank=True, to="provided_data.Authorship", verbose_name="Advisors"
+            ),
         ),
         migrations.AddIndex(
-            model_name='rawarticle',
-            index=models.Index(fields=['document_type'], name='provided_da_documen_3b99a9_idx'),
+            model_name="rawarticle",
+            index=models.Index(
+                fields=["document_type"], name="provided_da_documen_3b99a9_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='rawarticle',
-            index=models.Index(fields=['entity_id'], name='provided_da_entity__35d6f3_idx'),
+            model_name="rawarticle",
+            index=models.Index(
+                fields=["entity_id"], name="provided_da_entity__35d6f3_idx"
+            ),
         ),
         migrations.AddField(
-            model_name='journalarticle',
-            name='issns',
-            field=models.ManyToManyField(blank=True, related_name='_provided_data_journalarticle_issns_+', to='provided_data.CommonTextField', verbose_name="ISSN's"),
+            model_name="journalarticle",
+            name="issns",
+            field=models.ManyToManyField(
+                blank=True,
+                related_name="_provided_data_journalarticle_issns_+",
+                to="provided_data.CommonTextField",
+                verbose_name="ISSN's",
+            ),
         ),
         migrations.AddField(
-            model_name='journalarticle',
-            name='journal_titles',
-            field=models.ManyToManyField(blank=True, related_name='_provided_data_journalarticle_journal_titles_+', to='provided_data.CommonTextField', verbose_name='Journal title'),
+            model_name="journalarticle",
+            name="journal_titles",
+            field=models.ManyToManyField(
+                blank=True,
+                related_name="_provided_data_journalarticle_journal_titles_+",
+                to="provided_data.CommonTextField",
+                verbose_name="Journal title",
+            ),
         ),
         migrations.AddIndex(
-            model_name='commonpublicationdata',
-            index=models.Index(fields=['entity_id'], name='provided_da_entity__60830b_idx'),
+            model_name="commonpublicationdata",
+            index=models.Index(
+                fields=["entity_id"], name="provided_da_entity__60830b_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='commonpublicationdata',
-            index=models.Index(fields=['publication_date'], name='provided_da_publica_51416f_idx'),
+            model_name="commonpublicationdata",
+            index=models.Index(
+                fields=["publication_date"], name="provided_da_publica_51416f_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='commonpublicationdata',
-            index=models.Index(fields=['document_type'], name='provided_da_documen_db7b0e_idx'),
+            model_name="commonpublicationdata",
+            index=models.Index(
+                fields=["document_type"], name="provided_da_documen_db7b0e_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='commonpublicationdata',
-            index=models.Index(fields=['language'], name='provided_da_languag_3a4d57_idx'),
+            model_name="commonpublicationdata",
+            index=models.Index(
+                fields=["language"], name="provided_da_languag_3a4d57_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='commonpublicationdata',
-            index=models.Index(fields=['start_page'], name='provided_da_start_p_ed1184_idx'),
+            model_name="commonpublicationdata",
+            index=models.Index(
+                fields=["start_page"], name="provided_da_start_p_ed1184_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='commonpublicationdata',
-            index=models.Index(fields=['end_page'], name='provided_da_end_pag_fe3e79_idx'),
+            model_name="commonpublicationdata",
+            index=models.Index(
+                fields=["end_page"], name="provided_da_end_pag_fe3e79_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='commonpublicationdata',
-            index=models.Index(fields=['volume'], name='provided_da_volume_afbbdd_idx'),
+            model_name="commonpublicationdata",
+            index=models.Index(fields=["volume"], name="provided_da_volume_afbbdd_idx"),
         ),
         migrations.AddIndex(
-            model_name='authorship',
-            index=models.Index(fields=['id_lattes'], name='provided_da_id_latt_cc3388_idx'),
+            model_name="authorship",
+            index=models.Index(
+                fields=["id_lattes"], name="provided_da_id_latt_cc3388_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='authorship',
-            index=models.Index(fields=['orcid'], name='provided_da_orcid_efb32b_idx'),
+            model_name="authorship",
+            index=models.Index(fields=["orcid"], name="provided_da_orcid_efb32b_idx"),
         ),
         migrations.AddIndex(
-            model_name='journalarticle',
-            index=models.Index(fields=['series'], name='provided_da_series_2ae3cb_idx'),
+            model_name="journalarticle",
+            index=models.Index(fields=["series"], name="provided_da_series_2ae3cb_idx"),
         ),
     ]

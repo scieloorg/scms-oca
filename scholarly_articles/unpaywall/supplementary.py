@@ -58,7 +58,7 @@ def load(line, row, user):
     """
     try:
         row = orjson.loads(row)
-        doi = row.get('doi')
+        doi = row.get("doi")
         if doi:
             print("Line: %s, id: %s" % (line + 1, doi))
             supplementary = models.SupplementaryData.objects.filter(doi=doi)
@@ -67,7 +67,7 @@ def load(line, row, user):
                 supplementary.doi = doi
             else:
                 supplementary = supplementary[0]
-            supplementary.year = row.get('year')
+            supplementary.year = row.get("year")
             supplementary.json = row
             supplementary.save()
     except Exception as e:

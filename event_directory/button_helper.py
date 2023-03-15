@@ -5,10 +5,15 @@ from django.urls import reverse
 
 
 class EventDirectoryHelper(ButtonHelper):
-
     # Define classes for our button, here we can set an icon for example
-    validate_button_classnames = ["button-small", "icon",]
-    import_button_classnames = ["button-small", "icon",]
+    validate_button_classnames = [
+        "button-small",
+        "icon",
+    ]
+    import_button_classnames = [
+        "button-small",
+        "icon",
+    ]
 
     def validate_button(self, obj):
         # Define a label for our button

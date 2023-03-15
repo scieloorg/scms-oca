@@ -1,10 +1,8 @@
-
 from infrastructure_directory import infrastructure_factory
 from institution import institution_factory
 
 
 def run(*args):
-
     if args:
         bulk_size = args[0]
     else:
@@ -12,4 +10,6 @@ def run(*args):
 
     print("Gerando %s Infrastructure Directories.... " % (bulk_size))
     for i in range(0, int(bulk_size)):
-        infrastructure_factory.InfrastructureFactory(institutions=(institution_factory.InstitutionFactory(),))
+        infrastructure_factory.InfrastructureFactory(
+            institutions=(institution_factory.InstitutionFactory(),)
+        )

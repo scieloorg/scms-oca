@@ -6,16 +6,25 @@ import infrastructure_directory.models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('usefulmodels', '0011_auto_20221108_2356'),
-        ('infrastructure_directory', '0002_alter_infrastructuredirectory_record_status'),
+        ("usefulmodels", "0011_auto_20221108_2356"),
+        (
+            "infrastructure_directory",
+            "0002_alter_infrastructuredirectory_record_status",
+        ),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='infrastructuredirectory',
-            name='action',
-            field=models.ForeignKey(blank=True, default=infrastructure_directory.models.get_default_action, null=True, on_delete=django.db.models.deletion.SET_NULL, to='usefulmodels.action', verbose_name='Ação'),
+            model_name="infrastructuredirectory",
+            name="action",
+            field=models.ForeignKey(
+                blank=True,
+                default=infrastructure_directory.models.get_default_action,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="usefulmodels.action",
+                verbose_name="Ação",
+            ),
         ),
     ]

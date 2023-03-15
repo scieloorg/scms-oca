@@ -30,7 +30,7 @@ TYPE_OF_RESOURCE = [
     ("dataset", _("Dataset")),
     ("book-series", _("Book Series")),
     ("edited-book", _("Edited Book")),
-    ("standard-series", _("Standard Series"))
+    ("standard-series", _("Standard Series")),
 ]
 
 OA_STATUS = [

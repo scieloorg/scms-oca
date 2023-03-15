@@ -2,7 +2,6 @@ from wagtail.admin.forms import WagtailAdminModelForm
 
 
 class IndicatorDirectoryForm(WagtailAdminModelForm):
-
     def save_all(self, user):
         indicator = super().save(commit=False)
 

@@ -9,6 +9,7 @@ class EventIndex(indexes.SearchIndex, indexes.Indexable):
     Fields:
         text
     """
+
     record_type = indexes.CharField(null=False)
     text = indexes.CharField(document=True, use_template=True)
     title = indexes.CharField(model_attr="title", null=True)

@@ -6,16 +6,22 @@ import education_directory.models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('usefulmodels', '0011_auto_20221108_2356'),
-        ('education_directory', '0002_alter_educationdirectory_record_status'),
+        ("usefulmodels", "0011_auto_20221108_2356"),
+        ("education_directory", "0002_alter_educationdirectory_record_status"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='educationdirectory',
-            name='action',
-            field=models.ForeignKey(blank=True, default=education_directory.models.get_default_action, null=True, on_delete=django.db.models.deletion.SET_NULL, to='usefulmodels.action', verbose_name='Ação'),
+            model_name="educationdirectory",
+            name="action",
+            field=models.ForeignKey(
+                blank=True,
+                default=education_directory.models.get_default_action,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="usefulmodels.action",
+                verbose_name="Ação",
+            ),
         ),
     ]

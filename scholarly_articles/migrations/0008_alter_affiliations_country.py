@@ -5,16 +5,22 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('usefulmodels', '0006_auto_20221026_1320'),
-        ('scholarly_articles', '0007_affiliations_country'),
+        ("usefulmodels", "0006_auto_20221026_1320"),
+        ("scholarly_articles", "0007_affiliations_country"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='affiliations',
-            name='country',
-            field=models.ForeignKey(blank=True, max_length=255, null=True, on_delete=django.db.models.deletion.SET_NULL, to='usefulmodels.country', verbose_name='Country'),
+            model_name="affiliations",
+            name="country",
+            field=models.ForeignKey(
+                blank=True,
+                max_length=255,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="usefulmodels.country",
+                verbose_name="Country",
+            ),
         ),
     ]

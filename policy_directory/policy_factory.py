@@ -8,11 +8,10 @@ from policy_directory import models
 from policy_directory.choices import classification, status
 from usefulmodels.usefulmodels_factory import ActionFactory, PraticeFactory
 
-factory.Faker._DEFAULT_LOCALE = 'pt_BR'
+factory.Faker._DEFAULT_LOCALE = "pt_BR"
 
 
 class PolicyFactory(DjangoModelFactory):
-
     class Meta:
         model = models.PolicyDirectory
 
@@ -20,8 +19,8 @@ class PolicyFactory(DjangoModelFactory):
     creator = factory.SubFactory(user_factory.UserFactory)
 
     title = factory.Sequence(lambda n: "Title %03d" % n)
-    description = factory.Faker('sentence', nb_words=50)
-    link = factory.Faker('url')
+    description = factory.Faker("sentence", nb_words=50)
+    link = factory.Faker("url")
 
     date = factory.LazyFunction(datetime.now)
 
@@ -44,4 +43,3 @@ class PolicyFactory(DjangoModelFactory):
             # A list of groups were passed in, use them
             for org in extracted:
                 self.institutions.add(org)
-

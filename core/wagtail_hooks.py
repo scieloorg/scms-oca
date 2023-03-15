@@ -3,21 +3,18 @@
 from django.templatetags.static import static
 from django.utils.html import format_html
 
-from wagtail.core import hooks
+from wagtail import hooks
+
 
 @hooks.register("insert_global_admin_css", order=100)
 def global_admin_css():
     """Add /static/admin/css/custom.css to the admin."""
     return format_html(
-        '<link rel="stylesheet" href="{}">',
-        static("admin/css/custom.css")
+        '<link rel="stylesheet" href="{}">', static("admin/css/custom.css")
     )
 
 
 @hooks.register("insert_global_admin_js", order=100)
 def global_admin_js():
     """Add /static/admin/css/custom.js to the admin."""
-    return format_html(
-        '<script src="{}"></script>',
-        static("admin/js/custom.js")
-    )
+    return format_html('<script src="{}"></script>', static("admin/js/custom.js"))
