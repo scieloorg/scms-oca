@@ -6,16 +6,22 @@ import event_directory.models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('usefulmodels', '0011_auto_20221108_2356'),
-        ('event_directory', '0003_alter_eventdirectory_organization'),
+        ("usefulmodels", "0011_auto_20221108_2356"),
+        ("event_directory", "0003_alter_eventdirectory_organization"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='eventdirectory',
-            name='action',
-            field=models.ForeignKey(blank=True, default=event_directory.models.get_default_action, null=True, on_delete=django.db.models.deletion.SET_NULL, to='usefulmodels.action', verbose_name='Ação'),
+            model_name="eventdirectory",
+            name="action",
+            field=models.ForeignKey(
+                blank=True,
+                default=event_directory.models.get_default_action,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="usefulmodels.action",
+                verbose_name="Ação",
+            ),
         ),
     ]

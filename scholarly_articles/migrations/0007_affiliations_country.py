@@ -4,15 +4,16 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('scholarly_articles', '0006_rawunpaywall_scholarly_a_is_para_720cbd_idx'),
+        ("scholarly_articles", "0006_rawunpaywall_scholarly_a_is_para_720cbd_idx"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='affiliations',
-            name='country',
-            field=models.CharField(blank=True, max_length=255, null=True, verbose_name='Country'),
+            model_name="affiliations",
+            name="country",
+            field=models.CharField(
+                blank=True, max_length=255, null=True, verbose_name="Country"
+            ),
         ),
     ]

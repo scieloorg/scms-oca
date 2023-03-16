@@ -6,31 +6,111 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('usefulmodels', '0001_initial'),
+        ("usefulmodels", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Location',
+            name="Location",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created', models.DateTimeField(auto_now_add=True, verbose_name='Data de criação')),
-                ('updated', models.DateTimeField(auto_now=True, verbose_name='Data da última atualização')),
-                ('region', models.CharField(blank=True, choices=[('', ''), ('Norte', 'Norte'), ('Nordeste', 'Nordeste'), ('Centro-Oeste', 'Centro-Oeste'), ('Sudeste', 'Sudeste'), ('Sul', 'Sul')], max_length=255, null=True, verbose_name='Região')),
-                ('city', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='usefulmodels.city', verbose_name='Cidade')),
-                ('country', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='usefulmodels.country', verbose_name='País')),
-                ('creator', models.ForeignKey(editable=False, on_delete=django.db.models.deletion.CASCADE, related_name='location_creator', to=settings.AUTH_USER_MODEL, verbose_name='Criador')),
-                ('state', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='usefulmodels.state', verbose_name='Estado')),
-                ('updated_by', models.ForeignKey(blank=True, editable=False, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='location_last_mod_user', to=settings.AUTH_USER_MODEL, verbose_name='Atualizador')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "created",
+                    models.DateTimeField(
+                        auto_now_add=True, verbose_name="Data de criação"
+                    ),
+                ),
+                (
+                    "updated",
+                    models.DateTimeField(
+                        auto_now=True, verbose_name="Data da última atualização"
+                    ),
+                ),
+                (
+                    "region",
+                    models.CharField(
+                        blank=True,
+                        choices=[
+                            ("", ""),
+                            ("Norte", "Norte"),
+                            ("Nordeste", "Nordeste"),
+                            ("Centro-Oeste", "Centro-Oeste"),
+                            ("Sudeste", "Sudeste"),
+                            ("Sul", "Sul"),
+                        ],
+                        max_length=255,
+                        null=True,
+                        verbose_name="Região",
+                    ),
+                ),
+                (
+                    "city",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="usefulmodels.city",
+                        verbose_name="Cidade",
+                    ),
+                ),
+                (
+                    "country",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="usefulmodels.country",
+                        verbose_name="País",
+                    ),
+                ),
+                (
+                    "creator",
+                    models.ForeignKey(
+                        editable=False,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="location_creator",
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="Criador",
+                    ),
+                ),
+                (
+                    "state",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="usefulmodels.state",
+                        verbose_name="Estado",
+                    ),
+                ),
+                (
+                    "updated_by",
+                    models.ForeignKey(
+                        blank=True,
+                        editable=False,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="location_last_mod_user",
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="Atualizador",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Localização',
-                'verbose_name_plural': 'Locations',
+                "verbose_name": "Localização",
+                "verbose_name_plural": "Locations",
             },
         ),
     ]

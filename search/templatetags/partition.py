@@ -16,4 +16,4 @@ def partition(alist, size):
 
     """
 
-    return [alist[i:i+size] for i in range(0, len(alist), size)]
+    return [alist[i : i + size] for i in range(0, len(alist), size)]

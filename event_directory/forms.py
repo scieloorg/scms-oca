@@ -2,8 +2,8 @@ from wagtail.admin.forms import WagtailAdminModelForm
 
 from event_directory.search_indexes import EventIndex
 
-class EventDirectoryForm(WagtailAdminModelForm):
 
+class EventDirectoryForm(WagtailAdminModelForm):
     def save_all(self, user):
         event_directory = super().save(commit=False)
 
@@ -21,7 +21,6 @@ class EventDirectoryForm(WagtailAdminModelForm):
 
 
 class EventDirectoryFileForm(WagtailAdminModelForm):
-
     def save_all(self, user):
         event_directory_file = super().save(commit=False)
 

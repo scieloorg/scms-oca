@@ -9,6 +9,7 @@ class PolicyIndex(indexes.SearchIndex, indexes.Indexable):
     Fields:
         text
     """
+
     record_type = indexes.CharField(null=False)
     text = indexes.CharField(document=True, use_template=True)
     title = indexes.CharField(model_attr="title", null=True)
@@ -37,7 +38,6 @@ class PolicyIndex(indexes.SearchIndex, indexes.Indexable):
 
     def prepare_directory_type(self, obj):
         return "policy_directory"
-
 
     def prepare_institutions(self, obj):
         if obj.institutions:

@@ -6,16 +6,22 @@ import policy_directory.models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('usefulmodels', '0011_auto_20221108_2356'),
-        ('policy_directory', '0003_alter_policydirectory_date'),
+        ("usefulmodels", "0011_auto_20221108_2356"),
+        ("policy_directory", "0003_alter_policydirectory_date"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='policydirectory',
-            name='action',
-            field=models.ForeignKey(blank=True, default=policy_directory.models.get_default_action, null=True, on_delete=django.db.models.deletion.SET_NULL, to='usefulmodels.action', verbose_name='Ação'),
+            model_name="policydirectory",
+            name="action",
+            field=models.ForeignKey(
+                blank=True,
+                default=policy_directory.models.get_default_action,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="usefulmodels.action",
+                verbose_name="Ação",
+            ),
         ),
     ]

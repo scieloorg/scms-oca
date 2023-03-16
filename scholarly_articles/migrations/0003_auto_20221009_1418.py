@@ -4,44 +4,45 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('scholarly_articles', '0002_auto_20221009_1313'),
+        ("scholarly_articles", "0002_auto_20221009_1313"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='supplementarydata',
-            name='affiliation',
+            model_name="supplementarydata",
+            name="affiliation",
         ),
         migrations.RemoveField(
-            model_name='supplementarydata',
-            name='author',
+            model_name="supplementarydata",
+            name="author",
         ),
         migrations.RemoveField(
-            model_name='supplementarydata',
-            name='issue',
+            model_name="supplementarydata",
+            name="issue",
         ),
         migrations.RemoveField(
-            model_name='supplementarydata',
-            name='source_title',
+            model_name="supplementarydata",
+            name="source_title",
         ),
         migrations.RemoveField(
-            model_name='supplementarydata',
-            name='volume',
+            model_name="supplementarydata",
+            name="volume",
         ),
         migrations.AddField(
-            model_name='supplementarydata',
-            name='json',
-            field=models.JSONField(blank=True, null=True, verbose_name='Arquivo JSON'),
+            model_name="supplementarydata",
+            name="json",
+            field=models.JSONField(blank=True, null=True, verbose_name="Arquivo JSON"),
         ),
         migrations.AddField(
-            model_name='supplementarydata',
-            name='year',
-            field=models.CharField(blank=True, max_length=10, null=True, verbose_name='Ano'),
+            model_name="supplementarydata",
+            name="year",
+            field=models.CharField(
+                blank=True, max_length=10, null=True, verbose_name="Ano"
+            ),
         ),
         migrations.AddIndex(
-            model_name='supplementarydata',
-            index=models.Index(fields=['year'], name='scholarly_a_year_a63400_idx'),
+            model_name="supplementarydata",
+            index=models.Index(fields=["year"], name="scholarly_a_year_a63400_idx"),
         ),
     ]

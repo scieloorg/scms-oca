@@ -15,16 +15,23 @@ def qa():
     classifications.extend([c[0] for c in infra_choices])
     classifications.extend([c[0] for c in policy_choices])
 
-    for model in (EducationDirectory, InfrastructureDirectory, EventDirectory,
-                  PolicyDirectory):
+    for model in (
+        EducationDirectory,
+        InfrastructureDirectory,
+        EventDirectory,
+        PolicyDirectory,
+    ):
         for item in model.objects.iterator():
-            item.record_status = 'PUBLISHED'
+            item.record_status = "PUBLISHED"
             alt = []
             for classification in classifications:
-                if classification in item.description.lower() or classification in item.title.lower():
+                if (
+                    classification in item.description.lower()
+                    or classification in item.title.lower()
+                ):
                     alt.append(classification)
             if alt and item.classification not in alt:
-                item.record_status = 'TO MODERATE'
+                item.record_status = "TO MODERATE"
             item.save()
 
 

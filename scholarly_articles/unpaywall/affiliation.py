@@ -14,10 +14,10 @@ def complete_affiliation_data():
     de nomes de países
     É necessário seguir esta ordem de tentativas para completar os dados
     """
-    for institution in Institution.objects.filter(source='MEC').iterator():
+    for institution in Institution.objects.filter(source="MEC").iterator():
         for aff in Affiliations.objects.filter(
-                official__isnull=True,
-                name__icontains=institution.name).iterator():
+            official__isnull=True, name__icontains=institution.name
+        ).iterator():
             aff.official = institution
             aff.save()
             logging.info(aff.name)
@@ -25,10 +25,10 @@ def complete_affiliation_data():
     # first iteration to identify country by institution ROR
     for institution_ror in Institution.objects.filter(source="ROR").iterator():
         for aff in Affiliations.objects.filter(
-                official__isnull=True,
-                country__isnull=True,
-                name__icontains=institution_ror.name,
-                ).iterator():
+            official__isnull=True,
+            country__isnull=True,
+            name__icontains=institution_ror.name,
+        ).iterator():
             aff.country = institution_ror.location.country
             aff.save()
             logging.info(aff.name)
@@ -38,37 +38,36 @@ def complete_affiliation_data():
 
         # second iteration to identify country by declared name
         for aff in Affiliations.objects.filter(
-                Q(name__icontains=country.name_en) |
-                Q(name__icontains=country.name_pt),
-                country__isnull=True,
-                official__isnull=True,
-                ).iterator():
+            Q(name__icontains=country.name_en) | Q(name__icontains=country.name_pt),
+            country__isnull=True,
+            official__isnull=True,
+        ).iterator():
             aff.country = country
             aff.save()
             logging.info(aff.name)
 
         # third iteration to identify country by declared acronym with 3 char
         for aff in Affiliations.objects.filter(
-                Q(name__contains=" "+country.acron3+",") |
-                Q(name__contains=" "+country.acron3+";") |
-                Q(name__contains=" "+country.acron3+".") |
-                Q(name__endswith=" "+country.acron3),
-                country__isnull=True,
-                official__isnull=True,
-                ).iterator():
+            Q(name__contains=" " + country.acron3 + ",")
+            | Q(name__contains=" " + country.acron3 + ";")
+            | Q(name__contains=" " + country.acron3 + ".")
+            | Q(name__endswith=" " + country.acron3),
+            country__isnull=True,
+            official__isnull=True,
+        ).iterator():
             aff.country = country
             aff.save()
             logging.info(aff.name)
 
         # fourth iteration to identify country by declared acronym with 2 char
         for aff in Affiliations.objects.filter(
-                Q(name__contains=" "+country.acron2+",") |
-                Q(name__contains=" "+country.acron2+";") |
-                Q(name__contains=" "+country.acron2+".") |
-                Q(name__endswith=" "+country.acron2),
-                country__isnull=True,
-                official__isnull=True,
-                ).iterator():
+            Q(name__contains=" " + country.acron2 + ",")
+            | Q(name__contains=" " + country.acron2 + ";")
+            | Q(name__contains=" " + country.acron2 + ".")
+            | Q(name__endswith=" " + country.acron2),
+            country__isnull=True,
+            official__isnull=True,
+        ).iterator():
             aff.country = country
             aff.save()
             logging.info(aff.name)

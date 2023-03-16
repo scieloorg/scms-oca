@@ -4,48 +4,55 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('indicator', '0007_auto_20221108_2356'),
+        ("indicator", "0007_auto_20221108_2356"),
     ]
 
     operations = [
         migrations.RemoveIndex(
-            model_name='indicator',
-            name='indicator_i_scienti_e668fa_idx',
+            model_name="indicator",
+            name="indicator_i_scienti_e668fa_idx",
         ),
         migrations.RemoveField(
-            model_name='indicator',
-            name='scientific_production',
+            model_name="indicator",
+            name="scientific_production",
         ),
         migrations.AddField(
-            model_name='indicator',
-            name='category',
-            field=models.CharField(max_length=255, null=True, verbose_name='Categoria'),
+            model_name="indicator",
+            name="category",
+            field=models.CharField(max_length=255, null=True, verbose_name="Categoria"),
         ),
         migrations.AddField(
-            model_name='indicator',
-            name='context',
-            field=models.CharField(max_length=255, null=True, verbose_name='Contexto'),
+            model_name="indicator",
+            name="context",
+            field=models.CharField(max_length=255, null=True, verbose_name="Contexto"),
         ),
         migrations.AddField(
-            model_name='indicator',
-            name='object_name',
-            field=models.CharField(max_length=255, null=True, verbose_name='Observação'),
+            model_name="indicator",
+            name="object_name",
+            field=models.CharField(
+                max_length=255, null=True, verbose_name="Observação"
+            ),
         ),
         migrations.AddIndex(
-            model_name='indicator',
-            index=models.Index(fields=['object_name'], name='indicator_i_object__785a0d_idx'),
+            model_name="indicator",
+            index=models.Index(
+                fields=["object_name"], name="indicator_i_object__785a0d_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='indicator',
-            index=models.Index(fields=['category'], name='indicator_i_categor_111a26_idx'),
+            model_name="indicator",
+            index=models.Index(
+                fields=["category"], name="indicator_i_categor_111a26_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='indicator',
-            index=models.Index(fields=['context'], name='indicator_i_context_564325_idx'),
+            model_name="indicator",
+            index=models.Index(
+                fields=["context"], name="indicator_i_context_564325_idx"
+            ),
         ),
         migrations.DeleteModel(
-            name='ScientificProduction',
+            name="ScientificProduction",
         ),
     ]

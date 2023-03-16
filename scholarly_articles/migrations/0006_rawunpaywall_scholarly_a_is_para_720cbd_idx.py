@@ -4,14 +4,15 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('scholarly_articles', '0005_remove_affiliations_source'),
+        ("scholarly_articles", "0005_remove_affiliations_source"),
     ]
 
     operations = [
         migrations.AddIndex(
-            model_name='rawunpaywall',
-            index=models.Index(fields=['is_paratext'], name='scholarly_a_is_para_720cbd_idx'),
+            model_name="rawunpaywall",
+            index=models.Index(
+                fields=["is_paratext"], name="scholarly_a_is_para_720cbd_idx"
+            ),
         ),
     ]

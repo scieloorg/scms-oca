@@ -2,47 +2,46 @@ from django.utils.translation import gettext as _
 
 
 languages = (
-    ('', ''),
-    ('Pt', 'Pt'),
-    ('Es', 'Es'),
-    ('En', 'En'),
+    ("", ""),
+    ("Pt", "Pt"),
+    ("Es", "Es"),
+    ("En", "En"),
 )
 
 
-WIP = 'WIP'
-TO_MODERATE = 'TO MODERATE'
-PUBLISHED = 'PUBLISHED'
+WIP = "WIP"
+TO_MODERATE = "TO MODERATE"
+PUBLISHED = "PUBLISHED"
 
 status = (
-    ('', ''),
-    (WIP, _('WORK IN PROGRESS')),
-    (TO_MODERATE, _('TO MODERATE')),
-    (PUBLISHED, _('PUBLISHED')),
+    ("", ""),
+    (WIP, _("WORK IN PROGRESS")),
+    (TO_MODERATE, _("TO MODERATE")),
+    (PUBLISHED, _("PUBLISHED")),
 )
 
-CURRENT = 'CURRENT'
-OUTDATED = 'OUTDATED'
+CURRENT = "CURRENT"
+OUTDATED = "OUTDATED"
 
 VALIDITY = (
-    ('', ''),
-    (CURRENT, _('CURRENT')),
-    (OUTDATED, _('OUTDATED')),
+    ("", ""),
+    (CURRENT, _("CURRENT")),
+    (OUTDATED, _("OUTDATED")),
 )
 
 open_access = (
-    ('', ''),
-    ('NOT', _('NOT')),
-    ('YES', _('YES')),
-    ('ALL', _('ALL')),
-    ('NOT APPLICABLE', _('NOT APPLICABLE')),
-    ('UNDEFINED', _('UNDEFINED')),
+    ("", ""),
+    ("NOT", _("NOT")),
+    ("YES", _("YES")),
+    ("ALL", _("ALL")),
+    ("NOT APPLICABLE", _("NOT APPLICABLE")),
+    ("UNDEFINED", _("UNDEFINED")),
 )
-
 
 
 # Valores no unpaywall para `genre`
 COMMUNICATION_OBJECTS = (
-    ('', _('NOT APPLICABLE')),
+    ("", _("NOT APPLICABLE")),
     ("book", _("Book")),
     ("book-chapter", _("Book Chapter")),
     ("book-part", _("Part")),
@@ -76,28 +75,28 @@ COMMUNICATION_OBJECTS = (
 )
 
 
-INSTITUTIONAL = 'INSTITUTIONAL'
-THEMATIC = 'THEMATIC'
-GEOGRAPHIC = 'GEOGRAPHIC'
-CHRONOLOGICAL = 'CHRONOLOGICAL'
-GENERAL = 'GENERAL'
+INSTITUTIONAL = "INSTITUTIONAL"
+THEMATIC = "THEMATIC"
+GEOGRAPHIC = "GEOGRAPHIC"
+CHRONOLOGICAL = "CHRONOLOGICAL"
+GENERAL = "GENERAL"
 SCOPE = (
-    (GENERAL, _('Geral')),
-    (INSTITUTIONAL, _('Instituticional')),
-    (GEOGRAPHIC, _('Geográfico')),
-    (CHRONOLOGICAL, _('Cronológico')),
-    (THEMATIC, _('Temático')),
+    (GENERAL, _("Geral")),
+    (INSTITUTIONAL, _("Instituticional")),
+    (GEOGRAPHIC, _("Geográfico")),
+    (CHRONOLOGICAL, _("Cronológico")),
+    (THEMATIC, _("Temático")),
 )
 
-FREQUENCY = 'FREQUENCY'
-RELATIVE_FREQUENCY = 'RELATIVE_FREQUENCY'
-EVOLUTION = 'EVOLUTION'
-AVERAGE = 'AVERAGE'
+FREQUENCY = "FREQUENCY"
+RELATIVE_FREQUENCY = "RELATIVE_FREQUENCY"
+EVOLUTION = "EVOLUTION"
+AVERAGE = "AVERAGE"
 
 MEASUREMENT_TYPE = (
-    ('', ''),
-    (FREQUENCY, _('Frequência')),
-    (EVOLUTION, _('Evolução')),
-    (AVERAGE, _('Média')),
-    (RELATIVE_FREQUENCY, _('Frequência relativa')),
+    ("", ""),
+    (FREQUENCY, _("Frequência")),
+    (EVOLUTION, _("Evolução")),
+    (AVERAGE, _("Média")),
+    (RELATIVE_FREQUENCY, _("Frequência relativa")),
 )

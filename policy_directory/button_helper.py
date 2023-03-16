@@ -5,10 +5,15 @@ from django.urls import reverse
 
 
 class PolicyDirectoryHelper(ButtonHelper):
-
     # Define classes for our button, here we can set an icon for example
-    validate_button_classnames = ["button-small", "icon",]
-    import_button_classnames = ["button-small", "icon",]
+    validate_button_classnames = [
+        "button-small",
+        "icon",
+    ]
+    import_button_classnames = [
+        "button-small",
+        "icon",
+    ]
 
     def validate_button(self, obj):
         # Define a label for our button
@@ -24,7 +29,8 @@ class PolicyDirectoryHelper(ButtonHelper):
         # Define a label for our button
         text = _("Import")
         return {
-            "url": reverse("policy_directory:import_file") + "?file_id=%s" % str(obj.id),
+            "url": reverse("policy_directory:import_file")
+            + "?file_id=%s" % str(obj.id),
             "label": text,
             "classname": self.finalise_classname(self.import_button_classnames),
             "title": text,

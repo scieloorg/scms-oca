@@ -4,15 +4,27 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('usefulmodels', '0001_initial'),
+        ("usefulmodels", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='state',
-            name='region',
-            field=models.CharField(blank=True, choices=[('', ''), ('Norte', 'Norte'), ('Nordeste', 'Nordeste'), ('Centro-Oeste', 'Centro-Oeste'), ('Sudeste', 'Sudeste'), ('Sul', 'Sul')], max_length=255, null=True, verbose_name='Região'),
+            model_name="state",
+            name="region",
+            field=models.CharField(
+                blank=True,
+                choices=[
+                    ("", ""),
+                    ("Norte", "Norte"),
+                    ("Nordeste", "Nordeste"),
+                    ("Centro-Oeste", "Centro-Oeste"),
+                    ("Sudeste", "Sudeste"),
+                    ("Sul", "Sul"),
+                ],
+                max_length=255,
+                null=True,
+                verbose_name="Região",
+            ),
         ),
     ]

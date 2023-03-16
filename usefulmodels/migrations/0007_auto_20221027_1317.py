@@ -4,24 +4,33 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('usefulmodels', '0006_auto_20221026_1320'),
+        ("usefulmodels", "0006_auto_20221026_1320"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='country',
-            name='acronym',
+            model_name="country",
+            name="acronym",
         ),
         migrations.AddField(
-            model_name='country',
-            name='acron2',
-            field=models.CharField(blank=True, max_length=255, null=True, verbose_name='Acronym to the Country (2 char)'),
+            model_name="country",
+            name="acron2",
+            field=models.CharField(
+                blank=True,
+                max_length=255,
+                null=True,
+                verbose_name="Acronym to the Country (2 char)",
+            ),
         ),
         migrations.AddField(
-            model_name='country',
-            name='acron3',
-            field=models.CharField(blank=True, max_length=255, null=True, verbose_name='Acronym to the Country (3 char)'),
+            model_name="country",
+            name="acron3",
+            field=models.CharField(
+                blank=True,
+                max_length=255,
+                null=True,
+                verbose_name="Acronym to the Country (3 char)",
+            ),
         ),
     ]

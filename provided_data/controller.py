@@ -6,11 +6,13 @@ from .core import Authorship
 
 def load_raw_data(row, user):
     row = orjson.loads(row)
-    document_type = row.get('fields').get('type')[0]
-    document_id = row.get('entity_id')
+    document_type = row.get("fields").get("type")[0]
+    document_id = row.get("entity_id")
 
     try:
-        rawrecord = RawArticle.objects.filter(entity_id=document_id, document_type=document_type)[0]
+        rawrecord = RawArticle.objects.filter(
+            entity_id=document_id, document_type=document_type
+        )[0]
     except IndexError:
         rawrecord = RawArticle()
         rawrecord.document_type = document_type
@@ -30,28 +32,44 @@ def get_value_in_a_list(list_of_values):
 
 
 def get_common_person_data_values(person):
-    orcid = get_value_in_a_list(person.get('identifier.orcid'))
-    id_lattes = get_value_in_a_list(person.get('identifier.lattes'))
-    names = person.get('name')  # it's a list
-    citation_names = person.get('citationName')  # it's a list
-    person_research_areas = person.get('researchArea')  # it's a list
-    birth_city = get_value_in_a_list(person.get('birthCity'))
-    birth_state = get_value_in_a_list(person.get('birthState'))
-    birth_country = get_value_in_a_list(person.get('birthCountry'))
+    orcid = get_value_in_a_list(person.get("identifier.orcid"))
+    id_lattes = get_value_in_a_list(person.get("identifier.lattes"))
+    names = person.get("name")  # it's a list
+    citation_names = person.get("citationName")  # it's a list
+    person_research_areas = person.get("researchArea")  # it's a list
+    birth_city = get_value_in_a_list(person.get("birthCity"))
+    birth_state = get_value_in_a_list(person.get("birthState"))
+    birth_country = get_value_in_a_list(person.get("birthCountry"))
 
-    return orcid, id_lattes, names, citation_names, person_research_areas, \
-        birth_city, birth_state, birth_country
+    return (
+        orcid,
+        id_lattes,
+        names,
+        citation_names,
+        person_research_areas,
+        birth_city,
+        birth_state,
+        birth_country,
+    )
 
 
 def get_common_publication_data_values(user, json):
-    fields = json['fields']
-    entity_id = json.get('entity_id')
-    keywords = fields.get('keyword')  # it's a list
-    document_titles = fields.get('title')  # it's a list
+    fields = json["fields"]
+    entity_id = json.get("entity_id")
+    keywords = fields.get("keyword")  # it's a list
+    document_titles = fields.get("title")  # it's a list
     authors = []
-    for author in json.get('relations').get('Authorship') or []:
-        orcid, id_lattes, names, citation_names, person_research_areas, \
-            birth_city, birth_state, birth_country = get_common_person_data_values(author.get('fields'))
+    for author in json.get("relations").get("Authorship") or []:
+        (
+            orcid,
+            id_lattes,
+            names,
+            citation_names,
+            person_research_areas,
+            birth_city,
+            birth_state,
+            birth_country,
+        ) = get_common_person_data_values(author.get("fields"))
         try:
             authors.append(
                 Authorship.authorship_get_or_create(
@@ -63,36 +81,66 @@ def get_common_publication_data_values(user, json):
                     person_research_areas=person_research_areas,
                     birth_city=birth_city,
                     birth_state=birth_state,
-                    birth_country=birth_country
+                    birth_country=birth_country,
                 )
             )
         except:
             pass
 
-    publication_date = get_value_in_a_list(fields.get('publicationDate'))
-    document_type = get_value_in_a_list(fields.get('type'))
-    language = get_value_in_a_list(fields.get('language'))
-    research_areas = fields.get('researchArea.cnpq')  # it's a list
-    start_page = get_value_in_a_list(fields.get('starPage'))
-    end_page = get_value_in_a_list(fields.get('endPage'))
-    volume = get_value_in_a_list(fields.get('volume'))
+    publication_date = get_value_in_a_list(fields.get("publicationDate"))
+    document_type = get_value_in_a_list(fields.get("type"))
+    language = get_value_in_a_list(fields.get("language"))
+    research_areas = fields.get("researchArea.cnpq")  # it's a list
+    start_page = get_value_in_a_list(fields.get("starPage"))
+    end_page = get_value_in_a_list(fields.get("endPage"))
+    volume = get_value_in_a_list(fields.get("volume"))
 
-    return entity_id, keywords, document_titles, authors, publication_date, document_type, language, research_areas, \
-        start_page, end_page, volume
+    return (
+        entity_id,
+        keywords,
+        document_titles,
+        authors,
+        publication_date,
+        document_type,
+        language,
+        research_areas,
+        start_page,
+        end_page,
+        volume,
+    )
 
 
 def load_thesis(user, record):
     json = record.json
 
     # attribs to CommonPublicationData
-    entity_id, keywords, document_titles, authors, publication_date, document_type, language, research_areas, \
-        start_page, end_page, volume = get_common_publication_data_values(user=user, json=json)
+    (
+        entity_id,
+        keywords,
+        document_titles,
+        authors,
+        publication_date,
+        document_type,
+        language,
+        research_areas,
+        start_page,
+        end_page,
+        volume,
+    ) = get_common_publication_data_values(user=user, json=json)
 
     # attribs to Thesis
     advisors = []
-    for advisor in json.get('relations').get('Adivisoring') or []:
-        orcid, id_lattes, names, citation_names, person_research_areas, \
-            birth_city, birth_state, birth_country = get_common_person_data_values(advisor.get('fields'))
+    for advisor in json.get("relations").get("Adivisoring") or []:
+        (
+            orcid,
+            id_lattes,
+            names,
+            citation_names,
+            person_research_areas,
+            birth_city,
+            birth_state,
+            birth_country,
+        ) = get_common_person_data_values(advisor.get("fields"))
         try:
             advisors.append(
                 Authorship.authorship_get_or_create(
@@ -104,7 +152,7 @@ def load_thesis(user, record):
                     person_research_areas=person_research_areas,
                     birth_city=birth_city,
                     birth_state=birth_state,
-                    birth_country=birth_country
+                    birth_country=birth_country,
                 )
             )
         except:
@@ -124,7 +172,7 @@ def load_thesis(user, record):
             start_page=start_page,
             end_page=end_page,
             volume=volume,
-            advisors=advisors
+            advisors=advisors,
         )
     except:
         pass
@@ -134,8 +182,19 @@ def load_conference(user, record):
     json = record.json
 
     # attribs to CommonPublicationData
-    entity_id, keywords, document_titles, authors, publication_date, document_type, language, research_areas, \
-        start_page, end_page, volume = get_common_publication_data_values(user=user, json=json)
+    (
+        entity_id,
+        keywords,
+        document_titles,
+        authors,
+        publication_date,
+        document_type,
+        language,
+        research_areas,
+        start_page,
+        end_page,
+        volume,
+    ) = get_common_publication_data_values(user=user, json=json)
 
     try:
         ConferenceProceedings.conference_get_or_create(
@@ -150,7 +209,7 @@ def load_conference(user, record):
             research_areas=research_areas,
             start_page=start_page,
             end_page=end_page,
-            volume=volume
+            volume=volume,
         )
     except:
         pass
@@ -160,16 +219,27 @@ def load_article(user, record):
     json = record.json
 
     # attribs to CommonPublicationData
-    entity_id, keywords, document_titles, authors, publication_date, document_type, language, research_areas, \
-        start_page, end_page, volume = get_common_publication_data_values(user=user, json=json)
+    (
+        entity_id,
+        keywords,
+        document_titles,
+        authors,
+        publication_date,
+        document_type,
+        language,
+        research_areas,
+        start_page,
+        end_page,
+        volume,
+    ) = get_common_publication_data_values(user=user, json=json)
 
     # attribs to JournalArticle
-    series = get_value_in_a_list(json.get('fields').get('series'))
+    series = get_value_in_a_list(json.get("fields").get("series"))
     issns = []
     journal_titles = []
-    for item in json.get('relations').get('PublisherJournal') or []:
-        issns.extend(item.get('fields').get('identifier.issn'))
-        journal_titles.extend(item.get('fields').get('title'))
+    for item in json.get("relations").get("PublisherJournal") or []:
+        issns.extend(item.get("fields").get("identifier.issn"))
+        journal_titles.extend(item.get("fields").get("title"))
 
     try:
         JournalArticle.journal_get_or_create(
@@ -187,7 +257,7 @@ def load_article(user, record):
             volume=volume,
             series=series,
             issns=issns,
-            journal_titles=journal_titles
+            journal_titles=journal_titles,
         )
     except:
         pass

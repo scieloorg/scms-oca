@@ -4,14 +4,13 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('usefulmodels', '0003_auto_20220907_1749'),
+        ("usefulmodels", "0003_auto_20220907_1749"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='country',
-            options={'verbose_name': 'Country', 'verbose_name_plural': 'Países'},
+            name="country",
+            options={"verbose_name": "Country", "verbose_name_plural": "Países"},
         ),
     ]

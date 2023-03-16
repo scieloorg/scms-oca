@@ -57,7 +57,7 @@ def load(line, row, user):
     """
     try:
         row = orjson.loads(row)
-        doi = row.get('doi')
+        doi = row.get("doi")
         if doi:
             print("Line: %s, id: %s" % (line + 1, doi))
             rawunpaywall = models.RawUnpaywall.objects.filter(doi=doi)
@@ -67,11 +67,11 @@ def load(line, row, user):
                 rawunpaywall.harvesting_creation = date.today()
             else:
                 rawunpaywall = rawunpaywall[0]
-            rawunpaywall.is_paratext = row.get('is_paratext')
-            rawunpaywall.year = row.get('year')
-            rawunpaywall.resource_type = row.get('genre')
+            rawunpaywall.is_paratext = row.get("is_paratext")
+            rawunpaywall.year = row.get("year")
+            rawunpaywall.resource_type = row.get("genre")
             try:
-                rawunpaywall.update = row.get('updated')[:10]
+                rawunpaywall.update = row.get("updated")[:10]
             except TypeError:
                 pass
             rawunpaywall.json = row
@@ -81,7 +81,9 @@ def load(line, row, user):
             error = models.ErrorLog()
             error.error_type = str(type(e))
             error.error_message = str(e)[:255]
-            error.error_description = "Erro on processing the lines from a .json file to rawunpaywall model."
+            error.error_description = (
+                "Erro on processing the lines from a .json file to rawunpaywall model."
+            )
             error.data_reference = "line:%s" % str(line + 1)
             error.data = row
             error.data_type = "Unpaywall JSON"

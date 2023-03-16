@@ -11,6 +11,7 @@ class IndicatorIndex(indexes.SearchIndex, indexes.Indexable):
     Fields:
         text
     """
+
     created = indexes.CharField(model_attr="created", null=False)
     validity = indexes.CharField(model_attr="validity", null=False)
 
@@ -67,9 +68,9 @@ class IndicatorIndex(indexes.SearchIndex, indexes.Indexable):
         regions = set()
 
         for item in obj.institutions.iterator():
-            if item.location: 
+            if item.location:
                 cities.add(item.location.city)
-            if item.location and item.location.state: 
+            if item.location and item.location.state:
                 states.add(item.location.state)
                 regions.add(item.location.state.region)
 
@@ -85,8 +86,11 @@ class IndicatorIndex(indexes.SearchIndex, indexes.Indexable):
         n_regions = len(regions)
         n_country = 1
         return (
-            n_country*1000000 + n_regions*100000 + n_states*10000 +
-            n_cities*1000 + n_institutions*100
+            n_country * 1000000
+            + n_regions * 100000
+            + n_states * 10000
+            + n_cities * 1000
+            + n_institutions * 100
         )
 
     def prepare_geo_scope(self, obj):
@@ -96,9 +100,9 @@ class IndicatorIndex(indexes.SearchIndex, indexes.Indexable):
 
         n_institutions = obj.institutions.count()
         for item in obj.institutions.iterator():
-            if item.location: 
+            if item.location:
                 cities.add(item.location.city)
-            if item.location and item.location.state: 
+            if item.location and item.location.state:
                 states.add(item.location.state)
                 regions.add(item.location.state.region)
 
@@ -137,18 +141,19 @@ class IndicatorIndex(indexes.SearchIndex, indexes.Indexable):
             n_thematic_level1 = len(level1)
             n_thematic_level0 = len(level0)
             return (
-                n_thematic_level0*1000000 + n_thematic_level1*100000 +
-                n_thematic_level2*10000
+                n_thematic_level0 * 1000000
+                + n_thematic_level1 * 100000
+                + n_thematic_level2 * 10000
             )
 
     def prepare_thematic_scope(self, obj):
         for thematic_area in obj.thematic_areas.iterator():
             if thematic_area.level2:
-                return 'level2'
+                return "level2"
             if thematic_area.level1:
-                return 'level1'
+                return "level1"
             if thematic_area.level0:
-                return 'level0'
+                return "level0"
 
     def prepare_priority(self, obj):
         return obj.raw_data and obj.raw_data.size
@@ -158,7 +163,7 @@ class IndicatorIndex(indexes.SearchIndex, indexes.Indexable):
 
     def prepare_category(self, obj):
         if obj.category:
-            return CATEGORIES[obj.category]['title']
+            return CATEGORIES[obj.category]["title"]
 
     def prepare_classification(self, obj):
         return obj.action_and_practice and obj.action_and_practice.classification
@@ -261,4 +266,6 @@ class IndicatorIndex(indexes.SearchIndex, indexes.Indexable):
         return models.Indicator
 
     def index_queryset(self, using=None):
-        return self.get_model().objects.filter(validity="CURRENT", record_status="PUBLISHED")
+        return self.get_model().objects.filter(
+            validity="CURRENT", record_status="PUBLISHED"
+        )

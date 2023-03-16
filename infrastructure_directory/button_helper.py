@@ -5,16 +5,22 @@ from django.urls import reverse
 
 
 class InfrastructureDirectoryHelper(ButtonHelper):
-
     # Define classes for our button, here we can set an icon for example
-    validate_button_classnames = ["button-small", "icon",]
-    import_button_classnames = ["button-small", "icon",]
+    validate_button_classnames = [
+        "button-small",
+        "icon",
+    ]
+    import_button_classnames = [
+        "button-small",
+        "icon",
+    ]
 
     def validate_button(self, obj):
         # Define a label for our button
         text = _("Validate")
         return {
-            "url": reverse("infrastructure_directory:validate") + "?file_id=%s" % str(obj.id),
+            "url": reverse("infrastructure_directory:validate")
+            + "?file_id=%s" % str(obj.id),
             "label": text,
             "classname": self.finalise_classname(self.validate_button_classnames),
             "title": text,
@@ -24,7 +30,8 @@ class InfrastructureDirectoryHelper(ButtonHelper):
         # Define a label for our button
         text = _("Import")
         return {
-            "url": reverse("infrastructure_directory:import_file") + "?file_id=%s" % str(obj.id),
+            "url": reverse("infrastructure_directory:import_file")
+            + "?file_id=%s" % str(obj.id),
             "label": text,
             "classname": self.finalise_classname(self.import_button_classnames),
             "title": text,

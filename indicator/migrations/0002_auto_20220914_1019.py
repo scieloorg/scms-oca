@@ -4,20 +4,43 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('indicator', '0001_initial'),
+        ("indicator", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='indicator',
-            name='open_access',
-            field=models.CharField(blank=True, choices=[('', ''), ('NOT', 'NOT'), ('YES', 'YES'), ('ALL', 'ALL'), ('NOT APPLICABLE', 'NOT APPLICABLE'), ('UNDEFINED', 'UNDEFINED')], max_length=255, null=True, verbose_name='Open access'),
+            model_name="indicator",
+            name="open_access",
+            field=models.CharField(
+                blank=True,
+                choices=[
+                    ("", ""),
+                    ("NOT", "NOT"),
+                    ("YES", "YES"),
+                    ("ALL", "ALL"),
+                    ("NOT APPLICABLE", "NOT APPLICABLE"),
+                    ("UNDEFINED", "UNDEFINED"),
+                ],
+                max_length=255,
+                null=True,
+                verbose_name="Open access",
+            ),
         ),
         migrations.AlterField(
-            model_name='indicator',
-            name='record_status',
-            field=models.CharField(blank=True, choices=[('', ''), ('WIP', 'WIP'), ('TO MODERATE', 'TO MODERATE'), ('PUBLISHED', 'PUBLISHED')], max_length=255, null=True, verbose_name='Record status'),
+            model_name="indicator",
+            name="record_status",
+            field=models.CharField(
+                blank=True,
+                choices=[
+                    ("", ""),
+                    ("WIP", "WIP"),
+                    ("TO MODERATE", "TO MODERATE"),
+                    ("PUBLISHED", "PUBLISHED"),
+                ],
+                max_length=255,
+                null=True,
+                verbose_name="Record status",
+            ),
         ),
     ]

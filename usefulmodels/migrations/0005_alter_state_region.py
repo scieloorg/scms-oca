@@ -4,15 +4,30 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('usefulmodels', '0004_alter_country_options'),
+        ("usefulmodels", "0004_alter_country_options"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='state',
-            name='region',
-            field=models.CharField(blank=True, choices=[('', ''), ('Norte', 'Norte'), ('Nordeste', 'Nordeste'), ('Centro-oeste', 'Centro-Oeste'), ('Sudeste', 'Sudeste'), ('Sul', 'Sul'), ('ALL', 'ALL'), ('NOT APPLICABLE', 'NOT_APPLICABLE'), ('UNDEFINED', 'UNDEFINED')], max_length=255, null=True, verbose_name='Região'),
+            model_name="state",
+            name="region",
+            field=models.CharField(
+                blank=True,
+                choices=[
+                    ("", ""),
+                    ("Norte", "Norte"),
+                    ("Nordeste", "Nordeste"),
+                    ("Centro-oeste", "Centro-Oeste"),
+                    ("Sudeste", "Sudeste"),
+                    ("Sul", "Sul"),
+                    ("ALL", "ALL"),
+                    ("NOT APPLICABLE", "NOT_APPLICABLE"),
+                    ("UNDEFINED", "UNDEFINED"),
+                ],
+                max_length=255,
+                null=True,
+                verbose_name="Região",
+            ),
         ),
     ]

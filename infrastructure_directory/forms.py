@@ -4,7 +4,6 @@ from infrastructure_directory.search_indexes import InfraStructureIndex
 
 
 class InfrastructureDirectoryForm(WagtailAdminModelForm):
-
     def save_all(self, user):
         structure_directory = super().save(commit=False)
 
@@ -23,7 +22,6 @@ class InfrastructureDirectoryForm(WagtailAdminModelForm):
 
 
 class InfrastructureDirectoryFileForm(WagtailAdminModelForm):
-
     def save_all(self, user):
         structure_directory_file = super().save(commit=False)
 

@@ -3,6 +3,7 @@ from haystack import indexes
 
 from infrastructure_directory import models
 
+
 class InfraStructureIndex(indexes.SearchIndex, indexes.Indexable):
     """
     Common Fields:
@@ -16,6 +17,7 @@ class InfraStructureIndex(indexes.SearchIndex, indexes.Indexable):
         classification
         keywords
     """
+
     record_type = indexes.CharField(null=False)
     text = indexes.CharField(document=True, use_template=True)
     title = indexes.CharField(model_attr="title", null=True)
@@ -43,7 +45,6 @@ class InfraStructureIndex(indexes.SearchIndex, indexes.Indexable):
 
     def prepare_directory_type(self, obj):
         return "infrastructure_directory"
-
 
     def prepare_institutions(self, obj):
         if obj.institutions:

@@ -5,231 +5,368 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('usefulmodels', '0011_auto_20221108_2356'),
-        ('indicator', '0006_auto_20220927_1255'),
+        ("usefulmodels", "0011_auto_20221108_2356"),
+        ("indicator", "0006_auto_20220927_1255"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='ScientificProduction',
+            name="ScientificProduction",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('communication_object', models.CharField(blank=True, max_length=25, null=True, verbose_name='Communication object')),
-                ('open_access_status', models.CharField(blank=True, max_length=50, null=True, verbose_name='Open Access Status')),
-                ('use_license', models.CharField(blank=True, max_length=50, null=True, verbose_name='Use License')),
-                ('apc', models.CharField(blank=True, max_length=20, null=True, verbose_name='Article Processing Charge')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "communication_object",
+                    models.CharField(
+                        blank=True,
+                        max_length=25,
+                        null=True,
+                        verbose_name="Communication object",
+                    ),
+                ),
+                (
+                    "open_access_status",
+                    models.CharField(
+                        blank=True,
+                        max_length=50,
+                        null=True,
+                        verbose_name="Open Access Status",
+                    ),
+                ),
+                (
+                    "use_license",
+                    models.CharField(
+                        blank=True, max_length=50, null=True, verbose_name="Use License"
+                    ),
+                ),
+                (
+                    "apc",
+                    models.CharField(
+                        blank=True,
+                        max_length=20,
+                        null=True,
+                        verbose_name="Article Processing Charge",
+                    ),
+                ),
             ],
         ),
         migrations.RemoveField(
-            model_name='versioning',
-            name='creator',
+            model_name="versioning",
+            name="creator",
         ),
         migrations.RemoveField(
-            model_name='versioning',
-            name='posterior_record',
+            model_name="versioning",
+            name="posterior_record",
         ),
         migrations.RemoveField(
-            model_name='versioning',
-            name='previous_record',
+            model_name="versioning",
+            name="previous_record",
         ),
         migrations.RemoveField(
-            model_name='versioning',
-            name='updated_by',
+            model_name="versioning",
+            name="updated_by",
         ),
         migrations.RemoveIndex(
-            model_name='indicator',
-            name='indicator_i_action__8f231a_idx',
+            model_name="indicator",
+            name="indicator_i_action__8f231a_idx",
         ),
         migrations.RemoveIndex(
-            model_name='indicator',
-            name='indicator_i_practic_7b6df5_idx',
+            model_name="indicator",
+            name="indicator_i_practic_7b6df5_idx",
         ),
         migrations.RemoveIndex(
-            model_name='indicator',
-            name='indicator_i_start_d_618ee6_idx',
+            model_name="indicator",
+            name="indicator_i_start_d_618ee6_idx",
         ),
         migrations.RemoveIndex(
-            model_name='indicator',
-            name='indicator_i_end_dat_0cdcf7_idx',
+            model_name="indicator",
+            name="indicator_i_end_dat_0cdcf7_idx",
         ),
         migrations.RenameField(
-            model_name='indicator',
-            old_name='file_json',
-            new_name='summarized',
+            model_name="indicator",
+            old_name="file_json",
+            new_name="summarized",
         ),
         migrations.RemoveField(
-            model_name='indicator',
-            name='action',
+            model_name="indicator",
+            name="action",
         ),
         migrations.RemoveField(
-            model_name='indicator',
-            name='classification',
+            model_name="indicator",
+            name="classification",
         ),
         migrations.RemoveField(
-            model_name='indicator',
-            name='end_date',
+            model_name="indicator",
+            name="end_date",
         ),
         migrations.RemoveField(
-            model_name='indicator',
-            name='file_csv',
+            model_name="indicator",
+            name="file_csv",
         ),
         migrations.RemoveField(
-            model_name='indicator',
-            name='practice',
+            model_name="indicator",
+            name="practice",
         ),
         migrations.RemoveField(
-            model_name='indicator',
-            name='start_date',
+            model_name="indicator",
+            name="start_date",
         ),
         migrations.RemoveField(
-            model_name='indicator',
-            name='versioning',
+            model_name="indicator",
+            name="versioning",
         ),
         migrations.AddField(
-            model_name='indicator',
-            name='action_and_practice',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='usefulmodels.actionandpractice'),
+            model_name="indicator",
+            name="action_and_practice",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="usefulmodels.actionandpractice",
+            ),
         ),
         migrations.AddField(
-            model_name='indicator',
-            name='code',
-            field=models.CharField(default='', max_length=555, verbose_name='Código'),
+            model_name="indicator",
+            name="code",
+            field=models.CharField(default="", max_length=555, verbose_name="Código"),
             preserve_default=False,
         ),
         migrations.AddField(
-            model_name='indicator',
-            name='end_date_year',
-            field=models.IntegerField(blank=True, null=True, verbose_name='Data de fim'),
+            model_name="indicator",
+            name="end_date_year",
+            field=models.IntegerField(
+                blank=True, null=True, verbose_name="Data de fim"
+            ),
         ),
         migrations.AddField(
-            model_name='indicator',
-            name='measurement',
-            field=models.CharField(choices=[('', ''), ('FREQUENCY', 'Frequência'), ('EVOLUTION', 'Evolução'), ('AVERAGE', 'Média'), ('RELATIVE_FREQUENCY', 'Frequência relativa')], max_length=25, null=True, verbose_name='Measurement'),
+            model_name="indicator",
+            name="measurement",
+            field=models.CharField(
+                choices=[
+                    ("", ""),
+                    ("FREQUENCY", "Frequência"),
+                    ("EVOLUTION", "Evolução"),
+                    ("AVERAGE", "Média"),
+                    ("RELATIVE_FREQUENCY", "Frequência relativa"),
+                ],
+                max_length=25,
+                null=True,
+                verbose_name="Measurement",
+            ),
         ),
         migrations.AddField(
-            model_name='indicator',
-            name='posterior_record',
-            field=models.ForeignKey(blank=True, max_length=255, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='successor_register', to='indicator.indicator', verbose_name='Posterior Record'),
+            model_name="indicator",
+            name="posterior_record",
+            field=models.ForeignKey(
+                blank=True,
+                max_length=255,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="successor_register",
+                to="indicator.indicator",
+                verbose_name="Posterior Record",
+            ),
         ),
         migrations.AddField(
-            model_name='indicator',
-            name='previous_record',
-            field=models.ForeignKey(blank=True, max_length=255, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='predecessor_register', to='indicator.indicator', verbose_name='Previous Record'),
+            model_name="indicator",
+            name="previous_record",
+            field=models.ForeignKey(
+                blank=True,
+                max_length=255,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="predecessor_register",
+                to="indicator.indicator",
+                verbose_name="Previous Record",
+            ),
         ),
         migrations.AddField(
-            model_name='indicator',
-            name='raw_data',
-            field=models.FileField(blank=True, max_length=255, null=True, upload_to='', verbose_name='JSONL Zip File'),
+            model_name="indicator",
+            name="raw_data",
+            field=models.FileField(
+                blank=True,
+                max_length=255,
+                null=True,
+                upload_to="",
+                verbose_name="JSONL Zip File",
+            ),
         ),
         migrations.AddField(
-            model_name='indicator',
-            name='scope',
-            field=models.CharField(choices=[('GENERAL', 'Geral'), ('INSTITUTIONAL', 'Instituticional'), ('GEOGRAPHIC', 'Geográfico'), ('CHRONOLOGICAL', 'Cronológico'), ('THEMATIC', 'Temático')], max_length=20, null=True, verbose_name='Scope'),
+            model_name="indicator",
+            name="scope",
+            field=models.CharField(
+                choices=[
+                    ("GENERAL", "Geral"),
+                    ("INSTITUTIONAL", "Instituticional"),
+                    ("GEOGRAPHIC", "Geográfico"),
+                    ("CHRONOLOGICAL", "Cronológico"),
+                    ("THEMATIC", "Temático"),
+                ],
+                max_length=20,
+                null=True,
+                verbose_name="Scope",
+            ),
         ),
         migrations.AddField(
-            model_name='indicator',
-            name='seq',
-            field=models.IntegerField(blank=True, null=True, verbose_name='Sequential number'),
+            model_name="indicator",
+            name="seq",
+            field=models.IntegerField(
+                blank=True, null=True, verbose_name="Sequential number"
+            ),
         ),
         migrations.AddField(
-            model_name='indicator',
-            name='start_date_year',
-            field=models.IntegerField(blank=True, null=True, verbose_name='Data de início'),
+            model_name="indicator",
+            name="start_date_year",
+            field=models.IntegerField(
+                blank=True, null=True, verbose_name="Data de início"
+            ),
         ),
         migrations.AddField(
-            model_name='indicator',
-            name='validity',
-            field=models.CharField(blank=True, choices=[('', ''), ('CURRENT', 'CURRENT'), ('OUTDATED', 'OUTDATED')], max_length=255, null=True, verbose_name='Record validity'),
+            model_name="indicator",
+            name="validity",
+            field=models.CharField(
+                blank=True,
+                choices=[("", ""), ("CURRENT", "CURRENT"), ("OUTDATED", "OUTDATED")],
+                max_length=255,
+                null=True,
+                verbose_name="Record validity",
+            ),
         ),
         migrations.AlterField(
-            model_name='indicator',
-            name='record_status',
-            field=models.CharField(blank=True, choices=[('', ''), ('WIP', 'WORK IN PROGRESS'), ('TO MODERATE', 'TO MODERATE'), ('PUBLISHED', 'PUBLISHED')], max_length=255, null=True, verbose_name='Record status'),
+            model_name="indicator",
+            name="record_status",
+            field=models.CharField(
+                blank=True,
+                choices=[
+                    ("", ""),
+                    ("WIP", "WORK IN PROGRESS"),
+                    ("TO MODERATE", "TO MODERATE"),
+                    ("PUBLISHED", "PUBLISHED"),
+                ],
+                max_length=255,
+                null=True,
+                verbose_name="Record status",
+            ),
         ),
         migrations.AddIndex(
-            model_name='indicator',
-            index=models.Index(fields=['action_and_practice'], name='indicator_i_action__f46b16_idx'),
+            model_name="indicator",
+            index=models.Index(
+                fields=["action_and_practice"], name="indicator_i_action__f46b16_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='indicator',
-            index=models.Index(fields=['code'], name='indicator_i_code_ad3bf5_idx'),
+            model_name="indicator",
+            index=models.Index(fields=["code"], name="indicator_i_code_ad3bf5_idx"),
         ),
         migrations.AddIndex(
-            model_name='indicator',
-            index=models.Index(fields=['description'], name='indicator_i_descrip_361176_idx'),
+            model_name="indicator",
+            index=models.Index(
+                fields=["description"], name="indicator_i_descrip_361176_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='indicator',
-            index=models.Index(fields=['end_date_year'], name='indicator_i_end_dat_10d73e_idx'),
+            model_name="indicator",
+            index=models.Index(
+                fields=["end_date_year"], name="indicator_i_end_dat_10d73e_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='indicator',
-            index=models.Index(fields=['link'], name='indicator_i_link_8fc8f3_idx'),
+            model_name="indicator",
+            index=models.Index(fields=["link"], name="indicator_i_link_8fc8f3_idx"),
         ),
         migrations.AddIndex(
-            model_name='indicator',
-            index=models.Index(fields=['measurement'], name='indicator_i_measure_66cef4_idx'),
+            model_name="indicator",
+            index=models.Index(
+                fields=["measurement"], name="indicator_i_measure_66cef4_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='indicator',
-            index=models.Index(fields=['posterior_record'], name='indicator_i_posteri_48fe21_idx'),
+            model_name="indicator",
+            index=models.Index(
+                fields=["posterior_record"], name="indicator_i_posteri_48fe21_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='indicator',
-            index=models.Index(fields=['previous_record'], name='indicator_i_previou_4694ae_idx'),
+            model_name="indicator",
+            index=models.Index(
+                fields=["previous_record"], name="indicator_i_previou_4694ae_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='indicator',
-            index=models.Index(fields=['record_status'], name='indicator_i_record__612ab1_idx'),
+            model_name="indicator",
+            index=models.Index(
+                fields=["record_status"], name="indicator_i_record__612ab1_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='indicator',
-            index=models.Index(fields=['scope'], name='indicator_i_scope_7e501d_idx'),
+            model_name="indicator",
+            index=models.Index(fields=["scope"], name="indicator_i_scope_7e501d_idx"),
         ),
         migrations.AddIndex(
-            model_name='indicator',
-            index=models.Index(fields=['seq'], name='indicator_i_seq_c68a1b_idx'),
+            model_name="indicator",
+            index=models.Index(fields=["seq"], name="indicator_i_seq_c68a1b_idx"),
         ),
         migrations.AddIndex(
-            model_name='indicator',
-            index=models.Index(fields=['source'], name='indicator_i_source_d3cea0_idx'),
+            model_name="indicator",
+            index=models.Index(fields=["source"], name="indicator_i_source_d3cea0_idx"),
         ),
         migrations.AddIndex(
-            model_name='indicator',
-            index=models.Index(fields=['start_date_year'], name='indicator_i_start_d_4a915d_idx'),
+            model_name="indicator",
+            index=models.Index(
+                fields=["start_date_year"], name="indicator_i_start_d_4a915d_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='indicator',
-            index=models.Index(fields=['validity'], name='indicator_i_validit_ea4c80_idx'),
+            model_name="indicator",
+            index=models.Index(
+                fields=["validity"], name="indicator_i_validit_ea4c80_idx"
+            ),
         ),
         migrations.DeleteModel(
-            name='Versioning',
+            name="Versioning",
         ),
         migrations.AddIndex(
-            model_name='scientificproduction',
-            index=models.Index(fields=['communication_object'], name='indicator_s_communi_867a4b_idx'),
+            model_name="scientificproduction",
+            index=models.Index(
+                fields=["communication_object"], name="indicator_s_communi_867a4b_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='scientificproduction',
-            index=models.Index(fields=['open_access_status'], name='indicator_s_open_ac_2ec1d6_idx'),
+            model_name="scientificproduction",
+            index=models.Index(
+                fields=["open_access_status"], name="indicator_s_open_ac_2ec1d6_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='scientificproduction',
-            index=models.Index(fields=['use_license'], name='indicator_s_use_lic_6e77e0_idx'),
+            model_name="scientificproduction",
+            index=models.Index(
+                fields=["use_license"], name="indicator_s_use_lic_6e77e0_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='scientificproduction',
-            index=models.Index(fields=['apc'], name='indicator_s_apc_aa703b_idx'),
+            model_name="scientificproduction",
+            index=models.Index(fields=["apc"], name="indicator_s_apc_aa703b_idx"),
         ),
         migrations.AddField(
-            model_name='indicator',
-            name='scientific_production',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='indicator.scientificproduction'),
+            model_name="indicator",
+            name="scientific_production",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="indicator.scientificproduction",
+            ),
         ),
         migrations.AddIndex(
-            model_name='indicator',
-            index=models.Index(fields=['scientific_production'], name='indicator_i_scienti_e668fa_idx'),
+            model_name="indicator",
+            index=models.Index(
+                fields=["scientific_production"], name="indicator_i_scienti_e668fa_idx"
+            ),
         ),
     ]

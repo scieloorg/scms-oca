@@ -8,7 +8,8 @@ User = get_user_model()
 # This presuppose a fixtures/countries.csv file exists.
 # Consider that existe a user with id=1
 
-SEPARATOR = ';'
+SEPARATOR = ";"
+
 
 def run(*args):
     user_id = 1
@@ -16,7 +17,9 @@ def run(*args):
     # Delete all cities
     models.Country.objects.all().delete()
 
-    with open(os.path.dirname(os.path.realpath(__file__)) + "/../fixtures/countries.csv", 'r') as fp:
+    with open(
+        os.path.dirname(os.path.realpath(__file__)) + "/../fixtures/countries.csv", "r"
+    ) as fp:
         for line in fp.readlines():
             name_pt, name_en, capital, acron3, acron2 = line.strip().split(SEPARATOR)
 
@@ -26,5 +29,11 @@ def run(*args):
 
             creator = User.objects.get(id=user_id)
 
-            models.Country(name_pt=name_pt, name_en=name_en, capital=capital,
-                           acron3=acron3, acron2=acron2, creator=creator).save()
+            models.Country(
+                name_pt=name_pt,
+                name_en=name_en,
+                capital=capital,
+                acron3=acron3,
+                acron2=acron2,
+                creator=creator,
+            ).save()
