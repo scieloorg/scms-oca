@@ -103,7 +103,7 @@ def load_crossref(from_update_date, until_update_date):
     Sync or Async
     Param: from_update_date and until_update_date are strings representing the date range in the format 'YYYY'.
     """
-    url = f'https://api.crossref.org/works?query.affiliation=Brazil&filter=type:journal-article,from-update-date:{from_update_date},until-update-date:{until_update_date}&mailto=samuelveiga710@gmail.com&cursor=*'
+    url = f'https://api.crossref.org/works?query.affiliation=Brazil&filter=type:journal-article,from-update-date:{from_update_date},until-update-date:{until_update_date}&cursor=*'
     
     dados = ['DOI', 'title', 'volume', 'publisher', 'source', 'type',]
 
@@ -112,7 +112,7 @@ def load_crossref(from_update_date, until_update_date):
 
             data = fetch_data_retry.request_retry(url)
             articles = []
-            
+
             if data['status'] == 'ok':
                 for item in data['message']['items']:
                     article_dict = {field: item.get(field, '') for field in dados}
@@ -125,7 +125,8 @@ def load_crossref(from_update_date, until_update_date):
                 crossref.load(articles)
 
                 cursor = data['message']['next-cursor']
-                url = url[:168] + cursor
+                # Url with new cursor
+                url = url.split('cursor=')[0] + 'cursor=' + cursor
 
     except Exception as e:
         logger.info(f'Error: {e}')
