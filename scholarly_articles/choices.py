@@ -60,4 +60,5 @@ APC = [
 SOURCE = [
     ("", ""),
     ("UNPAYWALL", "UNPAYWALL"),
+    ("CROSSREF", "CROSSREF"),
 ]
