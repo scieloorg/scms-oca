@@ -107,7 +107,10 @@ def load_crossref(from_update_date, until_update_date):
     Param: from_update_date and until_update_date are strings representing the date range in the format 'YYYY'.
     
     The crossref API format is something like the format below:
-
+    
+    "status": "ok",
+    "message-type": "work-list",
+    "message-version": "1.0.0",
     "message": {
         "facets": {
             
