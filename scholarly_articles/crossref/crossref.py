@@ -40,23 +40,31 @@ def create_journal(journal_name):
     journal, created = models.Journals.objects.get_or_create(
         journal_name=journal_name
     )
-
     return journal
 
 
 def create_contributors(authors):
     contributors = []
-    date_author = ['family', 'given', 'orcid']
+    date_author = ['family', 'given', 'orcid', 'affiliation']
     for author in authors:
         # Caso esteja faltando alguns dos dados (family, given, orcid)
         # ele atribui uma string vazia ao campo.
         field = {field: author.get(field, '') for field in date_author}
 
+        affiliation = create_affiliation(field['affiliation'])
+        
         contributor, created = models.Contributors.objects.get_or_create(
             family=field['family'],
             given=field['given'],
             orcid=field['orcid'],
+            affiliation=affiliation,
         )
         contributors.append(contributor)
-    
     return contributors
+
+
+def create_affiliation(author):
+    affiliation, created = models.Affiliations.objects.get_or_create(
+        name=author[0]['name'],
+    )
+    return affiliation
