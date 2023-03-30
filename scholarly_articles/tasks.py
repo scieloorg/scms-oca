@@ -99,7 +99,7 @@ def complete_affiliation_data(self):
 
 
 @celery_app.task()
-def load_crossref(from_update_date, until_update_date):
+def load_crossref(from_update_date=2012, until_update_date=2012):
     """
     Retrieves article data from CrossRef API for a given range of years.
 
@@ -207,6 +207,6 @@ def load_crossref(from_update_date, until_update_date):
                 url = url.split('cursor=')[0] + 'cursor=' + cursor
 
     except Exception as e:
-        logger.info(f'Error: {e}')
+        logger.info(f'Error ao pegar os dados no banco de dados: {e}')
 
    
