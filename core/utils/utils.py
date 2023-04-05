@@ -10,6 +10,7 @@ from tenacity import (
 
 logger = logging.getLogger(__name__)
 
+
 class RetryableError(Exception):
     """Recoverable error without having to modify the data state on the client
     side, e.g. timeouts, errors from network partitioning, etc.
@@ -20,6 +21,7 @@ class NonRetryableError(Exception):
     """Recoverable error without having to modify the data state on the client
     side, e.g. timeouts, errors from network partitioning, etc.
     """
+
 
 def nestget(data, *path, default=None):
     """

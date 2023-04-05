@@ -102,7 +102,7 @@ def load_crossref(from_update_date=2012, until_update_date=2012):
 
         from scholarly_articles import tasks
         from scholarly_articles import models
-        
+
         tasks.load_crossref(from_update_date=2012, until_update_date=2017)
 
 
@@ -212,4 +212,4 @@ def load_crossref(from_update_date=2012, until_update_date=2012):
                 url = url.split("cursor=")[0] + "cursor=" + cursor
 
     except Exception as e:
-        logger.info(f'Unexpected error: {e}')
+        logger.info(f"Unexpected error: {e}")

@@ -8,7 +8,7 @@ def load(articles):
     """
     Load the article data do models.ScholarlyArticles, cheching by DOI if the article already exists.
 
-    Example of article data: 
+    Example of article data:
     [
         {'DOI': '10.1590/s1516-14391999000400004',
         'author': [{'affiliation': [{'name': 'UNESP,  Brazil; UFSCar,  Brazil'}],
@@ -47,10 +47,15 @@ def load(articles):
     try:
 
         for article in articles:
-            journal = get_or_create_journal(utils.nestget(article, "container-title", 0))
+            journal = get_or_create_journal(
+                utils.nestget(article, "container-title", 0)
+            )
             contributors = get_or_create_contributor(utils.nestget(article, "author"))
 
-            scholary_article, created = models.ScholarlyArticles.objects.update_or_create(
+            (
+                scholary_article,
+                created,
+            ) = models.ScholarlyArticles.objects.update_or_create(
                 doi=utils.nestget(article, "DOI"),
                 defaults={
                     "title": utils.nestget(article, "title", 0),
