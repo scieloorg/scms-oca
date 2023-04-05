@@ -1,26 +1,18 @@
 import gzip
+import logging
 
-
+from django.conf import settings
 from django.contrib.auth import get_user_model
 
 from config import celery_app
+from core.utils import utils
+from scholarly_articles.crossref import crossref
 from scholarly_articles.unpaywall import (
-    load_data,
-    unpaywall,
-    supplementary,
     affiliation,
+    load_data,
+    supplementary,
+    unpaywall,
 )
-from scholarly_articles.crossref import (
-    crossref,
-    fetch_data_retry,
-)
-from config.settings.base import (
-    URL_API_CROSSREF,
-)
-
-
-import logging
-
 
 logger = logging.getLogger(__name__)
 
@@ -105,15 +97,23 @@ def load_crossref(from_update_date=2012, until_update_date=2012):
 
     Sync or Async
     Param: from_update_date and until_update_date are strings representing the date range in the format 'YYYY'.
-    
+
+    Example running this function on python terminal
+
+        from scholarly_articles import tasks
+        from scholarly_articles import models
+        
+        tasks.load_crossref(from_update_date=2012, until_update_date=2017)
+
+
     The crossref API format is something like the format below:
-    
+
     "status": "ok",
     "message-type": "work-list",
     "message-version": "1.0.0",
     "message": {
         "facets": {
-            
+
         },
         "next-cursor": "DnF1ZXJ5VGhlbkZldGNoBgAAAAAKerflFjFGV1lXWE94VGU2bUMzaVRjNzc2aFEAAAAAIGt0aRZHblpDbkEzT1FvRy0tOGFOZ05EOHVnAAAAACBrdGgWR25aQ25
             BM09Rb0ctLThhTmdORDh1ZwAAAAAZqMEuFk5qWk1fWm1iUVV1V3Nwd3MxN3FqQ3cAAAAAFV5fOBZfNEZlTDBRZ1FuLWZ4NVhlZU9MYzN3AAAAABWPAdcWaDRJMjhrcXVUOGE3dDI1VDhnWHMyZw==",
@@ -172,41 +172,44 @@ def load_crossref(from_update_date=2012, until_update_date=2012):
         ]
     }
     """
-    url = URL_API_CROSSREF + f'?query.affiliation=Brazil&filter=type:journal-article,from-update-date:{from_update_date},until-update-date:{until_update_date}&cursor=*'
-    
+    url = (
+        settings.URL_API_CROSSREF
+        + f"?query.affiliation=Brazil&filter=type:journal-article,from-update-date:{from_update_date},until-update-date:{until_update_date}&mailto=atta.jamil@gmail.com&cursor=*"
+    )
+
     dados = [
-        'publisher', 
-        'DOI', 
-        'type', 
-        'source', 
-        'title', 
-        'volume', 
-        'author', 
-        'container-title'
+        "publisher",
+        "DOI",
+        "type",
+        "source",
+        "title",
+        "volume",
+        "author",
+        "container-title",
+        "issued",
+        "issue",
     ]
 
     try:
         while True:
 
-            data = fetch_data_retry.request_retry(url, total=10, backoff_factor=1)
+            data = utils.fetch_data(url, json=True, timeout=30, verify=True)
             articles = []
-            if data['status'] == 'ok':
-                for item in data['message']['items']:
-                    article_dict = {field: item.get(field, '') for field in dados}
+            if data["status"] == "ok":
+                for item in data["message"]["items"]:
+                    article_dict = {field: item.get(field, "") for field in dados}
                     articles.append(article_dict)
 
                 # If there were no more items, the interaction stops
-                if not data['message']['items']:
+                if not data["message"]["items"]:
                     return "No more articles found."
 
                 # Send articles to a function that will save in the database
                 crossref.load(articles)
 
-                cursor = data['message']['next-cursor']
+                cursor = data["message"]["next-cursor"]
                 # Url with new cursor
-                url = url.split('cursor=')[0] + 'cursor=' + cursor
+                url = url.split("cursor=")[0] + "cursor=" + cursor
 
     except Exception as e:
-        logger.info(f'Error ao pegar os dados no banco de dados: {e}')
-
-   
+        logger.info(f'Unexpected error: {e}')
