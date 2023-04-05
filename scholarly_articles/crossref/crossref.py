@@ -157,7 +157,6 @@ def get_or_create_license(license):
     """
     if license:
         url = utils.nestget(license, 0, "URL")
-        print(url)
         if url:
             lic, created = models.License.objects.get_or_create(
                 url=url,
