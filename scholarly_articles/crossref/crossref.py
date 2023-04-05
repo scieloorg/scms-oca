@@ -39,7 +39,26 @@ def load(articles):
         'title': ['Influence of synthesis and processing parameters of the columbite '
                     'precursor on the amount of Perovskite PMN'],
         'type': 'journal-article',
-        'volume': '2'}]
+        'volume': '2'}],
+        "license": [
+          {
+            "start": {
+              "date-parts": [
+                [
+                  2020,
+                  6,
+                  9
+                ]
+              ],
+              "date-time": "2020-06-09T00:00:00Z",
+              "timestamp": 1591660800000
+            },
+            "content-version": "vor",
+            "delay-in-days": 8,
+            "URL": "http://www.diabetesjournals.org/content/license"
+          }
+        ],
+        }
     ]
 
     """
@@ -51,6 +70,7 @@ def load(articles):
                 utils.nestget(article, "container-title", 0)
             )
             contributors = get_or_create_contributor(utils.nestget(article, "author"))
+            license = get_or_create_license(utils.nestget(article, "license"))
 
             (
                 scholary_article,
@@ -64,6 +84,7 @@ def load(articles):
                     "year": utils.nestget(article, "issued", "date-parts", 0, 0),
                     "number": utils.nestget(article, "issue"),
                     "journal": journal,
+                    "license": license,
                 },
             )
             scholary_article.contributors.set(contributors)
@@ -127,4 +148,19 @@ def get_or_create_affiliation(affiliation):
                 name=name,
             )
             return aff
+    return None
+
+
+def get_or_create_license(license):
+    """
+    Get or create license by "name"
+    """
+    if license:
+        url = utils.nestget(license, 0, "URL")
+        print(url)
+        if url:
+            lic, created = models.License.objects.get_or_create(
+                url=url,
+            )
+            return lic
     return None

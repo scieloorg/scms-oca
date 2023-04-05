@@ -26,6 +26,14 @@ class ScholarlyArticles(models.Model):
     use_license = models.CharField(
         _("Use License"), max_length=50, choices=choices.LICENSE, null=True, blank=True
     )
+    license = models.ForeignKey(
+        _("License"),
+        verbose_name=_("License"),
+        on_delete=models.SET_NULL,
+        max_length=255,
+        null=True,
+        blank=True,
+    )
     apc = models.CharField(
         _("Article Processing Charge"),
         max_length=20,
@@ -116,6 +124,7 @@ class ScholarlyArticles(models.Model):
         FieldPanel("year"),
         FieldPanel("open_access_status"),
         FieldPanel("use_license"),
+        FieldPanel("license"),
         FieldPanel("apc"),
         AutocompletePanel("contributors"),
         AutocompletePanel("journal"),
@@ -230,7 +239,7 @@ class Contributors(models.Model):
     autocomplete_search_field = "given"
 
     def autocomplete_label(self):
-        return self.given + self.family
+        return "%s %s" % (self.given, self.family)
 
     def __unicode__(self):
         return f"{self.family}, {self.given} ({self.orcid})"
@@ -509,3 +518,32 @@ class ErrorLog(CommonControlField):
         blank=True,
         help_text=_("Data type, can the the model, ex.: models.RawUnpaywall"),
     )
+
+
+class License(models.Model):
+    """
+    A class to represent a license designed in the SciELO context.
+
+    Attributes
+    ----------
+    name: The name of license, it is not required
+    delay_in_days: 
+        Number of days between the publication date of the work and the start date of this license
+    start: Date on which this license begins to take effect
+    URL: Link to a web page describing this license
+
+    Methods
+    -------
+    TODO
+    """
+
+    name = models.CharField(_("Name"), max_length=100, null=True, blank=True, help_text=_("The name of license, it is not required"))
+    delay_in_days = models.IntegerField(_("Delay in Days"), null=True, blank=True, help_text=_("Number of days between the publication date of the work and the start date of this license"))
+    start = models.CharField(_("Stard Date"), max_length=100, null=True, blank=True, help_text=_("Date on which this license begins to take effect"))
+    url = models.URLField(_("URL"), help_text="Link to a web page describing this license")
+
+    def __unicode__(self):
+        return self.name or self.url
+
+    def __str__(self):
+        return self.name or self.url

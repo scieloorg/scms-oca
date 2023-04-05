@@ -188,6 +188,7 @@ def load_crossref(from_update_date=2012, until_update_date=2012):
         "container-title",
         "issued",
         "issue",
+        "license",
     ]
 
     try:

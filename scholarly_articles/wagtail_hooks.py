@@ -14,6 +14,7 @@ from .models import (
     RawUnpaywall,
     SupplementaryData,
     ErrorLog,
+    License,
 )
 
 
@@ -40,6 +41,7 @@ class ScholarlyArticlesAdmin(ModelAdmin):
         "year",
         "open_access_status",
         "use_license",
+        "license",
         "apc",
         "all_contributors",
         "journal",
@@ -177,6 +179,24 @@ class ErrorLogAdmin(ModelAdmin):
     search_fields = ("document_id",)
 
 
+class LicenseAdmin(ModelAdmin):
+    model = License
+    menu_label = _("License")
+    menu_icon = "folder-open-inverse"
+    add_to_settings_menu = False  # or True to add your model to the Settings sub-menu
+    exclude_from_explorer = (
+        False  # or True to exclude pages of this type from Wagtail's explorer view
+    )
+    list_display = (
+        "name",
+        "delay_in_days",
+        "start",
+        "url",
+    )
+    list_filter = ("name", "url")
+    search_fields = ("name", "url")
+
+
 class ScholarlyArticlesAdminGroup(ModelAdminGroup):
     menu_label = _("Articles Directory")
     menu_icon = "folder-open-inverse"  # change as required
@@ -188,6 +208,7 @@ class ScholarlyArticlesAdminGroup(ModelAdminGroup):
         AffiliationsAdmin,
         RawUnpaywallAdmin,
         SupplementaryDataAdmin,
+        LicenseAdmin,
         ErrorLogAdmin,
     )
 
