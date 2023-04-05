@@ -1,21 +1,65 @@
 from scholarly_articles import models
 from django.db.utils import DataError
 
+from core.utils import utils
+
 
 def load(articles):
+    """
+    Load the article data do models.ScholarlyArticles, cheching by DOI if the article already exists.
+
+    Example of article data: 
+    [
+        {'DOI': '10.1590/s1516-14391999000400004',
+        'author': [{'affiliation': [{'name': 'UNESP,  Brazil; UFSCar,  Brazil'}],
+                    'family': 'Cavalheiro',
+                    'given': 'A.A.',
+                    'sequence': 'first'},
+                    {'affiliation': [{'name': 'UNESP,  Brazil; UFSCar,  Brazil'}],
+                    'family': 'Zaghete',
+                    'given': 'M.A.',
+                    'sequence': 'additional'},
+                    {'affiliation': [{'name': 'UNESP,  Brazil; UFSCar,  Brazil'}],
+                    'family': 'Santos',
+                    'given': 'C.O. Paiva',
+                    'sequence': 'additional'},
+                    {'affiliation': [{'name': 'UNESP,  Brazil; UFSCar,  Brazil'}],
+                    'family': 'Varela',
+                    'given': 'J.A.',
+                    'sequence': 'additional'},
+                    {'affiliation': [{'name': 'UNESP,  Brazil; UFSCar,  Brazil'}],
+                    'family': 'Longo',
+                    'given': 'E.',
+                    'sequence': 'additional'}],
+        'container-title': ['Materials Research'],
+        'issue': '4',
+        'issued': {'date-parts': [[1999, 10]]},
+        'publisher': 'FapUNIFESP (SciELO)',
+        'source': 'Crossref',
+        'title': ['Influence of synthesis and processing parameters of the columbite '
+                    'precursor on the amount of Perovskite PMN'],
+        'type': 'journal-article',
+        'volume': '2'}]
+    ]
+
+    """
+
     try:
-        for article in articles:  
-            journal = create_journal(article['container-title'][0])
-            contributors = create_contributors(article['author'])
+
+        for article in articles:
+            journal = get_or_create_journal(utils.nestget(article, "container-title", 0))
+            contributors = get_or_create_contributor(utils.nestget(article, "author"))
 
             scholary_article, created = models.ScholarlyArticles.objects.update_or_create(
-                doi=article['DOI'],
+                doi=utils.nestget(article, "DOI"),
                 defaults={
-                    'title': article['title'][0],
-                    'volume': article['volume'],
-                    'source': article['source'].upper(),
-                    'journal': journal,
-                }
+                    "title": utils.nestget(article, "title", 0),
+                    "volume": utils.nestget(article, "volume"),
+                    "source": utils.nestget(article, "source", default="").upper(),
+                    "year": utils.nestget(article, "issued", "date-parts", 0, 0),
+                    "number": utils.nestget(article, "issue"),
+                    "journal": journal,
+                },
             )
             scholary_article.contributors.set(contributors)
 
@@ -33,38 +77,49 @@ def load(articles):
             error.data_type = "API Crossref"
             error.save()
         except (DataError, TypeError):
-            pass    
+            pass
 
 
-def create_journal(journal_name):
-    journal, created = models.Journals.objects.get_or_create(
-        journal_name=journal_name
-    )
+def get_or_create_journal(journal_name):
+    """
+    Get or create journal by "name".
+    """
+    journal, created = models.Journals.objects.get_or_create(journal_name=journal_name)
     return journal
 
 
-def create_contributors(authors):
+def get_or_create_contributor(authors):
+    """
+    Get or create contributor by "family", "given", "ORCID", "affiliation"
+    """
     contributors = []
-    date_author = ['family', 'given', 'orcid', 'affiliation']
+    date_author = ["family", "given", "ORCID", "affiliation"]
     for author in authors:
         # Caso esteja faltando alguns dos dados (family, given, orcid)
         # ele atribui uma string vazia ao campo.
-        field = {field: author.get(field, '') for field in date_author}
+        field = {field: author.get(field, "") for field in date_author}
 
-        affiliation = create_affiliation(field['affiliation'])
-        
+        affiliation = get_or_create_affiliation(utils.nestget(field, "affiliation"))
+
         contributor, created = models.Contributors.objects.get_or_create(
-            family=field['family'],
-            given=field['given'],
-            orcid=field['orcid'],
+            family=utils.nestget(field, "family"),
+            given=utils.nestget(field, "given"),
+            orcid=utils.nestget(field, "ORCID"),
             affiliation=affiliation,
         )
         contributors.append(contributor)
     return contributors
 
 
-def create_affiliation(author):
-    affiliation, created = models.Affiliations.objects.get_or_create(
-        name=author[0]['name'],
-    )
-    return affiliation
+def get_or_create_affiliation(affiliation):
+    """
+    Get or create affiliation by "name"
+    """
+    if affiliation:
+        name = utils.nestget(affiliation, 0, "name")
+        if name:
+            aff, created = models.Affiliations.objects.get_or_create(
+                name=name,
+            )
+            return aff
+    return None
