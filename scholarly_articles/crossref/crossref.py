@@ -125,7 +125,7 @@ def get_or_create_journal(journal_name, issns):
         if journal:
             return utils.nestget(journal, 0)
         else: 
-            return models.Journals.objects.create(journal_name=journal_name, journal_issns=",".join())
+            return models.Journals.objects.create(journal_name=journal_name, journal_issns=",".join(issns))
     return None
 
 
