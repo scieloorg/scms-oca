@@ -94,8 +94,8 @@ class JournalsAdmin(ModelAdmin):
         "journal_is_in_doaj",
     )
 
-    # list_filter = (_('journal_issn_l'),)
-    search_fields = (_("journal_issn_l)"),)
+    list_filter = ("journal_is_in_doaj", )
+    search_fields = ("journal_issn_l", "journal_name", "journal_issns", "publisher")
 
 
 class ContributorsAdmin(ModelAdmin):

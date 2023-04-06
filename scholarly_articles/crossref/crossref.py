@@ -67,7 +67,8 @@ def load(articles):
 
         for article in articles:
             journal = get_or_create_journal(
-                utils.nestget(article, "container-title", 0)
+                utils.nestget(article, "container-title", 0),
+                utils.nestget(article, "ISSN")
             )
             contributors = get_or_create_contributor(utils.nestget(article, "author"))
             license = get_or_create_license(utils.nestget(article, "license"))
@@ -106,12 +107,26 @@ def load(articles):
             pass
 
 
-def get_or_create_journal(journal_name):
+def get_or_create_journal(journal_name, issns):
     """
-    Get or create journal by "name".
+    Get or create journal by "issns".
+
+    This function try to get the journal from database, 
+    if this find one this function return from database, 
+    otherwise create a journal.
+
+    Params:
+
+        ISSNS: This is a list with all ISSNs, example: "ISSN": [ "0012-1797", "1939-327X" ],
     """
-    journal, created = models.Journals.objects.get_or_create(journal_name=journal_name)
-    return journal
+
+    for issn in issns:
+        journal = models.Journals.objects.filter(journal_issns__icontains=issn)
+        if journal:
+            return utils.nestget(journal, 0)
+        else: 
+            return models.Journals.objects.create(journal_name=journal_name, journal_issns=",".join())
+    return None
 
 
 def get_or_create_contributor(authors):

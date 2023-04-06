@@ -103,7 +103,7 @@ def load_crossref(from_update_date=2012, until_update_date=2012):
         from scholarly_articles import tasks
         from scholarly_articles import models
 
-        tasks.load_crossref(from_update_date=2012, until_update_date=2017)
+        tasks.load_crossref(from_update_date=2022, until_update_date=2023)
 
 
     The crossref API format is something like the format below:
@@ -189,6 +189,7 @@ def load_crossref(from_update_date=2012, until_update_date=2012):
         "issued",
         "issue",
         "license",
+        "ISSN",
     ]
 
     try:
