@@ -4,15 +4,16 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('policy_directory', '0002_alter_policydirectory_record_status'),
+        ("policy_directory", "0002_alter_policydirectory_record_status"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='policydirectory',
-            name='date',
-            field=models.DateField(blank=True, max_length=255, null=True, verbose_name='Data'),
+            model_name="policydirectory",
+            name="date",
+            field=models.DateField(
+                blank=True, max_length=255, null=True, verbose_name="Data"
+            ),
         ),
     ]

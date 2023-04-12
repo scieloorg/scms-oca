@@ -8,11 +8,10 @@ from infrastructure_directory import models
 from event_directory.choices import attendance_type, classification, status
 from usefulmodels.usefulmodels_factory import ActionFactory, PraticeFactory
 
-factory.Faker._DEFAULT_LOCALE = 'pt_BR'
+factory.Faker._DEFAULT_LOCALE = "pt_BR"
 
 
 class InfrastructureFactory(DjangoModelFactory):
-
     class Meta:
         model = models.InfrastructureDirectory
 
@@ -20,8 +19,8 @@ class InfrastructureFactory(DjangoModelFactory):
     creator = factory.SubFactory(user_factory.UserFactory)
 
     title = factory.Sequence(lambda n: "Title %03d" % n)
-    description = factory.Faker('sentence', nb_words=50)
-    link = factory.Faker('url')
+    description = factory.Faker("sentence", nb_words=50)
+    link = factory.Faker("url")
 
     practice = factory.SubFactory(PraticeFactory)
     action = factory.SubFactory(ActionFactory)

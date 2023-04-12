@@ -4,15 +4,16 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('indicator', '0004_auto_20220923_2116'),
+        ("indicator", "0004_auto_20220923_2116"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='indicator',
-            name='chronology',
-            field=models.DateField(blank=True, max_length=255, null=True, verbose_name='Data'),
+            model_name="indicator",
+            name="chronology",
+            field=models.DateField(
+                blank=True, max_length=255, null=True, verbose_name="Data"
+            ),
         ),
     ]

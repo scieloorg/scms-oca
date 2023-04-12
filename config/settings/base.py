@@ -73,7 +73,7 @@ WAGTAIL = [
     "wagtail.images",
     "wagtail.search",
     "wagtail.admin",
-    "wagtail.core",
+    "wagtail",
     "wagtail.locales",
     "wagtail.api.v2",
     "wagtail.contrib.settings",
@@ -251,7 +251,7 @@ CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 # FIXTURES
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#fixture-dirs
-#FIXTURE_DIRS = (str(APPS_DIR / "fixtures"),)
+# FIXTURE_DIRS = (str(APPS_DIR / "fixtures"),)
 
 # SECURITY
 # ------------------------------------------------------------------------------
@@ -331,12 +331,14 @@ CELERY_TASK_TIME_LIMIT = 5 * 60
 CELERY_TASK_SOFT_TIME_LIMIT = 36000
 # http://docs.celeryproject.org/en/latest/userguide/configuration.html#beat-scheduler
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
+# http://docs.celeryproject.org/en/latest/userguide/configuration.html
+DJANGO_CELERY_BEAT_TZ_AWARE = False
 
 # Celery Results
 # ------------------------------------------------------------------------------
 # https: // django-celery-results.readthedocs.io/en/latest/getting_started.html
-CELERY_RESULT_BACKEND = 'django-db'
-CELERY_CACHE_BACKEND = 'django-cache'
+CELERY_RESULT_BACKEND = "django-db"
+CELERY_CACHE_BACKEND = "django-cache"
 CELERY_RESULT_EXTENDED = True
 
 # django-allauth
@@ -364,10 +366,11 @@ STATICFILES_FINDERS += ["compressor.finders.CompressorFinder"]
 
 # Your stuff...
 WAGTAIL_SITE_NAME = "OCABR"
-BASE_URL = env.str("DJANGO_BASE_URL", default='https://ocabr')
+BASE_URL = env.str("DJANGO_BASE_URL", default="https://ocabr")
+URL_API_CROSSREF = env.str("API_CROSSREF", default="https://api.crossref.org/works")
 
 LANGUAGES = [
-    ('pt-BR', "Portuguese"),
+    ("pt-BR", "Portuguese"),
     # ('en', "English"),
     # ('es', "Spanish"),
 ]
@@ -375,28 +378,30 @@ LANGUAGES = [
 WAGTAIL_I18N_ENABLED = True
 
 WAGTAIL_CONTENT_LANGUAGES = [
-    ('pt-BR', "Portuguese"),
+    ("pt-BR", "Portuguese"),
     # ('en', "English"),
     # ('es', "Spanish"),
 ]
 
 NOCAPTCHA = True
 
-RECAPTCHA_PUBLIC_KEY = env.str("RECAPTCHA_PUBLIC_KEY", default='')
-RECAPTCHA_PRIVATE_KEY = env.str("RECAPTCHA_PRIVATE_KEY", default='')
+RECAPTCHA_PUBLIC_KEY = env.str("RECAPTCHA_PUBLIC_KEY", default="")
+RECAPTCHA_PRIVATE_KEY = env.str("RECAPTCHA_PRIVATE_KEY", default="")
 
-WAGTAILMENUS_FLAT_MENUS_HANDLE_CHOICES = [("oca", "OCA"),
-                                          ("comite", _("Comitê")),
-                                          ("busca", _("Busca")),
-                                          ("faq", "FAQ"),
-                                          ("noticias", _("Notícias")), ]
+WAGTAILMENUS_FLAT_MENUS_HANDLE_CHOICES = [
+    ("oca", "OCA"),
+    ("comite", _("Comitê")),
+    ("busca", _("Busca")),
+    ("faq", "FAQ"),
+    ("noticias", _("Notícias")),
+]
 
 PAGINATION_PER_PAGE = 10
 
 WAGTAILSEARCH_BACKENDS = {
-    'default': {
-        'BACKEND': 'wagtail.search.backends.database',
-        'SEARCH_CONFIG': 'english',
+    "default": {
+        "BACKEND": "wagtail.search.backends.database",
+        "SEARCH_CONFIG": "english",
     }
 }
 
@@ -405,7 +410,7 @@ HAYSTACK_CONNECTIONS = {
         "ENGINE": "haystack.backends.solr_backend.SolrEngine",
         "URL": env("SOLR_URL", default="http://solr:8983/solr/ocabr/"),
         "SILENTLY_FAIL": False,
-        "SOLR_TIMEOUT": 10
+        "SOLR_TIMEOUT": 10,
     }
 }
 
@@ -415,15 +420,18 @@ SEARCH_PAGINATION_ITEMS_PER_PAGE = 10
 
 SEARCH_FACET_ITEMS_PER_MORE = 5
 
-SEARCH_FACET_LIST = ['record_type',
-                     'directory_type',
-                     'practice',
-                     'action',
-                     'regions',
-                     'states',
-                     'cities',
-                     'thematic_areas',
-                     'category',
-                     'geo_scope',
-                    #  'thematic_scope',
-                     ]
+SEARCH_FACET_LIST = [
+    "record_type",
+    "directory_type",
+    "practice",
+    "action",
+    "regions",
+    "states",
+    "cities",
+    "thematic_areas",
+    "category",
+    "geo_scope",
+    #  'thematic_scope',
+]
+
+WAGTAILADMIN_BASE_URL = env("WAGTAILADMIN_BASE_URL", default="http://localhost:8000")

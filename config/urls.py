@@ -5,7 +5,7 @@ from django.contrib import admin
 from django.urls import include, path, re_path
 from django.views import defaults as default_views
 from wagtail.admin import urls as wagtailadmin_urls
-from wagtail.core import urls as wagtail_urls
+from wagtail import urls as wagtail_urls
 from wagtail.documents import urls as wagtaildocs_urls
 from django.conf.urls import include
 from wagtailautocomplete.urls.admin import urlpatterns as autocomplete_admin_urls
@@ -45,7 +45,7 @@ urlpatterns += i18n_patterns(
     # User management
     path("api/v2/", api_router.urls),
     path("users/", include("core.users.urls", namespace="users")),
-    path('i18n/', include('django.conf.urls.i18n')),
+    path("i18n/", include("django.conf.urls.i18n")),
     path("", include("allauth.urls")),
     path("", include(wagtail_urls)),
 )

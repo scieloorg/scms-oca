@@ -4,15 +4,16 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('scholarly_articles', '0003_auto_20221009_1418'),
+        ("scholarly_articles", "0003_auto_20221009_1418"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='affiliations',
-            name='source',
-            field=models.CharField(blank=True, max_length=255, null=True, verbose_name='Affiliation Source'),
+            model_name="affiliations",
+            name="source",
+            field=models.CharField(
+                blank=True, max_length=255, null=True, verbose_name="Affiliation Source"
+            ),
         ),
     ]

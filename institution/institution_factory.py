@@ -6,10 +6,10 @@ from institution.choices import inst_type
 from institution.models import Institution
 from location.location_factory import LocationFactory
 
-factory.Faker._DEFAULT_LOCALE = 'pt_BR'
+factory.Faker._DEFAULT_LOCALE = "pt_BR"
+
 
 class InstitutionFactory(DjangoModelFactory):
-
     class Meta:
         model = Institution
 

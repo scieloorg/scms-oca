@@ -6,7 +6,6 @@ from institution import institution_factory
 
 
 def run(*args):
-
     if args:
         bulk_size = args[0]
     else:
@@ -14,5 +13,7 @@ def run(*args):
 
     print("Gerando %s Education Directories.... " % (bulk_size))
     for i in range(0, int(bulk_size)):
-        education_factory.EducationFactory(locations=(location_factory.LocationFactory(),),
-                                           institutions=(institution_factory.InstitutionFactory(),))
+        education_factory.EducationFactory(
+            locations=(location_factory.LocationFactory(),),
+            institutions=(institution_factory.InstitutionFactory(),),
+        )

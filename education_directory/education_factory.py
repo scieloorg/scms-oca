@@ -8,11 +8,10 @@ from education_directory import models
 from education_directory.choices import attendance_type, classification, status
 from usefulmodels.usefulmodels_factory import ActionFactory, PraticeFactory
 
-factory.Faker._DEFAULT_LOCALE = 'pt_BR'
+factory.Faker._DEFAULT_LOCALE = "pt_BR"
 
 
 class EducationFactory(DjangoModelFactory):
-
     class Meta:
         model = models.EducationDirectory
 
@@ -20,8 +19,8 @@ class EducationFactory(DjangoModelFactory):
     creator = factory.SubFactory(user_factory.UserFactory)
 
     title = factory.Sequence(lambda n: "Title %03d" % n)
-    description = factory.Faker('sentence', nb_words=50)
-    link = factory.Faker('url')
+    description = factory.Faker("sentence", nb_words=50)
+    link = factory.Faker("url")
 
     start_date = factory.LazyFunction(datetime.now)
     end_date = factory.LazyFunction(datetime.now)

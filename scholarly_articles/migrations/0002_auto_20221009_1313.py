@@ -4,26 +4,64 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('scholarly_articles', '0001_initial'),
+        ("scholarly_articles", "0001_initial"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='SupplementaryData',
+            name="SupplementaryData",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('doi', models.CharField(max_length=100, verbose_name='DOI')),
-                ('source_title', models.CharField(blank=True, max_length=255, null=True, verbose_name='Source Title')),
-                ('volume', models.CharField(blank=True, max_length=10, null=True, verbose_name='Volume')),
-                ('issue', models.CharField(blank=True, max_length=10, null=True, verbose_name='Issue')),
-                ('author', models.CharField(blank=True, max_length=255, null=True, verbose_name='Author')),
-                ('affiliation', models.CharField(blank=True, max_length=255, null=True, verbose_name='Affiliation')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("doi", models.CharField(max_length=100, verbose_name="DOI")),
+                (
+                    "source_title",
+                    models.CharField(
+                        blank=True,
+                        max_length=255,
+                        null=True,
+                        verbose_name="Source Title",
+                    ),
+                ),
+                (
+                    "volume",
+                    models.CharField(
+                        blank=True, max_length=10, null=True, verbose_name="Volume"
+                    ),
+                ),
+                (
+                    "issue",
+                    models.CharField(
+                        blank=True, max_length=10, null=True, verbose_name="Issue"
+                    ),
+                ),
+                (
+                    "author",
+                    models.CharField(
+                        blank=True, max_length=255, null=True, verbose_name="Author"
+                    ),
+                ),
+                (
+                    "affiliation",
+                    models.CharField(
+                        blank=True,
+                        max_length=255,
+                        null=True,
+                        verbose_name="Affiliation",
+                    ),
+                ),
             ],
         ),
         migrations.AddIndex(
-            model_name='supplementarydata',
-            index=models.Index(fields=['doi'], name='scholarly_a_doi_4d2520_idx'),
+            model_name="supplementarydata",
+            index=models.Index(fields=["doi"], name="scholarly_a_doi_4d2520_idx"),
         ),
     ]

@@ -5,16 +5,21 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('usefulmodels', '0004_alter_country_options'),
-        ('location', '0002_remove_location_region'),
+        ("usefulmodels", "0004_alter_country_options"),
+        ("location", "0002_remove_location_region"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='location',
-            name='country',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='usefulmodels.country', verbose_name='Country'),
+            model_name="location",
+            name="country",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="usefulmodels.country",
+                verbose_name="Country",
+            ),
         ),
     ]

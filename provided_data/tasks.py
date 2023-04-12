@@ -39,9 +39,12 @@ def load_data():
     user = User.objects.get(id=1)
 
     for record in RawArticle.objects.all().iterator():
-        if record.document_type == 'journal article':
+        if record.document_type == "journal article":
             load_article(user, record)
-        if record.document_type == 'conference proceedings':
+        if record.document_type == "conference proceedings":
             load_conference(user, record)
-        if record.document_type == 'master thesis' or record.document_type == 'doctoral thesis':
+        if (
+            record.document_type == "master thesis"
+            or record.document_type == "doctoral thesis"
+        ):
             load_thesis(user, record)

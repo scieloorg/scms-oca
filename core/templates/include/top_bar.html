@@ -16,9 +16,9 @@
                 ============================================= -->
                 <div class="top-links on-click">
                     <ul class="top-links-container">
-                        {% if settings.asettings.CustomSettings.faq_content_page %}
+                        {% if settings.core_settings.CustomSettings.faq_content_page %}
                             <li class="top-links-item"><a
-                                    href="{% pageurl settings.asettings.CustomSettings.faq_content_page %}">FAQs</a></li>
+                                    href="{% pageurl settings.core_settings.CustomSettings.faq_content_page %}">FAQs</a></li>
                         {% endif %}
                         <!-- <li class="top-links-item"><a href="login-register.html">Login</a> -->
                         <div class="top-links-section">
@@ -49,16 +49,16 @@
                 <!-- Top Social
                 ============================================= -->
                 <ul id="top-social">
-                    <li><a href="{{ settings.asettings.CustomSettings.facebook }}" target="_blank"
+                    <li><a href="{{ settings.core_settings.CustomSettings.facebook }}" target="_blank"
                             class="si-facebook"><span class="ts-icon"><i class="icon-facebook"></i></span><span
                                 class="ts-text">Facebook</span></a></li>
-                    <li><a href="https://www.instagram.com/{{ settings.asettings.CustomSettings.instagram }}/"
+                    <li><a href="https://www.instagram.com/{{ settings.core_settings.CustomSettings.instagram }}/"
                             target="_blank" class="si-instagram"><span class="ts-icon"><i
                                     class="icon-instagram2"></i></span><span class="ts-text">Instagram</span></a></li>
-                    <li><a href="tel:+{{ settings.asettings.CustomSettings.telephone }}" class="si-call"><span
-                                class="ts-icon"><i class="icon-call"></i></span><span class="ts-text">+{{ settings.asettings.CustomSettings.telephone }}</span></a></li>
-                    <li><a href="mailto: {{ settings.asettings.CustomSettings.email }}" class="si-email3"><span
-                                class="ts-icon"><i class="icon-email3"></i></span><span class="ts-text">{{ settings.asettings.CustomSettings.email }}</span></a></li>
+                    <li><a href="tel:+{{ settings.core_settings.CustomSettings.telephone }}" class="si-call"><span
+                                class="ts-icon"><i class="icon-call"></i></span><span class="ts-text">+{{ settings.core_settings.CustomSettings.telephone }}</span></a></li>
+                    <li><a href="mailto: {{ settings.core_settings.CustomSettings.email }}" class="si-email3"><span
+                                class="ts-icon"><i class="icon-email3"></i></span><span class="ts-text">{{ settings.core_settings.CustomSettings.email }}</span></a></li>
                 </ul>
                 <!-- #top-social end -->
 

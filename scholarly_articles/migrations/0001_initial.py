@@ -6,156 +6,514 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('institution', '0003_alter_institution_institution_type'),
+        ("institution", "0003_alter_institution_institution_type"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Affiliations',
+            name="Affiliations",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(blank=True, max_length=510, null=True, verbose_name='Nome de afiliação')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "name",
+                    models.CharField(
+                        blank=True,
+                        max_length=510,
+                        null=True,
+                        verbose_name="Nome de afiliação",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='Contributors',
+            name="Contributors",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('family', models.CharField(blank=True, max_length=255, null=True, verbose_name='Sobrenome')),
-                ('given', models.CharField(blank=True, max_length=255, null=True, verbose_name='Nome dado')),
-                ('orcid', models.CharField(blank=True, max_length=50, null=True, verbose_name='ORCID')),
-                ('authenticated_orcid', models.BooleanField(blank=True, default=False, null=True, verbose_name='Autenticado')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "family",
+                    models.CharField(
+                        blank=True, max_length=255, null=True, verbose_name="Sobrenome"
+                    ),
+                ),
+                (
+                    "given",
+                    models.CharField(
+                        blank=True, max_length=255, null=True, verbose_name="Nome dado"
+                    ),
+                ),
+                (
+                    "orcid",
+                    models.CharField(
+                        blank=True, max_length=50, null=True, verbose_name="ORCID"
+                    ),
+                ),
+                (
+                    "authenticated_orcid",
+                    models.BooleanField(
+                        blank=True, default=False, null=True, verbose_name="Autenticado"
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='ErrorLog',
+            name="ErrorLog",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created', models.DateTimeField(auto_now_add=True, verbose_name='Data de criação')),
-                ('updated', models.DateTimeField(auto_now=True, verbose_name='Data da última atualização')),
-                ('error_type', models.CharField(blank=True, help_text='Type of python error.', max_length=50, null=True, verbose_name='Tipo de erro')),
-                ('error_message', models.CharField(blank=True, help_text='Message of python error.', max_length=255, null=True, verbose_name='Mensagem de erro')),
-                ('error_description', models.TextField(blank=True, help_text='More context about the error', max_length=255, null=True, verbose_name='Error description')),
-                ('data_reference', models.CharField(blank=True, help_text='Reference to the data, can be id, line. Use line:10 or id:452 to to differ between id|line.', max_length=10, null=True, verbose_name='Reference data')),
-                ('data', models.TextField(blank=True, help_text='Data when the error happened.', max_length=10, null=True, verbose_name='Data')),
-                ('data_type', models.CharField(blank=True, help_text='Data type, can the the model, ex.: models.RawUnpaywall', max_length=255, null=True, verbose_name='Data type')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "created",
+                    models.DateTimeField(
+                        auto_now_add=True, verbose_name="Data de criação"
+                    ),
+                ),
+                (
+                    "updated",
+                    models.DateTimeField(
+                        auto_now=True, verbose_name="Data da última atualização"
+                    ),
+                ),
+                (
+                    "error_type",
+                    models.CharField(
+                        blank=True,
+                        help_text="Type of python error.",
+                        max_length=50,
+                        null=True,
+                        verbose_name="Tipo de erro",
+                    ),
+                ),
+                (
+                    "error_message",
+                    models.CharField(
+                        blank=True,
+                        help_text="Message of python error.",
+                        max_length=255,
+                        null=True,
+                        verbose_name="Mensagem de erro",
+                    ),
+                ),
+                (
+                    "error_description",
+                    models.TextField(
+                        blank=True,
+                        help_text="More context about the error",
+                        max_length=255,
+                        null=True,
+                        verbose_name="Error description",
+                    ),
+                ),
+                (
+                    "data_reference",
+                    models.CharField(
+                        blank=True,
+                        help_text="Reference to the data, can be id, line. Use line:10 or id:452 to to differ between id|line.",
+                        max_length=10,
+                        null=True,
+                        verbose_name="Reference data",
+                    ),
+                ),
+                (
+                    "data",
+                    models.TextField(
+                        blank=True,
+                        help_text="Data when the error happened.",
+                        max_length=10,
+                        null=True,
+                        verbose_name="Data",
+                    ),
+                ),
+                (
+                    "data_type",
+                    models.CharField(
+                        blank=True,
+                        help_text="Data type, can the the model, ex.: models.RawUnpaywall",
+                        max_length=255,
+                        null=True,
+                        verbose_name="Data type",
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='Journals',
+            name="Journals",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('journal_issn_l', models.CharField(blank=True, max_length=50, null=True, verbose_name='ISSN-L')),
-                ('journal_issns', models.CharField(blank=True, max_length=50, null=True, verbose_name="ISSN's")),
-                ('journal_name', models.CharField(blank=True, max_length=255, null=True, verbose_name='Nome do periódico')),
-                ('publisher', models.CharField(blank=True, max_length=255, null=True, verbose_name='Publicador')),
-                ('journal_is_in_doaj', models.BooleanField(blank=True, default=False, null=True, verbose_name='DOAJ')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "journal_issn_l",
+                    models.CharField(
+                        blank=True, max_length=50, null=True, verbose_name="ISSN-L"
+                    ),
+                ),
+                (
+                    "journal_issns",
+                    models.CharField(
+                        blank=True, max_length=50, null=True, verbose_name="ISSN's"
+                    ),
+                ),
+                (
+                    "journal_name",
+                    models.CharField(
+                        blank=True,
+                        max_length=255,
+                        null=True,
+                        verbose_name="Nome do periódico",
+                    ),
+                ),
+                (
+                    "publisher",
+                    models.CharField(
+                        blank=True, max_length=255, null=True, verbose_name="Publicador"
+                    ),
+                ),
+                (
+                    "journal_is_in_doaj",
+                    models.BooleanField(
+                        blank=True, default=False, null=True, verbose_name="DOAJ"
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='RawUnpaywall',
+            name="RawUnpaywall",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('doi', models.CharField(max_length=100, verbose_name='DOI')),
-                ('harvesting_creation', models.CharField(max_length=20, verbose_name='Data da coleta')),
-                ('is_paratext', models.BooleanField(blank=True, default=False, null=True, verbose_name='Paratext')),
-                ('year', models.CharField(blank=True, max_length=10, null=True, verbose_name='Ano')),
-                ('resource_type', models.CharField(blank=True, choices=[('', ''), ('book-section', 'Book Section'), ('monograph', 'Monograph'), ('report', 'Report'), ('peer-review', 'Peer Review'), ('book-track', 'Book Track'), ('journal-article', 'Journal Article'), ('book-part', 'Part'), ('other', 'Other'), ('book', 'Book'), ('journal-volume', 'Journal Volume'), ('book-set', 'Book Set'), ('reference-entry', 'Reference Entry'), ('proceedings-article', 'Proceedings Article'), ('journal', 'Journal'), ('component', 'Component'), ('book-chapter', 'Book Chapter'), ('proceedings-series', 'Proceedings Series'), ('report-series', 'Report Series'), ('proceedings', 'Proceedings'), ('standard', 'Standard'), ('reference-book', 'Reference Book'), ('posted-content', 'Posted Content'), ('journal-issue', 'Journal Issue'), ('dissertation', 'Dissertation'), ('grant', 'Grant'), ('dataset', 'Dataset'), ('book-series', 'Book Series'), ('edited-book', 'Edited Book'), ('standard-series', 'Standard Series')], max_length=50, verbose_name='Tipo de recurso')),
-                ('update', models.CharField(blank=True, max_length=20, null=True, verbose_name='Atualiza')),
-                ('json', models.JSONField(blank=True, null=True, verbose_name='Arquivo JSON')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("doi", models.CharField(max_length=100, verbose_name="DOI")),
+                (
+                    "harvesting_creation",
+                    models.CharField(max_length=20, verbose_name="Data da coleta"),
+                ),
+                (
+                    "is_paratext",
+                    models.BooleanField(
+                        blank=True, default=False, null=True, verbose_name="Paratext"
+                    ),
+                ),
+                (
+                    "year",
+                    models.CharField(
+                        blank=True, max_length=10, null=True, verbose_name="Ano"
+                    ),
+                ),
+                (
+                    "resource_type",
+                    models.CharField(
+                        blank=True,
+                        choices=[
+                            ("", ""),
+                            ("book-section", "Book Section"),
+                            ("monograph", "Monograph"),
+                            ("report", "Report"),
+                            ("peer-review", "Peer Review"),
+                            ("book-track", "Book Track"),
+                            ("journal-article", "Journal Article"),
+                            ("book-part", "Part"),
+                            ("other", "Other"),
+                            ("book", "Book"),
+                            ("journal-volume", "Journal Volume"),
+                            ("book-set", "Book Set"),
+                            ("reference-entry", "Reference Entry"),
+                            ("proceedings-article", "Proceedings Article"),
+                            ("journal", "Journal"),
+                            ("component", "Component"),
+                            ("book-chapter", "Book Chapter"),
+                            ("proceedings-series", "Proceedings Series"),
+                            ("report-series", "Report Series"),
+                            ("proceedings", "Proceedings"),
+                            ("standard", "Standard"),
+                            ("reference-book", "Reference Book"),
+                            ("posted-content", "Posted Content"),
+                            ("journal-issue", "Journal Issue"),
+                            ("dissertation", "Dissertation"),
+                            ("grant", "Grant"),
+                            ("dataset", "Dataset"),
+                            ("book-series", "Book Series"),
+                            ("edited-book", "Edited Book"),
+                            ("standard-series", "Standard Series"),
+                        ],
+                        max_length=50,
+                        verbose_name="Tipo de recurso",
+                    ),
+                ),
+                (
+                    "update",
+                    models.CharField(
+                        blank=True, max_length=20, null=True, verbose_name="Atualiza"
+                    ),
+                ),
+                (
+                    "json",
+                    models.JSONField(
+                        blank=True, null=True, verbose_name="Arquivo JSON"
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='ScholarlyArticles',
+            name="ScholarlyArticles",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('doi', models.CharField(blank=True, max_length=100, null=True, verbose_name='DOI')),
-                ('title', models.CharField(blank=True, max_length=510, null=True, verbose_name='Título')),
-                ('volume', models.CharField(blank=True, max_length=20, null=True, verbose_name='Volume')),
-                ('number', models.CharField(blank=True, max_length=20, null=True, verbose_name='Número')),
-                ('year', models.CharField(blank=True, max_length=20, null=True, verbose_name='Ano')),
-                ('open_access_status', models.CharField(blank=True, choices=[('', ''), ('gold', 'Gold'), ('hybrid', 'Hybrid'), ('bronze', 'Bronze'), ('green', 'Green'), ('closed', 'Closed')], max_length=50, null=True, verbose_name='Open Access Status')),
-                ('use_license', models.CharField(blank=True, choices=[('', ''), ('CC0', 'CC0'), ('CC-BY', 'CC-BY'), ('CC-BYNC', 'CC-BYNC'), ('CC-BYND', 'CC-BYND'), ('CC-BYNCND', 'CC-BYNCND')], max_length=50, null=True, verbose_name='Use License')),
-                ('apc', models.CharField(blank=True, choices=[('', ''), ('YES', 'YES'), ('NO', 'NO')], max_length=20, null=True, verbose_name='Article Processing Charge')),
-                ('source', models.CharField(blank=True, choices=[('', ''), ('UNPAYWALL', 'UNPAYWALL')], max_length=50, null=True, verbose_name='Record Source')),
-                ('contributors', models.ManyToManyField(blank=True, to='scholarly_articles.Contributors', verbose_name='Contribuidores')),
-                ('journal', models.ForeignKey(blank=True, max_length=255, null=True, on_delete=django.db.models.deletion.SET_NULL, to='scholarly_articles.journals', verbose_name='Periódico')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "doi",
+                    models.CharField(
+                        blank=True, max_length=100, null=True, verbose_name="DOI"
+                    ),
+                ),
+                (
+                    "title",
+                    models.CharField(
+                        blank=True, max_length=510, null=True, verbose_name="Título"
+                    ),
+                ),
+                (
+                    "volume",
+                    models.CharField(
+                        blank=True, max_length=20, null=True, verbose_name="Volume"
+                    ),
+                ),
+                (
+                    "number",
+                    models.CharField(
+                        blank=True, max_length=20, null=True, verbose_name="Número"
+                    ),
+                ),
+                (
+                    "year",
+                    models.CharField(
+                        blank=True, max_length=20, null=True, verbose_name="Ano"
+                    ),
+                ),
+                (
+                    "open_access_status",
+                    models.CharField(
+                        blank=True,
+                        choices=[
+                            ("", ""),
+                            ("gold", "Gold"),
+                            ("hybrid", "Hybrid"),
+                            ("bronze", "Bronze"),
+                            ("green", "Green"),
+                            ("closed", "Closed"),
+                        ],
+                        max_length=50,
+                        null=True,
+                        verbose_name="Open Access Status",
+                    ),
+                ),
+                (
+                    "use_license",
+                    models.CharField(
+                        blank=True,
+                        choices=[
+                            ("", ""),
+                            ("CC0", "CC0"),
+                            ("CC-BY", "CC-BY"),
+                            ("CC-BYNC", "CC-BYNC"),
+                            ("CC-BYND", "CC-BYND"),
+                            ("CC-BYNCND", "CC-BYNCND"),
+                        ],
+                        max_length=50,
+                        null=True,
+                        verbose_name="Use License",
+                    ),
+                ),
+                (
+                    "apc",
+                    models.CharField(
+                        blank=True,
+                        choices=[("", ""), ("YES", "YES"), ("NO", "NO")],
+                        max_length=20,
+                        null=True,
+                        verbose_name="Article Processing Charge",
+                    ),
+                ),
+                (
+                    "source",
+                    models.CharField(
+                        blank=True,
+                        choices=[("", ""), ("UNPAYWALL", "UNPAYWALL")],
+                        max_length=50,
+                        null=True,
+                        verbose_name="Record Source",
+                    ),
+                ),
+                (
+                    "contributors",
+                    models.ManyToManyField(
+                        blank=True,
+                        to="scholarly_articles.Contributors",
+                        verbose_name="Contribuidores",
+                    ),
+                ),
+                (
+                    "journal",
+                    models.ForeignKey(
+                        blank=True,
+                        max_length=255,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to="scholarly_articles.journals",
+                        verbose_name="Periódico",
+                    ),
+                ),
             ],
         ),
         migrations.AddIndex(
-            model_name='rawunpaywall',
-            index=models.Index(fields=['doi'], name='scholarly_a_doi_e75c1d_idx'),
+            model_name="rawunpaywall",
+            index=models.Index(fields=["doi"], name="scholarly_a_doi_e75c1d_idx"),
         ),
         migrations.AddIndex(
-            model_name='rawunpaywall',
-            index=models.Index(fields=['year'], name='scholarly_a_year_c2349f_idx'),
+            model_name="rawunpaywall",
+            index=models.Index(fields=["year"], name="scholarly_a_year_c2349f_idx"),
         ),
         migrations.AddIndex(
-            model_name='rawunpaywall',
-            index=models.Index(fields=['resource_type'], name='scholarly_a_resourc_0d5bcb_idx'),
+            model_name="rawunpaywall",
+            index=models.Index(
+                fields=["resource_type"], name="scholarly_a_resourc_0d5bcb_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='journals',
-            index=models.Index(fields=['journal_issn_l'], name='scholarly_a_journal_23ada4_idx'),
+            model_name="journals",
+            index=models.Index(
+                fields=["journal_issn_l"], name="scholarly_a_journal_23ada4_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='journals',
-            index=models.Index(fields=['journal_issns'], name='scholarly_a_journal_82745c_idx'),
+            model_name="journals",
+            index=models.Index(
+                fields=["journal_issns"], name="scholarly_a_journal_82745c_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='journals',
-            index=models.Index(fields=['journal_name'], name='scholarly_a_journal_b95c1d_idx'),
+            model_name="journals",
+            index=models.Index(
+                fields=["journal_name"], name="scholarly_a_journal_b95c1d_idx"
+            ),
         ),
         migrations.AddField(
-            model_name='errorlog',
-            name='creator',
-            field=models.ForeignKey(editable=False, on_delete=django.db.models.deletion.CASCADE, related_name='errorlog_creator', to=settings.AUTH_USER_MODEL, verbose_name='Criador'),
+            model_name="errorlog",
+            name="creator",
+            field=models.ForeignKey(
+                editable=False,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="errorlog_creator",
+                to=settings.AUTH_USER_MODEL,
+                verbose_name="Criador",
+            ),
         ),
         migrations.AddField(
-            model_name='errorlog',
-            name='updated_by',
-            field=models.ForeignKey(blank=True, editable=False, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='errorlog_last_mod_user', to=settings.AUTH_USER_MODEL, verbose_name='Atualizador'),
+            model_name="errorlog",
+            name="updated_by",
+            field=models.ForeignKey(
+                blank=True,
+                editable=False,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="errorlog_last_mod_user",
+                to=settings.AUTH_USER_MODEL,
+                verbose_name="Atualizador",
+            ),
         ),
         migrations.AddField(
-            model_name='contributors',
-            name='affiliation',
-            field=models.ForeignKey(blank=True, max_length=510, null=True, on_delete=django.db.models.deletion.SET_NULL, to='scholarly_articles.affiliations'),
+            model_name="contributors",
+            name="affiliation",
+            field=models.ForeignKey(
+                blank=True,
+                max_length=510,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="scholarly_articles.affiliations",
+            ),
         ),
         migrations.AddField(
-            model_name='affiliations',
-            name='official',
-            field=models.ForeignKey(blank=True, max_length=1020, null=True, on_delete=django.db.models.deletion.SET_NULL, to='institution.institution', verbose_name='Official Affiliation Name'),
+            model_name="affiliations",
+            name="official",
+            field=models.ForeignKey(
+                blank=True,
+                max_length=1020,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="institution.institution",
+                verbose_name="Official Affiliation Name",
+            ),
         ),
         migrations.AddIndex(
-            model_name='scholarlyarticles',
-            index=models.Index(fields=['doi'], name='scholarly_a_doi_967c29_idx'),
+            model_name="scholarlyarticles",
+            index=models.Index(fields=["doi"], name="scholarly_a_doi_967c29_idx"),
         ),
         migrations.AddIndex(
-            model_name='contributors',
-            index=models.Index(fields=['family'], name='scholarly_a_family_741f92_idx'),
+            model_name="contributors",
+            index=models.Index(fields=["family"], name="scholarly_a_family_741f92_idx"),
         ),
         migrations.AddIndex(
-            model_name='contributors',
-            index=models.Index(fields=['given'], name='scholarly_a_given_cab90c_idx'),
+            model_name="contributors",
+            index=models.Index(fields=["given"], name="scholarly_a_given_cab90c_idx"),
         ),
         migrations.AddIndex(
-            model_name='contributors',
-            index=models.Index(fields=['orcid'], name='scholarly_a_orcid_2fe794_idx'),
+            model_name="contributors",
+            index=models.Index(fields=["orcid"], name="scholarly_a_orcid_2fe794_idx"),
         ),
         migrations.AddIndex(
-            model_name='contributors',
-            index=models.Index(fields=['affiliation'], name='scholarly_a_affilia_cab862_idx'),
+            model_name="contributors",
+            index=models.Index(
+                fields=["affiliation"], name="scholarly_a_affilia_cab862_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='affiliations',
-            index=models.Index(fields=['name'], name='scholarly_a_name_565309_idx'),
+            model_name="affiliations",
+            index=models.Index(fields=["name"], name="scholarly_a_name_565309_idx"),
         ),
     ]

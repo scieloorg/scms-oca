@@ -4,7 +4,6 @@ from education_directory.search_indexes import EducationIndex
 
 
 class EducationDirectoryForm(WagtailAdminModelForm):
-
     def save_all(self, user):
         education_directory = super().save(commit=False)
 
@@ -23,7 +22,6 @@ class EducationDirectoryForm(WagtailAdminModelForm):
 
 
 class EducationDirectoryFileForm(WagtailAdminModelForm):
-
     def save_all(self, user):
         education_directory_file = super().save(commit=False)
 
