@@ -389,9 +389,10 @@ RECAPTCHA_PUBLIC_KEY = env.str("RECAPTCHA_PUBLIC_KEY", default="")
 RECAPTCHA_PRIVATE_KEY = env.str("RECAPTCHA_PRIVATE_KEY", default="")
 
 WAGTAILMENUS_FLAT_MENUS_HANDLE_CHOICES = [
-    ("oca", "OCA"),
-    ("comite", _("Comitê")),
     ("busca", _("Busca")),
+    ("oca", "OCA"),
+    ("contato", "Contato"),
+    ("comite", _("Comitê")),
     ("faq", "FAQ"),
     ("noticias", _("Notícias")),
 ]
@@ -423,8 +424,8 @@ SEARCH_FACET_ITEMS_PER_MORE = 5
 SEARCH_FACET_LIST = [
     "record_type",
     "directory_type",
-    "practice",
     "action",
+    "practice",
     "regions",
     "states",
     "cities",
