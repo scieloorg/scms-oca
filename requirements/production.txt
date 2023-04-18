@@ -12,3 +12,8 @@ sentry-sdk==1.14.0  # https://github.com/getsentry/sentry-python
 django-extensions==3.2.1  # https://github.com/django-extensions/django-extensions
 django-debug-toolbar  # https://github.com/jazzband/django-debug-toolbar
 django-anymail  # https://github.com/anymail/django-anymail
+
+
+# Elastic-APM  # https://pypi.org/project/elastic-apm/
+# ------------------------------------------------------------------------------
+elastic-apm==6.15.1
