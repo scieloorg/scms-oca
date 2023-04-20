@@ -273,6 +273,11 @@ EMAIL_BACKEND = env(
 )
 # https://docs.djangoproject.com/en/dev/ref/settings/#email-timeout
 EMAIL_TIMEOUT = 5
+# https://docs.djangoproject.com/en/4.2/ref/settings/#std-setting-EMAIL_SUBJECT_PREFIX
+EMAIL_SUBJECT_PREFIX = env(
+    "DJANGO_EMAIL_SUBJECT_PREFIX",
+    default="[OCABR] "
+)
 
 # ADMIN
 # ------------------------------------------------------------------------------

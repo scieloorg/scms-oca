@@ -80,7 +80,7 @@ SERVER_EMAIL = env("DJANGO_SERVER_EMAIL", default=DEFAULT_FROM_EMAIL)
 # https://docs.djangoproject.com/en/dev/ref/settings/#email-subject-prefix
 EMAIL_SUBJECT_PREFIX = env(
     "DJANGO_EMAIL_SUBJECT_PREFIX",
-    default="[SciELO Content Manager ]",
+    default="[OCABR] ",
 )
 EMAIL_HOST = env("EMAIL_HOST", default="")
 
