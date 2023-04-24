@@ -1,56 +1,22 @@
 from django.urls import include, path
-from django.http import HttpResponseRedirect
 from django.utils.translation import gettext as _
-
 from wagtail import hooks
-from wagtail.contrib.modeladmin.views import CreateView, EditView
 from wagtail.contrib.modeladmin.options import (
     ModelAdmin,
-    modeladmin_register,
     ModelAdminGroup,
+    modeladmin_register,
 )
 
-from .models import PolicyDirectory, PolicyDirectoryFile
+from . import views
 from .button_helper import PolicyDirectoryHelper
-
-from usefulmodels.models import Action
-
-
-class PolicyDirectoryEditView(EditView):
-    def form_valid(self, form):
-        self.object = form.save_all(self.request.user)
-        return HttpResponseRedirect(self.get_success_url())
-
-
-class PolicyDirectoryCreateView(CreateView):
-    def form_valid(self, form):
-        self.object = form.save_all(self.request.user)
-        return HttpResponseRedirect(self.get_success_url())
-
-    def get_instance(self):
-        instance = super().get_instance()
-
-        if Action.objects.filter(
-            name__icontains="políticas públicas e institucionais"
-        ).exists():
-            instance.action = Action.objects.get(
-                name__icontains="políticas públicas e institucionais"
-            )
-
-        return instance
-
-
-class PolicyDirectoryFileCreateView(CreateView):
-    def form_valid(self, form):
-        self.object = form.save_all(self.request.user)
-        return HttpResponseRedirect(self.get_success_url())
+from .models import PolicyDirectory, PolicyDirectoryFile
 
 
 class PolicyDirectoryAdmin(ModelAdmin):
     model = PolicyDirectory
     ordering = ("-updated",)
-    create_view_class = PolicyDirectoryCreateView
-    edit_view_class = PolicyDirectoryEditView
+    create_view_class = views.PolicyDirectoryCreateView
+    edit_view_class = views.PolicyDirectoryEditView
     menu_label = _("Policy Directory")
     menu_icon = "folder"
     menu_order = 100
@@ -58,17 +24,27 @@ class PolicyDirectoryAdmin(ModelAdmin):
     exclude_from_explorer = (
         False  # or True to exclude pages of this type from Wagtail's explorer view
     )
-    list_display = ("title", "link", "description", "creator", "updated", "created")
+    list_display = ("title", "link", "record_status", "description", "creator", "updated", "created")
     list_filter = ("practice", "classification", "thematic_areas", "record_status")
     search_fields = ("title", "description")
     list_export = ("title", "link", "description")
     export_filename = "policy_directory"
 
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+
+        # If the user is not a staff
+        if not request.user.is_staff:
+            # Only show the records create by the current user
+            return qs.filter(creator=request.user)
+        else: 
+            return qs
+
 
 class PolicyDirectoryFileAdmin(ModelAdmin):
     model = PolicyDirectoryFile
     ordering = ("-updated",)
-    create_view_class = PolicyDirectoryFileCreateView
+    create_view_class = views.PolicyDirectoryFileCreateView
     button_helper_class = PolicyDirectoryHelper
     menu_label = _("Policy Directory Upload")
     menu_icon = "folder"

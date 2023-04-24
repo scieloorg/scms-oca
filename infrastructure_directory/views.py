@@ -61,7 +61,7 @@ class InfrastructureDirectoryCreateView(CreateView):
                     ]
                     tasks.send_mail(
                         _("Novo conteúdo para moderação - %s" % self.model._meta.verbose_name.title()),
-                        render_to_string('email/moderate_email.html', {'context': ""}),
+                        render_to_string('email/moderate_email.html', {'obj': self.object, 'user': self.request.user, 'request': self.request}),
                         to_list=[user_email],
                         bcc_list=group_mails,
                         html=True,

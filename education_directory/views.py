@@ -14,13 +14,12 @@ from core.libs import chkcsv
 from core_settings.models import Moderation
 from institution.models import Institution
 from usefulmodels.models import Action, Practice, ThematicArea
-from .permission_helper import InfrastructureDirectoryPermissionHelper
+from .permission_helper import EducationDirectoryPermissionHelper
 
 from .models import EducationDirectory, EducationDirectoryFile
 
 
 class EducationDirectoryCreateView(CreateView):
-
     def get_moderation(self):
         # check if exists a moderation and if is enabled
         if Moderation.objects.filter(model=self.model.__name__, status=True).exists():
@@ -33,7 +32,7 @@ class EducationDirectoryCreateView(CreateView):
             if self.request.user.is_staff:
                 return False
 
-            return InfrastructureDirectoryPermissionHelper(
+            return EducationDirectoryPermissionHelper(
                 model=self.model
             ).must_be_moderate(self.request.user)
 
@@ -49,7 +48,7 @@ class EducationDirectoryCreateView(CreateView):
                 self.object.record_status = "TO MODERATE"
                 self.object.save()
 
-                # check if must send e-mail 
+                # check if must send e-mail
                 if moderation.send_mail:
                     # get user
                     user_email = self.get_moderation().moderator.email or None
@@ -60,8 +59,18 @@ class EducationDirectoryCreateView(CreateView):
                         if user.email
                     ]
                     tasks.send_mail(
-                        _("Novo conteúdo para moderação - %s" % self.model._meta.verbose_name.title()),
-                        render_to_string('email/moderate_email.html', {'context': ""}),
+                        _(
+                            "Novo conteúdo para moderação - %s"
+                            % self.model._meta.verbose_name.title()
+                        ),
+                        render_to_string(
+                            "email/moderate_email.html",
+                            {
+                                "obj": self.object,
+                                "user": self.request.user,
+                                "request": self.request,
+                            },
+                        ),
                         to_list=[user_email],
                         bcc_list=group_mails,
                         html=True,

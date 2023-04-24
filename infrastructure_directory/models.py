@@ -100,6 +100,9 @@ class InfrastructureDirectory(CommonControlField):
     def __str__(self):
         return "%s" % self.title
 
+    def get_absolute_edit_url(self):
+        return f"/infrastructure_directory/infrastructuredirectory/edit/{self.id}/"
+
     @property
     def data(self):
         d = {
