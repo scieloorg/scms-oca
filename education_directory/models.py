@@ -9,11 +9,11 @@ from wagtailautocomplete.edit_handlers import AutocompletePanel
 from core.models import CommonControlField
 from institution.models import Institution
 from location.models import Location
-from usefulmodels.models import Practice, ThematicArea, Action
-
-from .forms import EducationDirectoryFileForm, EducationDirectoryForm
+from usefulmodels.models import Action, Practice, ThematicArea
 
 from . import choices
+from .forms import EducationDirectoryFileForm, EducationDirectoryForm
+from .permission_helper import MUST_BE_MODERATE
 
 
 def get_default_action():
@@ -26,6 +26,9 @@ def get_default_action():
 class EducationDirectory(CommonControlField):
     class Meta:
         verbose_name_plural = _("Education Directory")
+        permissions = (
+            (MUST_BE_MODERATE, _("Must be moderated")),
+        )
 
     title = models.CharField(_("Title"), max_length=255, null=False, blank=False)
     link = models.URLField(_("Link"), null=False, blank=False)

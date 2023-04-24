@@ -1,52 +1,21 @@
-from django.http import HttpResponseRedirect
 from django.urls import include, path
 from django.utils.translation import gettext as _
+from wagtail import hooks
 from wagtail.contrib.modeladmin.options import (
     ModelAdmin,
     ModelAdminGroup,
     modeladmin_register,
 )
-from wagtail.contrib.modeladmin.views import CreateView, EditView
-from wagtail import hooks
 
+from . import views
 from .button_helper import EducationDirectoryHelper
 from .models import EducationDirectory, EducationDirectoryFile
-
-from usefulmodels.models import Action
-
-
-class EducationDirectoryCreateView(CreateView):
-    def form_valid(self, form):
-        self.object = form.save_all(self.request.user)
-        return HttpResponseRedirect(self.get_success_url())
-
-    def get_instance(self):
-        instance = super().get_instance()
-
-        if Action.objects.filter(name__icontains="educação / capacitação").exists():
-            instance.action = Action.objects.get(
-                name__icontains="educação / capacitação"
-            )
-
-        return instance
-
-
-class EducationDirectoryEditView(EditView):
-    def form_valid(self, form):
-        self.object = form.save_all(self.request.user)
-        return HttpResponseRedirect(self.get_success_url())
-
-
-class EducationDirectoryFileCreateView(CreateView):
-    def form_valid(self, form):
-        self.object = form.save_all(self.request.user)
-        return HttpResponseRedirect(self.get_success_url())
 
 
 class EducationDirectoryAdmin(ModelAdmin):
     model = EducationDirectory
     ordering = ("-updated",)
-    create_view_class = EducationDirectoryCreateView
+    create_view_class = views.EducationDirectoryCreateView
     # edit_view_class = EducationDirectoryEditView
     menu_label = _("Education Directory")
     menu_icon = "folder"
@@ -65,7 +34,7 @@ class EducationDirectoryAdmin(ModelAdmin):
 class EducationDirectoryFileAdmin(ModelAdmin):
     model = EducationDirectoryFile
     ordering = ("-updated",)
-    create_view_class = EducationDirectoryFileCreateView
+    create_view_class = views.EducationDirectoryFileCreateView
     button_helper_class = EducationDirectoryHelper
     menu_label = _("Education Directory Upload")
     menu_icon = "folder"

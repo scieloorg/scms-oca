@@ -22,18 +22,20 @@ from .permission_helper import InfrastructureDirectoryPermissionHelper
 class InfrastructureDirectoryCreateView(CreateView):
     
     def get_moderation(self):
-        if Moderation.objects.filter(model=self.model.__name__).exists():
+        # check if exists a moderation and if is enabled
+        if Moderation.objects.filter(model=self.model.__name__, status=True).exists():
             return Moderation.objects.get(model=self.model.__name__)
 
     @property
     def must_moderate(self):
-        # if user is a staff must no moderate
-        if self.request.user.is_staff:
-            return False
+        if self.get_moderation():
+            # if user is a staff must no moderate
+            if self.request.user.is_staff:
+                return False
 
-        return InfrastructureDirectoryPermissionHelper(
-            model=self.model
-        ).must_be_moderate(self.request.user)
+            return InfrastructureDirectoryPermissionHelper(
+                model=self.model
+            ).must_be_moderate(self.request.user)
 
     def form_valid(self, form):
         self.object = form.save_all(self.request.user)
