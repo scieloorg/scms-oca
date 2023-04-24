@@ -26,9 +26,7 @@ def get_default_action():
 class EventDirectory(CommonControlField):
     class Meta:
         verbose_name_plural = _("EventDirectory Directory")
-        permissions = (
-            (MUST_BE_MODERATE, _("Must be moderated")),
-        )
+        permissions = ((MUST_BE_MODERATE, _("Must be moderated")),)
 
     title = models.CharField(_("Title"), max_length=255, null=False, blank=False)
     link = models.URLField(_("Link"), null=False, blank=False)

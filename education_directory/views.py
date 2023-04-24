@@ -95,7 +95,6 @@ class EducationDirectoryCreateView(CreateView):
 
 
 class EducationDirectoryEditView(EditView):
-
     def get_moderation(self):
         if Moderation.objects.filter(model=self.model.__name__, status=True).exists():
             return Moderation.objects.get(model=self.model.__name__)
@@ -106,9 +105,9 @@ class EducationDirectoryEditView(EditView):
         if self.request.user.is_staff:
             return False
 
-        return EducationDirectoryPermissionHelper(
-            model=self.model
-        ).must_be_moderate(self.request.user)
+        return EducationDirectoryPermissionHelper(model=self.model).must_be_moderate(
+            self.request.user
+        )
 
     def form_valid(self, form):
         self.object = form.save_all(self.request.user)

@@ -20,7 +20,6 @@ from .permission_helper import PolicyDirectoryPermissionHelper
 
 
 class PolicyDirectoryEditView(EditView):
-
     def get_moderation(self):
         if Moderation.objects.filter(model=self.model.__name__, status=True).exists():
             return Moderation.objects.get(model=self.model.__name__)
@@ -31,9 +30,9 @@ class PolicyDirectoryEditView(EditView):
         if self.request.user.is_staff:
             return False
 
-        return PolicyDirectoryPermissionHelper(
-            model=self.model
-        ).must_be_moderate(self.request.user)
+        return PolicyDirectoryPermissionHelper(model=self.model).must_be_moderate(
+            self.request.user
+        )
 
     def form_valid(self, form):
         self.object = form.save_all(self.request.user)
@@ -46,6 +45,7 @@ class PolicyDirectoryEditView(EditView):
                 self.object.save()
 
         return HttpResponseRedirect(self.get_success_url())
+
 
 class PolicyDirectoryCreateView(CreateView):
     def get_moderation(self):
@@ -60,9 +60,9 @@ class PolicyDirectoryCreateView(CreateView):
             if self.request.user.is_staff:
                 return False
 
-            return PolicyDirectoryPermissionHelper(
-                model=self.model
-            ).must_be_moderate(self.request.user)
+            return PolicyDirectoryPermissionHelper(model=self.model).must_be_moderate(
+                self.request.user
+            )
 
     def form_valid(self, form):
         self.object = form.save_all(self.request.user)

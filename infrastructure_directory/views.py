@@ -20,7 +20,6 @@ from .permission_helper import InfrastructureDirectoryPermissionHelper
 
 
 class InfrastructureDirectoryCreateView(CreateView):
-    
     def get_moderation(self):
         # check if exists a moderation and if is enabled
         if Moderation.objects.filter(model=self.model.__name__, status=True).exists():
@@ -49,7 +48,7 @@ class InfrastructureDirectoryCreateView(CreateView):
                 self.object.record_status = "TO MODERATE"
                 self.object.save()
 
-                # check if must send e-mail 
+                # check if must send e-mail
                 if moderation.send_mail:
                     # get user
                     user_email = self.get_moderation().moderator.email or None
@@ -60,8 +59,18 @@ class InfrastructureDirectoryCreateView(CreateView):
                         if user.email
                     ]
                     tasks.send_mail(
-                        _("Novo conteúdo para moderação - %s" % self.model._meta.verbose_name.title()),
-                        render_to_string('email/moderate_email.html', {'obj': self.object, 'user': self.request.user, 'request': self.request}),
+                        _(
+                            "Novo conteúdo para moderação - %s"
+                            % self.model._meta.verbose_name.title()
+                        ),
+                        render_to_string(
+                            "email/moderate_email.html",
+                            {
+                                "obj": self.object,
+                                "user": self.request.user,
+                                "request": self.request,
+                            },
+                        ),
                         to_list=[user_email],
                         bcc_list=group_mails,
                         html=True,
@@ -84,7 +93,6 @@ class InfrastructureDirectoryCreateView(CreateView):
 
 
 class InfrastructureDirectoryEditView(EditView):
-
     def get_moderation(self):
         if Moderation.objects.filter(model=self.model.__name__, status=True).exists():
             return Moderation.objects.get(model=self.model.__name__)

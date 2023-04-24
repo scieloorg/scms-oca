@@ -94,7 +94,7 @@ class JournalsAdmin(ModelAdmin):
         "journal_is_in_doaj",
     )
 
-    list_filter = ("journal_is_in_doaj", )
+    list_filter = ("journal_is_in_doaj",)
     search_fields = ("journal_issn_l", "journal_name", "journal_issns", "publisher")
 
 

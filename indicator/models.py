@@ -152,9 +152,7 @@ class Indicator(CommonControlField):
                 yield f"{json.dumps(data)}\n"
 
     class Meta:
-        permissions = (
-            (MUST_BE_MODERATE, _("Must be moderated")),
-        )
+        permissions = ((MUST_BE_MODERATE, _("Must be moderated")),)
         indexes = [
             models.Index(fields=["action_and_practice"]),
             models.Index(fields=["code"]),
