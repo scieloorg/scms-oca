@@ -136,7 +136,11 @@ class Moderation(Orderable):
     )
 
     send_mail = models.BooleanField(
-        default=True, verbose_name=_("Send e-mail to moderator(s)"), help_text="This field indicate if any record is create if must send e-mail to moderator or a group of moderators"
+        default=True, verbose_name=_("Send e-mail to moderator(s)"), help_text="This field indicate if any record is create and if must send e-mail to moderator or a group of moderators"
+    )
+
+    status = models.BooleanField(
+        default=True, verbose_name=_("Enabled"), help_text="Set to False to disable the moderation"
     )
 
     class Meta:
