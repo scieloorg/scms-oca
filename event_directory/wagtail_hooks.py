@@ -1,52 +1,22 @@
 from django.urls import include, path
-from django.http import HttpResponseRedirect
 from django.utils.translation import gettext as _
-
 from wagtail import hooks
-from wagtail.contrib.modeladmin.views import CreateView, EditView
 from wagtail.contrib.modeladmin.options import (
     ModelAdmin,
-    modeladmin_register,
     ModelAdminGroup,
+    modeladmin_register,
 )
 
-from .models import EventDirectory, EventDirectoryFile
+from . import views
 from .button_helper import EventDirectoryHelper
-
-from usefulmodels.models import Action
-
-
-class EventDirectoryEditView(EditView):
-    def form_valid(self, form):
-        self.object = form.save_all(self.request.user)
-        return HttpResponseRedirect(self.get_success_url())
-
-
-class EventDirectoryCreateView(CreateView):
-    def form_valid(self, form):
-        self.object = form.save_all(self.request.user)
-        return HttpResponseRedirect(self.get_success_url())
-
-    def get_instance(self):
-        instance = super().get_instance()
-
-        if Action.objects.filter(name__icontains="disseminação").exists():
-            instance.action = Action.objects.get(name__icontains="disseminação")
-
-        return instance
-
-
-class EventDirectoryFileCreateView(CreateView):
-    def form_valid(self, form):
-        self.object = form.save_all(self.request.user)
-        return HttpResponseRedirect(self.get_success_url())
+from .models import EventDirectory, EventDirectoryFile
 
 
 class EventDirectoryAdmin(ModelAdmin):
     model = EventDirectory
     ordering = ("-updated",)
-    create_view_class = EventDirectoryCreateView
-    edit_view_class = EventDirectoryEditView
+    create_view_class = views.EventDirectoryCreateView
+    edit_view_class = views.EventDirectoryEditView
     menu_label = _("Event Directory")
     menu_icon = "folder"
     menu_order = 100
@@ -54,17 +24,27 @@ class EventDirectoryAdmin(ModelAdmin):
     exclude_from_explorer = (
         False  # or True to exclude pages of this type from Wagtail's explorer view
     )
-    list_display = ("title", "link", "description", "creator", "updated", "created")
+    list_display = ("title", "link", "record_status", "description", "creator", "updated", "created")
     list_filter = ("practice", "classification", "thematic_areas", "record_status")
     search_fields = ("title", "description")
     list_export = ("title", "link", "description")
     export_filename = "event_directory"
 
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+
+        # If the user is not a staff
+        if not request.user.is_staff:
+            # Only show the records create by the current user
+            return qs.filter(creator=request.user)
+        else: 
+            return qs
+
 
 class EventDirectoryFileAdmin(ModelAdmin):
     model = EventDirectoryFile
     ordering = ("-updated",)
-    create_view_class = EventDirectoryFileCreateView
+    create_view_class = views.EventDirectoryFileCreateView
     button_helper_class = EventDirectoryHelper
     menu_label = _("Event Directory Upload")
     menu_icon = "folder"

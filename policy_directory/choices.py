@@ -13,4 +13,5 @@ status = (
     ("WIP", "WIP"),
     ("TO MODERATE", _("TO MODERATE")),
     ("PUBLISHED", _("PUBLISHED")),
+    ("NOT PUBLISHED", _("NOT PUBLISHED")),
 )

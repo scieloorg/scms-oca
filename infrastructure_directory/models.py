@@ -2,13 +2,14 @@ import os
 
 from django.db import models
 from django.utils.translation import gettext as _
+from .permission_helper import MUST_BE_MODERATE
 from taggit.managers import TaggableManager
 from wagtail.admin.panels import FieldPanel, HelpPanel
 from wagtailautocomplete.edit_handlers import AutocompletePanel
 
 from core.models import CommonControlField
 from institution.models import Institution
-from usefulmodels.models import ThematicArea, Practice, Action
+from usefulmodels.models import Action, Practice, ThematicArea
 
 from . import choices
 from .forms import InfrastructureDirectoryFileForm, InfrastructureDirectoryForm
@@ -24,6 +25,9 @@ def get_default_action():
 class InfrastructureDirectory(CommonControlField):
     class Meta:
         verbose_name_plural = _("Infraestructure Directory")
+        permissions = (
+            (MUST_BE_MODERATE, _("Must be moderated")),
+        )
 
     title = models.CharField(_("Title"), max_length=255, null=False, blank=False)
     link = models.URLField(_("Link"), null=False, blank=False)
@@ -95,6 +99,9 @@ class InfrastructureDirectory(CommonControlField):
 
     def __str__(self):
         return "%s" % self.title
+
+    def get_absolute_edit_url(self):
+        return f"/infrastructure_directory/infrastructuredirectory/edit/{self.id}/"
 
     @property
     def data(self):

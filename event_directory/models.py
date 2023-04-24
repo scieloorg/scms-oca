@@ -4,16 +4,16 @@ from django.db import models
 from django.utils.translation import gettext as _
 from taggit.managers import TaggableManager
 from wagtail.admin.panels import FieldPanel, HelpPanel
-
 from wagtailautocomplete.edit_handlers import AutocompletePanel
 
 from core.models import CommonControlField
 from institution.models import Institution
 from location.models import Location
-from usefulmodels.models import ThematicArea, Practice, Action
+from usefulmodels.models import Action, Practice, ThematicArea
 
 from . import choices
 from .forms import EventDirectoryFileForm, EventDirectoryForm
+from .permission_helper import MUST_BE_MODERATE
 
 
 def get_default_action():
@@ -26,6 +26,9 @@ def get_default_action():
 class EventDirectory(CommonControlField):
     class Meta:
         verbose_name_plural = _("EventDirectory Directory")
+        permissions = (
+            (MUST_BE_MODERATE, _("Must be moderated")),
+        )
 
     title = models.CharField(_("Title"), max_length=255, null=False, blank=False)
     link = models.URLField(_("Link"), null=False, blank=False)
@@ -121,6 +124,9 @@ class EventDirectory(CommonControlField):
 
     def __str__(self):
         return "%s" % self.title
+
+    def get_absolute_edit_url(self):
+        return f"/event_directory/eventdirectory/edit/{self.id}/"
 
     @property
     def data(self):

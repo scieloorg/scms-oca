@@ -1,0 +1,17 @@
+{% extends "modeladmin/create.html" %}
+{% load i18n wagtailadmin_tags %}
+
+{% block form_actions %}
+
+{% if has_moderation %}
+  <button type="submit" class="button action-save button-longrunning"
+    data-clicked-text="{% trans 'Sending to moderation'%}" style="width:100%">
+    <svg class="icon icon-spinner icon" aria-hidden="true">
+      <use href="#icon-spinner"></use>
+    </svg><em>{% trans 'Send to moderation'%}</em>
+  </button>
+{% else %}
+  {{ block.super }}
+{% endif %}
+
+{% endblock %}
