@@ -1,32 +1,25 @@
-import os
-from zipfile import ZipFile
-from datetime import datetime
-from tempfile import TemporaryDirectory
-import shutil
-import logging
-import csv
-import io
 import json
+import logging
+import os
+import shutil
+from tempfile import TemporaryDirectory
+from zipfile import ZipFile
 
 from django.conf import settings
 from django.db import models
-from django.utils.translation import gettext as _
 from django.utils.text import slugify
+from django.utils.translation import gettext as _
 from taggit.managers import TaggableManager
 from wagtail.admin.panels import FieldPanel
 
 from core.models import CommonControlField
-
-from scholarly_articles import choices as scholarly_articles_choices
-from . import choices
-from .forms import IndicatorDirectoryForm
-from usefulmodels.models import Action, Practice, ThematicArea, ActionAndPractice
 from institution.models import Institution
 from location.models import Location
-from education_directory.models import EducationDirectory
-from event_directory.models import EventDirectory
-from infrastructure_directory.models import InfrastructureDirectory
-from policy_directory.models import PolicyDirectory
+from usefulmodels.models import ActionAndPractice, ThematicArea
+
+from . import choices
+from .forms import IndicatorDirectoryForm
+from .permission_helper import MUST_BE_MODERATE
 
 
 class Indicator(CommonControlField):
@@ -106,6 +99,9 @@ class Indicator(CommonControlField):
     category = models.CharField(_("Categoria"), max_length=255, null=True, blank=False)
     context = models.CharField(_("Contexto"), max_length=255, null=True, blank=False)
 
+    def get_absolute_edit_url(self):
+        return f"/indicator/indicator/edit/{self.id}/"
+
     @property
     def header(self):
         link = "https://ocabr.org/search/indicator/{}/detail/".format(
@@ -156,6 +152,9 @@ class Indicator(CommonControlField):
                 yield f"{json.dumps(data)}\n"
 
     class Meta:
+        permissions = (
+            (MUST_BE_MODERATE, _("Must be moderated")),
+        )
         indexes = [
             models.Index(fields=["action_and_practice"]),
             models.Index(fields=["code"]),

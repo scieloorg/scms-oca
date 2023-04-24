@@ -86,7 +86,7 @@ class InfrastructureDirectoryCreateView(CreateView):
 class InfrastructureDirectoryEditView(EditView):
 
     def get_moderation(self):
-        if Moderation.objects.filter(model=self.model.__name__).exists():
+        if Moderation.objects.filter(model=self.model.__name__, status=True).exists():
             return Moderation.objects.get(model=self.model.__name__)
 
     @property

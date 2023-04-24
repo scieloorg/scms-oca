@@ -20,10 +20,32 @@ from .permission_helper import PolicyDirectoryPermissionHelper
 
 
 class PolicyDirectoryEditView(EditView):
+
+    def get_moderation(self):
+        if Moderation.objects.filter(model=self.model.__name__, status=True).exists():
+            return Moderation.objects.get(model=self.model.__name__)
+
+    @property
+    def must_moderate(self):
+        # if user is a staff must no moderate
+        if self.request.user.is_staff:
+            return False
+
+        return PolicyDirectoryPermissionHelper(
+            model=self.model
+        ).must_be_moderate(self.request.user)
+
     def form_valid(self, form):
         self.object = form.save_all(self.request.user)
-        return HttpResponseRedirect(self.get_success_url())
 
+        # check if have moderation and if the record_status is diferent from ``PUBLISHED``
+        if self.must_moderate and self.object.record_status != "PUBLISHED":
+            if self.get_moderation():
+                # fix the status to ``TO MODERATE``
+                self.object.record_status = "TO MODERATE"
+                self.object.save()
+
+        return HttpResponseRedirect(self.get_success_url())
 
 class PolicyDirectoryCreateView(CreateView):
     def get_moderation(self):

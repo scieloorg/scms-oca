@@ -13,7 +13,7 @@ class IndicatorIndex(indexes.SearchIndex, indexes.Indexable):
     """
 
     created = indexes.CharField(model_attr="created", null=False)
-    validity = indexes.CharField(model_attr="validity", null=False)
+    validity = indexes.CharField(model_attr="validity", null=True)
 
     text = indexes.CharField(document=True, use_template=True)
     record_type = indexes.CharField(null=False)
