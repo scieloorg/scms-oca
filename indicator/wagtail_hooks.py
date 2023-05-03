@@ -50,5 +50,16 @@ class IndicatorAdmin(ModelAdmin):
         "action_and_practice__practice__name",
     )
 
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+
+        # If the user is not a staff
+        if not request.user.is_staff:
+            # Only show the records create by the current user
+            return qs.filter(creator=request.user)
+        else:
+            return qs
+
+
 
 modeladmin_register(IndicatorAdmin)

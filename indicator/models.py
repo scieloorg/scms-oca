@@ -152,7 +152,27 @@ class Indicator(CommonControlField):
                 yield f"{json.dumps(data)}\n"
 
     class Meta:
-        permissions = ((MUST_BE_MODERATE, _("Must be moderated")),)
+        permissions = (
+            (MUST_BE_MODERATE, _("Must be moderated")),
+            ("can_edit_record_status", _("Can edit record_status")),
+            ("can_edit_action_and_practice", _("Can edit action_and_practice")),
+            ("can_edit_link", _("Can edit link")),
+            ("can_edit_measurement", _("Can edit measurement")),
+            ("can_edit_object_name", _("Can edit object_name")),
+            ("can_edit_category", _("Can edit category")),
+            ("can_edit_context", _("Can edit context")),
+            ("can_edit_scope", _("Can edit scope")),
+            ("can_edit_seq", _("Can edit seq")),
+            ("can_edit_source", _("Can edit source")),
+            ("can_edit_start_date_year", _("Can edit start_date_year")),
+            ("can_edit_end_date_year", _("Can edit end_date_year")),
+            ("can_edit_validity", _("Can edit validity")),
+            ("can_edit_code", _("Can edit code")),
+            ("can_edit_thematic_areas", _("Can edit thematic_areas")),
+            ("can_edit_locations", _("Can edit locations")),
+            ("can_edit_raw_datas", _("Can edit raw_datas")),
+            ("can_edit_summarized", _("Can edit summarized")),
+        )
         indexes = [
             models.Index(fields=["action_and_practice"]),
             models.Index(fields=["code"]),
@@ -178,7 +198,26 @@ class Indicator(CommonControlField):
         FieldPanel("title"),
         FieldPanel("description"),
         FieldPanel("keywords"),
-        FieldPanel("record_status"),
+        FieldPanel("record_status", permission="indicator.can_edit_record_status"),
+        FieldPanel(
+            "action_and_practice", permission="indicator.can_edit_action_and_practice"
+        ),
+        FieldPanel("link", permission="indicator.can_edit_link"),
+        FieldPanel("measurement", permission="indicator.can_edit_measurement"),
+        FieldPanel("object_name", permission="indicator.can_edit_object_name"),
+        FieldPanel("category", permission="indicator.can_edit_category"),
+        FieldPanel("context", permission="indicator.can_edit_context"),
+        FieldPanel("scope", permission="indicator.can_edit_scope"),
+        FieldPanel("seq", permission="indicator.can_edit_seq"),
+        FieldPanel("source", permission="indicator.can_edit_source"),
+        FieldPanel("start_date_year", permission="indicator.can_edit_start_date_year"),
+        FieldPanel("end_date_year", permission="indicator.can_edit_end_date_year"),
+        FieldPanel("validity", permission="indicator.can_edit_validity"),
+        FieldPanel("code", permission="indicator.can_edit_code"),
+        # FieldPanel("thematic_areas", permission="indicator.can_edit_thematic_areas"),
+        # FieldPanel("locations", permission="indicator.can_edit_locations"),
+        FieldPanel("raw_data", permission="indicator.can_edit_raw_datas"),
+        FieldPanel("summarized", permission="indicator.can_edit_summarized"),
     ]
 
     # https://drive.google.com/drive/folders/1_J8iKhr_gayuBqtvnSWreC-eBnxzY9rh
