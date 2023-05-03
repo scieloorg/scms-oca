@@ -1,19 +1,20 @@
 import csv
-import os
 import datetime
 import math
+import os
 from collections import OrderedDict
 
 import pysolr
 from django.conf import settings
+from django.db.models import Q
 from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.template import loader
 
-from indicator.models import Indicator
 from indicator import controller as indicator_controller
-from . import controller
+from indicator.models import Indicator
 
+from . import controller
 
 solr = pysolr.Solr(
     settings.HAYSTACK_CONNECTIONS["default"]["URL"],
@@ -109,20 +110,24 @@ def search(request):
     )
 
 
-def indicator_detail(request, indicator_id):
+def indicator_detail(request, indicator_slug):
     try:
-        indicator = Indicator.objects.get(pk=indicator_id)
+       indicator = Indicator.objects.get(
+            Q(slug=indicator_slug) | Q(code=indicator_slug), record_status="PUBLISHED"
+        )
     except Indicator.DoesNotExist:
         raise Http404("Indicator does not exist")
-
+    
     indicator.latest = indicator_controller.get_latest_version(indicator.code).id
     parameters = controller.indicator_detail(request, indicator)
-    return render(request, "indicator/indicator_detail.html", parameters)
+    return render(request, "indicator/indicator_detail.html", parameters or {'object': indicator})
 
 
-def indicator_summarized(request, indicator_id):
+def indicator_summarized(request, indicator_slug):
     try:
-        indicator = Indicator.objects.get(pk=indicator_id, record_status="PUBLISHED")
+        indicator = Indicator.objects.get(
+            Q(slug=indicator_slug) | Q(code=indicator_slug), record_status="PUBLISHED"
+        )
     except Indicator.DoesNotExist:
         raise Http404("Indicator does not exist")
 
@@ -146,9 +151,11 @@ def indicator_summarized(request, indicator_id):
     return response
 
 
-def indicator_raw_data(request, indicator_id):
+def indicator_raw_data(request, indicator_slug):
     try:
-        indicator = Indicator.objects.get(pk=indicator_id, record_status="PUBLISHED")
+       indicator = Indicator.objects.get(
+            Q(slug=indicator_slug) | Q(code=indicator_slug), record_status="PUBLISHED"
+        )
     except Indicator.DoesNotExist:
         raise Http404("Indicator does not exist")
 
