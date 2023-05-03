@@ -1,5 +1,7 @@
 # coding: utf-8
 import logging
+
+from django.conf import settings
 from haystack import indexes
 
 from indicator import models
@@ -53,12 +55,15 @@ class IndicatorIndex(indexes.SearchIndex, indexes.Indexable):
     # nacional -> municipal
     geo_priority = indexes.IntegerField(null=True)
     thematic_priority = indexes.IntegerField(null=True)
-    priority = indexes.FloatField(null=True)
+    # priority = indexes.FloatField(null=True)
 
     # scopes
     # por enquanto deixar apenas geo_scope, traduzir apenas como "âmbito"
     geo_scope = indexes.CharField(null=True)
     thematic_scope = indexes.CharField(null=True)
+
+    disclaimer = indexes.CharField(null=True)
+    slug = indexes.CharField(model_attr="slug", null=True)
 
     def prepare_geo_priority(self, obj):
         n_institutions = obj.institutions.count()
@@ -155,8 +160,8 @@ class IndicatorIndex(indexes.SearchIndex, indexes.Indexable):
             if thematic_area.level0:
                 return "level0"
 
-    def prepare_priority(self, obj):
-        return obj.raw_data and obj.raw_data.size
+    # def prepare_priority(self, obj):
+    #     return obj.raw_data and obj.raw_data.size
 
     def prepare_action(self, obj):
         return obj.action_and_practice and obj.action_and_practice.action.name
@@ -261,6 +266,13 @@ class IndicatorIndex(indexes.SearchIndex, indexes.Indexable):
                 except AttributeError:
                     continue
         return regions
+
+    def prepare_disclaimer(self, obj):
+        """
+        This add a disclaimer if user.updated is not a company
+        user and the content is public
+        """
+        return obj.disclaimer
 
     def get_model(self):
         return models.Indicator

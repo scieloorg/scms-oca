@@ -18,6 +18,12 @@
 
         <h1>{{ object.title }}</h1>
 
+        {% if object.disclaimer %}
+            <div class="alert alert-warning alert-dismissible fade show mt-1" role="alert">
+            <strong>{% trans "Atenção" %}: </strong> {{ object.disclaimer }}
+            </div>
+        {% endif %}
+
         <!-- Navegação entre as versões -->
         <div class="container">
             <nav aria-label="...">
@@ -25,7 +31,7 @@
 
                     <li class="page-item" aria-current="page">
                         {% if object.previous_record.id %}
-                            <a class="page-link" href="{% url 'search:indicator_detail' object.previous_record.id %}">
+                            <a class="page-link" href="{% url 'search:indicator_detail' object.previous_record.slug %}">
                                 < {% trans 'versões anteriores' %}
                             </a>
                         {% endif %}
@@ -40,7 +46,7 @@
                     </li>
                     <li class="page-item">
                         {% if object.posterior_record.seq %}
-                            <a class="page-link" href="{% url 'search:indicator_detail' object.posterior_record.id %}">
+                            <a class="page-link" href="{% url 'search:indicator_detail' object.posterior_record.slug %}">
                                 {% trans 'versões posteriores' %} >
                             </a>
                         {% endif %}
@@ -76,19 +82,41 @@
                 <p>{{ object.description }}</p>
             {% endif %}
         </div>
+
         <div class="container">
-            <p>
-                {% if object.record_status == 'WIP' %}
-                    <a href="#">{% trans 'download dados brutos' %}{% trans 'em processamento' %}</a>
-                |
-                {% else %}
-                    <a href="{% url 'search:indicator_raw_data' object.id %}">{% trans 'download dados brutos' %}</a>
-                |
-                {% endif %}
-                <a href="{% url 'search:indicator_summarized' object.id %}">{% trans 'download dados computados' %}</a>
-            </p>
+
+            {% if object.link_to_data %}
+                <p>
+                    <b>{% trans 'Link to the data' %}</b>: <a href="{{ object.link_to_data }}">{{ object.link_to_data }}</a>
+                </p>
+            {% endif %}
+            
+            {% if object.link_to_graphic %}
+                <p>
+                    <b>{% trans 'Link to the graphic' %}</b>: <a href="{{ object.link_to_graphic }}">{{ object.link_to_graphic }}</a>
+                </p>
+            {% endif %}
         </div>
-        <div class="container">{% include 'indicator/abas.html' %}</div>
+
+        {% if object.indicator_raw_data and object.indicator_summarized %}
+            <div class="container">
+                <p>
+                    {% if object.record_status == 'WIP' %}
+                        <a href="#">{% trans 'download dados brutos' %}{% trans 'em processamento' %}</a>
+                    |
+                    {% else %}
+                        <a href="{% url 'search:indicator_raw_data' object.slug %}">{% trans 'download dados brutos' %}</a>
+                    |
+                    {% endif %}
+                        <a href="{% url 'search:indicator_summarized' object.slug %}">{% trans 'download dados computados' %}</a>
+                </p>
+            </div>
+        {% endif %}
+
+        {% if object.table_header %}
+            <div class="container">{% include 'indicator/abas.html' %}</div>
+        {% endif %}
+
         <div class="container">
             <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Licença Creative Commons" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/80x15.png" /></a><br />Este obra está licenciado com uma Licença <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Atribuição 4.0 Internacional</a>.
         </div>

@@ -12,14 +12,16 @@ from indicator import controller as indicator_controller
 def indicator_detail(request, indicator):
     layouts = ["bar-label-rotation", "categories_1_grid", "categories_2_grids"]
     graphic_type = layouts[int(request.GET.get("g") or 1)]
-    try:
-        cat2_name = indicator.summarized["cat2_name"]
-    except KeyError:
-        return _parameters_for_ranking_indicator(
-            indicator, graphic_type, indicator.summarized.get("cat1_name")
-        )
-    else:
-        return _parameters_for_categories_indicator(indicator, graphic_type, cat2_name)
+    
+    if indicator.summarized:
+        try:
+            cat2_name = indicator.summarized["cat2_name"]
+        except KeyError:
+            return _parameters_for_ranking_indicator(
+                indicator, graphic_type, indicator.summarized.get("cat1_name")
+            )
+        else:
+            return _parameters_for_categories_indicator(indicator, graphic_type, cat2_name)
 
 
 def _parameters_for_ranking_indicator(indicator, graphic_type, cat1_name=None):

@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import secrets
 import shutil
 from tempfile import TemporaryDirectory
 from zipfile import ZipFile
@@ -11,6 +12,7 @@ from django.utils.text import slugify
 from django.utils.translation import gettext as _
 from taggit.managers import TaggableManager
 from wagtail.admin.panels import FieldPanel
+from wagtailautocomplete.edit_handlers import AutocompletePanel
 
 from core.models import CommonControlField
 from institution.models import Institution
@@ -94,10 +96,21 @@ class Indicator(CommonControlField):
     code = models.CharField(_("Code"), max_length=555, null=False, blank=False)
 
     object_name = models.CharField(
-        _("Observação"), max_length=255, null=True, blank=False
+        _("Observation"), max_length=255, null=True, blank=False
     )
     category = models.CharField(_("Categoria"), max_length=255, null=True, blank=False)
     context = models.CharField(_("Contexto"), max_length=255, null=True, blank=False)
+    slug = models.SlugField(unique=True, null=True, max_length=64)
+
+    link_to_graphic = models.URLField(_("Link to graphic"), null=True, blank=True)
+
+    link_to_data = models.URLField(_("Link to the data"), null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        # ensure we always have the slug.
+        if not self.slug:
+            self.slug = secrets.token_urlsafe(48)
+        return super().save(*args, **kwargs)
 
     def get_absolute_edit_url(self):
         return f"/indicator/indicator/edit/{self.id}/"
@@ -151,6 +164,23 @@ class Indicator(CommonControlField):
                 data.update(self.header)
                 yield f"{json.dumps(data)}\n"
 
+    @property
+    def disclaimer(self):
+
+        if self.updated_by:
+            return (
+                settings.CONTENT_DISCLAIMER_MESSAGE
+                if not self.updated_by.is_staff and self.record_status == "PUBLISHED"
+                else None
+            )
+        
+        if self.creator: 
+            return (
+                settings.CONTENT_DISCLAIMER_MESSAGE
+                if not self.creator.is_staff and self.record_status == "PUBLISHED"
+                else None
+            )   
+
     class Meta:
         permissions = (
             (MUST_BE_MODERATE, _("Must be moderated")),
@@ -172,6 +202,8 @@ class Indicator(CommonControlField):
             ("can_edit_locations", _("Can edit locations")),
             ("can_edit_raw_datas", _("Can edit raw_datas")),
             ("can_edit_summarized", _("Can edit summarized")),
+            ("can_edit_link_to_data", _("Can edit link to data")),
+            ("can_edit_link_to_graphic", _("Can edit link do graphic")),
         )
         indexes = [
             models.Index(fields=["action_and_practice"]),
@@ -198,6 +230,9 @@ class Indicator(CommonControlField):
         FieldPanel("title"),
         FieldPanel("description"),
         FieldPanel("keywords"),
+        FieldPanel("code"),
+        FieldPanel("link_to_graphic", permission="indicator.can_edit_link_to_graphic"),
+        FieldPanel("link_to_data", permission="indicator.can_edit_link_to_data"),
         FieldPanel("record_status", permission="indicator.can_edit_record_status"),
         FieldPanel(
             "action_and_practice", permission="indicator.can_edit_action_and_practice"
@@ -214,8 +249,8 @@ class Indicator(CommonControlField):
         FieldPanel("end_date_year", permission="indicator.can_edit_end_date_year"),
         FieldPanel("validity", permission="indicator.can_edit_validity"),
         FieldPanel("code", permission="indicator.can_edit_code"),
-        # FieldPanel("thematic_areas", permission="indicator.can_edit_thematic_areas"),
-        # FieldPanel("locations", permission="indicator.can_edit_locations"),
+        AutocompletePanel("thematic_areas", permission="indicator.can_edit_thematic_areas"),
+        AutocompletePanel("locations", permission="indicator.can_edit_locations"),
         FieldPanel("raw_data", permission="indicator.can_edit_raw_datas"),
         FieldPanel("summarized", permission="indicator.can_edit_summarized"),
     ]

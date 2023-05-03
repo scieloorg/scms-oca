@@ -7,17 +7,17 @@ urlpatterns = [
     # path /
     path("", views.search, name="search"),
     path(
-        "indicator/<int:indicator_id>/detail/",
+        "indicator/<str:indicator_slug>/detail/",
         views.indicator_detail,
         name="indicator_detail",
     ),
     path(
-        "indicator/<int:indicator_id>/summarized/",
+        "indicator/<str:indicator_slug>/summarized/",
         views.indicator_summarized,
         name="indicator_summarized",
     ),
     path(
-        "indicator/<int:indicator_id>/raw_data/",
+        "indicator/<str:indicator_slug>/raw_data/",
         views.indicator_raw_data,
         name="indicator_raw_data",
     ),
