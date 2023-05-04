@@ -18,6 +18,7 @@ status = (
     (WIP, _("WORK IN PROGRESS")),
     (TO_MODERATE, _("TO MODERATE")),
     (PUBLISHED, _("PUBLISHED")),
+    ("NOT PUBLISHED", _("NOT PUBLISHED")),
 )
 
 CURRENT = "CURRENT"

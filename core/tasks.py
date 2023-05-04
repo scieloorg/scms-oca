@@ -9,8 +9,17 @@ logger = logging.getLogger(__name__)
 
 
 @celery_app.task(bind=True, max_retries=3)
-def send_mail(self, subject, content, to_list=None, bcc_list=None, html=True, 
-              attachment_name=None, attachment_content=None, attachment_content_type=None):
+def send_mail(
+    self,
+    subject,
+    content,
+    to_list=None,
+    bcc_list=None,
+    html=True,
+    attachment_name=None,
+    attachment_content=None,
+    attachment_content_type=None,
+):
     """
     Send email to list set on ``to_list`` param.
     This tasks consider the settings.DEFAUL_FROM_EMAIL as from_mail param
@@ -35,24 +44,34 @@ def send_mail(self, subject, content, to_list=None, bcc_list=None, html=True,
     if settings.EMAIL_SUBJECT_PREFIX:
         subject = settings.EMAIL_SUBJECT_PREFIX + subject
 
-    msg = EmailMessage(subject, content, settings.DEFAULT_FROM_EMAIL, to_list,
-                       bcc_list)
+    msg = EmailMessage(subject, content, settings.DEFAULT_FROM_EMAIL, to_list, bcc_list)
 
     if attachment_content and attachment_name:
         msg.attach(attachment_name, attachment_content, attachment_content_type)
 
     if html:
-        msg.content_subtype = 'html'
+        msg.content_subtype = "html"
 
     try:
         ret = msg.send()
 
         if ret:
-            logger.info("Successfully sent email message to ({0!r}) (bcc: {1!r}).".format(to_list, bcc_list))
+            logger.info(
+                "Successfully sent email message to ({0!r}) (bcc: {1!r}).".format(
+                    to_list, bcc_list
+                )
+            )
         else:
-            logger.error("Erro sent email message to ({0!r}) (bcc: {1!r}).".format(to_list, bcc_list))
+            logger.error(
+                "Erro sent email message to ({0!r}) (bcc: {1!r}).".format(
+                    to_list, bcc_list
+                )
+            )
 
     except Exception as e:
-        logger.error("Failed to send email message to ({0!r}) (bcc: {1!r}), traceback: {2!s}".format(
-            to_list, bcc_list, e))
+        logger.error(
+            "Failed to send email message to ({0!r}) (bcc: {1!r}), traceback: {2!s}".format(
+                to_list, bcc_list, e
+            )
+        )
         raise self.retry(exc=e)

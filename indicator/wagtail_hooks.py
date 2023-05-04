@@ -1,37 +1,19 @@
-from django.urls import include, path
-from django.http import HttpResponseRedirect
 from django.utils.translation import gettext as _
-
 from wagtail import hooks
-from wagtail.contrib.modeladmin.views import CreateView, EditView
 from wagtail.contrib.modeladmin.options import (
     ModelAdmin,
     modeladmin_register,
-    ModelAdminGroup,
 )
 
-from .models import (
-    Indicator,
-)
-
-
-class IndicatorDirectoryEditView(EditView):
-    def form_valid(self, form):
-        self.object = form.save_all(self.request.user)
-        return HttpResponseRedirect(self.get_success_url())
-
-
-class IndicatorDirectoryCreateView(CreateView):
-    def form_valid(self, form):
-        self.object = form.save_all(self.request.user)
-        return HttpResponseRedirect(self.get_success_url())
+from . import views
+from .models import Indicator
 
 
 class IndicatorAdmin(ModelAdmin):
     model = Indicator
     ordering = ("-updated",)
-    create_view_class = IndicatorDirectoryCreateView
-    edit_view_class = IndicatorDirectoryEditView
+    create_view_class = views.IndicatorDirectoryCreateView
+    edit_view_class = views.IndicatorDirectoryEditView
     menu_label = _("Indicator")  # ditch this to use verbose_name_plural from model
     menu_icon = "folder-open-inverse"  # change as required
     menu_order = 100  # will put in 3rd place (000 being 1st, 100 2nd)
@@ -67,6 +49,17 @@ class IndicatorAdmin(ModelAdmin):
         "action_and_practice__classification",
         "action_and_practice__practice__name",
     )
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+
+        # If the user is not a staff
+        if not request.user.is_staff:
+            # Only show the records create by the current user
+            return qs.filter(creator=request.user)
+        else:
+            return qs
+
 
 
 modeladmin_register(IndicatorAdmin)

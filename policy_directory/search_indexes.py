@@ -1,4 +1,5 @@
 # coding: utf-8
+from django.conf import settings
 from haystack import indexes
 
 from policy_directory import models
@@ -95,6 +96,27 @@ class PolicyIndex(indexes.SearchIndex, indexes.Indexable):
                 except AttributeError:
                     continue
             return regions
+
+        
+    def prepare_disclaimer(self, obj):
+        """
+        This add a disclaimer if user.updated is not a company
+        user and the content is public
+        """
+
+        if obj.updated_by:
+            return (
+                settings.CONTENT_DISCLAIMER_MESSAGE
+                if not obj.updated_by.is_staff and obj.record_status == "PUBLISHED"
+                else None
+            )
+        
+        if obj.creator: 
+            return (
+                settings.CONTENT_DISCLAIMER_MESSAGE
+                if not obj.creator.is_staff and obj.record_status == "PUBLISHED"
+                else None
+            )    
 
     def get_model(self):
         return models.PolicyDirectory

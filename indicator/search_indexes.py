@@ -1,5 +1,7 @@
 # coding: utf-8
 import logging
+
+from django.conf import settings
 from haystack import indexes
 
 from indicator import models
@@ -13,7 +15,7 @@ class IndicatorIndex(indexes.SearchIndex, indexes.Indexable):
     """
 
     created = indexes.CharField(model_attr="created", null=False)
-    validity = indexes.CharField(model_attr="validity", null=False)
+    validity = indexes.CharField(model_attr="validity", null=True)
 
     text = indexes.CharField(document=True, use_template=True)
     record_type = indexes.CharField(null=False)
@@ -59,6 +61,9 @@ class IndicatorIndex(indexes.SearchIndex, indexes.Indexable):
     # por enquanto deixar apenas geo_scope, traduzir apenas como "âmbito"
     geo_scope = indexes.CharField(null=True)
     thematic_scope = indexes.CharField(null=True)
+
+    disclaimer = indexes.CharField(null=True)
+    slug = indexes.CharField(model_attr="slug", null=True)
 
     def prepare_geo_priority(self, obj):
         n_institutions = obj.institutions.count()
@@ -171,9 +176,6 @@ class IndicatorIndex(indexes.SearchIndex, indexes.Indexable):
     def prepare_practice(self, obj):
         return obj.action_and_practice and obj.action_and_practice.practice.name
 
-    # def prepare_file_csv(self, obj):
-    #     return obj.raw_data and obj.raw_data.url
-
     def prepare_record_type(self, obj):
         return "indicator"
 
@@ -261,6 +263,13 @@ class IndicatorIndex(indexes.SearchIndex, indexes.Indexable):
                 except AttributeError:
                     continue
         return regions
+
+    def prepare_disclaimer(self, obj):
+        """
+        This add a disclaimer if user.updated is not a company
+        user and the content is public
+        """
+        return obj.disclaimer
 
     def get_model(self):
         return models.Indicator

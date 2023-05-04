@@ -1,4 +1,5 @@
 # coding: utf-8
+from django.conf import settings
 from haystack import indexes
 
 from infrastructure_directory import models
@@ -39,6 +40,7 @@ class InfraStructureIndex(indexes.SearchIndex, indexes.Indexable):
     record_status = indexes.CharField(model_attr="record_status", null=True)
 
     source = indexes.CharField(model_attr="action", null=True)
+    disclaimer = indexes.CharField(null=True)
 
     def prepare_record_type(self, obj):
         return "directory"
@@ -102,6 +104,26 @@ class InfraStructureIndex(indexes.SearchIndex, indexes.Indexable):
                 except AttributeError:
                     continue
             return regions
+        
+    def prepare_disclaimer(self, obj):
+        """
+        This add a disclaimer if user.updated is not a company
+        user and the content is public
+        """
+
+        if obj.updated_by:
+            return (
+                settings.CONTENT_DISCLAIMER_MESSAGE
+                if not obj.updated_by.is_staff and obj.record_status == "PUBLISHED"
+                else None
+            )
+        
+        if obj.creator: 
+            return (
+                settings.CONTENT_DISCLAIMER_MESSAGE
+                if not obj.creator.is_staff and obj.record_status == "PUBLISHED"
+                else None
+            )    
 
     def get_model(self):
         return models.InfrastructureDirectory

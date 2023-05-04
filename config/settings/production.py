@@ -193,16 +193,13 @@ INSTALLED_APPS += ["elasticapm.contrib.django"]
 ELASTIC_APM = {
     # Set the required service name. Allowed characters:
     # a-z, A-Z, 0-9, -, _, and space
-    'SERVICE_NAME': env("ELASTIC_APM_SERVICE_NAME", default="OCABR-SciELO"),
-
+    "SERVICE_NAME": env("ELASTIC_APM_SERVICE_NAME", default="OCABR-SciELO"),
     # Use if APM Server requires a secret token
-    'SECRET_TOKEN': env("ELASTIC_APM_SECRET_TOKEN", default=""),
-
+    "SECRET_TOKEN": env("ELASTIC_APM_SECRET_TOKEN", default=""),
     # Set the custom APM Server URL (default: http://localhost:8200)
-    'SERVER_URL': env("ELASTIC_APM_SERVER_URL", default="http://siem.scielo.org:8200"),
-
+    "SERVER_URL": env("ELASTIC_APM_SERVER_URL", default="http://siem.scielo.org:8200"),
     # Set the service environment
-    'ENVIRONMENT': env("ELASTIC_APM_ENVIRONMENT", default="produciton"),
+    "ENVIRONMENT": env("ELASTIC_APM_ENVIRONMENT", default="produciton"),
 }
 
 MIDDLEWARE.insert(0, "elasticapm.contrib.django.middleware.TracingMiddleware")

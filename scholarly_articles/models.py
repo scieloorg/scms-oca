@@ -527,7 +527,7 @@ class License(models.Model):
     Attributes
     ----------
     name: The name of license, it is not required
-    delay_in_days: 
+    delay_in_days:
         Number of days between the publication date of the work and the start date of this license
     start: Date on which this license begins to take effect
     URL: Link to a web page describing this license
@@ -537,10 +537,31 @@ class License(models.Model):
     TODO
     """
 
-    name = models.CharField(_("Name"), max_length=100, null=True, blank=True, help_text=_("The name of license, it is not required"))
-    delay_in_days = models.IntegerField(_("Delay in Days"), null=True, blank=True, help_text=_("Number of days between the publication date of the work and the start date of this license"))
-    start = models.CharField(_("Stard Date"), max_length=100, null=True, blank=True, help_text=_("Date on which this license begins to take effect"))
-    url = models.URLField(_("URL"), help_text="Link to a web page describing this license")
+    name = models.CharField(
+        _("Name"),
+        max_length=100,
+        null=True,
+        blank=True,
+        help_text=_("The name of license, it is not required"),
+    )
+    delay_in_days = models.IntegerField(
+        _("Delay in Days"),
+        null=True,
+        blank=True,
+        help_text=_(
+            "Number of days between the publication date of the work and the start date of this license"
+        ),
+    )
+    start = models.CharField(
+        _("Stard Date"),
+        max_length=100,
+        null=True,
+        blank=True,
+        help_text=_("Date on which this license begins to take effect"),
+    )
+    url = models.URLField(
+        _("URL"), help_text="Link to a web page describing this license"
+    )
 
     def __unicode__(self):
         return self.name or self.url

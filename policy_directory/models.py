@@ -25,10 +25,8 @@ def get_default_action():
 class PolicyDirectory(CommonControlField):
     class Meta:
         verbose_name_plural = _("Policy Directory")
-        permissions = (
-            (MUST_BE_MODERATE, _("Must be moderated")),
-        )
-        
+        permissions = ((MUST_BE_MODERATE, _("Must be moderated")),)
+
     title = models.CharField(_("Title"), max_length=255, null=False, blank=False)
     link = models.URLField(_("Link"), null=False, blank=False)
     description = models.TextField(
@@ -101,7 +99,7 @@ class PolicyDirectory(CommonControlField):
 
     def __str__(self):
         return "%s" % self.title
-    
+
     def get_absolute_edit_url(self):
         return f"/policy_directory/policydirectory/edit/{self.id}/"
 

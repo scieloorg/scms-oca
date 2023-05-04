@@ -14,6 +14,13 @@
       <div class="entry-title title-sm">
         <h2><i class="icon-folder2" data-toggle="tooltip" data-placement="top" title="{% trans 'Diretórios' %}"></i> <a href="{{ item.link }}" target="_blank">{{ item.title }}</a> <a href="{{ item.link }}" target="_blank"><i class="icon-line-external-link"></i></a></h2>
       </div>
+    
+      {% if item.disclaimer %}
+        <div class="alert alert-warning alert-dismissible fade show mt-1" role="alert">
+          <strong>{% trans "Atenção" %}: </strong> {{ item.disclaimer }}
+        </div>
+      {% endif %}
+
       <div class="entry-meta">
         <ul>
           <!-- {% if item.start_date and item.end_date %} 
