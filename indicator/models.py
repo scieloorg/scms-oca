@@ -106,6 +106,14 @@ class Indicator(CommonControlField):
 
     link_to_data = models.URLField(_("Link to the data"), null=True, blank=True)
 
+    institutional_contribution = models.CharField(
+        _("Institutional Contribution"), max_length=255, default="SciELO", help_text=_("Name of the contributing institution, default=SciELO.")
+    )
+
+    notes = models.TextField(
+        _("Notes"), max_length=1000, null=True, blank=True
+    )
+
     def save(self, *args, **kwargs):
         # ensure we always have the slug.
         if not self.slug:
@@ -169,14 +177,14 @@ class Indicator(CommonControlField):
 
         if self.updated_by:
             return (
-                settings.CONTENT_DISCLAIMER_MESSAGE
+                _("Conteúdo publicado sem moderação / contribuição de %s") % self.institutional_contribution
                 if not self.updated_by.is_staff and self.record_status == "PUBLISHED"
                 else None
             )
         
         if self.creator: 
             return (
-                settings.CONTENT_DISCLAIMER_MESSAGE
+                _("Conteúdo publicado sem moderação / contribuição de %s") % self.institutional_contribution
                 if not self.creator.is_staff and self.record_status == "PUBLISHED"
                 else None
             )   
@@ -204,6 +212,7 @@ class Indicator(CommonControlField):
             ("can_edit_summarized", _("Can edit summarized")),
             ("can_edit_link_to_data", _("Can edit link to data")),
             ("can_edit_link_to_graphic", _("Can edit link do graphic")),
+            ("can_edit_notes", _("Can edit notes")),
         )
         indexes = [
             models.Index(fields=["action_and_practice"]),
@@ -229,6 +238,7 @@ class Indicator(CommonControlField):
     panels = [
         FieldPanel("title"),
         FieldPanel("description"),
+        FieldPanel("institutional_contribution"),
         FieldPanel("keywords"),
         FieldPanel("code"),
         FieldPanel("link_to_graphic", permission="indicator.can_edit_link_to_graphic"),
@@ -253,6 +263,7 @@ class Indicator(CommonControlField):
         AutocompletePanel("locations", permission="indicator.can_edit_locations"),
         FieldPanel("raw_data", permission="indicator.can_edit_raw_datas"),
         FieldPanel("summarized", permission="indicator.can_edit_summarized"),
+        FieldPanel("notes", permission="indicator.can_edit_notes"),
     ]
 
     # https://drive.google.com/drive/folders/1_J8iKhr_gayuBqtvnSWreC-eBnxzY9rh

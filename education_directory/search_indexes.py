@@ -1,5 +1,4 @@
 # coding: utf-8
-from django.conf import settings
 from haystack import indexes
 
 from education_directory import models
@@ -39,6 +38,9 @@ class EducationIndex(indexes.SearchIndex, indexes.Indexable):
     source = indexes.CharField(model_attr="action", null=True)
 
     disclaimer = indexes.CharField(null=True)
+    institutional_contribution = indexes.CharField(
+        model_attr="institutional_contribution", null=True
+    )
 
     def prepare_record_type(self, obj):
         return "directory"
@@ -111,14 +113,14 @@ class EducationIndex(indexes.SearchIndex, indexes.Indexable):
 
         if obj.updated_by:
             return (
-                settings.CONTENT_DISCLAIMER_MESSAGE
+                _("Conteúdo publicado sem moderação / contribuição de %s") % obj.institutional_contribution
                 if not obj.updated_by.is_staff and obj.record_status == "PUBLISHED"
                 else None
             )
         
         if obj.creator: 
             return (
-                settings.CONTENT_DISCLAIMER_MESSAGE
+                _("Conteúdo publicado sem moderação / contribuição de %s") % obj.institutional_contribution 
                 if not obj.creator.is_staff and obj.record_status == "PUBLISHED"
                 else None
             )    

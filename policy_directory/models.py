@@ -77,6 +77,14 @@ class PolicyDirectory(CommonControlField):
 
     source = models.CharField(_("Source"), max_length=255, null=True, blank=True)
 
+    institutional_contribution = models.CharField(
+        _("Institutional Contribution"), max_length=255, default="SciELO", help_text=_("Name of the contributing institution, default=SciELO.")
+    )
+
+    notes = models.TextField(
+        _("Notes"), max_length=1000, null=True, blank=True
+    )
+
     panels = [
         HelpPanel(
             "Documentos de promoção, posicionamentos ou mandatos sobre Ciência Aberta elaborados e publicados por instituições brasileiras, tais como: universidades, sociedades científicas, institutos de pesquisa e agências de fomento."
@@ -84,6 +92,7 @@ class PolicyDirectory(CommonControlField):
         FieldPanel("title"),
         FieldPanel("link"),
         FieldPanel("source"),
+        FieldPanel("institutional_contribution"),
         FieldPanel("description"),
         FieldPanel("date"),
         AutocompletePanel("institutions"),
@@ -92,6 +101,7 @@ class PolicyDirectory(CommonControlField):
         FieldPanel("classification"),
         FieldPanel("practice"),
         FieldPanel("record_status"),
+        FieldPanel("notes"),
     ]
 
     def __unicode__(self):
