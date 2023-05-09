@@ -95,6 +95,14 @@ class EventDirectory(CommonControlField):
     )
     source = models.CharField(_("Source"), max_length=255, null=True, blank=True)
 
+    institutional_contribution = models.CharField(
+        _("Institutional Contribution"), max_length=255, default="SciELO", help_text=_("Name of the contributing institution, default=SciELO.")
+    )
+
+    notes = models.TextField(
+        _("Notes"), max_length=1000, null=True, blank=True
+    )
+
     panels = [
         HelpPanel(
             "Encontros, congressos, workshops, seminários realizados no Brasil (presenciais, virtuais ou híbridos) cujo tema principal seja a promoção da Ciência Aberta"
@@ -103,6 +111,7 @@ class EventDirectory(CommonControlField):
         FieldPanel("link"),
         FieldPanel("source"),
         FieldPanel("description"),
+        FieldPanel("institutional_contribution"),
         AutocompletePanel("organization"),
         FieldPanel("start_date"),
         FieldPanel("end_date"),
@@ -115,6 +124,7 @@ class EventDirectory(CommonControlField):
         FieldPanel("classification"),
         FieldPanel("practice"),
         FieldPanel("record_status"),
+        FieldPanel("notes"),
     ]
 
     def __unicode__(self):

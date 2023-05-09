@@ -26,6 +26,7 @@ class IndicatorAdmin(ModelAdmin):
     list_display = (
         "title",
         "record_status",
+        "institutional_contribution",
         "validity",
         "updated",
     )
@@ -41,10 +42,12 @@ class IndicatorAdmin(ModelAdmin):
         "object_name",
         "category",
         "context",
+        "institutional_contribution",
     )
 
     search_fields = (
         "title",
+        "institutional_contribution",
         "action_and_practice__action__name",
         "action_and_practice__classification",
         "action_and_practice__practice__name",

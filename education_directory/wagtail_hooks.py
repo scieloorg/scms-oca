@@ -29,11 +29,18 @@ class EducationDirectoryAdmin(ModelAdmin):
         "link",
         "record_status",
         "description",
+        "institutional_contribution", 
         "creator",
         "updated",
         "created",
     )
-    list_filter = ("practice", "classification", "thematic_areas", "record_status")
+    list_filter = (
+        "practice",
+        "classification",
+        "thematic_areas",
+        "record_status",
+        "institutional_contribution",
+    )
     search_fields = ("title", "description")
     list_export = ("title", "link", "description")
     export_filename = "education_directory"
