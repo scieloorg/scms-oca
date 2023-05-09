@@ -428,6 +428,7 @@ SEARCH_FACET_LIST = [
     "directory_type",
     "action",
     "practice",
+    "institutional_contribution",
     "regions",
     "states",
     "cities",
@@ -439,6 +440,8 @@ SEARCH_FACET_LIST = [
 
 WAGTAILADMIN_BASE_URL = env("WAGTAILADMIN_BASE_URL", default="http://localhost:8000")
 
-CONTENT_DISCLAIMER_MESSAGE = env(
-    "CONTENT_DISCLAIMER_MESSAGE", default="Conteúdo publicado sem moderação"
-)
+
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': env.int("DRF_PAGE_SIZE", default=10)
+}

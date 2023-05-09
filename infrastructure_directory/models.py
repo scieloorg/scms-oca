@@ -76,6 +76,14 @@ class InfrastructureDirectory(CommonControlField):
 
     source = models.CharField(_("Source"), max_length=255, null=True, blank=True)
 
+    institutional_contribution = models.CharField(
+        _("Institutional Contribution"), max_length=255, default="SciELO", help_text=_("Name of the contributing institution, default=SciELO.")
+    )
+
+    notes = models.TextField(
+        _("Notes"), max_length=1000, null=True, blank=True
+    )
+
     panels = [
         HelpPanel(
             "Portais, plataformas, servidores, repositórios e serviços brasileiros que operam em acesso aberto objetos de comunicação de comunicação de pesquisas, recursos de apoio e resultantes de pesquisas e em acesso aberto."
@@ -84,12 +92,14 @@ class InfrastructureDirectory(CommonControlField):
         FieldPanel("link"),
         FieldPanel("source"),
         FieldPanel("description"),
+        FieldPanel("institutional_contribution"),
         AutocompletePanel("institutions"),
         AutocompletePanel("thematic_areas"),
         FieldPanel("keywords"),
         FieldPanel("classification"),
         FieldPanel("practice"),
         FieldPanel("record_status"),
+        FieldPanel("notes"),
     ]
 
     def __unicode__(self):

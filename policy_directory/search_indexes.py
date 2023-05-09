@@ -1,5 +1,4 @@
 # coding: utf-8
-from django.conf import settings
 from haystack import indexes
 
 from policy_directory import models
@@ -33,6 +32,10 @@ class PolicyIndex(indexes.SearchIndex, indexes.Indexable):
     record_status = indexes.CharField(model_attr="record_status", null=True)
 
     source = indexes.CharField(model_attr="action", null=True)
+
+    institutional_contribution = indexes.CharField(
+        model_attr="institutional_contribution", null=True
+    )
 
     def prepare_record_type(self, obj):
         return "directory"
@@ -106,14 +109,14 @@ class PolicyIndex(indexes.SearchIndex, indexes.Indexable):
 
         if obj.updated_by:
             return (
-                settings.CONTENT_DISCLAIMER_MESSAGE
+                _("Conteúdo publicado sem moderação / contribuição de %s") % obj.institutional_contribution
                 if not obj.updated_by.is_staff and obj.record_status == "PUBLISHED"
                 else None
             )
         
         if obj.creator: 
             return (
-                settings.CONTENT_DISCLAIMER_MESSAGE
+                _("Conteúdo publicado sem moderação / contribuição de %s") % obj.institutional_contribution
                 if not obj.creator.is_staff and obj.record_status == "PUBLISHED"
                 else None
             )    

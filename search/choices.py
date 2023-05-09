@@ -19,4 +19,5 @@ translates = {
     "category": _("Categoria"),
     "geo_scope": _("Escopo geográfico"),
     "thematic_scope": _("Escopo temático"),
+    "institutional_contribution": _("Contribuição"),
 }
