@@ -42,8 +42,13 @@ urlpatterns += i18n_patterns(
     re_path(r"^search/", include("search.urls")),
     # Auto complete endpoint
     path("admin/autocomplete/", include(autocomplete_admin_urls)),
-    # User management
+
+    # API V2 endpoint wagtail models
     path("api/v2/", api_router.urls),
+
+    # API V1 endpoint to custom models
+    path("api/v1/", include("config.api_router")),
+
     path("users/", include("core.users.urls", namespace="users")),
     path("i18n/", include("django.conf.urls.i18n")),
     path("", include("allauth.urls")),
