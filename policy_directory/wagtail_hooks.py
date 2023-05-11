@@ -17,7 +17,7 @@ class PolicyDirectoryAdmin(ModelAdmin):
     ordering = ("-updated",)
     create_view_class = views.PolicyDirectoryCreateView
     edit_view_class = views.PolicyDirectoryEditView
-    menu_label = _("Policy Directory")
+    menu_label = _("Policy Data")
     menu_icon = "folder"
     menu_order = 100
     add_to_settings_menu = False  # or True to add your model to the Settings sub-menu
@@ -61,7 +61,7 @@ class PolicyDirectoryFileAdmin(ModelAdmin):
     ordering = ("-updated",)
     create_view_class = views.PolicyDirectoryFileCreateView
     button_helper_class = PolicyDirectoryHelper
-    menu_label = _("Policy Directory Upload")
+    menu_label = _("Policy Data Upload")
     menu_icon = "folder"
     menu_order = 200
     add_to_settings_menu = False
@@ -79,7 +79,7 @@ class PolicyDirectoryFileAdmin(ModelAdmin):
 
 
 class PolicyDirectoryAdminGroup(ModelAdminGroup):
-    menu_label = _("Policy Directory")
+    menu_label = _("Policy Data")
     menu_icon = "folder-open-inverse"
     menu_order = 200
     items = (

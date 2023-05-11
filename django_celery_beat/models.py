@@ -1,4 +1,9 @@
 """Database models."""
+try:
+    from zoneinfo import available_timezones
+except ImportError:
+    from backports.zoneinfo import available_timezones
+    
 from datetime import timedelta
 
 import timezone_field
@@ -63,20 +68,18 @@ def cronexp(field):
 
 
 def crontab_schedule_celery_timezone():
-    """Return timezone string from Django settings `CELERY_TIMEZONE` variable.
+    """Return timezone string from Django settings ``CELERY_TIMEZONE`` variable.
 
-    If is not defined or is not a valid timezone, return `"UTC"` instead.
-    """
+    If is not defined or is not a valid timezone, return ``"UTC"`` instead.
+    """  # noqa: E501
     try:
-        CELERY_TIMEZONE = getattr(settings, "%s_TIMEZONE" % current_app.namespace)
+        CELERY_TIMEZONE = getattr(
+            settings, '%s_TIMEZONE' % current_app.namespace)
     except AttributeError:
-        return "UTC"
-    return (
-        CELERY_TIMEZONE
-        if CELERY_TIMEZONE
-        in [choice[0].zone for choice in timezone_field.TimeZoneField.default_choices]
-        else "UTC"
-    )
+        return 'UTC'
+    if CELERY_TIMEZONE in available_timezones():
+        return CELERY_TIMEZONE
+    return 'UTC'
 
 
 class SolarSchedule(models.Model):

@@ -17,7 +17,7 @@ class EducationDirectoryAdmin(ModelAdmin):
     ordering = ("-updated",)
     create_view_class = views.EducationDirectoryCreateView
     # edit_view_class = EducationDirectoryEditView
-    menu_label = _("Education Directory")
+    menu_label = _("Education Data")
     menu_icon = "folder"
     menu_order = 100
     add_to_settings_menu = False  # or True to add your model to the Settings sub-menu
@@ -61,7 +61,7 @@ class EducationDirectoryFileAdmin(ModelAdmin):
     ordering = ("-updated",)
     create_view_class = views.EducationDirectoryFileCreateView
     button_helper_class = EducationDirectoryHelper
-    menu_label = _("Education Directory Upload")
+    menu_label = _("Education Data Upload")
     menu_icon = "folder"
     menu_order = 200
     add_to_settings_menu = False
@@ -79,7 +79,7 @@ class EducationDirectoryFileAdmin(ModelAdmin):
 
 
 class EducationDirectoryAdminGroup(ModelAdminGroup):
-    menu_label = _("Education Directory")
+    menu_label = _("Education Data")
     menu_icon = "folder-open-inverse"
     menu_order = 200
     items = (

@@ -17,7 +17,7 @@ class InfrastructureDirectoryAdmin(ModelAdmin):
     ordering = ("-updated",)
     create_view_class = views.InfrastructureDirectoryCreateView
     edit_view_class = views.InfrastructureDirectoryEditView
-    menu_label = _("Infraestructure Directory")
+    menu_label = _("Infrastructure Data")
     menu_icon = "folder"
     menu_order = 100
     add_to_settings_menu = False  # or True to add your model to the Settings sub-menu
@@ -61,7 +61,7 @@ class InfrastructureDirectoryFileAdmin(ModelAdmin):
     ordering = ("-updated",)
     create_view_class = views.InfrastructureDirectoryFileCreateView
     button_helper_class = InfrastructureDirectoryHelper
-    menu_label = _("Infraestructure Directory Upload")
+    menu_label = _("Infrastructure Data Upload")
     menu_icon = "folder"
     menu_order = 200
     add_to_settings_menu = False
@@ -79,7 +79,7 @@ class InfrastructureDirectoryFileAdmin(ModelAdmin):
 
 
 class InfrastructureDirectoryAdminGroup(ModelAdminGroup):
-    menu_label = _("Infraestructure Directory")
+    menu_label = _("Infrastructure Data")
     menu_icon = "folder-open-inverse"
     menu_order = 200
     items = (

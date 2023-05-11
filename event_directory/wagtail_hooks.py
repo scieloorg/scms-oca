@@ -17,7 +17,7 @@ class EventDirectoryAdmin(ModelAdmin):
     ordering = ("-updated",)
     create_view_class = views.EventDirectoryCreateView
     edit_view_class = views.EventDirectoryEditView
-    menu_label = _("Event Directory")
+    menu_label = _("Event Data")
     menu_icon = "folder"
     menu_order = 100
     add_to_settings_menu = False  # or True to add your model to the Settings sub-menu
@@ -61,7 +61,7 @@ class EventDirectoryFileAdmin(ModelAdmin):
     ordering = ("-updated",)
     create_view_class = views.EventDirectoryFileCreateView
     button_helper_class = EventDirectoryHelper
-    menu_label = _("Event Directory Upload")
+    menu_label = _("Event Data Upload")
     menu_icon = "folder"
     menu_order = 200
     add_to_settings_menu = False
@@ -79,7 +79,7 @@ class EventDirectoryFileAdmin(ModelAdmin):
 
 
 class EventDirectoryAdminGroup(ModelAdminGroup):
-    menu_label = _("Event Directory")
+    menu_label = _("Event Data")
     menu_icon = "folder-open-inverse"
     menu_order = 200
     items = (

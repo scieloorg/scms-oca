@@ -48,7 +48,7 @@ class ScholarlyArticlesAdmin(ModelAdmin):
         "source",
     )
 
-    list_filter = ("year",)
+    list_filter = ("source", "year")
     search_fields = ("doi",)
 
 

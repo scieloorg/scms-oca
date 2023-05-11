@@ -24,8 +24,28 @@ def get_default_action():
 
 class InfrastructureDirectory(CommonControlField):
     class Meta:
-        verbose_name_plural = _("Infraestructure Directory")
-        permissions = ((MUST_BE_MODERATE, _("Must be moderated")),)
+        verbose_name_plural = _("Infrastructure Data")
+        verbose_name = _("Infrastructure Data")
+        permissions = (
+            (MUST_BE_MODERATE, _("Must be moderated")),
+            ("can_edit_title", _("Can edit title")),
+            ("can_edit_link", _("Can edit link")),
+            ("can_edit_description", _("Can edit description")),
+            ("can_edit_locations", _("Can edit locations")),
+            ("can_edit_institutions", _("Can edit institutions")),
+            ("can_edit_thematic_areas", _("Can edit thematic_areas")),
+            ("can_edit_practice", _("Can edit practice")),
+            ("can_edit_action", _("Can edit action")),
+            ("can_edit_classification", _("Can edit classification")),
+            ("can_edit_keywords", _("Can edit keywords")),
+            ("can_edit_record_status", _("Can edit record_status")),
+            ("can_edit_source", _("Can edit source")),
+            (
+                "can_edit_institutional_contribution",
+                _("Can edit institutional_contribution"),
+            ),
+            ("can_edit_notes", _("Can edit notes")),
+        )
 
     title = models.CharField(_("Title"), max_length=255, null=False, blank=False)
     link = models.URLField(_("Link"), null=False, blank=False)
@@ -77,12 +97,13 @@ class InfrastructureDirectory(CommonControlField):
     source = models.CharField(_("Source"), max_length=255, null=True, blank=True)
 
     institutional_contribution = models.CharField(
-        _("Institutional Contribution"), max_length=255, default="SciELO", help_text=_("Name of the contributing institution, default=SciELO.")
+        _("Institutional Contribution"),
+        max_length=255,
+        default="SciELO",
+        help_text=_("Name of the contributing institution, default=SciELO."),
     )
 
-    notes = models.TextField(
-        _("Notes"), max_length=1000, null=True, blank=True
-    )
+    notes = models.TextField(_("Notes"), max_length=1000, null=True, blank=True)
 
     panels = [
         HelpPanel(
@@ -148,7 +169,7 @@ class InfrastructureDirectory(CommonControlField):
 
 class InfrastructureDirectoryFile(CommonControlField):
     class Meta:
-        verbose_name_plural = _("Infraestructure Directory Upload")
+        verbose_name_plural = _("Infrastructure Data Upload")
 
     attachment = models.ForeignKey(
         "wagtaildocs.Document",
