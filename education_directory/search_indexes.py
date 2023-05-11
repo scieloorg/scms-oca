@@ -1,5 +1,6 @@
 # coding: utf-8
 from haystack import indexes
+from django.utils.translation import gettext as _
 
 from education_directory import models
 

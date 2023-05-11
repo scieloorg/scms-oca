@@ -12,10 +12,7 @@ from django.utils.translation import gettext_lazy as _
 from wagtail.admin.panels import (
     HelpPanel,
     FieldPanel,
-    MultiFieldPanel,
     ObjectList,
-    PageChooserPanel,
-    StreamFieldPanel,
     TabbedInterface,
 )
 

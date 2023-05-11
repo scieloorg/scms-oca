@@ -2,6 +2,7 @@
 import logging
 
 from haystack import indexes
+from django.utils.translation import gettext as _
 
 from indicator import models
 from indicator.controller import CATEGORIES

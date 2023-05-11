@@ -1,5 +1,6 @@
 # coding: utf-8
 from haystack import indexes
+from django.utils.translation import gettext as _
 
 from infrastructure_directory import models
 
@@ -38,7 +39,7 @@ class InfraStructureIndex(indexes.SearchIndex, indexes.Indexable):
     thematic_areas = indexes.MultiValueField(null=True)
     record_status = indexes.CharField(model_attr="record_status", null=True)
 
-    source = indexes.CharField(model_attr="action", null=True)
+    source = indexes.CharField(model_attr="source", null=True)
     disclaimer = indexes.CharField(null=True)
     institutional_contribution = indexes.CharField(
         model_attr="institutional_contribution", null=True
