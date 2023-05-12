@@ -47,9 +47,12 @@
                         </a>
                     </div> -->
                     <div class="clear"></div>
-                    <i class="icon-envelope2"></i> {{ settings.core_settings.CustomSettings.email }} <span class="middot">·</span> <i
-                        class="icon-headphones"></i> {{ settings.core_settings.CustomSettings.phone }} <span class="middot">·</span> <i
-                        class="icon-facebook"></i> {{ settings.core_settings.CustomSettings.name }}
+                    {% if settings.core_settings.CustomSettings.email %}
+                        <i class="icon-envelope2"></i> {{ settings.core_settings.CustomSettings.email }} 
+                    {% endif %}
+                    {% if settings.core_settings.CustomSettings.phone %}
+                        <i class="icon-headphones"></i> {{ settings.core_settings.CustomSettings.phone }} 
+                    {% endif %}
                 </div>
             </div>
         </div>
