@@ -2,7 +2,6 @@
 {% load humanize %}
 {% load i18n %}
 {% load static %}
-{% load translate %}
 {% load l10n %}
 {% load auth_extras %}
 
@@ -54,7 +53,7 @@
       
       <div class="entry-meta">
         <ul>
-          <li><i class="icon-calendar3" data-toggle="tooltip" data-placement="top" title="{% trans 'Data de criação' %}"></i> {{ item.created }} {% trans item.validity %} {% trans item.record_status %}
+          <li><i class="icon-calendar3" data-toggle="tooltip" data-placement="top" title="{% trans 'Data de criação' %}"></i> {{ item.created }} {% trans item.validity|translate_data %} 
           </li>
           <!-- <li><i class="icon-line-bar-graph"></i></li>
           <li><span class="badge bg-secondary" style="color:#fff;">{{ item.record_type|translate_data }}</span></li> -->

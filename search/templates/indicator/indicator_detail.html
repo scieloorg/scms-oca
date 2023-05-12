@@ -3,6 +3,7 @@
 {% load static %}
 {% load i18n %}
 {% load wagtailsettings_tags %}
+{% load translate %}
 
 {% get_settings use_default_site=True %}
 
@@ -39,8 +40,8 @@
                     <li class="page-item active">
                         {% if object.seq %}
                         <a class="page-link" href="#">
-                            {% trans object.validity %} |
-                            {% trans 'Generated' %}: {{ object.created |date:"r" }}
+                            {% trans object.validity|translate_data %} |
+                            {% trans 'Gerado' %}: {{ object.created|date:"Y-m-d" }}
                         </a>
                         {% endif %}
                     </li>
@@ -62,11 +63,11 @@
                 </ul>
             </nav>
             <p>
-                <span class="badge badge-primary">{{ object.action_and_practice.action }}</span>
-                <span class="badge badge-secondary">{{ object.action_and_practice.classification }}</span>
-                <span class="badge badge-success">{{ object.action_and_practice.practice }}</span>
-                <span class="badge badge-danger">{{ object.scope }}</span>
-                <span class="badge badge-warning">{{ object.measurement }}</span>
+                <span class="badge badge-primary">{{ object.action_and_practice.action|translate_data }}</span>
+                <span class="badge badge-secondary">{{ object.action_and_practice.classification|translate_data }}</span>
+                <span class="badge badge-success">{{ object.action_and_practice.practice|translate_data }}</span>
+                <span class="badge badge-danger">{{ object.scope|translate_data }}</span>
+                <span class="badge badge-warning">{{ object.measurement|translate_data }}</span>
             </p>
         </div>
 
@@ -81,6 +82,10 @@
             {% if object.description %}
                 <p>{{ object.description }}</p>
             {% endif %}
+        </div>
+
+        <div class="container">
+            {% if object.institutional_contribution %}<span><b>{% trans "Contributor" %}:  </b>{{ object.institutional_contribution }}</span>{% endif %}
         </div>
 
         <div class="container">

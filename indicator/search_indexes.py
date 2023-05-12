@@ -55,7 +55,7 @@ class IndicatorIndex(indexes.SearchIndex, indexes.Indexable):
     # nacional -> municipal
     geo_priority = indexes.IntegerField(null=True)
     thematic_priority = indexes.IntegerField(null=True)
-    # priority = indexes.FloatField(null=True)
+    priority = indexes.FloatField(null=True)
 
     # scopes
     # por enquanto deixar apenas geo_scope, traduzir apenas como "âmbito"
@@ -164,8 +164,8 @@ class IndicatorIndex(indexes.SearchIndex, indexes.Indexable):
             if thematic_area.level0:
                 return "level0"
 
-    # def prepare_priority(self, obj):
-    #     return obj.raw_data and obj.raw_data.size
+    def prepare_priority(self, obj):
+        return obj.raw_data and obj.raw_data.size
 
     def prepare_action(self, obj):
         return obj.action_and_practice and obj.action_and_practice.action.name
@@ -274,6 +274,9 @@ class IndicatorIndex(indexes.SearchIndex, indexes.Indexable):
         user and the content is public
         """
         return obj.disclaimer
+
+    def prepare_created(self, obj):
+        return obj.created.strftime("%Y-%m-%d")
 
     def get_model(self):
         return models.Indicator

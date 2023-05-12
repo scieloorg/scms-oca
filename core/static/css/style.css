@@ -3399,7 +3399,7 @@ html[xmlns] .slider-wrap {
 	display: flex;
 }
 
-#logo a.retina-logo { display: none; }
+/*#logo a.retina-logo { display: none; }*/ 
 
 @media (min-width: 992px) {
 
@@ -3430,7 +3430,7 @@ only screen and (        min-device-pixel-ratio: 2),
 only screen and (                min-resolution: 192dpi),
 only screen and (                min-resolution: 2dppx) {
 
-	#logo a.standard-logo { display: none; }
+	/*#logo a.standard-logo { display: none; }*/
 
 	#logo a.retina-logo {
 		display: -ms-flexbox;
