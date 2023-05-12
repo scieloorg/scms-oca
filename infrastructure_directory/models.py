@@ -170,6 +170,7 @@ class InfrastructureDirectory(CommonControlField):
 class InfrastructureDirectoryFile(CommonControlField):
     class Meta:
         verbose_name_plural = _("Infrastructure Data Upload")
+        verbose_name = _("Infrastructure Data Upload")
 
     attachment = models.ForeignKey(
         "wagtaildocs.Document",

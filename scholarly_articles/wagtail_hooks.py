@@ -120,8 +120,7 @@ class ContributorsAdmin(ModelAdmin):
     search_fields = (
         "orcid",
         "family",
-        "given",
-        "affiliation",
+        "given"
     )
 
 
@@ -141,7 +140,6 @@ class AffiliationsAdmin(ModelAdmin):
     list_filter = ("country",)
     search_fields = (
         "name",
-        "official",
     )
 
 

@@ -75,7 +75,7 @@ class EventDirectoryFileAdmin(ModelAdmin):
         "created",
     )
     list_filter = ("is_valid",)
-    search_fields = ("attachment",)
+    search_fields = ("attachment__title",)
 
 
 class EventDirectoryAdminGroup(ModelAdminGroup):

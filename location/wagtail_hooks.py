@@ -33,9 +33,15 @@ class LocationAdmin(ModelAdmin):
         "created",
     )
     search_fields = (
-        "country",
-        "state",
-        "city",
+        "country__name_pt",
+        "country__name_en",
+        "country__capital",
+        "country__acron2",
+        "country__acron3",
+        "state__name",
+        "state__acronym",
+        "state__region",
+        "city__name",
     )
     list_export = (
         "country",
