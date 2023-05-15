@@ -85,7 +85,7 @@
         </div>
 
         <div class="container">
-            {% if object.institutional_contribution %}<span><b>{% trans "Contributor" %}:  </b>{{ object.institutional_contribution }}</span>{% endif %}
+            {% if object.institutional_contribution %}<span><b>{% trans "Contribuição" %}:  </b>{{ object.institutional_contribution }}</span>{% endif %}
         </div>
 
         <div class="container">
@@ -103,7 +103,7 @@
             {% endif %}
         </div>
 
-        {% if object.indicator_raw_data and object.indicator_summarized %}
+        {% if object.raw_data or object.summarized %}
             <div class="container">
                 <p>
                     {% if object.record_status == 'WIP' %}
@@ -118,7 +118,7 @@
             </div>
         {% endif %}
 
-        {% if object.table_header %}
+        {% if table_header %}
             <div class="container">{% include 'indicator/abas.html' %}</div>
         {% endif %}
 
