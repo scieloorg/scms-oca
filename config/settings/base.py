@@ -445,3 +445,5 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': env.int("DRF_PAGE_SIZE", default=10)
 }
+
+DIRECTORY_DEFAULT_CONTRIBUTOR = env.str("DIRECTORY_DEFAULT_CONTRIBUTOR", default="SciELO")

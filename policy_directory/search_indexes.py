@@ -1,5 +1,6 @@
 # coding: utf-8
 from haystack import indexes
+from django.conf import settings
 from django.utils.translation import gettext as _
 
 from policy_directory import models
@@ -107,20 +108,20 @@ class PolicyIndex(indexes.SearchIndex, indexes.Indexable):
         This add a disclaimer if user.updated is not a company
         user and the content is public
         """
-
-        if obj.updated_by:
-            return (
-                _("Conteúdo publicado sem moderação / contribuição de %s") % obj.institutional_contribution
-                if not obj.updated_by.is_staff and obj.record_status == "PUBLISHED"
-                else None
-            )
-        
-        if obj.creator: 
-            return (
-                _("Conteúdo publicado sem moderação / contribuição de %s") % obj.institutional_contribution
-                if not obj.creator.is_staff and obj.record_status == "PUBLISHED"
-                else None
-            )    
+        if obj.institutional_contribution != settings.DIRECTORY_DEFAULT_CONTRIBUTOR:
+            if obj.updated_by:
+                return (
+                    _("Conteúdo publicado sem moderação / contribuição de %s") % obj.institutional_contribution
+                    if not obj.updated_by.is_staff and obj.record_status == "PUBLISHED"
+                    else None
+                )
+            
+            if obj.creator: 
+                return (
+                    _("Conteúdo publicado sem moderação / contribuição de %s") % obj.institutional_contribution
+                    if not obj.creator.is_staff and obj.record_status == "PUBLISHED"
+                    else None
+                )    
 
     def get_model(self):
         return models.PolicyDirectory

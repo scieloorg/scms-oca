@@ -1,6 +1,7 @@
 import os
 
 from django.db import models
+from django.conf import settings
 from django.utils.translation import gettext as _
 from .permission_helper import MUST_BE_MODERATE
 from taggit.managers import TaggableManager
@@ -99,7 +100,7 @@ class InfrastructureDirectory(CommonControlField):
     institutional_contribution = models.CharField(
         _("Institutional Contribution"),
         max_length=255,
-        default="SciELO",
+        default=settings.DIRECTORY_DEFAULT_CONTRIBUTOR,
         help_text=_("Name of the contributing institution, default=SciELO."),
     )
 

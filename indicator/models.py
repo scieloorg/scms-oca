@@ -107,7 +107,7 @@ class Indicator(CommonControlField):
     link_to_data = models.URLField(_("Link to the data"), null=True, blank=True)
 
     institutional_contribution = models.CharField(
-        _("Institutional Contribution"), max_length=255, default="SciELO", help_text=_("Name of the contributing institution, default=SciELO.")
+        _("Institutional Contribution"), max_length=255, default=settings.DIRECTORY_DEFAULT_CONTRIBUTOR, help_text=_("Name of the contributing institution, default=SciELO.")
     )
 
     notes = models.TextField(
@@ -175,19 +175,20 @@ class Indicator(CommonControlField):
     @property
     def disclaimer(self):
 
-        if self.updated_by:
-            return (
-                _("Conteúdo publicado sem moderação / contribuição de %s") % self.institutional_contribution
-                if not self.updated_by.is_staff and self.record_status == "PUBLISHED"
-                else None
-            )
-        
-        if self.creator: 
-            return (
-                _("Conteúdo publicado sem moderação / contribuição de %s") % self.institutional_contribution
-                if not self.creator.is_staff and self.record_status == "PUBLISHED"
-                else None
-            )   
+        if self.institutional_contribution != settings.DIRECTORY_DEFAULT_CONTRIBUTOR:
+            if self.updated_by:
+                return (
+                    _("Conteúdo publicado sem moderação / contribuição de %s") % self.institutional_contribution
+                    if not self.updated_by.is_staff and self.record_status == "PUBLISHED"
+                    else None
+                )
+            
+            if self.creator: 
+                return (
+                    _("Conteúdo publicado sem moderação / contribuição de %s") % self.institutional_contribution
+                    if not self.creator.is_staff and self.record_status == "PUBLISHED"
+                    else None
+                )   
 
     class Meta:
         permissions = (
