@@ -240,7 +240,6 @@ class Indicator(CommonControlField):
         FieldPanel("description"),
         FieldPanel("institutional_contribution"),
         FieldPanel("keywords"),
-        FieldPanel("code"),
         FieldPanel("link_to_graphic", permission="indicator.can_edit_link_to_graphic"),
         FieldPanel("link_to_data", permission="indicator.can_edit_link_to_data"),
         FieldPanel("record_status", permission="indicator.can_edit_record_status"),
