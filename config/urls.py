@@ -23,6 +23,13 @@ urlpatterns = [
     # Wagtail Admin
     path(settings.WAGTAIL_ADMIN_URL, include(wagtailadmin_urls)),
     re_path(r"^documents/", include(wagtaildocs_urls)),
+
+    # API V1 endpoint to custom models
+    path("api/v1/", include("config.api_router")),
+
+    # Swagger documentation to API v1
+    path("swagger/", include("config.swagger_urls")),
+
     # Your stuff: custom urls includes go here
     # For anything not caught by a more specific rule above, hand over to
     # Wagtail’s page serving mechanism. This should be the last pattern in
@@ -45,9 +52,6 @@ urlpatterns += i18n_patterns(
 
     # API V2 endpoint wagtail models
     path("api/v2/", api_router.urls),
-
-    # API V1 endpoint to custom models
-    path("api/v1/", include("config.api_router")),
 
     path("users/", include("core.users.urls", namespace="users")),
     path("i18n/", include("django.conf.urls.i18n")),

@@ -21,6 +21,7 @@ crispy-bootstrap5==0.7  # https://github.com/django-crispy-forms/crispy-bootstra
 django-compressor==4.3.1  # https://github.com/django-compressor/django-compressor
 django-redis==5.2.0  # https://github.com/jazzband/django-redis
 
+
 # Wagtail
 # ------------------------------------------------------------------------------
 wagtail==4.2.2  # https://github.com/wagtail/wagtail
@@ -67,4 +68,8 @@ orjson==3.8.7  # https://github.com/ijl/orjson
 
 # Tenacity
 # ------------------------------------------------------------------------------
-tenacity==8.2.2
+tenacity==8.2.2  # https://pypi.org/project/tenacity/
+
+# DRF - Yet another Swagger generator 2
+# ------------------------------------------------------------------------------
+drf-yasg==1.21.5  # https://pypi.org/project/drf-yasg2/

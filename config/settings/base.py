@@ -107,6 +107,7 @@ THIRD_PARTY_APPS = [
     "widget_tweaks",
     "django_celery_results",
     "haystack",
+    "drf_yasg",
 ]
 
 LOCAL_APPS = [
