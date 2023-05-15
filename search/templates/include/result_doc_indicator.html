@@ -44,8 +44,8 @@
       {% if item.practice or item.action or item.institutional_contribution %}
       <div class="card">
         <div class="card-body">
-          {% if item.action %}<span><b>{% trans "Action" %}: </b>{{ item.action }} </span>{% endif %}
-          {% if item.practice %}<span><b>{% trans "Practice" %}: </b>{{ item.practice }}</span>{% endif %}
+          {% if item.action %}<span><b>{% trans "Action" %}: </b>{{ item.action }} </span> | {% endif %}
+          {% if item.practice %}<span><b>{% trans "Practice" %}: </b>{{ item.practice }} | </span>{% endif %}
           {% if item.institutional_contribution %}<span><b>{% trans "Contribuição" %}:  </b>{{ item.institutional_contribution }}</span>{% endif %}
         </div>
       </div>
@@ -53,8 +53,7 @@
       
       <div class="entry-meta">
         <ul>
-          <li><i class="icon-calendar3" data-toggle="tooltip" data-placement="top" title="{% trans 'Data de criação' %}"></i> {{ item.created }} {% trans item.validity|translate_data %} 
-          </li>
+          <li><i class="icon-calendar3" data-toggle="tooltip" data-placement="top" title="{% trans 'Data de criação' %}"></i> {{ item.created }} </li>
           <!-- <li><i class="icon-line-bar-graph"></i></li>
           <li><span class="badge bg-secondary" style="color:#fff;">{{ item.record_type|translate_data }}</span></li> -->
         </ul>
