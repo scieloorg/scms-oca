@@ -13,7 +13,7 @@ else:
 
 router.register("infrastructure", InfrastructureViewSet, basename="Infrastructure")
 router.register("education", EducationViewSet, basename="Education")
-router.register("event", EventViewSet, basename="Event")
+router.register("dissemination", EventViewSet, basename="Dissemination")
 router.register("policy", PolicyViewSet, basename="Policy")
 
 app_name = "api"

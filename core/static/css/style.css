@@ -3430,7 +3430,8 @@ only screen and (        min-device-pixel-ratio: 2),
 only screen and (                min-resolution: 192dpi),
 only screen and (                min-resolution: 2dppx) {
 
-	/*#logo a.standard-logo { display: none; }*/
+	/* #logo deve esta desativado para aparecer o logo em telas pequenas */
+	/* #logo a.standard-logo { display: none; } */
 
 	#logo a.retina-logo {
 		display: -ms-flexbox;

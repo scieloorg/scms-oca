@@ -2,7 +2,7 @@ from django.utils.translation import gettext as _
 
 translates = {
     "education_directory": _("Dados de educação"),
-    "event_directory": _("Dados de divulgação"),
+    "event_directory": _("Dados de disseminação"),
     "infrastructure_directory": _("Dados de infraestrutura"),
     "policy_directory": _("Dados de Política"),
     "record_type": _("Tipo de registro"),

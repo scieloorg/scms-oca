@@ -26,8 +26,8 @@ def get_default_action():
 
 class EventDirectory(CommonControlField):
     class Meta:
-        verbose_name_plural = _("Event Data")
-        verbose_name = _("Event Data")
+        verbose_name_plural = _("Dissemination Data")
+        verbose_name = _("Dissemination Data")
         permissions = (
             (MUST_BE_MODERATE, _("Must be moderated")),
             ("can_edit_title", _("Can edit title")),
@@ -206,7 +206,7 @@ class EventDirectory(CommonControlField):
 
 class EventDirectoryFile(CommonControlField):
     class Meta:
-        verbose_name_plural = _("Event Data Upload")
+        verbose_name_plural = _("Dissemination Data Upload")
 
     attachment = models.ForeignKey(
         "wagtaildocs.Document",
