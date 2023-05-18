@@ -120,3 +120,36 @@ def fetch_data(url, headers=None, json=False, timeout=2, verify=True):
             raise
 
     return response.content if not json else response.json()
+
+
+def is_float(element: any) -> bool:
+    #If you expect None to be passed:
+    if element is None: 
+        return False
+    try:
+        float(element)
+        return True
+    except ValueError:
+        return False
+
+
+def is_int(element: any) -> bool:
+    #If you expect None to be passed:
+    if element is None: 
+        return False
+    try:
+        int(element)
+        return True
+    except ValueError:
+        return False
+
+
+def is_str(element: any) -> bool:
+    #If you expect None to be passed:
+    if element is None: 
+        return False
+    try:
+        str(element)
+        return True
+    except ValueError:
+        return False
