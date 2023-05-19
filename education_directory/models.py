@@ -168,15 +168,19 @@ class EducationDirectory(CommonControlField):
             "education__title": self.title,
             "education__link": self.link,
             "education__description": self.description,
-            "education__start_date": self.start_date.isoformat(),
-            "education__end_date": self.end_date.isoformat(),
-            "education__start_time": self.start_time.isoformat(),
-            "education__end_time": self.end_time.isoformat(),
+            "education__start_date": self.start_date.isoformat() if self.start_date else None,
+            "education__end_date": self.end_date.isoformat() if self.end_date else None,
+            "education__start_time": self.start_time.isoformat() if self.start_time else None,
+            "education__end_time": self.end_time.isoformat() if self.end_time else None,
             "education__classification": self.classification,
             "education__keywords": [keyword for keyword in self.keywords.names()],
             "education__attendance": self.attendance,
             "education__record_status": self.record_status,
             "education__source": self.source,
+            "education__institutional_contribution": self.institutional_contribution,
+            "education__notes": self.notes,
+            "education__action": self.action,
+            "education__practice": self.practice,
         }
         if self.locations:
             loc = []

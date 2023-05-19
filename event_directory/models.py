@@ -165,15 +165,18 @@ class EventDirectory(CommonControlField):
             "event__title": self.title,
             "event__link": self.link,
             "event__description": self.description,
-            "event__start_date": self.start_date.isoformat(),
-            "event__end_date": self.end_date.isoformat(),
-            "event__start_time": self.start_time.isoformat(),
-            "event__end_time": self.end_time.isoformat(),
+            "event__start_date": self.start_date.isoformat() if self.start_date else None,
+            "event__end_date": self.end_date.isoformat() if self.end_date else None,
+            "event__start_time": self.start_time.isoformat() if self.start_time else None,
+            "event__end_time": self.end_time.isoformat() if self.end_time else None,
             "event__classification": self.classification,
             "event__keywords": [keyword for keyword in self.keywords.names()],
             "event__attendance": self.attendance,
             "event__record_status": self.record_status,
             "event__source": self.source,
+            "event__institutional_contribution": self.institutional_contribution,
+            "event__action": self.action,
+            "event__practice": self.practice,
         }
         if self.locations:
             loc = []

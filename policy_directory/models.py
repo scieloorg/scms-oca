@@ -141,11 +141,15 @@ class PolicyDirectory(CommonControlField):
             "policy__title": self.title,
             "policy__link": self.link,
             "policy__description": self.description,
-            "policy__date": self.date.isoformat(),
+            "policy__date": self.date.isoformat() if self.date else None,
             "policy__classification": self.classification,
             "policy__keywords": [keyword for keyword in self.keywords.names()],
             "policy__record_status": self.record_status,
             "policy__source": self.source,
+            "policy__action": self.action,
+            "policy__practice": self.practice,
+            "policy__institutional_contribution": self.institutional_contribution,
+            "policy__notes": self.notes,
         }
         if self.institutions:
             inst = []
