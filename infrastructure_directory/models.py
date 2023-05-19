@@ -143,6 +143,10 @@ class InfrastructureDirectory(CommonControlField):
             "infrastructure__keywords": [keyword for keyword in self.keywords.names()],
             "infrastructure__record_status": self.record_status,
             "infrastructure__source": self.source,
+            "infrastructure__action": self.action,
+            "infrastructure__practice": self.practice,
+            "infrastructure__institutional_contribution": self.institutional_contribution,
+            "infrastructure__notes": self.notes,
         }
 
         if self.institutions:
