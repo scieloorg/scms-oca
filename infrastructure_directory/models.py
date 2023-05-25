@@ -51,21 +51,21 @@ class InfrastructureDirectory(CommonControlField):
     title = models.CharField(_("Title"), max_length=255, null=False, blank=False)
     link = models.URLField(_("Link"), null=False, blank=False)
     description = models.TextField(
-        _("Description"), max_length=1000, null=True, blank=True
+        _("Description"), max_length=1000, null=True, blank=False
     )
 
     institutions = models.ManyToManyField(
-        Institution, verbose_name=_("Institution"), blank=True
+        Institution, verbose_name=_("Institution"), blank=False, null=True,
     )
     thematic_areas = models.ManyToManyField(
-        ThematicArea, verbose_name=_("Thematic Area"), blank=True
+        ThematicArea, verbose_name=_("Thematic Area"), blank=False, null=True,
     )
 
     practice = models.ForeignKey(
         Practice,
         verbose_name=_("Practice"),
         null=True,
-        blank=True,
+        blank=False,
         on_delete=models.SET_NULL,
     )
     action = models.ForeignKey(
@@ -82,10 +82,10 @@ class InfrastructureDirectory(CommonControlField):
         choices=choices.classification,
         max_length=255,
         null=True,
-        blank=True,
+        blank=False,
     )
 
-    keywords = TaggableManager(_("Keywords"), blank=True)
+    keywords = TaggableManager(_("Keywords"), blank=False)
 
     record_status = models.CharField(
         _("Record status"),
@@ -95,13 +95,15 @@ class InfrastructureDirectory(CommonControlField):
         blank=True,
     )
 
-    source = models.CharField(_("Source"), max_length=255, null=True, blank=True)
+    source = models.CharField(_("Source"), max_length=255, null=True, blank=False)
 
     institutional_contribution = models.CharField(
         _("Institutional Contribution"),
         max_length=255,
         default=settings.DIRECTORY_DEFAULT_CONTRIBUTOR,
         help_text=_("Name of the contributing institution, default=SciELO."),
+        blank=False,
+        null=True,
     )
 
     notes = models.TextField(_("Notes"), max_length=1000, null=True, blank=True)
