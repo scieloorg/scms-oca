@@ -70,7 +70,7 @@ class EducationDirectory(CommonControlField):
     )
     end_time = models.TimeField(_("End Time"), max_length=255, null=True, blank=True)
 
-    locations = models.ManyToManyField(Location, verbose_name=_("Location"), blank=True)
+    locations = models.ManyToManyField(Location, verbose_name=_("Location"), blank=False, null=True)
     institutions = models.ManyToManyField(
         Institution, verbose_name=_("Institution"), blank=True, help_text=help_fields.DIRECTORY_INSTITUTIONS_HELP
     )
@@ -83,7 +83,7 @@ class EducationDirectory(CommonControlField):
         Practice,
         verbose_name=_("Practice"),
         null=True,
-        blank=True,
+        blank=False,
         on_delete=models.SET_NULL,
         help_text=help_fields.DIRECTORY_PRACTICE_HELP
     )
@@ -114,7 +114,7 @@ class EducationDirectory(CommonControlField):
         choices=choices.attendance_type,
         max_length=255,
         null=True,
-        blank=True,
+        blank=False,
     )
 
     record_status = models.CharField(

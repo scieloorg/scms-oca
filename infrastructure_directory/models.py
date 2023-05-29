@@ -65,7 +65,7 @@ class InfrastructureDirectory(CommonControlField):
         Practice,
         verbose_name=_("Practice"),
         null=True,
-        blank=True,
+        blank=False,
         on_delete=models.SET_NULL,
         help_text=help_fields.DIRECTORY_PRACTICE_HELP
     )
