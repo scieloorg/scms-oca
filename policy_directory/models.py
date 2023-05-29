@@ -14,6 +14,7 @@ from usefulmodels.models import Action, Practice, ThematicArea
 from . import choices
 from .forms import PolicyDirectoryFileForm, PolicyDirectoryForm
 from .permission_helper import MUST_BE_MODERATE
+from core import help_fields
 
 
 def get_default_action():
@@ -48,19 +49,20 @@ class PolicyDirectory(CommonControlField):
             ("can_edit_notes", _("Can edit notes")),
         )
 
-    title = models.CharField(_("Title"), max_length=255, null=False, blank=False)
-    link = models.URLField(_("Link"), null=False, blank=False)
+    title = models.CharField(_("Title"), max_length=255, null=False, blank=False, help_text=help_fields.DIRECTORY_TITLE_HELP)
+    link = models.URLField(_("Link"), null=False, blank=False, help_text=help_fields.DIRECTORY_LINK_HELP)
     description = models.TextField(
-        _("Description"), max_length=1000, null=True, blank=True
+        _("Description"), max_length=1000, null=True, blank=True, help_text=help_fields.DIRECTORY_DESCRIPTION_HELP
     )
     date = models.DateField(_("Date"), max_length=255, null=True, blank=True)
 
     institutions = models.ManyToManyField(
-        Institution, verbose_name=_("Institution"), blank=True
+        Institution, verbose_name=_("Institution"), blank=True, help_text=help_fields.DIRECTORY_INSTITUTIONS_HELP
     )
     thematic_areas = models.ManyToManyField(
-        ThematicArea, verbose_name=_("Thematic Area"), blank=True
+        ThematicArea, verbose_name=_("Thematic Area"), blank=True, help_text=help_fields.DIRECTORY_THEMATIC_AREA_HELP
     )
+
 
     practice = models.ForeignKey(
         Practice,
@@ -68,7 +70,9 @@ class PolicyDirectory(CommonControlField):
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
+        help_text=help_fields.DIRECTORY_PRACTICE_HELP
     )
+
     action = models.ForeignKey(
         Action,
         verbose_name=_("Action"),
@@ -76,6 +80,7 @@ class PolicyDirectory(CommonControlField):
         blank=True,
         on_delete=models.SET_NULL,
         default=get_default_action,
+        help_text=help_fields.DIRECTORY_ACTION_HELP
     )
 
     classification = models.CharField(
@@ -84,9 +89,11 @@ class PolicyDirectory(CommonControlField):
         max_length=255,
         null=True,
         blank=True,
+        help_text=help_fields.DIRECTORY_CLASSIFICATION_HELP
     )
 
-    keywords = TaggableManager(_("Keywords"), blank=True)
+    keywords = TaggableManager(_("Keywords"), blank=True, help_text=help_fields.DIRECTORY_KEYWORDS_AREA_HELP)
+
 
     record_status = models.CharField(
         _("Record status"),
@@ -94,18 +101,21 @@ class PolicyDirectory(CommonControlField):
         max_length=255,
         null=True,
         blank=True,
+        help_text=help_fields.DIRECTORY_RECORD_STATUS_HELP
     )
 
-    source = models.CharField(_("Source"), max_length=255, null=True, blank=True)
+
+    source = models.CharField(_("Source"), max_length=255, null=True, blank=True, help_text=help_fields.DIRECTORY_SOURCE_HELP)
+
 
     institutional_contribution = models.CharField(
         _("Institutional Contribution"),
         max_length=255,
         default=settings.DIRECTORY_DEFAULT_CONTRIBUTOR,
-        help_text=_("Name of the contributing institution, default=SciELO."),
+        help_text=help_fields.DIRECTORY_INSTITUTIONAL_CONTRIBUTION_HELP,
     )
 
-    notes = models.TextField(_("Notes"), max_length=1000, null=True, blank=True)
+    notes = models.TextField(_("Notes"), max_length=1000, null=True, blank=True, help_text=help_fields.DIRECTORY_NOTES_HELP)
 
     panels = [
         HelpPanel(
