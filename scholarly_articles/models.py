@@ -12,6 +12,7 @@ from core.models import CommonControlField
 
 class ScholarlyArticles(models.Model):
     doi = models.CharField(_("DOI"), max_length=100, null=True, blank=True)
+    id_int_production = models.CharField(_("Id Intellectual Production"), max_length=100, null=True, blank=True)
     title = models.CharField(_("Title"), max_length=510, null=True, blank=True)
     volume = models.CharField(_("Volume"), max_length=20, null=True, blank=True)
     number = models.CharField(_("Number"), max_length=20, null=True, blank=True)
@@ -30,7 +31,6 @@ class ScholarlyArticles(models.Model):
         _("License"),
         verbose_name=_("License"),
         on_delete=models.SET_NULL,
-        max_length=255,
         null=True,
         blank=True,
     )
@@ -48,7 +48,6 @@ class ScholarlyArticles(models.Model):
         "Journals",
         verbose_name=_("Journals"),
         on_delete=models.SET_NULL,
-        max_length=255,
         null=True,
         blank=True,
     )
@@ -57,10 +56,10 @@ class ScholarlyArticles(models.Model):
     )
 
     def __unicode__(self):
-        return self.doi if self.doi else ""
+        return str("%s") % self.doi or self.id_int_production
 
     def __str__(self):
-        return self.doi if self.doi else ""
+        return str("%s") % self.doi or self.id_int_production
 
     class Meta:
         indexes = [
@@ -118,6 +117,7 @@ class ScholarlyArticles(models.Model):
 
     panels = [
         FieldPanel("doi"),
+        FieldPanel("id_int_production"),
         FieldPanel("title"),
         FieldPanel("volume"),
         FieldPanel("number"),
@@ -135,6 +135,8 @@ class ScholarlyArticles(models.Model):
     def data(self):
         d = {
             "article__doi": self.doi,
+            "article__id_int_production": self.id_int_production,
+            "article__id_int_production": self.id_int_production,
             "article__title": self.title,
             "article__volume": self.volume,
             "article__number": self.number,
@@ -158,7 +160,7 @@ class Journals(models.Model):
     journal_issn_l = models.CharField(_("ISSN-L"), max_length=50, null=True, blank=True)
     journal_issns = models.CharField(_("ISSN's"), max_length=50, null=True, blank=True)
     journal_name = models.CharField(
-        _("Journal Name"), max_length=255, null=True, blank=True
+        _("Journal Name"), max_length=510, null=True, blank=True
     )
     publisher = models.CharField(_("Publisher"), max_length=255, null=True, blank=True)
     journal_is_in_doaj = models.BooleanField(
@@ -236,6 +238,8 @@ class Contributors(models.Model):
         "Affiliations", on_delete=models.SET_NULL, max_length=510, null=True, blank=True
     )
 
+    programs = models.ManyToManyField("Programs", verbose_name=_("Programs"), blank=True)
+
     autocomplete_search_field = "given"
 
     def autocomplete_label(self):
@@ -282,6 +286,7 @@ class Contributors(models.Model):
         FieldPanel("orcid"),
         FieldPanel("authenticated_orcid"),
         AutocompletePanel("affiliation"),
+        AutocompletePanel("programs"),
     ]
 
     @property
@@ -475,7 +480,7 @@ class SupplementaryData(models.Model):
 class ErrorLog(CommonControlField):
     error_type = models.CharField(
         _("Error Type"),
-        max_length=50,
+        max_length=100,
         null=True,
         blank=True,
         help_text=_("Type of python error."),
@@ -497,7 +502,7 @@ class ErrorLog(CommonControlField):
 
     data_reference = models.CharField(
         _("Reference data"),
-        max_length=10,
+        max_length=100,
         null=True,
         blank=True,
         help_text=_(
@@ -506,7 +511,6 @@ class ErrorLog(CommonControlField):
     )
     data = models.TextField(
         _("Data"),
-        max_length=10,
         null=True,
         blank=True,
         help_text=_("Data when the error happened."),
@@ -568,3 +572,38 @@ class License(models.Model):
 
     def __str__(self):
         return self.name or self.url
+
+
+class Programs(models.Model): 
+    """
+    This entity represents the program of an institution. 
+    Program is associated with the Institution
+
+    Example of programs: 
+
+        TECNOLOGIA EM QUÍMICA E BIOQUÍMICA
+        LINGUÍSTICA
+        INOVAÇÃO E TECNOLOGIA INTEGRADAS À MEDICINA VETERINÁRIA
+        ODONTOLOGIA
+        BIODIVERSIDADE TROPICAL
+    """
+    name = models.CharField(
+        _("Program Name"), max_length=510, null=True, blank=True
+    )
+    institution = models.ForeignKey(
+        Institution,
+        verbose_name=_("Institution"),
+        on_delete=models.SET_NULL,
+        max_length=1020,
+        null=True,
+        blank=True,
+    )
+
+    def autocomplete_label(self):
+        return "%s" % self.name
+    
+    def __unicode__(self):
+        return "%s - %s" % (self.name, self.institution or '')
+
+    def __str__(self):
+        return self.__unicode__()

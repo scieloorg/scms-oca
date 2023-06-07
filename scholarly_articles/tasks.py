@@ -1,11 +1,18 @@
 import gzip
+import json
 import logging
+import re
 
+import django
+import pandas as pd
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.db.models import Q
+from django.utils.translation import gettext as _
 
 from config import celery_app
 from core.utils import utils
+from scholarly_articles import models
 from scholarly_articles.crossref import crossref
 from scholarly_articles.unpaywall import (
     affiliation,
@@ -120,7 +127,7 @@ def load_crossref(from_update_date=2012, until_update_date=2012):
         "total-results": 37342,
         "items": [
             {
-            "indexed": {
+            "ied": {
                 "date-parts": [[2022,4,5]],
                 "date-time": "2022-04-05T02:58:23Z",
                 "timestamp": 1649127503838
@@ -194,7 +201,6 @@ def load_crossref(from_update_date=2012, until_update_date=2012):
 
     try:
         while True:
-
             data = utils.fetch_data(url, json=True, timeout=30, verify=True)
             articles = []
             if data["status"] == "ok":
@@ -215,3 +221,161 @@ def load_crossref(from_update_date=2012, until_update_date=2012):
 
     except Exception as e:
         logger.info(f"Unexpected error: {e}")
+
+
+@celery_app.task(name=_("Load sucupira data"))
+def load_sucupira(file_path, user_id):
+    """
+    Load the data from sucupira file.
+
+    Sync or Async function
+
+    Param file_path: String with the path of the .csv file.
+    Param user: The user id passed by kwargs on tasks.kwargs
+
+    Fields used on this load: 
+    
+        doi = DS_DOI
+        id_int_production
+        title = NM_PRODUCAO
+        volume = NR_VOLUME
+        number = NR_SERIE
+        year = AN_BASE_PRODUCAO
+        open_access_status = NA
+        use_license = CC-By
+        license = https://opendefinition.org/licenses/cc-by/
+        apc = NA
+        contributors = DICT_AUTORES
+        journal = DS_ISSN (refe to journal)
+        source = SUCUPIRA
+
+    """
+
+    def get_institution(institution_acron):
+        """
+        Get the institution from models.Institution.
+
+        Example of the acronym of institution:
+
+            UFPA - ABAETETUBA
+            UFPB/AREIA
+            UNESP-ARAR
+            UTFPR-MD
+            CCD/SES
+            CEFET/MG
+        """
+
+        # makes a treatment to obtain the institution
+        institution_acron = institution_acron.split("/")[0]
+        institution_acron = institution_acron.split(" / ")[0]
+        institution_acron = institution_acron.split("-")[0]
+        institution_acron = institution_acron.split(" - ")[0]
+        institution_acron = institution_acron.strip()
+
+        if models.Institution.objects.filter(acronym=institution_acron).exists():
+            return models.Institution.objects.filter(acronym=institution_acron)[0]
+
+    def get_journal(journal_issn, journal_name):
+        """
+        This method try to get the journal on database if exists and create otherwise.
+        """
+        journals = models.Journals.objects.filter(
+            Q(journal_issn_l=journal_issn) | Q(journal_issns=journal_issn)
+        )
+
+        try:
+            journal = journals[0]
+        except IndexError:
+            journal = models.Journals()
+            journal.journal_issns = journal_issn
+            journal.journal_name = journal_name
+            journal.save()
+
+        return journal
+
+    def get_license(url, name=None):
+        """
+        This method try to get the license on database if exists and create otherwise.
+        """
+        license, created = models.License.objects.get_or_create(
+            **{"name": name, "url": url}
+        )
+        return license
+
+    user = User.objects.get(id=user_id)
+
+    df = pd.read_csv(file_path)
+
+    for index, row in df.iterrows():
+        try:
+            article_dict = {
+                "doi": "" if str(row["DS_DOI"]) == "nan" else row["DS_DOI"],
+                "id_int_production": str(row["ID_ADD_PRODUCAO_INTELECTUAL"]),
+                "title": row["NM_PRODUCAO"][0:255],
+                "number": row["NR_SERIE"],
+                "volume": row["NR_VOLUME"],
+                "year": row["AN_BASE_PRODUCAO"],
+                "source": "SUCUPIRA",
+                "year": row["AN_BASE_PRODUCAO"],
+                "license": get_license("https://opendefinition.org/licenses/cc-by/"),
+                "use_license": "CC-BY",
+            }
+            
+            split_ds_issn = row["DS_ISSN"].split(" ")
+
+            issn = re.search("[\S]{4}\-[\S]{4}", split_ds_issn[0]).group()
+
+            journal_name = " ".join(split_ds_issn[1:])
+        
+            article, created = models.ScholarlyArticles.objects.get_or_create(
+                **article_dict
+            )
+
+            authors_json = json.loads(row["DICT_AUTORES"])
+
+            for au in authors_json:
+
+                filter_dict = {
+                    "family": au["NM_ABNT_AUTOR"].split(",")[0].strip()
+                    if "," in au["NM_ABNT_AUTOR"]
+                    else au["NM_ABNT_AUTOR"],
+                    "given": au["NM_ABNT_AUTOR"].split(",")[1].strip()
+                    if "," in au["NM_ABNT_AUTOR"]
+                    else au["NM_ABNT_AUTOR"],
+                }
+
+                try:
+                    contributor, created = models.Contributors.objects.get_or_create(**filter_dict)
+                except models.Contributors.MultipleObjectsReturned:
+                    contributor = models.Contributors.objects.filter(**filter_dict)[0]
+
+                institution = get_institution(row["SG_ENTIDADE_ENSINO"])
+                program, created = models.Programs.objects.get_or_create(
+                    **{"name": row["NM_PROGRAMA_IES"], "institution": institution}
+                )
+
+                contributor.programs.add(program)
+                article.contributors.add(contributor)
+                article.journal = get_journal(issn, journal_name)
+                article.save()
+
+            logger.info("####%s####, %s" % (index.numerator, article.data))
+
+        except django.db.utils.DataError as e:
+            try:
+                logger.error("Erro: %s" % (e))
+                error = models.ErrorLog()
+                error.error_type = str(type(e))
+                error.error_message = str(e)[:255]
+                error.error_description = (
+                    "Erro on processing the Sucupira to ScholarlyArticles."
+                )
+                error.data_reference = "id:%s" % str(
+                    row["ID_ADD_PRODUCAO_INTELECTUAL"]
+                ) or str(row["DS_DOI"])
+                error.data = article_dict
+                error.data_type = "Sucupira"
+                error.creator = user
+                error.save()
+            except Exception as erro:
+                logger.error("Erro when saving erro on ErrorLog: %s " % erro)

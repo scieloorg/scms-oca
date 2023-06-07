@@ -61,4 +61,5 @@ SOURCE = [
     ("", ""),
     ("UNPAYWALL", "UNPAYWALL"),
     ("CROSSREF", "CROSSREF"),
+    ("SUCUPIRA", "SUCUPIRA"),
 ]

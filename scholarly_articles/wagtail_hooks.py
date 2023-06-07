@@ -15,6 +15,7 @@ from .models import (
     SupplementaryData,
     ErrorLog,
     License,
+    Programs,
 )
 
 
@@ -194,6 +195,21 @@ class LicenseAdmin(ModelAdmin):
     list_filter = ("name", "url")
     search_fields = ("name", "url")
 
+class ProgramsAdmin(ModelAdmin):
+    model = Programs
+    menu_label = _("Programs")
+    menu_icon = "folder-open-inverse"
+    add_to_settings_menu = False  # or True to add your model to the Settings sub-menu
+    exclude_from_explorer = (
+        False  # or True to exclude pages of this type from Wagtail's explorer view
+    )
+    list_display = (
+        "name",
+        "institution",
+    )
+    list_filter = ("name",)
+    search_fields = ("name", "institution")
+
 
 class ScholarlyArticlesAdminGroup(ModelAdminGroup):
     menu_label = _("Articles Directory")
@@ -204,6 +220,7 @@ class ScholarlyArticlesAdminGroup(ModelAdminGroup):
         ScholarlyArticlesAdmin,
         ContributorsAdmin,
         AffiliationsAdmin,
+        ProgramsAdmin,
         RawUnpaywallAdmin,
         SupplementaryDataAdmin,
         LicenseAdmin,
