@@ -109,4 +109,27 @@ class Institution(CommonControlField, ClusterableModel):
             institution.save()
         return institution
 
+    @classmethod
+    def parameters_for_values(cls, prefix):
+        return [
+            f"{prefix}__name",
+        ]
+
+    @classmethod
+    def values(cls, selected_attributes=None):
+        selected_attributes = selected_attributes or [
+            "name",
+        ]
+        return (
+            cls.objects.filter(location__country__acron2="BR")
+            .values(*selected_attributes)
+            .annotate(count=Count("id"))
+            .order_by("count")
+            .iterator()
+        )
+
+    @classmethod
+    def names(cls):
+        return (item["name"] for item in cls.values())
+
     base_form_class = InstitutionForm

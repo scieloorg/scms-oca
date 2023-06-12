@@ -3,6 +3,7 @@ import os
 from django.db import models
 from django.conf import settings
 from django.utils.translation import gettext as _
+from django.db.models import Count
 from taggit.managers import TaggableManager
 from wagtail.admin.panels import FieldPanel, HelpPanel
 from wagtailautocomplete.edit_handlers import AutocompletePanel
@@ -10,7 +11,7 @@ from wagtailautocomplete.edit_handlers import AutocompletePanel
 from core.models import CommonControlField
 from institution.models import Institution
 from location.models import Location
-from usefulmodels.models import Action, Practice, ThematicArea
+from usefulmodels.models import Action, Practice, ThematicArea, State
 
 from . import choices
 from .forms import EventDirectoryFileForm, EventDirectoryForm
@@ -244,6 +245,79 @@ class EventDirectory(CommonControlField):
             d.update(self.action.data)
 
         return d
+
+    @classmethod
+    def filter_items_to_generate_indicators(
+        cls,
+        action__name=None,
+        practice__code=None,
+        practice__name=None,
+        classification=None,
+        institution__name=None,
+        thematic_area__level0=None,
+        thematic_area__level1=None,
+        location__state__code=None,
+        location__region=None,
+    ):
+        params = dict(
+            action__name=action__name,
+            practice__code=practice__code,
+            practice__name=practice__name,
+            classification=classification,
+            organization__name=institution__name,
+            organization__location__state__acronym=location__state__code,
+            organization__location__region=location__region,
+            thematic_areas__level0=thematic_area__level0,
+            thematic_areas__level1=thematic_area__level1,
+            locations__state__acronym=location__state__code,
+            locations__region=location__region,
+        )
+        params = {k: v for k, v in params.items() if v}
+        return cls.objects.filter(record_status="PUBLISHED", **params)
+
+    @classmethod
+    def parameters_for_values(
+        cls,
+        by_practice=False,
+        by_classification=False,
+        by_institution=False,
+        by_thematic_area_level0=False,
+        by_thematic_area_level1=False,
+        by_state=False,
+        by_region=False,
+    ):
+        selected_attributes = Action.parameters_for_values("action")
+        if by_classification:
+            selected_attributes += ["classification"]
+        if by_practice:
+            selected_attributes += Practice.parameters_for_values("practice")
+        if by_institution:
+            selected_attributes += Institution.parameters_for_values("organization")
+        if by_state or by_region:
+            selected_attributes += State.parameters_for_values(
+                "locations__state", by_state, by_state, by_region
+            )
+            selected_attributes += State.parameters_for_values(
+                "organization__location__state", by_state, by_state, by_region
+            )
+        if by_thematic_area_level0 or by_thematic_area_level1:
+            selected_attributes += ThematicArea.parameters_for_values(
+                "thematic_areas", by_thematic_area_level0, by_thematic_area_level1
+            )
+        return selected_attributes
+
+    @classmethod
+    def group(
+        cls,
+        query_result,
+        selected_attributes,
+    ):
+        return (
+            query_result.values(*selected_attributes)
+            .annotate(count=Count("id"))
+            .order_by("count")
+            .iterator()
+        )
 
     base_form_class = EventDirectoryForm
 

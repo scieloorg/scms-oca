@@ -1,5 +1,7 @@
 from django.db import models
+from django.db.models import Count
 from django.utils.translation import gettext as _
+from django.utils.text import slugify
 from core.models import CommonControlField
 from usefulmodels.forms import (
     CityForm,
@@ -58,6 +60,18 @@ class City(CommonControlField):
             city.save()
 
         return city
+
+    @classmethod
+    def values(cls, selected_attributes=None):
+        selected_attributes = selected_attributes or [
+            "name",
+        ]
+        return (
+            cls.objects.values(*selected_attributes)
+            .annotate(count=Count("id"))
+            .order_by("count")
+            .iterator()
+        )
 
     base_form_class = CityForm
 
@@ -121,6 +135,25 @@ class State(CommonControlField):
         state.save()
 
         return state
+
+    @classmethod
+    def parameters_for_values(cls, prefix, name, acronym, region):
+        params = []
+        if name or acronym:
+            params += [f"{prefix}__name", f"{prefix}__acronym"]
+        if region:
+            params += [f"{prefix}__region"]
+        return params
+
+    @classmethod
+    def values(cls, selected_attributes=None):
+        selected_attributes = selected_attributes or ["name", "acronym", "region"]
+        return (
+            cls.objects.values(*selected_attributes)
+            .annotate(count=Count("id"))
+            .order_by("count")
+            .iterator()
+        )
 
     base_form_class = StateForm
 
@@ -197,6 +230,28 @@ class Country(CommonControlField):
         country.save()
 
         return country
+
+    @classmethod
+    def parameters_for_values(cls, prefix):
+        return [
+            f"{prefix}__name_pt",
+            f"{prefix}__name_en",
+            f"{prefix}__capital",
+            f"{prefix}__acron3",
+            f"{prefix}__acron2",
+        ]
+
+    @classmethod
+    def values(cls, selected_attributes=None):
+        selected_attributes = selected_attributes or [
+            "acron2",
+        ]
+        return (
+            cls.objects.values(*selected_attributes)
+            .annotate(count=Count("id"))
+            .order_by("count")
+            .iterator()
+        )
 
     base_form_class = CountryForm
 
@@ -285,6 +340,25 @@ class ThematicArea(CommonControlField):
 
         return the_area
 
+    @classmethod
+    def parameters_for_values(cls, prefix, level0, level1):
+        params = []
+        if level0:
+            params += [f"{prefix}__level0"]
+        if level1:
+            params += [f"{prefix}__level1"]
+        return params
+
+    @classmethod
+    def values(cls, selected_attributes=None):
+        selected_attributes = selected_attributes or ["level1"]
+        return (
+            cls.objects.values(*selected_attributes)
+            .annotate(count=Count("id"))
+            .order_by("count")
+            .iterator()
+        )
+
     base_form_class = ThematicAreaForm
 
 
@@ -318,6 +392,22 @@ class Practice(CommonControlField):
     def data(self):
         return {"practice__name": self.name, "practice__code": self.code}
 
+    @classmethod
+    def parameters_for_values(cls, prefix):
+        return [
+            f"{prefix}__name",
+        ]
+
+    @classmethod
+    def values(cls, selected_attributes=None):
+        selected_attributes = selected_attributes or ["name", "code"]
+        return (
+            cls.objects.values(*selected_attributes)
+            .annotate(count=Count("id"))
+            .order_by("count")
+            .iterator()
+        )
+
     base_form_class = PracticeForm
 
 
@@ -350,6 +440,22 @@ class Action(CommonControlField):
     @property
     def data(self):
         return {"action__name": self.name, "action__code": self.code}
+
+    @classmethod
+    def parameters_for_values(cls, prefix):
+        return [
+            f"{prefix}__name",
+        ]
+
+    @classmethod
+    def values(cls, selected_attributes=None):
+        selected_attributes = selected_attributes or ["code", "name"]
+        return (
+            cls.objects.values(*selected_attributes)
+            .annotate(count=Count("id"))
+            .order_by("count")
+            .iterator()
+        )
 
     base_form_class = ActionForm
 
@@ -411,3 +517,12 @@ class ActionAndPractice(models.Model):
                 practice=practice,
                 classification=classification,
             ).first()
+
+    @property
+    def code(self):
+        items = (
+            self.action and self.action.code,
+            classification and slugify(classification) or "",
+            practice and practice.code or "",
+        )
+        return slugify("_".join(items)).upper()
