@@ -46,6 +46,7 @@ class IndicatorAdmin(ModelAdmin):
     )
 
     search_fields = (
+        "slug",
         "title",
         "institutional_contribution",
         "action_and_practice__action__name",
