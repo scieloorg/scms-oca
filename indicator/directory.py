@@ -459,7 +459,7 @@ def get_location_filter_params():
     )
 
 
-def schedule_tasks_to_generate_directory_indicators(
+def schedule_indicators_tasks(
     user_id=None,
     day_of_week=None,
     hour=None,
