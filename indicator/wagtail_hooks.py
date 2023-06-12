@@ -64,5 +64,4 @@ class IndicatorAdmin(ModelAdmin):
             return qs
 
 
-
 modeladmin_register(IndicatorAdmin)

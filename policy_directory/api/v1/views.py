@@ -7,7 +7,7 @@ from policy_directory import models
 
 class PolicyViewSet(viewsets.ModelViewSet):
     serializer_class = PolicySerializer
-    http_method_names = ['get']
+    http_method_names = ["get"]
     # queryset = Policy.objects.all()
 
     def get_queryset(self):

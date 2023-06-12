@@ -10,7 +10,6 @@ from .permission_helper import IndicatorPermissionHelper
 
 
 class IndicatorDirectoryEditView(EditView):
-
     def get_moderation(self):
         if Moderation.objects.filter(model=self.model.__name__, status=True).exists():
             return Moderation.objects.get(model=self.model.__name__)
@@ -20,7 +19,7 @@ class IndicatorDirectoryEditView(EditView):
         # if user is a staff must no moderate
         if self.request.user.is_staff:
             return False
-        
+
         return IndicatorPermissionHelper(model=self.model).must_be_moderate(
             self.request.user
         )

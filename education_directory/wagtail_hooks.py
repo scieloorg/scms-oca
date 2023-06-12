@@ -29,7 +29,7 @@ class EducationDirectoryAdmin(ModelAdmin):
         "link",
         "record_status",
         "description",
-        "institutional_contribution", 
+        "institutional_contribution",
         "creator",
         "updated",
         "created",

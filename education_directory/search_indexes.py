@@ -106,7 +106,7 @@ class EducationIndex(indexes.SearchIndex, indexes.Indexable):
                 except AttributeError:
                     continue
             return regions
-        
+
     def prepare_disclaimer(self, obj):
         """
         This add a disclaimer if user.updated is not a company
@@ -115,17 +115,19 @@ class EducationIndex(indexes.SearchIndex, indexes.Indexable):
         if obj.institutional_contribution != settings.DIRECTORY_DEFAULT_CONTRIBUTOR:
             if obj.updated_by:
                 return (
-                    _("Conteúdo publicado sem moderação / contribuição de %s") % obj.institutional_contribution
+                    _("Conteúdo publicado sem moderação / contribuição de %s")
+                    % obj.institutional_contribution
                     if not obj.updated_by.is_staff and obj.record_status == "PUBLISHED"
                     else None
                 )
-            
-            if obj.creator: 
+
+            if obj.creator:
                 return (
-                    _("Conteúdo publicado sem moderação / contribuição de %s") % obj.institutional_contribution 
+                    _("Conteúdo publicado sem moderação / contribuição de %s")
+                    % obj.institutional_contribution
                     if not obj.creator.is_staff and obj.record_status == "PUBLISHED"
                     else None
-                )    
+                )
 
     def get_model(self):
         return models.EducationDirectory

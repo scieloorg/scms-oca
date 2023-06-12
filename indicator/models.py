@@ -107,12 +107,13 @@ class Indicator(CommonControlField):
     link_to_data = models.URLField(_("Link to the data"), null=True, blank=True)
 
     institutional_contribution = models.CharField(
-        _("Institutional Contribution"), max_length=255, default=settings.DIRECTORY_DEFAULT_CONTRIBUTOR, help_text=_("Name of the contributing institution, default=SciELO.")
+        _("Institutional Contribution"),
+        max_length=255,
+        default=settings.DIRECTORY_DEFAULT_CONTRIBUTOR,
+        help_text=_("Name of the contributing institution, default=SciELO."),
     )
 
-    notes = models.TextField(
-        _("Notes"), max_length=1000, null=True, blank=True
-    )
+    notes = models.TextField(_("Notes"), max_length=1000, null=True, blank=True)
 
     def save(self, *args, **kwargs):
         # ensure we always have the slug.
@@ -178,17 +179,20 @@ class Indicator(CommonControlField):
         if self.institutional_contribution != settings.DIRECTORY_DEFAULT_CONTRIBUTOR:
             if self.updated_by:
                 return (
-                    _("Conteúdo publicado sem moderação / contribuição de %s") % self.institutional_contribution
-                    if not self.updated_by.is_staff and self.record_status == "PUBLISHED"
+                    _("Conteúdo publicado sem moderação / contribuição de %s")
+                    % self.institutional_contribution
+                    if not self.updated_by.is_staff
+                    and self.record_status == "PUBLISHED"
                     else None
                 )
-            
-            if self.creator: 
+
+            if self.creator:
                 return (
-                    _("Conteúdo publicado sem moderação / contribuição de %s") % self.institutional_contribution
+                    _("Conteúdo publicado sem moderação / contribuição de %s")
+                    % self.institutional_contribution
                     if not self.creator.is_staff and self.record_status == "PUBLISHED"
                     else None
-                )   
+                )
 
     class Meta:
         permissions = (
@@ -259,7 +263,9 @@ class Indicator(CommonControlField):
         FieldPanel("end_date_year", permission="indicator.can_edit_end_date_year"),
         FieldPanel("validity", permission="indicator.can_edit_validity"),
         FieldPanel("code", permission="indicator.can_edit_code"),
-        AutocompletePanel("thematic_areas", permission="indicator.can_edit_thematic_areas"),
+        AutocompletePanel(
+            "thematic_areas", permission="indicator.can_edit_thematic_areas"
+        ),
         AutocompletePanel("locations", permission="indicator.can_edit_locations"),
         FieldPanel("raw_data", permission="indicator.can_edit_raw_datas"),
         FieldPanel("summarized", permission="indicator.can_edit_summarized"),
