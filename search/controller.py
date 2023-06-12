@@ -1,3 +1,6 @@
+import logging
+from random import randrange
+
 from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.template import loader
@@ -12,8 +15,15 @@ from indicator import controller as indicator_controller
 def indicator_detail(request, indicator):
     layouts = ["bar-label-rotation", "categories_1_grid", "categories_2_grids"]
     graphic_type = layouts[int(request.GET.get("g") or 1)]
-    
+
     if indicator.summarized:
+        try:
+            version = indicator.summarized["version"]
+        except KeyError:
+            pass
+        else:
+            gb = GraphicBuilder(indicator)
+            return gb.parameters
         try:
             cat2_name = indicator.summarized["cat2_name"]
         except KeyError:
@@ -21,7 +31,9 @@ def indicator_detail(request, indicator):
                 indicator, graphic_type, indicator.summarized.get("cat1_name")
             )
         else:
-            return _parameters_for_categories_indicator(indicator, graphic_type, cat2_name)
+            return _parameters_for_categories_indicator(
+                indicator, graphic_type, cat2_name
+            )
 
 
 def _parameters_for_ranking_indicator(indicator, graphic_type, cat1_name=None):
@@ -183,4 +195,143 @@ def _get_cat2_text(cat2_name_and_values_list):
     items = []
     for name, values in cat2_name_and_values_list:
         items.append(text % (name, str(values)))
-    return f"[{', '.join(items)}]"
+
+    return "[" + ", ".join(items) + "]"
+
+
+class GraphicBuilder:
+    def __init__(self, indicator):
+        self._indicator = indicator
+
+    @property
+    def graphic_data(self):
+        if not hasattr(self, "_graphic_data"):
+            self._graphic_data = self.get_data_for_graphic()
+        return self._graphic_data
+
+    def get_data_for_graphic(self):
+        """
+        https://echarts.apache.org/examples/en/editor.html?c=bar-y-category-stack
+        """
+        x_items = []
+        y_items = []
+
+        data = {}
+        items = sorted(
+            self._indicator.summarized["graphic_data"], key=lambda item: item["count"]
+        )
+        for item in items:
+            y_label = item["y"]
+            x_label = item["x"]
+
+            if y_label not in y_items:
+                y_items.append(y_label)
+            if x_label not in x_items:
+                x_items.append(x_label)
+
+            data[(x_label, y_label)] = item["count"]
+
+        changed = False
+        if len(x_items) > len(y_items):
+            x_items, y_items = y_items, x_items
+            changed = True
+
+        series = []
+        for x_label in x_items:
+            d = {"name": x_label}
+            numbers = []
+            for y_label in y_items:
+                if changed:
+                    numbers.append(data.get((y_label, x_label)) or "null")
+                else:
+                    numbers.append(data.get((x_label, y_label)) or "null")
+            d["numbers"] = numbers
+            series.append(d)
+
+        return {
+            "category": y_items,
+            "series": series,
+        }
+
+    @property
+    def parameters(self):
+        data = {
+            "graphic_type": "bar-y-category-stack",
+            "object": self._indicator,
+            "category": self.category,
+            # "serie_names": self.serie_names,
+            "series": self.series,
+            "graphic_height": 150 * len(self.graphic_data["series"]) + 300,
+            "table_header": self._indicator.summarized["table_header"],
+            "colors": self.format_as_str_list(self.colors),
+        }
+        logging.info(data)
+        return data
+
+    def format_as_str_list(self, items):
+        return str([item for item in items]).replace('"', "'")
+
+    @property
+    def colors(self):
+        items = []
+        for i in self.category:
+            while True:
+                number = randrange(5000, 2 ** 24)
+                hex_color = "#" + str(number)
+                if hex_color not in items:
+                    items.append(hex_color)
+                    break
+        return items
+
+    @property
+    def category(self):
+        # ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+        return str(self.graphic_data["category"]).replace('"', "'")
+
+    @property
+    def series(self):
+        items = []
+        for serie in self.graphic_data["series"]:
+            items.append(self.serie_item(serie))
+        return ",".join(items)
+
+    def serie_item(self, serie):
+        """
+        {
+          name: 'Affiliate Ad',
+          type: 'bar',
+          stack: 'total',
+          label: {
+            show: true
+          },
+          emphasis: {
+            focus: 'series'
+          },
+          data: [220, 182, 191, 234, 290, 330, 310]
+        }
+        """
+        name = serie["name"]
+        numbers = [n or "null" for n in serie["numbers"]]
+        logging.info(name)
+        logging.info(numbers)
+
+        return """
+            {
+              name: '%s',
+              type: 'bar',
+              stack: 'total',
+              barMaxWidth: '%s',
+              barGap: '%s',
+              label: {
+                show: true
+              },
+              emphasis: {
+                focus: 'series'
+              },
+              data: %s
+            }""" % (
+            name,
+            "30px",
+            "10px",
+            str(numbers).replace("'null'", "null"),
+        )
