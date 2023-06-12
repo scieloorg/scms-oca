@@ -1,0 +1,59 @@
+{% load static %}
+{% block content %}
+<!-- https://echarts.apache.org/examples/en/editor.html?c=bar-y-category-stack -->
+<div id="graph1" style="width: 1000px;height: {{ graphic_height }}px"></div>
+
+<script src="{% static 'js/echarts/echarts.min.js' %}"></script>
+<script src="{% static 'js/echarts/theme/roma-macarons-macarons2-infographic.js' %}"></script>
+<script type="text/javascript">
+var dom = document.getElementById('graph1');
+var myChart = echarts.init(dom, 'roma-macarons-macarons2-infographic', {
+  renderer: 'svg',
+  useDirtyRect: false,
+});
+
+
+var app = {};
+
+var option;
+
+option = {
+
+  aria: {
+    show: true
+  },
+  tooltip: {
+    trigger: 'axis',
+    axisPointer: {
+      // Use axis to trigger tooltip
+      type: 'shadow' // 'shadow' as default; can also be 'line' or 'shadow'
+    }
+  },
+  legend: {},
+  grid: {
+    left: '3%',
+    right: '4%',
+    bottom: '3%',
+    containLabel: true
+  },
+  xAxis: {
+    type: 'value',
+    min: 0
+  },
+  yAxis: {
+    min: 0,
+    type: 'category',
+    data: {{ category | safe }}
+  },
+  series: [
+    {{ series | safe }}
+  ]
+};
+
+if (option && typeof option === 'object') {
+  myChart.setOption(option);
+}
+
+window.addEventListener('resize', myChart.resize);
+</script>
+{% endblock %}
