@@ -62,6 +62,9 @@
 
                 </ul>
             </nav>
+        </div>
+
+        <div class="container">
             <p>
                 <span class="badge badge-primary">{{ object.action_and_practice.action|translate_data }}</span>
                 <span class="badge badge-secondary">{{ object.action_and_practice.classification|translate_data }}</span>
@@ -73,54 +76,72 @@
 
         <div class="container">
             {% if object.keywords.all %}
-                <p>{% trans 'Palavras-chave' %}:
+                <h4 class="mb-1 mt-4">{% trans 'Palavras-chave' %}</h4>
+                <p>
                     {% for item in object.keywords.all %}
                         <span class="badge badge-info">{{ item.name }}</span>
                     {% endfor %}
                 </p>
             {% endif %}
+        </div>
+
+        <div class="container">
             {% if object.description %}
+                <h4 class="mb-1 mt-4">{% trans 'Descrição' %}</h4>
                 <p>{{ object.description }}</p>
             {% endif %}
         </div>
 
         <div class="container">
-            {% if object.institutional_contribution %}<span><b>{% trans "Contribuição" %}:  </b>{{ object.institutional_contribution }}</span>{% endif %}
+            {% if object.institutional_contribution %}
+                <h4 class="mb-1 mt-4">{% trans "Contribuição" %}</h4>
+                <p>{{ object.institutional_contribution }}</p>
+            {% endif %}
         </div>
 
         <div class="container">
+            {% if object.link or object.link_to_data or object.link_to_graphic %}
+                <h4 class="mb-1 mt-4">{% trans "Links externos" %}</h4>
+            {% endif %}
 
             {% if object.link_to_data %}
+                <h4 class="mb-1 mt-4">{% trans "Link to the data" %}</h4>
                 <p>
-                    <b>{% trans 'Link to the data' %}</b>: <a href="{{ object.link_to_data }}">{{ object.link_to_data }}</a>
+                    <a href="{{ object.link_to_data }}">{{ object.link_to_data }}</a>
                 </p>
             {% endif %}
             
             {% if object.link_to_graphic %}
+                <h4 class="mb-1 mt-4">{% trans 'Link to the graphic' %}</h4>
                 <p>
-                    <b>{% trans 'Link to the graphic' %}</b>: <a href="{{ object.link_to_graphic }}">{{ object.link_to_graphic }}</a>
+                    <a href="{{ object.link_to_graphic }}">{{ object.link_to_graphic }}</a>
+                </p>
+            {% endif %}
+
+            {% if object.link %}
+                <h4 class="mb-1 mt-4">{% trans 'Link para os indicadores' %}</h4>
+                <p>
+                    <a href="{{ object.link }}">{{ object.link }}</a>
                 </p>
             {% endif %}
         </div>
 
         {% if object.raw_data or object.summarized %}
             <div class="container">
+                <h4 class="mb-1 mt-4">Downloads dos dados</h4>
                 <p>
                     {% if object.record_status == 'WIP' %}
-                        <a href="#">{% trans 'download dados brutos' %}{% trans 'em processamento' %}</a>
-                    |
+                        <a href="#">{% trans 'dados brutos' %}{% trans 'em processamento' %}</a>
                     {% else %}
-                        <a href="{% url 'search:indicator_raw_data' object.slug %}">{% trans 'download dados brutos' %}</a>
-                    |
+                        <a href="{% url 'search:indicator_raw_data' object.slug %}">{% trans 'dados brutos' %}</a>
                     {% endif %}
-                        <a href="{% url 'search:indicator_summarized' object.slug %}">{% trans 'download dados computados' %}</a>
+                    |
+                    <a href="{% url 'search:indicator_summarized' object.slug %}">{% trans 'dados computados' %}</a>
                 </p>
             </div>
         {% endif %}
 
-        {% if table_header %}
-            <div class="container">{% include 'indicator/abas.html' %}</div>
-        {% endif %}
+        <div class="container">{% include 'indicator/abas.html' %}</div>
 
         <div class="container">
             <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Licença Creative Commons" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/80x15.png" /></a><br />Este obra está licenciado com uma Licença <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Atribuição 4.0 Internacional</a>.
