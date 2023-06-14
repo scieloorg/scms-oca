@@ -24,7 +24,7 @@ class InstitutionAdmin(ModelAdmin):
         False  # or True to exclude pages of this type from Wagtail's explorer view
     )
     list_display = ("name", "acronym", "location", "source", "updated")
-    search_fields = ("name", "institution_type")
+    search_fields = ("name", "institution_type", "acronym")
     list_export = (
         "name",
         "institution_type",
