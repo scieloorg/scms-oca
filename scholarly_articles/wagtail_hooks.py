@@ -15,7 +15,7 @@ from .models import (
     SupplementaryData,
     ErrorLog,
     License,
-    Programs,
+    Program,
 )
 
 
@@ -36,21 +36,18 @@ class ScholarlyArticlesAdmin(ModelAdmin):
 
     list_display = (
         "doi",
+        "id_int_production",
         "title",
         "volume",
         "number",
         "year",
-        "open_access_status",
-        "use_license",
-        "license",
-        "apc",
         "all_contributors",
         "journal",
         "source",
     )
 
-    list_filter = ("source", "year")
-    search_fields = ("doi",)
+    list_filter = ("source", "year", ) 
+    search_fields = ("doi", "id_int_production", )
 
 
 class RawUnpaywallAdmin(ModelAdmin):
@@ -109,12 +106,16 @@ class ContributorsAdmin(ModelAdmin):
         False  # or True to exclude pages of this type from Wagtail's explorer view
     )
 
+    def all_programs(self, obj):
+        return "\n".join([p.name for p in obj.programs.all()])
+
     list_display = (
         "family",
         "given",
         "orcid",
         "authenticated_orcid",
         "affiliation",
+        "all_programs",
     )
 
     # list_filter = ('orcid',)
@@ -196,7 +197,7 @@ class LicenseAdmin(ModelAdmin):
     search_fields = ("name", "url")
 
 class ProgramsAdmin(ModelAdmin):
-    model = Programs
+    model = Program
     menu_label = _("Programs")
     menu_icon = "folder-open-inverse"
     add_to_settings_menu = False  # or True to add your model to the Settings sub-menu
@@ -205,10 +206,10 @@ class ProgramsAdmin(ModelAdmin):
     )
     list_display = (
         "name",
-        "institution",
+        "affiliation",
     )
     list_filter = ("name",)
-    search_fields = ("name", "institution")
+    search_fields = ("name", "affiliation")
 
 
 class ScholarlyArticlesAdminGroup(ModelAdminGroup):

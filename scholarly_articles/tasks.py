@@ -224,7 +224,7 @@ def load_crossref(from_update_date=2012, until_update_date=2012):
 
 
 @celery_app.task(name=_("Load sucupira data"))
-def load_sucupira(file_path, user_id):
+def load_sucupira(file_path, user_id, output_json=False):
     """
     Load the data from sucupira file.
 
@@ -233,8 +233,8 @@ def load_sucupira(file_path, user_id):
     Param file_path: String with the path of the .csv file.
     Param user: The user id passed by kwargs on tasks.kwargs
 
-    Fields used on this load: 
-    
+    Fields used on this load:
+
         doi = DS_DOI
         id_int_production
         title = NM_PRODUCAO
@@ -251,9 +251,9 @@ def load_sucupira(file_path, user_id):
 
     """
 
-    def get_institution(institution_acron):
+    def get_institution(user, name, acron):
         """
-        Get the institution from models.Institution.
+        Get the institution from models.Institution, search the institution by name and acronym.
 
         Example of the acronym of institution:
 
@@ -265,15 +265,36 @@ def load_sucupira(file_path, user_id):
             CEFET/MG
         """
 
-        # makes a treatment to obtain the institution
-        institution_acron = institution_acron.split("/")[0]
-        institution_acron = institution_acron.split(" / ")[0]
-        institution_acron = institution_acron.split("-")[0]
-        institution_acron = institution_acron.split(" - ")[0]
-        institution_acron = institution_acron.strip()
+        inst = {
+            "name": name,
+            "acronym": acron,
+        }
 
-        if models.Institution.objects.filter(acronym=institution_acron).exists():
-            return models.Institution.objects.filter(acronym=institution_acron)[0]
+        ins_filter = {
+            "name__iexact": name.strip(),
+            "acronym__iexact": acron.strip(),
+        }
+
+        try:
+            return models.Institution.objects.get(**ins_filter)
+        except models.Institution.DoesNotExist:
+            inst.update({"creator": user})
+            return models.Institution.objects.create(**inst)
+
+    def get_affiliation(user, name, acron):
+        """
+        Get the affiliation from models.Affiliation.
+        """
+
+        aff = {
+            "name": name,
+            "official": get_institution(user, name, acron),
+        }
+
+        try:
+            return models.Affiliations.objects.get(**aff)
+        except models.Affiliations.DoesNotExist:
+            return models.Affiliations.objects.create(**aff)
 
     def get_journal(journal_issn, journal_name):
         """
@@ -293,75 +314,87 @@ def load_sucupira(file_path, user_id):
 
         return journal
 
-    def get_license(url, name=None):
-        """
-        This method try to get the license on database if exists and create otherwise.
-        """
-        license, created = models.License.objects.get_or_create(
-            **{"name": name, "url": url}
-        )
-        return license
+    def get_issn_from_str(issn_str, pattern="[\S]{4}\-[\S]{4}"):
+        return re.search(pattern, issn_str).group()
+
+    def get_contributors(authors, program=None):
+        contributors = []
+
+        for au in authors:
+            filter_dict = {
+                "family": au["NM_ABNT_AUTOR"].split(",")[0].strip()
+                if "," in au["NM_ABNT_AUTOR"]
+                else au["NM_ABNT_AUTOR"],
+                "given": au["NM_ABNT_AUTOR"].split(",")[1].strip()
+                if "," in au["NM_ABNT_AUTOR"]
+                else au["NM_ABNT_AUTOR"],
+            }
+
+            try:
+                contributor, _ = models.Contributors.objects.get_or_create(
+                    **filter_dict
+                )
+            except models.Contributors.MultipleObjectsReturned:
+                contributor = models.Contributors.objects.filter(**filter_dict)[0]
+            else:
+                if program:
+                    contributor.programs.add(program)
+                contributors.append(contributor)
+
+        return contributors
 
     user = User.objects.get(id=user_id)
 
     df = pd.read_csv(file_path)
 
     for index, row in df.iterrows():
+        doi = "" if str(row["DS_DOI"]) == "nan" else row["DS_DOI"]
+        id_int_production = str(row["ID_ADD_PRODUCAO_INTELECTUAL"])
+
         try:
+            split_ds_issn = row["DS_ISSN"].split(" ")
+
+            issn = get_issn_from_str(split_ds_issn[0])
+
+            journal_name = " ".join(split_ds_issn[1:])
+
+            affiliation = get_affiliation(
+                user, row["NM_ENTIDADE_ENSINO"], row["SG_ENTIDADE_ENSINO"]
+            )
+            program, _ = models.Program.objects.get_or_create(
+                **{"name": row["NM_PROGRAMA_IES"], "affiliation": affiliation}
+            )
+            contributors = get_contributors(json.loads(row["DICT_AUTORES"]), program)
+
             article_dict = {
-                "doi": "" if str(row["DS_DOI"]) == "nan" else row["DS_DOI"],
-                "id_int_production": str(row["ID_ADD_PRODUCAO_INTELECTUAL"]),
+                "doi": doi,
+                "id_int_production": id_int_production,
                 "title": row["NM_PRODUCAO"][0:255],
                 "number": row["NR_SERIE"],
                 "volume": row["NR_VOLUME"],
                 "year": row["AN_BASE_PRODUCAO"],
                 "source": "SUCUPIRA",
-                "year": row["AN_BASE_PRODUCAO"],
-                "license": get_license("https://opendefinition.org/licenses/cc-by/"),
-                "use_license": "CC-BY",
+                "journal": get_journal(issn, journal_name),
+                "contributors": contributors,
             }
-            
-            split_ds_issn = row["DS_ISSN"].split(" ")
-
-            issn = re.search("[\S]{4}\-[\S]{4}", split_ds_issn[0]).group()
-
-            journal_name = " ".join(split_ds_issn[1:])
-        
-            article, created = models.ScholarlyArticles.objects.get_or_create(
-                **article_dict
-            )
-
-            authors_json = json.loads(row["DICT_AUTORES"])
-
-            for au in authors_json:
-
-                filter_dict = {
-                    "family": au["NM_ABNT_AUTOR"].split(",")[0].strip()
-                    if "," in au["NM_ABNT_AUTOR"]
-                    else au["NM_ABNT_AUTOR"],
-                    "given": au["NM_ABNT_AUTOR"].split(",")[1].strip()
-                    if "," in au["NM_ABNT_AUTOR"]
-                    else au["NM_ABNT_AUTOR"],
-                }
-
-                try:
-                    contributor, created = models.Contributors.objects.get_or_create(**filter_dict)
-                except models.Contributors.MultipleObjectsReturned:
-                    contributor = models.Contributors.objects.filter(**filter_dict)[0]
-
-                institution = get_institution(row["SG_ENTIDADE_ENSINO"])
-                program, created = models.Programs.objects.get_or_create(
-                    **{"name": row["NM_PROGRAMA_IES"], "institution": institution}
+            if doi:
+                article, created = models.ScholarlyArticles.get_or_create(
+                    **article_dict
+                )
+            else:
+                article, created = models.ScholarlyArticles.get_or_create(
+                    pk="id_int_production", **article_dict
                 )
 
-                contributor.programs.add(program)
-                article.contributors.add(contributor)
-                article.journal = get_journal(issn, journal_name)
-                article.save()
+            if output_json:
+                print(json.dumps(article.data))
+            else:
+                logger.info(
+                    "####%s####, %s, %s"
+                    % (index.numerator, article.doi or article.id_int_production, created)
+                )
 
-            logger.info("####%s####, %s" % (index.numerator, article.data))
-
-        except django.db.utils.DataError as e:
+        except Exception as e:
             try:
                 logger.error("Erro: %s" % (e))
                 error = models.ErrorLog()

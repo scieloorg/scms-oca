@@ -12,7 +12,9 @@ from core.models import CommonControlField
 
 class ScholarlyArticles(models.Model):
     doi = models.CharField(_("DOI"), max_length=100, null=True, blank=True)
-    id_int_production = models.CharField(_("Id Intellectual Production"), max_length=100, null=True, blank=True)
+    id_int_production = models.CharField(
+        _("Id Intellectual Production"), max_length=100, null=True, blank=True
+    )
     title = models.CharField(_("Title"), max_length=510, null=True, blank=True)
     volume = models.CharField(_("Volume"), max_length=20, null=True, blank=True)
     number = models.CharField(_("Number"), max_length=20, null=True, blank=True)
@@ -28,7 +30,7 @@ class ScholarlyArticles(models.Model):
         _("Use License"), max_length=50, choices=choices.LICENSE, null=True, blank=True
     )
     license = models.ForeignKey(
-        _("License"),
+        "License",
         verbose_name=_("License"),
         on_delete=models.SET_NULL,
         null=True,
@@ -136,13 +138,13 @@ class ScholarlyArticles(models.Model):
         d = {
             "article__doi": self.doi,
             "article__id_int_production": self.id_int_production,
-            "article__id_int_production": self.id_int_production,
             "article__title": self.title,
             "article__volume": self.volume,
             "article__number": self.number,
             "article__year": self.year,
             "article__open_access_status": self.open_access_status,
             "article__use_license": self.use_license,
+            "article__license": self.license.name if self.license else "",
             "article__apc": self.apc,
             "article__contributors": [
                 contributor.data for contributor in self.contributors.iterator()
@@ -155,6 +157,64 @@ class ScholarlyArticles(models.Model):
 
         return d
 
+    @classmethod
+    def get_or_create(cls, pk="doi", **kwargs):
+        """
+        This function will try to get the article by doi.
+
+        If the article exists update, otherwise create.
+
+        The kwargs must be a dict, something like this:
+
+            {
+                "doi": "10.1016/J.JFOODENG.2017.08.999",
+                "id_int_production": '',
+                "title": "Update the record",
+                "number": "999",
+                "volume": "9",
+                "year": 2002,
+                "source": "SUCUPIRA",
+                "journal": instance of <journal>
+                "contributors": list of <contributors> [<contributor>, <contributor>, <contributor>]
+                "license": instance of license
+            }
+
+        return article(object), 0|1
+
+        0 = updated
+        1 = created
+
+        """
+        if not kwargs.get("doi") and not kwargs.get("id_int_production"):
+            raise ValueError("Param doi or id_int_production is required")
+
+        if pk == "doi":
+            filter = {"doi": kwargs.get("doi")}
+        elif pk == "id_int_production":
+            filter = {"id_int_production": kwargs.get("id_int_production")}
+
+        try:
+            article = cls.objects.get(**filter)
+            created = 0
+        except ScholarlyArticles.DoesNotExist:
+            article = cls.objects.create()
+            created = 1
+    
+        article.doi = kwargs.get("doi")
+        article.id_int_production = kwargs.get("id_int_production")
+        article.title = kwargs.get("title")
+        article.number = kwargs.get("number")
+        article.volume = kwargs.get("volume")
+        article.year = kwargs.get("year")
+        article.source = kwargs.get("source")
+        article.journal = kwargs.get("journal")
+        article.save()
+
+        for contrib in kwargs.get("contributors"):
+            article.contributors.add(contrib)
+
+        return article, created
+        
 
 class Journals(models.Model):
     journal_issn_l = models.CharField(_("ISSN-L"), max_length=50, null=True, blank=True)
@@ -173,10 +233,10 @@ class Journals(models.Model):
         return self.journal_name
 
     def __unicode__(self):
-        return self.journal_issn_l if self.journal_issn_l else ""
+        return self.journal_issn_l or self.journal_issns or self.journal_name
 
     def __str__(self):
-        return self.journal_issn_l if self.journal_issn_l else ""
+        return self.journal_issn_l or self.journal_issns or self.journal_name
 
     class Meta:
         indexes = [
@@ -226,6 +286,54 @@ class Journals(models.Model):
         }
         return d
 
+    @classmethod
+    def get_or_create(cls, pk="journal_issn_l", **kwargs):
+        """
+        This function will try to get the journal by journal_issn_l or journal__name.
+
+        If the journal exists update, otherwise create.
+
+        The kwargs must be a dict, something like this:
+
+            {
+                journal_issn_l = "",
+                journal_issns = "",
+                journal_name = "",
+                publisher = "",
+                journal_is_in_doaj = True,
+            }
+
+        return journal(object), 0|1
+
+        0 = updated
+        1 = created
+
+        """
+
+        if not kwargs.get("journal_issn_l") and not kwargs.get("journal_name"):
+            raise ValueError("Param journal_issn_l or journal_name is required")
+
+        if pk == "journal_issn_l":
+            filter = {"journal_issn_l": kwargs.get("journal_issn_l")}
+        elif pk == "journal_name":
+            filter = {"journal_name": kwargs.get("journal_name")}
+
+        try:
+            journal = cls.objects.get(**filter)
+            created = 0
+        except Journals.DoesNotExist:
+            journal = cls.objects.create()
+            created = 1
+
+        journal.journal_issn_l = kwargs.get("journal_issn_l")
+        journal.journal_issns = kwargs.get("journal_issns")
+        journal.journal_name = kwargs.get("journal_name")
+        journal.publisher = kwargs.get("publisher")
+        journal.journal_is_in_doaj = kwargs.get("journal_is_in_doaj")
+        journal.save()
+
+        return journal, created
+
 
 class Contributors(models.Model):
     family = models.CharField(_("Family Name"), max_length=255, null=True, blank=True)
@@ -238,7 +346,7 @@ class Contributors(models.Model):
         "Affiliations", on_delete=models.SET_NULL, max_length=510, null=True, blank=True
     )
 
-    programs = models.ManyToManyField("Programs", verbose_name=_("Programs"), blank=True)
+    programs = models.ManyToManyField("Program", verbose_name=_("Program"), blank=True)
 
     autocomplete_search_field = "given"
 
@@ -301,6 +409,11 @@ class Contributors(models.Model):
         if self.affiliation:
             d.update(self.affiliation.data)
 
+        if self.programs:
+            d.update(
+                {"programs": [program.data for program in self.programs.iterator()]}
+            )
+
         return d
 
 
@@ -334,7 +447,7 @@ class Affiliations(models.Model):
         return self.name if self.name else ""
 
     def autocomplete_label(self):
-        return str(self)
+        return "%s" % self.name
 
     class Meta:
         indexes = [
@@ -372,6 +485,47 @@ class Affiliations(models.Model):
             d.update(self.country.data)
 
         return d
+
+    @classmethod
+    def get_or_create(cls, **kwargs):
+        """
+        This function will try to get the affiliation by name.
+
+        If the affiliation exists update, otherwise create.
+
+        The kwargs must be a dict, something like this:
+
+            {
+                "name" = "",
+                "official": instance of <institution>
+                "country": instance of country
+            }
+
+        return affiliation(object), 0|1
+
+        0 = updated
+        1 = created
+
+        """
+
+        if not kwargs.get("name"):
+            raise ValueError("Param name is required")
+
+        filter = {"name": kwargs.get("name")}
+ 
+        try:
+            aff = cls.objects.get(**filter)
+            created = 0
+        except Affiliations.DoesNotExist:
+            aff = cls.objects.create()
+            created = 1
+
+        aff.name = kwargs.get("name")
+        aff.official = kwargs.get("institution")
+        aff.country = kwargs.get("country")
+        aff.save()
+
+        return aff, created
 
 
 class RawUnpaywall(models.Model):
@@ -573,26 +727,69 @@ class License(models.Model):
     def __str__(self):
         return self.name or self.url
 
+    @classmethod
+    def get_or_create(cls, **kwargs):
+        """
+        This function will try to get the license by name.
 
-class Programs(models.Model): 
+        If the license exists update, otherwise create.
+
+        The kwargs must be a dict, something like this:
+
+            {
+                "name" = "",
+                "delay_in_days": "", 
+                "start": "", 
+                "url": "", 
+            }
+
+        return license(object), 0|1
+
+        0 = updated
+        1 = created
+
+        """
+
+        if not kwargs.get("name"):
+            raise ValueError("Param name is required")
+
+        filter = {"name": kwargs.get("name")}
+ 
+        try:
+            lic = cls.objects.get(**filter)
+            created = 0
+        except License.DoesNotExist:
+            lic = cls.objects.create()
+            created = 1
+
+        lic.name = kwargs.get("name")
+        lic.delay_in_days = kwargs.get("delay_in_days")
+        lic.start = kwargs.get("start")
+        lic.url = kwargs.get("url")
+        lic.save()
+
+        return lic, created
+
+
+class Program(models.Model):
     """
-    This entity represents the program of an institution. 
-    Program is associated with the Institution
+    This entity represents the program of an institution.
+    Program is associated with the Affiliation that is a proxy to Institution
 
-    Example of programs: 
+    Example of programs:
 
         TECNOLOGIA EM QUÍMICA E BIOQUÍMICA
         LINGUÍSTICA
         INOVAÇÃO E TECNOLOGIA INTEGRADAS À MEDICINA VETERINÁRIA
         ODONTOLOGIA
         BIODIVERSIDADE TROPICAL
+
     """
-    name = models.CharField(
-        _("Program Name"), max_length=510, null=True, blank=True
-    )
-    institution = models.ForeignKey(
-        Institution,
-        verbose_name=_("Institution"),
+
+    name = models.CharField(_("Program Name"), max_length=510, null=True, blank=True)
+    affiliation = models.ForeignKey(
+        Affiliations,
+        verbose_name=_("Affiliation"),
         on_delete=models.SET_NULL,
         max_length=1020,
         null=True,
@@ -601,9 +798,65 @@ class Programs(models.Model):
 
     def autocomplete_label(self):
         return "%s" % self.name
-    
+
     def __unicode__(self):
-        return "%s - %s" % (self.name, self.institution or '')
+        return "%s - %s" % (self.name, self.affiliation or "")
 
     def __str__(self):
         return self.__unicode__()
+
+    panels = [
+        FieldPanel("name"),
+        AutocompletePanel("affiliation"),
+    ]
+
+    @property
+    def data(self):
+        d = {
+            "program__name": self.name,
+        }
+
+        if self.affiliation:
+            d.update(self.affiliation.data)
+
+        return d
+
+
+    @classmethod
+    def get_or_create(cls, **kwargs):
+        """
+        This function will try to get the program by name.
+
+        If the program exists update, otherwise create.
+
+        The kwargs must be a dict, something like this:
+
+            {
+                "name" = "",
+                "affiliation": instance of affiliation
+            }
+
+        return program(object), 0|1
+
+        0 = updated
+        1 = created
+
+        """
+
+        if not kwargs.get("name"):
+            raise ValueError("Param name is required")
+
+        filter = {"name": kwargs.get("name")}
+ 
+        try:
+            prg = cls.objects.get(**filter)
+            created = 0
+        except Program.DoesNotExist:
+            prg = cls.objects.create()
+            created = 1
+
+        prg.name = kwargs.get("name")
+        prg.affiliation = kwargs.get("affiliation")
+        prg.save()
+
+        return prg, created
