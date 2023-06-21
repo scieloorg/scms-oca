@@ -217,8 +217,8 @@ class EventDirectory(CommonControlField):
             "event__record_status": self.record_status,
             "event__source": self.source,
             "event__institutional_contribution": self.institutional_contribution,
-            "event__action": self.action,
-            "event__practice": self.practice,
+            "event__action": self.action.name,
+            "event__practice": self.practice.name,
         }
         if self.locations:
             loc = []
@@ -257,7 +257,7 @@ class EventDirectory(CommonControlField):
         thematic_area__level0=None,
         thematic_area__level1=None,
         location__state__code=None,
-        location__region=None,
+        location__state__region=None,
     ):
         params = dict(
             action__name=action__name,
@@ -266,11 +266,11 @@ class EventDirectory(CommonControlField):
             classification=classification,
             organization__name=institution__name,
             organization__location__state__acronym=location__state__code,
-            organization__location__region=location__region,
+            organization__location__state__region=location__state__region,
             thematic_areas__level0=thematic_area__level0,
             thematic_areas__level1=thematic_area__level1,
             locations__state__acronym=location__state__code,
-            locations__region=location__region,
+            locations__state__region=location__state__region,
         )
         params = {k: v for k, v in params.items() if v}
         return cls.objects.filter(record_status="PUBLISHED", **params)

@@ -182,8 +182,8 @@ class InfrastructureDirectory(CommonControlField):
             "infrastructure__keywords": [keyword for keyword in self.keywords.names()],
             "infrastructure__record_status": self.record_status,
             "infrastructure__source": self.source,
-            "infrastructure__action": self.action,
-            "infrastructure__practice": self.practice,
+            "infrastructure__action": self.action.name,
+            "infrastructure__practice": self.practice.name,
             "infrastructure__institutional_contribution": self.institutional_contribution,
             "infrastructure__notes": self.notes,
         }
@@ -219,7 +219,7 @@ class InfrastructureDirectory(CommonControlField):
         thematic_area__level0=None,
         thematic_area__level1=None,
         location__state__code=None,
-        location__region=None,
+        location__state__region=None,
     ):
         params = dict(
             action__name=action__name,
@@ -228,7 +228,7 @@ class InfrastructureDirectory(CommonControlField):
             classification=classification,
             institutions__name=institution__name,
             institutions__location__state__acronym=location__state__code,
-            institutions__location__region=location__region,
+            institutions__location__state__region=location__state__region,
             thematic_areas__level0=thematic_area__level0,
             thematic_areas__level1=thematic_area__level1,
         )

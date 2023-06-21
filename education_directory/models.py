@@ -223,8 +223,8 @@ class EducationDirectory(CommonControlField):
             "education__source": self.source,
             "education__institutional_contribution": self.institutional_contribution,
             "education__notes": self.notes,
-            "education__action": self.action,
-            "education__practice": self.practice,
+            "education__action": self.action.name,
+            "education__practice": self.practice.name,
         }
         if self.locations:
             loc = []
@@ -263,7 +263,7 @@ class EducationDirectory(CommonControlField):
         thematic_area__level0=None,
         thematic_area__level1=None,
         location__state__code=None,
-        location__region=None,
+        location__state__region=None,
     ):
         params = dict(
             action__name=action__name,
@@ -272,11 +272,11 @@ class EducationDirectory(CommonControlField):
             classification=classification,
             institutions__name=institution__name,
             institutions__location__state__acronym=location__state__code,
-            institutions__location__region=location__region,
+            institutions__location__state__region=location__state__region,
             thematic_areas__level0=thematic_area__level0,
             thematic_areas__level1=thematic_area__level1,
             locations__state__acronym=location__state__code,
-            locations__region=location__region,
+            locations__state__region=location__state__region,
         )
         params = {k: v for k, v in params.items() if v}
         return cls.objects.filter(record_status="PUBLISHED", **params)

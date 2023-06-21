@@ -185,8 +185,8 @@ class PolicyDirectory(CommonControlField):
             "policy__keywords": [keyword for keyword in self.keywords.names()],
             "policy__record_status": self.record_status,
             "policy__source": self.source,
-            "policy__action": self.action,
-            "policy__practice": self.practice,
+            "policy__action": self.action.name,
+            "policy__practice": self.practice.name,
             "policy__institutional_contribution": self.institutional_contribution,
             "policy__notes": self.notes,
         }
@@ -221,7 +221,7 @@ class PolicyDirectory(CommonControlField):
         thematic_area__level0=None,
         thematic_area__level1=None,
         location__state__code=None,
-        location__region=None,
+        location__state__region=None,
     ):
         params = dict(
             action__name=action__name,
@@ -230,7 +230,7 @@ class PolicyDirectory(CommonControlField):
             classification=classification,
             institutions__name=institution__name,
             institutions__location__state__acronym=location__state__code,
-            institutions__location__region=location__region,
+            institutions__location__state__region=location__state__region,
             thematic_areas__level0=thematic_area__level0,
             thematic_areas__level1=thematic_area__level1,
         )
