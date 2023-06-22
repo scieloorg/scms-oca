@@ -1,13 +1,13 @@
 {% load static %}
 {% block content %}
 <!-- https://echarts.apache.org/examples/en/editor.html?c=bar-y-category-stack -->
-<div id="std_graph" style="width: 1000px;height: {{ graphic_height }}px"></div>
+<div id="decal_graph" style="width: 1000px;height: {{ graphic_height }}px"></div>
 
 <script src="{% static 'js/echarts/echarts.min.js' %}"></script>
 <script src="{% static 'js/echarts/theme/roma-macarons-macarons2-infographic.js' %}"></script>
 <script type="text/javascript">
-var dom = document.getElementById('std_graph');
-var myChart_std = echarts.init(dom, 'roma-macarons-macarons2-infographic', {
+var dom = document.getElementById('decal_graph');
+var myChart_decal = echarts.init(dom, 'roma-macarons-macarons2-infographic', {
   renderer: 'svg',
   useDirtyRect: false,
 });
@@ -20,7 +20,10 @@ var option;
 option = {
 
   aria: {
-    enabled: true
+    enabled: true,
+    decal: {
+        show: true
+    }
   },
   tooltip: {
     trigger: 'axis',
@@ -30,13 +33,14 @@ option = {
     }
   },
   legend: {
+
   },
   grid: {
-    containLabel: true,
     top: '4%',
     left: '3%',
     right: '4%',
-    bottom: '3%'
+    bottom: '3%',
+    containLabel: true
   },
   xAxis: {
     type: 'value',
@@ -54,9 +58,9 @@ option = {
 };
 
 if (option && typeof option === 'object') {
-  myChart_std.setOption(option);
+  myChart_decal.setOption(option);
 }
 
-window.addEventListener('resize', myChart_std.resize);
+window.addEventListener('resize', myChart_decal.resize);
 </script>
 {% endblock %}
