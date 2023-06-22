@@ -142,6 +142,15 @@ class Indicator(CommonControlField):
     @property
     def header(self):
         link = self.permanent_link
+        practice = None
+        action = None
+        classification = None
+        if self.action_and_practice:
+            if self.action_and_practice.action:
+                action = self.action_and_practice.action.name
+            if self.action_and_practice.practice:
+                practice = self.action_and_practice.practice.name
+            classification = self.action_and_practice.classification
         d = dict(
             title=self.title,
             description=self.description,
@@ -151,10 +160,9 @@ class Indicator(CommonControlField):
             source="OCABr",
             updated=self.updated.isoformat(),
             contributors=["SciELO"],
-            action=self.action_and_practice and self.action_and_practice.action.name,
-            practice=self.action_and_practice and self.action_and_practice.action.name,
-            qualification=self.action_and_practice
-            and self.action_and_practice.classification,
+            action=action,
+            practice=practice,
+            qualification=classification,
             license="CC-BY",
         )
         indicator = {}
@@ -184,7 +192,11 @@ class Indicator(CommonControlField):
                 data = {"teste": "teste"}
             else:
                 data.update(self.header)
-                yield f"{json.dumps(data)}\n"
+                try:
+                    yield f"{json.dumps(data)}\n"
+                except Exception as e:
+                    logging.exception(e)
+                    logging.exception(data)
 
     @property
     def disclaimer(self):
@@ -235,7 +247,7 @@ class Indicator(CommonControlField):
         indexes = [
             models.Index(fields=["action_and_practice"]),
             models.Index(fields=["code"]),
-            models.Index(fields=["description"]),
+            models.Index(fields=["slug"]),
             models.Index(fields=["end_date_year"]),
             models.Index(fields=["link"]),
             models.Index(fields=["measurement"]),
@@ -244,9 +256,9 @@ class Indicator(CommonControlField):
             models.Index(fields=["record_status"]),
             models.Index(fields=["object_name"]),
             models.Index(fields=["category"]),
-            models.Index(fields=["context"]),
-            models.Index(fields=["scope"]),
-            models.Index(fields=["seq"]),
+            # models.Index(fields=["context"]),
+            # models.Index(fields=["scope"]),
+            # models.Index(fields=["seq"]),
             models.Index(fields=["source"]),
             models.Index(fields=["start_date_year"]),
             models.Index(fields=["title"]),
@@ -325,15 +337,7 @@ class Indicator(CommonControlField):
         d["EVOLUTION"] = _("Evolução do número")
 
         measurement_title = d.get(self.measurement) + " " + _("de")
-
-        # políticas | ações | journal-article
-        object_name = _(
-            self.action_and_practice
-            and self.action_and_practice.action
-            and self.action_and_practice.action.name
-            or self.object_name
-        )
-        return f"{measurement_title} {object_name}"
+        return f"{measurement_title} {self.object_name}"
 
     @classmethod
     def build_old_code(
@@ -356,8 +360,8 @@ class Indicator(CommonControlField):
             measurement,
             object_name,
             category2_id or category1_id or "",
-            str(start_date_year or ""),
-            str(end_date_year or ""),
+            start_date_year or "",
+            end_date_year or "",
         ] + (context or [])
         return _str_with_64_char(slugify("_".join(items)).upper())
 
@@ -443,15 +447,28 @@ class Indicator(CommonControlField):
         # ano ou intervalo de anos
         years = ""
         if self.start_date_year:
-            years = f" - {self.start_date_year.isoformat()[:10]}"
+            years = f" - {self.start_date_year}"
             if self.end_date_year and self.start_date_year != self.end_date_year:
-                years += f"-{self.start_date_year.isoformat()[:10]}"
+                years += f"-{self.end_date_year}"
 
         # contexto institucional, geográfico, temático
         # Universidade X | SP | Ciências Biológicas
         context = self.context and f" - {self.context}" or ""
 
         return f"{name}{by_category}{years}{context}"
+
+    @property
+    def object_code(self):
+        """
+        Retorna código do objeto para o qual o indicador está sendo gerado
+        """
+        try:
+            return (
+                self.action_and_practice.classification
+                or self.action_and_practice.action.code
+            )
+        except AttributeError:
+            return ''
 
     def set_code(self):
         """
@@ -467,7 +484,7 @@ class Indicator(CommonControlField):
         ----------------------------------------------
         Mas:
 
-        object_name - ex.: políticas | journal-article | ações | ...
+        object_code - ex.: políticas | journal-article | ações | ...
         tipo de indicador - ex.: freq | evol | perc | ...
         categoria - ex.: por área temática, por instituição, por UF,
         data início, data fim - data dos dados
@@ -476,20 +493,13 @@ class Indicator(CommonControlField):
         data de criação do indicador
         """
         # ação ou objeto (ex.: políticas, journal-article, ações, ...)
-        object_name = (
-            self.action_and_practice
-            and self.action_and_practice.action
-            and self.action_and_practice.action.code
-            or self.object_name
-        )
-
         items = (
-            object_name,
+            self.object_code,
             self.measurement[:4],
             self.category or "",
             self.context or "",
-            str(self.start_date_year and self.start_date_year.isoformat()[:10] or ""),
-            str(self.end_date_year and self.end_date_year.isoformat()[:10] or ""),
+            self.start_date_year or "",
+            self.end_date_year or "",
             self.source or "",
             self.created.isoformat()[:10],
         )
