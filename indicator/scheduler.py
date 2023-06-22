@@ -81,3 +81,11 @@ def get_or_create_crontab_schedule(day_of_week=None, hour=None, minute=None):
             )
         )
     return crontab_schedule
+
+
+def delete_tasks(task):
+    for item in PeriodicTask.objects.filter(task=task).iterator():
+        try:
+            item.delete()
+        except Exception as e:
+            logging.exception(e)
