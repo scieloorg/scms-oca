@@ -540,28 +540,27 @@ def schedule_indicators_tasks(
 
     delete_tasks(task)
 
-    filters = [None, "thematic_area", "location", "institution"]
-    groups = [
-        {},
-        {"by_thematic_area_level1": True},
-        {"by_state": True},
-        # {"by_institution": True},
-    ]
+    # TODO thematic_area ainda não está no modelo
+    filters = {
+        None: {
+            # "by_thematic_area_level1": True,
+            "by_state": True,
+            "by_institution": True
+        },
+        "location": {
+            # "by_thematic_area_level1": True,
+            "by_institution": True
+        },
+        "institution": {
+            # "by_thematic_area_level1": True,
+            "by_state": True,
+        },
+        # "thematic_area": {
+        #     "by_institution": True, "by_state": True
+        # },
+    }
 
-    for filter_by, group_by in product(filters, groups):
-        if filter_by and len(group_by) == 1:
-            if filter_by == "institution" and group_by.get(
-                "by_institution"
-            ):
-                continue
-            if filter_by == "location" and group_by.get(
-                "by_state"
-            ):
-                continue
-            if filter_by == "thematic_area" and group_by.get(
-                "by_thematic_area_level1"
-            ):
-                continue
+    for filter_by, group_by in filters.items():
 
         # mais parâmetros menos prioridade por ser mais rápido
         priority = 1 + len(group_by)

@@ -31,7 +31,7 @@ class GraphicData:
                 y_items.append(y_label)
             if x_label not in x_items:
                 x_items.append(x_label)
-                x_stacks[x_label] = item.get("attribute")
+                x_stacks[x_label] = item.get("stack")
 
             data[(x_label, y_label)] = item["count"]
 
