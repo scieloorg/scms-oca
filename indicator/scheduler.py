@@ -4,6 +4,7 @@ import json
 
 from django.utils.translation import gettext as _
 from django_celery_beat.models import PeriodicTask, CrontabSchedule
+from django.db.models import Q
 
 from indicator import exceptions
 
@@ -83,8 +84,11 @@ def get_or_create_crontab_schedule(day_of_week=None, hour=None, minute=None):
     return crontab_schedule
 
 
-def delete_tasks(task):
-    for item in PeriodicTask.objects.filter(task=task).iterator():
+def delete_tasks(task=None):
+    task = task or 'indicadores'
+    for item in PeriodicTask.objects.filter(
+            Q(task=task) | Q(name__icontains=task)
+            ).iterator():
         try:
             item.delete()
         except Exception as e:
