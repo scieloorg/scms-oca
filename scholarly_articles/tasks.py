@@ -7,8 +7,8 @@ from django.contrib.auth import get_user_model
 from config import celery_app
 from core.utils import utils
 from scholarly_articles.crossref import crossref
+from scholarly_articles.controller import affiliation
 from scholarly_articles.unpaywall import (
-    affiliation,
     load_data,
     supplementary,
     unpaywall,
@@ -78,6 +78,11 @@ def load_supplementary(user_id, file_path):
         with open(file_path, "rb") as f:
             for line, row in enumerate(f):
                 supplementary.load(line, row, user)
+
+
+@celery_app.task(bind=True)
+def delete_aff_country_and_official(self):
+    return affiliation.delete_aff_country_and_official()
 
 
 @celery_app.task(bind=True, name="Set official institution or country to affiliation")
