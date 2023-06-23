@@ -30,31 +30,29 @@
             <nav aria-label="...">
                 <ul class="pagination">
 
-                    <li class="page-item" aria-current="page">
-                        {% if object.previous_record.id %}
+                    <li class="page-item">
+                        {% if object.previous_record %}
                             <a class="page-link" href="{% url 'search:indicator_detail' object.previous_record.slug %}">
                                 < {% trans 'versões anteriores' %}
                             </a>
                         {% endif %}
                     </li>
-                    <li class="page-item active">
-                        {% if object.seq %}
+                    <li class="page-item active" aria-current="page">
                         <a class="page-link" href="#">
                             {% trans object.validity|translate_data %} |
                             {% trans 'Gerado' %}: {{ object.created|date:"Y-m-d" }}
                         </a>
-                        {% endif %}
                     </li>
                     <li class="page-item">
-                        {% if object.posterior_record.seq %}
+                        {% if object.posterior_record %}
                             <a class="page-link" href="{% url 'search:indicator_detail' object.posterior_record.slug %}">
                                 {% trans 'versões posteriores' %} >
                             </a>
                         {% endif %}
                     </li>
                     <li class="page-item">
-                        {% if object.latest != object.id %}
-                            <a class="page-link" href="{% url 'search:indicator_detail' object.latest %}">
+                        {% if object.latest and object.latest.id != object.id %}
+                            <a class="page-link" href="{% url 'search:indicator_detail' object.latest.slug %}">
                                 {% trans 'ir para a versão mais recente' %}
                             </a>
                         {% endif %}
@@ -66,9 +64,23 @@
 
         <div class="container">
             <p>
-                <span class="badge badge-primary">{{ object.action_and_practice.action|translate_data }}</span>
-                <span class="badge badge-secondary">{{ object.action_and_practice.classification|translate_data }}</span>
-                <span class="badge badge-success">{{ object.action_and_practice.practice|translate_data }}</span>
+                {% if object.action_and_practice %}
+                    {% if object.action_and_practice.action %}
+                        <span class="badge badge-primary">
+                            {{ object.action_and_practice.action.name|translate_data }}
+                        </span>
+                    {% endif %}
+                    {% if object.action_and_practice.classification %}
+                        <span class="badge badge-secondary">
+                            {{ object.action_and_practice.classification|translate_data }}
+                        </span>
+                    {% endif %}
+                    {% if object.action_and_practice.practice %}
+                        <span class="badge badge-success">
+                            {{ object.action_and_practice.practice.name|translate_data }}
+                        </span>
+                    {% endif %}
+                {% endif %}
                 <span class="badge badge-danger">{{ object.scope|translate_data }}</span>
                 <span class="badge badge-warning">{{ object.measurement|translate_data }}</span>
             </p>
