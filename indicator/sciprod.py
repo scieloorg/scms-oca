@@ -352,9 +352,8 @@ class SciProd:
         action = Action.objects.get(name="evolução da produção científica")
         practice = Practice.objects.get(name="literatura em acesso aberto")
 
-        raw_data_items = self.get_raw_data()
         summarized = self.get_summarized()
-        if len(summarized) < 2:
+        if len(summarized["items"]) < 2:
             logging.warning("Insuficient data")
             return
 
@@ -382,6 +381,7 @@ class SciProd:
         indicator.description = _(
             f"Gerado automaticamente usando dados provenientes de {contribution}"
         )
+        raw_data_items = self.get_raw_data()
         indicator.add_raw_data(raw_data_items)
         return indicator
 

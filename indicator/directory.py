@@ -454,9 +454,8 @@ class DataDirectory:
         object_name = self.action_label
         action = self.action__name and Action.objects.get(name=self.action__name)
 
-        raw_data_items = self.get_raw_data()
         summarized = self.get_summarized()
-        if len(summarized) < 2:
+        if len(summarized["items"]) < 2:
             logging.warning("Insuficient data")
             return
 
@@ -484,6 +483,8 @@ class DataDirectory:
         indicator.description = _(
             f"Gerado automaticamente usando dados coletados e registrados manualmente por {contribution}"
         )
+
+        raw_data_items = self.get_raw_data()
         indicator.add_raw_data(raw_data_items)
         return indicator
 
