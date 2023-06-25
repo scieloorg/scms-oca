@@ -443,7 +443,7 @@ class DataDirectory:
             return self.action__name
         return _("ações de {}").format(self.action__name)
 
-    def generate_frequency_indicator(self, creator):
+    def generate_frequency_indicator(self, creator, min_items=None):
         """
         Gera o indicador do número de ações
         (educação, disseminação, infraestrutura, políticas)
@@ -455,7 +455,8 @@ class DataDirectory:
         action = self.action__name and Action.objects.get(name=self.action__name)
 
         summarized = self.get_summarized()
-        if len(summarized["items"]) < 2:
+        min_items = min_items or 10
+        if len(summarized.get("items") or []) < min_items:
             logging.warning("Insuficient data")
             return
 
@@ -504,6 +505,7 @@ def generate_indicator(
     by_thematic_area_level1=False,
     by_state=False,
     by_region=False,
+    min_items=None,
 ):
     """
     Fornece os parâmetros para obter os dados das ações (diretórios) e
@@ -524,10 +526,10 @@ def generate_indicator(
         by_state=by_state,
         by_region=by_region,
     )
-    return directory.generate_frequency_indicator(creator)
+    return directory.generate_frequency_indicator(creator, min_items)
 
 
-def generate_indicators(creator, action__names, filter_by, group_by_params):
+def generate_indicators(creator, action__names, filter_by, group_by_params, min_items=None):
     """
     Gera os indicadores da combinação dos parâmetros:
 
@@ -545,6 +547,7 @@ def generate_indicators(creator, action__names, filter_by, group_by_params):
         action__names, filter_params, group_by_params
     ):
         logging.info("Generating indicator for {}".format(params))
+        params["min_items"] = min_items
         generate_indicator(creator, **params)
 
 
@@ -582,6 +585,7 @@ def get_location_filter_params():
 
 
 def schedule_indicators_tasks(
+    min_items=None,
     user_id=None,
     day_of_week=None,
     hour=None,
@@ -642,6 +646,7 @@ def schedule_indicators_tasks(
             params["action_name"] = action
             params["filter_by"] = filter_by
             params["group_by"] = group_by
+            params["min_items"] = min_items
 
             task_name = get_task_title(task, action, filter_by, group_by)
             logging.info("Scheduling task {} {} {}".format(task_name, task, params))

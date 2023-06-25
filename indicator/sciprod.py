@@ -341,7 +341,7 @@ class SciProd:
         """
         return list(self.filter_params.values()) or [_("Brasil")]
 
-    def generate_article_evolution_indicator(self, creator):
+    def generate_article_evolution_indicator(self, creator, min_items=None):
         """
         Gera o indicador de evolução do número de artigos
         segundo os filtros e os agrupamentos fornecidos
@@ -353,7 +353,8 @@ class SciProd:
         practice = Practice.objects.get(name="literatura em acesso aberto")
 
         summarized = self.get_summarized()
-        if len(summarized["items"]) < 2:
+        min_items = min_items or 10
+        if len(summarized.get("items") or []) < min_items:
             logging.warning("Insuficient data")
             return
 
@@ -402,6 +403,7 @@ def generate_indicator(
     by_thematic_area_level1=False,
     by_state=False,
     by_region=False,
+    min_items=None,
 ):
 
     """
@@ -424,7 +426,7 @@ def generate_indicator(
         by_state=by_state,
         by_region=by_region,
     )
-    return sciprod.generate_article_evolution_indicator(creator)
+    return sciprod.generate_article_evolution_indicator(creator, min_items)
 
 
 def get_filter_params(filter_by):
@@ -437,7 +439,7 @@ def get_filter_params(filter_by):
     return [{}]
 
 
-def generate_indicators(creator, filter_by, group_by_params, begin_year, end_year):
+def generate_indicators(creator, filter_by, group_by_params, begin_year, end_year, min_items=None):
     """
     Gera os indicadores da combinação dos parâmetros:
 
@@ -448,6 +450,7 @@ def generate_indicators(creator, filter_by, group_by_params, begin_year, end_yea
     filter_params = get_filter_params(filter_by)
     for params in get_indicator_parameters(filter_params, group_by_params):
         logging.info("Generating indicator for {}".format(params))
+        params["min_items"] = min_items
         generate_indicator(creator, begin_year, end_year, **params)
 
 
@@ -518,6 +521,7 @@ def get_institution_filter_params():
 
 
 def schedule_indicators_tasks(
+    min_items=None,
     begin_year=None,
     end_year=None,
     user_id=None,
@@ -571,6 +575,7 @@ def schedule_indicators_tasks(
         params["end_year"] = end_year
         params["filter_by"] = filter_by
         params["group_by"] = group_by
+        params["min_items"] = min_items
         logging.info("Scheduling task {} {}".format(task, params))
         get_or_create_periodic_task(
             name=get_task_title(task, filter_by, group_by, begin_year, end_year),

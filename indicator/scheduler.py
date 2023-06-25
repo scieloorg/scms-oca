@@ -33,8 +33,7 @@ def get_or_create_periodic_task(
         periodic_task = PeriodicTask()
         periodic_task.name = name
         periodic_task.task = task
-        periodic_task.kwargs = json.dumps(kwargs)
-
+    periodic_task.kwargs = json.dumps(kwargs)
     periodic_task.priority = priority
     periodic_task.enabled = enabled
     periodic_task.one_off = only_once
