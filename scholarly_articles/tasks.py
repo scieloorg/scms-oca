@@ -3,9 +3,11 @@ import logging
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.utils.translation import gettext as _
 
 from config import celery_app
-from core.utils import utils
+from core.utils import utils as core_utils
+from scholarly_articles import models, utils
 from scholarly_articles.crossref import crossref
 from scholarly_articles.unpaywall import (
     affiliation,
@@ -91,7 +93,7 @@ def complete_affiliation_data(self):
 
 
 @celery_app.task()
-def load_crossref(from_update_date=2012, until_update_date=2012):
+def load_crossref(user_id, from_update_date=2012, until_update_date=2012):
     """
     Retrieves article data from CrossRef API for a given range of years.
 
@@ -195,7 +197,7 @@ def load_crossref(from_update_date=2012, until_update_date=2012):
     try:
         while True:
 
-            data = utils.fetch_data(url, json=True, timeout=30, verify=True)
+            data = core_utils.fetch_data(url, json=True, timeout=30, verify=True)
             articles = []
             if data["status"] == "ok":
                 for item in data["message"]["items"]:
@@ -215,3 +217,114 @@ def load_crossref(from_update_date=2012, until_update_date=2012):
 
     except Exception as e:
         logger.info(f"Unexpected error: {e}")
+
+
+@celery_app.task(name=_("Sanitize by journals"))
+def sanitize_journals(user_id, journals_ids):
+    """
+    This task receive a list of journals and check if has duplicate. 
+    Cast the more complete journal to be reassigns to the articles.
+    """
+    
+    for id in journals_ids:
+        journal = models.Journals.objects.get(pk=id)
+        journals = utils.check_duplicate_journal(journal)
+
+        if journals:
+            logger.info(
+                "Duplicate journals %s, size: %s" % (journals, len(journals))
+            )
+
+            cast_journal = None
+
+            for j in journals:
+                if (
+                    j.journal_issn_l
+                    and j.journal_issns
+                    and j.journal_name
+                    and j.publisher
+                ):
+                    if len(j.journal_issns) > 9:
+                        cast_journal = j
+                        break
+                    elif len(j.journal_issns) == 9:
+                        cast_journal = j
+                        break
+                if j.journal_issn_l and j.journal_issns and j.journal_name:
+                    if len(j.journal_issns) > 9:
+                        cast_journal = j
+                        break
+                    elif len(j.journal_issns) == 9:
+                        cast_journal = j
+                        break
+                if j.journal_issn_l and j.journal_issns:
+                    if len(j.journal_issns) > 9:
+                        cast_journal = j
+                        break
+                    elif len(j.journal_issns) == 9:
+                        cast_journal = j
+                        break
+                if j.journal_issn_l and j.journal_name:
+                    cast_journal = j
+                    continue
+                if j.journal_issns and j.journal_name:
+                    if len(j.journal_issns) > 9:
+                        cast_journal = j
+                        break
+                    elif len(j.journal_issns) == 9:
+                        cast_journal = j
+                        break
+                if j.journal_issn_l or j.journal_issns or j.journal_name:
+                    cast_journal = j
+
+            logger.info("Casted journal: %s" % cast_journal)
+
+            logger.info("Reassigned articles: %s" % utils.reassignment_articles(cast_journal, journals))
+
+
+@celery_app.task(name=_("Sanitize all Journals"))
+def sanitize_all_journals(user_id, loop_size=1000):
+    """
+    This task go to all journals and check if has duplicate. 
+
+    If has the article are reassign to more complete journal.   
+
+    After this task problably will be orphans journals.
+
+    This function get the size of journal divide per loop_size and raise 
+    a list of task based on this division.
+
+    So if we have 1000 journal it will be raise a 1 task to sanitize this journals 
+    So if we have 2000 journal it will be raise a 2 task to sanitize this journals 
+
+    This way we raise ``Journals.count`` divided by loop_size task to do the work.
+    """
+    count = 0
+    journals = models.Journals.objects.all()
+    total = journals.count()
+    offset = loop_size
+
+    for i in range(int(journals.count() / loop_size) + 1):
+        _journals = journals[count:offset]
+        sanitize_journals.apply_async(
+            kwargs={"user_id": user_id, "journals_ids": [journal.id for journal in _journals]}
+        )
+        count += loop_size
+        offset += loop_size
+
+        if offset > total:
+            offset = total
+
+
+@celery_app.task(name=_("Remove journals without articles associated"))
+def remove_orphans_journals(user_id):
+    """
+    This task remove all journals with no associated articles.
+    """
+    logger.info("Checking the journals....")
+    
+    journals = utils.check_articles_journals()
+
+    removed = [journal.delete() for journal in journals]
+
+    logger.info("Reassigned articles: %s" % removed)
