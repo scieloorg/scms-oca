@@ -222,10 +222,10 @@ def load_crossref(user_id, from_update_date=2012, until_update_date=2012):
 @celery_app.task(name=_("Sanitize by journals"))
 def sanitize_journals(user_id, journals_ids):
     """
-    This task receive a list of journals and check if has duplicate. 
+    This task receive a list of journals and check if has duplicate.
     Cast the more complete journal to be reassigns to the articles.
     """
-    
+
     for id in journals_ids:
         journal = models.Journals.objects.get(pk=id)
         journals = utils.check_duplicate_journal(journal)
@@ -285,17 +285,17 @@ def sanitize_journals(user_id, journals_ids):
 @celery_app.task(name=_("Sanitize all Journals"))
 def sanitize_all_journals(user_id, loop_size=1000):
     """
-    This task go to all journals and check if has duplicate. 
+    This task go to all journals and check if has duplicate.
 
-    If has the article are reassign to more complete journal.   
+    If has the article are reassign to more complete journal.
 
     After this task problably will be orphans journals.
 
-    This function get the size of journal divide per loop_size and raise 
+    This function get the size of journal divide per loop_size and raise
     a list of task based on this division.
 
-    So if we have 1000 journal it will be raise a 1 task to sanitize this journals 
-    So if we have 2000 journal it will be raise a 2 task to sanitize this journals 
+    So if we have 1000 journal it will be raise a 1 task to sanitize this journals
+    So if we have 2000 journal it will be raise a 2 task to sanitize this journals
 
     This way we raise ``Journals.count`` divided by loop_size task to do the work.
     """
@@ -322,9 +322,62 @@ def remove_orphans_journals(user_id):
     This task remove all journals with no associated articles.
     """
     logger.info("Checking the journals....")
-    
+
     journals = utils.check_articles_journals()
 
     removed = [journal.delete() for journal in journals]
 
     logger.info("Reassigned articles: %s" % removed)
+
+
+@celery_app.task(name=_("Sanitize authors"))
+def sanitize_authors(user_id):
+    """
+    Check the duplicate authors and remove the authors where doesnt have article associated.
+
+    This function check author that are igual in attributes:
+        ``family``
+        ``given``
+        ``affiliation``
+        ``orcid``
+
+    If the author has more than one affiliation, we keep the duplicate author with diference affiliation.
+    """
+
+    for au in models.Contributors.objects.all().iterator():
+        logger.info("Checking duplicate for user: %s" % str(au))
+
+        try:
+            models.Contributors.objects.get(
+                **{
+                    "family": au.family,
+                    "given": au.given,
+                    "affiliation": au.affiliation,
+                    "orcid": au.orcid
+                }
+            )
+        except models.Contributors.MultipleObjectsReturned as e:
+            # remove article associated with the duplicate contribuitor
+            contribs = models.Contributors.objects.filter(
+                **{
+                    "family": au.family,
+                    "given": au.given,
+                    "affiliation": au.affiliation,
+                    "orcid": au.orcid
+                }
+            )
+            logger.info("Has duplicate: %s %s (%s)" % (au.family, au.given, len(contribs)))
+
+            # cast the contributor with orcid or the first contrib
+            contrib_with_orcid = [con for con in contribs if con.orcid]
+            cast_contrib = contrib_with_orcid[0] if contrib_with_orcid else contribs[0]
+
+            logger.info("Author casted %s" % (cast_contrib))
+
+            for contrib in contribs:
+                if contrib != cast_contrib:
+                    articles = contrib.scholarlyarticles_set.all()
+
+                    for article in articles:
+                        article.contributors.remove(contrib)
+                        logger.info("Article contributors: %s" % str([con for con in article.contributors.all()]))
