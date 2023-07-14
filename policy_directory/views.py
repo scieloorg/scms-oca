@@ -37,8 +37,8 @@ class PolicyDirectoryEditView(EditView):
     def form_valid(self, form):
         self.object = form.save_all(self.request.user)
 
-        # check if have moderation and if the record_status is diferent from ``PUBLISHED``
-        if self.must_moderate and self.object.record_status != "PUBLISHED":
+        # check if have moderation
+        if self.must_moderate:
             if self.get_moderation():
                 # fix the status to ``TO MODERATE``
                 self.object.record_status = "TO MODERATE"
@@ -80,12 +80,15 @@ class PolicyDirectoryCreateView(CreateView):
                 if moderation.send_mail:
                     # get user
                     user_email = self.get_moderation().moderator.email or None
-                    # get group
-                    group_mails = [
-                        user.email
-                        for user in self.get_moderation().group_moderator.user_set.all()
-                        if user.email
-                    ]
+                    group_mails = []
+                    
+                    if self.get_moderation().group_moderator:
+                        # get group
+                        group_mails = [
+                            user.email
+                            for user in self.get_moderation().group_moderator.user_set.all()
+                            if user.email
+                        ]
                     tasks.send_mail(
                         _(
                             "Novo conteúdo para moderação - %s"
