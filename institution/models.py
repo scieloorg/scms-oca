@@ -108,5 +108,89 @@ class Institution(CommonControlField, ClusterableModel):
 
             institution.save()
         return institution
+    
+    @classmethod
+    def get(cls, **kwargs):
+        """
+        This function will try to get the institution by attributes: 
+
+            * name 
+            * institution_type
+            * acronym
+            * source
+
+        The kwargs must be a dict, something like this:
+
+           {
+                "name" = "Institution",
+                "institution_type": "agência de apoio à pesquisa",
+                "location": location(object),
+                "source": "MEC|ROR|..."
+           }
+
+        return instition|None
+
+        This function can raise: 
+            ValueError
+            Institution.DoesNotExist
+            Institution.MultipleObjectsReturned
+        """
+        filters = {}
+
+        if not kwargs.get("name") and not kwargs.get("location") and not kwargs.get("source"):
+            raise ValueError("Param name and location(object) and source are required")
+
+        filters = {
+            "name__iexact": kwargs.get("name"),
+            "source__iexact": kwargs.get("source"),
+            "location": kwargs.get("location"),
+        }
+
+        return cls.objects.get(**filters)
+
+
+    @classmethod
+    def create_or_update(cls, **kwargs):
+        """
+        This function will try to get the institution by name and source and location
+
+        If the institution exists update, otherwise create.
+
+        The kwargs must be a dict, something like this:
+
+           {
+                "name" = "Institution",
+                "institution_type": "agência de apoio à pesquisa",
+                "location": location(object),
+                "source": "MEC|ROR|..."
+                "acronym": "inst"
+           }
+
+        return institution(object), 0|1
+
+        0 = updated
+        1 = created
+
+        """
+
+        try:
+            inst = cls.get(**kwargs)
+            created = 0
+        except Institution.DoesNotExist:
+            inst = cls.objects.create()
+            created = 1
+        except Institution.MultipleObjectsReturned as e:
+            print(_("The institution table have duplicity...."))
+            raise (Institution.MultipleObjectsReturned)
+
+        inst.name = kwargs.get("name")
+        inst.source = kwargs.get("given")
+        inst.location = kwargs.get("orcid")
+        inst.acronym = kwargs.get("acronym")
+        inst.institution_type = kwargs.get("institution_type")
+        inst.save()
+
+        return inst, created
+
 
     base_form_class = InstitutionForm
