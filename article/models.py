@@ -10,10 +10,10 @@ from . import choices
 
 
 class Journal(models.Model):
-    journal_issn_l = models.CharField(_("ISSN-L"), max_length=50, null=True, blank=True)
-    journal_issns = models.CharField(_("ISSN's"), max_length=50, null=True, blank=True)
+    journal_issn_l = models.CharField(_("ISSN-L"), max_length=255, null=True, blank=True)
+    journal_issns = models.CharField(_("ISSN's"), max_length=255, null=True, blank=True)
     journal_name = models.CharField(
-        _("Journal Name"), max_length=510, null=True, blank=True
+        _("Journal Name"), max_length=512, null=True, blank=True
     )
     publisher = models.CharField(_("Publisher"), max_length=255, null=True, blank=True)
     journal_is_in_doaj = models.BooleanField(
@@ -26,10 +26,10 @@ class Journal(models.Model):
         return self.journal_name
 
     def __unicode__(self):
-        return self.journal_issn_l or self.journal_issns or self.journal_name
+        return self.__str__()
 
     def __str__(self):
-        return self.journal_issn_l or self.journal_issns or self.journal_name
+        return self.journal_issn_l or self.journal_issns or self.journal_name or ""
 
     class Meta:
         indexes = [
@@ -142,7 +142,7 @@ class Journal(models.Model):
         """
 
         try:
-            cls.get(**kwargs)
+            journal = cls.get(**kwargs)
             created = 0
         except Journal.DoesNotExist:
             journal = cls.objects.create()
@@ -396,14 +396,20 @@ class Contributor(models.Model):
 
         if kwargs.get("orcid"):
             filters["orcid"] = kwargs.get("orcid")
+        else: 
+            filters["orcid"] = None
 
         if kwargs.get("affiliation"):
             filters["affiliation"] = kwargs.get("affiliation")
+        else: 
+            filters["affiliation"] = None
 
         if kwargs.get("programs"):
             filters["programs__in"] = kwargs.get("programs")
+        else: 
+            filters["programs"] = None
 
-        cls.objects.get(**filters)
+        return cls.objects.get(**filters)
 
     @classmethod
     def create_or_update(cls, **kwargs):
@@ -455,8 +461,8 @@ class Contributor(models.Model):
 
 
 class Affiliation(models.Model):
-    name = models.CharField(
-        _("Affiliation Name"), max_length=510, null=True, blank=True
+    name = models.TextField(
+        _("Affiliation Name"), null=True, blank=True
     )
     official = models.ForeignKey(
         Institution,
@@ -478,21 +484,16 @@ class Affiliation(models.Model):
     autocomplete_search_field = "name"
 
     def __unicode__(self):
-        return self.name if self.name else ""
+        return self.__str__()
 
     def __str__(self):
-        return self.name if self.name else ""
+        return self.name or ""
 
     def autocomplete_label(self):
         return "%s" % self.name
 
     class Meta:
         indexes = [
-            models.Index(
-                fields=[
-                    "name",
-                ]
-            ),
             models.Index(
                 fields=[
                     "country",
@@ -557,9 +558,8 @@ class Affiliation(models.Model):
 
         return cls.objects.get(**kwargs)
 
-
     @classmethod
-    def get_or_create(cls, **kwargs):
+    def create_or_update(cls, **kwargs):
         """
         This function will try to get the affiliation by name.
 
@@ -645,7 +645,7 @@ class License(models.Model):
     )
 
     def __unicode__(self):
-        return self.name or self.url
+        return self.__str__()
 
     def __str__(self):
         return self.name or self.url
@@ -731,10 +731,10 @@ class Source(models.Model):
         return str(self)
 
     def __unicode__(self):
-        return str("%s") % self.name
+        return self.__str__()
 
     def __str__(self):
-        return str("%s") % self.name
+        return self.name or ""
 
 
 class SourceArticle(models.Model):
@@ -861,7 +861,7 @@ class SourceArticle(models.Model):
         """
 
         try:
-            article = cls.get(**filter)
+            article = cls.get(**kwargs)
             created = 0
         except SourceArticle.DoesNotExist:
             article = cls.objects.create()
@@ -884,8 +884,8 @@ class SourceArticle(models.Model):
 
 
 class Article(models.Model):
-    doi = models.CharField(_("DOI"), max_length=100, null=True, blank=True)
     title = models.CharField(_("Title"), max_length=510, null=True, blank=True)
+    doi = models.CharField(_("DOI"), max_length=100, null=True, blank=True)
     volume = models.CharField(_("Volume"), max_length=20, null=True, blank=True)
     number = models.CharField(_("Number"), max_length=20, null=True, blank=True)
     year = models.CharField(_("Year"), max_length=20, null=True, blank=True)
@@ -931,10 +931,10 @@ class Article(models.Model):
     )
 
     def __unicode__(self):
-        return str("%s") % self.doi
+        return self.__str__()
 
     def __str__(self):
-        return str("%s") % self.doi
+        return self.doi or self.title
 
     class Meta:
         indexes = [
@@ -981,8 +981,8 @@ class Article(models.Model):
         ]
 
     panels = [
-        FieldPanel("doi"),
         FieldPanel("title"),
+        FieldPanel("doi"),
         FieldPanel("volume"),
         FieldPanel("number"),
         FieldPanel("year"),
@@ -1044,12 +1044,16 @@ class Article(models.Model):
             ValueError
             Article.DoesNotExist
             Article.MultipleObjectsReturned
-        """      
-        if not kwargs.get("doi"):
-            raise ValueError("Param doi is required")
+        """
+        
+        if not kwargs.get("doi") and not kwargs.get("title"):
+            raise ValueError("Param doi or title is required")
 
         if kwargs.get("doi"):
             filters = {"doi": kwargs.get("doi")}
+
+        if kwargs.get("title"):
+            filters = {"title": kwargs.get("title")}
 
         return cls.objects.get(**filters)
 
@@ -1082,11 +1086,11 @@ class Article(models.Model):
         """
 
         try:
-            article = cls.get(**filter)
+            article = cls.get(**kwargs)
             created = 0
         except Article.DoesNotExist:
             article = cls.objects.create()
-            createdArticle = 1
+            created = 1
         except SourceArticle.MultipleObjectsReturned as e:
             print(_("The article table have duplicity...."))
             raise (Article.MultipleObjectsReturned)
