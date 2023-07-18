@@ -110,9 +110,9 @@ class ContributorAdmin(ModelAdmin):
     list_display = (
         "family",
         "given",
+        "affiliations_string",
         "orcid",
         "authenticated_orcid",
-        "affiliation",
     )
 
     # list_filter = ('orcid',)
@@ -136,7 +136,7 @@ class AffiliationAdmin(ModelAdmin):
         "official",
         "country",
     )
-    list_filter = ("country",)
+    # list_filter = ("country",)
     search_fields = (
         "name",
     )
