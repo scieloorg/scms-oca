@@ -172,8 +172,7 @@ def load_openalex(user_id, date=2012, country="BR"):
                     article["source"] = _source
                     article["raw"] = item
 
-                    article, is_created = models.SourceArticle.create_or_update(**article
-                                                                                )
+                    article, is_created = models.SourceArticle.create_or_update(**article)
 
                     logger.info(
                         "%s: %s"
@@ -203,23 +202,71 @@ def load_openalex_article(user_id, update=True):
     Only associaded the official institutions when exists and if from MEC.
 
     Param update: If update == True all articles will be update otherwise just the article will created.
-
     """
 
     user = User.objects.get(id=user_id)
 
-    def affiliation(aff_string):
-        name = aff_string
-
-        aff_obj, _ = models.Affiliation.create_or_update(
-            **{"name": name}
-        )
-
-        return aff_obj
-
     def contributors(authors):
         """
-        TODO: Nesse momento tem autores duplicados no futuro corrigir
+        This function generate a list os contributors list.
+
+        This function get the key ``authorships`` from with this struture: 
+
+             "authorships":[
+               {
+                  "author_position":"first",
+                  "author":{
+                     "id":"https://openalex.org/A4354288008",
+                     "display_name":"Pedro C. Hallal",
+                     "orcid":null
+                  },
+                  "institutions":[
+                     {
+                        "id":"https://openalex.org/I169248161",
+                        "display_name":"Universidade Federal de Pelotas",
+                        "ror":"https://ror.org/05msy9z54",
+                        "country_code":"BR",
+                        "type":"education"
+                     }
+                  ],
+                  "is_corresponding":true,
+                  "raw_affiliation_string":"Universidade Federal de Pelotas, Pelotas, Brazil",
+                  "raw_affiliation_strings":[
+                     "Universidade Federal de Pelotas, Pelotas, Brazil"
+                  ]
+               },
+               {
+                  "author_position":"middle",
+                  "author":{
+                     "id":"https://openalex.org/A4359769260",
+                     "display_name":"Lars Bo Andersen",
+                     "orcid":null
+                  },
+                  "institutions":[
+                     {
+                        "id":"https://openalex.org/I177969490",
+                        "display_name":"University of Southern Denmark",
+                        "ror":"https://ror.org/03yrrjy16",
+                        "country_code":"DK",
+                        "type":"education"
+                     },
+                     {
+                        "id":"https://openalex.org/I76283144",
+                        "display_name":"Norwegian School of Sport Sciences",
+                        "ror":"https://ror.org/045016w83",
+                        "country_code":"NO",
+                        "type":"education"
+                     }
+                  ],
+                  "is_corresponding":false,
+                  "raw_affiliation_string":"Department of Sport Medicine, Norwegian School of Sport Sciences, Oslo, Norway; Department of Exercise Epidemiology, Centre for Research in Childhood Health, University of Southern Denmark, Odense, Denmark",
+                  "raw_affiliation_strings":[
+                     "Department of Sport Medicine, Norwegian School of Sport Sciences, Oslo, Norway",
+                     "Department of Exercise Epidemiology, Centre for Research in Childhood Health, University of Southern Denmark, Odense, Denmark"
+                  ]
+               }
+
+
         """
         contributors = []
 
@@ -242,11 +289,19 @@ def load_openalex_article(user_id, update=True):
                         "orcid": au.get("author").get("orcid"),
                     }
 
-                    # If exists institutions
+                    # Here we are adding the affiliation to the contributor
                     if au.get("raw_affiliation_strings"):
+                        affs = []
+
+                        for aff in au.get("raw_affiliation_strings"):
+
+                            aff_obj, _ = models.Affiliation.create_or_update(
+                                **{"name": aff}
+                            )
+                            affs.append(aff_obj)
+
                         author_dict.update(
-                            {"affiliation": affiliation("|".join(au.get("raw_affiliation_strings")))}
-                        )
+                            {'affiliations': affs, 'affiliations_string': au.get("raw_affiliation_string")})
 
                     contributor, _ = models.Contributor.create_or_update(
                         **author_dict
@@ -257,13 +312,13 @@ def load_openalex_article(user_id, update=True):
         return contributors
 
     # read SourceArticle
-    for article in models.SourceArticle.objects.filter(source__name="OPENALEX").iterator():
+    for article in models.SourceArticle.objects.filter(source__name="OPENALEX"):
         try:
 
             doi = article.doi
             # title
             title = core_utils.nestget(article.raw, "title")
-            
+
             if not update:
                 if doi:
                     if models.Article.objects.filter(doi=doi).exists():
