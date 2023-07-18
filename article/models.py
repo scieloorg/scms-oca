@@ -7,6 +7,7 @@ from institution.models import Institution
 from usefulmodels.models import Country
 
 from . import choices
+from .forms import ContributorForm
 
 
 class Journal(models.Model):
@@ -210,7 +211,7 @@ class Program(models.Model):
             d.update(self.affiliation.data)
 
         return d
-    
+
     @classmethod
     def get(cls, **kwargs):
         """
@@ -285,10 +286,10 @@ class Contributor(models.Model):
     authenticated_orcid = models.BooleanField(
         _("Authenticated"), default=False, null=True, blank=True
     )
-    affiliation = models.ForeignKey(
-        "Affiliation", on_delete=models.SET_NULL, max_length=510, null=True, blank=True
+    affiliations = models.ManyToManyField(
+        "Affiliation", verbose_name=_("Affiliations"), blank=True
     )
-
+    affiliations_string = models.TextField(_("Affiliation String"), blank=True, null=True,)
     programs = models.ManyToManyField(Program, verbose_name=_("Program"), blank=True)
 
     autocomplete_search_field = "given"
@@ -323,12 +324,7 @@ class Contributor(models.Model):
                 fields=[
                     "authenticated_orcid",
                 ]
-            ),
-            models.Index(
-                fields=[
-                    "affiliation",
-                ]
-            ),
+            )
         ]
 
     panels = [
@@ -336,7 +332,8 @@ class Contributor(models.Model):
         FieldPanel("given"),
         FieldPanel("orcid"),
         FieldPanel("authenticated_orcid"),
-        AutocompletePanel("affiliation"),
+        FieldPanel("affiliations_string"),
+        AutocompletePanel("affiliations"),
         AutocompletePanel("programs"),
     ]
 
@@ -387,7 +384,7 @@ class Contributor(models.Model):
         filters = {}
 
         if not kwargs.get("family") and not kwargs.get("given"):
-            raise ValueError("Param family name or given name is required")
+            raise ValueError("Param family name, given and affiliations_string is required")
 
         filters = {
             "family__iexact": kwargs.get("family"),
@@ -396,21 +393,16 @@ class Contributor(models.Model):
 
         if kwargs.get("orcid"):
             filters["orcid"] = kwargs.get("orcid")
-        else: 
+        else:
             filters["orcid"] = None
 
-        if kwargs.get("affiliation"):
-            filters["affiliation"] = kwargs.get("affiliation")
-        else: 
-            filters["affiliation"] = None
-
-        if kwargs.get("programs"):
-            filters["programs__in"] = kwargs.get("programs")
-        else: 
-            filters["programs"] = None
+        if kwargs.get("affiliations_string"):
+            filters["affiliations_string"] = kwargs.get("affiliations_string")
+        else:
+            filters["affiliations_string"] = None
 
         return cls.objects.get(**filters)
-
+    
     @classmethod
     def create_or_update(cls, **kwargs):
         """
@@ -425,7 +417,8 @@ class Contributor(models.Model):
                 given = "",
                 orcid = "",
                 authenticated_orcid = True|False,
-                affiliation: affiliation (object)
+                affiliations_string: "",
+                affiliations: [affiliation, affiliation] (object)
                 programs: [program, program] (list of object)
             }
 
@@ -449,20 +442,26 @@ class Contributor(models.Model):
         co.family = kwargs.get("family")
         co.given = kwargs.get("given")
         co.orcid = kwargs.get("orcid")
+        co.affiliations_string = kwargs.get("affiliations_string")
         co.authenticated_orcid = kwargs.get("authenticated_orcid")
-        co.affiliation = kwargs.get("affiliation")
         co.save()
 
         if kwargs.get("programs"):
             for program in kwargs.get("programs"):
                 co.programs.add(program)
 
+        if kwargs.get("affiliations"):
+            for aff in kwargs.get("affiliations"):
+                co.affiliations.add(aff)
+
         return co, created
+
+    base_form_class = ContributorForm
 
 
 class Affiliation(models.Model):
-    name = models.TextField(
-        _("Affiliation Name"), null=True, blank=True
+    name = models.CharField(
+        _("Affiliation Name"), max_length=2048, null=True, blank=True
     )
     official = models.ForeignKey(
         Institution,
@@ -472,6 +471,7 @@ class Affiliation(models.Model):
         null=True,
         blank=True,
     )
+    # novo campo para non_official (not MEC), aponta para institution
     country = models.ForeignKey(
         Country,
         verbose_name=_("Country"),
@@ -494,6 +494,11 @@ class Affiliation(models.Model):
 
     class Meta:
         indexes = [
+            models.Index(
+                fields=[
+                    "name",
+                ]
+            ),
             models.Index(
                 fields=[
                     "country",
@@ -531,7 +536,7 @@ class Affiliation(models.Model):
 
             * name
             * official institution
-            
+
 
         The kwargs must be a dict, something like this:
 
@@ -656,7 +661,7 @@ class License(models.Model):
         This function will try to get the license by attributes: 
 
             * name
-        
+
         The kwargs must be a dict, something like this:
 
            {
@@ -671,7 +676,7 @@ class License(models.Model):
             License.DoesNotExist
             License.MultipleObjectsReturned
 
-        """ 
+        """
 
         if not kwargs.get("name"):
             raise ValueError("Param name is required")
@@ -800,7 +805,7 @@ class SourceArticle(models.Model):
 
             * doi
             * specific_id
-            
+
         The kwargs must be a dict, something like this:
 
             {
@@ -817,7 +822,7 @@ class SourceArticle(models.Model):
             ValueError
             SourceArticle.DoesNotExist
             SourceArticle.MultipleObjectsReturned
-        """ 
+        """
 
         filters = {}
 
@@ -830,7 +835,6 @@ class SourceArticle(models.Model):
             filters = {"specific_id": kwargs.get("specific_id")}
 
         return cls.objects.get(**filters)
-
 
     @classmethod
     def create_or_update(cls, **kwargs):
@@ -1016,14 +1020,13 @@ class Article(models.Model):
 
         return d
 
-
     @classmethod
     def get(cls, **kwargs):
         """
         This function will try to get the article by attributes: 
 
             * doi
-            
+
         The kwargs must be a dict, something like this:
 
             {
@@ -1045,7 +1048,7 @@ class Article(models.Model):
             Article.DoesNotExist
             Article.MultipleObjectsReturned
         """
-        
+
         if not kwargs.get("doi") and not kwargs.get("title"):
             raise ValueError("Param doi or title is required")
 
