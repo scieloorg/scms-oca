@@ -73,3 +73,4 @@ tenacity==8.2.2  # https://pypi.org/project/tenacity/
 # DRF - Yet another Swagger generator 2
 # ------------------------------------------------------------------------------
 drf-yasg==1.21.5  # https://pypi.org/project/drf-yasg2/
+tornado>=6.3.2 # not directly required, pinned by Snyk to avoid a vulnerability
