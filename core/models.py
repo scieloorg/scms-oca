@@ -46,3 +46,19 @@ class CommonControlField(models.Model):
 
     class Meta:
         abstract = True
+
+
+
+class Source(models.Model):
+    name = models.CharField(_("Source Name"), max_length=50, null=True, blank=True)
+
+    autocomplete_search_field = "name"
+
+    def autocomplete_label(self):
+        return str(self)
+
+    def __unicode__(self):
+        return self.__str__()
+
+    def __str__(self):
+        return self.name or ""
