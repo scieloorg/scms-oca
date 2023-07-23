@@ -5,6 +5,7 @@ from django.contrib.auth import get_user_model
 from django.utils.translation import gettext as _
 
 from article import models
+from core.models import Source
 from config import celery_app
 from core.utils import utils as core_utils
 
@@ -14,7 +15,7 @@ User = get_user_model()
 
 
 @celery_app.task(name="Load OpenAlex data to SourceArticle")
-def load_openalex(user_id, date=2012, country="BR"):
+def load_openalex(user_id, date=2012, length=None, country="BR"):
     """
     Retrieves article data from OpenALex API for a specific year and populate the article.models.Article
 
@@ -154,10 +155,13 @@ def load_openalex(user_id, date=2012, country="BR"):
         + f"?filter=institutions.country_code:{country},publication_year:{date}&per-page=200&cursor=*"
     )
 
-    _source, _ = models.Source.objects.get_or_create(name="OPENALEX")
+    _source, _ = Source.objects.get_or_create(name="OPENALEX")
 
     try:
-        while True:
+        flag  = True
+        article_count = 0
+
+        while flag:
             payload = core_utils.fetch_data(url, json=True, timeout=30, verify=True)
 
             if payload.get("results"):
@@ -181,11 +185,16 @@ def load_openalex(user_id, date=2012, country="BR"):
                             article,
                         )
                     )
+                    article_count += 1 
 
                 cursor = payload["meta"]["next_cursor"]
 
                 # Url with new cursor
                 url = url.split("cursor=")[0] + "cursor=" + cursor
+
+                if length and (length <= article_count):
+                    flag = False
+
             else:
                 logger.info("No more articles found.")
                 return
@@ -384,7 +393,7 @@ def load_openalex_article(user_id, update=True):
                 "volume": volume,
                 "year": year,
                 "is_ao": core_utils.nestget(article.raw, "open_access", "is_ao"),
-                "sources": [models.Source.objects.get(name="OPENALEX")],
+                "sources": [Source.objects.get(name="OPENALEX")],
                 "journal": journal,
                 "apc": is_apc,
                 "open_access_status": oa_status,
