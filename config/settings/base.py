@@ -373,6 +373,7 @@ WAGTAIL_SITE_NAME = "OCABR"
 BASE_URL = env.str("DJANGO_BASE_URL", default="https://ocabr")
 URL_API_CROSSREF = env.str("API_CROSSREF", default="https://api.crossref.org/works")
 URL_API_OPENALEX = env.str("API_OPENALEX", default="https://api.openalex.org/works")
+URL_API_OPENALEX_INSTITUTIONS = env.str("URL_API_OPENALEX_INSTITUTIONS", default="https://api.openalex.org/institutions")
 
 LANGUAGES = [
     ("pt-BR", "Portuguese"),
