@@ -1,10 +1,13 @@
 from django.http import HttpResponseRedirect
 from django.utils.translation import gettext as _
-
+from wagtail.contrib.modeladmin.options import (
+    ModelAdmin,
+    ModelAdminGroup,
+    modeladmin_register,
+)
 from wagtail.contrib.modeladmin.views import CreateView
-from wagtail.contrib.modeladmin.options import ModelAdmin, modeladmin_register
 
-from .models import Institution
+from .models import Institution, SourceInstitution
 
 
 class InstitutionCreateView(CreateView):
@@ -38,5 +41,31 @@ class InstitutionAdmin(ModelAdmin):
     )
     export_filename = "institutions"
 
+class SourceInstitutionAdmin(ModelAdmin):
+    model = SourceInstitution
+    menu_label = _("Source Institution")
+    menu_icon = "folder-open-inverse"
+    add_to_settings_menu = False  # or True to add your model to the Settings sub-menu
+    exclude_from_explorer = (
+        False  # or True to exclude pages of this type from Wagtail's explorer view
+    )
+    list_display = (
+        "specific_id",
+        "display_name",
+        "type",
+        "country_code",
+    )
+    list_filter = ("type", "country_code")
+    search_fields = ("display_name", "specific_id")
 
-modeladmin_register(InstitutionAdmin)
+class InstitutionAdminGroup(ModelAdminGroup):
+    menu_label = _("Instutition")
+    menu_icon = "folder-open-inverse"  # change as required
+    menu_order = 100  # will put in 3rd place (000 being 1st, 100 2nd)
+    items = (
+        InstitutionAdmin,
+        SourceInstitutionAdmin,
+    )
+
+modeladmin_register(InstitutionAdminGroup)
+
