@@ -9,28 +9,11 @@ from wagtail.contrib.modeladmin.options import (
 from .models import (
     Article,
     SourceArticle,
-    Source,
     Contributor,
     Affiliation,
     Journal,
     License,
 )
-
-
-class SourceAdmin(ModelAdmin):
-    model = Source
-    menu_label = _("Sources")  # ditch this to use verbose_name_plural from model
-    menu_icon = "folder-open-inverse"  # change as required
-    add_to_settings_menu = False  # or True to add your model to the Settings sub-menu
-    exclude_from_explorer = (
-        False  # or True to exclude pages of this type from Wagtail's explorer view
-    )
-
-    list_display = ("name",)
-
-    list_filter = ("name",)
-    search_fields = ("name", )
-
 
 class SourceArticleAdmin(ModelAdmin):
     model = SourceArticle
@@ -170,7 +153,6 @@ class ArticleAdminGroup(ModelAdminGroup):
         ContributorAdmin,
         AffiliationAdmin,
         LicenseAdmin,
-        SourceAdmin,
         SourceArticleAdmin,
     )
 

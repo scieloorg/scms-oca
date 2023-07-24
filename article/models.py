@@ -9,6 +9,8 @@ from usefulmodels.models import Country
 from . import choices
 from .forms import ContributorForm
 
+from core.models import Source
+
 
 class Journal(models.Model):
     journal_issn_l = models.CharField(_("ISSN-L"), max_length=255, null=True, blank=True)
@@ -725,21 +727,6 @@ class License(models.Model):
         lic.save()
 
         return lic, created
-
-
-class Source(models.Model):
-    name = models.CharField(_("Source Name"), max_length=50, null=True, blank=True)
-
-    autocomplete_search_field = "name"
-
-    def autocomplete_label(self):
-        return str(self)
-
-    def __unicode__(self):
-        return self.__str__()
-
-    def __str__(self):
-        return self.name or ""
 
 
 class SourceArticle(models.Model):
