@@ -10,6 +10,8 @@ from location.models import Location
 from . import choices
 from .forms import InstitutionForm
 
+from core.models import Source
+
 
 class Institution(CommonControlField, ClusterableModel):
     name = models.CharField(_("Name"), max_length=255, null=True, blank=True)
@@ -194,3 +196,124 @@ class Institution(CommonControlField, ClusterableModel):
 
 
     base_form_class = InstitutionForm
+
+
+class InstitutionSource(models.Model):
+    specific_id = models.CharField(
+            _("Specific Id"), max_length=255, null=False, blank=False
+        )
+    display_name = models.CharField(_("Display Name"), max_length=50, null=True, blank=True)
+    updated = models.CharField(
+        _("Source updated date"), max_length=50, null=True, blank=False
+    )
+    created = models.CharField(
+        _("Source created date"), max_length=50, null=True, blank=False
+    )
+    source = models.ForeignKey(
+        Source,
+        verbose_name=_("Source"),
+        null=True,
+        on_delete=models.CASCADE,
+    )
+    raw = models.JSONField(_("JSON Data institution"), null=True, blank=True)
+
+    class Meta:
+        indexes = [
+            models.Index(
+                fields=[
+                    "specific_id",
+                ]
+            ),
+            models.Index(
+                fields=[
+                    "display_name",
+                ]
+            ),
+        ]
+
+    def __unicode__(self):
+        return str("%s") % (self.specific_id or self.display_name)
+
+    def __str__(self):
+        return str("%s") % (self.specific_id or self.display_name)
+ 
+
+    @classmethod
+    def get(cls, **kwargs):
+        """
+        This function will try to get the source institution by attributes: 
+
+            * specific_id
+
+        The kwargs must be a dict, something like this:
+
+            {
+                "specific_id": "10.1016/J.JFOODENG.2017.08.999",
+                "display_name": "Institution ....",
+                "source": "OpenAlex",
+            }
+
+        return InstitutionSource|None
+
+        This function can raise: 
+            ValueError
+            InstitutionSource.DoesNotExist
+            InstitutionSource.MultipleObjectsReturned
+        """
+
+        filters = {}
+
+        if not kwargs.get("specific_id") and not kwargs.get("source"):
+            raise ValueError("Param specific_id or source is required")
+
+        if kwargs.get("specific_id"):
+            filters = {"specific_id": kwargs.get("doi")}
+        elif kwargs.get("source"):
+            filters = {"source": kwargs.get("source")}
+
+        return cls.objects.get(**filters)
+
+    @classmethod
+    def create_or_update(cls, **kwargs):
+        """
+        This function will try to get the article by doi.
+
+        If the article exists update, otherwise create.
+
+        The kwargs must be a dict, something like this:
+
+            {
+                "specific_id", 
+                "display_name",
+                "updated", 
+                "created", 
+                "source", 
+                "raw", 
+            }
+
+        return InstitutionSource(object), 0|1
+
+        0 = updated
+        1 = created
+
+        """
+
+        try:
+            inst = cls.get(**kwargs)
+            created = 0
+        except InstitutionSource.DoesNotExist:
+            inst = cls.objects.create()
+            created = 1
+        except InstitutionSource.MultipleObjectsReturned as e:
+            print(_("The source institution table have duplicity...."))
+            raise (InstitutionSource.MultipleObjectsReturned)
+
+        inst.specific_id = kwargs.get("specific_id")
+        inst.display_name = kwargs.get("display_name")
+        inst.updated = kwargs.get("updated")
+        inst.created = kwargs.get("created")
+        inst.raw = kwargs.get("raw")
+        inst.source = kwargs.get("source")
+        inst.save()
+
+        return inst, created
