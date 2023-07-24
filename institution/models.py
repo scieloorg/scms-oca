@@ -198,11 +198,13 @@ class Institution(CommonControlField, ClusterableModel):
     base_form_class = InstitutionForm
 
 
-class InstitutionSource(models.Model):
+class SourceInstitution(models.Model):
     specific_id = models.CharField(
             _("Specific Id"), max_length=255, null=False, blank=False
         )
-    display_name = models.CharField(_("Display Name"), max_length=50, null=True, blank=True)
+    display_name = models.CharField(_("Display Name"), max_length=255, null=True, blank=True)
+    country_code = models.CharField(_("Country code"), max_length=50, null=True, blank=True)
+    type = models.CharField(_("type"), max_length=255, null=True, blank=True)
     updated = models.CharField(
         _("Source updated date"), max_length=50, null=True, blank=False
     )
@@ -267,7 +269,7 @@ class InstitutionSource(models.Model):
             raise ValueError("Param specific_id or source is required")
 
         if kwargs.get("specific_id"):
-            filters = {"specific_id": kwargs.get("doi")}
+            filters = {"specific_id": kwargs.get("specific_id")}
         elif kwargs.get("source"):
             filters = {"source": kwargs.get("source")}
 
@@ -285,13 +287,15 @@ class InstitutionSource(models.Model):
             {
                 "specific_id", 
                 "display_name",
+                "country_code",
+                "type",
                 "updated", 
                 "created", 
                 "source", 
                 "raw", 
             }
 
-        return InstitutionSource(object), 0|1
+        return SourceInstitution(object), 0|1
 
         0 = updated
         1 = created
@@ -301,15 +305,17 @@ class InstitutionSource(models.Model):
         try:
             inst = cls.get(**kwargs)
             created = 0
-        except InstitutionSource.DoesNotExist:
+        except SourceInstitution.DoesNotExist:
             inst = cls.objects.create()
             created = 1
-        except InstitutionSource.MultipleObjectsReturned as e:
+        except SourceInstitution.MultipleObjectsReturned as e:
             print(_("The source institution table have duplicity...."))
-            raise (InstitutionSource.MultipleObjectsReturned)
+            raise (SourceInstitution.MultipleObjectsReturned)
 
         inst.specific_id = kwargs.get("specific_id")
         inst.display_name = kwargs.get("display_name")
+        inst.country_code = kwargs.get("country_code")
+        inst.type = kwargs.get("type")
         inst.updated = kwargs.get("updated")
         inst.created = kwargs.get("created")
         inst.raw = kwargs.get("raw")
