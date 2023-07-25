@@ -734,10 +734,10 @@ class SourceArticle(models.Model):
         _("Specific Id"), max_length=255, null=False, blank=False
     )
     year = models.CharField(_("Year"), max_length=10, null=True, blank=True)
+    doi = models.CharField(_("DOI"), max_length=255, null=True, blank=False)
     is_paratext = models.BooleanField(
         _("Paratext"), default=False, null=True, blank=True
     )
-    doi = models.CharField(_("DOI"), max_length=100, null=True, blank=False)
     updated = models.CharField(
         _("Source updated date"), max_length=50, null=True, blank=False
     )
@@ -813,13 +813,13 @@ class SourceArticle(models.Model):
 
         filters = {}
 
-        if not kwargs.get("doi") and not kwargs.get("specific_id"):
+        if not kwargs.get("doi") and not kwargs.get("specific_id") and not kwargs.get("source"):
             raise ValueError("Param doi or specific_id is required")
 
         if kwargs.get("doi"):
-            filters = {"doi": kwargs.get("doi")}
+            filters = {"doi": kwargs.get("doi"), 'source': kwargs.get("source")}
         elif kwargs.get("specific_id"):
-            filters = {"specific_id": kwargs.get("specific_id")}
+            filters = {"specific_id": kwargs.get("specific_id"), 'source': kwargs.get("source")}
 
         return cls.objects.get(**filters)
 
