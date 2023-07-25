@@ -15,6 +15,6 @@ def run(user_id, length=None, country=None):
     elif user_id and length:
         load_institution.apply_async(args=(int(user_id), int(length)))
     elif user_id:
-        load_institution.apply_async(args=(int(user_id)))
+        load_institution.apply_async(args=(int(user_id), ))
     else:
         print(_("Param user_id required."))
