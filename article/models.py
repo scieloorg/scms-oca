@@ -734,10 +734,10 @@ class SourceArticle(models.Model):
         _("Specific Id"), max_length=255, null=False, blank=False
     )
     year = models.CharField(_("Year"), max_length=10, null=True, blank=True)
+    doi = models.CharField(_("DOI"), max_length=255, null=True, blank=False)
     is_paratext = models.BooleanField(
         _("Paratext"), default=False, null=True, blank=True
     )
-    doi = models.CharField(_("DOI"), max_length=255, null=True, blank=False)
     updated = models.CharField(
         _("Source updated date"), max_length=50, null=True, blank=False
     )
