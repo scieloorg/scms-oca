@@ -1,12 +1,13 @@
 import logging
 
+import pandas as pd
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext as _
 
 from article import models
-from core.models import Source
 from config import celery_app
+from core.models import Source
 from core.utils import utils as core_utils
 
 logger = logging.getLogger(__name__)
@@ -158,7 +159,7 @@ def load_openalex(user_id, date=2012, length=None, country="BR"):
     _source, _ = Source.objects.get_or_create(name="OPENALEX")
 
     try:
-        flag  = True
+        flag = True
         article_count = 0
 
         while flag:
@@ -185,7 +186,7 @@ def load_openalex(user_id, date=2012, length=None, country="BR"):
                             article,
                         )
                     )
-                    article_count += 1 
+                    article_count += 1
 
                 cursor = payload["meta"]["next_cursor"]
 
@@ -408,3 +409,104 @@ def load_openalex_article(user_id, update=True):
             logger.info("Article: %s, %s" % (article, created))
         except Exception as e:
             logger.error("Erro on save article: %s" % e)
+
+
+@celery_app.task(name="Concatenates the Sucupira intellectual production with the details of the production")
+def concat_article_sucupira_detail(production_file_csv, detail_file_csv, json=False):
+    """
+    This task concate the a file with the article production in CAPES.
+
+    The source of the production_file_csv: https://dadosabertos.capes.gov.br/dataset/2017-a-2020-autor-da-producao-intelectual-de-programas-de-pos-graduacao-stricto-sensu
+
+    The columns of the production_file_csv: 
+
+        ['CD_PROGRAMA_IES', 'NM_PROGRAMA_IES', 'SG_ENTIDADE_ENSINO',
+         'NM_ENTIDADE_ENSINO', 'AN_BASE', 'ID_ADD_PRODUCAO_INTELECTUAL',
+         'ID_PRODUCAO_INTELECTUAL', 'NM_PRODUCAO', 'ID_TIPO_PRODUCAO',
+         'NM_TIPO_PRODUCAO', 'ID_SUBTIPO_PRODUCAO', 'NM_SUBTIPO_PRODUCAO',
+         'ID_FORMULARIO_PRODUCAO', 'NM_FORMULARIO', 'ID_AREA_CONCENTRACAO',
+         'NM_AREA_CONCENTRACAO', 'ID_LINHA_PESQUISA', 'NM_LINHA_PESQUISA',
+         'ID_PROJETO', 'NM_PROJETO', 'DH_INICIO_AREA_CONC', 'DH_FIM_AREA_CONC',
+         'DH_INICIO_LINHA', 'DH_FIM_LINHA', 'IN_GLOSA',
+         'IN_PRODUCAO_COM_VINCULO_TCC', 'ID_ADD_TRABALHO_CONCLUSAO_CT'],
+
+    The dictionary of the data is in this file: https://dadosabertos.capes.gov.br/dataset/de69242b-03b0-4d38-b5b2-a9169abd84c2/resource/40b83217-dc80-4d30-8db1-4ee91dea3ecc/download/metadados_autor_producao_intelectual_2017_2020.pdf
+
+    The source of the detail_file_csv: https://dadosabertos.capes.gov.br/dataset/2017-a-2020-detalhes-da-producao-intelectual-bibliografica-de-programas-de-pos-graduacao
+
+    The columns of the detail_file_csv: 
+        ['CD_PROGRAMA_IES', 'NM_PROGRAMA_IES', 'SG_ENTIDADE_ENSINO',
+         'NM_ENTIDADE_ENSINO', 'AN_BASE_PRODUCAO', 'ID_ADD_PRODUCAO_INTELECTUAL',
+         'ID_TIPO_PRODUCAO', 'ID_SUBTIPO_PRODUCAO', 'DS_NATUREZA', 'NR_VOLUME',
+         'DS_FASCICULO', 'NR_SERIE', 'NR_PAGINA_FINAL', 'NR_PAGINA_INICIAL',
+         'DS_IDIOMA', 'DS_DIVULGACAO', 'DS_URL', 'DS_OBSERVACOES', 'NM_EDITORA',
+         'NM_CIDADE', 'DS_DOI', 'DS_ISSN', 'ID_VALOR_LISTA', 'DS_URL_DOI',
+         'IN_GLOSA']
+
+    The dictionary of the data is in this file: https://dadosabertos.capes.gov.br/dataset/8498a5f7-de52-4fb9-8c62-b827cb27bcf9/resource/c6064162-3e13-4b71-ac47-114f83771002/download/metadados_detalhes_producao_intelectual_bibliografica_2017a2020.pdf
+    """
+    df = pd.read_csv(production_file_csv, encoding='iso-8859-1', delimiter=';')
+
+    ddf = pd.read_csv(detail_file_csv, encoding='iso-8859-1', delimiter=';', low_memory=False)
+
+    # Cria lista de colunas e preserva coluna ID_ADD_PRODUCAO_INTELECTUAL
+    diff_cols = ['ID_ADD_PRODUCAO_INTELECTUAL']
+
+    # Encontre as colunas que não estão no primeiro DataFrame e extenda a lista de colunas
+    diff_cols.extend(list(ddf.columns.difference(df.columns)))
+
+    # Recrie o DDF com somente as colunas diferentes
+    ddf2 = ddf[diff_cols]
+
+    # Aplica o Merge dos 2 DFs
+    dfj = pd.merge(df, ddf2, on='ID_ADD_PRODUCAO_INTELECTUAL', how='left')
+
+    logger.info("Total of lines concatenates: %s" % str(dfj.shape))
+    logger.info("Columns: %s" % set(dfj.columns))
+
+    return dfj.to_json() if json else dfj
+
+
+@celery_app.task(name="Concatenates the author with the details of the production")
+def concat_author_sucupira(djf, author_files, json=False):
+    """
+    This task concate the author files of sucupira with the result of ``concat_article_sucupira_detail`` task.
+
+    The djf is a dataframe with the columns: 
+
+        {'DS_OBSERVACOES', 'NM_PROGRAMA_IES', 'ID_PRODUCAO_INTELECTUAL', 'NR_SERIE', 'DS_FASCICULO', 'ID_ADD_TRABALHO_CONCLUSAO_CT', 'DS_URL_DOI', 'DH_INICIO_LINHA', 'ID_ADD_PRODUCAO_INTELECTUAL', 'NM_CIDADE', 'ID_AREA_CONCENTRACAO', 'DS_DIVULGACAO', 'DS_IDIOMA', 'NM_ENTIDADE_ENSINO', 'AN_BASE', 'ID_LINHA_PESQUISA', 'ID_VALOR_LISTA', 'NM_TIPO_PRODUCAO', 'NM_AREA_CONCENTRACAO', 'ID_PROJETO', 'CD_PROGRAMA_IES', 'ID_FORMULARIO_PRODUCAO', 'DH_INICIO_AREA_CONC', 'DS_NATUREZA', 'NM_FORMULARIO', 'SG_ENTIDADE_ENSINO', 'NR_PAGINA_FINAL', 'NM_SUBTIPO_PRODUCAO', 'ID_TIPO_PRODUCAO', 'NR_VOLUME', 'NR_PAGINA_INICIAL', 'ID_SUBTIPO_PRODUCAO', 'IN_GLOSA', 'AN_BASE_PRODUCAO', 'DS_DOI', 'NM_PRODUCAO', 'NM_PROJETO', 'DH_FIM_LINHA', 'DS_ISSN', 'IN_PRODUCAO_COM_VINCULO_TCC', 'DH_FIM_AREA_CONC', 'NM_EDITORA', 'NM_LINHA_PESQUISA', 'DS_URL'}
+
+    The source of the author_files: https://dadosabertos.capes.gov.br/dataset/2017-a-2020-autor-da-producao-intelectual-de-programas-de-pos-graduacao-stricto-sensu 
+
+    The columns of the production_file_csv: 
+        ['AN_BASE', 'ID_TIPO_PRODUCAO', 'ID_SUBTIPO_PRODUCAO',
+         'QT_ANO_EGRESSO_M', 'QT_ANO_EGRESSO_F', 'QT_ANO_EGRESSO_D',
+         'QT_ANO_EGRESSO_R', 'CD_PROGRAMA_IES', 'NM_PROGRAMA_IES',
+         'SG_ENTIDADE_ENSINO', 'NM_ENTIDADE_ENSINO',
+         'ID_ADD_PRODUCAO_INTELECTUAL', 'NR_ORDEM', 'ID_PESSOA_DISCENTE',
+         'ID_PESSOA_DOCENTE', 'ID_PARTICIPANTE_PPG_IES',
+         'ID_PESSOA_PART_EXTERNO', 'ID_PESSOA_POS_DOC', 'ID_PESSOA_EGRESSO',
+         'NM_AUTOR', 'TP_AUTOR', 'NM_TP_CATEGORIA_DOCENTE', 'NM_NIVEL_DISCENTE',
+         'NM_ABNT_AUTOR', 'CD_AREA_CONHECIMENTO', 'NM_AREA_CONHECIMENTO',
+         'ID_NATUREZA_ATUACAO', 'NM_NATUREZA_ATUACAO', 'ID_PAIS', 'NM_PAIS',
+         'IN_GLOSA']
+
+    The dictionary of the data is in this file: https://dadosabertos.capes.gov.br/dataset/de69242b-03b0-4d38-b5b2-a9169abd84c2/resource/40b83217-dc80-4d30-8db1-4ee91dea3ecc/download/metadados_autor_producao_intelectual_2017_2020.pdf
+    """
+    dfas = pd.DataFrame()
+
+    for file in author_files:
+        data = pd.read_csv(file, encoding='iso-8859-1', delimiter=';')
+        dfas = pd.concat([dfas, data], axis=0)
+    
+    dfgrupa = pd.DataFrame(dfas.groupby(['ID_ADD_PRODUCAO_INTELECTUAL']) \
+                .apply(lambda x:x[['NM_AUTOR', 'NM_PROGRAMA_IES', \
+                                            'SG_ENTIDADE_ENSINO', 'NM_ABNT_AUTOR']].to_dict(orient='records'))\
+                        .rename("DICT_AUTORES")).reset_index()
+
+    djau = pd.merge(djf, dfgrupa, on='ID_ADD_PRODUCAO_INTELECTUAL', how='left')
+
+    logger.info("Total of authors lines concatenates: %s" % str(djau.shape))
+    logger.info("Columns: %s" % set(djau.columns))
+
+    return djau.to_json() if json else djau
