@@ -35,6 +35,10 @@ class Institution(CommonControlField, ClusterableModel):
         _("Institution Source"), max_length=255, null=True, blank=True
     )
 
+    sources = models.ManyToManyField(
+        "SourceInstitution", verbose_name="Source Institutions"
+    )
+
     level_1 = models.CharField(
         _("Level 1 organization"), blank=True, null=True, max_length=255
     )
@@ -110,13 +114,13 @@ class Institution(CommonControlField, ClusterableModel):
 
             institution.save()
         return institution
-    
+
     @classmethod
     def get(cls, **kwargs):
         """
-        This function will try to get the institution by attributes: 
+        This function will try to get the institution by attributes:
 
-            * name 
+            * name
             * institution_type
             * acronym
             * source
@@ -132,14 +136,18 @@ class Institution(CommonControlField, ClusterableModel):
 
         return instition|None
 
-        This function can raise: 
+        This function can raise:
             ValueError
             Institution.DoesNotExist
             Institution.MultipleObjectsReturned
         """
         filters = {}
 
-        if not kwargs.get("name") and not kwargs.get("location") and not kwargs.get("source"):
+        if (
+            not kwargs.get("name")
+            and not kwargs.get("location")
+            and not kwargs.get("source")
+        ):
             raise ValueError("Param name and location(object) and source are required")
 
         filters = {
@@ -149,7 +157,6 @@ class Institution(CommonControlField, ClusterableModel):
         }
 
         return cls.objects.get(**filters)
-
 
     @classmethod
     def create_or_update(cls, **kwargs):
@@ -194,16 +201,19 @@ class Institution(CommonControlField, ClusterableModel):
 
         return inst, created
 
-
     base_form_class = InstitutionForm
 
 
 class SourceInstitution(models.Model):
     specific_id = models.CharField(
-            _("Specific Id"), max_length=255, null=False, blank=False
-        )
-    display_name = models.CharField(_("Display Name"), max_length=255, null=True, blank=True)
-    country_code = models.CharField(_("Country code"), max_length=50, null=True, blank=True)
+        _("Specific Id"), max_length=255, null=False, blank=False
+    )
+    display_name = models.CharField(
+        _("Display Name"), max_length=255, null=True, blank=True
+    )
+    country_code = models.CharField(
+        _("Country code"), max_length=50, null=True, blank=True
+    )
     type = models.CharField(_("type"), max_length=255, null=True, blank=True)
     updated = models.CharField(
         _("Source updated date"), max_length=50, null=True, blank=False
@@ -238,12 +248,11 @@ class SourceInstitution(models.Model):
 
     def __str__(self):
         return str("%s") % (self.specific_id or self.display_name)
- 
 
     @classmethod
     def get(cls, **kwargs):
         """
-        This function will try to get the source institution by attributes: 
+        This function will try to get the source institution by attributes:
 
             * specific_id
 
@@ -257,7 +266,7 @@ class SourceInstitution(models.Model):
 
         return InstitutionSource|None
 
-        This function can raise: 
+        This function can raise:
             ValueError
             InstitutionSource.DoesNotExist
             InstitutionSource.MultipleObjectsReturned
@@ -285,14 +294,14 @@ class SourceInstitution(models.Model):
         The kwargs must be a dict, something like this:
 
             {
-                "specific_id", 
+                "specific_id",
                 "display_name",
                 "country_code",
                 "type",
-                "updated", 
-                "created", 
-                "source", 
-                "raw", 
+                "updated",
+                "created",
+                "source",
+                "raw",
             }
 
         return SourceInstitution(object), 0|1
