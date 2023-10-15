@@ -1,6 +1,8 @@
 import logging
+import re
 
 import requests
+from langcodes import standardize_tag, tag_is_valid
 from tenacity import (
     retry,
     retry_if_exception_type,
@@ -123,8 +125,8 @@ def fetch_data(url, headers=None, json=False, timeout=2, verify=True):
 
 
 def is_float(element: any) -> bool:
-    #If you expect None to be passed:
-    if element is None: 
+    # If you expect None to be passed:
+    if element is None:
         return False
     try:
         float(element)
@@ -134,8 +136,8 @@ def is_float(element: any) -> bool:
 
 
 def is_int(element: any) -> bool:
-    #If you expect None to be passed:
-    if element is None: 
+    # If you expect None to be passed:
+    if element is None:
         return False
     try:
         int(element)
@@ -145,11 +147,21 @@ def is_int(element: any) -> bool:
 
 
 def is_str(element: any) -> bool:
-    #If you expect None to be passed:
-    if element is None: 
+    # If you expect None to be passed:
+    if element is None:
         return False
     try:
         str(element)
         return True
     except ValueError:
         return False
+
+
+def language_iso(code):
+    """
+    This function standardize a language tag and check if is valid language.
+    """
+    code = re.split(r"-|_", code)[0] if code else ""
+    if tag_is_valid(code):
+        return standardize_tag(code)
+    return ""
