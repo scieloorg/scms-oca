@@ -483,14 +483,13 @@ class Affiliation(models.Model):
         blank=True,
     )
     # Faz link com o institution do contributor (OpenALex)
-    # source = models.ForeignKey(
-    #     SourceInstitution,
-    #     verbose_name=_("Official Affiliation Name"),
-    #     on_delete=models.SET_NULL,
-    #     max_length=1020,
-    #     null=True,
-    #     blank=True,
-    # )
+    source = models.ForeignKey(
+        SourceInstitution,
+        verbose_name=_("Source Institution"),
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
     # Esse campo é preenchido quando é correspondencia(casamento)
     country = models.ForeignKey(
         Country,
