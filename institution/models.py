@@ -3,14 +3,22 @@ from django.utils.translation import gettext as _
 from modelcluster.models import ClusterableModel
 from wagtail.admin.panels import FieldPanel
 from wagtailautocomplete.edit_handlers import AutocompletePanel
-
+from wagtail.models import Orderable
+from modelcluster.fields import ParentalKey
 from core.models import CommonControlField
 from location.models import Location
+
+from wagtail.admin.panels import (
+    FieldPanel,
+    InlinePanel,
+    ObjectList,
+    TabbedInterface,
+)
 
 from . import choices
 from .forms import InstitutionForm
 
-from core.models import Source
+from core.models import Source, Language
 
 
 class Institution(CommonControlField, ClusterableModel):
@@ -204,7 +212,7 @@ class Institution(CommonControlField, ClusterableModel):
     base_form_class = InstitutionForm
 
 
-class SourceInstitution(models.Model):
+class SourceInstitution(ClusterableModel):
     specific_id = models.CharField(
         _("Specific Id"), max_length=255, null=False, blank=False
     )
@@ -242,6 +250,26 @@ class SourceInstitution(models.Model):
                 ]
             ),
         ]
+
+    panels_identification = [
+        FieldPanel("specific_id"),
+        FieldPanel("display_name"),
+        FieldPanel("country_code"),
+        FieldPanel("type"),
+        FieldPanel("source"),
+        FieldPanel("raw"),
+    ]
+
+    panels_translation = [
+        InlinePanel("source_institution", label=_("Translation Name")),
+    ]
+
+    edit_handler = TabbedInterface(
+        [
+            ObjectList(panels_identification, heading=_("Identification")),
+            ObjectList(panels_translation, heading=_("Translation Name")),
+        ]
+    )
 
     def __unicode__(self):
         return str("%s") % (self.specific_id or self.display_name)
@@ -332,3 +360,110 @@ class SourceInstitution(models.Model):
         inst.save()
 
         return inst, created
+
+
+class InstitutionTranslateName(Orderable):
+    source_institution = ParentalKey(
+        SourceInstitution,
+        on_delete=models.CASCADE,
+        related_name="source_institution",
+        null=True,
+        blank=True,
+    )
+
+    name = models.CharField(_("Name"), max_length=255, null=True, blank=True)
+
+    language = models.ForeignKey(
+        Language,
+        verbose_name=_("Language"),
+        null=True,
+        on_delete=models.SET_NULL,
+    )
+
+    def __unicode__(self):
+        return "%s" % (self.name)
+
+    def __str__(self):
+        return self.__unicode__()
+
+    @classmethod
+    def get(cls, **kwargs):
+        """
+        This function will try to get the translate by attributes:
+
+            * name
+            * language
+
+        The kwargs must be a dict, something like this:
+
+            {
+                "name": "inglish",
+                "language": "en",
+            }
+
+        return InstitutionTranslateName|None
+
+        This function can raise:
+            ValueError
+            InstitutionTranslateName.DoesNotExist
+            InstitutionTranslateName.MultipleObjectsReturned
+        """
+
+        filters = {}
+
+        if (
+            not kwargs.get("name")
+            and not kwargs.get("language")
+            and not kwargs.get("source_institution")
+        ):
+            raise ValueError("Param name or language is required")
+
+        filters = {
+            "name": kwargs.get("name"),
+            "language__name": kwargs.get("language"),
+            "source_institution": kwargs.get("source_institution"),
+        }
+
+        return cls.objects.get(**filters)
+
+    @classmethod
+    def create_or_update(cls, **kwargs):
+        """
+        This function will try to get the translate by name and language.
+
+        If the translate exists get, otherwise create.
+
+        The kwargs must be a dict, something like this:
+
+            {
+                "name",
+                "language",
+                "source_institution": source_institution(object)
+            }
+
+        return InstitutionTranslateName(object)
+
+        0 = get
+        1 = created
+
+        """
+
+        try:
+            trans = cls.get(**kwargs)
+            created = 0
+        except InstitutionTranslateName.DoesNotExist:
+            trans = cls.objects.create()
+            trans.name = kwargs.get("name")
+            trans.language = Language.get_or_create(code2=kwargs.get("language"))
+            trans.source_institution = (
+                kwargs.get("source_institution")
+                if kwargs.get("source_institution")
+                else None
+            )
+            trans.save()
+            created = 1
+        except InstitutionTranslateName.MultipleObjectsReturned as e:
+            print(_("The institution translate table have duplicity...."))
+            raise (InstitutionTranslateName.MultipleObjectsReturned)
+
+        return trans, created
