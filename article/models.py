@@ -3,7 +3,7 @@ from django.utils.translation import gettext as _
 from wagtail.admin.panels import FieldPanel
 from wagtailautocomplete.edit_handlers import AutocompletePanel
 
-from institution.models import Institution
+from institution.models import Institution, SourceInstitution
 from usefulmodels.models import Country
 
 from . import choices
@@ -285,14 +285,16 @@ class Contributor(models.Model):
     family = models.CharField(_("Family Name"), max_length=255, null=True, blank=True)
     given = models.CharField(_("Given Name"), max_length=255, null=True, blank=True)
     orcid = models.CharField("ORCID", max_length=50, null=True, blank=True)
+    author_position = models.CharField("author_position", max_length=100, null=True, blank=True)
     authenticated_orcid = models.BooleanField(
         _("Authenticated"), default=False, null=True, blank=True
     )
     affiliations = models.ManyToManyField(
         "Affiliation", verbose_name=_("Affiliations"), blank=True
     )
-    affiliations_string = models.TextField(_("Affiliation String"), blank=True, null=True,)
     programs = models.ManyToManyField(Program, verbose_name=_("Program"), blank=True)
+
+    institutions = models.ManyToManyField(SourceInstitution, verbose_name=_("Institutions"))
 
     autocomplete_search_field = "given"
 
@@ -418,10 +420,11 @@ class Contributor(models.Model):
                 family = "",
                 given = "",
                 orcid = "",
+                author_position = "",
                 authenticated_orcid = True|False,
-                affiliations_string: "",
                 affiliations: [affiliation, affiliation] (object)
                 programs: [program, program] (list of object)
+                institutions: [institution, institution] (list of object)
             }
 
         return contributor(object), 0|1
@@ -444,7 +447,7 @@ class Contributor(models.Model):
         co.family = kwargs.get("family")
         co.given = kwargs.get("given")
         co.orcid = kwargs.get("orcid")
-        co.affiliations_string = kwargs.get("affiliations_string")
+        co.author_position = kwargs.get("author_position")
         co.authenticated_orcid = kwargs.get("authenticated_orcid")
         co.save()
 
@@ -456,15 +459,21 @@ class Contributor(models.Model):
             for aff in kwargs.get("affiliations"):
                 co.affiliations.add(aff)
 
+        if kwargs.get("institutions"):
+            for inst in kwargs.get("institutions"):
+                co.institutions.add(inst)
+
         return co, created
 
     base_form_class = ContributorForm
 
 
 class Affiliation(models.Model):
+    # Nome declarado não padronizado, mesma coisa que o raw_affiliation_string
     name = models.CharField(
         _("Affiliation Name"), max_length=2048, null=True, blank=True
     )
+    # Somente preenchido que existir correspondencia com o MEC
     official = models.ForeignKey(
         Institution,
         verbose_name=_("Official Affiliation Name"),
@@ -473,7 +482,16 @@ class Affiliation(models.Model):
         null=True,
         blank=True,
     )
-    # novo campo para non_official (not MEC), aponta para institution
+    # Faz link com o institution do contributor (OpenALex)
+    # source = models.ForeignKey(
+    #     SourceInstitution,
+    #     verbose_name=_("Official Affiliation Name"),
+    #     on_delete=models.SET_NULL,
+    #     max_length=1020,
+    #     null=True,
+    #     blank=True,
+    # )
+    # Esse campo é preenchido quando é correspondencia(casamento)
     country = models.ForeignKey(
         Country,
         verbose_name=_("Country"),
@@ -558,12 +576,9 @@ class Affiliation(models.Model):
         if not kwargs.get("name"):
             raise ValueError("Param name is required")
 
-        filters = {"name": kwargs.get("name")}
+        filters = {"name__exact": kwargs.get("name")}
 
-        if kwargs.get("official"):
-            filters["official"] = kwargs.get("official")
-
-        return cls.objects.get(**kwargs)
+        return cls.objects.get(**filters)
 
     @classmethod
     def create_or_update(cls, **kwargs):
@@ -594,7 +609,7 @@ class Affiliation(models.Model):
             aff = cls.objects.create()
             created = 1
         except Affiliation.MultipleObjectsReturned as e:
-            print(_("The affiliation table have duplicity...."))
+            print(_("The affiliation table have duplicity.... Args: %s" % kwargs))
             raise (Affiliation.MultipleObjectsReturned)
 
         aff.name = kwargs.get("name")
@@ -816,10 +831,10 @@ class SourceArticle(models.Model):
         if not kwargs.get("doi") and not kwargs.get("specific_id") and not kwargs.get("source"):
             raise ValueError("Param doi or specific_id is required")
 
-        if kwargs.get("doi"):
-            filters = {"doi": kwargs.get("doi"), 'source': kwargs.get("source")}
-        elif kwargs.get("specific_id"):
+        if kwargs.get("specific_id"):
             filters = {"specific_id": kwargs.get("specific_id"), 'source': kwargs.get("source")}
+        elif kwargs.get("doi"):
+            filters = {"doi": kwargs.get("doi"), 'source': kwargs.get("source")}
 
         return cls.objects.get(**filters)
 
@@ -880,7 +895,7 @@ class Article(models.Model):
     volume = models.CharField(_("Volume"), max_length=20, null=True, blank=True)
     number = models.CharField(_("Number"), max_length=20, null=True, blank=True)
     year = models.CharField(_("Year"), max_length=20, null=True, blank=True)
-    is_ao = models.BooleanField(
+    is_oa = models.BooleanField(
         _("Is Open Access"), default=False, null=True, blank=True
     )
     open_access_status = models.CharField(
@@ -1090,7 +1105,7 @@ class Article(models.Model):
         article.number = kwargs.get("number")
         article.volume = kwargs.get("volume")
         article.year = kwargs.get("year")
-        article.is_ao = kwargs.get("is_ao")
+        article.is_oa = kwargs.get("is_oa")
         article.journal = kwargs.get("journal")
         article.license = kwargs.get("license")
         article.apc = kwargs.get("apc")

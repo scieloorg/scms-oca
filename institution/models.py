@@ -43,6 +43,10 @@ class Institution(CommonControlField, ClusterableModel):
         _("Institution Source"), max_length=255, null=True, blank=True
     )
 
+    sources = models.ManyToManyField(
+        "SourceInstitution", verbose_name="Source Institutions"
+    )
+
     level_1 = models.CharField(
         _("Level 1 organization"), blank=True, null=True, max_length=255
     )
@@ -413,7 +417,7 @@ class InstitutionTranslateName(Orderable):
             and not kwargs.get("source_institution")
         ):
             raise ValueError("Param name and language and object SourceInstitution is required")
-
+            
         filters = {
             "name": kwargs.get("name"),
             "language__name": kwargs.get("language"),
