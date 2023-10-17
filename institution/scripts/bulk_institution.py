@@ -11,7 +11,7 @@ User = get_user_model()
 
 
 def load_or_up_date(inst, row, creator, source):
-    inst.name = row.get("Name")
+    inst.name = row.get("Name").title()
     inst.institution_type = row.get("Institution Type")
     inst.acronym = row.get("Acronym")
     inst.source = source
@@ -46,7 +46,7 @@ def load_official_institution(creator, row, line, source):
         # e como a fonte de dados pode ter ou não, poderia acabar criando
         # registros indesejáveis
         try:
-            inst = models.Institution.objects.get(name=row.get("Name"))
+            inst = models.Institution.objects.get(name__iexact=row.get("Name"))
         except models.Institution.DoesNotExist:
             inst = models.Institution()
             load_or_up_date(inst, row, creator, source)
@@ -59,6 +59,7 @@ def load_official_institution(creator, row, line, source):
     except Exception as ex:
         print("Import error: %s, Line: %s" % (ex, str(line + 2)))
     else:
+        print(inst.name, inst.acronym)
         print("File imported successfully!")
 
 
@@ -68,7 +69,8 @@ def run(*args):
     user = User.objects.get(id=user_id)
 
     for item in [
-        ["mec", ";", "MEC"],
+        ["mec_1", ";", "MEC"],
+        ["mec_2", ";", "MEC"],
         ["ror_brazil", ";", "ROR"],
         ["ror_others", ";", "ROR"],
     ]:
