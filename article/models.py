@@ -336,8 +336,8 @@ class Contributor(models.Model):
         FieldPanel("given"),
         FieldPanel("orcid"),
         FieldPanel("authenticated_orcid"),
-        FieldPanel("affiliations_string"),
         AutocompletePanel("affiliations"),
+        AutocompletePanel("institutions"),
         AutocompletePanel("programs"),
     ]
 
@@ -399,11 +399,6 @@ class Contributor(models.Model):
             filters["orcid"] = kwargs.get("orcid")
         else:
             filters["orcid"] = None
-
-        if kwargs.get("affiliations_string"):
-            filters["affiliations_string"] = kwargs.get("affiliations_string")
-        else:
-            filters["affiliations_string"] = None
 
         return cls.objects.get(**filters)
     
@@ -469,9 +464,9 @@ class Contributor(models.Model):
 
 
 class Affiliation(models.Model):
-    # Nome declarado não padronizado, mesma coisa que o raw_affiliation_string
-    name = models.CharField(
-        _("Affiliation Name"), max_length=2048, null=True, blank=True
+    # Nome declarado não padronizado, mesma coisa que o raw_affiliation_strings
+    name = models.TextField(
+        _("Affiliation Name"), null=True, blank=True
     )
     # Somente preenchido que existir correspondencia com o MEC
     official = models.ForeignKey(
@@ -515,11 +510,6 @@ class Affiliation(models.Model):
         indexes = [
             models.Index(
                 fields=[
-                    "name",
-                ]
-            ),
-            models.Index(
-                fields=[
                     "country",
                 ]
             ),
@@ -532,6 +522,7 @@ class Affiliation(models.Model):
 
     panels = [
         FieldPanel("name"),
+        AutocompletePanel("source"),
         AutocompletePanel("official"),
         AutocompletePanel("country"),
     ]
