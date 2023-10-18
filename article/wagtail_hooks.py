@@ -92,11 +92,18 @@ class ContributorAdmin(ModelAdmin):
     def all_institutions(self, obj):
         return " | ".join([str("%s(%s)" % (c.display_name, c.id)) for c in obj.institutions.all()])
 
+    def all_institutions(self, obj):
+        return " | ".join([str("%s(%s)" % (c.display_name, c.id)) for c in obj.institutions.all()])
+    
+    def all_affiliations(self, obj):
+        return " | ".join([str("%s(%s)" % (c.name, c.id)) for c in obj.affiliations.all()])
+
     list_display = (
         "family",
         "given",
         "orcid",
         "all_institutions",
+        "all_affiliations",
         "authenticated_orcid",
     )
 
