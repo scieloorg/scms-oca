@@ -3,7 +3,7 @@ import os
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext as _
-from utils.utils import language_iso
+from core.utils import utils
 
 User = get_user_model()
 
@@ -93,7 +93,7 @@ class Language(models.Model):
 
     @classmethod
     def get_or_create(cls, name=None, code2=None):
-        code2 = language_iso(code2)
+        code2 = utils.language_iso(code2)
         if code2:
             try:
                 return cls.objects.get(code2=code2)

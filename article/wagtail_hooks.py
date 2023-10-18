@@ -56,7 +56,7 @@ class ArticleAdmin(ModelAdmin):
         "all_contributors",
     )
 
-    list_filter = ("year", "license", "open_access_status", "apc", "is_ao", )
+    list_filter = ("year", "license", "open_access_status", "apc", "is_oa", )
     search_fields = ("doi", "year", )
 
 
@@ -89,6 +89,8 @@ class ContributorAdmin(ModelAdmin):
     exclude_from_explorer = (
         False  # or True to exclude pages of this type from Wagtail's explorer view
     )
+    def all_institutions(self, obj):
+        return " | ".join([str("%s(%s)" % (c.display_name, c.id)) for c in obj.institutions.all()])
 
     def all_institutions(self, obj):
         return " | ".join([str("%s(%s)" % (c.display_name, c.id)) for c in obj.institutions.all()])
@@ -99,7 +101,6 @@ class ContributorAdmin(ModelAdmin):
     list_display = (
         "family",
         "given",
-        "affiliations_string",
         "orcid",
         "all_institutions",
         "all_affiliations",
@@ -126,12 +127,12 @@ class AffiliationAdmin(ModelAdmin):
         "name",
         "official",
         "country",
+        "source"
     )
     # list_filter = ("country",)
     search_fields = (
         "name",
     )
-
 
 class LicenseAdmin(ModelAdmin):
     model = License

@@ -177,9 +177,7 @@ def load_openalex(user_id, date=2012, length=None, country="BR"):
                     article["source"] = _source
                     article["raw"] = item
 
-                    article, created = models.SourceArticle.create_or_update(
-                        **article
-                    )
+                    article, created = models.SourceArticle.create_or_update(**article)
 
                     logger.info(
                         "%s: %s"
@@ -205,8 +203,40 @@ def load_openalex(user_id, date=2012, length=None, country="BR"):
         logger.info(f"Unexpected error: {e}")
 
 
+@celery_app.task(name=_("Sanitize all Journals"))
+def article_source_to_article(
+    user_id, source_name="OPENALEX", size=None, loop_size=1000
+):
+    """ """
+    count = 0
+
+    size=1000 if size and size < 1000 else size
+
+    sarticle = (
+        models.SourceArticle.objects.filter(source__name=source_name).order_by("id")[0 : int(size)]
+        if size
+        else models.SourceArticle.objects.filter(source__name="OPENALEX")
+    )
+    total = sarticle.count()
+    offset = loop_size
+
+    for i in range(int(total / loop_size) + 1):
+        _article = sarticle[count:offset]
+        load_openalex_article.apply_async(
+            kwargs={
+                "user_id": user_id,
+                "article_ids": [article.id for article in _article],
+            }
+        )
+        count += loop_size
+        offset += loop_size
+
+        if offset > total:
+            offset = total
+
+
 @celery_app.task(name="Load OpenAlex to Article models")
-def load_openalex_article(user_id, update=True):
+def load_openalex_article(user_id, article_ids, update=False):
     """
     This task read the article.models.SourceArticle
     and add the articles to article.models.Article
@@ -218,114 +248,8 @@ def load_openalex_article(user_id, update=True):
 
     user = User.objects.get(id=user_id)
 
-    def contributors(authors):
-        """
-        This function generate a list os contributors list.
-
-        This function get the key ``authorships`` from with this struture:
-
-             "authorships":[
-               {
-                  "author_position":"first",
-                  "author":{
-                     "id":"https://openalex.org/A4354288008",
-                     "display_name":"Pedro C. Hallal",
-                     "orcid":null
-                  },
-                  "institutions":[
-                     {
-                        "id":"https://openalex.org/I169248161",
-                        "display_name":"Universidade Federal de Pelotas",
-                        "ror":"https://ror.org/05msy9z54",
-                        "country_code":"BR",
-                        "type":"education"
-                     }
-                  ],
-                  "is_corresponding":true,
-                  "raw_affiliation_string":"Universidade Federal de Pelotas, Pelotas, Brazil",
-                  "raw_affiliation_strings":[
-                     "Universidade Federal de Pelotas, Pelotas, Brazil"
-                  ]
-               },
-               {
-                  "author_position":"middle",
-                  "author":{
-                     "id":"https://openalex.org/A4359769260",
-                     "display_name":"Lars Bo Andersen",
-                     "orcid":null
-                  },
-                  "institutions":[
-                     {
-                        "id":"https://openalex.org/I177969490",
-                        "display_name":"University of Southern Denmark",
-                        "ror":"https://ror.org/03yrrjy16",
-                        "country_code":"DK",
-                        "type":"education"
-                     },
-                     {
-                        "id":"https://openalex.org/I76283144",
-                        "display_name":"Norwegian School of Sport Sciences",
-                        "ror":"https://ror.org/045016w83",
-                        "country_code":"NO",
-                        "type":"education"
-                     }
-                  ],
-                  "is_corresponding":false,
-                  "raw_affiliation_string":"Department of Sport Medicine, Norwegian School of Sport Sciences, Oslo, Norway; Department of Exercise Epidemiology, Centre for Research in Childhood Health, University of Southern Denmark, Odense, Denmark",
-                  "raw_affiliation_strings":[
-                     "Department of Sport Medicine, Norwegian School of Sport Sciences, Oslo, Norway",
-                     "Department of Exercise Epidemiology, Centre for Research in Childhood Health, University of Southern Denmark, Odense, Denmark"
-                  ]
-               }
-
-
-        """
-        contributors = []
-
-        for au in authors:
-            # if exists author
-            if au.get("author"):
-                display_name = au.get("author").get("display_name")
-
-                if display_name:
-                    family = (
-                        " ".join(display_name.split(" ")[1:]).strip()
-                        if display_name
-                        else ""
-                    )
-                    given = display_name.split(" ")[0].strip() if display_name else ""
-
-                    author_dict = {
-                        "family": family,
-                        "given": given,
-                        "orcid": au.get("author").get("orcid"),
-                    }
-
-                    # Here we are adding the affiliation to the contributor
-                    if au.get("raw_affiliation_strings"):
-                        affs = []
-
-                        for aff in au.get("raw_affiliation_strings"):
-                            aff_obj, _ = models.Affiliation.create_or_update(
-                                **{"name": aff}
-                            )
-                            affs.append(aff_obj)
-
-                        author_dict.update(
-                            {
-                                "affiliations": affs,
-                                "affiliations_string": au.get("raw_affiliation_string"),
-                            }
-                        )
-
-                    contributor, _ = models.Contributor.create_or_update(**author_dict)
-
-                    contributors.append(contributor)
-
-        return contributors
-
-    # read SourceArticle
-    for article in models.SourceArticle.objects.filter(source__name="OPENALEX"):
+    for id in article_ids:
+        article = models.SourceArticle.objects.get(id=id)
         try:
             doi = article.doi
             # title
@@ -334,6 +258,7 @@ def load_openalex_article(user_id, update=True):
             if not update:
                 if doi:
                     if models.Article.objects.filter(doi=doi).exists():
+                        print("ja existe")
                         continue
 
                 if title:
@@ -349,9 +274,7 @@ def load_openalex_article(user_id, update=True):
 
             # Get the journal data
             if article.raw.get("primary_location"):
-                journal_data = core_utils.nestget(
-                    article.raw, "primary_location", "source"
-                )
+                journal_data = core_utils.nestget(article.raw, "primary_location", "source")
                 if journal_data:
                     j_issn_l = journal_data.get("issn_l")
                     if journal_data.get("issn"):
@@ -371,9 +294,7 @@ def load_openalex_article(user_id, update=True):
                 journal = None
 
             # APC
-            is_apc = (
-                "YES" if bool(core_utils.nestget(article.raw, "apc_list")) else "NO"
-            )
+            is_apc = "YES" if bool(core_utils.nestget(article.raw, "apc_list")) else "NO"
 
             # Open Access Status
             oa_status = core_utils.nestget(article.raw, "open_access", "oa_status")
@@ -391,20 +312,74 @@ def load_openalex_article(user_id, update=True):
                 else:
                     license = None
 
+            # contributors
+            contributors = []
+
+            for au in core_utils.nestget(article.raw, "authorships"):
+                # if exists author
+                if au.get("author"):
+                    display_name = au.get("author").get("display_name")
+
+                    if display_name:
+                        family = (
+                            " ".join(display_name.split(" ")[1:]).strip()
+                            if display_name
+                            else ""
+                        )
+                        given = display_name.split(" ")[0].strip() if display_name else ""
+
+                        author_dict = {
+                            "family": family,
+                            "given": given,
+                            "orcid": au.get("author").get("orcid"),
+                            "author_position": au.get("author_position"),
+                        }
+
+                        # Here we are adding the affiliation to the contributor
+                        if au.get("raw_affiliation_strings"):
+                            affs = []
+                            aff_obj, _ = models.Affiliation.create_or_update(
+                                **{"name": "|".join(au.get("raw_affiliation_strings"))}
+                            )
+                            affs.append(aff_obj)
+
+                            author_dict.update(
+                                {
+                                    "affiliations": affs,
+                                }
+                            )
+
+                        # Add the institutions
+                        if au.get("institutions"):
+                            insts = []
+                            source = Source.objects.get(name="OPENALEX")
+                            for inst in au.get("institutions"):
+                                inst_obj, _ = models.SourceInstitution.create_or_update(
+                                    **{"specific_id": inst.get("id"), "source": source}
+                                )
+                                insts.append(inst_obj)
+
+                            author_dict.update(
+                                {
+                                    "institutions": insts,
+                                }
+                            )
+                        contributor, _ = models.Contributor.create_or_update(**author_dict)
+
+                        contributors.append(contributor)
+
             article_dict = {
                 "doi": doi,
                 "title": title,
                 "number": number,
                 "volume": volume,
                 "year": year,
-                "is_ao": core_utils.nestget(article.raw, "open_access", "is_ao"),
+                "is_oa": core_utils.nestget(article.raw, "open_access", "is_oa"),
                 "sources": [Source.objects.get(name="OPENALEX")],
                 "journal": journal,
                 "apc": is_apc,
                 "open_access_status": oa_status,
-                "contributors": contributors(
-                    core_utils.nestget(article.raw, "authorships")
-                ),
+                "contributors": contributors,
                 "license": license,
             }
 
@@ -551,19 +526,15 @@ def load_sucupira(production_file_csv, detail_file_csv, authors):
             "specific_id": specific_id,
             "year": row["AN_BASE_PRODUCAO"],
             "source": _source,
-            "raw": row.to_json()
+            "raw": row.to_json(),
         }
 
-        article, created = models.SourceArticle.create_or_update(
-            **article_source_dict
-        )
+        article, created = models.SourceArticle.create_or_update(**article_source_dict)
 
         logger.info(
             "####%s####, %s, %s"
             % (index.numerator, article.doi or article.specific_id, created)
         )
-
-
 
 @celery_app.task(name="Match between institutions and affiliations")
 def match_contrib_inst_aff(user_id):
@@ -583,3 +554,4 @@ def match_contrib_inst_aff(user_id):
                         print("Update the contributor affiliation: %s(%s)" % (co, co.id))
                         aff.source = inst
                         aff.save()
+
