@@ -90,11 +90,19 @@ class ContributorAdmin(ModelAdmin):
         False  # or True to exclude pages of this type from Wagtail's explorer view
     )
 
+    def all_institutions(self, obj):
+        return " | ".join([str("%s(%s)" % (c.display_name, c.id)) for c in obj.institutions.all()])
+    
+    def all_affiliations(self, obj):
+        return " | ".join([str("%s(%s)" % (c.name, c.id)) for c in obj.affiliations.all()])
+
     list_display = (
         "family",
         "given",
         "affiliations_string",
         "orcid",
+        "all_institutions",
+        "all_affiliations",
         "authenticated_orcid",
     )
 

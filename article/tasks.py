@@ -562,3 +562,24 @@ def load_sucupira(production_file_csv, detail_file_csv, authors):
             "####%s####, %s, %s"
             % (index.numerator, article.doi or article.specific_id, created)
         )
+
+
+
+@celery_app.task(name="Match between institutions and affiliations")
+def match_contrib_inst_aff(user_id):
+    """
+    This task loop to all contributor looking for contributor.institutions and find the affiliation
+    """
+    user = User.objects.get(id=user_id)
+
+    for co in models.Contributor.objects.all():
+        # Loop to all contributor institutions
+        for inst in co.institutions.all():
+            # Loop to all affiliations
+            for aff in co.affiliations.all():
+                # check if institution name is in aff.name
+                if inst.display_name:
+                    if inst.display_name in aff.name:
+                        print("Update the contributor affiliation: %s(%s)" % (co, co.id))
+                        aff.source = inst
+                        aff.save()
