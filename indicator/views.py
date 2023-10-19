@@ -70,12 +70,15 @@ class IndicatorDirectoryCreateView(CreateView):
                 if moderation.send_mail:
                     # get user
                     user_email = self.get_moderation().moderator.email or None
-                    # get group
-                    group_mails = [
-                        user.email
-                        for user in self.get_moderation().group_moderator.user_set.all()
-                        if user.email
-                    ]
+                    group_mails = []
+
+                    if self.get_moderation().group_moderator:
+                        # get group
+                        group_mails = [
+                            user.email
+                            for user in self.get_moderation().group_moderator.user_set.all()
+                            if user.email
+                        ]
                     tasks.send_mail(
                         _(
                             "Novo conteúdo para moderação - %s"

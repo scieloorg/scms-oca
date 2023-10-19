@@ -129,6 +129,7 @@ LOCAL_APPS = [
     "search",
     "wagtailautocomplete",
     # "provided_data",
+    "article",
 ]
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
@@ -328,10 +329,10 @@ CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 # http://docs.celeryproject.org/en/latest/userguide/configuration.html#task-time-limit
 # TODO: set to whatever value is adequate in your circumstances
-CELERY_TASK_TIME_LIMIT = 5 * 60
+CELERY_TASK_TIME_LIMIT = 5 * 600000000
 # http://docs.celeryproject.org/en/latest/userguide/configuration.html#task-soft-time-limit
 # TODO: set to whatever value is adequate in your circumstances
-CELERY_TASK_SOFT_TIME_LIMIT = 36000
+CELERY_TASK_SOFT_TIME_LIMIT = 360000000
 # http://docs.celeryproject.org/en/latest/userguide/configuration.html#beat-scheduler
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 # http://docs.celeryproject.org/en/latest/userguide/configuration.html
@@ -371,6 +372,8 @@ STATICFILES_FINDERS += ["compressor.finders.CompressorFinder"]
 WAGTAIL_SITE_NAME = "OCABR"
 BASE_URL = env.str("DJANGO_BASE_URL", default="https://ocabr")
 URL_API_CROSSREF = env.str("API_CROSSREF", default="https://api.crossref.org/works")
+URL_API_OPENALEX = env.str("API_OPENALEX", default="https://api.openalex.org/works")
+URL_API_OPENALEX_INSTITUTIONS = env.str("URL_API_OPENALEX_INSTITUTIONS", default="https://api.openalex.org/institutions")
 
 LANGUAGES = [
     ("pt-BR", "Portuguese"),

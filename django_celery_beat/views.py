@@ -22,7 +22,7 @@ def task_run(request):
 
     # Add user id to the kwargs
     kwargs = json.loads(p_task.kwargs)
-    # kwargs["user_id"] = request.user.id
+    kwargs["user_id"] = request.user.id
 
     task.apply_async(
         args=json.loads(p_task.args),
