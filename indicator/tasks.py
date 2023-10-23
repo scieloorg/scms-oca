@@ -11,7 +11,7 @@ User = get_user_model()
 
 @celery_app.task(bind=True, name=_("Geração de indicadores de ações"))
 def task_generate_directory_indicators(
-    self, creator_id, action_name=None, filter_by=None, group_by=None
+    self, user_id, creator_id, action_name=None, filter_by=None, group_by=None
 ):
     creator = User.objects.get(id=creator_id) or User.objects.first()
     action__names = [action_name]
@@ -23,7 +23,7 @@ def task_generate_directory_indicators(
 
 @celery_app.task(bind=True, name=_("Geração de indicadores de artigos científicos"))
 def task_generate_sciprod_indicators(
-    self, creator_id, filter_by=None, group_by=None, begin_year=None, end_year=None,
+    self, user_id, creator_id, filter_by=None, group_by=None, begin_year=None, end_year=None,
 ):
     creator = User.objects.get(id=creator_id) or User.objects.first()
 
