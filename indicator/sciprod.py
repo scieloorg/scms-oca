@@ -457,7 +457,6 @@ def get_indicator_parameters(filter_params, group_by_params):
     - parâmetros para filtrar registros
     - parâmetros para agrupar e contar as ocorrências agrupadas
     """
-    import pdb; pdb.set_trace()
     for f_params in filter_params:
         params = {}
         params.update(f_params)
@@ -492,9 +491,9 @@ def get_location_filter_params():
         for item in models.Article.objects.filter(
                 Q(contributors__affiliations__country__acron2="BR") |
                 Q(contributors__affiliations__official__location__country__acron2="BR")
-            ).values("contributors__affiliation__official__location__state__acronym").annotate(count=Count("id")):
+            ).values("contributors__affiliations__official__location__state__acronym").annotate(count=Count("id")):
             logging.info(item)
-            yield {"location__state__code": item["contributors__affiliation__official__location__state__acronym"]}
+            yield {"location__state__code": item["contributors__affiliations__official__location__state__acronym"]}
     except Exception as e:
         logging.info(e)
         yield from []
