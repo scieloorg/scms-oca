@@ -259,6 +259,9 @@ class SourceInstitution(ClusterableModel):
     )
     raw = models.JSONField(_("JSON Data institution"), null=True, blank=True)
 
+    def autocomplete_label(self):
+        return "%s (%s)" % (self.display_name, self.source)
+
     class Meta:
         indexes = [
             models.Index(
