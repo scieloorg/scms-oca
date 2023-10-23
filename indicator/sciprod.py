@@ -1,20 +1,18 @@
-from itertools import product
+
 import logging
 from datetime import datetime
 
-from django.core.files.base import ContentFile
+from django.contrib.auth import get_user_model
 from django.db.models import Count, Q
 from django.utils.translation import gettext as _
-from django.db.models.functions import Upper
-from django.contrib.auth import get_user_model
 
-from scholarly_articles import models
-from usefulmodels.models import Action, ThematicArea, State, Practice
-from indicator.models import Indicator
+from article import models
 from indicator import choices
+from indicator.models import Indicator
+from indicator.scheduler import delete_tasks, get_or_create_periodic_task
 from institution.models import Institution
 from location.models import Location
-from indicator.scheduler import get_or_create_periodic_task, delete_tasks
+from usefulmodels.models import Action, Practice, ThematicArea
 
 
 class SciProd:
@@ -39,7 +37,7 @@ class SciProd:
         by_open_access_status = True
         by_use_license = True
         self.GROUP_BY_AND_ATTRIBUTE_NAME = dict(
-            by_use_license="use_license",
+            by_use_license="license",
             by_open_access_status="open_access_status",
             by_institution="institution__name",
             by_thematic_area_level0="thematic_areas__level0",
@@ -205,7 +203,7 @@ class SciProd:
     @property
     def items(self):
         if not hasattr(self, "_items"):
-            self._items = models.ScholarlyArticles.filter_items_to_generate_indicators(
+            self._items = models.Article.filter_items_to_generate_indicators(
                 **self.filter_params
             )
         return self._items
@@ -227,12 +225,12 @@ class SciProd:
 
     def get_series(self):
         """
-        Retorna os itens resultantes de filtragem e agrupamento aplicado em ScholarlyArticles
+        Retorna os itens resultantes de filtragem e agrupamento aplicado em Article
         """
         for serie_params in self.series_parameters:
-            grouped_by = models.ScholarlyArticles.parameters_for_values(**serie_params["grouped_by_params"])
+            grouped_by = models.Article.parameters_for_values(**serie_params["grouped_by_params"])
             logging.info(f"grouped_by {grouped_by}")
-            for item in models.ScholarlyArticles.group(self.items, grouped_by):
+            for item in models.Article.group(self.items, grouped_by):
                 item["stack"] = serie_params["name"]
                 yield item
 
@@ -280,13 +278,13 @@ class SciProd:
         """
         contribution = []
         for item in (
-            self.items.values("source")
+            self.items.values("sources")
             .annotate(count=Count("id"))
             .order_by("count")
             .iterator()
         ):
-            contribution += [item["source"]]
-        return " • ".join(contribution) or "SciELO"
+            contribution += [item["sources"]]
+        return " • ".join(str(contribution)) or "SciELO"
 
     @property
     def institutions(self):
@@ -446,6 +444,7 @@ def generate_indicators(creator, filter_by, group_by_params, begin_year, end_yea
     - group_by_params
     """
     filter_params = get_filter_params(filter_by)
+    print(filter_params)
     for params in get_indicator_parameters(filter_params, group_by_params):
         logging.info("Generating indicator for {}".format(params))
         generate_indicator(creator, begin_year, end_year, **params)
@@ -458,6 +457,7 @@ def get_indicator_parameters(filter_params, group_by_params):
     - parâmetros para filtrar registros
     - parâmetros para agrupar e contar as ocorrências agrupadas
     """
+    import pdb; pdb.set_trace()
     for f_params in filter_params:
         params = {}
         params.update(f_params)
@@ -472,9 +472,9 @@ def get_thematic_area_filter_params():
     sendo Model qualquer `*Directory` (Education, Event, ...)
     """
     try:
-        for item in models.ScholarlyArticles.objects.filter(
-                Q(contributors__affiliation__country__acron2="BR") |
-                Q(contributors__affiliation__official__location__country__acron2="BR")
+        for item in models.Article.objects.filter(
+                Q(contributors__affiliations__country__acron2="BR") |
+                Q(contributors__affiliations__official__location__country__acron2="BR")
             ).values("contributors__thematic_area__level1").annotate(count=Count("id")):
             logging.info(item)
             yield {"thematic_area__level1": item["contributors__thematic_area__level1"]}
@@ -489,9 +489,9 @@ def get_location_filter_params():
     sendo Model qualquer `*Directory` (Education, Event, ...)
     """
     try:
-        for item in models.ScholarlyArticles.objects.filter(
-                Q(contributors__affiliation__country__acron2="BR") |
-                Q(contributors__affiliation__official__location__country__acron2="BR")
+        for item in models.Article.objects.filter(
+                Q(contributors__affiliations__country__acron2="BR") |
+                Q(contributors__affiliations__official__location__country__acron2="BR")
             ).values("contributors__affiliation__official__location__state__acronym").annotate(count=Count("id")):
             logging.info(item)
             yield {"location__state__code": item["contributors__affiliation__official__location__state__acronym"]}
@@ -507,12 +507,12 @@ def get_institution_filter_params():
     sendo Model qualquer `*Directory` (Education, Event, ...)
     """
     try:
-        for item in models.ScholarlyArticles.objects.filter(
-                Q(contributors__affiliation__country__acron2="BR") |
-                Q(contributors__affiliation__official__location__country__acron2="BR")
-            ).values("contributors__affiliation__official__name").annotate(count=Count("id")):
+        for item in models.Article.objects.filter(
+                Q(contributors__affiliations__country__acron2="BR") |
+                Q(contributors__affiliations__official__location__country__acron2="BR")
+            ).values("contributors__affiliations__official__name").annotate(count=Count("id")):
             logging.info(item)
-            yield {"institution__name": item["contributors__affiliation__official__name"]}
+            yield {"institution__name": item["contributors__affiliations__official__name"]}
     except:
         yield from []
 
