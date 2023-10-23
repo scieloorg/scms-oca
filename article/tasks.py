@@ -10,6 +10,8 @@ from config import celery_app
 from core.models import Source
 from core.utils import utils as core_utils
 
+from institution.models import Institution
+
 logger = logging.getLogger(__name__)
 
 User = get_user_model()
@@ -554,4 +556,21 @@ def match_contrib_inst_aff(user_id):
                         print("Update the contributor affiliation: %s(%s)" % (co, co.id))
                         aff.source = inst
                         aff.save()
+
+
+@celery_app.task(name="Match between affiliation.source and Institution[MEC]")
+def match_contrib_aff_source_with_inst_MEC(user_id):
+    """
+    This task loop to all affiliations looking for affiliation.source and find the instiution from MEC
+    """
+
+    for aff in models.Affiliation.objects.all():
+        if aff.source:
+
+            insts = Institution.objects.filter(
+                name__icontains=aff.source.display_name, source="MEC"
+            )
+            if insts:
+                aff.official = insts[0]
+                aff.save()
 
