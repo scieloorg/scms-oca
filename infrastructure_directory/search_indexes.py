@@ -117,14 +117,16 @@ class InfraStructureIndex(indexes.SearchIndex, indexes.Indexable):
         if obj.institutional_contribution != settings.DIRECTORY_DEFAULT_CONTRIBUTOR:
             if obj.updated_by:
                 return (
-                    _("Conteúdo publicado sem moderação / contribuição de %s") % obj.institutional_contribution
+                    _("Conteúdo publicado sem moderação / contribuição de %s")
+                    % obj.institutional_contribution
                     if not obj.updated_by.is_staff and obj.record_status == "PUBLISHED"
                     else None
                 )
 
             if obj.creator:
                 return (
-                    _("Conteúdo publicado sem moderação / contribuição de %s") % obj.institutional_contribution
+                    _("Conteúdo publicado sem moderação / contribuição de %s")
+                    % obj.institutional_contribution
                     if not obj.creator.is_staff and obj.record_status == "PUBLISHED"
                     else None
                 )

@@ -1,0 +1,6 @@
+class GetOrCreateCrontabScheduleError(Exception):
+    ...
+
+
+class CreateIndicatorRecordError(Exception):
+    ...

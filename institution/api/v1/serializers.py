@@ -4,6 +4,7 @@ from institution import models
 
 from location.api.v1.serializers import LocationSerializer
 
+
 class InstitutionsSerializer(serializers.ModelSerializer):
     location = LocationSerializer(many=False, read_only=True)
 

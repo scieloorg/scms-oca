@@ -3,6 +3,7 @@ import os
 from django.db import models
 from django.conf import settings
 from django.utils.translation import gettext as _
+from django.db.models import Count
 from taggit.managers import TaggableManager
 from wagtail.admin.panels import FieldPanel, HelpPanel
 from wagtailautocomplete.edit_handlers import AutocompletePanel
@@ -10,13 +11,12 @@ from wagtailautocomplete.edit_handlers import AutocompletePanel
 from core.models import CommonControlField
 from institution.models import Institution
 from location.models import Location
-from usefulmodels.models import Action, Practice, ThematicArea
+from usefulmodels.models import Action, Practice, ThematicArea, State
 
 from . import choices
 from .forms import EducationDirectoryFileForm, EducationDirectoryForm
 from .permission_helper import MUST_BE_MODERATE
 from core import help_fields
-
 
 
 def get_default_action():
@@ -29,7 +29,7 @@ def get_default_action():
 class EducationDirectory(CommonControlField):
     class Meta:
         verbose_name_plural = _("Education Data")
-        verbose_name= _("Education Data")
+        verbose_name = _("Education Data")
         permissions = (
             (MUST_BE_MODERATE, _("Must be moderated")),
             ("can_edit_title", _("Can edit title")),
@@ -55,10 +55,22 @@ class EducationDirectory(CommonControlField):
             ("can_edit_notes", _("Can edit notes")),
         )
 
-    title = models.CharField(_("Title"), max_length=255, null=False, blank=False, help_text=help_fields.DIRECTORY_TITLE_HELP)
-    link = models.URLField(_("Link"), null=False, blank=False, help_text=help_fields.DIRECTORY_LINK_HELP)
+    title = models.CharField(
+        _("Title"),
+        max_length=255,
+        null=False,
+        blank=False,
+        help_text=help_fields.DIRECTORY_TITLE_HELP,
+    )
+    link = models.URLField(
+        _("Link"), null=False, blank=False, help_text=help_fields.DIRECTORY_LINK_HELP
+    )
     description = models.TextField(
-        _("Description"), max_length=1000, null=True, blank=True, help_text=help_fields.DIRECTORY_DESCRIPTION_HELP
+        _("Description"),
+        max_length=1000,
+        null=True,
+        blank=True,
+        help_text=help_fields.DIRECTORY_DESCRIPTION_HELP,
     )
     start_date = models.DateField(
         _("Start Date"), max_length=255, null=True, blank=True
@@ -69,14 +81,21 @@ class EducationDirectory(CommonControlField):
     )
     end_time = models.TimeField(_("End Time"), max_length=255, null=True, blank=True)
 
-    locations = models.ManyToManyField(Location, verbose_name=_("Location"), blank=False, null=True)
+    locations = models.ManyToManyField(
+        Location, verbose_name=_("Location"), blank=False, null=True
+    )
     institutions = models.ManyToManyField(
-        Institution, verbose_name=_("Institution"), blank=True, help_text=help_fields.DIRECTORY_INSTITUTIONS_HELP
+        Institution,
+        verbose_name=_("Institution"),
+        blank=True,
+        help_text=help_fields.DIRECTORY_INSTITUTIONS_HELP,
     )
     thematic_areas = models.ManyToManyField(
-        ThematicArea, verbose_name=_("Thematic Area"), blank=True, help_text=help_fields.DIRECTORY_THEMATIC_AREA_HELP
+        ThematicArea,
+        verbose_name=_("Thematic Area"),
+        blank=True,
+        help_text=help_fields.DIRECTORY_THEMATIC_AREA_HELP,
     )
-
 
     practice = models.ForeignKey(
         Practice,
@@ -84,7 +103,7 @@ class EducationDirectory(CommonControlField):
         null=True,
         blank=False,
         on_delete=models.SET_NULL,
-        help_text=help_fields.DIRECTORY_PRACTICE_HELP
+        help_text=help_fields.DIRECTORY_PRACTICE_HELP,
     )
 
     action = models.ForeignKey(
@@ -94,7 +113,7 @@ class EducationDirectory(CommonControlField):
         blank=True,
         on_delete=models.SET_NULL,
         default=get_default_action,
-        help_text=help_fields.DIRECTORY_ACTION_HELP
+        help_text=help_fields.DIRECTORY_ACTION_HELP,
     )
     classification = models.CharField(
         _("Classification"),
@@ -102,11 +121,12 @@ class EducationDirectory(CommonControlField):
         max_length=255,
         null=True,
         blank=True,
-        help_text=help_fields.DIRECTORY_CLASSIFICATION_HELP
+        help_text=help_fields.DIRECTORY_CLASSIFICATION_HELP,
     )
 
-    keywords = TaggableManager(_("Keywords"), blank=True, help_text=help_fields.DIRECTORY_KEYWORDS_AREA_HELP)
-
+    keywords = TaggableManager(
+        _("Keywords"), blank=True, help_text=help_fields.DIRECTORY_KEYWORDS_AREA_HELP
+    )
 
     attendance = models.CharField(
         _("Attendance"),
@@ -122,12 +142,16 @@ class EducationDirectory(CommonControlField):
         max_length=255,
         null=True,
         blank=True,
-        help_text=help_fields.DIRECTORY_RECORD_STATUS_HELP
+        help_text=help_fields.DIRECTORY_RECORD_STATUS_HELP,
     )
 
-
-    source = models.CharField(_("Source"), max_length=255, null=True, blank=True, help_text=help_fields.DIRECTORY_SOURCE_HELP)
-
+    source = models.CharField(
+        _("Source"),
+        max_length=255,
+        null=True,
+        blank=True,
+        help_text=help_fields.DIRECTORY_SOURCE_HELP,
+    )
 
     institutional_contribution = models.CharField(
         _("Institutional Contribution"),
@@ -136,7 +160,13 @@ class EducationDirectory(CommonControlField):
         help_text=help_fields.DIRECTORY_INSTITUTIONAL_CONTRIBUTION_HELP,
     )
 
-    notes = models.TextField(_("Notes"), max_length=1000, null=True, blank=True, help_text=help_fields.DIRECTORY_NOTES_HELP)
+    notes = models.TextField(
+        _("Notes"),
+        max_length=1000,
+        null=True,
+        blank=True,
+        help_text=help_fields.DIRECTORY_NOTES_HELP,
+    )
 
     panels = [
         HelpPanel(
@@ -177,9 +207,13 @@ class EducationDirectory(CommonControlField):
             "education__title": self.title,
             "education__link": self.link,
             "education__description": self.description,
-            "education__start_date": self.start_date.isoformat() if self.start_date else None,
+            "education__start_date": self.start_date.isoformat()
+            if self.start_date
+            else None,
             "education__end_date": self.end_date.isoformat() if self.end_date else None,
-            "education__start_time": self.start_time.isoformat() if self.start_time else None,
+            "education__start_time": self.start_time.isoformat()
+            if self.start_time
+            else None,
             "education__end_time": self.end_time.isoformat() if self.end_time else None,
             "education__classification": self.classification,
             "education__keywords": [keyword for keyword in self.keywords.names()],
@@ -188,8 +222,8 @@ class EducationDirectory(CommonControlField):
             "education__source": self.source,
             "education__institutional_contribution": self.institutional_contribution,
             "education__notes": self.notes,
-            "education__action": self.action,
-            "education__practice": self.practice,
+            "education__action": self.action.name,
+            "education__practice": self.practice.name,
         }
         if self.locations:
             loc = []
@@ -216,6 +250,79 @@ class EducationDirectory(CommonControlField):
             d.update(self.action.data)
 
         return d
+
+    @classmethod
+    def filter_items_to_generate_indicators(
+        cls,
+        action__name=None,
+        practice__code=None,
+        practice__name=None,
+        classification=None,
+        institution__name=None,
+        thematic_area__level0=None,
+        thematic_area__level1=None,
+        location__state__code=None,
+        location__state__region=None,
+    ):
+        params = dict(
+            action__name=action__name,
+            practice__code=practice__code,
+            practice__name=practice__name,
+            classification=classification,
+            institutions__name=institution__name,
+            institutions__location__state__acronym=location__state__code,
+            institutions__location__state__region=location__state__region,
+            thematic_areas__level0=thematic_area__level0,
+            thematic_areas__level1=thematic_area__level1,
+            locations__state__acronym=location__state__code,
+            locations__state__region=location__state__region,
+        )
+        params = {k: v for k, v in params.items() if v}
+        return cls.objects.filter(record_status="PUBLISHED", **params)
+
+    @classmethod
+    def parameters_for_values(
+        cls,
+        by_practice=False,
+        by_classification=False,
+        by_institution=False,
+        by_thematic_area_level0=False,
+        by_thematic_area_level1=False,
+        by_state=False,
+        by_region=False,
+    ):
+        selected_attributes = Action.parameters_for_values("action")
+        if by_classification:
+            selected_attributes += ["classification"]
+        if by_practice:
+            selected_attributes += Practice.parameters_for_values("practice")
+        if by_institution:
+            selected_attributes += Institution.parameters_for_values("institutions")
+        if by_state or by_state or by_region:
+            selected_attributes += State.parameters_for_values(
+                "locations__state", by_state, by_state, by_region
+            )
+            selected_attributes += State.parameters_for_values(
+                "institutions__location__state", by_state, by_state, by_region
+            )
+        if by_thematic_area_level0 or by_thematic_area_level1:
+            selected_attributes += ThematicArea.parameters_for_values(
+                "thematic_areas", by_thematic_area_level0, by_thematic_area_level1
+            )
+        return selected_attributes
+
+    @classmethod
+    def group(
+        cls,
+        query_result,
+        selected_attributes,
+    ):
+        return (
+            query_result.values(*selected_attributes)
+            .annotate(count=Count("id"))
+            .order_by("count")
+            .iterator()
+        )
 
     base_form_class = EducationDirectoryForm
 

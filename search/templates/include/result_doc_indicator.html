@@ -11,7 +11,7 @@
     <div class="col-md-12 pe-md-12">
 
       <div class="entry-title title-sm">
-        <h2><i class="icon-line-bar-graph" data-toggle="tooltip" data-placement="top" title="{% trans 'Indicadores' %}"></i> <a href="{% url 'search:indicator_detail' item.slug %}" target="_blank">{{ item.title }}</a> </h2>
+        <h2><i class="icon-line-bar-graph" data-toggle="tooltip" data-placement="top" title="{% trans 'Indicadores' %}"></i> <a href="{% url 'search:indicator_detail' item.slug %}">{{ item.title }}</a> </h2>
       </div>
 
       {% if item.disclaimer %}

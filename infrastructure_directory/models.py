@@ -3,6 +3,7 @@ import os
 from django.db import models
 from django.conf import settings
 from django.utils.translation import gettext as _
+from django.db.models import Count
 from .permission_helper import MUST_BE_MODERATE
 from taggit.managers import TaggableManager
 from wagtail.admin.panels import FieldPanel, HelpPanel
@@ -10,11 +11,12 @@ from wagtailautocomplete.edit_handlers import AutocompletePanel
 
 from core.models import CommonControlField
 from institution.models import Institution
-from usefulmodels.models import Action, Practice, ThematicArea
+from usefulmodels.models import Action, Practice, ThematicArea, State
 
 from . import choices
 from .forms import InfrastructureDirectoryFileForm, InfrastructureDirectoryForm
 from core import help_fields
+
 
 def get_default_action():
     try:
@@ -46,17 +48,35 @@ class InfrastructureDirectory(CommonControlField):
             ("can_edit_notes", _("Can edit notes")),
         )
 
-    title = models.CharField(_("Title"), max_length=255, null=False, blank=False, help_text=help_fields.DIRECTORY_TITLE_HELP)
-    link = models.URLField(_("Link"), null=False, blank=False, help_text=help_fields.DIRECTORY_LINK_HELP)
+    title = models.CharField(
+        _("Title"),
+        max_length=255,
+        null=False,
+        blank=False,
+        help_text=help_fields.DIRECTORY_TITLE_HELP,
+    )
+    link = models.URLField(
+        _("Link"), null=False, blank=False, help_text=help_fields.DIRECTORY_LINK_HELP
+    )
     description = models.TextField(
-        _("Description"), max_length=1000, null=True, blank=True, help_text=help_fields.DIRECTORY_DESCRIPTION_HELP
+        _("Description"),
+        max_length=1000,
+        null=True,
+        blank=True,
+        help_text=help_fields.DIRECTORY_DESCRIPTION_HELP,
     )
 
     institutions = models.ManyToManyField(
-        Institution, verbose_name=_("Institution"), blank=True, help_text=help_fields.DIRECTORY_INSTITUTIONS_HELP
+        Institution,
+        verbose_name=_("Institution"),
+        blank=True,
+        help_text=help_fields.DIRECTORY_INSTITUTIONS_HELP,
     )
     thematic_areas = models.ManyToManyField(
-        ThematicArea, verbose_name=_("Thematic Area"), blank=True, help_text=help_fields.DIRECTORY_THEMATIC_AREA_HELP
+        ThematicArea,
+        verbose_name=_("Thematic Area"),
+        blank=True,
+        help_text=help_fields.DIRECTORY_THEMATIC_AREA_HELP,
     )
 
     practice = models.ForeignKey(
@@ -65,7 +85,7 @@ class InfrastructureDirectory(CommonControlField):
         null=True,
         blank=False,
         on_delete=models.SET_NULL,
-        help_text=help_fields.DIRECTORY_PRACTICE_HELP
+        help_text=help_fields.DIRECTORY_PRACTICE_HELP,
     )
 
     action = models.ForeignKey(
@@ -75,7 +95,7 @@ class InfrastructureDirectory(CommonControlField):
         blank=True,
         on_delete=models.SET_NULL,
         default=get_default_action,
-        help_text=help_fields.DIRECTORY_ACTION_HELP
+        help_text=help_fields.DIRECTORY_ACTION_HELP,
     )
 
     classification = models.CharField(
@@ -84,10 +104,12 @@ class InfrastructureDirectory(CommonControlField):
         max_length=255,
         null=True,
         blank=True,
-        help_text=help_fields.DIRECTORY_CLASSIFICATION_HELP
+        help_text=help_fields.DIRECTORY_CLASSIFICATION_HELP,
     )
 
-    keywords = TaggableManager(_("Keywords"), blank=True, help_text=help_fields.DIRECTORY_KEYWORDS_AREA_HELP)
+    keywords = TaggableManager(
+        _("Keywords"), blank=True, help_text=help_fields.DIRECTORY_KEYWORDS_AREA_HELP
+    )
 
     record_status = models.CharField(
         _("Record status"),
@@ -95,10 +117,16 @@ class InfrastructureDirectory(CommonControlField):
         max_length=255,
         null=True,
         blank=True,
-        help_text=help_fields.DIRECTORY_RECORD_STATUS_HELP
+        help_text=help_fields.DIRECTORY_RECORD_STATUS_HELP,
     )
 
-    source = models.CharField(_("Source"), max_length=255, null=True, blank=True, help_text=help_fields.DIRECTORY_SOURCE_HELP)
+    source = models.CharField(
+        _("Source"),
+        max_length=255,
+        null=True,
+        blank=True,
+        help_text=help_fields.DIRECTORY_SOURCE_HELP,
+    )
 
     institutional_contribution = models.CharField(
         _("Institutional Contribution"),
@@ -107,7 +135,13 @@ class InfrastructureDirectory(CommonControlField):
         help_text=help_fields.DIRECTORY_INSTITUTIONAL_CONTRIBUTION_HELP,
     )
 
-    notes = models.TextField(_("Notes"), max_length=1000, null=True, blank=True, help_text=help_fields.DIRECTORY_NOTES_HELP)
+    notes = models.TextField(
+        _("Notes"),
+        max_length=1000,
+        null=True,
+        blank=True,
+        help_text=help_fields.DIRECTORY_NOTES_HELP,
+    )
 
     panels = [
         HelpPanel(
@@ -146,8 +180,8 @@ class InfrastructureDirectory(CommonControlField):
             "infrastructure__keywords": [keyword for keyword in self.keywords.names()],
             "infrastructure__record_status": self.record_status,
             "infrastructure__source": self.source,
-            "infrastructure__action": self.action,
-            "infrastructure__practice": self.practice,
+            "infrastructure__action": self.action.name,
+            "infrastructure__practice": self.practice.name,
             "infrastructure__institutional_contribution": self.institutional_contribution,
             "infrastructure__notes": self.notes,
         }
@@ -171,6 +205,75 @@ class InfrastructureDirectory(CommonControlField):
             d.update(self.action.data)
 
         return d
+
+    @classmethod
+    def filter_items_to_generate_indicators(
+        cls,
+        action__name=None,
+        practice__code=None,
+        practice__name=None,
+        classification=None,
+        institution__name=None,
+        thematic_area__level0=None,
+        thematic_area__level1=None,
+        location__state__code=None,
+        location__state__region=None,
+    ):
+        params = dict(
+            action__name=action__name,
+            practice__code=practice__code,
+            practice__name=practice__name,
+            classification=classification,
+            institutions__name=institution__name,
+            institutions__location__state__acronym=location__state__code,
+            institutions__location__state__region=location__state__region,
+            thematic_areas__level0=thematic_area__level0,
+            thematic_areas__level1=thematic_area__level1,
+        )
+        params = {k: v for k, v in params.items() if v}
+        return cls.objects.filter(record_status="PUBLISHED", **params)
+
+    @classmethod
+    def parameters_for_values(
+        cls,
+        by_practice=False,
+        by_classification=False,
+        by_institution=False,
+        by_thematic_area_level0=False,
+        by_thematic_area_level1=False,
+        by_state=False,
+        by_region=False,
+    ):
+        selected_attributes = Action.parameters_for_values("action")
+        if by_classification:
+            selected_attributes += ["classification"]
+        if by_practice:
+            selected_attributes += Practice.parameters_for_values("practice")
+        if by_institution:
+            selected_attributes += Institution.parameters_for_values("institutions")
+        if by_state or by_state or by_region:
+            selected_attributes += State.parameters_for_values(
+                "institutions__location__state", by_state, by_state, by_region
+            )
+        if by_thematic_area_level0 or by_thematic_area_level1:
+            selected_attributes += ThematicArea.parameters_for_values(
+                "thematic_areas", by_thematic_area_level0, by_thematic_area_level1
+            )
+
+        return selected_attributes
+
+    @classmethod
+    def group(
+        cls,
+        query_result,
+        selected_attributes,
+    ):
+        return (
+            query_result.values(*selected_attributes)
+            .annotate(count=Count("id"))
+            .order_by("count")
+            .iterator()
+        )
 
     base_form_class = InfrastructureDirectoryForm
 

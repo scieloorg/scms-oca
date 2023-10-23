@@ -2,10 +2,8 @@
 import logging
 
 from haystack import indexes
-from django.utils.translation import gettext as _
 
 from indicator import models
-from indicator.controller import CATEGORIES
 
 
 class IndicatorIndex(indexes.SearchIndex, indexes.Indexable):
@@ -170,15 +168,15 @@ class IndicatorIndex(indexes.SearchIndex, indexes.Indexable):
     def prepare_action(self, obj):
         return obj.action_and_practice and obj.action_and_practice.action.name
 
-    def prepare_category(self, obj):
-        if obj.category:
-            return CATEGORIES[obj.category]["title"]
-
     def prepare_classification(self, obj):
         return obj.action_and_practice and obj.action_and_practice.classification
 
     def prepare_practice(self, obj):
-        return obj.action_and_practice and obj.action_and_practice.practice.name
+        return (
+            obj.action_and_practice
+            and obj.action_and_practice.practice
+            and obj.action_and_practice.practice.name
+        )
 
     def prepare_record_type(self, obj):
         return "indicator"

@@ -124,6 +124,28 @@ class Institution(CommonControlField, ClusterableModel):
         return institution
 
     @classmethod
+    def parameters_for_values(cls, prefix):
+        return [
+            f"{prefix}__name",
+        ]
+
+    @classmethod
+    def values(cls, selected_attributes=None):
+        selected_attributes = selected_attributes or [
+            "name",
+        ]
+        return (
+            cls.objects.filter(location__country__acron2="BR")
+            .values(*selected_attributes)
+            .annotate(count=Count("id"))
+            .order_by("count")
+            .iterator()
+        )
+
+    @classmethod
+    def names(cls):
+        return (item["name"] for item in cls.values())
+
     def get(cls, **kwargs):
         """
         This function will try to get the institution by attributes:
@@ -236,6 +258,9 @@ class SourceInstitution(ClusterableModel):
         on_delete=models.CASCADE,
     )
     raw = models.JSONField(_("JSON Data institution"), null=True, blank=True)
+
+    def autocomplete_label(self):
+        return "%s (%s)" % (self.display_name, self.source)
 
     class Meta:
         indexes = [

@@ -1,5 +1,5 @@
-from indicator import controller
+from indicator import scheduler
 
 
 def run():
-    controller.delete_tasks()
+    scheduler.delete_tasks()
