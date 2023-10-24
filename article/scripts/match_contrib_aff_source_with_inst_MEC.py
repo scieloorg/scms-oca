@@ -1,8 +1,6 @@
 from django.utils.translation import gettext as _
 
 from article.tasks import match_contrib_aff_source_with_inst_MEC
-from article import models
-from institution.models import Institution
 
 def run(user_id):
     """

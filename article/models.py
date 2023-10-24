@@ -1147,12 +1147,15 @@ class Article(models.Model):
         by_thematic_area_level1=False,
         by_state=False,
         by_region=False,
+        by_apc=False,
     ):
         selected_attributes = ["year"]
         if by_open_access_status:
             selected_attributes += ["open_access_status"]
         if by_use_license:
             selected_attributes += ["license"]
+        if by_apc:
+            selected_attributes += ["apc"]
         if by_institution:
             selected_attributes += Institution.parameters_for_values("contributors__affiliations__official")
         if by_state or by_region:

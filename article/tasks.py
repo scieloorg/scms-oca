@@ -207,18 +207,24 @@ def load_openalex(user_id, date=2012, length=None, country="BR"):
 
 @celery_app.task(name=_("Sanitize all Journals"))
 def article_source_to_article(
-    user_id, source_name="OPENALEX", size=None, loop_size=1000
+    user_id, source_name="OPENALEX", size=None, loop_size=1000, intitution_id=None
 ):
-    """ """
+    """
+    This task load the source article to article.
+    """
     count = 0
+    filters = {}
+    filters['source__name'] = source_name
 
-    size=1000 if size and size < 1000 else size
+    if intitution_id:
+        filters["raw__authorships__0__institutions__icontains"] = intitution_id
 
     sarticle = (
-        models.SourceArticle.objects.filter(source__name=source_name).order_by("id")[0 : int(size)]
+        models.SourceArticle.objects.filter(**filters).order_by("id")[0 : int(size)]
         if size
-        else models.SourceArticle.objects.filter(source__name="OPENALEX")
+        else models.SourceArticle.objects.filter(**filters)
     )
+    
     total = sarticle.count()
     offset = loop_size
 

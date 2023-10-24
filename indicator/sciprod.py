@@ -32,10 +32,9 @@ class SciProd:
         by_thematic_area_level1=False,
         by_state=False,
         by_region=False,
+        by_apc=False,
     ):
 
-        by_open_access_status = True
-        by_use_license = True
         self.GROUP_BY_AND_ATTRIBUTE_NAME = dict(
             by_use_license="license",
             by_open_access_status="open_access_status",
@@ -44,6 +43,7 @@ class SciProd:
             by_thematic_area_level1="thematic_areas__level1",
             by_state="state__acronym",
             by_region="state__region",
+            by_apc="apc",
         )
         self.ATTRIBUTE_LABEL = dict(
             use_license=_("licença de uso"),
@@ -53,6 +53,7 @@ class SciProd:
             thematic_area__level1=_("área temática"),
             state__acronym=_("UF"),
             state__region=_("região"),
+            apc=_("APC"),
         )
         self._contribution = set()
 
@@ -72,6 +73,7 @@ class SciProd:
         self.by_thematic_area_level1 = by_thematic_area_level1
         self.by_state = by_state
         self.by_region = by_region
+        self.by_apc = by_apc
         self.by_year = bool(begin_year and end_year and begin_year < end_year)
 
     @property
@@ -128,7 +130,7 @@ class SciProd:
             by_thematic_area_level1=self.by_thematic_area_level1,
             by_state=self.by_state,
             by_region=self.by_region,
-            # by_year=self.begin_year,
+            by_apc=self.by_apc,
         )
         return {k: v for k, v in _data.items() if v}
 
@@ -172,11 +174,12 @@ class SciProd:
             by_institution=self.by_institution,
             by_thematic_area_level1=self.by_thematic_area_level1,
             by_state=self.by_state,
+            by_apc=self.by_apc,
         )
         for k, v in names.items():
             if v:
                 return {k: True}
-        return {"by_open_access_status": True, "by_use_license": True}
+        return {"by_open_access_status": True, "by_use_license": True, "by_apc": True}
 
 
     @property
@@ -194,6 +197,7 @@ class SciProd:
             "by_thematic_area_level1",
             "by_state",
             "by_region",
+            "by_apc",
         ]
         return " / ".join([
             self.ATTRIBUTE_LABEL[self.GROUP_BY_AND_ATTRIBUTE_NAME[k]]
@@ -227,6 +231,7 @@ class SciProd:
         """
         Retorna os itens resultantes de filtragem e agrupamento aplicado em Article
         """
+
         for serie_params in self.series_parameters:
             grouped_by = models.Article.parameters_for_values(**serie_params["grouped_by_params"])
             logging.info(f"grouped_by {grouped_by}")
@@ -271,20 +276,21 @@ class SciProd:
         """
         yield from self.items
 
-    def get_contribution(self):
+    def get_source(self):
         """
-        Retorna os nomes das instituições fornecedora dos dados usados para
+        Retorna os nomes das fontes dos dados usados para
         gerar os indicadores
         """
-        contribution = []
+        sources = []
         for item in (
-            self.items.values("sources")
+            self.items.values("sources__name")
             .annotate(count=Count("id"))
             .order_by("count")
             .iterator()
         ):
-            contribution += [item["sources"]]
-        return " • ".join(str(contribution)) or "SciELO"
+            sources.append(item["sources__name"])
+        return " • ".join(sources)
+
 
     @property
     def institutions(self):
@@ -352,11 +358,11 @@ class SciProd:
 
         raw_data_items = self.get_raw_data()
         summarized = self.get_summarized()
-        if len(summarized) < 2:
-            logging.warning("Insuficient data")
-            return
+        # if len(summarized) < 2:
+        #     logging.warning("Insuficient data")
+        #     return
 
-        contribution = self.get_contribution()
+        sources = self.get_source()
 
         indicator = Indicator.create(
             creator,
@@ -378,7 +384,7 @@ class SciProd:
         )
         indicator.summarized = summarized
         indicator.description = _(
-            f"Gerado automaticamente usando dados provenientes de {contribution}"
+            f"Gerado automaticamente usando dados provenientes de {sources}"
         )
         indicator.add_raw_data(raw_data_items)
         return indicator
@@ -400,6 +406,7 @@ def generate_indicator(
     by_thematic_area_level1=False,
     by_state=False,
     by_region=False,
+    by_apc=False,
 ):
 
     """
@@ -421,6 +428,7 @@ def generate_indicator(
         by_thematic_area_level1=by_thematic_area_level1,
         by_state=by_state,
         by_region=by_region,
+        by_apc=by_apc,
     )
     return sciprod.generate_article_evolution_indicator(creator)
 
@@ -444,7 +452,6 @@ def generate_indicators(creator, filter_by, group_by_params, begin_year, end_yea
     - group_by_params
     """
     filter_params = get_filter_params(filter_by)
-    print(filter_params)
     for params in get_indicator_parameters(filter_params, group_by_params):
         logging.info("Generating indicator for {}".format(params))
         generate_indicator(creator, begin_year, end_year, **params)

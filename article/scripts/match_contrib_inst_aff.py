@@ -5,7 +5,7 @@ from article.tasks import match_contrib_inst_aff
 
 def run(user_id):
     """
-    Load the article from SourceArticle model to Article model.
+    contributor looking for contributor.institutions and find the affiliation
     """
     if user_id:
         match_contrib_inst_aff(int(user_id))
