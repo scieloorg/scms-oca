@@ -1141,7 +1141,7 @@ class Article(models.Model):
     def parameters_for_values(
         cls,
         by_open_access_status=False,
-        by_use_license=False,
+        by_license=False,
         by_institution=False,
         by_thematic_area_level0=False,
         by_thematic_area_level1=False,
@@ -1152,8 +1152,8 @@ class Article(models.Model):
         selected_attributes = ["year"]
         if by_open_access_status:
             selected_attributes += ["open_access_status"]
-        if by_use_license:
-            selected_attributes += ["license"]
+        if by_license:
+            selected_attributes += ["license__name"]
         if by_apc:
             selected_attributes += ["apc"]
         if by_institution:
