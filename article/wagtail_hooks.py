@@ -13,22 +13,74 @@ from .models import (
     Affiliation,
     Journal,
     License,
+    Concepts,
 )
+
 
 class SourceArticleAdmin(ModelAdmin):
     model = SourceArticle
-    menu_label = _("Source Articles")  # ditch this to use verbose_name_plural from model
+    menu_label = _(
+        "Source Articles"
+    )  # ditch this to use verbose_name_plural from model
     menu_icon = "folder-open-inverse"  # change as required
     add_to_settings_menu = False  # or True to add your model to the Settings sub-menu
     exclude_from_explorer = (
         False  # or True to exclude pages of this type from Wagtail's explorer view
     )
 
+    list_display = (
+        "doi",
+        "specific_id",
+        "year",
+        "is_paratext",
+        "updated",
+        "created",
+    )
 
-    list_display = ("doi", "specific_id", "year", "is_paratext", "updated", "created", )
+    list_filter = (
+        "year",
+        "is_paratext",
+        "source",
+    )
+    search_fields = (
+        "doi",
+        "specific_id",
+    )
 
-    list_filter = ("year", "is_paratext", "source", )
-    search_fields = ("doi", "specific_id", )
+
+class ConceptsAdmin(ModelAdmin):
+    model = Concepts
+    menu_label = _("Concepts")  # ditch this to use verbose_name_plural from model
+    menu_icon = "folder-open-inverse"  # change as required
+    add_to_settings_menu = False  # or True to add your model to the Settings sub-menu
+    exclude_from_explorer = (
+        False  # or True to exclude pages of this type from Wagtail's explorer view
+    )
+
+    def all_parents_id(self, obj):
+        return " | ".join([str(c) for c in obj.parent_ids.all()])
+
+    def all_theme(self, obj):
+        return " | ".join([str(c) for c in obj.thematic_areas.all()])
+
+    def has_theme(self, obj):
+        return bool(obj.thematic_areas.all())
+
+    list_display = (
+        "name",
+        "specific_id",
+        "normalized_name",
+        "level",
+        "parent_display_names",
+        "all_parents_id",
+        "all_theme",
+    )
+
+    list_filter = (
+        "level",
+        "thematic_areas",
+    )
+    search_fields = ("name", "specific_id", "normalized_name")
 
 
 class ArticleAdmin(ModelAdmin):
@@ -43,6 +95,12 @@ class ArticleAdmin(ModelAdmin):
     def all_contributors(self, obj):
         return " | ".join([str(c) for c in obj.contributors.all()])
 
+    def all_theme(self, obj):
+        for c in obj.concepts.all():
+            return " | ".join(
+                ["%s (%s)" % (str(t), t.id) for t in c.thematic_areas.all() if t]
+            )
+
     list_display = (
         "doi",
         "title",
@@ -54,10 +112,20 @@ class ArticleAdmin(ModelAdmin):
         "license",
         # "apc",
         "all_contributors",
+        "all_theme",
     )
 
-    list_filter = ("year", "license", "open_access_status", "apc", "is_oa", )
-    search_fields = ("doi", "year", )
+    list_filter = (
+        "year",
+        "license",
+        "open_access_status",
+        "apc",
+        "is_oa",
+    )
+    search_fields = (
+        "doi",
+        "year",
+    )
 
 
 class JournalAdmin(ModelAdmin):
@@ -89,14 +157,21 @@ class ContributorAdmin(ModelAdmin):
     exclude_from_explorer = (
         False  # or True to exclude pages of this type from Wagtail's explorer view
     )
-    def all_institutions(self, obj):
-        return " | ".join([str("%s(%s)" % (c.display_name, c.id)) for c in obj.institutions.all()])
 
     def all_institutions(self, obj):
-        return " | ".join([str("%s(%s)" % (c.display_name, c.id)) for c in obj.institutions.all()])
-    
+        return " | ".join(
+            [str("%s(%s)" % (c.display_name, c.id)) for c in obj.institutions.all()]
+        )
+
+    def all_institutions(self, obj):
+        return " | ".join(
+            [str("%s(%s)" % (c.display_name, c.id)) for c in obj.institutions.all()]
+        )
+
     def all_affiliations(self, obj):
-        return " | ".join([str("%s(%s)" % (c.name, c.id)) for c in obj.affiliations.all()])
+        return " | ".join(
+            [str("%s(%s)" % (c.name, c.id)) for c in obj.affiliations.all()]
+        )
 
     list_display = (
         "family",
@@ -108,11 +183,7 @@ class ContributorAdmin(ModelAdmin):
     )
 
     # list_filter = ('orcid',)
-    search_fields = (
-        "orcid",
-        "family",
-        "given"
-    )
+    search_fields = ("orcid", "family", "given")
 
 
 class AffiliationAdmin(ModelAdmin):
@@ -123,16 +194,10 @@ class AffiliationAdmin(ModelAdmin):
     exclude_from_explorer = (
         False  # or True to exclude pages of this type from Wagtail's explorer view
     )
-    list_display = (
-        "name",
-        "official",
-        "country",
-        "source"
-    )
+    list_display = ("name", "official", "country", "source")
     # list_filter = ("country",)
-    search_fields = (
-        "name",
-    )
+    search_fields = ("name",)
+
 
 class LicenseAdmin(ModelAdmin):
     model = License
@@ -162,6 +227,7 @@ class ArticleAdminGroup(ModelAdminGroup):
         ContributorAdmin,
         AffiliationAdmin,
         LicenseAdmin,
+        ConceptsAdmin,
         SourceArticleAdmin,
     )
 

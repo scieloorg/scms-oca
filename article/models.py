@@ -12,8 +12,89 @@ from . import choices
 from .forms import ContributorForm
 
 
+
+class Concepts(models.Model):
+    """
+    Concepts are abstract ideas that works are about.
+
+    More about, see the source: https://docs.openalex.org/api-entities/concepts
+    """
+
+    specific_id = models.CharField(
+        _("Specific Id"), max_length=255, null=False, blank=False
+    )
+
+    name = models.CharField(
+        _("Name"),
+        max_length=512,
+        null=True,
+        blank=True,
+        help_text=_("Name of the concept"),
+    )
+
+    normalized_name = models.CharField(
+        _("Normalized Name"),
+        max_length=512,
+        null=True,
+        blank=True,
+        help_text=_("Name of the concept"),
+    )
+
+    level = models.IntegerField(
+        _("Level"),
+        null=True,
+        blank=True,
+        help_text=_("Number indicating hierarchy"),
+    )
+
+    parent_display_names = models.CharField(
+        _("Parent Display Name"),
+        max_length=512,
+        null=True,
+        blank=True,
+        help_text=_("The name of parents up to child names"),
+    )
+
+    parent_ids = models.ManyToManyField(
+        "self",
+        verbose_name=_("Parent ids"),
+        symmetrical=False,
+        blank=True,
+        related_name="parent_id",
+        help_text=_("Parent relation"),
+    )
+
+    thematic_areas = models.ManyToManyField(
+        ThematicArea,
+        verbose_name=_("Thematic Area"),
+        blank=True,
+        help_text=_("Thematic area relation"),
+    )
+
+    source = models.ForeignKey(
+        Source,
+        verbose_name=_("Source"),
+        null=True,
+        on_delete=models.SET_NULL,
+    )
+
+    def autocomplete_label(self):
+        return "%s (%s)" % (self.name, self.level) or ""
+    class Meta:
+        verbose_name = _("Concept")
+        verbose_name_plural = _("Concepts")
+
+    def __unicode__(self):
+        return self.__str__()
+
+    def __str__(self):
+        return "%s (%s)" % (self.name, self.level) or ""
+
+
 class Journal(models.Model):
-    journal_issn_l = models.CharField(_("ISSN-L"), max_length=255, null=True, blank=True)
+    journal_issn_l = models.CharField(
+        _("ISSN-L"), max_length=255, null=True, blank=True
+    )
     journal_issns = models.CharField(_("ISSN's"), max_length=255, null=True, blank=True)
     journal_name = models.CharField(
         _("Journal Name"), max_length=512, null=True, blank=True
@@ -99,7 +180,7 @@ class Journal(models.Model):
 
         return journal|None
 
-        This function can raise: 
+        This function can raise:
             ValueError
             Journal.DoesNotExist
             Journal.MultipleObjectsReturned
@@ -228,7 +309,7 @@ class Program(models.Model):
 
         return program|None
 
-        This function can raise: 
+        This function can raise:
             ValueError
             Program.DoesNotExist
             Program.MultipleObjectsReturned
@@ -285,7 +366,9 @@ class Contributor(models.Model):
     family = models.CharField(_("Family Name"), max_length=255, null=True, blank=True)
     given = models.CharField(_("Given Name"), max_length=255, null=True, blank=True)
     orcid = models.CharField("ORCID", max_length=50, null=True, blank=True)
-    author_position = models.CharField("author_position", max_length=100, null=True, blank=True)
+    author_position = models.CharField(
+        "author_position", max_length=100, null=True, blank=True
+    )
     authenticated_orcid = models.BooleanField(
         _("Authenticated"), default=False, null=True, blank=True
     )
@@ -294,7 +377,9 @@ class Contributor(models.Model):
     )
     programs = models.ManyToManyField(Program, verbose_name=_("Program"), blank=True)
 
-    institutions = models.ManyToManyField(SourceInstitution, verbose_name=_("Institutions"))
+    institutions = models.ManyToManyField(
+        SourceInstitution, verbose_name=_("Institutions")
+    )
 
     autocomplete_search_field = "given"
 
@@ -328,7 +413,7 @@ class Contributor(models.Model):
                 fields=[
                     "authenticated_orcid",
                 ]
-            )
+            ),
         ]
 
     panels = [
@@ -363,9 +448,9 @@ class Contributor(models.Model):
     @classmethod
     def get(cls, **kwargs):
         """
-        This function will try to get the contributor by attributes: 
+        This function will try to get the contributor by attributes:
 
-            * family 
+            * family
             * given
             * orcid
             * affiliation
@@ -380,7 +465,7 @@ class Contributor(models.Model):
 
         return contributor|None
 
-        This function can raise: 
+        This function can raise:
             ValueError
             Contributor.DoesNotExist
             Contributor.MultipleObjectsReturned
@@ -388,7 +473,9 @@ class Contributor(models.Model):
         filters = {}
 
         if not kwargs.get("family") and not kwargs.get("given"):
-            raise ValueError("Param family name, given and affiliations_string is required")
+            raise ValueError(
+                "Param family name, given and affiliations_string is required"
+            )
 
         filters = {
             "family__iexact": kwargs.get("family"),
@@ -401,7 +488,7 @@ class Contributor(models.Model):
             filters["orcid"] = None
 
         return cls.objects.get(**filters)
-    
+
     @classmethod
     def create_or_update(cls, **kwargs):
         """
@@ -465,9 +552,7 @@ class Contributor(models.Model):
 
 class Affiliation(models.Model):
     # Nome declarado não padronizado, mesma coisa que o raw_affiliation_strings
-    name = models.TextField(
-        _("Affiliation Name"), null=True, blank=True
-    )
+    name = models.TextField(_("Affiliation Name"), null=True, blank=True)
     # Somente preenchido que existir correspondencia com o MEC
     official = models.ForeignKey(
         Institution,
@@ -542,7 +627,7 @@ class Affiliation(models.Model):
     @classmethod
     def get(cls, **kwargs):
         """
-        This function will try to get the affiliation by attributes: 
+        This function will try to get the affiliation by attributes:
 
             * name
             * official institution
@@ -557,7 +642,7 @@ class Affiliation(models.Model):
 
         return affiliation|None
 
-        This function can raise: 
+        This function can raise:
             ValueError
             Affiliation.DoesNotExist
             Affiliation.MultipleObjectsReturned
@@ -665,7 +750,7 @@ class License(models.Model):
     @classmethod
     def get(cls, **kwargs):
         """
-        This function will try to get the license by attributes: 
+        This function will try to get the license by attributes:
 
             * name
 
@@ -678,7 +763,7 @@ class License(models.Model):
 
         return license|None
 
-        This function can raise: 
+        This function can raise:
             ValueError
             License.DoesNotExist
             License.MultipleObjectsReturned
@@ -793,7 +878,7 @@ class SourceArticle(models.Model):
     @classmethod
     def get(cls, **kwargs):
         """
-        This function will try to get the source article by attributes: 
+        This function will try to get the source article by attributes:
 
             * doi
             * specific_id
@@ -810,7 +895,7 @@ class SourceArticle(models.Model):
 
         return source article|None
 
-        This function can raise: 
+        This function can raise:
             ValueError
             SourceArticle.DoesNotExist
             SourceArticle.MultipleObjectsReturned
@@ -818,13 +903,20 @@ class SourceArticle(models.Model):
 
         filters = {}
 
-        if not kwargs.get("doi") and not kwargs.get("specific_id") and not kwargs.get("source"):
+        if (
+            not kwargs.get("doi")
+            and not kwargs.get("specific_id")
+            and not kwargs.get("source")
+        ):
             raise ValueError("Param doi or specific_id is required")
 
         if kwargs.get("specific_id"):
-            filters = {"specific_id": kwargs.get("specific_id"), 'source': kwargs.get("source")}
+            filters = {
+                "specific_id": kwargs.get("specific_id"),
+                "source": kwargs.get("source"),
+            }
         elif kwargs.get("doi"):
-            filters = {"doi": kwargs.get("doi"), 'source': kwargs.get("source")}
+            filters = {"doi": kwargs.get("doi"), "source": kwargs.get("source")}
 
         return cls.objects.get(**filters)
 
@@ -926,6 +1018,18 @@ class Article(models.Model):
         blank=True,
     )
 
+    concepts = models.ManyToManyField(
+        Concepts,
+        verbose_name=_("Concepts"),
+        blank=True,
+    )
+
+    programs = models.ManyToManyField(
+        Program,
+        verbose_name=_("Programs"),
+        blank=True,
+    )
+
     def __unicode__(self):
         return self.__str__()
 
@@ -988,6 +1092,8 @@ class Article(models.Model):
         AutocompletePanel("contributors"),
         AutocompletePanel("journal"),
         AutocompletePanel("sources"),
+        AutocompletePanel("concepts"),
+        AutocompletePanel("programs"),
     ]
 
     @property
@@ -1015,7 +1121,7 @@ class Article(models.Model):
     @classmethod
     def get(cls, **kwargs):
         """
-        This function will try to get the article by attributes: 
+        This function will try to get the article by attributes:
 
             * doi
 
@@ -1035,7 +1141,7 @@ class Article(models.Model):
 
         return article|None
 
-        This function can raise: 
+        This function can raise:
             ValueError
             Article.DoesNotExist
             Article.MultipleObjectsReturned
@@ -1110,6 +1216,10 @@ class Article(models.Model):
             for source in kwargs.get("sources"):
                 article.sources.add(source)
 
+        if kwargs.get("concepts"):
+            for concept in kwargs.get("concepts"):
+                article.concepts.add(concept)
+
         return article, created
 
     @classmethod
@@ -1157,14 +1267,21 @@ class Article(models.Model):
         if by_apc:
             selected_attributes += ["apc"]
         if by_institution:
-            selected_attributes += Institution.parameters_for_values("contributors__affiliations__official")
+            selected_attributes += Institution.parameters_for_values(
+                "contributors__affiliations__official"
+            )
         if by_state or by_region:
             selected_attributes += State.parameters_for_values(
-                "contributors__affiliations__official__location__state", by_state, by_state, by_region
+                "contributors__affiliations__official__location__state",
+                by_state,
+                by_state,
+                by_region,
             )
         if by_thematic_area_level0 or by_thematic_area_level1:
             selected_attributes += ThematicArea.parameters_for_values(
-                "contributors__thematic_areas", by_thematic_area_level0, by_thematic_area_level1
+                "contributors__thematic_areas",
+                by_thematic_area_level0,
+                by_thematic_area_level1,
             )
         return selected_attributes
 
@@ -1184,7 +1301,9 @@ class Article(models.Model):
             d = {}
             for k, v in item.items():
                 k = k.replace("contributors__affiliations__official__location__", "")
-                k = k.replace("contributors__affiliations__official__name", "institution__name")
+                k = k.replace(
+                    "contributors__affiliations__official__name", "institution__name"
+                )
                 k = k.replace("thematic_areas__", "thematic_area__")
 
                 d[k] = v

@@ -26,7 +26,7 @@ class SciProd:
         location__state__code=None,
         location__state__region=None,
         by_open_access_status=False,
-        by_use_license=False,
+        by_license=False,
         by_institution=False,
         by_thematic_area_level0=False,
         by_thematic_area_level1=False,
@@ -36,7 +36,7 @@ class SciProd:
     ):
 
         self.GROUP_BY_AND_ATTRIBUTE_NAME = dict(
-            by_use_license="license",
+            by_license="license__name",
             by_open_access_status="open_access_status",
             by_institution="institution__name",
             by_thematic_area_level0="thematic_areas__level0",
@@ -46,7 +46,7 @@ class SciProd:
             by_apc="apc",
         )
         self.ATTRIBUTE_LABEL = dict(
-            use_license=_("licença de uso"),
+            license__name=_("licença de uso"),
             open_access_status=_("status de acesso aberto"),
             institution__name=_("instituição"),
             thematic_area__level0=_("área temática"),
@@ -66,7 +66,7 @@ class SciProd:
         self.thematic_area__level1 = thematic_area__level1
         self.location__state__code = location__state__code
         self.location__state__region = location__state__region
-        self.by_use_license = by_use_license
+        self.by_license = by_license
         self.by_open_access_status = by_open_access_status
         self.by_institution = by_institution
         self.by_thematic_area_level0 = by_thematic_area_level0
@@ -124,7 +124,7 @@ class SciProd:
         """
         _data = dict(
             by_open_access_status=self.by_open_access_status,
-            by_use_license=self.by_use_license,
+            by_license=self.by_license,
             by_institution=self.by_institution,
             by_thematic_area_level0=self.by_thematic_area_level0,
             by_thematic_area_level1=self.by_thematic_area_level1,
@@ -175,11 +175,13 @@ class SciProd:
             by_thematic_area_level1=self.by_thematic_area_level1,
             by_state=self.by_state,
             by_apc=self.by_apc,
+            by_license=self.by_license,
+            by_open_access_status=self.by_open_access_status,
         )
         for k, v in names.items():
             if v:
                 return {k: True}
-        return {"by_open_access_status": True, "by_use_license": True, "by_apc": True}
+        return {"by_open_access_status": True, "by_license": True, "by_apc": True}
 
 
     @property
@@ -193,10 +195,12 @@ class SciProd:
         """
         names = [
             "by_institution",
+            "by_open_access_status",
             "by_thematic_area_level0",
             "by_thematic_area_level1",
             "by_state",
             "by_region",
+            "by_license",
             "by_apc",
         ]
         return " / ".join([
@@ -258,7 +262,6 @@ class SciProd:
         Retorna os itens preparados para serem usados para montar o gráfico
         """
         for item in self.get_series():
-
             logging.info("Data graphic {}".format(item))
             x_label = self.get_x_label(item)
             y_label = self.get_y_label(item)
@@ -400,7 +403,7 @@ def generate_indicator(
     location__state__code=None,
     location__state__region=None,
     by_open_access_status=False,
-    by_use_license=False,
+    by_license=False,
     by_institution=False,
     by_thematic_area_level0=False,
     by_thematic_area_level1=False,
@@ -422,7 +425,7 @@ def generate_indicator(
         location__state__code=location__state__code,
         location__state__region=location__state__region,
         by_open_access_status=by_open_access_status,
-        by_use_license=by_use_license,
+        by_license=by_license,
         by_institution=by_institution,
         by_thematic_area_level0=by_thematic_area_level0,
         by_thematic_area_level1=by_thematic_area_level1,

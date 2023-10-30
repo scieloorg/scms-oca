@@ -9,8 +9,8 @@ from article import models
 from config import celery_app
 from core.models import Source
 from core.utils import utils as core_utils
-
 from institution.models import Institution
+from usefulmodels.models import ThematicArea
 
 logger = logging.getLogger(__name__)
 
@@ -205,7 +205,7 @@ def load_openalex(user_id, date=2012, length=None, country="BR"):
         logger.info(f"Unexpected error: {e}")
 
 
-@celery_app.task(name=_("Sanitize all Journals"))
+@celery_app.task(name=_("ArticleSource to Article"))
 def article_source_to_article(
     user_id, source_name="OPENALEX", size=None, loop_size=1000, intitution_id=None
 ):
@@ -214,7 +214,7 @@ def article_source_to_article(
     """
     count = 0
     filters = {}
-    filters['source__name'] = source_name
+    filters["source__name"] = source_name
 
     if intitution_id:
         filters["raw__authorships__0__institutions__icontains"] = intitution_id
@@ -224,7 +224,7 @@ def article_source_to_article(
         if size
         else models.SourceArticle.objects.filter(**filters)
     )
-    
+
     total = sarticle.count()
     offset = loop_size
 
@@ -376,6 +376,16 @@ def load_openalex_article(user_id, article_ids, update=False):
 
                         contributors.append(contributor)
 
+            # add the concepts
+            concepts = []
+            for concept in core_utils.nestget(article.raw, "concepts"):
+                try:
+                    concepts.append(
+                        models.Concepts.objects.get(specific_id=concept.get("id").lower())
+                    )
+                except models.Concepts.DoesNotExist as ex:
+                    logger.warning("Not found concept: %s" % concept.get("id").lower())
+
             article_dict = {
                 "doi": doi,
                 "title": title,
@@ -389,6 +399,7 @@ def load_openalex_article(user_id, article_ids, update=False):
                 "open_access_status": oa_status,
                 "contributors": contributors,
                 "license": license,
+                "concepts": concepts,
             }
 
             article, created = models.Article.create_or_update(**article_dict)
@@ -544,6 +555,7 @@ def load_sucupira(production_file_csv, detail_file_csv, authors):
             % (index.numerator, article.doi or article.specific_id, created)
         )
 
+
 @celery_app.task(name="Match between institutions and affiliations")
 def match_contrib_inst_aff(user_id):
     """
@@ -559,7 +571,9 @@ def match_contrib_inst_aff(user_id):
                 # check if institution name is in aff.name
                 if inst.display_name:
                     if inst.display_name in aff.name:
-                        print("Update the contributor affiliation: %s(%s)" % (co, co.id))
+                        print(
+                            "Update the contributor affiliation: %s(%s)" % (co, co.id)
+                        )
                         aff.source = inst
                         aff.save()
 
@@ -572,7 +586,6 @@ def match_contrib_aff_source_with_inst_MEC(user_id):
 
     for aff in models.Affiliation.objects.all():
         if aff.source:
-
             insts = Institution.objects.filter(
                 name__icontains=aff.source.display_name, source="MEC"
             )
@@ -580,3 +593,265 @@ def match_contrib_aff_source_with_inst_MEC(user_id):
                 aff.official = insts[0]
                 aff.save()
 
+
+@celery_app.task(name="Load concepts")
+def load_concepts(user_id, delete=True):
+    """
+    This task add the concepts from a .csv file and Related theme between Concepts and Thematic Area(CAPES)
+
+    The relation are in the shared file: https://docs.google.com/spreadsheets/d/1yBlEXd2gRK_xfPoIBo5_FCFBkfJNcnJrva8-sF-5YFk
+    """
+
+    # Related theme between Concepts and Thematic Area(CAPES)
+    relate_theme = {
+        "food science": {
+            "level0": "Ciências da Vida",
+            "level1": "Ciências Agrárias",
+            "level2": "Ciência de Alimentos",
+        },
+        "agricultural science": {
+            "level0": "Ciências da Vida",
+            "level1": "Ciências Agrárias",
+            "level2": "Ciências Agrárias I",
+        },
+        "veterinary medicine": {
+            "level0": "Ciências da Vida",
+            "level1": "Ciências Agrárias",
+            "level2": "Medicina Veterinária",
+        },
+        "animal science": {
+            "level0": "Ciências da Vida",
+            "level1": "Ciências Agrárias",
+            "level2": "Zootecnia / Recursos Pesqueiros",
+        },
+        "biodiversity": {
+            "level0": "Ciências da Vida",
+            "level1": "Ciências Biológicas",
+            "level2": "Biodiversidade",
+        },
+        "biology": {
+            "level0": "Ciências da Vida",
+            "level1": "Ciências Biológicas",
+            "level2": "Ciências Biológicas I",
+        },
+        "physical education": {
+            "level0": "Ciências da Vida",
+            "level1": "Ciências da Saúde",
+            "level2": "Educação Física",
+        },
+        "nursing science": {
+            "level0": "Ciências da Vida",
+            "level1": "Ciências da Saúde",
+            "level2": "Enfermagem",
+        },
+        "pharmacy": {
+            "level0": "Ciências da Vida",
+            "level1": "Ciências da Saúde",
+            "level2": "Farmácia",
+        },
+        "medicine": {
+            "level0": "Ciências da Vida",
+            "level1": "Ciências da Saúde",
+            "level2": "medicine",
+        },
+        "nutritional science": {
+            "level0": "Ciências da Vida",
+            "level1": "Ciências da Saúde",
+            "level2": "Nutrição",
+        },
+        "dentistry": {
+            "level0": "Ciências da Vida",
+            "level1": "Ciências da Saúde",
+            "level2": "Odontologia",
+        },
+        "public health": {
+            "level0": "Ciências da Vida",
+            "level1": "Ciências da Saúde",
+            "level2": "Saúde Coletiva",
+        },
+        "anthropology": {
+            "level0": "Humanidades",
+            "level1": "Ciências Humanas",
+            "level2": "Antropologia / Arqueologia",
+        },
+        "political science": {
+            "level0": "Humanidades",
+            "level1": "Ciências Humanas",
+            "level2": "Ciência Política e Relações Internacionais",
+        },
+        "theology": {
+            "level0": "Humanidades",
+            "level1": "Ciências Humanas",
+            "level2": "Ciências da Religião e Teologia",
+        },
+        "formal education": {
+            "level0": "Humanidades",
+            "level1": "Ciências Humanas",
+            "level2": "Educação",
+        },
+        "philosophy": {
+            "level0": "Humanidades",
+            "level1": "Ciências Humanas",
+            "level2": "Filosofia",
+        },
+        "geography": {
+            "level0": "Humanidades",
+            "level1": "Ciências Humanas",
+            "level2": "Geografia",
+        },
+        "history": {
+            "level0": "Humanidades",
+            "level1": "Ciências Humanas",
+            "level2": "História",
+        },
+        "psychology": {
+            "level0": "Humanidades",
+            "level1": "Ciências Humanas",
+            "level2": "Psicologia",
+        },
+        "sociology": {
+            "level0": "Humanidades",
+            "level1": "Ciências Humanas",
+            "level2": "Sociologia",
+        },
+        "business": {
+            "level0": "Humanidades",
+            "level1": "Ciências Sociais Aplicadas",
+            "level2": "Administração Pública e de Empresas, Ciências Contábeis e Turismo",
+        },
+        "architecture": {
+            "level0": "Humanidades",
+            "level1": "Ciências Sociais Aplicadas",
+            "level2": "Arquitetura, Urbanismo e Design",
+        },
+        "information and communications technology": {
+            "level0": "Humanidades",
+            "level1": "Ciências Sociais Aplicadas",
+            "level2": "Comunicação e Informação",
+        },
+        "law": {
+            "level0": "Humanidades",
+            "level1": "Ciências Sociais Aplicadas",
+            "level2": "Direito",
+        },
+        "economics": {
+            "level0": "Humanidades",
+            "level1": "Ciências Sociais Aplicadas",
+            "level2": "Economia",
+        },
+        "urban planning": {
+            "level0": "Humanidades",
+            "level1": "Ciências Sociais Aplicadas",
+            "level2": "Planejamento Urbano e Regional / Demografia",
+        },
+        "business": {
+            "level0": "Humanidades",
+            "level1": "Ciências Sociais Aplicadas",
+            "level2": "Administração Pública e de Empresas, Ciências Contábeis e Turismo",
+        },
+        "art": {
+            "level0": "Humanidades",
+            "level1": "Linguística, Letras e Artes",
+            "level2": "Artes",
+        },
+        "linguistics": {
+            "level0": "Humanidades",
+            "level1": "Linguística, Letras e Artes",
+            "level2": "Linguística e Literatura",
+        },
+        "physics": {
+            "level0": "Ciências Exatas, Tecnológicas e Multidisciplinar",
+            "level1": "Ciências Exatas e da Terra",
+            "level2": "Astronomia / Física",
+        },
+        "computer science": {
+            "level0": "Ciências Exatas, Tecnológicas e Multidisciplinar",
+            "level1": "Ciências Exatas e da Terra",
+            "level2": "Ciência da Computação",
+        },
+        "mathematics": {
+            "level0": "Ciências Exatas, Tecnológicas e Multidisciplinar",
+            "level1": "Ciências Exatas e da Terra",
+            "level2": "Matemática / Probabilidade e Estatística",
+        },
+        "geology": {
+            "level0": "Ciências Exatas, Tecnológicas e Multidisciplinar",
+            "level1": "Ciências Exatas e da Terra",
+            "level2": "Geociências",
+        },
+        "chemistry": {
+            "level0": "Ciências Exatas, Tecnológicas e Multidisciplinar",
+            "level1": "Ciências Exatas e da Terra",
+            "level2": "Química",
+        },
+        "engineering": {
+            "level0": "Ciências Exatas, Tecnológicas e Multidisciplinar",
+            "level1": "Engenharias",
+            "level2": "Engenharias I",
+        },
+        "environmental science": {
+            "level0": "Ciências Exatas, Tecnológicas e Multidisciplinar",
+            "level1": "Multidisciplinar",
+            "level2": "Ciências Ambientais",
+        },
+        "biotechnology": {
+            "level0": "Ciências Exatas, Tecnológicas e Multidisciplinar",
+            "level1": "Multidisciplinar",
+            "level2": "Biotecnologia",
+        },
+        "biogeosciences": {
+            "level0": "Ciências Exatas, Tecnológicas e Multidisciplinar",
+            "level1": "Multidisciplinar",
+            "level2": "Ciências Ambientais",
+        },
+        "higher education": {
+            "level0": "Ciências Exatas, Tecnológicas e Multidisciplinar",
+            "level1": "Multidisciplinar",
+            "level2": "Ensino",
+        },
+        "interdisciplinarity": {
+            "level0": "Ciências Exatas, Tecnológicas e Multidisciplinar",
+            "level1": "Multidisciplinar",
+            "level2": "Interdisciplinar",
+        },
+        "materials science": {
+            "level0": "Ciências Exatas, Tecnológicas e Multidisciplinar",
+            "level1": "Multidisciplinar",
+            "level2": "Materiais",
+        },
+    }
+
+    user = User.objects.get(id=user_id)
+
+    if delete:
+        models.Concepts.objects.all().delete()
+
+    concepts = pd.read_csv("article/scripts/concepts.csv", delimiter=",")
+    source = Source.objects.get(name="OPENALEX")
+
+    for i, concept in concepts.iterrows():
+        normalized_name = concept.get("normalized_name")
+        sc, created = models.Concepts.objects.get_or_create(
+            specific_id=concept.get("openalex_id"),
+            name=concept.get("display_name"),
+            normalized_name=normalized_name,
+            level=concept.get("level"),
+            parent_display_names=concept.get("parent_display_names"),
+            source=source,
+        )
+
+        if relate_theme.get(normalized_name):
+            th = ThematicArea.get_or_create(
+                **relate_theme.get(normalized_name), user=user
+            )
+            sc.thematic_areas.add(th)
+
+        if concept.get("parent_ids") and isinstance(concept.get("parent_ids"), str):
+            for pid in concept.get("parent_ids").split(","):
+                try:
+                    parent_id = models.Concepts.objects.get(
+                        specific_id=pid.strip().lower()
+                    )
+                    sc.parent_ids.add(parent_id)
+                except models.Concepts.DoesNotExist as ex:
+                    print("PID: %s not found" % pid)
