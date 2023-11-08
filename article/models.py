@@ -10,6 +10,85 @@ from . import choices
 from .forms import ContributorForm
 
 from core.models import Source
+from usefulmodels.models import ThematicArea
+
+class Concepts(models.Model):
+    """
+    Concepts are abstract ideas that works are about.
+
+    More about, see the source: https://docs.openalex.org/api-entities/concepts
+    """
+
+    specific_id = models.CharField(
+        _("Specific Id"), max_length=255, null=False, blank=False
+    )
+
+    name = models.CharField(
+        _("Name"),
+        max_length=512,
+        null=True,
+        blank=True,
+        help_text=_("Name of the concept"),
+    )
+
+    normalized_name = models.CharField(
+        _("Normalized Name"),
+        max_length=512,
+        null=True,
+        blank=True,
+        help_text=_("Name of the concept"),
+    )
+
+    level = models.IntegerField(
+        _("Level"),
+        null=True,
+        blank=True,
+        help_text=_("Number indicating hierarchy"),
+    )
+
+    parent_display_names = models.CharField(
+        _("Parent Display Name"),
+        max_length=512,
+        null=True,
+        blank=True,
+        help_text=_("The name of parents up to child names"),
+    )
+
+    parent_ids = models.ManyToManyField(
+        "self",
+        verbose_name=_("Parent ids"),
+        symmetrical=False,
+        blank=True,
+        related_name="parent_id",
+        help_text=_("Parent relation"),
+    )
+
+    thematic_areas = models.ManyToManyField(
+        ThematicArea,
+        verbose_name=_("Thematic Area"),
+        blank=True,
+        help_text=_("Thematic area relation"),
+    )
+
+    source = models.ForeignKey(
+        Source,
+        verbose_name=_("Source"),
+        null=True,
+        on_delete=models.SET_NULL,
+    )
+
+    def autocomplete_label(self):
+        return "%s (%s)" % (self.name, self.level) or ""
+
+    class Meta:
+        verbose_name = _("Concept")
+        verbose_name_plural = _("Concepts")
+
+    def __unicode__(self):
+        return self.__str__()
+
+    def __str__(self):
+        return "%s (%s)" % (self.name, self.level) or ""
 
 
 class Journal(models.Model):
@@ -1106,3 +1185,102 @@ class Article(models.Model):
                 article.sources.add(source)
 
         return article, created
+
+    @classmethod
+    def filter_items_to_generate_indicators(
+        cls,
+        begin_year,
+        end_year,
+        institution__name=None,
+        thematic_area__level0=None,
+        thematic_area__level1=None,
+        location__state__code=None,
+        location__state__region=None,
+    ):
+        params = dict(
+            open_access_status__isnull=False,
+            license__isnull=False,
+            year__gte=begin_year,
+            year__lte=end_year,
+            contributors__affiliations__official__name=institution__name,
+            contributors__affiliations__official__location__state__acronym=location__state__code,
+            contributors__affiliations__official__location__state__region=location__state__region,
+            contributors__thematic_areas__level0=thematic_area__level0,
+            contributors__thematic_areas__level1=thematic_area__level1,
+        )
+        params = {k: v for k, v in params.items() if v}
+        return cls.objects.filter(**params)
+
+    @classmethod
+    def parameters_for_values(
+        cls,
+        by_open_access_status=False,
+        by_license=False,
+        by_institution=False,
+        by_thematic_area_level0=False,
+        by_thematic_area_level1=False,
+        by_state=False,
+        by_region=False,
+        by_apc=False,
+    ):
+        selected_attributes = ["year"]
+        if by_open_access_status:
+            selected_attributes += ["open_access_status"]
+        if by_license:
+            selected_attributes += ["license__name"]
+        if by_apc:
+            selected_attributes += ["apc"]
+        if by_institution:
+            selected_attributes += Institution.parameters_for_values(
+                "contributors__affiliations__official"
+            )
+        if by_state or by_region:
+            selected_attributes += State.parameters_for_values(
+                "contributors__affiliations__official__location__state",
+                by_state,
+                by_state,
+                by_region,
+            )
+        if by_thematic_area_level0 or by_thematic_area_level1:
+            selected_attributes += ThematicArea.parameters_for_values(
+                "contributors__thematic_areas",
+                by_thematic_area_level0,
+                by_thematic_area_level1,
+            )
+        return selected_attributes
+
+    @classmethod
+    def group(
+        cls,
+        query_result,
+        selected_attributes,
+        order_by="year",
+    ):
+        """This classmethod receive a QuerySet and a list of attributes to count
+
+        Args:
+        query_result: Django QuerySet result.
+        selected_attributes: A list of selected attributes do QuerySet.values(**selected_attributes)
+
+        Yields:
+        A dictionary something like: {'year': '2021', 'apc': 'YES', 'count': 633}.
+
+        Raises:
+        This function doesnt raise anything
+        """
+        for item in (
+            query_result.values(*selected_attributes)
+            .annotate(count=Count("id"))
+            .order_by(order_by)
+            .iterator()
+        ):
+            d = {}
+            for k, v in item.items():
+                k = k.replace("contributors__affiliations__official__location__", "")
+                k = k.replace(
+                    "contributors__affiliations__official__name", "institution__name"
+                )
+                k = k.replace("thematic_areas__", "thematic_area__")
+
+                d[k] = v
+            yield d

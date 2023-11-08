@@ -13,6 +13,7 @@ from .models import (
     Affiliation,
     Journal,
     License,
+    Concepts
 )
 
 class SourceArticleAdmin(ModelAdmin):
@@ -27,8 +28,37 @@ class SourceArticleAdmin(ModelAdmin):
 
     list_display = ("doi", "specific_id", "year", "is_paratext", "updated", "created", )
 
-    list_filter = ("year", "is_paratext", "source", )
-    search_fields = ("doi", "specific_id", )
+
+class ConceptsAdmin(ModelAdmin):
+    model = Concepts
+    menu_label = _("Concepts")  # ditch this to use verbose_name_plural from model
+    menu_icon = "folder-open-inverse"  # change as required
+    add_to_settings_menu = False  # or True to add your model to the Settings sub-menu
+    exclude_from_explorer = (
+        False  # or True to exclude pages of this type from Wagtail's explorer view
+    )
+
+    def all_parents_id(self, obj):
+        return " | ".join([str(c) for c in obj.parent_ids.all()])
+
+    def all_theme(self, obj):
+        return " | ".join([str(c) for c in obj.thematic_areas.all()])
+
+    list_display = (
+        "name",
+        "specific_id",
+        "normalized_name",
+        "level",
+        "parent_display_names",
+        "all_parents_id",
+        "all_theme",
+    )
+
+    list_filter = (
+        "level",
+        "thematic_areas",
+    )
+    search_fields = ("name", "specific_id", "normalized_name")
 
 
 class ArticleAdmin(ModelAdmin):
@@ -42,6 +72,14 @@ class ArticleAdmin(ModelAdmin):
 
     def all_contributors(self, obj):
         return " | ".join([str(c) for c in obj.contributors.all()])
+
+    def all_theme(self, obj):
+        themes = []
+        for c in obj.concepts.all():
+            themes.extend(
+                ["%s (%s)" % (str(t), t.id) for t in c.thematic_areas.all() if t]
+            )
+        return " | ".join(themes)
 
     list_display = (
         "doi",
@@ -89,6 +127,16 @@ class ContributorAdmin(ModelAdmin):
     exclude_from_explorer = (
         False  # or True to exclude pages of this type from Wagtail's explorer view
     )
+
+    def all_institutions(self, obj):
+        return " | ".join(
+            [str("%s(%s)" % (c.name, c.id)) for c in obj.institutions.all()]
+        )
+
+    def all_affiliations(self, obj):
+        return " | ".join(
+            [str("%s(%s)" % (c.name, c.id)) for c in obj.affiliations.all()]
+        )
 
     list_display = (
         "family",
