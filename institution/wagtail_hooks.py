@@ -26,8 +26,22 @@ class InstitutionAdmin(ModelAdmin):
     exclude_from_explorer = (
         False  # or True to exclude pages of this type from Wagtail's explorer view
     )
-    list_display = ("name", "acronym", "location", "source", "updated")
-    search_fields = ("name", "institution_type")
+    def all_source_institutions(self, obj):
+        return " | ".join([str("%s(%s)" % (c.display_name, c.id)) for c in obj.sources.all()])
+
+    list_display = (
+        "name",
+        "acronym",
+        "location",
+        "source",
+        "all_source_institutions",
+        "updated",
+    )
+    search_fields = ("name", "institution_type", "source", "acronym")
+    list_filter = (
+        "institution_type",
+        "source",
+    )
     list_export = (
         "name",
         "institution_type",
@@ -41,6 +55,7 @@ class InstitutionAdmin(ModelAdmin):
     )
     export_filename = "institutions"
 
+
 class SourceInstitutionAdmin(ModelAdmin):
     model = SourceInstitution
     menu_label = _("Source Institution")
@@ -49,14 +64,20 @@ class SourceInstitutionAdmin(ModelAdmin):
     exclude_from_explorer = (
         False  # or True to exclude pages of this type from Wagtail's explorer view
     )
+
+    def all_name(self, obj):
+        return " | ".join([str(c.name) for c in obj.source_institution.all()])
+
     list_display = (
         "specific_id",
         "display_name",
+        "all_name",
         "type",
         "country_code",
     )
     list_filter = ("type", "country_code")
     search_fields = ("display_name", "specific_id")
+
 
 class InstitutionAdminGroup(ModelAdminGroup):
     menu_label = _("Instutition")
@@ -67,5 +88,5 @@ class InstitutionAdminGroup(ModelAdminGroup):
         SourceInstitutionAdmin,
     )
 
-modeladmin_register(InstitutionAdminGroup)
 
+modeladmin_register(InstitutionAdminGroup)

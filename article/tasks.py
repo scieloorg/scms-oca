@@ -1,13 +1,16 @@
 import logging
 
+import pandas as pd
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext as _
 
 from article import models
-from core.models import Source
 from config import celery_app
+from core.models import Source
 from core.utils import utils as core_utils
+from institution.models import Institution
+from usefulmodels.models import ThematicArea
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +36,7 @@ def load_openalex(user_id, date=2012, length=None, country="BR"):
         tasks.load_openalex(date=2012)
 
 
-    Running using a script: 
+    Running using a script:
 
     python manage.py runscript load_openalex --script-args 1 2012
 
@@ -148,7 +151,7 @@ def load_openalex(user_id, date=2012, length=None, country="BR"):
                      "Department of Exercise Epidemiology, Centre for Research in Childhood Health, University of Southern Denmark, Odense, Denmark"
                   ]
                }
-        } 
+        }
     """
     url = (
         settings.URL_API_OPENALEX
@@ -158,7 +161,7 @@ def load_openalex(user_id, date=2012, length=None, country="BR"):
     _source, _ = Source.objects.get_or_create(name="OPENALEX")
 
     try:
-        flag  = True
+        flag = True
         article_count = 0
 
         while flag:
@@ -176,16 +179,16 @@ def load_openalex(user_id, date=2012, length=None, country="BR"):
                     article["source"] = _source
                     article["raw"] = item
 
-                    article, is_created = models.SourceArticle.create_or_update(**article)
+                    article, created = models.SourceArticle.create_or_update(**article)
 
                     logger.info(
                         "%s: %s"
                         % (
-                            "Created article" if is_created else "Updated article",
+                            "Created article" if created else "Updated article",
                             article,
                         )
                     )
-                    article_count += 1 
+                    article_count += 1
 
                 cursor = payload["meta"]["next_cursor"]
 
@@ -242,7 +245,7 @@ def article_source_to_article(
 
 
 @celery_app.task(name="Load OpenAlex to Article models")
-def load_openalex_article(user_id, update=True):
+def load_openalex_article(user_id, article_ids, update=False):
     """
     This task read the article.models.SourceArticle
     and add the articles to article.models.Article
@@ -254,115 +257,9 @@ def load_openalex_article(user_id, update=True):
 
     user = User.objects.get(id=user_id)
 
-    def contributors(authors):
-        """
-        This function generate a list os contributors list.
-
-        This function get the key ``authorships`` from with this struture: 
-
-             "authorships":[
-               {
-                  "author_position":"first",
-                  "author":{
-                     "id":"https://openalex.org/A4354288008",
-                     "display_name":"Pedro C. Hallal",
-                     "orcid":null
-                  },
-                  "institutions":[
-                     {
-                        "id":"https://openalex.org/I169248161",
-                        "display_name":"Universidade Federal de Pelotas",
-                        "ror":"https://ror.org/05msy9z54",
-                        "country_code":"BR",
-                        "type":"education"
-                     }
-                  ],
-                  "is_corresponding":true,
-                  "raw_affiliation_string":"Universidade Federal de Pelotas, Pelotas, Brazil",
-                  "raw_affiliation_strings":[
-                     "Universidade Federal de Pelotas, Pelotas, Brazil"
-                  ]
-               },
-               {
-                  "author_position":"middle",
-                  "author":{
-                     "id":"https://openalex.org/A4359769260",
-                     "display_name":"Lars Bo Andersen",
-                     "orcid":null
-                  },
-                  "institutions":[
-                     {
-                        "id":"https://openalex.org/I177969490",
-                        "display_name":"University of Southern Denmark",
-                        "ror":"https://ror.org/03yrrjy16",
-                        "country_code":"DK",
-                        "type":"education"
-                     },
-                     {
-                        "id":"https://openalex.org/I76283144",
-                        "display_name":"Norwegian School of Sport Sciences",
-                        "ror":"https://ror.org/045016w83",
-                        "country_code":"NO",
-                        "type":"education"
-                     }
-                  ],
-                  "is_corresponding":false,
-                  "raw_affiliation_string":"Department of Sport Medicine, Norwegian School of Sport Sciences, Oslo, Norway; Department of Exercise Epidemiology, Centre for Research in Childhood Health, University of Southern Denmark, Odense, Denmark",
-                  "raw_affiliation_strings":[
-                     "Department of Sport Medicine, Norwegian School of Sport Sciences, Oslo, Norway",
-                     "Department of Exercise Epidemiology, Centre for Research in Childhood Health, University of Southern Denmark, Odense, Denmark"
-                  ]
-               }
-
-
-        """
-        contributors = []
-
-        for au in authors:
-            # if exists author
-            if au.get("author"):
-                display_name = au.get("author").get("display_name")
-
-                if display_name:
-                    family = (
-                        " ".join(display_name.split(" ")[1:]).strip()
-                        if display_name
-                        else ""
-                    )
-                    given = display_name.split(" ")[0].strip() if display_name else ""
-
-                    author_dict = {
-                        "family": family,
-                        "given": given,
-                        "orcid": au.get("author").get("orcid"),
-                    }
-
-                    # Here we are adding the affiliation to the contributor
-                    if au.get("raw_affiliation_strings"):
-                        affs = []
-
-                        for aff in au.get("raw_affiliation_strings"):
-
-                            aff_obj, _ = models.Affiliation.create_or_update(
-                                **{"name": aff}
-                            )
-                            affs.append(aff_obj)
-
-                        author_dict.update(
-                            {'affiliations': affs, 'affiliations_string': au.get("raw_affiliation_string")})
-
-                    contributor, _ = models.Contributor.create_or_update(
-                        **author_dict
-                    )
-
-                    contributors.append(contributor)
-
-        return contributors
-
-    # read SourceArticle
-    for article in models.SourceArticle.objects.filter(source__name="OPENALEX"):
+    for id in article_ids:
+        article = models.SourceArticle.objects.get(id=id)
         try:
-
             doi = article.doi
             # title
             title = core_utils.nestget(article.raw, "title")
@@ -370,6 +267,7 @@ def load_openalex_article(user_id, update=True):
             if not update:
                 if doi:
                     if models.Article.objects.filter(doi=doi).exists():
+                        print("ja existe")
                         continue
 
                 if title:
@@ -495,15 +393,14 @@ def load_openalex_article(user_id, update=True):
                 "number": number,
                 "volume": volume,
                 "year": year,
-                "is_ao": core_utils.nestget(article.raw, "open_access", "is_ao"),
+                "is_oa": core_utils.nestget(article.raw, "open_access", "is_oa"),
                 "sources": [Source.objects.get(name="OPENALEX")],
                 "journal": journal,
                 "apc": is_apc,
                 "open_access_status": oa_status,
-                "contributors": contributors(
-                    core_utils.nestget(article.raw, "authorships")
-                ),
+                "contributors": contributors,
                 "license": license,
+                "concepts": concepts,
             }
 
             article, created = models.Article.create_or_update(**article_dict)

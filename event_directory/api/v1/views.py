@@ -7,7 +7,7 @@ from event_directory import models
 
 class EventViewSet(viewsets.ModelViewSet):
     serializer_class = EventSerializer
-    http_method_names = ['get']
+    http_method_names = ["get"]
     # queryset = Event.objects.all()
 
     def get_queryset(self):
@@ -16,9 +16,9 @@ class EventViewSet(viewsets.ModelViewSet):
         """
         # user = self.request.user
 
-        return models.EventDirectory.objects.filter(
-            record_status="PUBLISHED"
-        ).order_by("-updated")
+        return models.EventDirectory.objects.filter(record_status="PUBLISHED").order_by(
+            "-updated"
+        )
 
     # def perform_create(self, serializer):
     #     serializer.save(creator=self.request.user)

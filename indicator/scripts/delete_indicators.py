@@ -1,5 +1,5 @@
-from indicator import controller
+from indicator.models import Indicator
 
 
 def run():
-    controller.delete()
+    Indicator.delete()

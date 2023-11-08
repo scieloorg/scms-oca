@@ -1,3 +1,4 @@
+import logging
 import csv
 import datetime
 import math
@@ -8,16 +9,13 @@ import pysolr
 from django.conf import settings
 from django.shortcuts import redirect
 from django.urls import reverse
-from django.db.models import Q
 from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.template import loader
 
-from core.utils import utils
-from indicator import controller as indicator_controller
+from search.graphic_data import GraphicData
 from indicator.models import Indicator
 
-from . import controller
 
 solr = pysolr.Solr(
     settings.HAYSTACK_CONNECTIONS["default"]["URL"],
@@ -113,111 +111,65 @@ def search(request):
     )
 
 
-def indicator_detail(request, indicator_slug):
+def _get_indicator(request, indicator_slug):
     # check if the slug is not a database id else redirect to slug url format
-    if not utils.is_int(indicator_slug):
-        try:
-            indicator = Indicator.objects.get(
-                Q(slug=indicator_slug) | Q(code=indicator_slug),
-                record_status="PUBLISHED",
-            )
-        except Indicator.DoesNotExist:
-            raise Http404("Indicator does not exist")
+    try:
+        return Indicator.get(indicator_slug, record_status="PUBLISHED")
+    except Indicator.DoesNotExist:
+        raise Http404("Indicator does not exist")
 
-        indicator.latest = indicator_controller.get_latest_version(indicator.code).id
-        parameters = controller.indicator_detail(request, indicator)
-        return render(
-            request,
-            "indicator/indicator_detail.html",
-            parameters or {"object": indicator},
-        )
-    else:
-        try:
-            indicator = Indicator.objects.get(
-                id=indicator_slug, record_status="PUBLISHED"
-            )
-        except Indicator.DoesNotExist:
-            raise Http404("Indicator does not exist")
 
+def indicator_detail(request, indicator_slug):
+    indicator = _get_indicator(request, indicator_slug)
+    if indicator.slug != indicator_slug:
         return redirect(
             reverse(
-                "search:indicator_detail", kwargs={"indicator_slug": indicator.slug}
+                "search:indicator_detail",
+                kwargs={"indicator_slug": indicator.slug}
             ),
             permanent=True,
         )
+
+    gd = GraphicData(indicator)
+
+    return render(
+        request,
+        "indicator/indicator_detail.html",
+        gd.parameters or {"object": indicator},
+    )
 
 
 def indicator_summarized(request, indicator_slug):
-    # check if the slug is not a database id else redirect to slug url format
-    if not utils.is_int(indicator_slug):
+    indicator = _get_indicator(request, indicator_slug)
+
+    filename, ext = os.path.splitext(os.path.basename(indicator.raw_data.name))
+    filename = filename + ".csv"
+
+    response = HttpResponse(
+        content_type="text/csv",
+        headers={"Content-Disposition": 'attachment; filename="%s"' % filename},
+    )
+
+    for item in indicator.summarized["items"]:
+        fieldnames = indicator.summarized["table_header"]
+        break
+    logging.info(indicator.summarized["table_header"])
+
+    writer = csv.DictWriter(response, fieldnames=fieldnames)
+
+    writer.writeheader()
+    for item in indicator.summarized["items"]:
         try:
-            indicator = Indicator.objects.get(
-                Q(slug=indicator_slug) | Q(code=indicator_slug),
-                record_status="PUBLISHED",
-            )
-        except Indicator.DoesNotExist:
-            raise Http404("Indicator does not exist")
-
-        filename, ext = os.path.splitext(os.path.basename(indicator.raw_data.name))
-        filename = filename + ".csv"
-
-        response = HttpResponse(
-            content_type="text/csv",
-            headers={"Content-Disposition": 'attachment; filename="%s"' % filename},
-        )
-
-        for item in indicator.summarized["items"]:
-            fieldnames = item.keys()
-            break
-
-        writer = csv.DictWriter(response, fieldnames=fieldnames)
-
-        writer.writeheader()
-        for item in indicator.summarized["items"]:
             writer.writerow(item)
-        return response
-    else:
-        try:
-            indicator = Indicator.objects.get(
-                id=indicator_slug, record_status="PUBLISHED"
-            )
-        except Indicator.DoesNotExist:
-            raise Http404("Indicator does not exist")
-        
-        return redirect(
-            reverse(
-                "search:indicator_summarized", kwargs={"indicator_slug": indicator.slug}
-            ),
-            permanent=True,
-        )
+        except:
+            logging.info(item)
+    return response
 
 
 def indicator_raw_data(request, indicator_slug):
-    # check if the slug is not a database id else redirect to slug url format
-    if not utils.is_int(indicator_slug):
-        try:
-            indicator = Indicator.objects.get(
-                Q(slug=indicator_slug) | Q(code=indicator_slug),
-                record_status="PUBLISHED",
-            )
-        except Indicator.DoesNotExist:
-            raise Http404("Indicator does not exist")
+    indicator = _get_indicator(request, indicator_slug)
 
-        filename = os.path.basename(indicator.raw_data.name)
-        response = HttpResponse(indicator.raw_data, content_type="application/zip")
-        response["Content-Disposition"] = "attachment; filename=%s" % filename
-        return response
-    else:
-        try:
-            indicator = Indicator.objects.get(
-                id=indicator_slug, record_status="PUBLISHED"
-            )
-        except Indicator.DoesNotExist:
-            raise Http404("Indicator does not exist")
-
-        return redirect(
-            reverse(
-                "search:indicator_raw_data", kwargs={"indicator_slug": indicator.slug}
-            ),
-            permanent=True,
-        )
+    filename = os.path.basename(indicator.raw_data.name)
+    response = HttpResponse(indicator.raw_data, content_type="application/zip")
+    response["Content-Disposition"] = "attachment; filename=%s" % filename
+    return response

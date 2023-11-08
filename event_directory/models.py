@@ -3,6 +3,7 @@ import os
 from django.db import models
 from django.conf import settings
 from django.utils.translation import gettext as _
+from django.db.models import Count
 from taggit.managers import TaggableManager
 from wagtail.admin.panels import FieldPanel, HelpPanel
 from wagtailautocomplete.edit_handlers import AutocompletePanel
@@ -10,7 +11,7 @@ from wagtailautocomplete.edit_handlers import AutocompletePanel
 from core.models import CommonControlField
 from institution.models import Institution
 from location.models import Location
-from usefulmodels.models import Action, Practice, ThematicArea
+from usefulmodels.models import Action, Practice, ThematicArea, State
 
 from . import choices
 from .forms import EventDirectoryFileForm, EventDirectoryForm
@@ -54,10 +55,22 @@ class EventDirectory(CommonControlField):
             ("can_edit_notes", _("Can edit notes")),
         )
 
-    title = models.CharField(_("Title"), max_length=255, null=False, blank=False, help_text=help_fields.DIRECTORY_TITLE_HELP)
-    link = models.URLField(_("Link"), null=False, blank=False, help_text=help_fields.DIRECTORY_LINK_HELP)
+    title = models.CharField(
+        _("Title"),
+        max_length=255,
+        null=False,
+        blank=False,
+        help_text=help_fields.DIRECTORY_TITLE_HELP,
+    )
+    link = models.URLField(
+        _("Link"), null=False, blank=False, help_text=help_fields.DIRECTORY_LINK_HELP
+    )
     description = models.TextField(
-        _("Description"), max_length=1000, null=True, blank=True, help_text=help_fields.DIRECTORY_DESCRIPTION_HELP
+        _("Description"),
+        max_length=1000,
+        null=True,
+        blank=True,
+        help_text=help_fields.DIRECTORY_DESCRIPTION_HELP,
     )
     start_date = models.DateField(
         _("Start Date"), max_length=255, null=True, blank=True
@@ -68,7 +81,9 @@ class EventDirectory(CommonControlField):
     )
     end_time = models.TimeField(_("End Time"), max_length=255, null=True, blank=True)
 
-    locations = models.ManyToManyField(Location, verbose_name=_("Location"), blank=False)
+    locations = models.ManyToManyField(
+        Location, verbose_name=_("Location"), blank=False
+    )
     organization = models.ManyToManyField(
         Institution,
         verbose_name=_("Instituição"),
@@ -76,9 +91,11 @@ class EventDirectory(CommonControlField):
         help_text=_("Instituições responsáveis pela organização do evento."),
     )
     thematic_areas = models.ManyToManyField(
-        ThematicArea, verbose_name=_("Thematic Area"), blank=True, help_text=help_fields.DIRECTORY_THEMATIC_AREA_HELP
+        ThematicArea,
+        verbose_name=_("Thematic Area"),
+        blank=True,
+        help_text=help_fields.DIRECTORY_THEMATIC_AREA_HELP,
     )
-
 
     practice = models.ForeignKey(
         Practice,
@@ -86,7 +103,7 @@ class EventDirectory(CommonControlField):
         null=True,
         blank=False,
         on_delete=models.SET_NULL,
-        help_text=help_fields.DIRECTORY_PRACTICE_HELP
+        help_text=help_fields.DIRECTORY_PRACTICE_HELP,
     )
 
     action = models.ForeignKey(
@@ -96,7 +113,7 @@ class EventDirectory(CommonControlField):
         blank=True,
         on_delete=models.SET_NULL,
         default=get_default_action,
-        help_text=help_fields.DIRECTORY_ACTION_HELP
+        help_text=help_fields.DIRECTORY_ACTION_HELP,
     )
     classification = models.CharField(
         _("Classification"),
@@ -104,10 +121,11 @@ class EventDirectory(CommonControlField):
         max_length=255,
         null=True,
         blank=True,
-        help_text=help_fields.DIRECTORY_CLASSIFICATION_HELP
+        help_text=help_fields.DIRECTORY_CLASSIFICATION_HELP,
     )
-    keywords = TaggableManager(_("Keywords"), blank=True, help_text=help_fields.DIRECTORY_KEYWORDS_AREA_HELP)
-
+    keywords = TaggableManager(
+        _("Keywords"), blank=True, help_text=help_fields.DIRECTORY_KEYWORDS_AREA_HELP
+    )
 
     attendance = models.CharField(
         _("Attendance"),
@@ -123,11 +141,16 @@ class EventDirectory(CommonControlField):
         max_length=255,
         null=True,
         blank=True,
-        help_text=help_fields.DIRECTORY_RECORD_STATUS_HELP
+        help_text=help_fields.DIRECTORY_RECORD_STATUS_HELP,
     )
 
-    source = models.CharField(_("Source"), max_length=255, null=True, blank=True, help_text=help_fields.DIRECTORY_SOURCE_HELP)
-
+    source = models.CharField(
+        _("Source"),
+        max_length=255,
+        null=True,
+        blank=True,
+        help_text=help_fields.DIRECTORY_SOURCE_HELP,
+    )
 
     institutional_contribution = models.CharField(
         _("Institutional Contribution"),
@@ -136,7 +159,13 @@ class EventDirectory(CommonControlField):
         help_text=help_fields.DIRECTORY_INSTITUTIONAL_CONTRIBUTION_HELP,
     )
 
-    notes = models.TextField(_("Notes"), max_length=1000, null=True, blank=True, help_text=help_fields.DIRECTORY_NOTES_HELP)
+    notes = models.TextField(
+        _("Notes"),
+        max_length=1000,
+        null=True,
+        blank=True,
+        help_text=help_fields.DIRECTORY_NOTES_HELP,
+    )
 
     panels = [
         HelpPanel(
@@ -177,9 +206,13 @@ class EventDirectory(CommonControlField):
             "event__title": self.title,
             "event__link": self.link,
             "event__description": self.description,
-            "event__start_date": self.start_date.isoformat() if self.start_date else None,
+            "event__start_date": self.start_date.isoformat()
+            if self.start_date
+            else None,
             "event__end_date": self.end_date.isoformat() if self.end_date else None,
-            "event__start_time": self.start_time.isoformat() if self.start_time else None,
+            "event__start_time": self.start_time.isoformat()
+            if self.start_time
+            else None,
             "event__end_time": self.end_time.isoformat() if self.end_time else None,
             "event__classification": self.classification,
             "event__keywords": [keyword for keyword in self.keywords.names()],
@@ -187,8 +220,8 @@ class EventDirectory(CommonControlField):
             "event__record_status": self.record_status,
             "event__source": self.source,
             "event__institutional_contribution": self.institutional_contribution,
-            "event__action": self.action,
-            "event__practice": self.practice,
+            "event__action": self.action.name,
+            "event__practice": self.practice.name,
         }
         if self.locations:
             loc = []
@@ -215,6 +248,79 @@ class EventDirectory(CommonControlField):
             d.update(self.action.data)
 
         return d
+
+    @classmethod
+    def filter_items_to_generate_indicators(
+        cls,
+        action__name=None,
+        practice__code=None,
+        practice__name=None,
+        classification=None,
+        institution__name=None,
+        thematic_area__level0=None,
+        thematic_area__level1=None,
+        location__state__code=None,
+        location__state__region=None,
+    ):
+        params = dict(
+            action__name=action__name,
+            practice__code=practice__code,
+            practice__name=practice__name,
+            classification=classification,
+            organization__name=institution__name,
+            organization__location__state__acronym=location__state__code,
+            organization__location__state__region=location__state__region,
+            thematic_areas__level0=thematic_area__level0,
+            thematic_areas__level1=thematic_area__level1,
+            locations__state__acronym=location__state__code,
+            locations__state__region=location__state__region,
+        )
+        params = {k: v for k, v in params.items() if v}
+        return cls.objects.filter(record_status="PUBLISHED", **params)
+
+    @classmethod
+    def parameters_for_values(
+        cls,
+        by_practice=False,
+        by_classification=False,
+        by_institution=False,
+        by_thematic_area_level0=False,
+        by_thematic_area_level1=False,
+        by_state=False,
+        by_region=False,
+    ):
+        selected_attributes = Action.parameters_for_values("action")
+        if by_classification:
+            selected_attributes += ["classification"]
+        if by_practice:
+            selected_attributes += Practice.parameters_for_values("practice")
+        if by_institution:
+            selected_attributes += Institution.parameters_for_values("organization")
+        if by_state or by_region:
+            selected_attributes += State.parameters_for_values(
+                "locations__state", by_state, by_state, by_region
+            )
+            selected_attributes += State.parameters_for_values(
+                "organization__location__state", by_state, by_state, by_region
+            )
+        if by_thematic_area_level0 or by_thematic_area_level1:
+            selected_attributes += ThematicArea.parameters_for_values(
+                "thematic_areas", by_thematic_area_level0, by_thematic_area_level1
+            )
+        return selected_attributes
+
+    @classmethod
+    def group(
+        cls,
+        query_result,
+        selected_attributes,
+    ):
+        return (
+            query_result.values(*selected_attributes)
+            .annotate(count=Count("id"))
+            .order_by("count")
+            .iterator()
+        )
 
     base_form_class = EventDirectoryForm
 

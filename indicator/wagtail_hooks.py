@@ -46,6 +46,7 @@ class IndicatorAdmin(ModelAdmin):
     )
 
     search_fields = (
+        "slug",
         "title",
         "institutional_contribution",
         "action_and_practice__action__name",
@@ -62,7 +63,6 @@ class IndicatorAdmin(ModelAdmin):
             return qs.filter(creator=request.user)
         else:
             return qs
-
 
 
 modeladmin_register(IndicatorAdmin)

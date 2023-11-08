@@ -7,7 +7,7 @@ from education_directory import models
 
 class EducationViewSet(viewsets.ModelViewSet):
     serializer_class = EducationSerializer
-    http_method_names = ['get']
+    http_method_names = ["get"]
     # queryset = Education.objects.all()
 
     def get_queryset(self):

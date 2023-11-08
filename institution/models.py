@@ -3,14 +3,22 @@ from django.utils.translation import gettext as _
 from modelcluster.models import ClusterableModel
 from wagtail.admin.panels import FieldPanel
 from wagtailautocomplete.edit_handlers import AutocompletePanel
-
+from wagtail.models import Orderable
+from modelcluster.fields import ParentalKey
 from core.models import CommonControlField
 from location.models import Location
+
+from wagtail.admin.panels import (
+    FieldPanel,
+    InlinePanel,
+    ObjectList,
+    TabbedInterface,
+)
 
 from . import choices
 from .forms import InstitutionForm
 
-from core.models import Source
+from core.models import Source, Language
 
 
 class Institution(CommonControlField, ClusterableModel):
@@ -33,6 +41,10 @@ class Institution(CommonControlField, ClusterableModel):
 
     source = models.CharField(
         _("Institution Source"), max_length=255, null=True, blank=True
+    )
+
+    sources = models.ManyToManyField(
+        "SourceInstitution", verbose_name="Source Institutions"
     )
 
     level_1 = models.CharField(
@@ -110,13 +122,35 @@ class Institution(CommonControlField, ClusterableModel):
 
             institution.save()
         return institution
-    
+
     @classmethod
+    def parameters_for_values(cls, prefix):
+        return [
+            f"{prefix}__name",
+        ]
+
+    @classmethod
+    def values(cls, selected_attributes=None):
+        selected_attributes = selected_attributes or [
+            "name",
+        ]
+        return (
+            cls.objects.filter(location__country__acron2="BR")
+            .values(*selected_attributes)
+            .annotate(count=Count("id"))
+            .order_by("count")
+            .iterator()
+        )
+
+    @classmethod
+    def names(cls):
+        return (item["name"] for item in cls.values())
+
     def get(cls, **kwargs):
         """
-        This function will try to get the institution by attributes: 
+        This function will try to get the institution by attributes:
 
-            * name 
+            * name
             * institution_type
             * acronym
             * source
@@ -132,14 +166,18 @@ class Institution(CommonControlField, ClusterableModel):
 
         return instition|None
 
-        This function can raise: 
+        This function can raise:
             ValueError
             Institution.DoesNotExist
             Institution.MultipleObjectsReturned
         """
         filters = {}
 
-        if not kwargs.get("name") and not kwargs.get("location") and not kwargs.get("source"):
+        if (
+            not kwargs.get("name")
+            and not kwargs.get("location")
+            and not kwargs.get("source")
+        ):
             raise ValueError("Param name and location(object) and source are required")
 
         filters = {
@@ -149,7 +187,6 @@ class Institution(CommonControlField, ClusterableModel):
         }
 
         return cls.objects.get(**filters)
-
 
     @classmethod
     def create_or_update(cls, **kwargs):
@@ -194,16 +231,19 @@ class Institution(CommonControlField, ClusterableModel):
 
         return inst, created
 
-
     base_form_class = InstitutionForm
 
 
-class SourceInstitution(models.Model):
+class SourceInstitution(ClusterableModel):
     specific_id = models.CharField(
-            _("Specific Id"), max_length=255, null=False, blank=False
-        )
-    display_name = models.CharField(_("Display Name"), max_length=255, null=True, blank=True)
-    country_code = models.CharField(_("Country code"), max_length=50, null=True, blank=True)
+        _("Specific Id"), max_length=255, null=False, blank=False
+    )
+    display_name = models.CharField(
+        _("Display Name"), max_length=255, null=True, blank=True
+    )
+    country_code = models.CharField(
+        _("Country code"), max_length=50, null=True, blank=True
+    )
     type = models.CharField(_("type"), max_length=255, null=True, blank=True)
     updated = models.CharField(
         _("Source updated date"), max_length=50, null=True, blank=False
@@ -219,6 +259,9 @@ class SourceInstitution(models.Model):
     )
     raw = models.JSONField(_("JSON Data institution"), null=True, blank=True)
 
+    def autocomplete_label(self):
+        return "%s (%s)" % (self.display_name, self.source)
+
     class Meta:
         indexes = [
             models.Index(
@@ -233,17 +276,36 @@ class SourceInstitution(models.Model):
             ),
         ]
 
+    panels_identification = [
+        FieldPanel("specific_id"),
+        FieldPanel("display_name"),
+        FieldPanel("country_code"),
+        FieldPanel("type"),
+        FieldPanel("source"),
+        FieldPanel("raw"),
+    ]
+
+    panels_translation = [
+        InlinePanel("source_institution", label=_("Translation Name")),
+    ]
+
+    edit_handler = TabbedInterface(
+        [
+            ObjectList(panels_identification, heading=_("Identification")),
+            ObjectList(panels_translation, heading=_("Translation Name")),
+        ]
+    )
+
     def __unicode__(self):
         return str("%s") % (self.specific_id or self.display_name)
 
     def __str__(self):
         return str("%s") % (self.specific_id or self.display_name)
- 
 
     @classmethod
     def get(cls, **kwargs):
         """
-        This function will try to get the source institution by attributes: 
+        This function will try to get the source institution by attributes:
 
             * specific_id
 
@@ -257,7 +319,7 @@ class SourceInstitution(models.Model):
 
         return InstitutionSource|None
 
-        This function can raise: 
+        This function can raise:
             ValueError
             InstitutionSource.DoesNotExist
             InstitutionSource.MultipleObjectsReturned
@@ -285,14 +347,14 @@ class SourceInstitution(models.Model):
         The kwargs must be a dict, something like this:
 
             {
-                "specific_id", 
+                "specific_id",
                 "display_name",
                 "country_code",
                 "type",
-                "updated", 
-                "created", 
-                "source", 
-                "raw", 
+                "updated",
+                "created",
+                "source",
+                "raw",
             }
 
         return SourceInstitution(object), 0|1
@@ -323,3 +385,110 @@ class SourceInstitution(models.Model):
         inst.save()
 
         return inst, created
+
+
+class InstitutionTranslateName(Orderable):
+    source_institution = ParentalKey(
+        SourceInstitution,
+        on_delete=models.CASCADE,
+        related_name="source_institution",
+        null=True,
+        blank=True,
+    )
+
+    name = models.CharField(_("Name"), max_length=255, null=True, blank=True)
+
+    language = models.ForeignKey(
+        Language,
+        verbose_name=_("Language"),
+        null=True,
+        on_delete=models.SET_NULL,
+    )
+
+    def __unicode__(self):
+        return "%s" % (self.name)
+
+    def __str__(self):
+        return self.__unicode__()
+
+    @classmethod
+    def get(cls, **kwargs):
+        """
+        This function will try to get the translate by attributes:
+
+            * name
+            * language
+
+        The kwargs must be a dict, something like this:
+
+            {
+                "name": "inglish",
+                "language": "en",
+            }
+
+        return InstitutionTranslateName|None
+
+        This function can raise:
+            ValueError
+            InstitutionTranslateName.DoesNotExist
+            InstitutionTranslateName.MultipleObjectsReturned
+        """
+
+        filters = {}
+
+        if (
+            not kwargs.get("name")
+            and not kwargs.get("language")
+            and not kwargs.get("source_institution")
+        ):
+            raise ValueError("Param name and language and object SourceInstitution is required")
+            
+        filters = {
+            "name": kwargs.get("name"),
+            "language__name": kwargs.get("language"),
+            "source_institution": kwargs.get("source_institution"),
+        }
+
+        return cls.objects.get(**filters)
+
+    @classmethod
+    def create_or_update(cls, **kwargs):
+        """
+        This function will try to get the translate by name and language.
+
+        If the translate exists get, otherwise create.
+
+        The kwargs must be a dict, something like this:
+
+            {
+                "name",
+                "language",
+                "source_institution": source_institution(object)
+            }
+
+        return InstitutionTranslateName(object)
+
+        0 = get
+        1 = created
+
+        """
+
+        try:
+            trans = cls.get(**kwargs)
+            created = 0
+        except InstitutionTranslateName.DoesNotExist:
+            trans = cls.objects.create()
+            trans.name = kwargs.get("name")
+            trans.language = Language.get_or_create(code2=kwargs.get("language"))
+            trans.source_institution = (
+                kwargs.get("source_institution")
+                if kwargs.get("source_institution")
+                else None
+            )
+            trans.save()
+            created = 1
+        except InstitutionTranslateName.MultipleObjectsReturned as e:
+            print(_("The institution translate table have duplicity...."))
+            raise (InstitutionTranslateName.MultipleObjectsReturned)
+
+        return trans, created

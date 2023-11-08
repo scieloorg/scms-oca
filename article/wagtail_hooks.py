@@ -16,17 +16,36 @@ from .models import (
     Concepts
 )
 
+
 class SourceArticleAdmin(ModelAdmin):
     model = SourceArticle
-    menu_label = _("Source Articles")  # ditch this to use verbose_name_plural from model
+    menu_label = _(
+        "Source Articles"
+    )  # ditch this to use verbose_name_plural from model
     menu_icon = "folder-open-inverse"  # change as required
     add_to_settings_menu = False  # or True to add your model to the Settings sub-menu
     exclude_from_explorer = (
         False  # or True to exclude pages of this type from Wagtail's explorer view
     )
 
+    list_display = (
+        "doi",
+        "specific_id",
+        "year",
+        "is_paratext",
+        "updated",
+        "created",
+    )
 
-    list_display = ("doi", "specific_id", "year", "is_paratext", "updated", "created", )
+    list_filter = (
+        "year",
+        "is_paratext",
+        "source",
+    )
+    search_fields = (
+        "doi",
+        "specific_id",
+    )
 
 
 class ConceptsAdmin(ModelAdmin):
@@ -92,10 +111,20 @@ class ArticleAdmin(ModelAdmin):
         "license",
         # "apc",
         "all_contributors",
+        "all_theme",
     )
 
-    list_filter = ("year", "license", "open_access_status", "apc", "is_ao", )
-    search_fields = ("doi", "year", )
+    list_filter = (
+        "year",
+        "license",
+        "open_access_status",
+        "apc",
+        "is_oa",
+    )
+    search_fields = (
+        "doi",
+        "year",
+    )
 
 
 class JournalAdmin(ModelAdmin):
@@ -141,17 +170,14 @@ class ContributorAdmin(ModelAdmin):
     list_display = (
         "family",
         "given",
-        "affiliations_string",
         "orcid",
+        "all_institutions",
+        "all_affiliations",
         "authenticated_orcid",
     )
 
     # list_filter = ('orcid',)
-    search_fields = (
-        "orcid",
-        "family",
-        "given"
-    )
+    search_fields = ("orcid", "family", "given")
 
 
 class AffiliationAdmin(ModelAdmin):
@@ -162,15 +188,9 @@ class AffiliationAdmin(ModelAdmin):
     exclude_from_explorer = (
         False  # or True to exclude pages of this type from Wagtail's explorer view
     )
-    list_display = (
-        "name",
-        "official",
-        "country",
-    )
+    list_display = ("name", "official", "country", "source")
     # list_filter = ("country",)
-    search_fields = (
-        "name",
-    )
+    search_fields = ("name",)
 
 
 class LicenseAdmin(ModelAdmin):
@@ -201,6 +221,7 @@ class ArticleAdminGroup(ModelAdminGroup):
         ContributorAdmin,
         AffiliationAdmin,
         LicenseAdmin,
+        ConceptsAdmin,
         SourceArticleAdmin,
     )
 

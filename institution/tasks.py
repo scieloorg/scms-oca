@@ -9,6 +9,8 @@ from core.models import Source
 from config import celery_app
 from core.utils import utils as core_utils
 
+from institution.models import Institution, SourceInstitution, InstitutionTranslateName
+
 logger = logging.getLogger(__name__)
 
 User = get_user_model()
@@ -32,12 +34,12 @@ def load_institution(user_id, length=None, country=None):
         tasks.load_institution(length=2000, country="BR")
 
 
-    Running using a script: 
+    Running using a script:
 
     python manage.py runscript load_openalex --script-args 1 2000 BR
 
     The OpenAlex API format is something like the format below:
-      
+
         "meta": {
             "count": 1733,
             "db_response_time_ms": 91,
@@ -59,10 +61,10 @@ def load_institution(user_id, length=None, country=None):
                 "USP"
             ],
             "display_name_alternatives": [
-                
+
             ],
             "repositories": [
-                
+
             ],
             "works_count": 309714,
             "cited_by_count": 4385451,
@@ -363,22 +365,19 @@ def load_institution(user_id, length=None, country=None):
             },
         }
     """
-    
+
     if country:
         url = (
             settings.URL_API_OPENALEX_INSTITUTIONS
             + f"?filter=country_code:{country}&per-page=200&cursor=*"
         )
-    else: 
-        url = (
-            settings.URL_API_OPENALEX_INSTITUTIONS
-            + f"?per-page=200&cursor=*"
-        )
+    else:
+        url = settings.URL_API_OPENALEX_INSTITUTIONS + f"?per-page=200&cursor=*"
 
     _source, _ = Source.objects.get_or_create(name="OPENALEX")
 
     try:
-        flag  = True
+        flag = True
         inst_count = 0
 
         while flag:
@@ -401,11 +400,13 @@ def load_institution(user_id, length=None, country=None):
                     logger.info(
                         "%s: %s"
                         % (
-                            "Created institution" if is_created else "Updated institution",
+                            "Created institution"
+                            if is_created
+                            else "Updated institution",
                             inst,
                         )
                     )
-                    inst_count += 1 
+                    inst_count += 1
 
                 cursor = payload["meta"]["next_cursor"]
 
@@ -420,3 +421,27 @@ def load_institution(user_id, length=None, country=None):
                 return
     except Exception as e:
         logger.info(f"Unexpected error: {e}")
+
+
+@celery_app.task(name="Update the Institution entity with the matching SourceInstitution")
+def update_inst_by_source_inst(user_id, source="MEC"):
+    """
+    This task update the Sources on Institution bind the translation name on SourceInstitution.
+
+    Update the city of the found institutions.
+    """
+
+    for inst in Institution.objects.filter(source=source):
+
+        sinst = SourceInstitution.objects.filter(display_name__icontains=inst.name)
+        tsint = InstitutionTranslateName.objects.filter(name__icontains=inst.name, language__code2="pt")
+        
+        if sinst:
+            logger.info("Found instiution: %s" % (sinst[0].display_name))
+            inst.sources.add(sinst[0])
+            inst.save()
+            
+        if tsint:
+            logger.info("Found instiution: %s" % (tsint[0].name))
+            inst.sources.add(tsint[0].source_institution)
+            inst.save()

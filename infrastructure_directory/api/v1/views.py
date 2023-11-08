@@ -7,7 +7,7 @@ from infrastructure_directory import models
 
 class InfrastructureViewSet(viewsets.ModelViewSet):
     serializer_class = InfrastructureSerializer
-    http_method_names = ['get']
+    http_method_names = ["get"]
     # queryset = Infrastructure.objects.all()
 
     def get_queryset(self):
