@@ -14,6 +14,82 @@ from .forms import ContributorForm
 from core.models import Source
 
 
+class Concepts(models.Model):
+    """
+    Concepts are abstract ideas that works are about.
+    More about, see the source: https://docs.openalex.org/api-entities/concepts
+    """
+
+    specific_id = models.CharField(
+        _("Specific Id"), max_length=255, null=False, blank=False
+    )
+
+    name = models.CharField(
+        _("Name"),
+        max_length=512,
+        null=True,
+        blank=True,
+        help_text=_("Name of the concept"),
+    )
+
+    normalized_name = models.CharField(
+        _("Normalized Name"),
+        max_length=512,
+        null=True,
+        blank=True,
+        help_text=_("Name of the concept"),
+    )
+
+    level = models.IntegerField(
+        _("Level"),
+        null=True,
+        blank=True,
+        help_text=_("Number indicating hierarchy"),
+    )
+
+    parent_display_names = models.CharField(
+        _("Parent Display Name"),
+        max_length=512,
+        null=True,
+        blank=True,
+        help_text=_("The name of parents up to child names"),
+    )
+
+    parent_ids = models.ManyToManyField(
+        "self",
+        verbose_name=_("Parent ids"),
+        symmetrical=False,
+        blank=True,
+        related_name="parent_id",
+        help_text=_("Parent relation"),
+    )
+
+    thematic_areas = models.ManyToManyField(
+        ThematicArea,
+        verbose_name=_("Thematic Area"),
+        blank=True,
+        help_text=_("Thematic area relation"),
+    )
+
+    source = models.ForeignKey(
+        Source,
+        verbose_name=_("Source"),
+        null=True,
+        on_delete=models.SET_NULL,
+    )
+
+    def autocomplete_label(self):
+        return "%s (%s)" % (self.name, self.level) or ""
+    class Meta:
+        verbose_name = _("Concept")
+        verbose_name_plural = _("Concepts")
+
+    def __unicode__(self):
+        return self.__str__()
+
+    def __str__(self):
+        return "%s (%s)" % (self.name, self.level) or ""
+
 class Journal(models.Model):
     journal_issn_l = models.CharField(
         _("ISSN-L"), max_length=255, null=True, blank=True
