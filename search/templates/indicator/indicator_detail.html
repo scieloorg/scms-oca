@@ -7,160 +7,255 @@
 
 {% get_settings use_default_site=True %}
 
+{% block extra_css %}
+<script src="{% static 'js/echarts/echarts.min.js' %}"></script>
+<script src="{% static 'js/echarts/theme/roma-macarons-macarons2-infographic.js' %}"></script>
+
+
+{% endblock %}
+
 {% block title %}
-    {{ object.title }}
+{{ object.title }}
 {% endblock title %}
 
 {% block content %}
+
 <section id="content">
-  <div class="content-wrap pt-0">
-    <div class="container clearfix">
-      <div class="section m-1 p-1 mt-4">
+    <div class="content-wrap pt-0">
+        <div class="container clearfix">
+            <div class="section m-1 p-1 mt-4">
 
-        <h1>{{ object.title }}</h1>
+                <form action="." method="GET" class="form busca m-1 mt-2 mb-2" id="search">
+                    <div class="container">
 
-        {% if object.disclaimer %}
-            <div class="alert alert-warning alert-dismissible fade show mt-1" role="alert">
-            <strong>{% trans "Atenção" %}: </strong> {{ object.disclaimer }}
+                        <!-- row 1 -->
+                        <div class="row">
+
+                            <!-- col 6 -->
+                            <div class="col-sm-8 col-md-8 col-lg-8">
+                                <input class="form-control" id="q" name="q" value="{{ search_query }}"
+                                    placeholder="{% trans 'Digite sua pesquisa...' %}">
+                            </div>
+
+                            <!-- col 2 -->
+                            <div class="col-sm-2 col-md-2 col-lg-2">
+                                <button class="btn btn-primary" id="search-button" for="search" type="submit">{% trans "Buscar" %}</button>
+                                <!-- <a href="#" class="ml-3">
+                      {% trans "Help" %}
+                      <i class="icon-line-help-circle"></i>
+                    </a> -->
+                            </div>
+
+                            <!-- col 2 -->
+                            <div class="col-sm-2 col-md-2 col-lg-2 pl-0 text-right">
+
+                            </div>
+
+                        </div>
+                    </div>
+                </form>
+
             </div>
-        {% endif %}
+            <br>
+            <br>
+            <section class="page-title bg-transparent">
+                <div class="container">
+                    <div class="page-title-row">
+                        <div class="page-title-content">
+                            <h2 style="margin-bottom: 5px;">{{ object.title }}</h2>
+                            <span>{{ object.description }}</span>
+                        </div>
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item mt-5"><a href="/">Home</a></li>
+                                <li class="breadcrumb-item mt-5"><a href="#" onClick="history_fall_back()">Search</a></li>
+                                <!-- <li class="breadcrumb-item active" aria-current="page">Charts</li> -->
+                            </ol>
+                        </nav>
+                    </div>
+                </div>
+            </section>
 
-        <!-- Navegação entre as versões -->
-        <div class="container">
-            <nav aria-label="...">
-                <ul class="pagination">
+            <br>
+            <br>
 
-                    <li class="page-item">
-                        {% if object.previous_record %}
-                            <a class="page-link" href="{% url 'search:indicator_detail' object.previous_record.slug %}">
-                                < {% trans 'versões anteriores' %}
-                            </a>
-                        {% endif %}
-                    </li>
-                    <li class="page-item active" aria-current="page">
-                        <a class="page-link" href="#">
-                            {% trans object.validity|translate_data %} |
-                            {% trans 'Gerado' %}: {{ object.created|date:"Y-m-d" }}
-                        </a>
-                    </li>
-                    <li class="page-item">
-                        {% if object.posterior_record %}
-                            <a class="page-link" href="{% url 'search:indicator_detail' object.posterior_record.slug %}">
-                                {% trans 'versões posteriores' %} >
-                            </a>
-                        {% endif %}
-                    </li>
-                    <li class="page-item">
-                        {% if object.latest and object.latest.id != object.id %}
-                            <a class="page-link" href="{% url 'search:indicator_detail' object.latest.slug %}">
-                                {% trans 'ir para a versão mais recente' %}
-                            </a>
-                        {% endif %}
-                    </li>
+            <!-- Tabs navs -->
+            <ul class="nav nav-tabs nav-fill mb-3" id="ex1" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link active" id="ex2-tab-1" data-toggle="tab" href="#ex2-tabs-1" role="tab"
+                        aria-controls="ex2-tabs-1" aria-selected="true">Gráfico</a>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link" id="ex2-tab-2" data-toggle="tab" href="#ex2-tabs-2" role="tab"
+                        aria-controls="ex2-tabs-2" aria-selected="false">Dados</a>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link" id="ex2-tab-3" data-toggle="tab" href="#ex2-tabs-3" role="tab"
+                        aria-controls="ex2-tabs-3" aria-selected="false">Sobre</a>
+                </li>
+            </ul>
+            <!-- Tabs navs -->
 
-                </ul>
-            </nav>
-        </div>
+            <!-- Tabs content -->
+            <div class="tab-content" id="ex2-content">
+                <div class="tab-pane fade show active" id="ex2-tabs-1" role="tabpanel" aria-labelledby="ex2-tab-1">
+                    <div class="mb-5 mx-auto" style="max-width: 100%; min-height: 100%;">
+                        <div id="graph" style="width: 100%;height: 1000px"></div>
+                    </div>
+                    <!-- <div class="toolbar text-center">
+                        <button class="btn btn-secondary btn-sm" id="randomizeData">Download dados</button>
+                        <button class="btn btn-secondary btn-sm" id="addDataset">Dowload dados sumarizados</button>
+                    </div> -->
+                </div>
+                <div class="tab-pane fade" id="ex2-tabs-2" role="tabpanel" aria-labelledby="ex2-tab-2">
+                    dados
+                </div>
+                <div class="tab-pane fade" id="ex2-tabs-3" role="tabpanel" aria-labelledby="ex2-tab-3">
+                    sobre
+                </div>
+            </div>
 
-        <div class="container">
-            <p>
-                {% if object.action_and_practice %}
-                    {% if object.action_and_practice.action %}
-                        <span class="badge badge-primary">
-                            {{ object.action_and_practice.action.name|translate_data }}
-                        </span>
-                    {% endif %}
-                    {% if object.action_and_practice.classification %}
-                        <span class="badge badge-secondary">
-                            {{ object.action_and_practice.classification|translate_data }}
-                        </span>
-                    {% endif %}
-                    {% if object.action_and_practice.practice %}
-                        <span class="badge badge-success">
-                            {{ object.action_and_practice.practice.name|translate_data }}
-                        </span>
-                    {% endif %}
-                {% endif %}
-                <span class="badge badge-danger">{{ object.scope|translate_data }}</span>
-                <span class="badge badge-warning">{{ object.measurement|translate_data }}</span>
-            </p>
-        </div>
+            <br>
+            <br>
 
-        <div class="container">
-            {% if object.keywords.all %}
-                <h4 class="mb-1 mt-4">{% trans 'Palavras-chave' %}</h4>
-                <p>
-                    {% for item in object.keywords.all %}
-                        <span class="badge badge-info">{{ item.name }}</span>
-                    {% endfor %}
-                </p>
-            {% endif %}
-        </div>
+            <!-- Tabs content -->
 
-        <div class="container">
-            {% if object.description %}
-                <h4 class="mb-1 mt-4">{% trans 'Descrição' %}</h4>
-                <p>{{ object.description }}</p>
-            {% endif %}
-        </div>
-
-        <div class="container">
-            {% if object.institutional_contribution %}
-                <h4 class="mb-1 mt-4">{% trans "Contribuição" %}</h4>
-                <p>{{ object.institutional_contribution }}</p>
-            {% endif %}
-        </div>
-
-        <div class="container">
-            {% if object.link or object.link_to_data or object.link_to_graphic %}
-                <h4 class="mb-1 mt-4">{% trans "Links externos" %}</h4>
-            {% endif %}
-
-            {% if object.link_to_data %}
-                <h4 class="mb-1 mt-4">{% trans "Link to the data" %}</h4>
-                <p>
-                    <a href="{{ object.link_to_data }}">{{ object.link_to_data }}</a>
-                </p>
-            {% endif %}
-            
-            {% if object.link_to_graphic %}
-                <h4 class="mb-1 mt-4">{% trans 'Link to the graphic' %}</h4>
-                <p>
-                    <a href="{{ object.link_to_graphic }}">{{ object.link_to_graphic }}</a>
-                </p>
-            {% endif %}
-
-            {% if object.link %}
-                <h4 class="mb-1 mt-4">{% trans 'Link para os indicadores' %}</h4>
-                <p>
-                    <a href="{{ object.link }}">{{ object.link }}</a>
-                </p>
-            {% endif %}
-        </div>
-
-        {% if object.raw_data or object.summarized %}
             <div class="container">
-                <h4 class="mb-1 mt-4">Downloads dos dados</h4>
-                <p>
-                    {% if object.record_status == 'WIP' %}
-                        <a href="#">{% trans 'dados brutos' %}{% trans 'em processamento' %}</a>
-                    {% else %}
-                        <a href="{% url 'search:indicator_raw_data' object.slug %}">{% trans 'dados brutos' %}</a>
-                    {% endif %}
-                    |
-                    <a href="{% url 'search:indicator_summarized' object.slug %}">{% trans 'dados computados' %}</a>
-                </p>
+                <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Licença Creative Commons"
+                        style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/80x15.png" /></a><br />Este
+                obra está licenciado com uma Licença <a rel="license"
+                    href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Atribuição 4.0
+                    Internacional</a>.
             </div>
-        {% endif %}
-
-        <div class="container">{% include 'indicator/abas.html' %}</div>
-
-        <div class="container">
-            <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Licença Creative Commons" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/80x15.png" /></a><br />Este obra está licenciado com uma Licença <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Atribuição 4.0 Internacional</a>.
         </div>
     </div>
-  </div>
 </section>
-
 <!-- content -->
+
 {% endblock %}
+
+
+{% block inline_javascript %}
+
+<script type="text/javascript">
+
+    function history_fall_back(fallbackUrl) {
+        fallbackUrl = fallbackUrl || '/search';
+    
+        if (document.referrer == "") {
+            window.location.href = fallbackUrl
+        } else {
+            window.history.go(-1);
+        }
+
+    }
+
+    var dom = document.getElementById('graph');
+    var chart = echarts.init(dom, {
+        renderer: 'svg',
+        useDirtyRect: false,
+    });
+
+    var app = {};
+
+    var option;
+
+    option = {
+        title: {
+            show: false,
+            text: "{{ object.title }}",
+            textAlign: 'auto',
+        },
+        tooltip: {
+            trigger: 'axis',
+            // formatter: function (params) {
+            //   console.log(params);
+            //   return `${params.seriesName}<br />
+            //           ${params.name}: ${params.value}<br />`;
+            // }
+        },
+        grid: {
+            left: '1%',
+            right: '30%',
+            bottom: '3%',
+            containLabel: true
+        },
+        legend: {
+            type: 'scroll',
+            orient: 'vertical',
+            x: 'right',
+            //left: '90%',
+            top: '5%',
+            bottom: '10%',
+            show: true,
+        },
+        toolbox: {
+            orient: 'horizontal',
+            feature: {
+                magicType: {
+                    type: ['line', 'bar', 'stack'],
+                },
+                dataView: {},
+                saveAsImage: { show: true },
+                restore: { show: true }
+            }
+        },
+        dataZoom: [
+            {
+                type: 'inside'
+            },
+            {
+                type: 'slider'
+            }
+        ],
+        xAxis: [
+            {
+                type: 'category',
+                data: {{chart_keys|safe}}
+            }
+        ],
+        yAxis: [
+            {
+                type: 'value'
+            }
+        ],
+        series: {{ chart_series|safe }}
+    };
+    
+    {/* // use configuration item and data specified to show chart
+    chart.setOption(option);
+
+    chart.on('legendselectchanged', function (params) {
+        console.log(params);
+        selectGraph(params);
+        unselectGrap(params);
+    });
+
+    function selectGraph(params) {
+        chart.dispatchAction({
+        type: 'legendSelect',
+        // legend name
+        name: params.name,
+    })
+    }
+
+    function unselectGrap(params) {
+        for (const legend in params.selected) {
+            if(legend !== params.name) {
+                    chart.dispatchAction({
+                        type: 'legendUnSelect',
+                        // legend name
+                        name: legend,
+                    })
+            }
+        }
+    } */}
+
+    if (option && typeof option === 'object') {
+        chart.setOption(option);
+    }
+
+    window.addEventListener('resize', chart.resize);
+</script>
+
+{% endblock inline_javascript %}

@@ -34,6 +34,7 @@ class Indicator:
         self,
         filters,
         title,
+        description,
         facet_by,
         context_by=None,
         default_filter={},
@@ -41,6 +42,7 @@ class Indicator:
         fill_range=True,
         fill_range_value=0,
         solr_instance=None,
+        include_all=False,
     ):
         """Initializes the instance indicator class.
 
@@ -54,6 +56,7 @@ class Indicator:
           of this items.
           fill_range: this set a default values to be filled on range filter.
           default_filter: A lucene query syntax to be default on filters.
+          include_all: Include all itens since the values is 0 to all key(years)
         """
         self.filters = filters
         self.title = title
@@ -64,6 +67,9 @@ class Indicator:
         self.fill_range = fill_range
         self.fill_range_value = fill_range_value
         self.ids = set()
+        self.keys = []
+        self.include_all = include_all
+        self.description = description
 
         self.solr = solr_instance or pysolr.Solr(
             settings.HAYSTACK_CONNECTIONS["default"]["URL"],
@@ -131,7 +137,7 @@ class Indicator:
             This function dont raise any exception
         """
 
-        result = result or self.result
+        result = result or self.solr.search("*:*")
 
         facet = result.facets.get("facet_fields").get(facet_name)
 
@@ -163,6 +169,12 @@ class Indicator:
         This will return all the ids to the indicator.
         """
         return self.ids
+
+    def get_keys(self):
+        """
+        This will return all the ids to the indicator.
+        """
+        return self.get_facet(self.facet_by).keys()
 
     def dynamic_filters(self):
         """
@@ -196,7 +208,7 @@ class Indicator:
                 {f'{p.split(":")[0]}': f'{p.split(":")[1]}' for p in prod}
             )
 
-        self.logger.info(self.filters)
+        # self.logger.info(self.filters)
 
     def generate(self):
         """This will produce the discrete mathematics based on filters to index.
@@ -209,10 +221,10 @@ class Indicator:
                 [
                     {
                         "example_key": {
-                            "keys": [
+                            "items": [
                                 "2012",
                             ],
-                            "values": [
+                            "counts": [
                                 1856,
                             ],
                         }
@@ -246,7 +258,7 @@ class Indicator:
 
             q = "%s" % (" AND ".join(["%s:%s" % (k, v) for k, v in filters.items()]))
 
-            self.logger.info(filters)
+            # self.logger.info(filters)
             self.logger.info(q)
 
             result = self.solr.search(q, fl=["django_id"], rows=100000000)
@@ -262,33 +274,46 @@ class Indicator:
             )
 
             result = dict(sorted(result.items()))
-
+            
             # fill the range
             # range with end +1 to include the last item
             if self.fill_range:
-                for dy in range(
-                    self.range_filter.get("range").get("start"),
-                    self.range_filter.get("range").get("end") + 1,
-                ):
-                    result.setdefault(str(dy), self.fill_range_value)
+                if self.range_filter:
+                    for dy in range(
+                        self.range_filter.get("range").get("start"),
+                        self.range_filter.get("range").get("end") + 1,
+                    ):
+                        result.setdefault(str(dy), self.fill_range_value)
+                else:
+                    # this is the keys facet 
+                    for key in self.get_facet(self.facet_by).keys():
+                        result.setdefault(str(key), self.fill_range_value)
 
+            result = dict(sorted(result.items()))
+            
+            values = result.values()
+            
             result = dict(
                 {
                     "%s"
                     % (
                         "-".join(
                             [
-                                value.replace('"', "").lower()
+                                value.replace('"', "").lower().strip()
                                 for value in filter.values()
                             ]
                         ),
                     ): {
                         "items": [k for k in sorted(result.keys())],
-                        "counts": [v for v in result.values()],
+                        "counts": [v for v in values],
                     }
                 }
             )
 
-            ret.append(result)
+            if self.include_all:
+                ret.append(result)
+            else:
+                if any(values):
+                    ret.append(result)
 
         return ret
