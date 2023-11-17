@@ -1,21 +1,20 @@
-import logging
 import csv
 import datetime
+import json
+import logging
 import math
 import os
 from collections import OrderedDict
 
 import pysolr
 from django.conf import settings
-from django.shortcuts import redirect
-from django.urls import reverse
 from django.http import Http404, HttpResponse, JsonResponse
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.template import loader
+from django.urls import reverse
 
-from search.graphic_data import GraphicData
 from indicator.models import Indicator
-
+from search.graphic_data import GraphicData
 
 solr = pysolr.Solr(
     settings.HAYSTACK_CONNECTIONS["default"]["URL"],
@@ -129,13 +128,17 @@ def indicator_detail(request, indicator_slug):
             ),
             permanent=True,
         )
-
-    gd = GraphicData(indicator)
-
+    
+    summarized = json.loads(indicator.summarized)
+    
     return render(
         request,
         "indicator/indicator_detail.html",
-        gd.parameters or {"object": indicator},
+        {
+            "object": indicator,
+            "chart_keys": summarized.get("keys"),
+            "chart_series": summarized.get("series"),
+         },
     )
 
 

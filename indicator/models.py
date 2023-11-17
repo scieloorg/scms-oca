@@ -203,8 +203,8 @@ class Indicator(CommonControlField):
         for item in items:
             try:
                 data = item.data
-            except:
-                data = {"teste": "teste"}
+            except Exception as e:
+                logging.exception(e)
             else:
                 data.update(self.header)
                 try:

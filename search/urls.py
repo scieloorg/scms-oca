@@ -7,7 +7,7 @@ urlpatterns = [
     # path /
     path("", views.search, name="search"),
     path(
-        "indicator/<str:indicator_slug>/detail/",
+        "detail/<str:indicator_slug>",
         views.indicator_detail,
         name="indicator_detail",
     ),

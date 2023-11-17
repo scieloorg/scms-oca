@@ -1,4 +1,3 @@
-
 import logging
 from datetime import datetime
 
@@ -34,7 +33,6 @@ class SciProd:
         by_region=False,
         by_apc=False,
     ):
-
         self.GROUP_BY_AND_ATTRIBUTE_NAME = dict(
             by_license="license__name",
             by_open_access_status="open_access_status",
@@ -136,22 +134,30 @@ class SciProd:
 
     @property
     def series_parameters(self):
-        """
-        Obtém os dados das séries do gráfico, mas somente para os campos
-        elencados pelo `group_by_params`:
-        - qualificação da ação
-        - prática
-        - instituição (nome)
-        - área temática (níveis 0 e 1)
-        - localidade (estado)
+        """This function get the data to the graph, just the fields cast by `group_by_params`
 
-        Retorna um gerador de séries
+        Yields:
+        A dictionary like: {'name': 'apc', 'grouped_by_params': {'by_apc': True}}
+        
+        Raises:
+        This function doesnt raise anything     
+
+        Aqui precisa nome=Year + APC | Access Status | Use License
+
+        Exemplo: 2023-yes(APC) | 2023-Bronze | 2023-CCBY
+
+        models.objects.filter(**filters).values("year", "apc", "state__name", "state__code").annotate(count=Count("id"))
+
+            Verificar o ``.distinct`` para não pegar itens repetidos.
+
+        return {"year": "2023", "apc": "yes", "count": 100, "state__name": "São Paulo", "state__code": "SP"}
         """
         for k, v in self.group_by_params.items():
             name = self.GROUP_BY_AND_ATTRIBUTE_NAME.get(k)
             if name not in self.y_params:
                 params = {k: True}
                 params.update(self.aditional_group_by_params or {})
+                print("valor do series_parameters %s" % { "name": name, "grouped_by_params": params, })
                 yield {
                     "name": name,
                     "grouped_by_params": params,
@@ -183,7 +189,6 @@ class SciProd:
                 return {k: True}
         return {"by_open_access_status": True, "by_license": True, "by_apc": True}
 
-
     @property
     def category_name(self):
         """
@@ -203,9 +208,12 @@ class SciProd:
             "by_license",
             "by_apc",
         ]
-        return " / ".join([
-            self.ATTRIBUTE_LABEL[self.GROUP_BY_AND_ATTRIBUTE_NAME[k]]
-            for k in self.group_by_params.keys() if k in names]
+        return " / ".join(
+            [
+                self.ATTRIBUTE_LABEL[self.GROUP_BY_AND_ATTRIBUTE_NAME[k]]
+                for k in self.group_by_params.keys()
+                if k in names
+            ]
         )
 
     @property
@@ -232,12 +240,27 @@ class SciProd:
         return summarized
 
     def get_series(self):
-        """
-        Retorna os itens resultantes de filtragem e agrupamento aplicado em Article
+        """This method return the items resultant of the filter.
+        
+        To help understand this function is necessary to known the result of ``self.series_parameters`` that return a dict like:
+
+        {'name': 'apc', 'grouped_by_params': {'by_apc': True}}
+
+        With this parameters is construct a ``grouped_by``, example: ['year', 'apc'] 
+
+        Yields:
+        A dictionary something like: {'year': '2021', 'apc': 'YES', 'count': 633, 'stack': 'apc'}.
+
+        This dictionary is the same of models.Article.group plus the stack.
+
+        Raises:
+        This function doesnt raise anything
         """
 
         for serie_params in self.series_parameters:
-            grouped_by = models.Article.parameters_for_values(**serie_params["grouped_by_params"])
+            grouped_by = models.Article.parameters_for_values(
+                **serie_params["grouped_by_params"]
+            )
             logging.info(f"grouped_by {grouped_by}")
             for item in models.Article.group(self.items, grouped_by):
                 item["stack"] = serie_params["name"]
@@ -254,7 +277,7 @@ class SciProd:
         Obtém o rótulo para os componentes do eixo X
         """
         label = self.ATTRIBUTE_LABEL.get(item["stack"])
-        return item[item["stack"]] or f'NA ({label})'
+        return item[item["stack"]] or f"NA ({label})"
 
     @property
     def graphic_data(self):
@@ -293,7 +316,6 @@ class SciProd:
         ):
             sources.append(item["sources__name"])
         return " • ".join(sources)
-
 
     @property
     def institutions(self):
@@ -344,7 +366,7 @@ class SciProd:
     @property
     def keywords(self):
         """
-        Usa como keywords os valores dos filtros usados na consulta 
+        Usa como keywords os valores dos filtros usados na consulta
         """
         return list(self.filter_params.values()) or [_("Brasil")]
 
@@ -411,7 +433,6 @@ def generate_indicator(
     by_region=False,
     by_apc=False,
 ):
-
     """
     Fornece os parâmetros para obter os dados dos artigos e
     gera o indicador
@@ -481,10 +502,16 @@ def get_thematic_area_filter_params():
     sendo Model qualquer `*Directory` (Education, Event, ...)
     """
     try:
-        for item in models.Article.objects.filter(
-                Q(contributors__affiliations__country__acron2="BR") |
-                Q(contributors__affiliations__official__location__country__acron2="BR")
-            ).values("contributors__thematic_area__level1").annotate(count=Count("id")):
+        for item in (
+            models.Article.objects.filter(
+                Q(contributors__affiliations__country__acron2="BR")
+                | Q(
+                    contributors__affiliations__official__location__country__acron2="BR"
+                )
+            )
+            .values("contributors__thematic_area__level1")
+            .annotate(count=Count("id"))
+        ):
             logging.info(item)
             yield {"thematic_area__level1": item["contributors__thematic_area__level1"]}
     except:
@@ -498,12 +525,22 @@ def get_location_filter_params():
     sendo Model qualquer `*Directory` (Education, Event, ...)
     """
     try:
-        for item in models.Article.objects.filter(
-                Q(contributors__affiliations__country__acron2="BR") |
-                Q(contributors__affiliations__official__location__country__acron2="BR")
-            ).values("contributors__affiliations__official__location__state__acronym").annotate(count=Count("id")):
+        for item in (
+            models.Article.objects.filter(
+                Q(contributors__affiliations__country__acron2="BR")
+                | Q(
+                    contributors__affiliations__official__location__country__acron2="BR"
+                )
+            )
+            .values("contributors__affiliations__official__location__state__acronym")
+            .annotate(count=Count("id"))
+        ):
             logging.info(item)
-            yield {"location__state__code": item["contributors__affiliations__official__location__state__acronym"]}
+            yield {
+                "location__state__code": item[
+                    "contributors__affiliations__official__location__state__acronym"
+                ]
+            }
     except Exception as e:
         logging.info(e)
         yield from []
@@ -516,12 +553,20 @@ def get_institution_filter_params():
     sendo Model qualquer `*Directory` (Education, Event, ...)
     """
     try:
-        for item in models.Article.objects.filter(
-                Q(contributors__affiliations__country__acron2="BR") |
-                Q(contributors__affiliations__official__location__country__acron2="BR")
-            ).values("contributors__affiliations__official__name").annotate(count=Count("id")):
+        for item in (
+            models.Article.objects.filter(
+                Q(contributors__affiliations__country__acron2="BR")
+                | Q(
+                    contributors__affiliations__official__location__country__acron2="BR"
+                )
+            )
+            .values("contributors__affiliations__official__name")
+            .annotate(count=Count("id"))
+        ):
             logging.info(item)
-            yield {"institution__name": item["contributors__affiliations__official__name"]}
+            yield {
+                "institution__name": item["contributors__affiliations__official__name"]
+            }
     except:
         yield from []
 
@@ -554,7 +599,7 @@ def schedule_indicators_tasks(
         None: {
             # "by_thematic_area_level1": True,
             "by_state": True,
-            "by_institution": True
+            "by_institution": True,
         },
         "location": {
             # "by_thematic_area_level1": True,
@@ -570,7 +615,6 @@ def schedule_indicators_tasks(
     }
 
     for filter_by, group_by in filters.items():
-
         # mais parâmetros menos prioridade por ser mais rápido
         priority = 1 + len(group_by)
 
