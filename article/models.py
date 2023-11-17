@@ -11,12 +11,12 @@ from usefulmodels.models import Country, State, ThematicArea
 from . import choices
 from .forms import ContributorForm
 
+from core.models import Source
 
 
 class Concepts(models.Model):
     """
     Concepts are abstract ideas that works are about.
-
     More about, see the source: https://docs.openalex.org/api-entities/concepts
     """
 
@@ -268,6 +268,69 @@ class Journal(models.Model):
         )
         params = {k: v for k, v in params.items() if v}
         return cls.objects.filter(**params)
+
+    @classmethod
+    def parameters_for_values(
+        cls,
+        by_open_access_status=False,
+        by_license=False,
+        by_institution=False,
+        by_thematic_area_level0=False,
+        by_thematic_area_level1=False,
+        by_state=False,
+        by_region=False,
+        by_apc=False,
+    ):
+        selected_attributes = ["year"]
+        if by_open_access_status:
+            selected_attributes += ["open_access_status"]
+        if by_license:
+            selected_attributes += ["license__name"]
+        if by_apc:
+            selected_attributes += ["apc"]
+        if by_institution:
+            selected_attributes += Institution.parameters_for_values(
+                "contributors__affiliations__official"
+            )
+        if by_state or by_region:
+            selected_attributes += State.parameters_for_values(
+                "contributors__affiliations__official__location__state",
+                by_state,
+                by_state,
+                by_region,
+            )
+        if by_thematic_area_level0 or by_thematic_area_level1:
+            selected_attributes += ThematicArea.parameters_for_values(
+                "contributors__thematic_areas",
+                by_thematic_area_level0,
+                by_thematic_area_level1,
+            )
+        return selected_attributes
+
+    @classmethod
+    def group(
+        cls,
+        query_result,
+        selected_attributes,
+        order_by="year",
+    ):
+        for item in (
+            query_result.values(*selected_attributes)
+            .annotate(count=Count("id"))
+            .order_by(order_by)
+            .iterator()
+        ):
+            d = {}
+            for k, v in item.items():
+                k = k.replace("contributors__affiliations__official__location__", "")
+                k = k.replace(
+                    "contributors__affiliations__official__name", "institution__name"
+                )
+                k = k.replace("thematic_areas__", "thematic_area__")
+
+                d[k] = v
+            yield d
+
 
     @classmethod
     def parameters_for_values(

@@ -13,7 +13,7 @@ from .models import (
     Affiliation,
     Journal,
     License,
-    Concepts,
+    Concepts
 )
 
 
@@ -63,9 +63,6 @@ class ConceptsAdmin(ModelAdmin):
     def all_theme(self, obj):
         return " | ".join([str(c) for c in obj.thematic_areas.all()])
 
-    def has_theme(self, obj):
-        return bool(obj.thematic_areas.all())
-
     list_display = (
         "name",
         "specific_id",
@@ -96,10 +93,12 @@ class ArticleAdmin(ModelAdmin):
         return " | ".join([str(c) for c in obj.contributors.all()])
 
     def all_theme(self, obj):
+        themes = []
         for c in obj.concepts.all():
-            return " | ".join(
+            themes.extend(
                 ["%s (%s)" % (str(t), t.id) for t in c.thematic_areas.all() if t]
             )
+        return " | ".join(themes)
 
     list_display = (
         "doi",
@@ -160,12 +159,7 @@ class ContributorAdmin(ModelAdmin):
 
     def all_institutions(self, obj):
         return " | ".join(
-            [str("%s(%s)" % (c.display_name, c.id)) for c in obj.institutions.all()]
-        )
-
-    def all_institutions(self, obj):
-        return " | ".join(
-            [str("%s(%s)" % (c.display_name, c.id)) for c in obj.institutions.all()]
+            [str("%s(%s)" % (c.name, c.id)) for c in obj.institutions.all()]
         )
 
     def all_affiliations(self, obj):
