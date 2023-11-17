@@ -209,6 +209,7 @@ def load_openalex(user_id, date=2012, length=None, country="BR"):
 def article_source_to_article(
     user_id, source_name="OPENALEX", size=None, loop_size=1000, intitution_id=None
 ):
+    
     """
     This task load the source article to article.
     """
@@ -302,7 +303,7 @@ def load_openalex_article(user_id, article_ids, update=False):
                 journal = None
 
             # APC
-            is_apc = "YES" if bool(core_utils.nestget(article.raw, "apc_list")) else "NO"
+            is_apc = "Yes" if bool(core_utils.nestget(article.raw, "apc_list")) else "No"
 
             # Open Access Status
             oa_status = core_utils.nestget(article.raw, "open_access", "oa_status")
@@ -362,7 +363,7 @@ def load_openalex_article(user_id, article_ids, update=False):
                             insts = []
                             source = Source.objects.get(name="OPENALEX")
                             for inst in au.get("institutions"):
-                                inst_obj, _ = models.SourceInstitution.create_or_update(
+                                inst_obj = models.SourceInstitution.get(
                                     **{"specific_id": inst.get("id"), "source": source}
                                 )
                                 insts.append(inst_obj)
@@ -385,7 +386,7 @@ def load_openalex_article(user_id, article_ids, update=False):
                     )
                 except models.Concepts.DoesNotExist as ex:
                     logger.warning("Not found concept: %s" % concept.get("id").lower())
-
+            
             article_dict = {
                 "doi": doi,
                 "title": title,
@@ -558,8 +559,10 @@ def load_sucupira(production_file_csv, detail_file_csv, authors):
 
 @celery_app.task(name="Match between institutions and affiliations")
 def match_contrib_inst_aff(user_id):
-    """
+    """ 
     This task loop to all contributor looking for contributor.institutions and find the affiliation
+
+    Update the the affiliation.source from contributor
     """
     user = User.objects.get(id=user_id)
 
@@ -586,6 +589,7 @@ def match_contrib_aff_source_with_inst_MEC(user_id):
 
     for aff in models.Affiliation.objects.all():
         if aff.source:
+            print(aff.source.display_name)
             insts = Institution.objects.filter(
                 name__icontains=aff.source.display_name, source="MEC"
             )

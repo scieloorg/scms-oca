@@ -193,7 +193,7 @@
          <str name="facet.field">practice</str>
          <str name="facet.field">action</str>
          <!-- melhor ficar só na pesquisa -->
-         <!-- str name="facet.field">institutions</str -->
+         <str name="facet.field">institutions</str>
 
          <str name="facet.field">cities</str>
          <str name="facet.field">states</str>
@@ -206,6 +206,18 @@
          <str name="facet.field">thematic_areas</str>
          <str name="facet.field">category</str>
          <str name="facet.field">institutional_contribution</str>
+         <str name="facet.field">sources</str>
+         <str name="facet.field">concepts</str>
+         <str name="facet.field">programs</str>
+         <str name="facet.field">thematic_level_0</str>
+         <str name="facet.field">thematic_level_1</str>
+         <str name="facet.field">thematic_level_2</str>
+         <str name="facet.field">year</str>
+         <str name="facet.field">open_access_status</str>
+         <str name="facet.field">is_oa</str>
+         <str name="facet.field">apc</str>
+         <str name="facet.field">programs</str>
+         <str name="facet.field">license</str>
 
          <str name="facet.limit">30</str>
          <str name="facet.mincount">1</str>
