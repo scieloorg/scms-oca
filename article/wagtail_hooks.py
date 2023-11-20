@@ -159,7 +159,7 @@ class ContributorAdmin(ModelAdmin):
 
     def all_institutions(self, obj):
         return " | ".join(
-            [str("%s(%s)" % (c.name, c.id)) for c in obj.institutions.all()]
+            [str("%s(%s)" % (c.display_name, c.id)) for c in obj.institutions.all()]
         )
 
     def all_affiliations(self, obj):
