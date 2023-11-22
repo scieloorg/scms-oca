@@ -207,11 +207,21 @@ def load_openalex(user_id, date=2012, length=None, country="BR"):
 
 @celery_app.task(name=_("ArticleSource to Article"))
 def article_source_to_article(
-    user_id, source_name="OPENALEX", size=None, loop_size=1000, intitution_id=None
+    user_id,
+    source_name="OPENALEX",
+    size=None,
+    loop_size=1000,
+    intitution_id=None,
+    year=None,
 ):
-    
     """
     This task load the source article to article.
+    
+    Args:
+        size: A integer to indicate the size of the article to process.
+        loop_size: A integer that determine the size os each slice to call a sub-task ``load_openalex_article``.
+        intitution_id: A string with the institution to process.
+        year: A string with the year to process.
     """
     count = 0
     filters = {}
@@ -219,6 +229,9 @@ def article_source_to_article(
 
     if intitution_id:
         filters["raw__authorships__0__institutions__icontains"] = intitution_id
+
+    if year:
+        filters["year"] = year
 
     sarticle = (
         models.SourceArticle.objects.filter(**filters).order_by("id")[0 : int(size)]
@@ -283,7 +296,9 @@ def load_openalex_article(user_id, article_ids, update=False):
 
             # Get the journal data
             if article.raw.get("primary_location"):
-                journal_data = core_utils.nestget(article.raw, "primary_location", "source")
+                journal_data = core_utils.nestget(
+                    article.raw, "primary_location", "source"
+                )
                 if journal_data:
                     j_issn_l = journal_data.get("issn_l")
                     if journal_data.get("issn"):
@@ -303,7 +318,9 @@ def load_openalex_article(user_id, article_ids, update=False):
                 journal = None
 
             # APC
-            is_apc = "Yes" if bool(core_utils.nestget(article.raw, "apc_list")) else "No"
+            is_apc = (
+                "Yes" if bool(core_utils.nestget(article.raw, "apc_list")) else "No"
+            )
 
             # Open Access Status
             oa_status = core_utils.nestget(article.raw, "open_access", "oa_status")
@@ -335,7 +352,9 @@ def load_openalex_article(user_id, article_ids, update=False):
                             if display_name
                             else ""
                         )
-                        given = display_name.split(" ")[0].strip() if display_name else ""
+                        given = (
+                            display_name.split(" ")[0].strip() if display_name else ""
+                        )
 
                         author_dict = {
                             "family": family,
@@ -373,7 +392,9 @@ def load_openalex_article(user_id, article_ids, update=False):
                                     "institutions": insts,
                                 }
                             )
-                        contributor, _ = models.Contributor.create_or_update(**author_dict)
+                        contributor, _ = models.Contributor.create_or_update(
+                            **author_dict
+                        )
 
                         contributors.append(contributor)
 
@@ -382,11 +403,13 @@ def load_openalex_article(user_id, article_ids, update=False):
             for concept in core_utils.nestget(article.raw, "concepts"):
                 try:
                     concepts.append(
-                        models.Concepts.objects.get(specific_id=concept.get("id").lower())
+                        models.Concepts.objects.get(
+                            specific_id=concept.get("id").lower()
+                        )
                     )
                 except models.Concepts.DoesNotExist as ex:
                     logger.warning("Not found concept: %s" % concept.get("id").lower())
-            
+
             article_dict = {
                 "doi": doi,
                 "title": title,
@@ -559,7 +582,7 @@ def load_sucupira(production_file_csv, detail_file_csv, authors):
 
 @celery_app.task(name="Match between institutions and affiliations")
 def match_contrib_inst_aff(user_id):
-    """ 
+    """
     This task loop to all contributor looking for contributor.institutions and find the affiliation
 
     Update the the affiliation.source from contributor
