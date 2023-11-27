@@ -23,7 +23,12 @@ def load_openalex(user_id, date=2012, length=None, country="BR"):
     Retrieves article data from OpenALex API for a specific year and populate the article.models.Article
 
     Sync or Async
-    Param: date is a integer representing the date range in the format 'YYYY'.
+
+    Args:
+
+        date: is a integer representing the date range in the format 'YYYY'.
+        length: A integer that determine the quantity of item to be get from OpenAlex.
+        country: A string represent the code of country to be get from OpenAlex.
 
     The endpoint OpenAlex: https://api.openalex.org/works/?filter=institutions.country_code:{country},publication_year:{date}&per-page=200&cursor=*"
 
@@ -34,7 +39,6 @@ def load_openalex(user_id, date=2012, length=None, country="BR"):
         from article import tasks
 
         tasks.load_openalex(date=2012)
-
 
     Running using a script:
 
@@ -211,24 +215,24 @@ def article_source_to_article(
     source_name="OPENALEX",
     size=None,
     loop_size=1000,
-    intitution_id=None,
+    institution_id=None,
     year=None,
 ):
     """
     This task load the source article to article.
-    
+
     Args:
         size: A integer to indicate the size of the article to process.
         loop_size: A integer that determine the size os each slice to call a sub-task ``load_openalex_article``.
-        intitution_id: A string with the institution to process.
+        institution_id: A string with the institution to process.
         year: A string with the year to process.
     """
     count = 0
     filters = {}
     filters["source__name"] = source_name
 
-    if intitution_id:
-        filters["raw__authorships__0__institutions__icontains"] = intitution_id
+    if institution_id:
+        filters["raw__authorships__0__institutions__icontains"] = institution_id
 
     if year:
         filters["year"] = year
@@ -424,6 +428,7 @@ def load_openalex_article(user_id, article_ids, update=False):
                 "contributors": contributors,
                 "license": license,
                 "concepts": concepts,
+                "user": user,
             }
 
             article, created = models.Article.create_or_update(**article_dict)
