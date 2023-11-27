@@ -1,25 +1,27 @@
-from datetime import datetime
 import json
 import logging
 import os
 import secrets
-import shutil
+from datetime import datetime
 from tempfile import TemporaryDirectory
 from zipfile import ZipFile
 
 from django.conf import settings
 from django.db import models
 from django.db.models import Q
+from django.dispatch.dispatcher import receiver
 from django.utils.text import slugify
 from django.utils.translation import gettext as _
 from taggit.managers import TaggableManager
 from wagtail.admin.panels import FieldPanel
 from wagtailautocomplete.edit_handlers import AutocompletePanel
 
+from core.utils import utils
 from core.models import CommonControlField
 from institution.models import Institution
 from location.models import Location
 from usefulmodels.models import ActionAndPractice, ThematicArea
+
 from . import choices
 from .forms import IndicatorDirectoryForm
 from .permission_helper import MUST_BE_MODERATE
@@ -31,6 +33,30 @@ class GetOrCreateCrontabScheduleError(Exception):
 
 class CreateIndicatorRecordError(Exception):
     ...
+
+
+class IndicatorFile(models.Model):
+    """
+    This class store a file .zip with the raw data to indicator.
+    """
+
+    name = models.CharField(_("File name"), max_length=1024, null=False, blank=False)
+
+    raw_data = models.FileField(_("JSONL Zip File"), null=True, blank=True)
+    data_ids = models.JSONField(_("Data ids"), null=True, blank=True)
+
+    def __unicode__(self):
+        return self.name
+
+    def __str__(self):
+        return self.__unicode__()
+
+
+@receiver(models.signals.post_delete, sender=IndicatorFile)
+def delete_file(sender, instance, *args, **kwargs):
+    """Deletes image files on `post_delete`"""
+    if instance.raw_data:
+        utils.delete_file(instance.raw_data.path)
 
 
 class Indicator(CommonControlField):
@@ -80,9 +106,11 @@ class Indicator(CommonControlField):
     end_date_year = models.IntegerField(_("End Date"), null=True, blank=True)
 
     link = models.URLField(_("Link"), null=True, blank=True)
-    raw_data = models.FileField(
-        _("JSONL Zip File"), null=True, blank=True, max_length=255
+
+    indicator_file = models.ForeignKey(
+        IndicatorFile, on_delete=models.SET_NULL, null=True
     )
+
     summarized = models.JSONField(_("JSON File"), null=True, blank=True)
 
     keywords = TaggableManager(_("Keywords"), blank=True)
@@ -150,9 +178,7 @@ class Indicator(CommonControlField):
 
     @property
     def permanent_link(self):
-        return "https://ocabr.org/search/indicator/{}/detail/".format(
-            self.slug
-        )
+        return "https://ocabr.org/search/indicator/{}/detail/".format(self.slug)
 
     @property
     def header(self):
@@ -184,20 +210,35 @@ class Indicator(CommonControlField):
         indicator["indicator"] = {k: v for k, v in d.items() if v}
         return indicator
 
-    def save_raw_data(self, items):
-        with TemporaryDirectory() as tmpdirname:
-            temp_zip_file_path = os.path.join(tmpdirname, self.filename + ".zip")
-            file_path = os.path.join(settings.MEDIA_ROOT, self.filename + ".zip")
-            logging.info("TemporaryDirectory %s" % tmpdirname)
-            logging.info("file_path %s" % file_path)
-            with ZipFile(temp_zip_file_path, "w") as zf:
-                zf.writestr(
-                    self.filename + ".jsonl", "".join(self._raw_data_rows(items))
-                )
-            shutil.move(temp_zip_file_path, file_path)
-            logging.info("existe file_path? %s" % os.path.isfile(file_path))
-        self.raw_data.name = file_path
-        self.save()
+    def save_raw_data(self, items, ids):
+        """
+        This function generate the .zip file to a list of items and relate this .zip
+        with the indicator.
+        """
+        if items:
+            with TemporaryDirectory() as tmpdirname:
+                temp_zip_file_path = os.path.join(tmpdirname, self.filename + ".zip")
+                logging.info("temp file_path %s" % temp_zip_file_path)
+
+                with ZipFile(temp_zip_file_path, "w") as zf:
+                    zf.writestr(
+                        self.filename + ".jsonl", "".join(self._raw_data_rows(items))
+                    )
+                zf.close()
+
+                zfile = open(temp_zip_file_path, "rb")
+
+                ind_file = IndicatorFile(name=self.filename)
+                ind_file.raw_data.save(self.filename + ".zip", zfile)
+                ind_file.data_ids = ids
+                ind_file.save()
+
+            logging.info(
+                "existe file_path? %s" % os.path.isfile(ind_file.raw_data.path)
+            )
+
+            self.indicator_file = ind_file
+            self.save()
 
     def _raw_data_rows(self, items):
         for item in items:
@@ -215,7 +256,6 @@ class Indicator(CommonControlField):
 
     @property
     def disclaimer(self):
-
         if self.institutional_contribution != settings.DIRECTORY_DEFAULT_CONTRIBUTOR:
             if self.updated_by:
                 return (
@@ -307,7 +347,6 @@ class Indicator(CommonControlField):
             "thematic_areas", permission="indicator.can_edit_thematic_areas"
         ),
         AutocompletePanel("locations", permission="indicator.can_edit_locations"),
-        FieldPanel("raw_data", permission="indicator.can_edit_raw_datas"),
         FieldPanel("summarized", permission="indicator.can_edit_summarized"),
         FieldPanel("notes", permission="indicator.can_edit_notes"),
     ]
@@ -322,7 +361,6 @@ class Indicator(CommonControlField):
     def filename(self):
         items = [
             self.title,
-            str(self.seq),
             self.updated.isoformat().replace(":", "")[:15],
         ]
         return slugify("_".join(items).lower())
@@ -501,7 +539,7 @@ class Indicator(CommonControlField):
                 or self.action_and_practice.action.code
             )
         except AttributeError:
-            return ''
+            return ""
 
     def set_code(self):
         """
