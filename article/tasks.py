@@ -23,7 +23,12 @@ def load_openalex(user_id, date=2012, length=None, country="BR"):
     Retrieves article data from OpenALex API for a specific year and populate the article.models.Article
 
     Sync or Async
-    Param: date is a integer representing the date range in the format 'YYYY'.
+
+    Args:
+
+        date: is a integer representing the date range in the format 'YYYY'.
+        length: A integer that determine the quantity of item to be get from OpenAlex.
+        country: A string represent the code of country to be get from OpenAlex.
 
     The endpoint OpenAlex: https://api.openalex.org/works/?filter=institutions.country_code:{country},publication_year:{date}&per-page=200&cursor=*"
 
@@ -34,7 +39,6 @@ def load_openalex(user_id, date=2012, length=None, country="BR"):
         from article import tasks
 
         tasks.load_openalex(date=2012)
-
 
     Running using a script:
 
@@ -211,24 +215,24 @@ def article_source_to_article(
     source_name="OPENALEX",
     size=None,
     loop_size=1000,
-    intitution_id=None,
+    institution_id=None,
     year=None,
 ):
     """
     This task load the source article to article.
-    
+
     Args:
         size: A integer to indicate the size of the article to process.
         loop_size: A integer that determine the size os each slice to call a sub-task ``load_openalex_article``.
-        intitution_id: A string with the institution to process.
+        institution_id: A string with the institution to process.
         year: A string with the year to process.
     """
     count = 0
     filters = {}
     filters["source__name"] = source_name
 
-    if intitution_id:
-        filters["raw__authorships__0__institutions__icontains"] = intitution_id
+    if institution_id:
+        filters["raw__authorships__0__institutions__icontains"] = institution_id
 
     if year:
         filters["year"] = year
@@ -280,7 +284,7 @@ def load_openalex_article(user_id, article_ids, update=False):
             if not update:
                 if doi:
                     if models.Article.objects.filter(doi=doi).exists():
-                        print("ja existe")
+                        logger.info("Article with id: %s, already exists" % id)
                         continue
 
                 if title:
@@ -295,27 +299,30 @@ def load_openalex_article(user_id, article_ids, update=False):
             year = core_utils.nestget(article.raw, "publication_year")
 
             # Get the journal data
-            if article.raw.get("primary_location"):
-                journal_data = core_utils.nestget(
-                    article.raw, "primary_location", "source"
-                )
-                if journal_data:
-                    j_issn_l = journal_data.get("issn_l")
-                    if journal_data.get("issn"):
-                        j_issns = ",".join(journal_data.get("issn"))
-                    j_name = journal_data.get("display_name")
-                    j_is_in_doaj = journal_data.get("is_in_doaj")
+            try: 
+                if article.raw.get("primary_location"):
+                    journal_data = core_utils.nestget(
+                        article.raw, "primary_location", "source"
+                    )
+                    if journal_data:
+                        j_issn_l = journal_data.get("issn_l")
+                        if journal_data.get("issn"):
+                            j_issns = ",".join(journal_data.get("issn"))
+                        j_name = journal_data.get("display_name")
+                        j_is_in_doaj = journal_data.get("is_in_doaj")
 
-                journal, _ = models.Journal.create_or_update(
-                    **{
-                        "journal_issn_l": j_issn_l,
-                        "journal_issns": j_issns,
-                        "journal_name": j_name,
-                        "journal_is_in_doaj": j_is_in_doaj,
-                    },
-                )
-            else:
-                journal = None
+                    journal, _ = models.Journal.create_or_update(
+                        **{
+                            "journal_issn_l": j_issn_l,
+                            "journal_issns": j_issns,
+                            "journal_name": j_name,
+                            "journal_is_in_doaj": j_is_in_doaj,
+                        },
+                    )
+                else:
+                    journal = None
+            except Exception as e:
+                logger.error("Erro get/create journal: %s" % e)
 
             # APC
             is_apc = (
@@ -325,18 +332,21 @@ def load_openalex_article(user_id, article_ids, update=False):
             # Open Access Status
             oa_status = core_utils.nestget(article.raw, "open_access", "oa_status")
 
-            # license
-            if article.raw.get("primary_location"):
-                if core_utils.nestget(article.raw, "primary_location", "license"):
-                    license, _ = models.License.create_or_update(
-                        **{
-                            "name": core_utils.nestget(
-                                article.raw, "primary_location", "license"
-                            )
-                        }
-                    )
-                else:
-                    license = None
+            try: 
+                # license
+                if article.raw.get("primary_location"):
+                    if core_utils.nestget(article.raw, "primary_location", "license"):
+                        license, _ = models.License.create_or_update(
+                            **{
+                                "name": core_utils.nestget(
+                                    article.raw, "primary_location", "license"
+                                )
+                            }
+                        )
+                    else:
+                        license = None
+            except Exception as e:
+                logger.error("Erro get/create license: %s" % e)
 
             # contributors
             contributors = []
@@ -366,36 +376,42 @@ def load_openalex_article(user_id, article_ids, update=False):
                         # Here we are adding the affiliation to the contributor
                         if au.get("raw_affiliation_strings"):
                             affs = []
-                            aff_obj, _ = models.Affiliation.create_or_update(
-                                **{"name": "|".join(au.get("raw_affiliation_strings"))}
-                            )
-                            affs.append(aff_obj)
+                            try: 
+                                aff_obj, _ = models.Affiliation.create_or_update(
+                                    **{"name": "|".join(au.get("raw_affiliation_strings"))}
+                                )
+                                affs.append(aff_obj)
 
-                            author_dict.update(
-                                {
-                                    "affiliations": affs,
-                                }
-                            )
+                                author_dict.update(
+                                    {
+                                        "affiliations": affs,
+                                    }
+                                )
+                            except Exception as ex:
+                                logger.error("Erro get/create affiliation: %s" % e)
 
                         # Add the institutions
                         if au.get("institutions"):
                             insts = []
                             source = Source.objects.get(name="OPENALEX")
-                            for inst in au.get("institutions"):
-                                inst_obj = models.SourceInstitution.get(
-                                    **{"specific_id": inst.get("id"), "source": source}
+                            try:
+                                for inst in au.get("institutions"):
+                                    inst_obj = models.SourceInstitution.get(
+                                        **{"specific_id": inst.get("id"), "source": source}
+                                    )
+                                    insts.append(inst_obj)
+
+                                author_dict.update(
+                                    {
+                                        "institutions": insts,
+                                    }
                                 )
-                                insts.append(inst_obj)
-
-                            author_dict.update(
-                                {
-                                    "institutions": insts,
-                                }
-                            )
-                        contributor, _ = models.Contributor.create_or_update(
-                            **author_dict
-                        )
-
+                                contributor, _ = models.Contributor.create_or_update(
+                                    **author_dict
+                                )
+                            except Exception as ex:
+                                logger.error("Erro get/create institution: %s" % e)
+                            
                         contributors.append(contributor)
 
             # add the concepts
@@ -418,12 +434,13 @@ def load_openalex_article(user_id, article_ids, update=False):
                 "year": year,
                 "is_oa": core_utils.nestget(article.raw, "open_access", "is_oa"),
                 "sources": [Source.objects.get(name="OPENALEX")],
-                "journal": journal,
+                "journal": journal or None,
                 "apc": is_apc,
                 "open_access_status": oa_status,
                 "contributors": contributors,
-                "license": license,
+                "license": license or None,
                 "concepts": concepts,
+                "user": user,
             }
 
             article, created = models.Article.create_or_update(**article_dict)

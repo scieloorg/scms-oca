@@ -163,7 +163,8 @@ class IndicatorIndex(indexes.SearchIndex, indexes.Indexable):
                 return "level0"
 
     def prepare_priority(self, obj):
-        return obj.raw_data and obj.raw_data.size
+        if  obj.indicator_file:
+            return obj.indicator_file.raw_data and obj.indicator_file.raw_data.size
 
     def prepare_action(self, obj):
         return obj.action_and_practice and obj.action_and_practice.action.name

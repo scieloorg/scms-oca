@@ -11,7 +11,7 @@ from usefulmodels.models import Country, State, ThematicArea
 from . import choices
 from .forms import ContributorForm
 
-from core.models import Source
+from core.models import Source, CommonControlField
 
 
 class Concepts(models.Model):
@@ -80,6 +80,7 @@ class Concepts(models.Model):
 
     def autocomplete_label(self):
         return "%s (%s)" % (self.name, self.level) or ""
+
     class Meta:
         verbose_name = _("Concept")
         verbose_name_plural = _("Concepts")
@@ -330,7 +331,6 @@ class Journal(models.Model):
 
                 d[k] = v
             yield d
-
 
     @classmethod
     def parameters_for_values(
@@ -1124,7 +1124,7 @@ class SourceArticle(models.Model):
         return article, created
 
 
-class Article(models.Model):
+class Article(CommonControlField):
     title = models.CharField(_("Title"), max_length=510, null=True, blank=True)
     doi = models.CharField(_("DOI"), max_length=100, null=True, blank=True)
     volume = models.CharField(_("Volume"), max_length=20, null=True, blank=True)
@@ -1326,10 +1326,11 @@ class Article(models.Model):
                 "number": "999",
                 "volume": "9",
                 "year": 2002,
-                "journal": instance of <journal>
-                "contributors": list of <contributors> [<contributor>, <contributor>, <contributor>]
-                "license": instance of license
-                "sources": list of <sources> [<source>, <source>]
+                "journal": instance of <journal>,
+                "contributors": list of <contributors> [<contributor>, <contributor>, <contributor>],
+                "license": instance of license,
+                "sources": list of <sources> [<source>, <source>],
+                "user": instance of <user>
             }
 
         return article(object), 0|1
@@ -1341,9 +1342,10 @@ class Article(models.Model):
 
         try:
             article = cls.get(**kwargs)
+            article.updated_by = kwargs.get("user")
             created = 0
         except Article.DoesNotExist:
-            article = cls.objects.create()
+            article = cls.objects.create(creator=kwargs.get("user"))
             created = 1
         except SourceArticle.MultipleObjectsReturned as e:
             print(_("The article table have duplicity...."))

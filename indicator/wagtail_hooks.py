@@ -2,11 +2,12 @@ from django.utils.translation import gettext as _
 from wagtail import hooks
 from wagtail.contrib.modeladmin.options import (
     ModelAdmin,
+    ModelAdminGroup,
     modeladmin_register,
 )
 
 from . import views
-from .models import Indicator
+from .models import Indicator, IndicatorFile
 
 
 class IndicatorAdmin(ModelAdmin):
@@ -65,4 +66,27 @@ class IndicatorAdmin(ModelAdmin):
             return qs
 
 
-modeladmin_register(IndicatorAdmin)
+class IndicatorFileAdmin(ModelAdmin):
+    model = IndicatorFile
+    menu_label = _("Indicator File")
+    menu_icon = "folder-open-inverse"
+    add_to_settings_menu = False  # or True to add your model to the Settings sub-menu
+    exclude_from_explorer = (
+        False  # or True to exclude pages of this type from Wagtail's explorer view
+    )
+
+    list_display = ("name", "raw_data")
+    list_filter = ("name",)
+    search_fields = ("name",)
+
+
+class InstitutionAdminGroup(ModelAdminGroup):
+    menu_label = _("Indicator")
+    menu_icon = "folder-open-inverse"  # change as required
+    menu_order = 100  # will put in 3rd place (000 being 1st, 100 2nd)
+    items = (
+        IndicatorAdmin,
+        IndicatorFileAdmin,
+    )
+
+modeladmin_register(InstitutionAdminGroup)

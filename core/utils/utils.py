@@ -1,4 +1,5 @@
 import logging
+import os
 import re
 
 import requests
@@ -165,3 +166,8 @@ def language_iso(code):
     if tag_is_valid(code):
         return standardize_tag(code)
     return ""
+
+
+def delete_file(path):
+    if os.path.isfile(path):
+        os.remove(path)

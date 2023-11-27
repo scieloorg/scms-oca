@@ -411,7 +411,6 @@ WAGTAILSEARCH_BACKENDS = {
         "SEARCH_CONFIG": "english",
     }
 }
-
 HAYSTACK_CONNECTIONS = {
     "default": {
         "ENGINE": "haystack.backends.solr_backend.SolrEngine",
@@ -421,7 +420,10 @@ HAYSTACK_CONNECTIONS = {
     }
 }
 
-HAYSTACK_SIGNAL_PROCESSOR = "haystack.signals.RealtimeSignalProcessor"
+USE_SOLR = env.str("USE_SOLR", "True") == "True"
+
+if USE_SOLR:
+    HAYSTACK_SIGNAL_PROCESSOR = "haystack.signals.RealtimeSignalProcessor"
 
 SEARCH_PAGINATION_ITEMS_PER_PAGE = 10
 
