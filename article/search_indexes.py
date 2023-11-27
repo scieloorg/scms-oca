@@ -6,7 +6,7 @@ from django.utils.translation import gettext as _
 from article import models
 
 
-class SourceArticleIndex(indexes.SearchIndex, indexes.Indexable):
+class ArticleIndex(indexes.SearchIndex, indexes.Indexable):
     """
     Fields:
         doi
@@ -52,6 +52,24 @@ class SourceArticleIndex(indexes.SearchIndex, indexes.Indexable):
     regions = indexes.MultiValueField(null=True)
 
     text = indexes.CharField(document=True, use_template=True)
+
+    # control fields
+    created = indexes.CharField(null=False)
+    updated = indexes.CharField(null=False)
+    creator = indexes.CharField(null=False)
+    updated_by = indexes.CharField(null=False)
+
+    def prepare_created(self, obj):
+        return obj.created.isoformat()
+
+    def prepare_updated(self, obj):
+        return obj.updated.isoformat()
+    
+    def prepare_creator(self, obj):
+        return obj.creator
+
+    def prepare_updated_by(self, obj):
+        return obj.updated_by
 
     def prepare_record_type(self, obj):
         return "article"
