@@ -100,10 +100,11 @@ def task_generate_article_indicators(self, user_id, indicators):
             )
 
             indicator_model.save()
+            items = []
 
-            ct = ContentType.objects.get(model=ind.model)
-            model = ct.model_class()
-
-            items = model.objects.filter(pk__in=[id for id in ind.ids.keys()])
+            for model in ind.models:
+                ct = ContentType.objects.get(model=model)
+                md = ct.model_class()
+                items += md.objects.filter(pk__in=[id for id in ind.ids.keys()])
 
             indicator_model.save_raw_data(items=items, ids=ind.get_ids())
