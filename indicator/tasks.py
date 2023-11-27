@@ -1,6 +1,7 @@
 import json
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext as _
+from django.contrib.contenttypes.models import ContentType
 
 from config import celery_app
 
@@ -34,7 +35,7 @@ User = get_user_model()
 #     sciprod.generate_indicators(creator, filter_by, group_by, begin_year, end_year)
 
 
-@celery_app.task(bind=True, name=_("Geração de indicadores de artigos científicos"))
+@celery_app.task(bind=True, name=_("Geração de indicadores científicos"))
 def task_generate_article_indicators(self, user_id, indicators):
     """
     This task receive a indicators list, something like:
@@ -50,6 +51,7 @@ def task_generate_article_indicators(self, user_id, indicators):
             "range_filter": {
                 "filter_name": "year",
                 "range": {"start": 2012, "end": 2023},
+            "model": "article"
         }
     ]
 
@@ -57,8 +59,6 @@ def task_generate_article_indicators(self, user_id, indicators):
     """
 
     user = User.objects.get(id=user_id)
-
-    models.Indicator.objects.all().delete()
 
     for ind in indicators:
         ind = indicator.Indicator(**ind)
@@ -87,12 +87,23 @@ def task_generate_article_indicators(self, user_id, indicators):
             {"keys": [key for key in ind.get_keys()], "series": serie_list}
         )
 
-        indicator_model = models.Indicator(
-            title=ind.title,
-            creator=user,
-            summarized=serie_json,
-            record_status="PUBLISHED",
-            description=ind.description,
-        )
+        # check if the indicator file existe and if ids is not empty.
+        if ind.get_ids() and not models.IndicatorFile.objects.filter(
+            data_ids=ind.get_ids()
+        ):
+            indicator_model = models.Indicator(
+                title=ind.title,
+                creator=user,
+                summarized=serie_json,
+                record_status="PUBLISHED",
+                description=ind.description,
+            )
 
-        indicator_model.save()
+            indicator_model.save()
+
+            ct = ContentType.objects.get(model=ind.model)
+            model = ct.model_class()
+
+            items = model.objects.filter(pk__in=[id for id in ind.ids.keys()])
+
+            indicator_model.save_raw_data(items=items, ids=ind.get_ids())
