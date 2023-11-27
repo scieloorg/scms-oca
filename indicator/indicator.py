@@ -43,6 +43,7 @@ class Indicator:
         fill_range_value=0,
         solr_instance=None,
         include_all=False,
+        model=None
     ):
         """Initializes the instance indicator class.
 
@@ -66,10 +67,11 @@ class Indicator:
         self.range_filter = range_filter
         self.fill_range = fill_range
         self.fill_range_value = fill_range_value
-        self.ids = set()
+        self.ids = {}
         self.keys = []
         self.include_all = include_all
         self.description = description
+        self.model = model
 
         self.solr = solr_instance or pysolr.Solr(
             settings.HAYSTACK_CONNECTIONS["default"]["URL"],
@@ -261,20 +263,24 @@ class Indicator:
             # self.logger.info(filters)
             self.logger.info(q)
 
-            result = self.solr.search(q, fl=["django_id"], rows=100000000)
-            ids = [
-                doc.get("django_id")
-                for doc in result.raw_response.get("response").get("docs")
-            ]
+            result = self.solr.search(q, fl="django_id, updated", rows=100000000)
 
-            # update the attribute ids
-            self.ids.update(ids)
+            # ids example: {'581512': '2023-11-24T15:23:41.642088+00:00',
+            #               '581513': '2023-11-24T15:23:41.735933+00:00',
+            #               '581520': '2023-11-24T15:23:42.377974+00:00'}
+            ids = {
+                doc.get("django_id"): doc.get("updated")
+                for doc in result.raw_response.get("response").get("docs")
+            }
+
+            # update the attribute ids with sorted ids
+            self.ids.update(sorted(ids.items()))
             result = self._convert_list_dict(
                 result.facets.get("facet_fields").get(self.facet_by)
             )
 
             result = dict(sorted(result.items()))
-            
+
             # fill the range
             # range with end +1 to include the last item
             if self.fill_range:
@@ -285,14 +291,14 @@ class Indicator:
                     ):
                         result.setdefault(str(dy), self.fill_range_value)
                 else:
-                    # this is the keys facet 
+                    # this is the keys facet
                     for key in self.get_facet(self.facet_by).keys():
                         result.setdefault(str(key), self.fill_range_value)
 
             result = dict(sorted(result.items()))
-            
+
             values = result.values()
-            
+
             result = dict(
                 {
                     "%s"
