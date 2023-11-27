@@ -43,7 +43,7 @@ class Indicator:
         fill_range_value=0,
         solr_instance=None,
         include_all=False,
-        model=None
+        models=[]
     ):
         """Initializes the instance indicator class.
 
@@ -58,6 +58,7 @@ class Indicator:
           fill_range: this set a default values to be filled on range filter.
           default_filter: A lucene query syntax to be default on filters.
           include_all: Include all itens since the values is 0 to all key(years)
+          models: model to get the ids 
         """
         self.filters = filters
         self.title = title
@@ -71,7 +72,7 @@ class Indicator:
         self.keys = []
         self.include_all = include_all
         self.description = description
-        self.model = model
+        self.models = models
 
         self.solr = solr_instance or pysolr.Solr(
             settings.HAYSTACK_CONNECTIONS["default"]["URL"],
