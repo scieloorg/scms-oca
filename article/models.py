@@ -20,6 +20,11 @@ class Concepts(models.Model):
     More about, see the source: https://docs.openalex.org/api-entities/concepts
     """
 
+    programs = models.ManyToManyField("Program",
+        verbose_name=_("Program"),
+        blank=True,
+    )
+
     specific_id = models.CharField(
         _("Specific Id"), max_length=255, null=False, blank=False
     )
