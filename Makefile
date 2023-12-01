@@ -50,6 +50,9 @@ logs: ## See all app logs using $(compose)
 stop:  ## Stop all app using $(compose)
 	@docker-compose -f $(compose) stop
 
+restart:  ## Rstart all app using $(compose)
+	@docker-compose -f $(compose) restart
+
 ps:  ## See all containers using $(compose)
 	@docker-compose -f $(compose) ps
 
