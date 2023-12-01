@@ -45,6 +45,21 @@ class EventIndex(indexes.SearchIndex, indexes.Indexable):
         model_attr="institutional_contribution", null=True
     )
 
+    # control fields
+    created = indexes.CharField(null=False)
+    updated = indexes.CharField(null=False)
+    creator = indexes.CharField(null=False)
+    updated_by = indexes.CharField(null=False)
+
+    def prepare_created(self, obj):
+        return obj.created.isoformat()
+
+    def prepare_updated(self, obj):
+        return obj.updated.isoformat()
+    
+    def prepare_creator(self, obj):
+        return obj.creator
+    
     def prepare_record_type(self, obj):
         return "directory"
 

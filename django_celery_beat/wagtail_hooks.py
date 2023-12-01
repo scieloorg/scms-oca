@@ -35,7 +35,8 @@ class PeriodicTaskAdmin(ModelAdmin):
     celery_app = current_app
     date_hierarchy = "start_time"
     list_display = (
-        "__str__",
+        "name",
+        "description",
         "enabled",
         "interval",
         "start_time",

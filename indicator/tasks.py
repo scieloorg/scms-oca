@@ -35,7 +35,7 @@ User = get_user_model()
 #     sciprod.generate_indicators(creator, filter_by, group_by, begin_year, end_year)
 
 
-@celery_app.task(bind=True, name=_("Geração de indicadores científicos"))
+@celery_app.task(bind=True, name=_("Generate scientific indicator"))
 def task_generate_article_indicators(self, user_id, indicators):
     """
     This task receive a indicators list, something like:
@@ -59,6 +59,9 @@ def task_generate_article_indicators(self, user_id, indicators):
     """
 
     user = User.objects.get(id=user_id)
+
+    models.Indicator.objects.all().delete()
+    models.IndicatorFile.objects.all().delete()
 
     for ind in indicators:
         ind = indicator.Indicator(**ind)
@@ -86,16 +89,17 @@ def task_generate_article_indicators(self, user_id, indicators):
         serie_json = json.dumps(
             {"keys": [key for key in ind.get_keys()], "series": serie_list}
         )
-
+        
         # check if the indicator file existe and if ids is not empty.
-        if ind.get_ids() and not models.IndicatorFile.objects.filter(
+        if not models.IndicatorFile.objects.filter(
             data_ids=ind.get_ids()
         ):
+            
             indicator_model = models.Indicator(
                 title=ind.title,
                 creator=user,
                 summarized=serie_json,
-                record_status="PUBLISHED",
+                record_status= "PUBLISHED" if ind.get_ids() else "NOT PUBLISHED",
                 description=ind.description,
             )
 

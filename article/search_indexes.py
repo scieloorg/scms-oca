@@ -183,7 +183,7 @@ class ArticleIndex(indexes.SearchIndex, indexes.Indexable):
         return thematics
 
     def prepare_programs(self, obj):
-        return ["AGRONOMIA".title(), "AGRONEGÓCIO".title()]
+        return []
 
     def get_model(self):
         return models.Article
