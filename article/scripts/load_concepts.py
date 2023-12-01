@@ -7,7 +7,7 @@ from article.tasks import load_concepts
 User = get_user_model()
 
 
-def run(user_id):
+def run(user_id=1):
     """
     Load the concepts from a csv file.
     """

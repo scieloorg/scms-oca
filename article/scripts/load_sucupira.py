@@ -4,7 +4,11 @@ from django.utils.translation import gettext as _
 from article.tasks import load_sucupira
 
 
-def run(production_file_csv, detail_file_csv, authors=None, sync=0):
+def run(
+        production_file_csv="article/fixture/br-capes-colsucup-producao-2017a2020-2022-06-22-bibliografica-artpe.csv", 
+        detail_file_csv="article/fixture/br-colsucup-prod-detalhe-bibliografica-2017a2020-2022-06-30-artpe.csv", 
+        authors="article/fixture/br-capes-colsucup-prod-autor-2017a2020-2022-05-31-bibliografica-artpe-2017.csv,article/fixture/br-capes-colsucup-prod-autor-2017a2020-2022-05-31-bibliografica-artpe-2018.csv,article/fixture/br-capes-colsucup-prod-autor-2017a2020-2022-05-31-bibliografica-artpe-2019.csv,article/fixture/br-capes-colsucup-prod-autor-2017a2020-2022-05-31-bibliografica-artpe-2020.csv", 
+        sync=0):
     """
     Load the sucupira data to article.models.SourceArticle
     """

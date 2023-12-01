@@ -1,9 +1,14 @@
 import logging
+import json
+import re
+
 
 import pandas as pd
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext as _
+from django.db.models.functions import Random
+from django.db.models import Q
 
 from article import models
 from config import celery_app
@@ -855,3 +860,60 @@ def load_concepts(user_id, delete=True):
                     sc.parent_ids.add(parent_id)
                 except models.Concepts.DoesNotExist as ex:
                     print("PID: %s not found" % pid)
+
+
+@celery_app.task(name="Load articles from OpenAlex")
+def load_source_articles_from_openalex(size=1000):
+    """
+    Load articles from the OpenAlex API  using DOIs obtained from SourceArticles within the 'SUCUPIRA' source.
+
+    Args:
+        size (int, optional): The number of SourceArticles to process. Default is 1000.
+    """
+
+    _source, _ = Source.objects.get_or_create(name="SUCUPIRA")
+    doi_pattern = r'10\.\d{4,9}/[-.;()/:\w]+'
+
+    sa_sucupira = models.SourceArticle.objects.filter(Q(source=_source) & Q(doi__isnull=False) & Q(doi__iregex=doi_pattern)).order_by(Random())[0 :int(size)]
+
+    partial_url = settings.URL_API_OPENALEX
+
+    for sucupira in sa_sucupira:
+        cdoi = re.search(doi_pattern, sucupira.doi)
+        url = partial_url + f"/https://doi.org/{cdoi.group()}"
+        _source, _ = Source.objects.get_or_create(name="OPENALEX")
+        try:
+            item = core_utils.fetch_data(url, json=True, timeout=30, verify=True)
+            article = {}
+            article["specific_id"] = item.get("id")
+            article["doi"] = item.get("doi")
+            article["year"] = item.get("publication_year")
+            article["is_paratext"] = item.get("is_paratext")
+            article["updated"] = item.get("updated_date")
+            article["created"] = item.get("created_date")
+            article["source"] = _source
+            article["raw"] = item
+            article, created = models.SourceArticle.create_or_update(**article)
+
+            logger.info(
+                "%s: %s"
+                % (
+                    "Created article" if created else "Updated article",
+                    article,
+                )
+            )
+        except core_utils.NonRetryableError as e:
+            logger.info(f"Unexpected error: {e}")
+
+
+@celery_app.task(name="Load sucupira in article")
+def load_articles_from_sucupira(year=2017):
+    source_articles = models.SourceArticle.objects.filter(source__name="SUCUPIRA", year=year)[0:10]
+
+    for sa in source_articles:
+        load_source_articles_in_articles.apply_async(args=(sa.raw,))
+    
+
+@celery_app.task(name="Load SourceArticles in article")
+def load_source_articles_in_articles(raw):
+    data = json.loads(raw)

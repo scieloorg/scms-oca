@@ -3,13 +3,13 @@ from django.utils.translation import gettext as _
 from article.tasks import article_source_to_article
 
 
-def run(user_id, update):
+def run(user_id=1, update=None):
     """
     Load the article from SourceArticle model to Article model.
     """
     if user_id:
         # load_openalex_article.apply_async(args=(int(user_id), bool(int(update))))
         # load_openalex_article(int(user_id), bool(int(update)))
-        article_source_to_article(int(user_id), size=1000)
+        article_source_to_article(int(user_id), size=None)
     else:
         print(_("Param user_id is required."))
