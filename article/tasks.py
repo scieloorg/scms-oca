@@ -209,7 +209,7 @@ def load_openalex(user_id, date=2012, length=None, country="BR"):
         logger.info(f"Unexpected error: {e}")
 
 
-@celery_app.task(name=_("ArticleSource to Article"))
+@celery_app.task(name=_("Load ArticleSource to Article"))
 def article_source_to_article(
     user_id,
     source_name="OPENALEX",
@@ -597,7 +597,7 @@ def load_sucupira(production_file_csv, detail_file_csv, authors):
         )
 
 
-@celery_app.task(name="Match between institutions and affiliations")
+@celery_app.task(name="Match between contributor institutions and set corresponding affiliations")
 def match_contrib_inst_aff(user_id):
     """
     This task loop to all contributor looking for contributor.institutions and find the affiliation
@@ -638,8 +638,8 @@ def match_contrib_aff_source_with_inst_MEC(user_id):
                 aff.save()
 
 
-@celery_app.task(name="Load concepts")
-def load_concepts(user_id, delete=True):
+@celery_app.task(name="Load OpenAlex Concepts")
+def load_openalex_concepts(user_id, delete=True):
     """
     This task add the concepts from a .csv file and Related theme between Concepts and Thematic Area(CAPES)
 
