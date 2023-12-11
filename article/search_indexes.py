@@ -59,12 +59,33 @@ class ArticleIndex(indexes.SearchIndex, indexes.Indexable):
     creator = indexes.CharField(null=False)
     updated_by = indexes.CharField(null=False)
 
+
+    def prepare(self, obj):
+        self.prepared_data = super(ArticleIndex, self).prepare(obj)
+        
+        contributors = obj.contributors.all().prefetch_related("affiliations")
+        concepts = obj.concepts.all().prefetch_related("thematic_areas")
+
+        self.prepared_data['contributors'] = self._prepare_contributors(contributors)
+        self.prepared_data['affiliations'] = self._prepare_affiliations(contributors)
+        self.prepared_data['institutions'] = self._prepare_institutions(contributors)
+        self.prepared_data['cities'] = self._prepare_cities(contributors)
+        self.prepared_data['states'] = self._prepare_states(contributors)
+        self.prepared_data['regions'] = self._prepare_regions(contributors)
+        self.prepared_data['concepts'] = self._prepare_concepts(concepts)
+        self.prepared_data['thematic_level_0'] = self._prepare_thematic_level_0(concepts)
+        self.prepared_data['thematic_level_1'] = self._prepare_thematic_level_1(concepts)
+        self.prepared_data['thematic_level_2'] = self._prepare_thematic_level_2(concepts)
+
+        return self.prepared_data 
+
+
     def prepare_created(self, obj):
         return obj.created.isoformat()
 
     def prepare_updated(self, obj):
         return obj.updated.isoformat()
-    
+
     def prepare_creator(self, obj):
         return obj.creator
 
@@ -81,24 +102,27 @@ class ArticleIndex(indexes.SearchIndex, indexes.Indexable):
         if obj.sources:
             return [s.name for s in obj.sources.all()]
 
-    def prepare_contributors(self, obj):
-        if obj.contributors:
+    def _prepare_contributors(self, contributors):
+
+        if contributors:
             return [
                 "%s, %s" % (contrib.family, contrib.given)
-                for contrib in obj.contributors.all()
+                for contrib in contributors
             ]
 
-    def prepare_affiliations(self, obj):
-        if obj.contributors:
+    def _prepare_affiliations(self, contributors):
+    
+        if contributors:
             affs = []
-            for contrib in obj.contributors.all():
+            for contrib in contributors.all():
                 affs.extend([affs.name for affs in contrib.affiliations.all()])
             return set(affs)
 
-    def prepare_institutions(self, obj):
-        if obj.contributors:
+    def _prepare_institutions(self, contributors):
+
+        if contributors:
             insts = []
-            for contrib in obj.contributors.all():
+            for contrib in contributors:
                 if contrib.affiliations.all():
                     insts.extend(
                         [
@@ -109,14 +133,16 @@ class ArticleIndex(indexes.SearchIndex, indexes.Indexable):
                     )
             return set(insts)
 
-    def prepare_concepts(self, obj):
-        if obj.concepts:
-            return [c.name for c in obj.concepts.all()]
+    def _prepare_concepts(self, concepts):
 
-    def prepare_cities(self, obj):
+        if concepts:
+            return [c.name for c in concepts]
+
+    def _prepare_cities(self, contributors):
         cities = set()
-        if obj.contributors.all():
-            for co in obj.contributors.all():
+
+        if contributors:
+            for co in contributors:
                 if co.affiliations.all():
                     for aff in co.affiliations.all():
                         if aff.official:
@@ -126,10 +152,11 @@ class ArticleIndex(indexes.SearchIndex, indexes.Indexable):
 
         return cities
 
-    def prepare_states(self, obj):
+    def _prepare_states(self, contributors):
         states = set()
-        if obj.contributors.all():
-            for co in obj.contributors.all():
+
+        if contributors:
+            for co in contributors:
                 if co.affiliations.all():
                     for aff in co.affiliations.all():
                         if aff.official:
@@ -138,10 +165,11 @@ class ArticleIndex(indexes.SearchIndex, indexes.Indexable):
                                     states.add(aff.official.location.state.name)
         return states
 
-    def prepare_regions(self, obj):
+    def _prepare_regions(self, contributors):
         regions = set()
-        if obj.contributors.all():
-            for co in obj.contributors.all():
+
+        if contributors:
+            for co in contributors:
                 if co.affiliations.all():
                     for aff in co.affiliations.all():
                         if aff.official:
@@ -151,31 +179,31 @@ class ArticleIndex(indexes.SearchIndex, indexes.Indexable):
                                         regions.add(aff.official.location.state.region)
         return regions
 
-    def prepare_thematic_level_0(self, obj):
+    def _prepare_thematic_level_0(self, concepts):
         thematics = set()
 
-        if obj.concepts:
-            for c in obj.concepts.all():
+        if concepts:
+            for c in concepts:
                 if c.thematic_areas.all():
                     for t in c.thematic_areas.all():
                         thematics.add(t.level0)
         return thematics
 
-    def prepare_thematic_level_1(self, obj):
+    def _prepare_thematic_level_1(self, concepts):
         thematics = set()
 
-        if obj.concepts:
-            for c in obj.concepts.all():
+        if concepts:
+            for c in concepts:
                 if c.thematic_areas.all():
                     for t in c.thematic_areas.all():
                         thematics.add(t.level1)
         return thematics
 
-    def prepare_thematic_level_2(self, obj):
+    def _prepare_thematic_level_2(self, concepts):
         thematics = set()
 
-        if obj.concepts:
-            for c in obj.concepts.all():
+        if concepts:
+            for c in concepts:
                 if c.thematic_areas.all():
                     for t in c.thematic_areas.all():
                         thematics.add(t.level2)
