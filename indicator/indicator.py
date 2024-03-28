@@ -1,6 +1,10 @@
 import itertools
+import json
 import logging
+import os
+import zipfile
 
+import pandas as pd
 import pysolr
 from django.conf import settings
 
@@ -43,7 +47,7 @@ class Indicator:
         fill_range_value=0,
         solr_instance=None,
         include_all=False,
-        models=[]
+        models=[],
     ):
         """Initializes the instance indicator class.
 
@@ -58,7 +62,7 @@ class Indicator:
           fill_range: this set a default values to be filled on range filter.
           default_filter: A lucene query syntax to be default on filters.
           include_all: Include all itens since the values is 0 to all key(years)
-          models: model to get the ids 
+          models: model to get the ids
         """
         self.filters = filters
         self.title = title
@@ -211,7 +215,7 @@ class Indicator:
                 {f'{p.split(":")[0]}': f'{p.split(":")[1]}' for p in prod}
             )
 
-        # self.logger.info(self.filters)
+        self.logger.info(self.filters)
 
     def generate(self):
         """This will produce the discrete mathematics based on filters to index.
@@ -324,3 +328,210 @@ class Indicator:
                     ret.append(result)
 
         return ret
+
+    def save_csv(
+        self,
+        data_dict,
+        dir_name,
+        file_name,
+        join=True,
+        joins_columns=[
+            "contributors",
+            "concepts",
+            "affiliations",
+            "thematic_level_0",
+            "thematic_level_1",
+            "thematic_level_2",
+            "institutions",
+            "sources",
+            "states",
+            "regions",
+            "license",
+            "cities",
+        ],
+        join_columns_caracter="|",
+    ):
+        # Cria um DataFrame a partir do dicionário
+        df = pd.DataFrame.from_dict(data_dict, orient="columns")
+
+        if join:
+            for column in joins_columns:
+                if column in df:
+                    df[column] = df[column].apply(
+                        lambda x: (
+                            join_columns_caracter.join(x) if type(x) == list else ""
+                        )
+                    )
+
+        # Salva o DataFrame em um arquivo CSV
+        df.to_csv(os.path.join(dir_name, file_name), index=False)
+
+        zip_path = self.create_zip_file(dir_name, file_name, suffix="csv")
+
+        self.logger.info(f"Data has been saved to '{zip_path}' successfully.")
+    
+        return zip_path
+
+    def create_zip_file(self, dir_name, file_name, suffix=None, origin_file=False):
+
+        file_path = os.path.join(dir_name, file_name)
+
+        # Verifica se o arquivo existe
+        if not os.path.exists(file_path):
+            self.logger.info(f"File '{file_path}' not found.")
+            return None
+
+        # Define o nome do arquivo ZIP
+        if suffix:
+            zip_file = os.path.join(
+                dir_name, f"{os.path.splitext(file_path)[0]}_{suffix}.zip"
+            )
+        else:
+            zip_file = os.path.join(dir_name, f"{os.path.splitext(file_path)[0]}.zip")
+
+        # Cria um arquivo ZIP
+        with zipfile.ZipFile(zip_file, "w", zipfile.ZIP_DEFLATED) as zipf:
+            # Adiciona o arquivo ao arquivo ZIP
+            zipf.write(file_path, os.path.basename(file_path))
+
+        if not origin_file:
+            if os.path.exists(file_path):
+                os.remove(file_path)
+                self.logger.info(f"File '{file_path}' removed successfully.")
+            else:
+                self.logger.info(f"File '{file_path}' not found.")
+
+        self.logger.info(f"ZIP file '{zip_file}' created successfully.")
+
+        return zip_file
+
+    def save_jsonl(self, dicts, dir_name, file_name):
+        if not dicts:
+            self.logger.info("The dicts is empty.")
+            return
+
+        # Abre o arquivo JSONLines em modo de escrita
+        with open(os.path.join(dir_name, file_name), "w") as jsonl_file:
+            # Escreve cada dicionário como uma linha no arquivo JSONLines
+            for dictionary in dicts:
+                jsonl_file.write(json.dumps(dictionary) + "\n")
+
+        zip_file = self.create_zip_file(dir_name, file_name, suffix="jsonl")
+
+        self.logger.info(
+            f"The data has been saved to the file '{zip_file}' successfully."
+        )
+
+        return zip_file
+
+    def get_data(self, query=[], rows=10000, files_by_year=False):
+        """
+        This get the data from Lucene.
+
+        Args:
+            No args
+
+        Returns:
+            Return a string from the format.
+
+        Raises:
+            This function dont raise any exception
+        """
+        
+        if query:
+            self.filters = query
+
+        for filter in self.filters:
+            filters = {}
+            # add the default filter
+            filters.update(filter)
+            filters.update(self.default_filter)
+
+            if not files_by_year:
+                data = []
+                ids = set()
+                if self.range_filter:
+                    filters.update(
+                        {
+                            self.range_filter.get("filter_name"): "[%s TO %s]"
+                            % (
+                                self.range_filter.get("range").get("start"),
+                                self.range_filter.get("range").get("end"),
+                            )
+                        }
+                    )
+
+                q = "%s" % (
+                    " AND ".join(["%s:%s" % (k, v) for k, v in filters.items()])
+                )
+
+                self.logger.info(q)
+
+                result = self.solr.search(q, cursorMark="*", sort="id asc", rows=rows)
+
+                for doc in result:
+                    # Ensure that the id is not in ``data``.
+                    if not doc.get("id") in ids:
+                        data.append(doc)
+                        ids.add(doc.get("id"))
+
+                yield (
+                    "%s"
+                    % (
+                        str(
+                            q.replace(" ", "_")
+                            .replace(":", "_")
+                            .replace('"', "")
+                            .replace("[", "")
+                            .replace("]", "")
+                        )
+                    ),
+                    data,
+                )
+            else:
+                if self.range_filter:
+                    for year in range(
+                        self.range_filter.get("range").get("start"),
+                        self.range_filter.get("range").get("end") + 1,
+                    ):
+                        data = []
+                        ids = set()
+                        filters.update(
+                            {
+                                self.range_filter.get("filter_name"): "[%s TO %s]"
+                                % (
+                                    year,
+                                    year,
+                                )
+                            }
+                        )
+
+                        q = "%s" % (
+                            " AND ".join(["%s:%s" % (k, v) for k, v in filters.items()])
+                        )
+
+                        self.logger.info(q)
+
+                        result = self.solr.search(
+                            q, cursorMark="*", sort="id asc", rows=rows
+                        )
+
+                        for doc in result:
+                            # Ensure that the id is not in ``data``.
+                            if not doc.get("id") in ids:
+                                data.append(doc)
+                                ids.add(doc.get("id"))
+
+                        yield (
+                            "%s"
+                            % (
+                                str(
+                                    q.replace(" ", "_")
+                                    .replace(":", "_")
+                                    .replace('"', "")
+                                    .replace("[", "")
+                                    .replace("]", "")
+                                )
+                            ),
+                            data,
+                        )

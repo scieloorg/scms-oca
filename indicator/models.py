@@ -41,15 +41,50 @@ class IndicatorFile(models.Model):
     """
 
     name = models.CharField(_("File name"), max_length=1024, null=False, blank=False)
-
     raw_data = models.FileField(_("JSONL Zip File"), null=True, blank=True)
-    data_ids = models.JSONField(_("Data ids"), null=True, blank=True)
+
+    autocomplete_search_field = "name"
+
+    def autocomplete_label(self):
+        return str(self)
 
     def __unicode__(self):
         return self.name
 
     def __str__(self):
         return self.__unicode__()
+
+
+@receiver(models.signals.post_delete, sender=IndicatorFile)
+def auto_delete_file_on_delete(sender, instance, **kwargs):
+    """
+    Deletes file from filesystem
+    when corresponding `IndicatorFile` object is deleted.
+    """
+    if instance.raw_data:
+        if os.path.isfile(instance.raw_data.path):
+            os.remove(instance.raw_data.path)
+
+
+@receiver(models.signals.pre_save, sender=IndicatorFile)
+def auto_delete_file_on_change(sender, instance, **kwargs):
+    """
+    Deletes old file from filesystem
+    when corresponding `IndicatorFile` object is updated
+    with new file.
+    """
+    if not instance.pk:
+        return False
+
+    try:
+        old_file = IndicatorFile.objects.get(pk=instance.pk).raw_data
+    except IndicatorFile.DoesNotExist:
+        return False
+
+    new_file = instance.raw_data
+    if not old_file == new_file:
+        if os.path.isfile(old_file.path):
+            os.remove(old_file.path)
 
 
 @receiver(models.signals.post_delete, sender=IndicatorFile)
@@ -107,8 +142,8 @@ class Indicator(CommonControlField):
 
     link = models.URLField(_("Link"), null=True, blank=True)
 
-    indicator_file = models.ForeignKey(
-        IndicatorFile, on_delete=models.SET_NULL, null=True
+    indicator_file =models.ManyToManyField(
+        IndicatorFile, verbose_name=_("Indicator File"), blank=True
     )
 
     summarized = models.JSONField(_("JSON File"), null=True, blank=True)
@@ -349,6 +384,7 @@ class Indicator(CommonControlField):
         AutocompletePanel("locations", permission="indicator.can_edit_locations"),
         FieldPanel("summarized", permission="indicator.can_edit_summarized"),
         FieldPanel("notes", permission="indicator.can_edit_notes"),
+        AutocompletePanel("indicator_file"),
     ]
 
     def __unicode__(self):

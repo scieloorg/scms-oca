@@ -162,9 +162,9 @@ class IndicatorIndex(indexes.SearchIndex, indexes.Indexable):
             if thematic_area.level0:
                 return "level0"
 
-    def prepare_priority(self, obj):
-        if  obj.indicator_file:
-            return obj.indicator_file.raw_data and obj.indicator_file.raw_data.size
+    # def prepare_priority(self, obj):
+    #     if  obj.indicator_file:
+    #         return obj.indicator_file.raw_data and obj.indicator_file.raw_data.size
 
     def prepare_action(self, obj):
         return obj.action_and_practice and obj.action_and_practice.action.name
