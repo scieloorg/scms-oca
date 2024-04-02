@@ -8,6 +8,8 @@ from config import celery_app
 # from indicator import directory, sciprod
 from indicator import indicator, models
 
+from pyalex import Works
+
 
 User = get_user_model()
 
@@ -89,17 +91,15 @@ def task_generate_article_indicators(self, user_id, indicators):
         serie_json = json.dumps(
             {"keys": [key for key in ind.get_keys()], "series": serie_list}
         )
-        
+
         # check if the indicator file existe and if ids is not empty.
-        if not models.IndicatorFile.objects.filter(
-            data_ids=ind.get_ids()
-        ):
-            
+        if not models.IndicatorFile.objects.filter(data_ids=ind.get_ids()):
+
             indicator_model = models.Indicator(
                 title=ind.title,
                 creator=user,
                 summarized=serie_json,
-                record_status= "PUBLISHED" if ind.get_ids() else "NOT PUBLISHED",
+                record_status="PUBLISHED" if ind.get_ids() else "NOT PUBLISHED",
                 description=ind.description,
             )
 
@@ -112,3 +112,75 @@ def task_generate_article_indicators(self, user_id, indicators):
             #     items += md.objects.filter(pk__in=[id for id in ind.ids.keys()])
 
             # indicator_model.save_raw_data(items=items, ids=ind.get_ids())
+
+
+@celery_app.task(bind=True, name=_("Generate scientific indicator by OA API"))
+def task_generate_indicators_by_oa_api(self, user_id, indicators):
+    """
+    This task receive a indicators list, something like:
+
+    [
+        {
+            "title": "Quantidade de documentos entre os anos de 2014 até 2024",
+            "description": "Gerado a partir da coleta da somatória dos registro do OpenALex no perído de 2014 até 2024",
+            "group_by": "type",
+            "filters": {"is_oa": True},
+            "range_year": {
+                "start": 2014,
+                "end": 2024
+            }
+        }
+    ]
+
+    Each item in the list is a param to generate a indicator.
+    """
+
+    user = User.objects.get(id=user_id)
+
+    for indicator in indicators:
+        result_dict = {}
+        serie_list = []
+        start = indicator.get("range_year").get("start")
+        end = indicator.get("range_year").get("end") + 1
+
+        for year in range(start, end):
+            result = (
+                Works()
+                .filter(**indicator.get("filters"))
+                .filter(publication_year=year)
+                .group_by(indicator.get("group_by"))
+                .get()
+            )
+
+            for item in result:
+                key_display_name = item["key_display_name"]
+                count = item["count"]
+                result_dict.setdefault(key_display_name, [])
+                result_dict[key_display_name].append(count)
+
+
+        for serie_name_and_stack, data in result_dict.items():
+            serie_list.append(
+                {
+                    "name": serie_name_and_stack.title(),
+                    "type": "bar",
+                    "stack": serie_name_and_stack.title(),
+                    "emphasis": {"focus": "series"},
+                    "data": data,
+                }
+            )
+
+        serie_json = json.dumps(
+            {"keys": [key for key in range(start, end)], "series": serie_list}
+        )
+
+        print(serie_json)
+        # indicator_model = models.Indicator(
+        #     title=indicator.get("title"),
+        #     creator=user,
+        #     summarized=serie_json,
+        #     record_status="PUBLISHED",
+        #     description=indicator.get("description"),
+        # )
+
+        # indicator_model.save()

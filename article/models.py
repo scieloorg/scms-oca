@@ -978,6 +978,7 @@ class SourceArticle(models.Model):
     )
     year = models.CharField(_("Year"), max_length=10, null=True, blank=True)
     doi = models.CharField(_("DOI"), max_length=255, null=True, blank=False)
+    title = models.CharField(_("Title"), max_length=1024, null=True, blank=False)
     is_paratext = models.BooleanField(
         _("Paratext"), default=False, null=True, blank=True
     )
@@ -1010,6 +1011,11 @@ class SourceArticle(models.Model):
             models.Index(
                 fields=[
                     "year",
+                ]
+            ),
+            models.Index(
+                fields=[
+                    "title",
                 ]
             ),
         ]
@@ -1128,6 +1134,7 @@ class Article(CommonControlField):
     title = models.CharField(_("Title"), max_length=510, null=True, blank=True)
     doi = models.CharField(_("DOI"), max_length=100, null=True, blank=True)
     volume = models.CharField(_("Volume"), max_length=20, null=True, blank=True)
+    type = models.CharField(_("Type"), max_length=20, null=True, blank=True)
     number = models.CharField(_("Number"), max_length=20, null=True, blank=True)
     year = models.CharField(_("Year"), max_length=20, null=True, blank=True)
     is_oa = models.BooleanField(
@@ -1240,6 +1247,7 @@ class Article(CommonControlField):
         FieldPanel("number"),
         FieldPanel("year"),
         FieldPanel("open_access_status"),
+        FieldPanel("type"),
         FieldPanel("license"),
         FieldPanel("apc"),
         AutocompletePanel("contributors"),
