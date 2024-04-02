@@ -329,6 +329,63 @@ class Indicator:
 
         return ret
 
+    def build_filters(self, filter_by_year=False):
+        """
+        This will build all filters.
+
+        This return something a list with all filters, something like:
+
+        """
+        filters = {}
+        filters_list = []
+
+        for filter in self.filters:
+
+            filters.update(filter)
+            filters.update(self.default_filter)
+
+            if not filter_by_year:
+
+                if self.range_filter:
+                    filters.update(
+                        {
+                            self.range_filter.get("filter_name"): "[%s TO %s]"
+                            % (
+                                self.range_filter.get("range").get("start"),
+                                self.range_filter.get("range").get("end"),
+                            )
+                        }
+                    )
+
+                q = "%s" % (
+                    " AND ".join(["%s:%s" % (k, v) for k, v in filters.items()])
+                )
+
+                self.logger.info(q)
+                filters_list.append(q)
+            else:
+                for year in range(
+                    self.range_filter.get("range").get("start"),
+                    self.range_filter.get("range").get("end") + 1,
+                ):
+                    filters.update(
+                        {
+                            self.range_filter.get("filter_name"): "[%s TO %s]"
+                            % (
+                                year,
+                                year,
+                            )
+                        }
+                    )
+
+                    q = "%s" % (
+                        " AND ".join(["%s:%s" % (k, v) for k, v in filters.items()])
+                    )
+                    self.logger.info(q)
+                    filters_list.append(q)
+
+        return filters_list
+
     def save_csv(
         self,
         data_dict,
@@ -369,7 +426,7 @@ class Indicator:
         zip_path = self.create_zip_file(dir_name, file_name, suffix="csv")
 
         self.logger.info(f"Data has been saved to '{zip_path}' successfully.")
-    
+
         return zip_path
 
     def create_zip_file(self, dir_name, file_name, suffix=None, origin_file=False):
@@ -424,7 +481,7 @@ class Indicator:
 
         return zip_file
 
-    def get_data(self, query=[], rows=10000, files_by_year=False):
+    def get_data(self, rows=10000, files_by_year=False):
         """
         This get the data from Lucene.
 
@@ -437,35 +494,34 @@ class Indicator:
         Raises:
             This function dont raise any exception
         """
-        
-        if query:
-            self.filters = query
+        data = []
+        ids = set()
 
-        for filter in self.filters:
-            filters = {}
-            # add the default filter
-            filters.update(filter)
-            filters.update(self.default_filter)
+        if not files_by_year:
 
-            if not files_by_year:
-                data = []
-                ids = set()
-                if self.range_filter:
-                    filters.update(
-                        {
-                            self.range_filter.get("filter_name"): "[%s TO %s]"
-                            % (
-                                self.range_filter.get("range").get("start"),
-                                self.range_filter.get("range").get("end"),
-                            )
-                        }
-                    )
+            for q in self.build_filters():
 
-                q = "%s" % (
-                    " AND ".join(["%s:%s" % (k, v) for k, v in filters.items()])
+                result = self.solr.search(q, cursorMark="*", sort="id asc", rows=rows)
+
+                for doc in result:
+                    # Ensure that the id is not in ``data``.
+                    if not doc.get("id") in ids:
+                        data.append(doc)
+                        ids.add(doc.get("id"))
+                
+                yield (
+                    "%s_%s_%s_%s"
+                    % (
+                        "_".join(["_".join([s.replace("*", "all") for s in i.values()]) for i in self.filters]),
+                        "_".join([s.replace("*", "all") for s in self.default_filter.values()]),
+                        self.range_filter.get("range").get("start") or "",
+                        self.range_filter.get("range").get("end") or ""
+                    ),
+                    data,
                 )
+        else:
 
-                self.logger.info(q)
+            for q in self.build_filters(filter_by_year=True):
 
                 result = self.solr.search(q, cursorMark="*", sort="id asc", rows=rows)
 
@@ -476,62 +532,11 @@ class Indicator:
                         ids.add(doc.get("id"))
 
                 yield (
-                    "%s"
+                    "%s_%s_%s"
                     % (
-                        str(
-                            q.replace(" ", "_")
-                            .replace(":", "_")
-                            .replace('"', "")
-                            .replace("[", "")
-                            .replace("]", "")
-                        )
+                        "_".join(["_".join([s.replace("*", "all") for s in i.values()]) for i in self.filters]),
+                        "_".join([s.replace("*", "all") for s in self.default_filter.values()]),
+                        str(q.replace("[", " ").replace("]", " ").split(" ")[-2])
                     ),
                     data,
                 )
-            else:
-                if self.range_filter:
-                    for year in range(
-                        self.range_filter.get("range").get("start"),
-                        self.range_filter.get("range").get("end") + 1,
-                    ):
-                        data = []
-                        ids = set()
-                        filters.update(
-                            {
-                                self.range_filter.get("filter_name"): "[%s TO %s]"
-                                % (
-                                    year,
-                                    year,
-                                )
-                            }
-                        )
-
-                        q = "%s" % (
-                            " AND ".join(["%s:%s" % (k, v) for k, v in filters.items()])
-                        )
-
-                        self.logger.info(q)
-
-                        result = self.solr.search(
-                            q, cursorMark="*", sort="id asc", rows=rows
-                        )
-
-                        for doc in result:
-                            # Ensure that the id is not in ``data``.
-                            if not doc.get("id") in ids:
-                                data.append(doc)
-                                ids.add(doc.get("id"))
-
-                        yield (
-                            "%s"
-                            % (
-                                str(
-                                    q.replace(" ", "_")
-                                    .replace(":", "_")
-                                    .replace('"', "")
-                                    .replace("[", "")
-                                    .replace("]", "")
-                                )
-                            ),
-                            data,
-                        )

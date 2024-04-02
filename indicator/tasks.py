@@ -36,7 +36,7 @@ User = get_user_model()
 
 
 @celery_app.task(bind=True, name=_("Generate scientific indicator"))
-def task_generate_article_indicators(self, user_id, indicators, remove=False):
+def task_generate_article_indicators(self, user_id, indicators, remove=False, raw_data=False):
     """
     This task receive a indicators list, something like:
 
@@ -101,27 +101,28 @@ def task_generate_article_indicators(self, user_id, indicators, remove=False):
         
         indicator_model.save()
 
-        for data in ind.get_data(rows=10000, files_by_year=True):
-            files = {}
+        if raw_data:
+            for data in ind.get_data(rows=10000, files_by_year=True):
+                files = {}
 
-            file_name_jsonl = "%s.json" % (data[0])
-            file_path_jsonl = ind.save_jsonl(
-                data[1], dir_name="/tmp", file_name=file_name_jsonl
-            )
+                file_name_jsonl = "%s.json" % (data[0])
+                file_path_jsonl = ind.save_jsonl(
+                    data[1], dir_name="/tmp", file_name=file_name_jsonl
+                )
 
-            file_name_csv = "%s.csv" % (data[0])
-            file_path_csv = ind.save_csv(
-                data[1], dir_name="/tmp", file_name=file_name_csv
-            )
-            files.update(
-                {file_name_csv: file_path_csv, file_name_jsonl: file_path_jsonl}
-            )
+                file_name_csv = "%s.csv" % (data[0])
+                file_path_csv = ind.save_csv(
+                    data[1], dir_name="/tmp", file_name=file_name_csv
+                )
+                files.update(
+                    {file_name_csv: file_path_csv, file_name_jsonl: file_path_jsonl}
+                )
 
-            for file_name, file_path in files.items():
-                ind_file = models.IndicatorFile(name=file_name)
-                zfile = open(file_path, "rb")
-                ind_file.raw_data.save(file_name + ".zip", zfile)
-                ind_file.save()
+                for file_name, file_path in files.items():
+                    ind_file = models.IndicatorFile(name=file_name)
+                    zfile = open(file_path, "rb")
+                    ind_file.raw_data.save(file_name + ".zip", zfile)
+                    ind_file.save()
 
-                indicator_model.indicator_file.add(ind_file)
+                    indicator_model.indicator_file.add(ind_file)
 
