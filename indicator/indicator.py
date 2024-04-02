@@ -2,6 +2,7 @@ import itertools
 import json
 import logging
 import os
+import re
 import zipfile
 
 import pandas as pd
@@ -441,7 +442,7 @@ class Indicator:
         # Define o nome do arquivo ZIP
         if suffix:
             zip_file = os.path.join(
-                dir_name, f"{os.path.splitext(file_path)[0]}_{suffix}.zip"
+                dir_name, f"{os.path.splitext(file_path)[0]}{suffix}.zip"
             )
         else:
             zip_file = os.path.join(dir_name, f"{os.path.splitext(file_path)[0]}.zip")
@@ -496,6 +497,7 @@ class Indicator:
         """
         data = []
         ids = set()
+        unwanted_chars = [":", "AND", '"', "[", "]", " "]
 
         if not files_by_year:
 
@@ -508,15 +510,13 @@ class Indicator:
                     if not doc.get("id") in ids:
                         data.append(doc)
                         ids.add(doc.get("id"))
-                
+
+                clq = q
+                for char in unwanted_chars:
+                    clq = clq.replace(char, "_")
+
                 yield (
-                    "%s_%s_%s_%s"
-                    % (
-                        "_".join(["_".join([s.replace("*", "all") for s in i.values()]) for i in self.filters]),
-                        "_".join([s.replace("*", "all") for s in self.default_filter.values()]),
-                        self.range_filter.get("range").get("start") or "",
-                        self.range_filter.get("range").get("end") or ""
-                    ),
+                    "%s" % (str(re.sub(r'_{2,}', '_', clq.lower()))),
                     data,
                 )
         else:
@@ -531,12 +531,11 @@ class Indicator:
                         data.append(doc)
                         ids.add(doc.get("id"))
 
+                clq = q
+                for char in unwanted_chars:
+                    clq = clq.replace(char, "_")
+
                 yield (
-                    "%s_%s_%s"
-                    % (
-                        "_".join(["_".join([s.replace("*", "all") for s in i.values()]) for i in self.filters]),
-                        "_".join([s.replace("*", "all") for s in self.default_filter.values()]),
-                        str(q.replace("[", " ").replace("]", " ").split(" ")[-2])
-                    ),
+                    "%s" % (str(re.sub(r'_{2,}', '_', clq.lower()))),
                     data,
                 )
