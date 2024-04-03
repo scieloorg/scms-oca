@@ -1,6 +1,3 @@
-# coding: utf-8
-import logging
-
 from haystack import indexes
 
 from indicator import models
@@ -126,13 +123,11 @@ class IndicatorIndex(indexes.SearchIndex, indexes.Indexable):
 
         scopes = ["INSTITUCIONAL", "MUNICIPAL", "ESTADUAL", "REGIONAL", "NACIONAL"]
         numbers = [n_institutions, n_cities, n_states, n_regions, 1]
-        logging.info(numbers)
         for i, number in enumerate(numbers):
             if number:
                 scope = scopes[i]
                 if number > 1:
                     scope = "INTER" + scope
-                logging.info(scope)
                 return scope
 
     def prepare_thematic_priority(self, obj):
