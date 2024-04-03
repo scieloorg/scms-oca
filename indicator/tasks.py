@@ -38,7 +38,7 @@ User = get_user_model()
 
 
 @celery_app.task(bind=True, name=_("Generate scientific indicator"))
-def task_generate_article_indicators(self, user_id, indicators):
+def task_generate_article_indicators(self, user_id, indicators, remove=False, raw_data=False):
     """
     This task receive a indicators list, something like:
 
@@ -62,8 +62,9 @@ def task_generate_article_indicators(self, user_id, indicators):
 
     user = User.objects.get(id=user_id)
 
-    models.Indicator.objects.all().delete()
-    models.IndicatorFile.objects.all().delete()
+    if remove: 
+        models.Indicator.objects.all().delete()
+        models.IndicatorFile.objects.all().delete()
 
     for ind in indicators:
         ind = indicator.Indicator(**ind)
@@ -92,26 +93,40 @@ def task_generate_article_indicators(self, user_id, indicators):
             {"keys": [key for key in ind.get_keys()], "series": serie_list}
         )
 
-        # check if the indicator file existe and if ids is not empty.
-        if not models.IndicatorFile.objects.filter(data_ids=ind.get_ids()):
+        indicator_model = models.Indicator(
+            title=ind.title,
+            creator=user,
+            summarized=serie_json,
+            record_status="PUBLISHED",
+            description=ind.description,
+        )
+        
+        indicator_model.save()
 
-            indicator_model = models.Indicator(
-                title=ind.title,
-                creator=user,
-                summarized=serie_json,
-                record_status="PUBLISHED" if ind.get_ids() else "NOT PUBLISHED",
-                description=ind.description,
-            )
+        if raw_data:
+            for data in ind.get_data(rows=10000, files_by_year=True):
+                files = {}
 
-            indicator_model.save()
-            # items = []
+                file_name_jsonl = "%s.json" % (data[0])
+                file_path_jsonl = ind.save_jsonl(
+                    data[1], dir_name="/tmp", file_name=file_name_jsonl
+                )
 
-            # for model in ind.models:
-            #     ct = ContentType.objects.get(model=model)
-            #     md = ct.model_class()
-            #     items += md.objects.filter(pk__in=[id for id in ind.ids.keys()])
+                file_name_csv = "%s.csv" % (data[0])
+                file_path_csv = ind.save_csv(
+                    data[1], dir_name="/tmp", file_name=file_name_csv
+                )
+                files.update(
+                    {file_name_csv: file_path_csv, file_name_jsonl: file_path_jsonl}
+                )
 
-            # indicator_model.save_raw_data(items=items, ids=ind.get_ids())
+                for file_name, file_path in files.items():
+                    ind_file = models.IndicatorFile(name=file_name)
+                    zfile = open(file_path, "rb")
+                    ind_file.raw_data.save(file_name + ".zip", zfile)
+                    ind_file.save()
+
+                    indicator_model.indicator_file.add(ind_file)
 
 
 @celery_app.task(bind=True, name=_("Generate scientific indicator by OA API"))
@@ -184,3 +199,4 @@ def task_generate_indicators_by_oa_api(self, user_id, indicators):
         # )
 
         # indicator_model.save()
+
