@@ -1,15 +1,14 @@
 import json
+import logging
+
 from django.contrib.auth import get_user_model
-from django.utils.translation import gettext as _
 from django.contrib.contenttypes.models import ContentType
-
-from config import celery_app
-
-# from indicator import directory, sciprod
-from indicator import indicator, models
-
+from django.utils.translation import gettext as _
 from pyalex import Works
 
+from config import celery_app
+# from indicator import directory, sciprod
+from indicator import indicator, models
 
 User = get_user_model()
 
@@ -159,20 +158,19 @@ def task_generate_indicators_by_oa_api(self, user_id, indicators):
         end = indicator.get("range_year").get("end") + 1
 
         for year in range(start, end):
-            result = (
+            result, meta = (
                 Works()
                 .filter(**indicator.get("filters"))
                 .filter(publication_year=year)
                 .group_by(indicator.get("group_by"))
-                .get()
+                .get(return_meta=True)
             )
-
+            logging.info(meta)
             for item in result:
                 key_display_name = item["key_display_name"]
                 count = item["count"]
                 result_dict.setdefault(key_display_name, [])
                 result_dict[key_display_name].append(count)
-
 
         for serie_name_and_stack, data in result_dict.items():
             serie_list.append(
@@ -189,14 +187,13 @@ def task_generate_indicators_by_oa_api(self, user_id, indicators):
             {"keys": [key for key in range(start, end)], "series": serie_list}
         )
 
-        print(serie_json)
-        # indicator_model = models.Indicator(
-        #     title=indicator.get("title"),
-        #     creator=user,
-        #     summarized=serie_json,
-        #     record_status="PUBLISHED",
-        #     description=indicator.get("description"),
-        # )
+        indicator_model = models.Indicator(
+            title=indicator.get("title"),
+            creator=user,
+            summarized=serie_json,
+            record_status="PUBLISHED",
+            description=indicator.get("description"),
+        )
 
-        # indicator_model.save()
+        indicator_model.save()
 
