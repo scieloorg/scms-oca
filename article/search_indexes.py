@@ -22,6 +22,7 @@ class ArticleIndex(indexes.SearchIndex, indexes.Indexable):
     doi = indexes.CharField(model_attr="doi", null=True)
     volume = indexes.CharField(model_attr="volume", null=True)
     number = indexes.CharField(model_attr="number", null=True)
+    type = indexes.CharField(model_attr="type", null=True)
     year = indexes.CharField(model_attr="year", null=True)
     is_oa = indexes.CharField(model_attr="is_oa", null=True)
     open_access_status = indexes.CharField(model_attr="open_access_status", null=True)
