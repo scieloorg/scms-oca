@@ -187,20 +187,20 @@ class Indicator(CommonControlField):
 
     notes = models.TextField(_("Notes"), max_length=1000, null=True, blank=True)
 
-    @classmethod
-    def delete(cls):
-        for item in cls.objects.iterator():
-            try:
-                item.action_and_practice = None
-                if item.thematic_areas:
-                    item.thematic_areas.clear()
-                if item.institutions:
-                    item.institutions.clear()
-                if item.locations:
-                    item.locations.clear()
-            except Exception as e:
-                logging.exception(e)
-        cls.objects.all().delete()
+    # @classmethod
+    # def delete(cls):
+    #     for item in cls.objects.iterator():
+    #         try:
+    #             item.action_and_practice = None
+    #             if item.thematic_areas:
+    #                 item.thematic_areas.clear()
+    #             if item.institutions:
+    #                 item.institutions.clear()
+    #             if item.locations:
+    #                 item.locations.clear()
+    #         except Exception as e:
+    #             logging.exception(e)
+    #     cls.objects.all().delete()
 
     def save(self, *args, **kwargs):
         # ensure we always have the slug.
