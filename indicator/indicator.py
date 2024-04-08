@@ -43,7 +43,7 @@ class Indicator:
         facet_by,
         context_by=None,
         default_filter={},
-        range_filter={"filter_name": "year", "range": {"start": 2012, "end": 2023}},
+        range_filter={"filter_name": "year", "range": {"start": 2014, "end": 2023}},
         fill_range=True,
         fill_range_value=0,
         solr_instance=None,
@@ -495,13 +495,14 @@ class Indicator:
         Raises:
             This function dont raise any exception
         """
-        data = []
-        ids = set()
+
         unwanted_chars = [":", "AND", '"', "[", "]", " "]
 
         if not files_by_year:
 
             for q in self.build_filters():
+                data = []
+                ids = set()
 
                 result = self.solr.search(q, cursorMark="*", sort="id asc", rows=rows)
 
@@ -514,6 +515,10 @@ class Indicator:
                 clq = q
                 for char in unwanted_chars:
                     clq = clq.replace(char, "_")
+
+                self.logger.info(
+                    "Filter: %s (%s)" % (q, len(data))
+                )
 
                 yield (
                     "%s" % (str(re.sub(r'_{2,}', '_', clq.lower()))),
@@ -522,7 +527,8 @@ class Indicator:
         else:
 
             for q in self.build_filters(filter_by_year=True):
-
+                data = []
+                ids = set()
                 result = self.solr.search(q, cursorMark="*", sort="id asc", rows=rows)
 
                 for doc in result:
@@ -534,6 +540,10 @@ class Indicator:
                 clq = q
                 for char in unwanted_chars:
                     clq = clq.replace(char, "_")
+
+                self.logger.info(
+                    "Filter: %s (%s)" % (q, len(data))
+                )
 
                 yield (
                     "%s" % (str(re.sub(r'_{2,}', '_', clq.lower()))),
