@@ -45,6 +45,13 @@ class IndicatorFile(models.Model):
 
     autocomplete_search_field = "name"
 
+    def extension(self):
+        name, extension = os.path.splitext(self.raw_data.name)
+        return extension
+    
+    class Meta:
+        ordering = ('id', )
+
     def autocomplete_label(self):
         return str(self)
 
