@@ -120,12 +120,17 @@ def task_generate_article_indicators(self, user_id, indicators, remove=False, ra
                 )
 
                 for file_name, file_path in files.items():
-                    ind_file = models.IndicatorFile(name=file_name)
-                    zfile = open(file_path, "rb")
-                    ind_file.raw_data.save(file_name + ".zip", zfile)
-                    ind_file.save()
+                    try: 
+                        ind_file = models.IndicatorFile(name=file_name)
+                        zfile = open(file_path, "rb")
+                        ind_file.raw_data.save(file_name + ".zip", zfile)
+                        ind_file.save()
 
-                    indicator_model.indicator_file.add(ind_file)
+                        indicator_model.indicator_file.add(ind_file)
+                    except TypeError as e: 
+                        logging.info("Error on save file to indicator: %s, %s" % (file_name, file_path))
+
+                    
 
 
 @celery_app.task(bind=True, name=_("Generate scientific indicator by OA API"))
