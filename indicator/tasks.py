@@ -157,8 +157,8 @@ def task_generate_indicators_by_oa_api(self, user_id, indicators):
     user = User.objects.get(id=user_id)
 
     for indicator in indicators:
-        result_dict = {}
         serie_list = []
+        result_dict = {}
         start = indicator.get("range_year").get("start")
         end = indicator.get("range_year").get("end") + 1
 
@@ -179,27 +179,28 @@ def task_generate_indicators_by_oa_api(self, user_id, indicators):
                     count = item["count"]
                     result_dict.setdefault(key_display_name, [])
                     result_dict[key_display_name].append(count)
-
-            
-                for serie_name_and_stack, data in result_dict.items():
-                    serie_list.append(
-                        {
-                            "name": serie_name_and_stack.title(),
-                            "type": "bar",
-                            "stack": serie_name_and_stack.title(),
-                            "emphasis": {"focus": "series"},
-                            "data": data,
-                        }
-                    )
-
-                serie_json = json.dumps(
-                    {"keys": [key for key in range(start, end)], "series": serie_list}
-                )
+                    
             else:
                 serie_list.append(result[0].get("count"))
                 serie_json = json.dumps(
                     {"keys": [key for key in range(start, end)], "series": {"data": serie_list, "type": "bar"}}
                 )
+                
+        if indicator.get("stacked"):
+            for serie_name_and_stack, data in result_dict.items():
+                serie_list.append(
+                    {
+                        "name": serie_name_and_stack.title(),
+                        "type": "bar",
+                        "stack": serie_name_and_stack.title(),
+                        "emphasis": {"focus": "series"},
+                        "data": data,
+                    }
+                )
+
+            serie_json = json.dumps(
+                {"keys": [key for key in range(start, end)], "series": serie_list}
+            )
 
         indicator_model = models.Indicator(
             title=indicator.get("title"),
