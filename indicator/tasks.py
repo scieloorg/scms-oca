@@ -7,6 +7,7 @@ from django.utils.translation import gettext as _
 from pyalex import Works
 
 from config import celery_app
+
 # from indicator import directory, sciprod
 from indicator import indicator, models
 
@@ -37,7 +38,9 @@ User = get_user_model()
 
 
 @celery_app.task(bind=True, name=_("Generate scientific indicator"))
-def task_generate_article_indicators(self, user_id, indicators, remove=False, raw_data=False):
+def task_generate_article_indicators(
+    self, user_id, indicators, remove=False, raw_data=False
+):
     """
     This task receive a indicators list, something like:
 
@@ -61,7 +64,7 @@ def task_generate_article_indicators(self, user_id, indicators, remove=False, ra
 
     user = User.objects.get(id=user_id)
 
-    if remove: 
+    if remove:
         models.Indicator.objects.all().delete()
         models.IndicatorFile.objects.all().delete()
 
@@ -89,7 +92,16 @@ def task_generate_article_indicators(self, user_id, indicators, remove=False, ra
                     )
 
         serie_json = json.dumps(
-            {"keys": [key for key in ind.get_keys()], "series": serie_list}
+            {
+                "keys": [
+                    key
+                    for key in range(
+                        ind.range_filter.get("range").get("start"),
+                        ind.range_filter.get("range").get("end") + 1,
+                    )
+                ],
+                "series": serie_list,
+            }
         )
 
         indicator_model = models.Indicator(
@@ -99,7 +111,7 @@ def task_generate_article_indicators(self, user_id, indicators, remove=False, ra
             record_status="PUBLISHED",
             description=ind.description,
         )
-        
+
         indicator_model.save()
 
         if raw_data:
@@ -120,17 +132,18 @@ def task_generate_article_indicators(self, user_id, indicators, remove=False, ra
                 )
 
                 for file_name, file_path in files.items():
-                    try: 
+                    try:
                         ind_file = models.IndicatorFile(name=file_name)
                         zfile = open(file_path, "rb")
                         ind_file.raw_data.save(file_name + ".zip", zfile)
                         ind_file.save()
 
                         indicator_model.indicator_file.add(ind_file)
-                    except TypeError as e: 
-                        logging.info("Error on save file to indicator: %s, %s" % (file_name, file_path))
-
-                    
+                    except TypeError as e:
+                        logging.info(
+                            "Error on save file to indicator: %s, %s"
+                            % (file_name, file_path)
+                        )
 
 
 @celery_app.task(bind=True, name=_("Generate scientific indicator by OA API"))
@@ -171,7 +184,7 @@ def task_generate_indicators_by_oa_api(self, user_id, indicators):
                 .get(return_meta=True)
             )
             logging.info(meta)
-            
+
             if indicator.get("stacked"):
 
                 for item in result:
@@ -179,13 +192,16 @@ def task_generate_indicators_by_oa_api(self, user_id, indicators):
                     count = item["count"]
                     result_dict.setdefault(key_display_name, [])
                     result_dict[key_display_name].append(count)
-                    
+
             else:
                 serie_list.append(result[0].get("count"))
                 serie_json = json.dumps(
-                    {"keys": [key for key in range(start, end)], "series": {"data": serie_list, "type": "bar"}}
+                    {
+                        "keys": [key for key in range(start, end)],
+                        "series": {"data": serie_list, "type": "bar"},
+                    }
                 )
-                
+
         if indicator.get("stacked"):
             for serie_name_and_stack, data in result_dict.items():
                 serie_list.append(
@@ -211,4 +227,3 @@ def task_generate_indicators_by_oa_api(self, user_id, indicators):
         )
 
         indicator_model.save()
-
