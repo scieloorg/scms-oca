@@ -269,18 +269,18 @@ class Indicator:
             # self.logger.info(filters)
             self.logger.info(q)
 
-            result = self.solr.search(q, fl="django_id, updated", rows=100000000)
+            result = self.solr.search(q)
 
             # ids example: {'581512': '2023-11-24T15:23:41.642088+00:00',
             #               '581513': '2023-11-24T15:23:41.735933+00:00',
             #               '581520': '2023-11-24T15:23:42.377974+00:00'}
-            ids = {
-                doc.get("django_id"): doc.get("updated")
-                for doc in result.raw_response.get("response").get("docs")
-            }
+            # ids = {
+            #     doc.get("django_id"): doc.get("updated")
+            #     for doc in result.raw_response.get("response").get("docs")
+            # }
 
-            # update the attribute ids with sorted ids
-            self.ids.update(sorted(ids.items()))
+            # # update the attribute ids with sorted ids
+            # self.ids.update(sorted(ids.items()))
             result = self._convert_list_dict(
                 result.facets.get("facet_fields").get(self.facet_by)
             )
@@ -482,7 +482,7 @@ class Indicator:
 
         return zip_file
 
-    def get_data(self, rows=10000, files_by_year=False):
+    def     get_data(self, rows=10000, files_by_year=False):
         """
         This get the data from Lucene.
 
