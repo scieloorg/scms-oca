@@ -18,35 +18,35 @@ def run(user_id=1):
 
     indicators = [
         # Por área temática
+        # {
+        #     "filters": [],
+        #     "title": "Evolução do número de artigos científicos por área temática 2014-2023 - Brasil",
+        #     "facet_by": "year",
+        #     "description": "Gerado automaticamente usando dados coletados do OpenALex no período de 2014 até 2023",
+        #     "context_by": ["thematic_level_0"],
+        #     "default_filter": {"record_type": "article"},
+        #     "range_filter": {
+        #         "filter_name": "year",
+        #         "range": {"start": 2014, "end": 2023},
+        #     },
+        #     "models": ["article"],
+        # },
+        # {
+        #     "filters": [],
+        #     "title": "Evolução do número de artigos científicos em acesso aberto por área temática 2014-2023 - Brasil",
+        #     "facet_by": "year",
+        #     "description": "Gerado automaticamente usando dados coletados do OpenALex no período de 2014 até 2023",
+        #     "context_by": ["thematic_level_0"],
+        #     "default_filter": {"record_type": "article", "is_oa": "true"},
+        #     "range_filter": {
+        #         "filter_name": "year",
+        #         "range": {"start": 2014, "end": 2023},
+        #     },
+        #     "models": ["article"],
+        # },
         {
             "filters": [],
-            "title": "Evolução do número de artigos científicos por área temática 2014-2023 - Brasil",
-            "facet_by": "year",
-            "description": "Gerado automaticamente usando dados coletados do OpenALex no período de 2014 até 2023",
-            "context_by": ["thematic_level_0"],
-            "default_filter": {"record_type": "article"},
-            "range_filter": {
-                "filter_name": "year",
-                "range": {"start": 2014, "end": 2023},
-            },
-            "models": ["article"],
-        },
-        {
-            "filters": [],
-            "title": "Evolução do número de artigos científicos em acesso aberto por área temática 2014-2023 - Brasil",
-            "facet_by": "year",
-            "description": "Gerado automaticamente usando dados coletados do OpenALex no período de 2014 até 2023",
-            "context_by": ["thematic_level_0"],
-            "default_filter": {"record_type": "article", "is_oa": "true"},
-            "range_filter": {
-                "filter_name": "year",
-                "range": {"start": 2014, "end": 2023},
-            },
-            "models": ["article"],
-        },
-        {
-            "filters": [],
-            "title": "Evolução do número de artigos científicos em acesso aberto por área temática 2014-2023 - Brasil",
+            "title": "Evolução do número de artigos científicos em acesso aberto Gold por área temática 2014-2023 - Brasil",
             "facet_by": "year",
             "description": "Gerado automaticamente usando dados coletados do OpenALex no período de 2014 até 2023",
             "context_by": ["thematic_level_0"],
@@ -59,45 +59,45 @@ def run(user_id=1):
         },
         
         # Por Região
-        {
-            "filters": [],
-            "title": "Evolução do número de artigos científicos por região 2014-2023 - Brasil",
-            "facet_by": "year",
-            "description": "Gerado automaticamente usando dados coletados do OpenALex no período de 2014 até 2023",
-            "context_by": ["regions"],
-            "default_filter": {"record_type": "article"},
-            "range_filter": {
-                "filter_name": "year",
-                "range": {"start": 2014, "end": 2023},
-            },
-            "models": ["article"],
-        },
-        {
-            "filters": [],
-            "title": "Evolução do número de artigos científicos em acesso aberto por região 2014-2023 - Brasil",
-            "facet_by": "year",
-            "description": "Gerado automaticamente usando dados coletados do OpenALex no período de 2014 até 2023",
-            "context_by": ["regions"],
-            "default_filter": {"record_type": "article", "is_oa": "true"},
-            "range_filter": {
-                "filter_name": "year",
-                "range": {"start": 2014, "end": 2023},
-            },
-            "models": ["article"],
-        },
-        {
-            "filters": [],
-            "title": "Evolução do número de artigos científicos em acesso aberto por região 2014-2023 - Brasil",
-            "facet_by": "year",
-            "description": "Gerado automaticamente usando dados coletados do OpenALex no período de 2014 até 2023",
-            "context_by": ["regions"],
-            "default_filter": {"record_type": "article", "is_oa": "true", "open_access_status": "gold"},
-            "range_filter": {
-                "filter_name": "year",
-                "range": {"start": 2014, "end": 2023},
-            },
-            "models": ["article"],
-        },
+        # {
+        #     "filters": [],
+        #     "title": "Evolução do número de artigos científicos por região 2014-2023 - Brasil",
+        #     "facet_by": "year",
+        #     "description": "Gerado automaticamente usando dados coletados do OpenALex no período de 2014 até 2023",
+        #     "context_by": ["regions"],
+        #     "default_filter": {"record_type": "article"},
+        #     "range_filter": {
+        #         "filter_name": "year",
+        #         "range": {"start": 2014, "end": 2023},
+        #     },
+        #     "models": ["article"],
+        # },
+        # {
+        #     "filters": [],
+        #     "title": "Evolução do número de artigos científicos em acesso aberto por região 2014-2023 - Brasil",
+        #     "facet_by": "year",
+        #     "description": "Gerado automaticamente usando dados coletados do OpenALex no período de 2014 até 2023",
+        #     "context_by": ["regions"],
+        #     "default_filter": {"record_type": "article", "is_oa": "true"},
+        #     "range_filter": {
+        #         "filter_name": "year",
+        #         "range": {"start": 2014, "end": 2023},
+        #     },
+        #     "models": ["article"],
+        # },
+        # {
+        #     "filters": [],
+        #     "title": "Evolução do número de artigos científicos em acesso aberto por região 2014-2023 - Brasil",
+        #     "facet_by": "year",
+        #     "description": "Gerado automaticamente usando dados coletados do OpenALex no período de 2014 até 2023",
+        #     "context_by": ["regions"],
+        #     "default_filter": {"record_type": "article", "is_oa": "true", "open_access_status": "gold"},
+        #     "range_filter": {
+        #         "filter_name": "year",
+        #         "range": {"start": 2014, "end": 2023},
+        #     },
+        #     "models": ["article"],
+        # },
         
         # {
         #     "filters": [],
