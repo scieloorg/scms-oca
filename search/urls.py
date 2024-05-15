@@ -21,4 +21,7 @@ urlpatterns = [
         views.indicator_raw_data,
         name="indicator_raw_data",
     ),
+    path(
+        "graph/json", views.graph, name="graph_json"
+    ),
 ]
