@@ -1,0 +1,128 @@
+{% extends "wagtailadmin/base.html" %}
+{% load humanize %}
+{% load static %}
+{% load i18n %}
+{% load wagtailsettings_tags %}
+
+{% get_settings use_default_site=True %}
+
+{% block content %}
+
+<main class="content-wrapper w-overflow-x-hidden" id="main">
+
+    <div class="content">
+
+        <div class="messages" role="status">
+
+        </div>
+
+        <header class="w-header w-header--hasform">
+
+            <div class="row">
+                <div class="left header-left">
+                    <div class="col">
+
+                        <h1 class="w-header__title">
+                            <svg class="icon icon-form w-header__glyph" aria-hidden="true">
+                                <use href="#icon-form"></use>
+                            </svg>
+                            Generate Indicators
+                        </h1>
+
+                    </div>
+
+                </div>
+
+                <div class="right header-right">
+
+                    <div class="actionbutton">
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </header>
+
+        <div class="main-content">
+            <div class="row">
+
+                <div class="result-list col9">
+                    <div class="mb-5 mx-auto" style="max-width: 100%; min-height: 100%;">
+                        <div id="graph" style="position: relative; height:80vh; width:60vw"></div>
+                    </div>   
+                </div>
+                <div class="changelist-filter col3">
+                    
+                    <!-- <div class="col-xl-2 col-sm-2 col-md-2"> -->
+                        {% trans "Ano" %}:
+                        <select id="ano" class="selector form-control form-control-sm">
+                            <option value="all">Todos</option>
+                            <option value="2024">2024</option>
+                            <option value="2023">2023</option>
+                            <option value="2022">2022</option>
+                            <option value="2021">2021</option>
+                            <option value="2020">2020</option>
+                            <option value="2019">2019</option>
+                            <option value="2018">2018</option>
+                            <option value="2017">2017</option>
+                            <option value="2016">2016</option>
+                            <option value="2015">2015</option>
+                            <option value="2014">2014</option>
+                        </select>
+                    <!-- </div> -->
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</main>
+
+
+<!-- <script type="text/javascript" src="{% get_static_prefix %}js/stopwords.js"></script>
+<script type="text/javascript" src="{% get_static_prefix %}js/jquery.marker.js"></script>
+<script type="text/javascript" src="{% get_static_prefix %}js/markerjs.js"></script>
+<script type="text/javascript" src="{% get_static_prefix %}js/JSONStorage.js"></script>
+<script type="text/javascript" src="{% get_static_prefix %}js/project.js"></script> -->
+
+<script src="{% static 'js/echarts/echarts.min.js' %}"></script>
+<script src="{% static 'js/echarts/theme/roma-macarons-macarons2-infographic.js' %}"></script>
+
+<script>
+
+    var chart = echarts.init(document.getElementById('graph'));
+
+    chart.showLoading();
+
+    //Gráfico por ano
+    $.get("/search/?q=*:*&raw=true").done(function (data) {
+
+        chart.hideLoading();
+
+        chart.setOption({
+            title: {
+                text: 'Quantidade de artigos em acesso aberto por área temática'
+            },
+            legend: {
+                // Try 'horizontal'
+                orient: 'horizontal',
+                right: 10,
+                top: 'top'
+            },
+            tooltip: {},
+
+            xAxis: {
+                type: 'category', data: [ "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023" ]
+            },
+            yAxis: { type: 'value' },
+            series:  [{ "name": "ciências exatas, tecnológicas e multidisciplinar", "type": "bar", "stack": "ciências exatas, tecnológicas e multidisciplinar", "emphasis": { "focus": "series" }, "data": [ 18665, 19858, 21660, 26167, 27683, 31481, 32770, 37211, 37765, 43608, 42233, 337 ], "label": { "show": null } }, { "name": "ciências da vida", "type": "bar", "stack": "ciências da vida", "emphasis": { "focus": "series" }, "data": [ 22358, 24288, 25451, 29433, 30793, 34729, 35735, 38627, 45683, 53253, 52558, 423 ], "label": { "show": null } }, { "name": "humanidades", "type": "bar", "stack": "humanidades", "emphasis": { "focus": "series" }, "data": [ 24972, 26896, 30283, 37461, 43707, 52910, 57875, 65054, 64742, 83674, 76084, 523 ], "label": { "show": null } } ]
+      
+        });
+    });
+
+
+</script>
+
+{% endblock %}

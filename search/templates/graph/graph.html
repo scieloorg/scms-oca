@@ -1,0 +1,374 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% load static %}
+{% load i18n %}
+{% load wagtailsettings_tags %}
+{% load sizify %}
+
+{% get_settings use_default_site=True %}
+
+
+{% block content %}
+
+<!-- content -->
+<section id="content">
+    <div class="content-wrap pt-0">
+        <div class="container clearfix">
+
+            <div class="section m-1 p-1 mt-4">
+
+                <div class="page-title-row">
+                    <div class="page-title-content">
+                        <h1>Indicadores</h1>
+                        <span>Painel de dados do Observatório OCABr</span>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="section pb-0 pt-2 mb-2 mt-3 bg-transparent">
+                <div class="container">
+
+                    <div class="row flex-row ">
+
+                        <div class="col-xl-3 col-sm-3 col-md-3"></div>
+                        <div class="col-xl-3 col-sm-3 col-md-3">
+                            {% trans "Universo" %}:
+                            <select id="country" class="form-control">
+                                <option value="all">Todos</option>
+                                <option value="brasil" selected>Brasil</option>
+                            </select>
+                        </div>
+
+                        <div class="col-xl-2 col-sm-2 col-md-2">
+                            {% trans "Ano" %}:
+                            <select id="year" class="form-control">
+                                <option value="all">Todos</option>
+                                <option value="2024">2024</option>
+                                <option value="2023">2023</option>
+                                <option value="2022">2022</option>
+                                <option value="2021">2021</option>
+                                <option value="2020">2020</option>
+                                <option value="2019">2019</option>
+                                <option value="2018">2018</option>
+                                <option value="2017">2017</option>
+                                <option value="2016">2016</option>
+                                <option value="2015">2015</option>
+                                <option value="2014">2014</option>
+                            </select>
+                        </div>
+                        <div class="col-xl-2 col-sm-2 col-md-2">
+                            <button type="button" class="btn btn-primary btn-sm mt-4" id="generate_graph">Gerar
+                                gráfico</button>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="row gutter-40 col-mb-80">
+                <!-- cluster ============================================= -->
+
+                <div class="sidebar col-lg-3 mt-n5 mb-1 card d-none d-sm-block">
+
+                    <div class="mt-2 mb-1"><b>Gráfico por: </b></div>
+                    <select id="graph_type" name="graph_type" class="chzn-select ordem form-control">
+                        <option value="year" selected>Ano</option>
+                        <option value="thematic_level_0">Área temática</option>
+                        <option value="regions">Região</option>
+                        <option value="open_access_status">Tipo de acesso aberto</option>
+                        <option value="license">Licença</option>
+                        <option value="open_access_status">Tipo de acesso aberto</option>
+                        <option value="is_oa">Acesso aberto (sim/não)</option>
+                        <option value="institutions">Instituição</option>
+                    </select>
+
+                    <div class="mt-4"><b>Filtros</b></div>
+                    <div class="col-xl-12 col-sm-12 col-md-12 mb-4 mt-3">
+                        {% trans "Áreas temáticas" %}:
+                        <select id="thematic_level_0" name="thematic_level_0" class="chzn-select ordem form-control" multiple>
+                            <option value="all" selected>Todas</option>
+                            <option value="Sudeste">Sudeste</option>
+                            <option value="Nordeste">Nordeste</option>
+                            <option value="Sul">Sul</option>
+                            <option value="Centro-oeste">Centro-oeste</option>
+                            <option value="Norte">Norte</option>
+                        </select>
+                    </div>
+                    <div class="col-xl-12 col-sm-12 col-md-12 mb-4 mt-3">
+                        {% trans "Região" %}:
+                        <select id="region" name="region" class="chzn-select ordem form-control" multiple>
+                            <option value="all" selected>Todas</option>
+                            <option value="Sudeste">Sudeste</option>
+                            <option value="Nordeste">Nordeste</option>
+                            <option value="Sul">Sul</option>
+                            <option value="Centro-oeste">Centro-oeste</option>
+                            <option value="Norte">Norte</option>
+                        </select>
+                    </div>
+
+                    <div class="col-xl-12 col-sm-12 col-md-12 mb-4">
+                        {% trans "Tipo de acesso aberto" %}:
+                        <select id="open_access_status" name="open_access_status"
+                            class="chzn-select ordem form-control" multiple>
+                            <option value="all" selected>Todos</option>
+                            <option value="closed">closed</option>
+                            <option value="gold">gold</option>
+                            <option value="bronze">bronze</option>
+                            <option value="hybrid">hybrid</option>
+                            <option value="green">green</option>
+                        </select>
+                    </div>
+
+                    <div class="col-xl-12 col-sm-12 col-md-12 mb-4">
+                        {% trans "Acesso aberto" %}:
+                        <select id="is_oa" name="is_oa"
+                            class="chzn-select ordem form-control">
+                            <option value="all">Todos</option>
+                            <option value="true">Sim</option>
+                            <option value="false">Não</option>
+                        </select>
+                    </div>
+
+                    <div class="col-xl-12 col-sm-12 col-md-12 mb-4">
+                        {% trans "License" %}:
+                        <select id="license" name="license" class="chzn-select ordem form-control">
+                            <option value="all">Todos</option>
+                            <option value="cc-by">cc-by</option>
+                            <option value="cc-by-nc">cc-by-nc</option>
+                            <option value="cc-by-nc-nd">cc-by-nc-nd</option>
+                            <option value="cc-by-nc-sa">cc-by-nc-sa</option>
+                            <option value="elsevier-specific: oa user license">elsevier-specific: oa user license</option>
+                            <option value="cc-by-sa">cc-by-sa</option>
+                            <option value="publisher-specific license">publisher-specific license</option>
+                            <option value="publisher-specific-oa">publisher-specific-oa</option>
+                            <option value="cc-by-nd">cc-by-nd</option>
+                            <option value="implied-oa">implied-oa</option>
+                            <option value="publisher-specifi">publisher-specifi</option>
+                            <option value="pd">pd</option>
+                            <option value="cc0">cc0</option>
+                            <option value="acs-specific: authorchoice/editors choice usage agreement">acs-specific: authorchoice/editors choice usage agreement</option>
+                            <option value="public-domain">public-domain</option>
+                            <option value="unspecified-oa">unspecified-oa</option>
+                            <option value="elsevier-specific">elsevier-specific</option>
+                        </select>
+                    </div>
+
+                    <div class="col-xl-12 col-sm-12 col-md-12 mb-4">
+                        {% trans "Institution" %}:
+                        <select id="institution" name="institution" class="chzn-select ordem form-control">
+                            <option value="all" selected>Todos</option>
+                        </select>
+                    </div>
+
+                    <div class="mt-2 mb-2"><b>Configuração do gráfico</b></div>
+
+                    <div class="col-xl-12 col-sm-12 col-md-12 mb-4">
+                        {% trans "Tipo de gráfico" %}:
+                        <select id="type_graph" name="type_graph" class="chzn-select ordem form-control">
+                            <option value="bar">Barras</option>
+                            <option value="line">Linha</option>
+                            <option value="scatter">Pontos</option>
+                        </select>
+                    </div>
+
+                    <div class="col-xl-12 col-sm-12 col-md-12 mb-4">
+                        {% trans "Título" %}:
+                        <textarea type="text" id="title" name="title"
+                            class="ordem form-control">Gráfico de evolução por ano</textarea>
+                    </div>
+
+                    <div class="col-xl-12 col-sm-12 col-md-12 mb-4">
+                        {% trans "Orientação da legenda" %}:
+                        <select id="legend_orient" name="legend_orient" class="chzn-select ordem form-control">
+                            <option value="vertical">Vertical</option>
+                            <option value="horizontal">Horizontal</option>
+                        </select>
+                    </div>
+
+                    <div class="col-xl-12 col-sm-12 col-md-12 mb-4">
+                        {% trans "Distancia da legenda para o topo" %}:
+                        <select id="legend_top" name="legend_top" class="chzn-select ordem form-control">
+                            <option value="top">Topo</option>
+                            <option value="middle">Meio</option>
+                            <option value="bottom">Rodapé</option>
+                        </select>
+                    </div>
+
+                    <div class="col-xl-12 col-sm-12 col-md-12 mb-4">
+                        {% trans "Mostra label de quantidade" %}:
+                        <select id="label" name="label" class="chzn-select ordem form-control">
+                            <option value="true">Sim</option>
+                            <option value="" selected>Não</option>
+                        </select>
+                    </div>
+                </div>
+                <!-- cluster ============================================= -->
+
+                <!-- Catalog content -->
+                <div class="postcontent col-lg-9">
+
+                    <div class="divider mt-3 mb-3"></div>
+
+                    <div class="tab-content" id="ex2-content">
+                        <div class="tab-pane fade show active" id="ex2-tabs-1" role="tabpanel"
+                            aria-labelledby="ex2-tab-1">
+                            <div class="mb-5 mx-auto" style="max-width: 100%; min-height: 100%;">
+                                <div id="graph" style="position: relative; height:60vh; width:50vw"></div>
+                            </div>
+                        </div>
+                        {% if object.indicator_file.all %}
+                        <div class="tab-pane fade" id="ex2-tabs-2" role="tabpanel" aria-labelledby="ex2-tab-2">
+
+                            <div class="list-group">
+                                {% for f in object.indicator_file.all %}
+                                <a href="{{ f.raw_data.url }}"
+                                    class="list-group-item list-group-item-action flex-column align-items-start">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h5 class="mb-1">Download {{ forloop.counter }}</h5>
+                                        <small>{{ f.name }}</small>
+                                    </div>
+                                    <p class="mb-1">Arquivo compactado em .zip.</p>
+                                    <small>Tamanho: {{ f.raw_data.size|sizify }}</small>
+                                </a>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                        <div class="tab-pane fade" id="ex2-tabs-3" role="tabpanel" aria-labelledby="ex2-tab-3">
+                            {{ object.description }}
+                        </div>
+                    </div>
+
+                    <div class="divider mt-3 mb-3"></div>
+
+                    <div class="row">
+                        <div class="container">
+                            <div class="col-12">
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div><!-- End Catalog content -->
+            </div>
+
+        </div>
+    </div>
+</section>
+<!-- content -->
+
+{% endblock %}
+
+{% block inline_javascript %}
+<script src="{% static 'js/echarts/echarts.min.js' %}"></script>
+<script src="{% static 'js/echarts/theme/roma-macarons-macarons2-infographic.js' %}"></script>
+
+
+<script>
+    $(".chzn-select").chosen(
+        {
+            no_results_text: "Nenhum resultado encontrado para: ",
+            search_contains: true,
+            display_disabled_options: false,
+            display_selected_options: false,
+            allow_single_deselect: false,
+        });
+
+
+    serialize = function(obj) {
+        var str = [];
+        for (var p in obj)
+            if (obj.hasOwnProperty(p)) {
+            str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
+            }
+        return str.join("&");
+        }
+
+    function get_params(){
+        data = {}
+        data["filters"] = "*:*" 
+        data["title"] = $('#title').val()
+        data["facet_by"] = "year"
+        data["context_by"] = $('#graph_type').val() != "year" ? $('#graph_type').val() : "year";
+        
+        if (data["context_by"] && data["context_by"] != "year"){
+            data["filters"] = ''
+        }
+        
+        if (data["context_by"] == "year"){
+            data["context_by"] = '' 
+        }
+
+        data["graph_type"] = $('#type_graph').val();
+        data["graph_label"] = $('#label').val();
+        data["graph_legend_orient"] = $('#legend_orient').val()
+        data["graph_legend_top"] = $('#legend_top').val()
+        
+        console.log(data);
+    
+        /*graph_type = $('#graph_type').val();
+            
+        thematic_area = $('#thematic_area').val() != "all" ? $('#thematic_area').val() : null;
+    
+        console.log(graph_type);
+        console.log(thematic_area ? thematic_area.join(',') : thematic_area);*/
+
+        return data
+    }
+
+
+    $("#generate_graph").click(function(){
+        generate_graph(get_params());
+    });
+
+
+    function generate_graph(data) {
+
+        var chart = echarts.init(document.getElementById('graph'));
+
+        chart.showLoading();
+        
+        query_string = serialize(data)
+        
+        console.log("/search/graph/json?" + query_string) 
+        
+        //Gráfico por ano
+        $.get("/search/graph/json?" + query_string).done(function (data) {
+
+            chart.hideLoading();
+
+            chart.setOption({
+                title: {
+                    text: data.graph_options.title
+                },
+                legend: {
+                    orient: data.graph_options.graph_legend_orient,
+                    right: data.graph_options.graph_legend_right,
+                    top: data.graph_options.graph_legend_top
+                },
+                tooltip: {},
+                xAxis: {
+                    type: 'category', data: data.data.keys
+                },
+                yAxis: { type: 'value' },
+                series: data.data.series
+
+            });
+        });
+
+        window.addEventListener('resize', chart.resize);
+
+
+    }
+
+
+    generate_graph(get_params());
+
+
+</script>
+
+{% endblock %}

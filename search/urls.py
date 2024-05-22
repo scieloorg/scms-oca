@@ -1,4 +1,5 @@
 from django.urls import path
+from django.views.generic import TemplateView
 
 from search import views
 
@@ -22,6 +23,11 @@ urlpatterns = [
         name="indicator_raw_data",
     ),
     path(
+        "graph/", TemplateView.as_view(template_name="graph/graph.html"), name="graph"
+    ),
+
+    path(
         "graph/json", views.graph, name="graph_json"
     ),
+
 ]
