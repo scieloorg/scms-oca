@@ -17,6 +17,7 @@ from indicator.models import Indicator
 from search.graphic_data import GraphicData
 from indicator import indicator
 from core.utils import utils
+from . import choices
 
 solr = pysolr.Solr(
     settings.HAYSTACK_CONNECTIONS["default"]["URL"],
@@ -184,6 +185,18 @@ def indicator_raw_data(request, indicator_slug):
 
 
 def graph(request):
+
+    search_results = solr.search("*:*")
+
+    return render(
+        request,
+        "graph/graph.html",
+        {
+            "facets": search_results.facets["facet_fields"]
+        },
+    )
+
+def graph_json(request):
     """
     This view function return the data of a Indicator class.
 
@@ -259,17 +272,18 @@ def graph(request):
     graph_type = request.GET.get("graph_type", "bar")
     graph_label = request.GET.get("graph_label", None)
 
-    graph_legend_orient = request.GET.get("graph_legend_orient", "vertical")
+    graph_legend_orient = request.GET.get("graph_legend_orient", "horizontal")
     graph_legend_right = request.GET.get("graph_legend_right_margin", "auto")
     graph_legend_right_margin = request.GET.get("graph_legend_right_margin", "auto")
     graph_legend_left = request.GET.get("graph_legend_left", "auto")
     graph_legend_left_margin = request.GET.get("graph_legend_left_margin", "auto")
-    graph_legend_top = request.GET.get("graph_legend_top", "top")
+    graph_legend_top = request.GET.get("graph_legend_top", "bottom")
 
     logging.info("Indicator dict: %s" % ind)
 
     ind = indicator.Indicator(**ind)
 
+    serie = {}
     serie_list = []
     filter_list = None
 
@@ -285,9 +299,9 @@ def graph(request):
                 serie_list.append(
                     {
                         "name": (
-                            ind.facet_by
+                            choices.translates.get(ind.facet_by, ind.facet_by)
                             if serie_name_and_stack == "*"
-                            else serie_name_and_stack
+                            else choices.translates.get(serie_name_and_stack, serie_name_and_stack)
                         ),
                         "type": graph_type,
                         "stack": ind.facet_by if stack == "*" else stack,

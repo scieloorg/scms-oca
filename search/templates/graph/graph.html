@@ -4,6 +4,9 @@
 {% load i18n %}
 {% load wagtailsettings_tags %}
 {% load sizify %}
+{% load partition %}
+{% load humanize %}
+{% load translate %}
 
 {% get_settings use_default_site=True %}
 
@@ -19,60 +22,38 @@
 
                 <div class="page-title-row">
                     <div class="page-title-content">
-                        <h1>Indicadores</h1>
+                        <h1 class="mb-1">Indicadores</h1>
                         <span>Painel de dados do Observatório OCABr</span>
                     </div>
                 </div>
 
             </div>
 
-            <div class="section pb-0 pt-2 mb-2 mt-3 bg-transparent">
+            <!-- <div class="section pb-0 pt-2 mb-2 mt-3 bg-transparent">
                 <div class="container">
 
                     <div class="row flex-row ">
 
                         <div class="col-xl-3 col-sm-3 col-md-3"></div>
                         <div class="col-xl-3 col-sm-3 col-md-3">
-                            {% trans "Universo" %}:
-                            <select id="country" class="form-control">
-                                <option value="all">Todos</option>
-                                <option value="brasil" selected>Brasil</option>
-                            </select>
                         </div>
 
                         <div class="col-xl-2 col-sm-2 col-md-2">
-                            {% trans "Ano" %}:
-                            <select id="year" class="form-control">
-                                <option value="all">Todos</option>
-                                <option value="2024">2024</option>
-                                <option value="2023">2023</option>
-                                <option value="2022">2022</option>
-                                <option value="2021">2021</option>
-                                <option value="2020">2020</option>
-                                <option value="2019">2019</option>
-                                <option value="2018">2018</option>
-                                <option value="2017">2017</option>
-                                <option value="2016">2016</option>
-                                <option value="2015">2015</option>
-                                <option value="2014">2014</option>
-                            </select>
                         </div>
                         <div class="col-xl-2 col-sm-2 col-md-2">
-                            <button type="button" class="btn btn-primary btn-sm mt-4" id="generate_graph">Gerar
-                                gráfico</button>
+    
                         </div>
 
                     </div>
 
                 </div>
 
-            </div>
+            </div> -->
 
-
-            <div class="row gutter-40 col-mb-80">
+            <div class="row gutter-40 col-mb-80 mt-6">
                 <!-- cluster ============================================= -->
 
-                <div class="sidebar col-lg-3 mt-n5 mb-1 card d-none d-sm-block">
+                <div class="sidebar col-lg-3 mt-n5 mb-1 card d-none d-sm-block mx-auto gap-2 d-grid">
 
                     <div class="mt-2 mb-1"><b>Gráfico por: </b></div>
                     <select id="graph_type" name="graph_type" class="chzn-select ordem form-control">
@@ -86,44 +67,73 @@
                         <option value="institutions">Instituição</option>
                     </select>
 
-                    <div class="mt-4"><b>Filtros</b></div>
-                    <div class="col-xl-12 col-sm-12 col-md-12 mb-4 mt-3">
-                        {% trans "Áreas temáticas" %}:
-                        <select id="thematic_level_0" name="thematic_level_0" class="chzn-select ordem form-control" multiple>
-                            <option value="all" selected>Todas</option>
-                            <option value="Sudeste">Sudeste</option>
-                            <option value="Nordeste">Nordeste</option>
-                            <option value="Sul">Sul</option>
-                            <option value="Centro-oeste">Centro-oeste</option>
-                            <option value="Norte">Norte</option>
-                        </select>
-                    </div>
-                    <div class="col-xl-12 col-sm-12 col-md-12 mb-4 mt-3">
-                        {% trans "Região" %}:
-                        <select id="region" name="region" class="chzn-select ordem form-control" multiple>
-                            <option value="all" selected>Todas</option>
-                            <option value="Sudeste">Sudeste</option>
-                            <option value="Nordeste">Nordeste</option>
-                            <option value="Sul">Sul</option>
-                            <option value="Centro-oeste">Centro-oeste</option>
-                            <option value="Norte">Norte</option>
+                    <div class="mt-3 mb-2"><b>Universo: </b></div>
+                    <div class="col-xl-12 col-sm-12 col-md-12">
+                        <select id="country" class="chzn-select ordem form-control">
+                            <option value="all">Todos</option>
+                            <option value="brasil" selected>Brasil</option>
                         </select>
                     </div>
 
-                    <div class="col-xl-12 col-sm-12 col-md-12 mb-4">
+                    <div class="divider mt-3 mb-3"></div>
+
+                    <div class="mt-3 mb-2"><b>Intervalo de ano de publicação: </b></div>
+                    <div class="col-xl-12 col-sm-12 col-md-12">
+                        <div id="year">
+                            <div class="form-group row">
+                                <label class="col-form-label">De</label>
+                                <div class="col-4">
+                                    <input id="start" class="form-control" type="text" name="year_start" value="2014" placeholder="2014">
+                                </div>
+                                <label class="col-form-label">A</label>
+                                <div class="col-4">
+                                    <input id="end" class="form-control" type="text" name="year_end" value="2023" placeholder="2023">
+                                </div>
+                                <small class="text-muted">Alcance max.: 10 anos</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="divider mt-3 mb-3"></div>
+
+                    <div class="mt-4"><b>Filtros</b></div>
+                    <div class="col-xl-12 col-sm-12 col-md-12 mb-2">
+                        {% trans "Áreas temáticas" %}:
+                        <select id="thematic_level_0" name="thematic_level_0" class="chzn-select ordem form-control" data-placeholder="Escolha um ou mais área temática..." multiple>
+                            {% for the in facets.thematic_level_0|partition:2 %}
+                                <option value="{{ the.0 }}">{{ the.0 }} ({{ the.1|intcomma }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-xl-12 col-sm-12 col-md-12 mb-2">
+                        {% trans "Região" %}:
+                        <select id="region" name="region" class="chzn-select ordem form-control" data-placeholder="Escolha um ou mais região..." multiple>
+                            {% for region in facets.regions|partition:2 %}
+                                <option value="{{ region.0 }}">{{ region.0 }} ({{ region.1|intcomma }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-xl-12 col-sm-12 col-md-12 mb-2">
                         {% trans "Tipo de acesso aberto" %}:
                         <select id="open_access_status" name="open_access_status"
-                            class="chzn-select ordem form-control" multiple>
-                            <option value="all" selected>Todos</option>
-                            <option value="closed">closed</option>
-                            <option value="gold">gold</option>
-                            <option value="bronze">bronze</option>
-                            <option value="hybrid">hybrid</option>
-                            <option value="green">green</option>
+                            class="chzn-select ordem form-control" data-placeholder="Escolha uma ou mais tipo de acesso aberto..." multiple>
+                            {% for aos in facets.open_access_status|partition:2 %}
+                            <option value="{{ aos.0 }}">{{ aos.0|translate_data }} ({{ aos.1|intcomma }})</option>
+                            {% endfor %}
                         </select>
                     </div>
 
-                    <div class="col-xl-12 col-sm-12 col-md-12 mb-4">
+                    <div class="col-xl-12 col-sm-12 col-md-12 mb-2" >
+                        {% trans "Institution" %}:
+                        <select id="institution" name="institution" class="chzn-select ordem form-control" data-placeholder="Escolha uma ou mais instituições..." multiple>
+                            {% for ins in facets.institutions|partition:2 %}
+                                <option value="{{ ins.0 }}">{{ ins.0|translate_data }} ({{ ins.1|intcomma }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-xl-12 col-sm-12 col-md-12 mb-2">
                         {% trans "Acesso aberto" %}:
                         <select id="is_oa" name="is_oa"
                             class="chzn-select ordem form-control">
@@ -133,40 +143,21 @@
                         </select>
                     </div>
 
-                    <div class="col-xl-12 col-sm-12 col-md-12 mb-4">
+                    <div class="col-xl-12 col-sm-12 col-md-12 mb-2">
                         {% trans "License" %}:
                         <select id="license" name="license" class="chzn-select ordem form-control">
                             <option value="all">Todos</option>
-                            <option value="cc-by">cc-by</option>
-                            <option value="cc-by-nc">cc-by-nc</option>
-                            <option value="cc-by-nc-nd">cc-by-nc-nd</option>
-                            <option value="cc-by-nc-sa">cc-by-nc-sa</option>
-                            <option value="elsevier-specific: oa user license">elsevier-specific: oa user license</option>
-                            <option value="cc-by-sa">cc-by-sa</option>
-                            <option value="publisher-specific license">publisher-specific license</option>
-                            <option value="publisher-specific-oa">publisher-specific-oa</option>
-                            <option value="cc-by-nd">cc-by-nd</option>
-                            <option value="implied-oa">implied-oa</option>
-                            <option value="publisher-specifi">publisher-specifi</option>
-                            <option value="pd">pd</option>
-                            <option value="cc0">cc0</option>
-                            <option value="acs-specific: authorchoice/editors choice usage agreement">acs-specific: authorchoice/editors choice usage agreement</option>
-                            <option value="public-domain">public-domain</option>
-                            <option value="unspecified-oa">unspecified-oa</option>
-                            <option value="elsevier-specific">elsevier-specific</option>
+                            {% for li in facets.license|partition:2 %}
+                                <option value="{{ li.0 }}">{{ li.0|translate_data }} ({{ li.1|intcomma }})</option>
+                            {% endfor %}
                         </select>
                     </div>
 
-                    <div class="col-xl-12 col-sm-12 col-md-12 mb-4">
-                        {% trans "Institution" %}:
-                        <select id="institution" name="institution" class="chzn-select ordem form-control">
-                            <option value="all" selected>Todos</option>
-                        </select>
-                    </div>
+                    <div class="divider mt-3 mb-3"></div>
 
                     <div class="mt-2 mb-2"><b>Configuração do gráfico</b></div>
 
-                    <div class="col-xl-12 col-sm-12 col-md-12 mb-4">
+                    <div class="col-xl-12 col-sm-12 col-md-12 mb-2">
                         {% trans "Tipo de gráfico" %}:
                         <select id="type_graph" name="type_graph" class="chzn-select ordem form-control">
                             <option value="bar">Barras</option>
@@ -175,35 +166,41 @@
                         </select>
                     </div>
 
-                    <div class="col-xl-12 col-sm-12 col-md-12 mb-4">
+                    <div class="col-xl-12 col-sm-12 col-md-12 mb-2">
                         {% trans "Título" %}:
                         <textarea type="text" id="title" name="title"
-                            class="ordem form-control">Gráfico de evolução por ano</textarea>
+                            class="form-control">Gráfico de evolução por ano</textarea>
                     </div>
 
-                    <div class="col-xl-12 col-sm-12 col-md-12 mb-4">
+                    <div class="col-xl-12 col-sm-12 col-md-12 mb-2">
                         {% trans "Orientação da legenda" %}:
                         <select id="legend_orient" name="legend_orient" class="chzn-select ordem form-control">
-                            <option value="vertical">Vertical</option>
                             <option value="horizontal">Horizontal</option>
+                            <option value="vertical">Vertical</option>
                         </select>
                     </div>
 
-                    <div class="col-xl-12 col-sm-12 col-md-12 mb-4">
+                    <div class="col-xl-12 col-sm-12 col-md-12 mb-2">
                         {% trans "Distancia da legenda para o topo" %}:
                         <select id="legend_top" name="legend_top" class="chzn-select ordem form-control">
+                            <option value="bottom">Rodapé</option>
                             <option value="top">Topo</option>
                             <option value="middle">Meio</option>
-                            <option value="bottom">Rodapé</option>
                         </select>
                     </div>
 
-                    <div class="col-xl-12 col-sm-12 col-md-12 mb-4">
+                    <div class="col-xl-12 col-sm-12 col-md-12 mb-2">
                         {% trans "Mostra label de quantidade" %}:
                         <select id="label" name="label" class="chzn-select ordem form-control">
                             <option value="true">Sim</option>
                             <option value="" selected>Não</option>
                         </select>
+                    </div>
+                    
+                    <div class="d-grid col-12 mx-auto">
+                        <button type="button" class="btn btn-primary" id="generate_graph">
+                            Gerar gráfico 
+                        </button>
                     </div>
                 </div>
                 <!-- cluster ============================================= -->
@@ -211,35 +208,12 @@
                 <!-- Catalog content -->
                 <div class="postcontent col-lg-9">
 
-                    <div class="divider mt-3 mb-3"></div>
-
                     <div class="tab-content" id="ex2-content">
                         <div class="tab-pane fade show active" id="ex2-tabs-1" role="tabpanel"
                             aria-labelledby="ex2-tab-1">
-                            <div class="mb-5 mx-auto" style="max-width: 100%; min-height: 100%;">
-                                <div id="graph" style="position: relative; height:60vh; width:50vw"></div>
+                            <div class="mb-2 mx-auto" style="max-width: 100%; min-height: 100%;">
+                                <div id="graph" style="position: relative; height:60vh; width:55vw"></div>
                             </div>
-                        </div>
-                        {% if object.indicator_file.all %}
-                        <div class="tab-pane fade" id="ex2-tabs-2" role="tabpanel" aria-labelledby="ex2-tab-2">
-
-                            <div class="list-group">
-                                {% for f in object.indicator_file.all %}
-                                <a href="{{ f.raw_data.url }}"
-                                    class="list-group-item list-group-item-action flex-column align-items-start">
-                                    <div class="d-flex w-100 justify-content-between">
-                                        <h5 class="mb-1">Download {{ forloop.counter }}</h5>
-                                        <small>{{ f.name }}</small>
-                                    </div>
-                                    <p class="mb-1">Arquivo compactado em .zip.</p>
-                                    <small>Tamanho: {{ f.raw_data.size|sizify }}</small>
-                                </a>
-                                {% endfor %}
-                            </div>
-                        </div>
-                        {% endif %}
-                        <div class="tab-pane fade" id="ex2-tabs-3" role="tabpanel" aria-labelledby="ex2-tab-3">
-                            {{ object.description }}
                         </div>
                     </div>
 
@@ -269,6 +243,7 @@
 
 
 <script>
+
     $(".chzn-select").chosen(
         {
             no_results_text: "Nenhum resultado encontrado para: ",
@@ -278,7 +253,6 @@
             allow_single_deselect: false,
         });
 
-
     serialize = function(obj) {
         var str = [];
         for (var p in obj)
@@ -287,6 +261,24 @@
             }
         return str.join("&");
         }
+
+    function format_prefix(stringList, prefix) {
+        // Check if the list is an array
+        if (!Array.isArray(stringList)) {
+            throw new Error("Invalid input: The list must be an array.");
+        }
+        
+        // Check if the prefix is a string
+        if (typeof prefix !== "string") {
+            throw new Error("Invalid input: The prefix must be a string.");
+        }
+        
+        // Join the strings with the prefix and separator
+        const formattedString = stringList.map((item) => `${prefix}:"${item}"`).join(",");
+
+        return formattedString;
+        }
+
 
     function get_params(){
         data = {}
@@ -307,24 +299,39 @@
         data["graph_label"] = $('#label').val();
         data["graph_legend_orient"] = $('#legend_orient').val()
         data["graph_legend_top"] = $('#legend_top').val()
+        data["start"] = $('#start').val()
+        data["end"] = $('#end').val()
+
+
+        data["default_filter"] = format_prefix($("#thematic_level_0").val(), "thematic_level_0")
+        if($("#region").val().length){
+            console.log("aqui");
+            data["default_filter"] += "," + format_prefix($("#region").val(), "regions")
+        }
+        if($("#open_access_status").val().length){
+            data["default_filter"] += "," + format_prefix($("#open_access_status").val(), "open_access_status")
+        }
+        if($("#institution").val().length){
+            data["default_filter"] += "," + format_prefix($("#institution").val(), "institutions")
+        }
+        if($("#is_oa").val() != "all"){
+            data["default_filter"] += "," + "is_oa:" + $("#is_oa").val()
+        } 
+        if($("#license").val() != "all"){
+            data["default_filter"] += "," + "license:" + $("#license").val()
+        } 
+
+        console.log(data["default_filter"])
         
         console.log(data);
-    
-        /*graph_type = $('#graph_type').val();
-            
-        thematic_area = $('#thematic_area').val() != "all" ? $('#thematic_area').val() : null;
-    
-        console.log(graph_type);
-        console.log(thematic_area ? thematic_area.join(',') : thematic_area);*/
+
 
         return data
     }
 
-
     $("#generate_graph").click(function(){
         generate_graph(get_params());
     });
-
 
     function generate_graph(data) {
 
@@ -338,7 +345,6 @@
         
         //Gráfico por ano
         $.get("/search/graph/json?" + query_string).done(function (data) {
-
             chart.hideLoading();
 
             chart.setOption({
@@ -356,18 +362,14 @@
                 },
                 yAxis: { type: 'value' },
                 series: data.data.series
-
             });
         });
 
         window.addEventListener('resize', chart.resize);
 
-
     }
 
-
     generate_graph(get_params());
-
 
 </script>
 
