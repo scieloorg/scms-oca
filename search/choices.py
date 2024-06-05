@@ -51,4 +51,12 @@ translates = {
     "GEOGRAPHIC": _("Geográfico"),
     "CHRONOLOGICAL": _("Cronológico"),
     "THEMATIC": _("Temático"),
+    "closed": _("Fechado"),
+    "gold": _("Ouro"),
+    "bronze": _("Bronze"),
+    "hybrid": _("Hibrído"),
+    "green": _("Verde"),
+    "year": _("Ano"),
+    "true": _("Sim"),
+    "false": _("Não"),
 }

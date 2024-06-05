@@ -23,11 +23,11 @@ urlpatterns = [
         name="indicator_raw_data",
     ),
     path(
-        "graph/", TemplateView.as_view(template_name="graph/graph.html"), name="graph"
+        "graph/", views.graph, name="graph"
     ),
 
     path(
-        "graph/json", views.graph, name="graph_json"
+        "graph/json", views.graph_json, name="graph_json"
     ),
 
 ]
