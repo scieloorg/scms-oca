@@ -75,6 +75,14 @@
                         </select>
                     </div>
 
+                    <div class="mt-3 mb-2"><b>Fonte: </b></div>
+                    <div class="col-xl-12 col-sm-12 col-md-12">
+                        <select id="country" class="chzn-select ordem form-control">
+                            <option value="all">Todos</option>
+                            <option value="brasil" selected>OpenAlex</option>
+                        </select>
+                    </div>
+
                     <div class="divider mt-3 mb-3"></div>
 
                     <div class="mt-3 mb-2"><b>Intervalo de ano de publicação: </b></div>
@@ -83,11 +91,13 @@
                             <div class="form-group row">
                                 <label class="col-form-label">De</label>
                                 <div class="col-4">
-                                    <input id="start" class="form-control" type="text" name="year_start" value="2014" placeholder="2014">
+                                    <input id="start" class="form-control" type="text" name="year_start" value="2014"
+                                        placeholder="2014">
                                 </div>
                                 <label class="col-form-label">A</label>
                                 <div class="col-4">
-                                    <input id="end" class="form-control" type="text" name="year_end" value="2023" placeholder="2023">
+                                    <input id="end" class="form-control" type="text" name="year_end" value="2023"
+                                        placeholder="2023">
                                 </div>
                                 <small class="text-muted">Alcance max.: 10 anos</small>
                             </div>
@@ -97,49 +107,64 @@
                     <div class="divider mt-3 mb-3"></div>
 
                     <div class="mt-4"><b>Filtros</b></div>
+
+                    <div class="col-xl-12 col-sm-12 col-md-12 mb-2">
+                        {% trans "Tipo de documento" %}:
+                        <select id="type" name="type" class="chzn-select ordem form-control"
+                            data-placeholder="Escolha tipo de documento..." >
+                            <option value="all">Todos</option>
+                            {% for type in facets.type|partition:2 %}
+                            <option value="{{ type.0 }}">{{ type.0|translate_data }} ({{ type.1|intcomma }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
                     <div class="col-xl-12 col-sm-12 col-md-12 mb-2">
                         {% trans "Áreas temáticas" %}:
-                        <select id="thematic_level_0" name="thematic_level_0" class="chzn-select ordem form-control" data-placeholder="Escolha um ou mais área temática..." multiple>
+                        <select id="thematic_level_0" name="thematic_level_0" class="chzn-select ordem form-control"
+                            data-placeholder="Escolha um ou mais área temática..." multiple>
                             {% for the in facets.thematic_level_0|partition:2 %}
-                                <option value="{{ the.0 }}">{{ the.0 }} ({{ the.1|intcomma }})</option>
+                            <option value="{{ the.0 }}">{{ the.0|translate_data }} ({{ the.1|intcomma }})</option>
                             {% endfor %}
                         </select>
                     </div>
+
                     <div class="col-xl-12 col-sm-12 col-md-12 mb-2">
                         {% trans "Região" %}:
-                        <select id="region" name="region" class="chzn-select ordem form-control" data-placeholder="Escolha um ou mais região..." multiple>
+                        <select id="region" name="region" class="chzn-select ordem form-control"
+                            data-placeholder="Escolha um ou mais região..." multiple>
                             {% for region in facets.regions|partition:2 %}
-                                <option value="{{ region.0 }}">{{ region.0 }} ({{ region.1|intcomma }})</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-
-                    <div class="col-xl-12 col-sm-12 col-md-12 mb-2">
-                        {% trans "Tipo de acesso aberto" %}:
-                        <select id="open_access_status" name="open_access_status"
-                            class="chzn-select ordem form-control" data-placeholder="Escolha uma ou mais tipo de acesso aberto..." multiple>
-                            {% for aos in facets.open_access_status|partition:2 %}
-                            <option value="{{ aos.0 }}">{{ aos.0|translate_data }} ({{ aos.1|intcomma }})</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-
-                    <div class="col-xl-12 col-sm-12 col-md-12 mb-2" >
-                        {% trans "Institution" %}:
-                        <select id="institution" name="institution" class="chzn-select ordem form-control" data-placeholder="Escolha uma ou mais instituições..." multiple>
-                            {% for ins in facets.institutions|partition:2 %}
-                                <option value="{{ ins.0 }}">{{ ins.0|translate_data }} ({{ ins.1|intcomma }})</option>
+                            <option value="{{ region.0 }}">{{ region.0 }} ({{ region.1|intcomma }})</option>
                             {% endfor %}
                         </select>
                     </div>
 
                     <div class="col-xl-12 col-sm-12 col-md-12 mb-2">
                         {% trans "Acesso aberto" %}:
-                        <select id="is_oa" name="is_oa"
-                            class="chzn-select ordem form-control">
+                        <select id="is_oa" name="is_oa" class="chzn-select ordem form-control">
                             <option value="all">Todos</option>
                             <option value="true">Sim</option>
                             <option value="false">Não</option>
+                        </select>
+                    </div>
+
+                    <div class="col-xl-12 col-sm-12 col-md-12 mb-2">
+                        {% trans "Tipo de acesso aberto" %}:
+                        <select id="open_access_status" name="open_access_status" class="chzn-select ordem form-control"
+                            data-placeholder="Escolha uma ou mais tipo de acesso aberto..." multiple>
+                            {% for aos in facets.open_access_status|partition:2 %}
+                            <option value="{{ aos.0 }}">{{ aos.0|translate_data }} ({{ aos.1|intcomma }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-xl-12 col-sm-12 col-md-12 mb-2">
+                        {% trans "Institution" %}:
+                        <select id="institution" name="institution" class="chzn-select ordem form-control"
+                            data-placeholder="Escolha uma ou mais instituições..." multiple>
+                            {% for ins in facets.institutions|partition:2 %}
+                            <option value="{{ ins.0 }}">{{ ins.0|translate_data }} ({{ ins.1|intcomma }})</option>
+                            {% endfor %}
                         </select>
                     </div>
 
@@ -148,7 +173,7 @@
                         <select id="license" name="license" class="chzn-select ordem form-control">
                             <option value="all">Todos</option>
                             {% for li in facets.license|partition:2 %}
-                                <option value="{{ li.0 }}">{{ li.0|translate_data }} ({{ li.1|intcomma }})</option>
+                            <option value="{{ li.0 }}">{{ li.0|translate_data }} ({{ li.1|intcomma }})</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -196,10 +221,10 @@
                             <option value="" selected>Não</option>
                         </select>
                     </div>
-                    
+
                     <div class="d-grid col-12 mx-auto">
                         <button type="button" class="btn btn-primary" id="generate_graph">
-                            Gerar gráfico 
+                            Gerar gráfico
                         </button>
                     </div>
                 </div>
@@ -212,7 +237,7 @@
                         <div class="tab-pane fade show active" id="ex2-tabs-1" role="tabpanel"
                             aria-labelledby="ex2-tab-1">
                             <div class="mb-2 mx-auto" style="max-width: 100%; min-height: 100%;">
-                                <div id="graph" style="position: relative; height:60vh; width:55vw"></div>
+                                <div id="graph" style="position: relative; height:60vh; width:50vw"></div>
                             </div>
                         </div>
                     </div>
@@ -253,46 +278,45 @@
             allow_single_deselect: false,
         });
 
-    serialize = function(obj) {
+    serialize = function (obj) {
         var str = [];
         for (var p in obj)
             if (obj.hasOwnProperty(p)) {
-            str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
+                str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
             }
         return str.join("&");
-        }
+    }
 
     function format_prefix(stringList, prefix) {
         // Check if the list is an array
         if (!Array.isArray(stringList)) {
             throw new Error("Invalid input: The list must be an array.");
         }
-        
+
         // Check if the prefix is a string
         if (typeof prefix !== "string") {
             throw new Error("Invalid input: The prefix must be a string.");
         }
-        
+
         // Join the strings with the prefix and separator
         const formattedString = stringList.map((item) => `${prefix}:"${item}"`).join(",");
 
         return formattedString;
-        }
+    }
 
-
-    function get_params(){
+    function get_params() {
         data = {}
-        data["filters"] = "*:*" 
+        data["filters"] = "*:*"
         data["title"] = $('#title').val()
         data["facet_by"] = "year"
         data["context_by"] = $('#graph_type').val() != "year" ? $('#graph_type').val() : "year";
-        
-        if (data["context_by"] && data["context_by"] != "year"){
+
+        if (data["context_by"] && data["context_by"] != "year") {
             data["filters"] = ''
         }
-        
-        if (data["context_by"] == "year"){
-            data["context_by"] = '' 
+
+        if (data["context_by"] == "year") {
+            data["context_by"] = ''
         }
 
         data["graph_type"] = $('#type_graph').val();
@@ -304,32 +328,35 @@
 
 
         data["default_filter"] = format_prefix($("#thematic_level_0").val(), "thematic_level_0")
-        if($("#region").val().length){
+        if ($("#region").val().length) {
             console.log("aqui");
             data["default_filter"] += "," + format_prefix($("#region").val(), "regions")
         }
-        if($("#open_access_status").val().length){
+        if ($("#open_access_status").val().length) {
             data["default_filter"] += "," + format_prefix($("#open_access_status").val(), "open_access_status")
         }
-        if($("#institution").val().length){
+        if ($("#institution").val().length) {
             data["default_filter"] += "," + format_prefix($("#institution").val(), "institutions")
         }
-        if($("#is_oa").val() != "all"){
+        if ($("#is_oa").val() != "all") {
             data["default_filter"] += "," + "is_oa:" + $("#is_oa").val()
-        } 
-        if($("#license").val() != "all"){
+        }
+        if ($("#license").val() != "all") {
             data["default_filter"] += "," + "license:" + $("#license").val()
-        } 
+        }
+        if ($("#type").val() != "all") {
+            data["default_filter"] += "," + "type:" + $("#type").val()
+        }
 
         console.log(data["default_filter"])
-        
+
         console.log(data);
 
 
         return data
     }
 
-    $("#generate_graph").click(function(){
+    $("#generate_graph").click(function () {
         generate_graph(get_params());
     });
 
@@ -338,11 +365,11 @@
         var chart = echarts.init(document.getElementById('graph'));
 
         chart.showLoading();
-        
+
         query_string = serialize(data)
-        
-        console.log("/search/graph/json?" + query_string) 
-        
+
+        console.log("/search/graph/json?" + query_string)
+
         //Gráfico por ano
         $.get("/search/graph/json?" + query_string).done(function (data) {
             chart.hideLoading();
@@ -356,13 +383,24 @@
                     right: data.graph_options.graph_legend_right,
                     top: data.graph_options.graph_legend_top
                 },
+                toolbox: {
+                    orient: 'vertical',
+                    feature: {
+                        magicType: {
+                            type: ['line', 'bar', 'stack', 'tield'],
+                        },
+                        dataView: {},
+                        saveAsImage: { show: true },
+                        restore: { show: true }
+                    }
+                },
                 tooltip: {},
                 xAxis: {
                     type: 'category', data: data.data.keys
                 },
                 yAxis: { type: 'value' },
                 series: data.data.series
-            });
+            }, true);
         });
 
         window.addEventListener('resize', chart.resize);
@@ -370,6 +408,21 @@
     }
 
     generate_graph(get_params());
+
+    document.addEventListener('keypress', function enterPress(e){
+        if(e.which == 13) {
+            generate_graph(get_params());
+        }
+    });
+
+    window.addEventListener('load', function () {
+        document.querySelectorAll('select').forEach( select => {
+            $('#' + select.id).change(function(){
+                generate_graph(get_params());
+            })
+        });
+    })
+      
 
 </script>
 

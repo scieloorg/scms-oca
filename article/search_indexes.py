@@ -6,6 +6,17 @@ from django.utils.translation import gettext as _
 from article import models
 
 
+LICENSE = [
+    "cc-by",
+    "cc-by-nc",
+    "cc-by-nc-nd",
+    "cc-by-nc-sa",
+    "cc-by-sa",
+    "cc-by-nd",
+    "cc0",
+]
+
+
 class ArticleIndex(indexes.SearchIndex, indexes.Indexable):
     """
     Fields:
@@ -33,7 +44,7 @@ class ArticleIndex(indexes.SearchIndex, indexes.Indexable):
     record_status = indexes.CharField(null=True)
 
     # Foreign key field
-    license = indexes.CharField(model_attr="license", null=True)
+    license = indexes.CharField(null=True)
     journal = indexes.CharField(model_attr="journal", null=True)
 
     # MultiValue fields
@@ -60,26 +71,30 @@ class ArticleIndex(indexes.SearchIndex, indexes.Indexable):
     creator = indexes.CharField(null=False)
     updated_by = indexes.CharField(null=False)
 
-
     def prepare(self, obj):
         self.prepared_data = super(ArticleIndex, self).prepare(obj)
-        
+
         contributors = obj.contributors.all().prefetch_related("affiliations")
         concepts = obj.concepts.all().prefetch_related("thematic_areas")
 
-        self.prepared_data['contributors'] = self._prepare_contributors(contributors)
-        self.prepared_data['affiliations'] = self._prepare_affiliations(contributors)
-        self.prepared_data['institutions'] = self._prepare_institutions(contributors)
-        self.prepared_data['cities'] = self._prepare_cities(contributors)
-        self.prepared_data['states'] = self._prepare_states(contributors)
-        self.prepared_data['regions'] = self._prepare_regions(contributors)
-        self.prepared_data['concepts'] = self._prepare_concepts(concepts)
-        self.prepared_data['thematic_level_0'] = self._prepare_thematic_level_0(concepts)
-        self.prepared_data['thematic_level_1'] = self._prepare_thematic_level_1(concepts)
-        self.prepared_data['thematic_level_2'] = self._prepare_thematic_level_2(concepts)
+        self.prepared_data["contributors"] = self._prepare_contributors(contributors)
+        self.prepared_data["affiliations"] = self._prepare_affiliations(contributors)
+        self.prepared_data["institutions"] = self._prepare_institutions(contributors)
+        self.prepared_data["cities"] = self._prepare_cities(contributors)
+        self.prepared_data["states"] = self._prepare_states(contributors)
+        self.prepared_data["regions"] = self._prepare_regions(contributors)
+        self.prepared_data["concepts"] = self._prepare_concepts(concepts)
+        self.prepared_data["thematic_level_0"] = self._prepare_thematic_level_0(
+            concepts
+        )
+        self.prepared_data["thematic_level_1"] = self._prepare_thematic_level_1(
+            concepts
+        )
+        self.prepared_data["thematic_level_2"] = self._prepare_thematic_level_2(
+            concepts
+        )
 
-        return self.prepared_data 
-
+        return self.prepared_data
 
     def prepare_created(self, obj):
         return obj.created.isoformat()
@@ -103,16 +118,22 @@ class ArticleIndex(indexes.SearchIndex, indexes.Indexable):
         if obj.sources:
             return [s.name for s in obj.sources.all()]
 
+    def prepare_license(self, obj):
+        if obj.license:
+            if obj.license.name in LICENSE:
+                return obj.license
+            else:
+                return "others"
+
     def _prepare_contributors(self, contributors):
 
         if contributors:
             return [
-                "%s, %s" % (contrib.family, contrib.given)
-                for contrib in contributors
+                "%s, %s" % (contrib.family, contrib.given) for contrib in contributors
             ]
 
     def _prepare_affiliations(self, contributors):
-    
+
         if contributors:
             affs = []
             for contrib in contributors.all():
