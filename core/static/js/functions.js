@@ -1304,7 +1304,7 @@ var SEMICOLON = SEMICOLON || {};
 			SEMICOLON.widget.youtubeBgVideo();
 			SEMICOLON.widget.tabs();
 			SEMICOLON.widget.toggles();
-			SEMICOLON.widget.accordions();
+			// SEMICOLON.widget.accordions();
 			SEMICOLON.widget.counter();
 			SEMICOLON.widget.countdown();
 			SEMICOLON.widget.gmap();
