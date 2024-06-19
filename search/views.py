@@ -19,6 +19,8 @@ from indicator import indicator
 from core.utils import utils
 from . import choices
 
+from pyalex import Works
+
 solr = pysolr.Solr(
     settings.HAYSTACK_CONNECTIONS["default"]["URL"],
     timeout=settings.HAYSTACK_CONNECTIONS["default"]["SOLR_TIMEOUT"],
@@ -191,10 +193,9 @@ def graph(request):
     return render(
         request,
         "graph/graph.html",
-        {
-            "facets": search_results.facets["facet_fields"]
-        },
+        {"facets": search_results.facets["facet_fields"]},
     )
+
 
 def graph_json(request):
     """
@@ -222,7 +223,6 @@ def graph_json(request):
         "description": "Gerado automaticamente usando dados coletados do OpenALex no período de 2014 até 2023",
         "context_by": [],
         "default_filter": {
-            "record_type": "article",
         },
         "range_filter": {
             "filter_name": "year",
@@ -281,6 +281,34 @@ def graph_json(request):
 
     logging.info("Indicator dict: %s" % ind)
 
+    w_total = 0
+
+    if request.GET.get("percent", None):
+        for year in range(int(start), int(end) + 1):
+            print(year)
+            result, meta = (
+                    Works()
+                    .filter(publication_year=year)
+                    .get(return_meta=True)
+                )
+        
+            # world count 
+            w_total += int(meta.get("count"))
+
+    title = request.GET.get("title", None)
+
+    if not title:
+
+        title = "Evolução da Produção Científica por Ano"
+
+        if filters != "*:*":
+            title += ": Um Panorama por %s" % (
+                " e ".join(
+                    [choices.translates.get(t) for t in ind.get("context_by")] +
+                    [choices.translates.get(t) for t in ind["default_filter"].keys()]
+                )
+            )
+
     ind = indicator.Indicator(**ind)
 
     serie = {}
@@ -301,7 +329,9 @@ def graph_json(request):
                         "name": (
                             choices.translates.get(ind.facet_by, ind.facet_by)
                             if serie_name_and_stack == "*"
-                            else choices.translates.get(serie_name_and_stack, serie_name_and_stack)
+                            else choices.translates.get(
+                                serie_name_and_stack, serie_name_and_stack
+                            )
                         ),
                         "type": graph_type,
                         "stack": ind.facet_by if stack == "*" else stack,
@@ -332,15 +362,20 @@ def graph_json(request):
     return JsonResponse(
         {
             "graph_options": {
-                "title": ind.title,
-                "graph_legend_orient":graph_legend_orient,
-                "graph_legend_right":graph_legend_right,
-                "graph_legend_right_margin":graph_legend_right_margin,
-                "graph_legend_left":graph_legend_left,
-                "graph_legend_left_margin":graph_legend_left_margin,
-                "graph_legend_top":graph_legend_top,
+                # Evolução da Produção Científica por ano: Um Panorama por Ano e Área Temática
+                "title": title,
+                "percent": request.GET.get("percent", None),
+                "graph_legend_orient": graph_legend_orient,
+                "graph_legend_right": graph_legend_right,
+                "graph_legend_right_margin": graph_legend_right_margin,
+                "graph_legend_left": graph_legend_left,
+                "graph_legend_left_margin": graph_legend_left_margin,
+                "graph_legend_top": graph_legend_top,
             },
             "data": serie,
             "filters": filter_list,
+            "oa_data": {
+                "world_count": w_total or 0,
+            }
         }
     )
