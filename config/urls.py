@@ -1,23 +1,26 @@
-from django.conf.urls.i18n import i18n_patterns
 from django.conf import settings
+from django.conf.urls import include
+from django.conf.urls.i18n import i18n_patterns
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path, re_path
 from django.views import defaults as default_views
-from wagtail.admin import urls as wagtailadmin_urls
+from django.views.generic import TemplateView
 from wagtail import urls as wagtail_urls
+from wagtail.admin import urls as wagtailadmin_urls
 from wagtail.documents import urls as wagtaildocs_urls
-from django.conf.urls import include
 from wagtailautocomplete.urls.admin import urlpatterns as autocomplete_admin_urls
 
 from core.api import api_router
+
 from core.search_site import views as search_views  # noqa isort:skip
 
 urlpatterns = [
     # path("", TemplateView.as_view(template_name="home/home_page.html"), name="home"),
     # path(
-    #     "about/", TemplateView.as_view(template_name="pages/about.html"), name="about"
+    #     "graph/", TemplateView.as_view(template_name="graph/graph.html"), name="graph" 
     # ),
+
     # Django Admin, use {% url "admin:index" %}
     path(settings.DJANGO_ADMIN_URL, admin.site.urls),
     # Wagtail Admin

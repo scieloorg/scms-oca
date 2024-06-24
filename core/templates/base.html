@@ -16,9 +16,8 @@
 
         <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}" type="text/css" />
         <link rel="stylesheet" href="{% static 'css/font-icons.css' %}" type="text/css" />
+        <link rel="stylesheet" media="screen, print" href="{% static 'css/chzn-chosen/chosen.css' %}">
 
-        <!-- banner de cookie -->
-        <!-- <link rel="stylesheet" href="{% static 'css/cookiealert.css' %}"> -->
 
         {% block extra_css %}
         {% endblock %}
@@ -80,11 +79,10 @@
       <script src="{% static 'js/jquery.js' %}"></script>
       <script src="{% static 'js/plugins.min.js' %}"></script>
 
-      <!-- banner de cookie -->
-      <!-- <script src="{% static 'js/cookiealert.js' %}"></script> -->
-
       <!-- Footer Scripts-->
       <script src="{% static 'js/functions.js' %}"></script>
+      <script src="{% static 'js/formplugins/chzn-chosen/chosen.jquery.js' %}"></script>
+      <script src="{% static 'js/formplugins/chzn-chosen/chosen.jquery.js' %}"></script>
 
       <!-- Your stuff: Third-party javascript libraries go here -->
 

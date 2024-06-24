@@ -17,6 +17,18 @@ def run(user_id=1):
     user = User.objects.get(id=user_id)
 
     indicators = [
+        {
+            "filters": [{"*": "*"}],
+            "title": "",
+            "facet_by": "year",
+            "description": "Gerado automaticamente usando dados coletados do OpenALex no período de 2014 até 2023",
+            "context_by": [],
+            "default_filter": {},
+            "range_filter": {
+                "filter_name": "year",
+                "range": {"start": 2014, "end": 2023},
+            },
+        }
         # Por área temática
         # {
         #     "filters": [],
@@ -44,20 +56,19 @@ def run(user_id=1):
         #     },
         #     "models": ["article"],
         # },
-        {
-            "filters": [],
-            "title": "Evolução do número de artigos científicos em acesso aberto Gold por área temática 2014-2023 - Brasil",
-            "facet_by": "year",
-            "description": "Gerado automaticamente usando dados coletados do OpenALex no período de 2014 até 2023",
-            "context_by": ["thematic_level_0"],
-            "default_filter": {"record_type": "article", "is_oa": "true", "open_access_status": "gold"},
-            "range_filter": {
-                "filter_name": "year",
-                "range": {"start": 2014, "end": 2023},
-            },
-            "models": ["article"],
-        },
-        
+        # {
+        #     "filters": [],
+        #     "title": "Evolução do número de artigos científicos em acesso aberto Gold por área temática 2014-2023 - Brasil",
+        #     "facet_by": "year",
+        #     "description": "Gerado automaticamente usando dados coletados do OpenALex no período de 2014 até 2023",
+        #     "context_by": ["thematic_level_0"],
+        #     "default_filter": {"record_type": "article", "is_oa": "true", "open_access_status": "gold"},
+        #     "range_filter": {
+        #         "filter_name": "year",
+        #         "range": {"start": 2014, "end": 2023},
+        #     },
+        #     "models": ["article"],
+        # },
         # Por Região
         # {
         #     "filters": [],
@@ -98,7 +109,6 @@ def run(user_id=1):
         #     },
         #     "models": ["article"],
         # },
-        
         # {
         #     "filters": [],
         #     "title": "Evolução do número de artigos científicos com e sem APC por instituição 2012-2022 - Brasil",

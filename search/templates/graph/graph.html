@@ -1,0 +1,556 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% load static %}
+{% load i18n %}
+{% load wagtailsettings_tags %}
+{% load sizify %}
+{% load partition %}
+{% load humanize %}
+{% load translate %}
+
+{% get_settings use_default_site=True %}
+
+
+{% block content %}
+
+
+<secton id="content" class="mt-5">
+    <div class="container">
+        <div class="row">
+            <div class="col pl-0">
+
+                <div class="page-title-row mb-4" style="background:#F9F9F9;border-radius:4px;">
+                    <div class="page-title-content py-3 px-3">
+                        <h1 class="mb-1">Indicadores</h1>
+                        <span>Painel de dados do Observatório OCABr</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <div class="row">
+
+            <!-- Menu -->
+            <div class="col-lg-3 card pt-2">
+                <style type="text/css">
+                    .divider:after {
+                        margin-left: 0;
+                    }
+
+                    .accordion-button {
+                        position: relative;
+                        display: block;
+                        width: 100%;
+                        text-align: left;
+
+                        background: transparent;
+                        border: 0;
+                        border-bottom: 2px solid #ced4da;
+                        font-weight: bold;
+                    }
+
+                    .accordion-button:after {
+                        content: "+";
+                        position: absolute;
+                        right: 0;
+                    }
+
+                    .accordion-button[aria-expanded="true"]:after {
+                        content: "-";
+                        margin-right: .125rem;
+                    }
+
+                    .sticky-bottom {
+                        position: -webkit-sticky;
+                        position: sticky;
+                        bottom: 0;
+                        z-index: 1030;
+                        /* Suficientemente alto para estar acima do conteúdo */
+                        margin-top: auto !important;
+                        /* Força o uso de margem automática */
+                    }
+
+                    .btn-generate {
+                        border: 1px solid #ced4da;
+                        padding-top: 1rem;
+                        padding-bottom: 1rem;
+                        background: #f9f9f9;
+                        padding-left: 1rem;
+                        padding-right: 1rem;
+
+                        margin-left: -1rem;
+                        width: calc(100% + 2rem);
+                        margin-bottom: 0 !important;
+                    }
+                </style>
+
+
+
+                <div class="mt-2 mb-1">
+                    <b>Gráfico por: </b>
+                </div>
+                <select id="graph_type" name="graph_type" class="chzn-select ordem form-control">
+                    <option value="year" selected="">Ano</option>
+                    <option value="thematic_level_0">Área temática</option>
+                    <option value="regions">Região</option>
+                    <option value="open_access_status">Tipo de acesso aberto</option>
+                    <option value="license">Licença</option>
+                    <option value="open_access_status">Tipo de acesso aberto</option>
+                    <option value="is_oa">Acesso aberto (sim/não)</option>
+                </select>
+
+                <div class="mt-3 mb-2">
+                    <b>Universo: </b>
+                </div>
+
+                <select id="country" class="chzn-select ordem form-control">
+                    <option value="all">Todos</option>
+                    <option value="brasil" selected="">Brasil</option>
+                </select>
+
+                <div class="divider mt-3 mb-3"></div>
+
+                <div class="mt-3 mb-2">
+                    <b>Intervalo de ano de publicação: </b>
+                </div>
+
+                <div id="year">
+                    <div class="row">
+                        <div class="col-1">
+                            <label for="start" class="form-label mt-2">De</label>
+                        </div>
+                        <div class="col">
+                            <input id="start" class="form-control" type="text" name="year_start" value="2014"
+                                placeholder="2014">
+                        </div>
+                        <div class="col-1">
+                            <label for="end" class="form-label mt-2">A</label>
+                        </div>
+                        <div class="col">
+                            <input id="end" class="form-control" type="text" name="year_end" value="2023"
+                                placeholder="2023">
+                        </div>
+                    </div>
+                    <small class="text-muted">Alcance max.: 10 anos</small>
+                </div>
+
+                <!--
+            <div class="divider mt-3 mb-3"></div>
+
+            <div class="d-grid gap-2 sticky-bottom" style="display:grid">
+              <button type="button" class="btn btn-primary" id="generate_graph"> Gerar gráfico </button>
+            </div>
+
+            -->
+
+                <div class="divider mt-3 mb-3"></div>
+
+                <div class="accordion" id="accordionPanelsStayOpenExample">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="true"
+                                aria-controls="panelsStayOpen-collapseOne">
+                                Filtros
+                            </button>
+                        </h2>
+                        <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse show">
+                            <div class="accordion-body pb-3">
+
+                                <div class="mt-3">
+                                    <label for="thematic_level_0" class="form-label">Tipo de documento:</label>
+                                </div>
+                                <select id="type" name="type" class="chzn-select ordem form-control"
+                                    data-placeholder="Escolha tipo de documento...">
+                                    <option value="all">Todos</option>
+                                    {% for type in facets.type|partition:2 %}
+                                    <option value="{{ type.0 }}">{{ type.0|translate_data }} ({{ type.1|intcomma }})
+                                    </option>
+                                    {% endfor %}
+                                </select>
+
+                                <div class="mt-3">
+                                    <label for="thematic_level_0" class="form-label">Áreas temáticas:</label>
+                                </div>
+                                <select id="thematic_level_0" name="thematic_level_0"
+                                    class="chzn-select ordem form-control"
+                                    data-placeholder="Escolha um ou mais área temática..." multiple>
+                                    {% for the in facets.thematic_level_0|partition:2 %}
+                                    <option value="{{ the.0 }}">{{ the.0|translate_data }} ({{ the.1|intcomma }})
+                                    </option>
+                                    {% endfor %}
+                                </select>
+
+                                <div class="mt-3">
+                                    <label for="region" class="form-label">Região</label>
+                                </div>
+                                <select id="region" name="region" class="chzn-select ordem form-control"
+                                    data-placeholder="Escolha um ou mais região..." multiple>
+                                    {% for region in facets.regions|partition:2 %}
+                                    <option value="{{ region.0 }}">{{ region.0 }} ({{ region.1|intcomma }})</option>
+                                    {% endfor %}
+                                </select>
+
+                                <div class="mt-3">
+                                    <label for="open_access_status" class="form-label">Tipo de acesso aberto: </label>
+                                </div>
+                                <select id="open_access_status" name="open_access_status"
+                                    class="chzn-select ordem form-control"
+                                    data-placeholder="Escolha uma ou mais tipo de acesso aberto..." multiple>
+                                    {% for aos in facets.open_access_status|partition:2 %}
+                                    <option value="{{ aos.0 }}">{{ aos.0|translate_data }} ({{ aos.1|intcomma }})
+                                    </option>
+                                    {% endfor %}
+                                </select>
+
+
+                                <div class="mt-3">
+                                    <label for="institution" class="form-label">Instituição:</label>
+                                </div>
+                                <select id="institution" name="institution" class="chzn-select ordem form-control"
+                                    data-placeholder="Escolha uma ou mais instituições..." multiple>
+                                    {% for ins in facets.institutions|partition:2 %}
+                                    <option value="{{ ins.0 }}">{{ ins.0|translate_data }} ({{ ins.1|intcomma }})
+                                    </option>
+                                    {% endfor %}
+                                </select>
+
+                                <div class="mt-3">
+                                    <label for="is_oa" class="form-label">Acesso aberto:</label>
+                                </div>
+                                <select id="is_oa" name="is_oa" class="chzn-select ordem form-control">
+                                    <option value="all">Todos</option>
+                                    <option value="true">Sim</option>
+                                    <option value="false">Não</option>
+                                </select>
+
+
+                                <div class="mt-3">
+                                    <label for="is_oa" class="form-label">License:</label>
+                                </div>
+                                <select id="license" name="license" class="chzn-select ordem form-control">
+                                    <option value="all">Todos</option>
+                                    {% for li in facets.license|partition:2 %}
+                                    <option value="{{ li.0 }}">{{ li.0|translate_data }} ({{ li.1|intcomma }})</option>
+                                    {% endfor %}
+                                </select>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#panelsStayOpen-collapseTwo" aria-expanded="false"
+                                aria-controls="panelsStayOpen-collapseTwo">
+                                Configuração do gráfico
+                            </button>
+                        </h2>
+                        <div id="panelsStayOpen-collapseTwo" class="accordion-collapse collapse">
+                            <div class="accordion-body">
+                                <div class="mt-3">
+                                    <label for="type_graph" class="form-label">Tipo de gráfico:</label>
+                                </div>
+                                <select id="type_graph" name="type_graph" class="form-control">
+                                    <option value="bar">Barras</option>
+                                    <option value="line">Linha</option>
+                                    <option value="scatter">Pontos</option>
+                                </select>
+
+                                <div class="mt-3">
+                                    <label for="title" class="form-label">Título:</label>
+                                </div>
+                                <textarea type="text" id="title" name="title"
+                                    class="form-control" placeholder="Adicione um título personalizado."></textarea>
+
+                                <div class="mt-3">
+                                    <label for="legend_orient" class="form-label">Orientação da legenda:</label>
+                                </div>
+                                <select id="legend_orient" name="legend_orient" class="form-control">
+                                    <option value="horizontal">Horizontal</option>
+                                    <option value="vertical">Vertical</option>
+                                </select>
+
+                                <div class="mt-3">
+                                    <label for="legend_top" class="form-label">Distancia da legenda para o topo:</label>
+                                </div>
+                                <select id="legend_top" name="legend_top" class="form-control">
+                                    <option value="bottom">Rodapé</option>
+                                    <option value="top">Topo</option>
+                                    <option value="middle">Meio</option>
+                                </select>
+
+                                <div class="mt-3">
+                                    <label for="label" class="form-label">Mostra label de quantidade:</label>
+                                </div>
+                                <select id="label" name="label" class="form-control">
+                                    <option value="true">Sim</option>
+                                    <option value="" selected="">Não</option>
+                                </select>
+
+                                <div class="form-check mt-3">
+                                    <input class="form-check-input" type="checkbox" value="" id="percent">
+                                    <label class="form-check-label" for="percent">
+                                        Mostrar gráfico em porcentagem relação Brasil/Mundo 
+                                    </label>
+                                </div>
+                                
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="d-grid sticky-bottom btn-generate mb-4" style="display:grid">
+                    <button type="button" class="btn btn-primary" id="generate_graph"> Gerar gráfico </button>
+                </div>
+
+                <!-- Outros inputs -->
+
+            </div>
+            <!-- Menu -->
+
+            <!-- Content -->
+            <div class="col-lg-9">
+
+                <!-- Tabs navs -->
+                <ul class="nav nav-tabs nav-fill mb-3" id="ex1" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link active" id="ex2-tab-1" data-toggle="tab" href="#ex2-tabs-1" role="tab"
+                            aria-controls="ex2-tabs-1" aria-selected="true">Gráfico<i class="bi-people fs-2 m-0"></i></a>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link" id="ex2-tab-2" data-toggle="tab" href="#ex2-tabs-2" role="tab"
+                            aria-controls="ex2-tabs-2" aria-selected="false">Dados</a>
+                    </li>
+                    <!-- <li class="nav-item" role="presentation">
+                        <a class="nav-link" id="ex2-tab-3" data-toggle="tab" href="#ex2-tabs-3" role="tab"
+                            aria-controls="ex2-tabs-3" aria-selected="false">Sobre</a>
+                    </li> -->
+                </ul>
+                <!-- Tabs navs -->
+
+                <div class="tab-content" id="ex2-content">
+                    <!-- Graph -->
+                    <div class="tab-pane fade show active" id="ex2-tabs-1" role="tabpanel" aria-labelledby="ex2-tab-1">
+                        <div class="mb-2 mx-auto" style="max-width: 100%; min-height: 100%;">
+                            <div id="graph" style="position: relative; height:60vh; width:50vw"></div>
+                        </div>
+                    </div>
+                    <!-- Graph -->
+
+                    <!-- Data -->
+                    <div class="tab-pane fade" id="ex2-tabs-2" role="tabpanel" aria-labelledby="ex2-tab-2">
+                        <div class="list-group">
+                            {% for f in ind_files %}
+                                <a href="{{ f.raw_data.url }}" class="list-group-item list-group-item-action flex-column align-items-start">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h5 class="mb-1">Download {{ forloop.counter }}</h5>
+                                        <small>{{ f.name }}</small>
+                                    </div>
+                                    <p class="mb-1">Arquivo compactado em .zip.</p>
+                                    <small>Tamanho: {{ f.raw_data.size|sizify }}</small>
+                                </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <!-- Data -->
+
+                    <!-- About -->
+                    <!-- <div class="tab-pane fade" id="ex2-tabs-3" role="tabpanel" aria-labelledby="ex2-tab-3">
+                        {{ object.description }}
+                    </div> -->
+                    <!-- About -->
+                </div>
+
+            </div>
+            <!-- Content -->
+
+        </div>
+    </div>
+</secton>
+
+
+{% endblock %}
+
+{% block inline_javascript %}
+<script src="{% static 'js/echarts/echarts.min.js' %}"></script>
+<script src="{% static 'js/echarts/theme/roma-macarons-macarons2-infographic.js' %}"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+
+    $(".chzn-select").chosen(
+        {
+            no_results_text: "Nenhum resultado encontrado para: ",
+            search_contains: true,
+            display_disabled_options: false,
+            display_selected_options: false,
+            allow_single_deselect: false,
+        }
+    );
+    $(".chosen-container").css({ "width": "100%" })
+
+
+    serialize = function (obj) {
+        var str = [];
+        for (var p in obj)
+            if (obj.hasOwnProperty(p)) {
+                str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
+            }
+        return str.join("&");
+    }
+
+    function format_prefix(stringList, prefix) {
+        // Check if the list is an array
+        if (!Array.isArray(stringList)) {
+            throw new Error("Invalid input: The list must be an array.");
+        }
+
+        // Check if the prefix is a string
+        if (typeof prefix !== "string") {
+            throw new Error("Invalid input: The prefix must be a string.");
+        }
+
+        // Join the strings with the prefix and separator
+        const formattedString = stringList.map((item) => `${prefix}:"${item}"`).join(",");
+
+        return formattedString;
+    }
+
+    function get_params() {
+        data = {}
+        data["filters"] = "*:*"
+        data["title"] = $('#title').val()
+        data["facet_by"] = "year"
+        data["context_by"] = $('#graph_type').val() != "year" ? $('#graph_type').val() : "year";
+
+        if (data["context_by"] && data["context_by"] != "year") {
+            data["filters"] = ''
+        }
+
+        if (data["context_by"] == "year") {
+            data["context_by"] = ''
+        }
+
+        data["graph_type"] = $('#type_graph').val();
+        data["graph_label"] = $('#label').val();
+        data["graph_legend_orient"] = $('#legend_orient').val()
+        data["graph_legend_top"] = $('#legend_top').val()
+        data["start"] = $('#start').val()
+        data["end"] = $('#end').val()
+
+        data["default_filter"] = format_prefix($("#thematic_level_0").val(), "thematic_level_0")
+        if ($("#region").val().length) {
+            console.log("aqui");
+            data["default_filter"] += "," + format_prefix($("#region").val(), "regions")
+        }
+        if ($("#open_access_status").val().length) {
+            data["default_filter"] += "," + format_prefix($("#open_access_status").val(), "open_access_status")
+        }
+        if ($("#institution").val().length) {
+            data["default_filter"] += "," + format_prefix($("#institution").val(), "institutions")
+        }
+        if ($("#is_oa").val() != "all") {
+            data["default_filter"] += "," + "is_oa:" + $("#is_oa").val()
+        }
+        if ($("#license").val() != "all") {
+            data["default_filter"] += "," + "license:" + $("#license").val()
+        }
+        if ($("#type").val() != "all") {
+            data["default_filter"] += "," + "type:" + $("#type").val()
+        }
+
+        if ($("#percent").is(":checked")) {
+            data["percent"] = true
+        }
+
+        console.log(data["default_filter"])
+
+        console.log(data);
+
+        return data
+    }
+
+    $("#generate_graph").click(function () {
+        generate_graph(get_params());
+    });
+
+    function generate_graph(data) {
+
+        var chart = echarts.init(document.getElementById('graph'));
+
+        chart.showLoading();
+
+        query_string = serialize(data)
+
+        console.log("/search/graph/json?" + query_string)
+
+        //Gráfico por ano
+        $.get("/search/graph/json?" + query_string).done(function (data) {
+            chart.hideLoading();
+
+            yaxis_param = {
+                type: 'value',
+            }
+
+            if (data.graph_options.percent){
+                yaxis_param["axisLabel"] = {
+                    formatter: (value) => {
+                        return ((value / data.oa_data.world_count) * 100).toFixed(2) + '%';
+                    }
+                }
+            } 
+
+            chart.setOption({
+                title: {
+                    text: data.graph_options.title
+                },
+                legend: {
+                    orient: data.graph_options.graph_legend_orient,
+                    right: data.graph_options.graph_legend_right,
+                    top: data.graph_options.graph_legend_top
+                },
+                toolbox: {
+                    orient: 'vertical',
+                    feature: {
+                        magicType: {
+                            type: ['line', 'bar', 'stack', 'tield'],
+                        },
+                        dataView: {},
+                        saveAsImage: { show: true },
+                        restore: { show: true }
+                    }
+                },
+                tooltip: {},
+                xAxis: {
+                    type: 'category', data: data.data.keys
+                },
+                yAxis: [yaxis_param],
+                series: data.data.series
+            }, true);
+        });
+
+        window.addEventListener('resize', chart.resize);
+
+    }
+
+    generate_graph(get_params());
+
+    document.addEventListener('keypress', function enterPress(e) {
+        if (e.which == 13) {
+            generate_graph(get_params());
+        }
+    });
+
+    window.addEventListener('load', function () {
+        document.querySelectorAll('select').forEach(select => {
+            $('#' + select.id).change(function () {
+                generate_graph(get_params());
+            })
+        });
+    })
+
+</script>
+
+{% endblock %}

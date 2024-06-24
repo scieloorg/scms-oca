@@ -43,12 +43,12 @@ class Indicator:
         facet_by,
         context_by=None,
         default_filter={},
-        range_filter={"filter_name": "year", "range": {"start": 2014, "end": 2023}},
+        # range_filter={"filter_name": "year", "range": {"start": 2014, "end": 2014}},
+        range_filter=None,
         fill_range=True,
         fill_range_value=0,
         solr_instance=None,
-        include_all=False,
-        models=[],
+        include_all=False
     ):
         """Initializes the instance indicator class.
 
@@ -63,7 +63,6 @@ class Indicator:
           fill_range: this set a default values to be filled on range filter.
           default_filter: A lucene query syntax to be default on filters.
           include_all: Include all itens since the values is 0 to all key(years)
-          models: model to get the ids
         """
         self.filters = filters
         self.title = title
@@ -77,7 +76,6 @@ class Indicator:
         self.keys = []
         self.include_all = include_all
         self.description = description
-        self.models = models
 
         self.solr = solr_instance or pysolr.Solr(
             settings.HAYSTACK_CONNECTIONS["default"]["URL"],
@@ -243,16 +241,17 @@ class Indicator:
             This function dont raise any exception
         """
         ret = []
-
+        q_list = []
+        
         if self.context_by:
             self.dynamic_filters()
 
         for filter in self.filters:
             filters = {}
-            # # add the default filter
+            # add the default filter
             filters.update(filter)
             filters.update(self.default_filter)
-
+            
             if self.range_filter:
                 filters.update(
                     {
@@ -266,21 +265,11 @@ class Indicator:
 
             q = "%s" % (" AND ".join(["%s:%s" % (k, v) for k, v in filters.items()]))
 
-            # self.logger.info(filters)
             self.logger.info(q)
+            q_list.append(q)
 
             result = self.solr.search(q)
 
-            # ids example: {'581512': '2023-11-24T15:23:41.642088+00:00',
-            #               '581513': '2023-11-24T15:23:41.735933+00:00',
-            #               '581520': '2023-11-24T15:23:42.377974+00:00'}
-            # ids = {
-            #     doc.get("django_id"): doc.get("updated")
-            #     for doc in result.raw_response.get("response").get("docs")
-            # }
-
-            # # update the attribute ids with sorted ids
-            # self.ids.update(sorted(ids.items()))
             result = self._convert_list_dict(
                 result.facets.get("facet_fields").get(self.facet_by)
             )
@@ -318,6 +307,7 @@ class Indicator:
                     ): {
                         "items": [k for k in sorted(result.keys())],
                         "counts": [v for v in values],
+                        "filters": q_list,
                     }
                 }
             )
@@ -482,7 +472,7 @@ class Indicator:
 
         return zip_file
 
-    def     get_data(self, rows=10000, files_by_year=False):
+    def get_data(self, rows=10000, files_by_year=False):
         """
         This get the data from Lucene.
 

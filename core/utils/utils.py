@@ -171,3 +171,35 @@ def language_iso(code):
 def delete_file(path):
     if os.path.isfile(path):
         os.remove(path)
+
+
+def parse_string_to_dicts(input_string, split_caracter=",", ret_type="list"):
+    """
+    This function transform: 
+    
+    "record_type:article\nauthor:John Doe\ntitle:Python Programming"
+        TO
+    [{'record_type': 'article'}, {'author': 'John Doe'}, {'title': 'Python Programming'}]
+    """    
+    # Dividir a string em linhas
+    lines = input_string.split(split_caracter)
+            
+    # Lista para armazenar os dicionários
+    if ret_type == "list":
+        ret_items = [] 
+    else:
+        ret_items = {}
+    
+    # Iterar sobre cada linha
+    for line in lines:
+        # Dividir a linha em chave e valor usando ":" como separador
+        parts = line.split(":")
+        # Verificar se a linha está no formato correto
+        if len(parts) == 2:
+            # Criar um dicionário com a chave e o valor e adicionar à lista
+            if ret_type == "list":
+                ret_items.append({parts[0]: parts[1]})
+            else: 
+                ret_items.update({parts[0]: parts[1]})
+
+    return ret_items
