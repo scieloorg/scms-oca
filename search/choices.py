@@ -90,4 +90,12 @@ translates = {
     "part": _("Parte"),
     "proceedingsseries": _("Série de anais"),
     "series": _("Série"),
+    "year": "Ano",
+    "thematic_level_0": "Área temática",
+    "regions": "Região",
+    "open_access_status": "Tipo de acesso aberto",
+    "license": "Licença",
+    "open_access_status": "Tipo de acesso aberto",
+    "is_oa": "Acesso aberto",
+    "type": "Tipo de documento",
 }

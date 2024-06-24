@@ -27,12 +27,10 @@ from .forms import IndicatorDirectoryForm
 from .permission_helper import MUST_BE_MODERATE
 
 
-class GetOrCreateCrontabScheduleError(Exception):
-    ...
+class GetOrCreateCrontabScheduleError(Exception): ...
 
 
-class CreateIndicatorRecordError(Exception):
-    ...
+class CreateIndicatorRecordError(Exception): ...
 
 
 class IndicatorFile(models.Model):
@@ -42,15 +40,17 @@ class IndicatorFile(models.Model):
 
     name = models.CharField(_("File name"), max_length=1024, null=False, blank=False)
     raw_data = models.FileField(_("JSONL Zip File"), null=True, blank=True)
-
+    is_dynamic_data = models.BooleanField(
+        _("Dynamic Data"), default=False, null=True, blank=True
+    )
     autocomplete_search_field = "name"
 
     def extension(self):
         name, extension = os.path.splitext(self.raw_data.name)
         return extension
-    
+
     class Meta:
-        ordering = ('id', )
+        ordering = ("id",)
 
     def autocomplete_label(self):
         return str(self)
@@ -149,7 +149,7 @@ class Indicator(CommonControlField):
 
     link = models.URLField(_("Link"), null=True, blank=True)
 
-    indicator_file =models.ManyToManyField(
+    indicator_file = models.ManyToManyField(
         IndicatorFile, verbose_name=_("Indicator File"), blank=True
     )
 

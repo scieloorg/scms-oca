@@ -1,5 +1,8 @@
+from django.urls import include, path
+from django.urls import reverse
 from django.utils.translation import gettext as _
 from wagtail import hooks
+from wagtail.admin.menu import MenuItem
 from wagtail.contrib.modeladmin.options import (
     ModelAdmin,
     ModelAdminGroup,
@@ -75,8 +78,8 @@ class IndicatorFileAdmin(ModelAdmin):
         False  # or True to exclude pages of this type from Wagtail's explorer view
     )
 
-    list_display = ("name", "raw_data")
-    list_filter = ("name",)
+    list_display = ("name", "raw_data", "is_dynamic_data")
+    list_filter = ("name", "is_dynamic_data")
     search_fields = ("name",)
 
 
@@ -89,4 +92,22 @@ class InstitutionAdminGroup(ModelAdminGroup):
         IndicatorFileAdmin,
     )
 
+    def get_submenu_items(self):
+        menu_items = super().get_submenu_items()
+        menu_items.append(MenuItem('Generate Indicador', reverse('indicator:generate_indicator'), icon_name='form', order=0))
+        return menu_items
+
 modeladmin_register(InstitutionAdminGroup)
+
+
+@hooks.register("register_admin_urls")
+def register_indicator_url():
+    return [
+        path(
+            "indicator/indicator/",
+            include("indicator.urls", namespace="indicator"),
+        ),
+    ]
+
+
+
