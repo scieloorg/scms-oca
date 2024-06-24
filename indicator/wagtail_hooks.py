@@ -92,22 +92,4 @@ class InstitutionAdminGroup(ModelAdminGroup):
         IndicatorFileAdmin,
     )
 
-    def get_submenu_items(self):
-        menu_items = super().get_submenu_items()
-        menu_items.append(MenuItem('Generate Indicador', reverse('indicator:generate_indicator'), icon_name='form', order=0))
-        return menu_items
-
 modeladmin_register(InstitutionAdminGroup)
-
-
-@hooks.register("register_admin_urls")
-def register_indicator_url():
-    return [
-        path(
-            "indicator/indicator/",
-            include("indicator.urls", namespace="indicator"),
-        ),
-    ]
-
-
-
