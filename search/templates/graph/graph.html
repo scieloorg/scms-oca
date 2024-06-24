@@ -29,6 +29,8 @@
             </div>
         </div>
         <div class="row">
+
+            <!-- Menu -->
             <div class="col-lg-3 card pt-2">
                 <style type="text/css">
                     .divider:after {
@@ -306,15 +308,64 @@
                 <!-- Outros inputs -->
 
             </div>
+            <!-- Menu -->
+
+            <!-- Content -->
             <div class="col-lg-9">
+
+                <!-- Tabs navs -->
+                <ul class="nav nav-tabs nav-fill mb-3" id="ex1" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link active" id="ex2-tab-1" data-toggle="tab" href="#ex2-tabs-1" role="tab"
+                            aria-controls="ex2-tabs-1" aria-selected="true">Gráfico<i class="bi-people fs-2 m-0"></i></a>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link" id="ex2-tab-2" data-toggle="tab" href="#ex2-tabs-2" role="tab"
+                            aria-controls="ex2-tabs-2" aria-selected="false">Dados</a>
+                    </li>
+                    <!-- <li class="nav-item" role="presentation">
+                        <a class="nav-link" id="ex2-tab-3" data-toggle="tab" href="#ex2-tabs-3" role="tab"
+                            aria-controls="ex2-tabs-3" aria-selected="false">Sobre</a>
+                    </li> -->
+                </ul>
+                <!-- Tabs navs -->
+
                 <div class="tab-content" id="ex2-content">
+                    <!-- Graph -->
                     <div class="tab-pane fade show active" id="ex2-tabs-1" role="tabpanel" aria-labelledby="ex2-tab-1">
                         <div class="mb-2 mx-auto" style="max-width: 100%; min-height: 100%;">
                             <div id="graph" style="position: relative; height:60vh; width:50vw"></div>
                         </div>
                     </div>
+                    <!-- Graph -->
+
+                    <!-- Data -->
+                    <div class="tab-pane fade" id="ex2-tabs-2" role="tabpanel" aria-labelledby="ex2-tab-2">
+                        <div class="list-group">
+                            {% for f in ind_files %}
+                                <a href="{{ f.raw_data.url }}" class="list-group-item list-group-item-action flex-column align-items-start">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h5 class="mb-1">Download {{ forloop.counter }}</h5>
+                                        <small>{{ f.name }}</small>
+                                    </div>
+                                    <p class="mb-1">Arquivo compactado em .zip.</p>
+                                    <small>Tamanho: {{ f.raw_data.size|sizify }}</small>
+                                </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <!-- Data -->
+
+                    <!-- About -->
+                    <!-- <div class="tab-pane fade" id="ex2-tabs-3" role="tabpanel" aria-labelledby="ex2-tab-3">
+                        {{ object.description }}
+                    </div> -->
+                    <!-- About -->
                 </div>
+
             </div>
+            <!-- Content -->
+
         </div>
     </div>
 </secton>
