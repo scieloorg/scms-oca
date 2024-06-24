@@ -13,7 +13,7 @@ from django.shortcuts import redirect, render
 from django.template import loader
 from django.urls import reverse
 
-from indicator.models import Indicator
+from indicator.models import Indicator, IndicatorFile
 from search.graphic_data import GraphicData
 from indicator import indicator
 from core.utils import utils
@@ -190,10 +190,12 @@ def graph(request):
 
     search_results = solr.search("*:*")
 
+    ind_files = IndicatorFile.objects.filter(is_dynamic_data=True)
+
     return render(
         request,
         "graph/graph.html",
-        {"facets": search_results.facets["facet_fields"]},
+        {"facets": search_results.facets["facet_fields"], "ind_files": ind_files},
     )
 
 
@@ -222,8 +224,7 @@ def graph_json(request):
         "facet_by": "year",
         "description": "Gerado automaticamente usando dados coletados do OpenALex no período de 2014 até 2023",
         "context_by": [],
-        "default_filter": {
-        },
+        "default_filter": {},
         "range_filter": {
             "filter_name": "year",
             "range": {"start": 2014, "end": 2023},
@@ -286,13 +287,9 @@ def graph_json(request):
     if request.GET.get("percent", None):
         for year in range(int(start), int(end) + 1):
             print(year)
-            result, meta = (
-                    Works()
-                    .filter(publication_year=year)
-                    .get(return_meta=True)
-                )
-        
-            # world count 
+            result, meta = Works().filter(publication_year=year).get(return_meta=True)
+
+            # world count
             w_total += int(meta.get("count"))
 
     title = request.GET.get("title", None)
@@ -304,8 +301,8 @@ def graph_json(request):
         if filters != "*:*":
             title += ": Um Panorama por %s" % (
                 " e ".join(
-                    [choices.translates.get(t) for t in ind.get("context_by")] +
-                    [choices.translates.get(t) for t in ind["default_filter"].keys()]
+                    [choices.translates.get(t, "") for t in ind.get("context_by", "")]
+                    + [choices.translates.get(t, "") for t in ind["default_filter"].keys()]
                 )
             )
 
@@ -376,6 +373,6 @@ def graph_json(request):
             "filters": filter_list,
             "oa_data": {
                 "world_count": w_total or 0,
-            }
+            },
         }
     )
