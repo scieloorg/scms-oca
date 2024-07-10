@@ -84,9 +84,46 @@
                     }
                 </style>
 
+                <div class="mt-3 mb-2">
+                    <b>Universo: </b>
+                </div>
+
+                <select id="universe" class="chzn-select ordem form-control">
+                    <option value="world" selected="">Mundo</option>
+                    <option value="brazil">Brasil</option>
+                </select>
+
+                <div class="mt-3 mb-2">
+                    <b>Base de dados: </b>
+                </div>
+
+                <select id="database" class="chzn-select ordem form-control">
+                    <option value="openalex" selected="">OpenAlex</option>
+                </select>
+
+                <div class="mt-3 mb-2">
+                    <b>Escopo: </b>
+                </div>
+
+                <select id="scope" class="chzn-select ordem form-control">
+                    <option value="scientific_production" selected="">Produção científica</option>
+                    <option value="policies">Políticas</option>
+                    <option value="infrastructure">Infraestrura</option>
+                    <option value="education">Educação</option>
+                    <option value="events">Divulgação</option>
+                </select>
+
+                <div class="mt-3 mb-2">
+                    <b>Métrica: </b>
+                </div>
+
+                <select id="metric" class="chzn-select ordem form-control">
+                    <option value="frequency" selected="">Frequência</option>
+                    <option value="relative_frequency">Frequência relativa</option>
+                </select>
 
 
-                <div class="mt-2 mb-1">
+                <div class="mt-3 mb-2">
                     <b>Gráfico por: </b>
                 </div>
                 <select id="graph_type" name="graph_type" class="chzn-select ordem form-control">
@@ -97,15 +134,6 @@
                     <option value="license">Licença</option>
                     <option value="open_access_status">Tipo de acesso aberto</option>
                     <option value="is_oa">Acesso aberto (sim/não)</option>
-                </select>
-
-                <div class="mt-3 mb-2">
-                    <b>Universo: </b>
-                </div>
-
-                <select id="country" class="chzn-select ordem form-control">
-                    <option value="all">Todos</option>
-                    <option value="brasil" selected="">Brasil</option>
                 </select>
 
                 <div class="divider mt-3 mb-3"></div>
@@ -134,15 +162,6 @@
                     <small class="text-muted">Alcance max.: 10 anos</small>
                 </div>
 
-                <!--
-            <div class="divider mt-3 mb-3"></div>
-
-            <div class="d-grid gap-2 sticky-bottom" style="display:grid">
-              <button type="button" class="btn btn-primary" id="generate_graph"> Gerar gráfico </button>
-            </div>
-
-            -->
-
                 <div class="divider mt-3 mb-3"></div>
 
                 <div class="accordion" id="accordionPanelsStayOpenExample">
@@ -158,59 +177,13 @@
                             <div class="accordion-body pb-3">
 
                                 <div class="mt-3">
-                                    <label for="thematic_level_0" class="form-label">Tipo de documento:</label>
+                                    <label for="thematic_level_0" class="form-label">Objeto:</label>
                                 </div>
                                 <select id="type" name="type" class="chzn-select ordem form-control"
-                                    data-placeholder="Escolha tipo de documento...">
+                                    data-placeholder="Escolha tipo de objeto...">
                                     <option value="all">Todos</option>
                                     {% for type in facets.type|partition:2 %}
-                                    <option value="{{ type.0 }}">{{ type.0|translate_data }} ({{ type.1|intcomma }})
-                                    </option>
-                                    {% endfor %}
-                                </select>
-
-                                <div class="mt-3">
-                                    <label for="thematic_level_0" class="form-label">Áreas temáticas:</label>
-                                </div>
-                                <select id="thematic_level_0" name="thematic_level_0"
-                                    class="chzn-select ordem form-control"
-                                    data-placeholder="Escolha um ou mais área temática..." multiple>
-                                    {% for the in facets.thematic_level_0|partition:2 %}
-                                    <option value="{{ the.0 }}">{{ the.0|translate_data }} ({{ the.1|intcomma }})
-                                    </option>
-                                    {% endfor %}
-                                </select>
-
-                                <div class="mt-3">
-                                    <label for="region" class="form-label">Região</label>
-                                </div>
-                                <select id="region" name="region" class="chzn-select ordem form-control"
-                                    data-placeholder="Escolha um ou mais região..." multiple>
-                                    {% for region in facets.regions|partition:2 %}
-                                    <option value="{{ region.0 }}">{{ region.0 }} ({{ region.1|intcomma }})</option>
-                                    {% endfor %}
-                                </select>
-
-                                <div class="mt-3">
-                                    <label for="open_access_status" class="form-label">Tipo de acesso aberto: </label>
-                                </div>
-                                <select id="open_access_status" name="open_access_status"
-                                    class="chzn-select ordem form-control"
-                                    data-placeholder="Escolha uma ou mais tipo de acesso aberto..." multiple>
-                                    {% for aos in facets.open_access_status|partition:2 %}
-                                    <option value="{{ aos.0 }}">{{ aos.0|translate_data }} ({{ aos.1|intcomma }})
-                                    </option>
-                                    {% endfor %}
-                                </select>
-
-
-                                <div class="mt-3">
-                                    <label for="institution" class="form-label">Instituição:</label>
-                                </div>
-                                <select id="institution" name="institution" class="chzn-select ordem form-control"
-                                    data-placeholder="Escolha uma ou mais instituições..." multiple>
-                                    {% for ins in facets.institutions|partition:2 %}
-                                    <option value="{{ ins.0 }}">{{ ins.0|translate_data }} ({{ ins.1|intcomma }})
+                                    <option value="{{ type.0 }}">{{ type.0|translate_data }} <!--({{ type.1|intcomma }})-->
                                     </option>
                                     {% endfor %}
                                 </select>
@@ -224,14 +197,59 @@
                                     <option value="false">Não</option>
                                 </select>
 
+                                <div class="mt-3">
+                                    <label for="open_access_status" class="form-label">Tipo de acesso aberto: </label>
+                                </div>
+                                <select id="open_access_status" name="open_access_status"
+                                    class="chzn-select ordem form-control"
+                                    data-placeholder="Escolha uma ou mais tipo de acesso aberto...">
+                                    <option value="all">Todos</option>
+                                    {% for aos in facets.open_access_status|partition:2 %}
+                                    <option value="{{ aos.0 }}">{{ aos.0|translate_data }} <!-- ({{ aos.1|intcomma }}) -->
+                                    </option>
+                                    {% endfor %}
+                                </select>
 
                                 <div class="mt-3">
-                                    <label for="is_oa" class="form-label">License:</label>
+                                    <label for="license" class="form-label">License:</label>
                                 </div>
                                 <select id="license" name="license" class="chzn-select ordem form-control">
                                     <option value="all">Todos</option>
                                     {% for li in facets.license|partition:2 %}
-                                    <option value="{{ li.0 }}">{{ li.0|translate_data }} ({{ li.1|intcomma }})</option>
+                                    <option value="{{ li.0 }}">{{ li.0|translate_data }} <!-- ({{ li.1|intcomma }})</option> -->
+                                    {% endfor %}
+                                </select>
+
+                                <div class="mt-3">
+                                    <label for="thematic_level_0" class="form-label">Áreas temáticas:</label>
+                                </div>
+                                <select id="thematic_level_0" name="thematic_level_0"
+                                    class="chzn-select ordem form-control"
+                                    data-placeholder="Escolha um ou mais área temática..." multiple>
+                                    {% for the in facets.thematic_level_0|partition:2 %}
+                                    <option value="{{ the.0 }}">{{ the.0|translate_data }} <!-- ({{ the.1|intcomma }}) -->
+                                    </option>
+                                    {% endfor %}
+                                </select>
+
+                                <div class="mt-3">
+                                    <label for="region" class="form-label">Região</label>
+                                </div>
+                                <select id="region" name="region" class="chzn-select ordem form-control"
+                                    data-placeholder="Escolha um ou mais região..." multiple>
+                                    {% for region in facets.regions|partition:2 %}
+                                    <option value="{{ region.0 }}">{{ region.0 }} <!-- ({{ region.1|intcomma }})</option> -->
+                                    {% endfor %}
+                                </select>
+
+                                <div class="mt-3">
+                                    <label for="institution" class="form-label">Instituição:</label>
+                                </div>
+                                <select id="institution" name="institution" class="chzn-select ordem form-control"
+                                    data-placeholder="Escolha uma ou mais instituições..." multiple>
+                                    {% for ins in facets.institutions|partition:2 %}
+                                    <option value="{{ ins.0 }}">{{ ins.0|translate_data }} <!-- ({{ ins.1|intcomma }}) -->
+                                    </option>
                                     {% endfor %}
                                 </select>
 
@@ -260,8 +278,8 @@
                                 <div class="mt-3">
                                     <label for="title" class="form-label">Título:</label>
                                 </div>
-                                <textarea type="text" id="title" name="title"
-                                    class="form-control" placeholder="Adicione um título personalizado."></textarea>
+                                <textarea type="text" id="title" name="title" class="form-control"
+                                    placeholder="Adicione um título personalizado."></textarea>
 
                                 <div class="mt-3">
                                     <label for="legend_orient" class="form-label">Orientação da legenda:</label>
@@ -284,28 +302,18 @@
                                     <label for="label" class="form-label">Mostra label de quantidade:</label>
                                 </div>
                                 <select id="label" name="label" class="form-control">
-                                    <option value="true">Sim</option>
-                                    <option value="" selected="">Não</option>
+                                    <option value="true"selected="">Sim</option>
+                                    <option value="">Não</option>
                                 </select>
 
-                                <div class="form-check mt-3">
-                                    <input class="form-check-input" type="checkbox" value="" id="percent">
-                                    <label class="form-check-label" for="percent">
-                                        Mostrar gráfico em porcentagem relação Brasil/Mundo 
-                                    </label>
-                                </div>
-                                
                             </div>
                         </div>
                     </div>
                 </div>
 
-
                 <div class="d-grid sticky-bottom btn-generate mb-4" style="display:grid">
                     <button type="button" class="btn btn-primary" id="generate_graph"> Gerar gráfico </button>
                 </div>
-
-                <!-- Outros inputs -->
 
             </div>
             <!-- Menu -->
@@ -314,20 +322,19 @@
             <div class="col-lg-9">
 
                 <!-- Tabs navs -->
-                <ul class="nav nav-tabs nav-fill mb-3" id="ex1" role="tablist">
-                    <li class="nav-item" role="presentation">
-                        <a class="nav-link active" id="ex2-tab-1" data-toggle="tab" href="#ex2-tabs-1" role="tab"
-                            aria-controls="ex2-tabs-1" aria-selected="true">Gráfico<i class="bi-people fs-2 m-0"></i></a>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <a class="nav-link" id="ex2-tab-2" data-toggle="tab" href="#ex2-tabs-2" role="tab"
-                            aria-controls="ex2-tabs-2" aria-selected="false">Dados</a>
-                    </li>
-                    <!-- <li class="nav-item" role="presentation">
-                        <a class="nav-link" id="ex2-tab-3" data-toggle="tab" href="#ex2-tabs-3" role="tab"
-                            aria-controls="ex2-tabs-3" aria-selected="false">Sobre</a>
-                    </li> -->
-                </ul>
+                {% if ind_files %}
+                    <ul class="nav nav-tabs nav-fill mb-3" id="ex1" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link active" id="ex2-tab-1" data-toggle="tab" href="#ex2-tabs-1" role="tab"
+                                aria-controls="ex2-tabs-1" aria-selected="true">Gráfico<i
+                                    class="bi-people fs-2 m-0"></i></a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link" id="ex2-tab-2" data-toggle="tab" href="#ex2-tabs-2" role="tab"
+                                aria-controls="ex2-tabs-2" aria-selected="false">Dados</a>
+                        </li>
+                    </ul>
+                {% endif %}
                 <!-- Tabs navs -->
 
                 <div class="tab-content" id="ex2-content">
@@ -343,24 +350,19 @@
                     <div class="tab-pane fade" id="ex2-tabs-2" role="tabpanel" aria-labelledby="ex2-tab-2">
                         <div class="list-group">
                             {% for f in ind_files %}
-                                <a href="{{ f.raw_data.url }}" class="list-group-item list-group-item-action flex-column align-items-start">
-                                    <div class="d-flex w-100 justify-content-between">
-                                        <h5 class="mb-1">Download {{ forloop.counter }}</h5>
-                                        <small>{{ f.name }}</small>
-                                    </div>
-                                    <p class="mb-1">Arquivo compactado em .zip.</p>
-                                    <small>Tamanho: {{ f.raw_data.size|sizify }}</small>
-                                </a>
+                            <a href="{{ f.raw_data.url }}"
+                                class="list-group-item list-group-item-action flex-column align-items-start">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h5 class="mb-1">Download {{ forloop.counter }}</h5>
+                                    <small>{{ f.name }}</small>
+                                </div>
+                                <p class="mb-1">Arquivo compactado em .zip.</p>
+                                <small>Tamanho: {{ f.raw_data.size|sizify }}</small>
+                            </a>
                             {% endfor %}
                         </div>
                     </div>
                     <!-- Data -->
-
-                    <!-- About -->
-                    <!-- <div class="tab-pane fade" id="ex2-tabs-3" role="tabpanel" aria-labelledby="ex2-tab-3">
-                        {{ object.description }}
-                    </div> -->
-                    <!-- About -->
                 </div>
 
             </div>
@@ -446,7 +448,7 @@
             data["default_filter"] += "," + format_prefix($("#region").val(), "regions")
         }
         if ($("#open_access_status").val().length) {
-            data["default_filter"] += "," + format_prefix($("#open_access_status").val(), "open_access_status")
+            data["default_filter"] += "," + + "open_access_status:" + $("#open_access_status").val()
         }
         if ($("#institution").val().length) {
             data["default_filter"] += "," + format_prefix($("#institution").val(), "institutions")
@@ -460,9 +462,20 @@
         if ($("#type").val() != "all") {
             data["default_filter"] += "," + "type:" + $("#type").val()
         }
-
-        if ($("#percent").is(":checked")) {
-            data["percent"] = true
+        if ($("#universe").val()) {
+            data["universe"] =  $("#universe").val()
+        }
+        if ($("#type").val()) {
+            data["type"] =  $("#type").val()
+        }
+        if ($("#is_oa").val()) {
+            data["is_oa"] =  $("#is_oa").val()
+        }
+        if ($("#open_access_status").val()) {
+            data["open_access_status"] =  $("#open_access_status").val()
+        }
+        if ($("#license").val()) {
+            data["license"] =  $("#license").val()
         }
 
         console.log(data["default_filter"])
@@ -493,14 +506,6 @@
             yaxis_param = {
                 type: 'value',
             }
-
-            if (data.graph_options.percent){
-                yaxis_param["axisLabel"] = {
-                    formatter: (value) => {
-                        return ((value / data.oa_data.world_count) * 100).toFixed(2) + '%';
-                    }
-                }
-            } 
 
             chart.setOption({
                 title: {

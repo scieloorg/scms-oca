@@ -280,81 +280,139 @@ def graph_json(request):
     graph_legend_left_margin = request.GET.get("graph_legend_left_margin", "auto")
     graph_legend_top = request.GET.get("graph_legend_top", "bottom")
 
-    logging.info("Indicator dict: %s" % ind)
+    universe = request.GET.get("universe", "brazil")
 
-    w_total = 0
-
-    if request.GET.get("percent", None):
-        for year in range(int(start), int(end) + 1):
-            print(year)
-            result, meta = Works().filter(publication_year=year).get(return_meta=True)
-
-            # world count
-            w_total += int(meta.get("count"))
-
-    title = request.GET.get("title", None)
-
-    if not title:
-
-        title = "Evolução da Produção Científica por Ano"
-
-        if filters != "*:*":
-            title += ": Um Panorama por %s" % (
-                " e ".join(
-                    [choices.translates.get(t, "") for t in ind.get("context_by", "")]
-                    + [choices.translates.get(t, "") for t in ind["default_filter"].keys()]
-                )
-            )
-
-    ind = indicator.Indicator(**ind)
-
-    serie = {}
-    serie_list = []
     filter_list = None
 
-    for item in ind.generate():
+    # check if is universe is brazil or world
+    if universe != "brazil":
+        # Exemplo:
+        # https://api.openalex.org/works?filter=publication_year:2020,type:article&group_by=publication_year
+        # Aqui é preciso pegar os campos que fazem sentido para o universo mundo
 
-        for serie_name_and_stack, data in item.items():
-            if data:
-                if "-" in serie_name_and_stack:
-                    stack = " ".join(serie_name_and_stack.split("-")[1:])
-                else:
-                    stack = serie_name_and_stack
+        filters = {}
+        group_by = "publication_year"
 
-                serie_list.append(
-                    {
-                        "name": (
-                            choices.translates.get(ind.facet_by, ind.facet_by)
-                            if serie_name_and_stack == "*"
-                            else choices.translates.get(
-                                serie_name_and_stack, serie_name_and_stack
-                            )
-                        ),
-                        "type": graph_type,
-                        "stack": ind.facet_by if stack == "*" else stack,
-                        "emphasis": {"focus": "series"},
-                        "data": list(data.get("counts")),
-                        "label": {"show": graph_label},
-                    }
+        serie = {}
+        serie_list = []
+
+        if request.GET.get("type") != "all":
+            filters["type"] = request.GET.get("type", "article")
+
+        if request.GET.get("is_oa") != "all":
+            filters["is_oa"] = request.GET.get("is_oa")
+
+        if request.GET.get("open_access_status") != "all":
+            filters["oa_status"] = request.GET.get("open_access_status")
+        
+        if request.GET.get("license") != "all":
+            filters["best_oa_location.license"] = request.GET.get("license")
+        
+        for year in range(int(start), int(end) + 1):
+            result, meta = (
+                Works()
+                .filter(**filters)
+                .filter(publication_year=year)
+                .group_by(group_by)
+                .get(return_meta=True)
+            )
+
+            # Necessário adicionar um tratamento quanto o gráfico for vazio.
+            if result:
+                serie_list.append(result[0].get("count"))
+
+        serie_list = (
+            {
+                "data": serie_list,
+                "type": "bar",
+                "label": {"show": graph_label},
+                "emphasis": {"focus": "series"},
+            },
+        )
+
+        serie = {
+            "keys": [
+                key
+                for key in range(
+                    int(start),
+                    int(end) + 1,
                 )
-                filter_list = data.get("filters")
+            ],
+            "series": serie_list,
+        }
 
-        if ind.range_filter:
-            serie = {
-                "keys": [
-                    key
-                    for key in range(
-                        ind.range_filter.get("range").get("start"),
-                        ind.range_filter.get("range").get("end") + 1,
+    else:
+
+        logging.info("Indicator dict: %s" % ind)
+
+        title = request.GET.get("title", None)
+
+        if not title:
+
+            title = "Evolução da Produção Científica por Ano"
+
+            if filters != "*:*":
+                title += ": Um Panorama por %s" % (
+                    " e ".join(
+                        [
+                            choices.translates.get(t, "")
+                            for t in ind.get("context_by", "")
+                        ]
+                        + [
+                            choices.translates.get(t, "")
+                            for t in ind["default_filter"].keys()
+                        ]
                     )
-                ],
-                "series": serie_list,
-            }
-        else:
-            serie = {
-                "keys": data.get("items"),
-                "series": serie_list,
-            }
+                )
+
+        ind = indicator.Indicator(**ind)
+
+        serie = {}
+        serie_list = []
+
+        for item in ind.generate():
+
+            for serie_name_and_stack, data in item.items():
+                if data:
+                    if "-" in serie_name_and_stack:
+                        stack = " ".join(serie_name_and_stack.split("-")[1:])
+                    else:
+                        stack = serie_name_and_stack
+
+                    serie_list.append(
+                        {
+                            "name": (
+                                choices.translates.get(ind.facet_by, ind.facet_by)
+                                if serie_name_and_stack == "*"
+                                else choices.translates.get(
+                                    serie_name_and_stack, serie_name_and_stack
+                                )
+                            ),
+                            "type": graph_type,
+                            "stack": ind.facet_by if stack == "*" else stack,
+                            "emphasis": {"focus": "series"},
+                            "data": list(data.get("counts")),
+                            "label": {"show": graph_label},
+                        }
+                    )
+                    filter_list = data.get("filters")
+
+            if ind.range_filter:
+                serie = {
+                    "keys": [
+                        key
+                        for key in range(
+                            ind.range_filter.get("range").get("start"),
+                            ind.range_filter.get("range").get("end") + 1,
+                        )
+                    ],
+                    "series": serie_list,
+                }
+            else:
+                serie = {
+                    "keys": data.get("items"),
+                    "series": serie_list,
+                }
 
     return JsonResponse(
         {
@@ -371,8 +429,5 @@ def graph_json(request):
             },
             "data": serie,
             "filters": filter_list,
-            "oa_data": {
-                "world_count": w_total or 0,
-            },
         }
     )
