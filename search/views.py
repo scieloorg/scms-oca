@@ -15,11 +15,14 @@ from django.urls import reverse
 
 from indicator.models import Indicator, IndicatorFile
 from search.graphic_data import GraphicData
-from indicator import indicator
+from indicator import indicator, indicatorOA
 from core.utils import utils
 from . import choices
 
+from . import tools
+
 from pyalex import Works
+
 
 solr = pysolr.Solr(
     settings.HAYSTACK_CONNECTIONS["default"]["URL"],
@@ -291,8 +294,16 @@ def graph_json(request):
         # Aqui é preciso pegar os campos que fazem sentido para o universo mundo
 
         filters = {}
-        group_by = "publication_year"
 
+        if request.GET.get("context_by") == "":
+            group_by = "publication_year"
+        if request.GET.get("context_by") == "open_access_status":
+            group_by = "oa_status"
+        if request.GET.get("context_by") == "license":
+            group_by = "best_oa_location.license"
+        if request.GET.get("context_by") == "is_oa":
+            group_by = "is_oa"
+        
         serie = {}
         serie_list = []
 
@@ -304,32 +315,44 @@ def graph_json(request):
 
         if request.GET.get("open_access_status") != "all":
             filters["oa_status"] = request.GET.get("open_access_status")
-        
+
         if request.GET.get("license") != "all":
             filters["best_oa_location.license"] = request.GET.get("license")
-        
-        for year in range(int(start), int(end) + 1):
-            result, meta = (
-                Works()
-                .filter(**filters)
-                .filter(publication_year=year)
-                .group_by(group_by)
-                .get(return_meta=True)
-            )
 
-            # Necessário adicionar um tratamento quanto o gráfico for vazio.
-            if result:
-                serie_list.append(result[0].get("count"))
+        ret = indicatorOA.Indicator(
+            filters=filters,
+            group_by=group_by,
+            range_filter={
+                "filter_name": "year",
+                "range": {"start": start, "end": end},
+            },
+        ).generate(key=True if group_by == "publication_year" else False)
+    
+        # Realiza a tradução de alguns items da licença para outros
+        if "best_oa_location.license" in group_by:
+            ret = tools.normalize_dictionary(ret)
 
-        serie_list = (
+        if isinstance(ret, dict):
+            for k, v in ret.items():
+                serie_list.append(
+                    {
+                        "name": choices.translates.get(k, k),
+                        "type": graph_type,
+                        "stack": choices.translates.get(k, k),
+                        "emphasis": {"focus": "series"},
+                        "data": v,
+                        "label": {"show": graph_label},
+                    }
+                )
+        else:
+            serie_list = (
             {
-                "data": serie_list,
+                "data": ret,
                 "type": "bar",
                 "label": {"show": graph_label},
                 "emphasis": {"focus": "series"},
             },
         )
-
         serie = {
             "keys": [
                 key
