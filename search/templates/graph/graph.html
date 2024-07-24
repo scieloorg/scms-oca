@@ -673,8 +673,12 @@
                 },
                 label:{
                     formatter: function(param) {
-                        value = param.data/1000
-                        return value.toFixed(3);
+                        if (param.data > 1000){
+                            value = param.data/1000
+                            return value.toFixed(3);
+                        }else{
+                            return param.data;
+                        }
                       }
                 },
                 toolbox: {
