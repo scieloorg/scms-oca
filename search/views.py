@@ -15,11 +15,14 @@ from django.urls import reverse
 
 from indicator.models import Indicator, IndicatorFile
 from search.graphic_data import GraphicData
-from indicator import indicator
+from indicator import indicator, indicatorOA
 from core.utils import utils
 from . import choices
 
+from . import tools
+
 from pyalex import Works
+
 
 solr = pysolr.Solr(
     settings.HAYSTACK_CONNECTIONS["default"]["URL"],
@@ -195,7 +198,12 @@ def graph(request):
     return render(
         request,
         "graph/graph.html",
-        {"facets": search_results.facets["facet_fields"], "ind_files": ind_files},
+        {
+            "facets": search_results.facets["facet_fields"],
+            "ind_files": ind_files,
+            "countries": choices.country_list,
+            "world_region": choices.scimago_region,
+        },
     )
 
 
@@ -284,14 +292,50 @@ def graph_json(request):
 
     filter_list = None
 
+    scope = request.GET.get("scope", None)
+
+    title = request.GET.get("title", None)
+
+    # Must concatenate the ``default_filter`` and ``context_by``
+    title_terms = [f for f in ind["default_filter"].values()] + [context_by]
+
+    if not title:
+        title_list = [
+            choices.translates.get(t, "")
+            for t in title_terms
+            if t != "" and t != "article"
+        ] + [choices.translates.get(universe, universe)]
+
+        title_list = [item for item in title_list if item]
+        
+        if scope != "article":
+            title = tools.generate_string(
+                title_list,
+                [start, end],
+                text="prática de"
+            )
+        else:
+            title = tools.generate_string(
+                title_list,
+                [start, end],
+            )
+
     # check if is universe is brazil or world
-    if universe != "brazil":
+    if universe == "world" or universe == "world_region" or universe == "world_country":
         # Exemplo:
         # https://api.openalex.org/works?filter=publication_year:2020,type:article&group_by=publication_year
         # Aqui é preciso pegar os campos que fazem sentido para o universo mundo
 
         filters = {}
-        group_by = "publication_year"
+
+        if request.GET.get("context_by") == "":
+            group_by = "publication_year"
+        if request.GET.get("context_by") == "open_access_status":
+            group_by = "oa_status"
+        if request.GET.get("context_by") == "license":
+            group_by = "best_oa_location.license"
+        if request.GET.get("context_by") == "is_oa":
+            group_by = "is_oa"
 
         serie = {}
         serie_list = []
@@ -304,66 +348,72 @@ def graph_json(request):
 
         if request.GET.get("open_access_status") != "all":
             filters["oa_status"] = request.GET.get("open_access_status")
-        
+
         if request.GET.get("license") != "all":
             filters["best_oa_location.license"] = request.GET.get("license")
-        
-        for year in range(int(start), int(end) + 1):
-            result, meta = (
-                Works()
-                .filter(**filters)
-                .filter(publication_year=year)
-                .group_by(group_by)
-                .get(return_meta=True)
-            )
 
-            # Necessário adicionar um tratamento quanto o gráfico for vazio.
-            if result:
-                serie_list.append(result[0].get("count"))
+        if request.GET.get("world_country"):
+            filters["authorships.countries"] = request.GET.get("world_country")
 
-        serie_list = (
-            {
-                "data": serie_list,
-                "type": "bar",
-                "label": {"show": graph_label},
-                "emphasis": {"focus": "series"},
+        if request.GET.get("world_region"):
+            filters["institutions.continent"] = request.GET.get("world_region")
+
+        ret = indicatorOA.Indicator(
+            filters=filters,
+            group_by=group_by,
+            range_filter={
+                "filter_name": "year",
+                "range": {"start": start, "end": end},
             },
-        )
+        ).generate(key=True if group_by == "publication_year" else False)
 
-        serie = {
-            "keys": [
-                key
-                for key in range(
-                    int(start),
-                    int(end) + 1,
+        # Realiza a tradução de alguns items da licença para outros
+        if "best_oa_location.license" in group_by:
+            ret = tools.normalize_dictionary(ret)
+
+        if ret:
+            if isinstance(ret, dict):
+                for k, v in ret.items():
+                    serie_list.append(
+                        {
+                            "name": choices.translates.get(k, k),
+                            "type": graph_type,
+                            # "stack": choices.translates.get(k, k),
+                            "stack": "total",
+                            "emphasis": {"focus": "series"},
+                            "data": v,
+                            "label": {"show": graph_label},
+                        }
+                    )
+            else:
+                serie_list = (
+                    {
+                        "data": ret,
+                        "type": "bar",
+                        "stack": "total",
+                        "label": {"show": graph_label},
+                        "emphasis": {"focus": "series"},
+                    },
                 )
-            ],
-            "series": serie_list,
-        }
+            serie = {
+                "keys": [
+                    key
+                    for key in range(
+                        int(start),
+                        int(end) + 1,
+                    )
+                ],
+                "series": serie_list,
+            }
+        else:
+            serie = {
+                "keys": [],
+                "series": [],
+            }
 
     else:
 
         logging.info("Indicator dict: %s" % ind)
-
-        title = request.GET.get("title", None)
-
-        if not title:
-
-            title = "Evolução da Produção Científica por Ano"
-
-            if filters != "*:*":
-                title += ": Um Panorama por %s" % (
-                    " e ".join(
-                        [
-                            choices.translates.get(t, "")
-                            for t in ind.get("context_by", "")
-                        ]
-                        + [
-                            choices.translates.get(t, "")
-                            for t in ind["default_filter"].keys()
-                        ]
-                    )
-                )
 
         ind = indicator.Indicator(**ind)
 
@@ -389,10 +439,11 @@ def graph_json(request):
                                 )
                             ),
                             "type": graph_type,
-                            "stack": ind.facet_by if stack == "*" else stack,
+                            # "stack": ind.facet_by if stack == "*" else stack,
+                            "stack": "total",
                             "emphasis": {"focus": "series"},
                             "data": list(data.get("counts")),
-                            "label": {"show": graph_label},
+                            "label": {"show": graph_label },
                         }
                     )
                     filter_list = data.get("filters")
@@ -417,7 +468,6 @@ def graph_json(request):
     return JsonResponse(
         {
             "graph_options": {
-                # Evolução da Produção Científica por ano: Um Panorama por Ano e Área Temática
                 "title": title,
                 "percent": request.GET.get("percent", None),
                 "graph_legend_orient": graph_legend_orient,

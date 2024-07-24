@@ -12,7 +12,16 @@ class PolicyIndex(indexes.SearchIndex, indexes.Indexable):
         text
     """
 
+    # Common fields between directory and article
     record_type = indexes.CharField(null=False)
+    record_status = indexes.CharField(model_attr="record_status", null=True)
+    institutions = indexes.MultiValueField(null=True)
+    cities = indexes.MultiValueField(null=True)
+    states = indexes.MultiValueField(null=True)
+    regions = indexes.MultiValueField(null=True)
+    thematic_level_0 = indexes.MultiValueField(null=True)
+    year = indexes.CharField(null=True)
+
     text = indexes.CharField(document=True, use_template=True)
     title = indexes.CharField(model_attr="title", null=True)
     directory_type = indexes.CharField(null=False)
@@ -21,17 +30,11 @@ class PolicyIndex(indexes.SearchIndex, indexes.Indexable):
     date = indexes.CharField(model_attr="date", null=True)
     description = indexes.CharField(model_attr="description", null=True)
 
-    institutions = indexes.MultiValueField(null=True)
     practice = indexes.CharField(model_attr="practice", null=True)
     action = indexes.CharField(model_attr="action", null=True)
     classification = indexes.CharField(model_attr="classification", null=True)
     keywords = indexes.MultiValueField(null=True)
     countries = indexes.MultiValueField(null=True)
-    cities = indexes.MultiValueField(null=True)
-    states = indexes.MultiValueField(null=True)
-    regions = indexes.MultiValueField(null=True)
-    thematic_areas = indexes.MultiValueField(null=True)
-    record_status = indexes.CharField(model_attr="record_status", null=True)
 
     source = indexes.CharField(model_attr="action", null=True)
 
@@ -45,6 +48,10 @@ class PolicyIndex(indexes.SearchIndex, indexes.Indexable):
     creator = indexes.CharField(null=False)
     updated_by = indexes.CharField(null=False)
 
+    def prepare_year(self, obj):
+        if obj.date:
+            return obj.date.year
+    
     def prepare_created(self, obj):
         return obj.created.isoformat()
 
@@ -64,7 +71,7 @@ class PolicyIndex(indexes.SearchIndex, indexes.Indexable):
         if obj.institutions:
             return [institution.name for institution in obj.institutions.all()]
 
-    def prepare_thematic_areas(self, obj):
+    def prepare_thematic_level_0(self, obj):
         thematic_areas = set()
         if obj.thematic_areas:
             for thematic_area in obj.thematic_areas.all():

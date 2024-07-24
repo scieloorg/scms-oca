@@ -12,7 +12,15 @@ class EventIndex(indexes.SearchIndex, indexes.Indexable):
         text
     """
 
+    # Common fields between directory and article
     record_type = indexes.CharField(null=False)
+    record_status = indexes.CharField(model_attr="record_status", null=True)
+    cities = indexes.MultiValueField(null=True)
+    states = indexes.MultiValueField(null=True)
+    regions = indexes.MultiValueField(null=True)
+    thematic_level_0 = indexes.MultiValueField(null=True)
+    year = indexes.CharField(null=True)
+
     text = indexes.CharField(document=True, use_template=True)
     title = indexes.CharField(model_attr="title", null=True)
     directory_type = indexes.CharField(null=False)
@@ -24,7 +32,6 @@ class EventIndex(indexes.SearchIndex, indexes.Indexable):
     end_date = indexes.CharField(model_attr="end_date", null=True)
     start_time = indexes.CharField(model_attr="start_time", null=True)
     end_time = indexes.CharField(model_attr="end_time", null=True)
-    record_status = indexes.CharField(model_attr="record_status", null=True)
 
     organization = indexes.MultiValueField(null=True)
     practice = indexes.CharField(model_attr="practice", null=True)
@@ -32,10 +39,6 @@ class EventIndex(indexes.SearchIndex, indexes.Indexable):
     classification = indexes.CharField(model_attr="classification", null=True)
     keywords = indexes.MultiValueField(null=True)
     countries = indexes.MultiValueField(null=True)
-    cities = indexes.MultiValueField(null=True)
-    states = indexes.MultiValueField(null=True)
-    regions = indexes.MultiValueField(null=True)
-    thematic_areas = indexes.MultiValueField(null=True)
 
     source = indexes.CharField(model_attr="action", null=True)
     attendance = indexes.CharField(model_attr="attendance", null=True)
@@ -50,6 +53,13 @@ class EventIndex(indexes.SearchIndex, indexes.Indexable):
     updated = indexes.CharField(null=False)
     creator = indexes.CharField(null=False)
     updated_by = indexes.CharField(null=False)
+
+    def prepare_year(self, obj):
+        if obj.start_date:
+            return obj.start_date.year
+        
+        if obj.end_date:
+            return obj.end_date.year
 
     def prepare_created(self, obj):
         return obj.created.isoformat()
@@ -70,7 +80,7 @@ class EventIndex(indexes.SearchIndex, indexes.Indexable):
         if obj.organization:
             return [org.name for org in obj.organization.all()]
 
-    def prepare_thematic_areas(self, obj):
+    def prepare_thematic_level_0(self, obj):
         thematic_areas = set()
         if obj.thematic_areas:
             for thematic_area in obj.thematic_areas.all():

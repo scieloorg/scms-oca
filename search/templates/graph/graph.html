@@ -89,16 +89,89 @@
                 </div>
 
                 <select id="universe" class="chzn-select ordem form-control">
-                    <option value="world" selected="">Mundo</option>
-                    <option value="brazil">Brasil</option>
+                    <option value="brazil" selected="">Brasil</option>
+                    <option value="brazil_region">Brasil - Região</option>
+                    <option value="brazil_state">Brasil - Estado</option>
+                    <option value="brazil_instituion">Brasil - Instituição</option>
+                    <option value="world">Mundo</option>
+                    <option value="world_region">Mundo - Região</option>
+                    <option value="world_country">Mundo - País</option>
                 </select>
 
+                <div id="div_world_region" style="display:none">
+                    <div class="mt-3 mb-2">
+                        <b>Regiões:</b>
+                    </div>
+                    <select id="world_region" name="world_region" class="chzn-select ordem form-control"
+                        data-placeholder="Escolha um ou mais regiões...">
+                        <option value="all">Todas</option>
+                        {% for wr in world_region.keys %}
+                            <option value="{{wr}}">{{wr}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div id="div_world_country" style="display:none">
+                    <div class="mt-3 mb-2">
+                        <b>Paises:</b>
+                    </div>
+                    <select id="world_country" name="world_country" class="chzn-select ordem form-control"
+                        data-placeholder="Escolha um ou mais paises...">
+                        <option value="all">Todas</option>
+                        {% for country in countries %}
+                            <option value="{{ country.1 }}">{{ country.0 }}
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div id="div_brazil_region" style="display:none">
+                    <div class="mt-3">
+                        <b>Regiões</b>
+                    </div>
+                    <select id="region" name="region" class="chzn-select ordem form-control"
+                        data-placeholder="Escolha um ou mais região..." multiple>
+                        {% for region in facets.regions|partition:2 %}
+                        <option value="{{ region.0 }}">{{ region.0 }}
+                            <!-- ({{ region.1|intcomma }})</option> -->
+                            {% endfor %}
+                    </select>
+                </div>
+
+                <div id="div_brazil_state" style="display:none">
+                    <div class="mt-3">
+                        <b>Estados</b>
+                    </div>
+                    <select id="states" name="states"
+                        class="chzn-select ordem form-control"
+                        data-placeholder="Escolha um ou mais área temática..." multiple>
+                        {% for sta in facets.states|partition:2 %}
+                        <option value="{{ sta.0 }}">{{ sta.0|translate_data }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div id="div_brazil_institution" style="display:none">
+                    <div class="mt-3">
+                        <b>Instituição:</b>
+                    </div>
+                    <select id="institution" name="institution" class="chzn-select_limit_3 ordem form-control"
+                        data-placeholder="Escolha uma ou mais instituições..." multiple>
+                        {% for ins in facets.institutions|partition:2 %}
+                        <option value="{{ ins.0 }}">{{ ins.0|translate_data }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                    <small class="text-muted">Quantidade max. de instituições: 3</small>
+                </div>
+                
                 <div class="mt-3 mb-2">
                     <b>Base de dados: </b>
                 </div>
 
                 <select id="database" class="chzn-select ordem form-control">
-                    <option value="openalex" selected="">OpenAlex</option>
+                    <option value="ocabr" selected="">OCABr</option>
+                    <option value="openalex">OpenAlex</option>
                 </select>
 
                 <div class="mt-3 mb-2">
@@ -106,11 +179,32 @@
                 </div>
 
                 <select id="scope" class="chzn-select ordem form-control">
-                    <option value="scientific_production" selected="">Produção científica</option>
-                    <option value="policies">Políticas</option>
-                    <option value="infrastructure">Infraestrura</option>
-                    <option value="education">Educação</option>
-                    <option value="events">Divulgação</option>
+                    <option value="article" selected="">Produção científica</option>
+                    <option value="policy_directory">Políticas</option>
+                    <option value="event_directory">Eventos</option>
+                    <option value="education_directory">Educação</option>
+                    <option value="infrastructure_directory">Infraestrura</option>
+                </select>
+
+                <div class="mt-3">
+                    <b>Objeto:</b>
+                </div>
+                <select id="type" name="type" class="chzn-select ordem form-control"
+                    data-placeholder="Escolha tipo de objeto...">
+                    <option value="all">Todos</option>
+                    {% for type in facets.type|partition:2 %}
+                    <option value="{{ type.0 }}">{{ type.0|translate_data }}
+                    </option>
+                    {% endfor %}
+                </select>
+
+                <select id="practice" name="practice" class="chzn-select ordem form-control"
+                    data-placeholder="Escolha tipo de objeto...">
+                    <option value="all">Todos</option>
+                    {% for practice in facets.practice|partition:2 %}
+                    <option value="{{ practice.0 }}">{{ practice.0|translate_data }}
+                    </option>
+                    {% endfor %}
                 </select>
 
                 <div class="mt-3 mb-2">
@@ -122,17 +216,15 @@
                     <option value="relative_frequency">Frequência relativa</option>
                 </select>
 
-
                 <div class="mt-3 mb-2">
                     <b>Gráfico por: </b>
                 </div>
                 <select id="graph_type" name="graph_type" class="chzn-select ordem form-control">
                     <option value="year" selected="">Ano</option>
                     <option value="thematic_level_0">Área temática</option>
-                    <option value="regions">Região</option>
                     <option value="open_access_status">Tipo de acesso aberto</option>
                     <option value="license">Licença</option>
-                    <option value="open_access_status">Tipo de acesso aberto</option>
+                    <!-- <option value="regions">Região</option> -->
                     <option value="is_oa">Acesso aberto (sim/não)</option>
                 </select>
 
@@ -177,18 +269,6 @@
                             <div class="accordion-body pb-3">
 
                                 <div class="mt-3">
-                                    <label for="thematic_level_0" class="form-label">Objeto:</label>
-                                </div>
-                                <select id="type" name="type" class="chzn-select ordem form-control"
-                                    data-placeholder="Escolha tipo de objeto...">
-                                    <option value="all">Todos</option>
-                                    {% for type in facets.type|partition:2 %}
-                                    <option value="{{ type.0 }}">{{ type.0|translate_data }} <!--({{ type.1|intcomma }})-->
-                                    </option>
-                                    {% endfor %}
-                                </select>
-
-                                <div class="mt-3">
                                     <label for="is_oa" class="form-label">Acesso aberto:</label>
                                 </div>
                                 <select id="is_oa" name="is_oa" class="chzn-select ordem form-control">
@@ -205,7 +285,8 @@
                                     data-placeholder="Escolha uma ou mais tipo de acesso aberto...">
                                     <option value="all">Todos</option>
                                     {% for aos in facets.open_access_status|partition:2 %}
-                                    <option value="{{ aos.0 }}">{{ aos.0|translate_data }} <!-- ({{ aos.1|intcomma }}) -->
+                                    <option value="{{ aos.0 }}">{{ aos.0|translate_data }}
+                                        <!-- ({{ aos.1|intcomma }}) -->
                                     </option>
                                     {% endfor %}
                                 </select>
@@ -216,43 +297,25 @@
                                 <select id="license" name="license" class="chzn-select ordem form-control">
                                     <option value="all">Todos</option>
                                     {% for li in facets.license|partition:2 %}
-                                    <option value="{{ li.0 }}">{{ li.0|translate_data }} <!-- ({{ li.1|intcomma }})</option> -->
-                                    {% endfor %}
+                                    <option value="{{ li.0 }}">{{ li.0|translate_data }}
+                                        <!-- ({{ li.1|intcomma }})</option> -->
+                                        {% endfor %}
                                 </select>
 
-                                <div class="mt-3">
-                                    <label for="thematic_level_0" class="form-label">Áreas temáticas:</label>
+                                <div id="universe_brazil">
+                                    <div class="mt-3">
+                                        <label for="thematic_level_0" class="form-label">Áreas temáticas:</label>
+                                    </div>
+                                    <select id="thematic_level_0" name="thematic_level_0"
+                                        class="chzn-select ordem form-control"
+                                        data-placeholder="Escolha um ou mais área temática..." multiple>
+                                        {% for the in facets.thematic_level_0|partition:2 %}
+                                        <option value="{{ the.0 }}">{{ the.0|translate_data }}
+                                            <!-- ({{ the.1|intcomma }}) -->
+                                        </option>
+                                        {% endfor %}
+                                    </select>
                                 </div>
-                                <select id="thematic_level_0" name="thematic_level_0"
-                                    class="chzn-select ordem form-control"
-                                    data-placeholder="Escolha um ou mais área temática..." multiple>
-                                    {% for the in facets.thematic_level_0|partition:2 %}
-                                    <option value="{{ the.0 }}">{{ the.0|translate_data }} <!-- ({{ the.1|intcomma }}) -->
-                                    </option>
-                                    {% endfor %}
-                                </select>
-
-                                <div class="mt-3">
-                                    <label for="region" class="form-label">Região</label>
-                                </div>
-                                <select id="region" name="region" class="chzn-select ordem form-control"
-                                    data-placeholder="Escolha um ou mais região..." multiple>
-                                    {% for region in facets.regions|partition:2 %}
-                                    <option value="{{ region.0 }}">{{ region.0 }} <!-- ({{ region.1|intcomma }})</option> -->
-                                    {% endfor %}
-                                </select>
-
-                                <div class="mt-3">
-                                    <label for="institution" class="form-label">Instituição:</label>
-                                </div>
-                                <select id="institution" name="institution" class="chzn-select ordem form-control"
-                                    data-placeholder="Escolha uma ou mais instituições..." multiple>
-                                    {% for ins in facets.institutions|partition:2 %}
-                                    <option value="{{ ins.0 }}">{{ ins.0|translate_data }} <!-- ({{ ins.1|intcomma }}) -->
-                                    </option>
-                                    {% endfor %}
-                                </select>
-
                             </div>
                         </div>
                     </div>
@@ -302,7 +365,7 @@
                                     <label for="label" class="form-label">Mostra label de quantidade:</label>
                                 </div>
                                 <select id="label" name="label" class="form-control">
-                                    <option value="true"selected="">Sim</option>
+                                    <option value="true" selected>Sim</option>
                                     <option value="">Não</option>
                                 </select>
 
@@ -344,6 +407,53 @@
                             <div id="graph" style="position: relative; height:60vh; width:50vw"></div>
                         </div>
                     </div>
+                    <!-- <div class="container">
+                        <div class="row">
+                          <div class="col-sm">
+                                <div class="mt-3">
+                                    <label for="title" class="form-label">Título:</label>
+                                </div>
+                                <textarea type="text" id="title" name="title" class="form-control"
+                                    placeholder="Adicione um título personalizado.">
+                                </textarea>
+
+                                <div class="mt-3">
+                                    <label for="type_graph" class="form-label">Tipo de gráfico:</label>
+                                </div>
+                                <select id="type_graph" name="type_graph" class="form-control">
+                                    <option value="bar">Barras</option>
+                                    <option value="line">Linha</option>
+                                    <option value="scatter">Pontos</option>
+                                </select>
+                          </div>
+                          <div class="col-sm">
+                                <div class="mt-3">
+                                    <label for="legend_orient" class="form-label">Orientação da legenda:</label>
+                                </div>
+                                <select id="legend_orient" name="legend_orient" class="form-control">
+                                    <option value="horizontal">Horizontal</option>
+                                    <option value="vertical">Vertical</option>
+                                </select>
+                                <div class="mt-3">
+                                    <label for="legend_top" class="form-label">Distancia da legenda para o topo:</label>
+                                </div>
+                                <select id="legend_top" name="legend_top" class="form-control">
+                                    <option value="bottom">Rodapé</option>
+                                    <option value="top">Topo</option>
+                                    <option value="middle">Meio</option>
+                                </select>
+                          </div>
+                          <div class="col-sm">
+                            <div class="mt-3">
+                                <label for="label" class="form-label">Mostra label de quantidade:</label>
+                            </div>
+                            <select id="label" name="label" class="form-control">
+                                <option value="true" selected>Sim</option>
+                                <option value="">Não</option>
+                            </select>
+                          </div>
+                        </div>
+                      </div> -->
                     <!-- Graph -->
 
                     <!-- Data -->
@@ -353,10 +463,10 @@
                             <a href="{{ f.raw_data.url }}"
                                 class="list-group-item list-group-item-action flex-column align-items-start">
                                 <div class="d-flex w-100 justify-content-between">
-                                    <h5 class="mb-1">Download {{ forloop.counter }}</h5>
+                                    <h5 class="mb-1">OCABr Articles {{ forloop.counter }}</h5>
                                     <small>{{ f.name }}</small>
                                 </div>
-                                <p class="mb-1">Arquivo compactado em .zip.</p>
+                                <p class="mb-1">Arquivo compactado em .zip, contento os dados brutos utilizado para produção das métricas</p>
                                 <small>Tamanho: {{ f.raw_data.size|sizify }}</small>
                             </a>
                             {% endfor %}
@@ -381,6 +491,9 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
+    const now = new Date();
+    const dataHora = now.toLocaleString();
+    const stringDataHora = `Data e hora: ${dataHora}`;
 
     $(".chzn-select").chosen(
         {
@@ -391,8 +504,17 @@
             allow_single_deselect: false,
         }
     );
+    $(".chzn-select_limit_3").chosen(
+        {
+            no_results_text: "Nenhum resultado encontrado para: ",
+            search_contains: true,
+            display_disabled_options: false,
+            display_selected_options: false,
+            allow_single_deselect: false,
+            max_selected_options: 3
+        }
+    );
     $(".chosen-container").css({ "width": "100%" })
-
 
     serialize = function (obj) {
         var str = [];
@@ -459,23 +581,44 @@
         if ($("#license").val() != "all") {
             data["default_filter"] += "," + "license:" + $("#license").val()
         }
-        if ($("#type").val() != "all") {
+        if ($("#type").val() != "all" && $("#scope").val() == "article") {
             data["default_filter"] += "," + "type:" + $("#type").val()
         }
+        if ($("#states").val() != "") {
+            data["default_filter"] += "," + '"states:"' + $("#states").val()
+        }
+        if ($("#practice").val() != "all" && $("#scope").val() != "article") {
+            data["default_filter"] += "," + 'practice:"' + $("#practice").val() + '"'
+        }
+        if ($("#scope").val() != "") {
+            if ($("#scope").val() == "article"){
+                data["default_filter"] += "," + 'record_type:' + $("#scope").val()
+            }else{
+                data["default_filter"] += "," + 'directory_type:' + $("#scope").val()
+            }
+            data["scope"] =  $("#scope").val()
+        }
+        // Somente para mundo
+        if ($("#world_country").val() != "all") {
+            data["world_country"] = $("#world_country").val()
+        }
+        if ($("#world_region").val() != "all") {
+            data["world_region"] = $("#world_region").val()
+        }
         if ($("#universe").val()) {
-            data["universe"] =  $("#universe").val()
+            data["universe"] = $("#universe").val()
         }
         if ($("#type").val()) {
-            data["type"] =  $("#type").val()
+            data["type"] = $("#type").val()
         }
         if ($("#is_oa").val()) {
-            data["is_oa"] =  $("#is_oa").val()
+            data["is_oa"] = $("#is_oa").val()
         }
         if ($("#open_access_status").val()) {
-            data["open_access_status"] =  $("#open_access_status").val()
+            data["open_access_status"] = $("#open_access_status").val()
         }
         if ($("#license").val()) {
-            data["license"] =  $("#license").val()
+            data["license"] = $("#license").val()
         }
 
         console.log(data["default_filter"])
@@ -508,13 +651,35 @@
             }
 
             chart.setOption({
-                title: {
-                    text: data.graph_options.title
+                title: [{
+                    text: data.graph_options.title,
+                    subtext: stringDataHora + " - Fonte: " + $("#database").val().toUpperCase()
                 },
+                {
+                    text: 'Dados do OCABr não mantém serie',
+                    textStyle: {
+                      fontWeight: 'normal',
+                      fontSize: 9,
+                      lineHeight: 1
+                    },
+                    top: 'bottom',
+                    left: 'right'
+                  }
+                ],
                 legend: {
                     orient: data.graph_options.graph_legend_orient,
                     right: data.graph_options.graph_legend_right,
                     top: data.graph_options.graph_legend_top
+                },
+                label:{
+                    formatter: function(param) {
+                        if (param.data > 1000){
+                            value = param.data/1000
+                            return value.toFixed(3);
+                        }else{
+                            return param.data;
+                        }
+                      }
                 },
                 toolbox: {
                     orient: 'vertical',
@@ -540,6 +705,148 @@
 
     }
 
+    function remove_options(selectId, optionValues) {
+        const selectElement = document.getElementById(selectId);
+
+        // Iterate over each value in the list of options to be removed
+        optionValues.forEach(value => {
+            // Iterate over all options in the select to find the option with the matching value
+            for (let i = selectElement.options.length - 1; i >= 0; i--) {
+                if (selectElement.options[i].value === value) {
+                    selectElement.remove(i);
+                }
+            }
+        });
+    }
+
+    function disable_options(selectId, optionValues) {
+        const selectElement = document.getElementById(selectId);
+
+        optionValues.forEach(value => {
+            for (let i = 0; i < selectElement.options.length; i++) {
+                if (selectElement.options[i].value === value) {
+                    selectElement.options[i].disabled = true;
+                    break;
+                }
+            }
+        });
+    }
+
+    function enable_options(selectId, optionValues) {
+        const selectElement = document.getElementById(selectId);
+
+        optionValues.forEach(value => {
+            for (let i = 0; i < selectElement.options.length; i++) {
+                if (selectElement.options[i].value === value) {
+                    selectElement.options[i].disabled = false;
+                    break;
+                }
+            }
+        });
+    }
+
+    function hide_components(componentList) {
+        componentList.forEach(component => {
+            if (typeof component === 'string') {
+                component = document.getElementById(component);
+            }
+            if (component) {
+                component.style.display = 'none';
+            } else {
+                console.error(`Element with ID ${component} not found.`);
+            }
+        });
+    }
+
+    function show_components(componentList) {
+        componentList.forEach(component => {
+            if (typeof component === 'string') {
+                component = document.getElementById(component);
+            }
+            if (component) {
+                component.style.display = 'block';
+            } else {
+                console.error(`Element with ID ${component} not found.`);
+            }
+        });
+    }
+
+    function dynamic_fields() {
+
+        if ($("#universe").val() == "brazil" && $("#scope").val() == "article") {
+        }
+        if ($("#universe").val() != "brazil" || $("#scope").val() != "article") {
+        }
+        if ($("#scope").val() != "article"){
+            show_components(["practice_chosen"]);
+            hide_components(["type_chosen"]);
+            disable_options("graph_type", ["open_access_status", "license", "is_oa"]);
+        }
+        if ($("#scope").val() == "article"){
+            show_components(["type_chosen"]);
+            hide_components(["practice_chosen"]);
+            enable_options("graph_type", ["open_access_status", "license", "is_oa"]);
+        }
+        if ($("#universe").val() == "world") {
+            disable_options("graph_type", ["thematic_level_0", "regions"]);
+            $("#graph_type").trigger("chosen:updated");
+            hide_components(["universe_brazil"])
+            hide_components(["div_world_region"])
+        }
+        if ($("#universe").val() == "brazil") {
+            enable_options("graph_type", ["thematic_level_0", "regions"]);
+            $("#graph_type").trigger("chosen:updated");
+            show_components(["universe_brazil"])
+            hide_components(["div_world_country"])
+            hide_components(["div_world_region"]) 
+            hide_components(["div_brazil_region"])
+            hide_components(["div_brazil_institution"])   
+            hide_components(["div_brazil_state"])   
+            hide_components(["div_world_country"]) 
+        }
+        if ($("#universe").val() == "brazil_region") {
+            show_components(["div_brazil_region"])   
+            hide_components(["div_world_country"])
+            hide_components(["div_world_region"])    
+        }
+        if ($("#universe").val() == "brazil_state") {
+            hide_components(["div_brazil_region"])   
+            show_components(["div_brazil_state"])      
+            hide_components(["div_brazil_institution"])   
+            hide_components(["div_world_country"]) 
+        }
+        if ($("#universe").val() == "brazil_instituion") {
+            hide_components(["div_brazil_region"])   
+            show_components(["div_brazil_institution"])   
+            hide_components(["div_brazil_state"])   
+            hide_components(["div_world_country"])
+            hide_components(["div_world_region"]) 
+        }
+        if ($("#universe").val() == "world") {
+            hide_components(["div_brazil_region"])   
+            hide_components(["div_brazil_institution"])   
+            hide_components(["div_brazil_state"])   
+            hide_components(["div_world_country"])   
+            hide_components(["div_world_region"])      
+        }
+        if ($("#universe").val() == "world_country") {
+            show_components(["div_world_country"]) 
+            hide_components(["div_brazil_region"])     
+            hide_components(["div_brazil_institution"])   
+            hide_components(["div_brazil_state"])
+            hide_components(["div_world_region"])    
+        }
+        if ($("#universe").val() == "world_region") {
+            show_components(["div_world_region"]) 
+            hide_components(["div_brazil_region"])     
+            hide_components(["div_brazil_institution"])   
+            hide_components(["div_brazil_state"])   
+            hide_components(["div_world_country"])
+        }
+
+    }
+
+    dynamic_fields();
     generate_graph(get_params());
 
     document.addEventListener('keypress', function enterPress(e) {
@@ -552,6 +859,7 @@
         document.querySelectorAll('select').forEach(select => {
             $('#' + select.id).change(function () {
                 generate_graph(get_params());
+                dynamic_fields();
             })
         });
     })

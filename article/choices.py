@@ -46,9 +46,13 @@ LICENSE = [
     ("", ""),
     ("CC0", "CC0"),
     ("CC-BY", "CC-BY"),
+    ("CC BY", "CC-BY"),
     ("CC-BYNC", "CC-BYNC"),
+    ("CC BY-NC", "CC-BYNC"),
     ("CC-BYND", "CC-BYND"),
+    ("CC BY-ND", "CC-BYND"),
     ("CC-BYNCND", "CC-BYNCND"),
+    ("CC BY-NC-ND", "CC-BYNCND"),
 ]
 
 APC = [
