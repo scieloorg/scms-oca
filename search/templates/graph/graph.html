@@ -20,7 +20,7 @@
             <div class="col pl-0">
 
                 <div class="page-title-row mb-4" style="background:#F9F9F9;border-radius:4px;">
-                    <div class="page-title-content py-3 px-3">
+                    <div class="page-title-content py-2 px-2">
                         <h1 class="mb-1">Indicadores</h1>
                         <span>Painel de dados do Observatório OCABr</span>
                     </div>
@@ -86,6 +86,7 @@
 
                 <div class="mt-3 mb-2">
                     <b>Universo: </b>
+                    <i class="fal fa-question-circle" data-toggle="tooltip" data-placement="right" data-original-title="Se fizer parte de coleção, registrar o volume. Se a inscrição for da coleção toda, registrar o nome da coleção."></i>
                 </div>
 
                 <select id="universe" class="chzn-select ordem form-control">
@@ -111,6 +112,7 @@
                     </select>
                 </div>
 
+
                 <div id="div_world_country" style="display:none">
                     <div class="mt-3 mb-2">
                         <b>Paises:</b>
@@ -119,7 +121,7 @@
                         data-placeholder="Escolha um ou mais paises...">
                         <option value="all">Todas</option>
                         {% for country in countries %}
-                            <option value="{{ country.1 }}">{{ country.0 }}
+                            <option value="{{ country.0 }}">{{ country.0 }}
                         {% endfor %}
                     </select>
                 </div>
@@ -128,10 +130,10 @@
                     <div class="mt-3">
                         <b>Regiões</b>
                     </div>
-                    <select id="region" name="region" class="chzn-select ordem form-control"
+                    <select id="regions" name="regions" class="chzn-select ordem form-control"
                         data-placeholder="Escolha um ou mais região..." multiple>
                         {% for region in facets.regions|partition:2 %}
-                        <option value="{{ region.0 }}">{{ region.0 }}
+                            <option value="{{ region.0 }}">{{ region.0 }}
                             <!-- ({{ region.1|intcomma }})</option> -->
                             {% endfor %}
                     </select>
@@ -153,44 +155,35 @@
 
                 <div id="div_brazil_institution" style="display:none">
                     <div class="mt-3">
-                        <b>Instituição:</b>
+                        <b>Institutições:</b>
                     </div>
-                    <select id="institution" name="institution" class="chzn-select_limit_3 ordem form-control"
+                    <select id="institutions" name="institutions" class="chzn-select ordem form-control"
                         data-placeholder="Escolha uma ou mais instituições..." multiple>
                         {% for ins in facets.institutions|partition:2 %}
                         <option value="{{ ins.0 }}">{{ ins.0|translate_data }}
                         </option>
                         {% endfor %}
                     </select>
-                    <small class="text-muted">Quantidade max. de instituições: 3</small>
+                    <!-- <small class="text-muted">Quantidade max. de instituições: 3</small> -->
                 </div>
                 
                 <div class="mt-3 mb-2">
-                    <b>Base de dados: </b>
-                </div>
-
-                <select id="database" class="chzn-select ordem form-control">
-                    <option value="ocabr" selected="">OCABr</option>
-                    <option value="openalex">OpenAlex</option>
-                </select>
-
-                <div class="mt-3 mb-2">
                     <b>Escopo: </b>
                 </div>
-
+                
                 <select id="scope" class="chzn-select ordem form-control">
                     <option value="article" selected="">Produção científica</option>
                     <option value="policy_directory">Políticas</option>
-                    <option value="event_directory">Eventos</option>
+                    <option value="event_directory">Disseminação</option>
                     <option value="education_directory">Educação</option>
                     <option value="infrastructure_directory">Infraestrura</option>
                 </select>
-
+                
                 <div class="mt-3">
                     <b>Objeto:</b>
                 </div>
                 <select id="type" name="type" class="chzn-select ordem form-control"
-                    data-placeholder="Escolha tipo de objeto...">
+                data-placeholder="Escolha tipo de objeto...">
                     <option value="all">Todos</option>
                     {% for type in facets.type|partition:2 %}
                     <option value="{{ type.0 }}">{{ type.0|translate_data }}
@@ -198,13 +191,22 @@
                     {% endfor %}
                 </select>
 
-                <select id="practice" name="practice" class="chzn-select ordem form-control"
+                <select id="classification" name="classification" class="chzn-select ordem form-control"
                     data-placeholder="Escolha tipo de objeto...">
                     <option value="all">Todos</option>
-                    {% for practice in facets.practice|partition:2 %}
-                    <option value="{{ practice.0 }}">{{ practice.0|translate_data }}
+                    {% for classification in facets.classification|partition:2 %}
+                    <option value="{{ classification.0 }}">{{ classification.0|translate_data }}
                     </option>
                     {% endfor %}
+                </select>
+            
+                <div class="mt-3 mb-2">
+                    <b>Base de dados: </b>
+                </div>
+
+                <select id="database" class="chzn-select ordem form-control">
+                    <option value="ocabr" selected="">OCABr</option>
+                    <option value="openalex">OpenAlex</option>
                 </select>
 
                 <div class="mt-3 mb-2">
@@ -404,7 +406,7 @@
                     <!-- Graph -->
                     <div class="tab-pane fade show active" id="ex2-tabs-1" role="tabpanel" aria-labelledby="ex2-tab-1">
                         <div class="mb-2 mx-auto" style="max-width: 100%; min-height: 100%;">
-                            <div id="graph" style="position: relative; height:60vh; width:50vw"></div>
+                            <div id="graph" style="position: relative; height:75vh; width:60vw"></div>
                         </div>
                     </div>
                     <!-- <div class="container">
@@ -492,8 +494,8 @@
 
 <script>
     const now = new Date();
-    const dataHora = now.toLocaleString();
-    const stringDataHora = `Data e hora: ${dataHora}`;
+    const dataHora = now.toLocaleString('en-GB', { timeZone: 'UTC' });
+    const stringDataHora = ` ${dataHora} - UTC`;
 
     $(".chzn-select").chosen(
         {
@@ -565,16 +567,15 @@
         data["end"] = $('#end').val()
 
         data["default_filter"] = format_prefix($("#thematic_level_0").val(), "thematic_level_0")
-        if ($("#region").val().length) {
-            console.log("aqui");
-            data["default_filter"] += "," + format_prefix($("#region").val(), "regions")
-        }
+        //if ($("#region").val() != "all") {
+        //    data["filters"] = "regions:" + $("#region").val()
+        //}
         if ($("#open_access_status").val().length) {
             data["default_filter"] += "," + + "open_access_status:" + $("#open_access_status").val()
         }
-        if ($("#institution").val().length) {
-            data["default_filter"] += "," + format_prefix($("#institution").val(), "institutions")
-        }
+        //if ($("#institution").val().length) {
+            //data["default_filter"] += "," + format_prefix($("#institution").val(), "institutions")
+        //}
         if ($("#is_oa").val() != "all") {
             data["default_filter"] += "," + "is_oa:" + $("#is_oa").val()
         }
@@ -584,11 +585,11 @@
         if ($("#type").val() != "all" && $("#scope").val() == "article") {
             data["default_filter"] += "," + "type:" + $("#type").val()
         }
-        if ($("#states").val() != "") {
-            data["default_filter"] += "," + '"states:"' + $("#states").val()
-        }
-        if ($("#practice").val() != "all" && $("#scope").val() != "article") {
-            data["default_filter"] += "," + 'practice:"' + $("#practice").val() + '"'
+        //if ($("#states").val() != "") {
+        //    data["default_filter"] += "," + '"states:"' + $("#states").val()
+        //}
+        if ($("#classification").val() != "all" && $("#scope").val() != "article") {
+            data["default_filter"] += "," + 'classification:"' + $("#classification").val() + '"'
         }
         if ($("#scope").val() != "") {
             if ($("#scope").val() == "article"){
@@ -620,13 +621,29 @@
         if ($("#license").val()) {
             data["license"] = $("#license").val()
         }
-
+        if ($("#regions").val() != "") {
+            data["regions"] = $("#regions").val()
+        }
+        if ($("#states").val() != "") {
+            data["states"] = $("#states").val()
+        }
+        if ($("#institutions").val() != "") {
+            data["institutions"] = $("#institutions").val()
+        }
+        console.log($("#regions").val())
+        
         console.log(data["default_filter"])
 
         console.log(data);
 
         return data
     }
+
+    function replaceSpacesWithNewlines(text) {
+        // The regular expression /\s/g finds all whitespace characters, including spaces, tabs, etc.
+        // The \n represents a newline.
+        return text.replace(/\s/g, '\n');
+      }
 
     $("#generate_graph").click(function () {
         generate_graph(get_params());
@@ -648,29 +665,82 @@
 
             yaxis_param = {
                 type: 'value',
+                axisLabel: {
+                    formatter: function(param) {
+                        if (param > 1000){
+                            value = param/1000
+                            return value + "K";
+                        }else{
+                            return param;
+                        }
+                      }
+                  }
+            }
+
+            var right = data.graph_options.graph_legend_right
+            var top = data.graph_options.graph_legend_top
+            var legend_type = 'plain'
+            var selected_mode = true
+            var selector = false
+            var toolbox_orient = "vertical"
+            var legend_orient = data.graph_options.graph_legend_orient
+
+            // Get the size of the array series
+            if (data.data.series.length > 10){
+                legend_type = 'scroll'
+                selected_mode = 'multiple'
+                toolbox_orient = "horizontal"
+                legend_orient = "vertical"
+                right = 0
+                top = 40
+                $("#legend_orient").prop("disabled", true);
+                $("#legend_top").prop("disabled", true);
+
+                selector = [
+                    {
+                        type: 'all',
+                        // can be any title you like
+                        title: 'Todos'
+                    },
+                    {
+                        type: 'inverse',
+                        // can be any title you like
+                        title: 'Nenhum'
+                    }
+                ]
+            }else{
+                $("#legend_orient").prop("disabled", false);
+                $("#legend_top").prop("disabled", false); 
             }
 
             chart.setOption({
                 title: [{
                     text: data.graph_options.title,
-                    subtext: stringDataHora + " - Fonte: " + $("#database").val().toUpperCase()
-                },
-                {
-                    text: 'Dados do OCABr não mantém serie',
-                    textStyle: {
-                      fontWeight: 'normal',
-                      fontSize: 9,
-                      lineHeight: 1
-                    },
-                    top: 'bottom',
-                    left: 'right'
-                  }
+                    subtext: "Fonte: " + $("#database").val().toUpperCase() + " - " + stringDataHora + " - Licença: " + "CC-BY" 
+                    }
                 ],
                 legend: {
-                    orient: data.graph_options.graph_legend_orient,
-                    right: data.graph_options.graph_legend_right,
-                    top: data.graph_options.graph_legend_top
+                    type: legend_type,
+                    orient: legend_orient,
+                    right: right,
+                    top: top,
+                    selectedMode: selected_mode,
+                    selector: selector,
+                    formatter: function (name) {
+                        if (legend_orient == 'horizontal'){
+                            return name;
+                        }else{
+                            return replaceSpacesWithNewlines(name);
+                        }
+                      }
                 },
+                grid: {
+                    top: 110,
+                    left: 0,
+                    right: 200,
+                    bottom: '10%',
+                    containLabel: true
+                  },
                 label:{
                     formatter: function(param) {
                         if (param.data > 1000){
@@ -682,19 +752,20 @@
                       }
                 },
                 toolbox: {
-                    orient: 'vertical',
+                    orient: toolbox_orient,
                     feature: {
                         magicType: {
                             type: ['line', 'bar', 'stack', 'tield'],
                         },
                         dataView: {},
                         saveAsImage: { show: true },
-                        restore: { show: true }
+                        restore: { show: true },
+                        dataZoom: {}
                     }
                 },
                 tooltip: {},
                 xAxis: {
-                    type: 'category', data: data.data.keys
+                    type: 'category', data: data.data.keys    
                 },
                 yAxis: [yaxis_param],
                 series: data.data.series
@@ -778,13 +849,13 @@
         if ($("#universe").val() != "brazil" || $("#scope").val() != "article") {
         }
         if ($("#scope").val() != "article"){
-            show_components(["practice_chosen"]);
+            show_components(["classification_chosen"]);
             hide_components(["type_chosen"]);
             disable_options("graph_type", ["open_access_status", "license", "is_oa"]);
         }
         if ($("#scope").val() == "article"){
             show_components(["type_chosen"]);
-            hide_components(["practice_chosen"]);
+            hide_components(["classification_chosen"]);
             enable_options("graph_type", ["open_access_status", "license", "is_oa"]);
         }
         if ($("#universe").val() == "world") {

@@ -10,7 +10,7 @@ from wagtail.contrib.modeladmin.options import (
 )
 
 from . import views
-from .models import Indicator, IndicatorFile
+from .models import Indicator, IndicatorFile, IndicatorData
 
 
 class IndicatorAdmin(ModelAdmin):
@@ -83,13 +83,28 @@ class IndicatorFileAdmin(ModelAdmin):
     search_fields = ("name",)
 
 
-class InstitutionAdminGroup(ModelAdminGroup):
+class IndicatorDataAdmin(ModelAdmin):
+    model = IndicatorData
+    menu_label = _("Indicator Data")
+    menu_icon = "folder-open-inverse"
+    add_to_settings_menu = False  # or True to add your model to the Settings sub-menu
+    exclude_from_explorer = (
+        False  # or True to exclude pages of this type from Wagtail's explorer view
+    )
+
+    list_display = ("name", "data_type", "raw",)
+    list_filter = ("name", "data_type",)
+    search_fields = ("name", "data_type",)
+
+
+class IndicatorAdminGroup(ModelAdminGroup):
     menu_label = _("Indicator")
     menu_icon = "folder-open-inverse"  # change as required
     menu_order = 100  # will put in 3rd place (000 being 1st, 100 2nd)
     items = (
         IndicatorAdmin,
+        IndicatorDataAdmin,
         IndicatorFileAdmin,
     )
 
-modeladmin_register(InstitutionAdminGroup)
+modeladmin_register(IndicatorAdminGroup)
