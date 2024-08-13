@@ -13,7 +13,7 @@ from django.shortcuts import redirect, render
 from django.template import loader
 from django.urls import reverse
 
-from indicator.models import Indicator, IndicatorFile
+from indicator.models import Indicator, IndicatorFile, IndicatorData
 from search.graphic_data import GraphicData
 from indicator import indicator, indicatorOA
 from core.utils import utils
@@ -239,6 +239,8 @@ def graph_json(request):
         },
     }
 
+    universe = request.GET.get("universe", "brazil")
+
     filters = request.GET.get("filters", None)
     if filters:
         ind["filters"] = utils.parse_string_to_dicts(filters)
@@ -259,6 +261,18 @@ def graph_json(request):
     if context_by:
         ind["context_by"] = context_by.split(",")
         # Se tem contexto deve ser removido o filtro padrão {"year": "*"}
+        ind["filters"] = []
+
+    if universe == "brazil_region":
+        ind["context_by"] = ["regions"] 
+        ind["filters"] = []
+
+    if universe == "brazil_state":
+        ind["context_by"] = ["states"] 
+        ind["filters"] = []
+
+    if universe == "brazil_instituion":
+        ind["context_by"] = ["institutions"] 
         ind["filters"] = []
 
     default_filter = request.GET.get("default_filter", None)
@@ -288,13 +302,25 @@ def graph_json(request):
     graph_legend_left_margin = request.GET.get("graph_legend_left_margin", "auto")
     graph_legend_top = request.GET.get("graph_legend_top", "bottom")
 
-    universe = request.GET.get("universe", "brazil")
-
     filter_list = None
 
     scope = request.GET.get("scope", None)
 
     title = request.GET.get("title", None)
+
+    regions = request.GET.getlist("regions", None)
+    states = request.GET.getlist("states", None)
+    institutions = request.GET.getlist("institutions", None)
+    
+    # Set a key to generate the indicator
+    # Brazil region and Brazil state and Brazil institution can be a key
+    keys = None  
+    if regions: 
+        keys=regions[0].split(",")
+    if states:
+        keys=states[0].split(",")
+    if institutions:
+        keys=institutions[0].split(",")
 
     # Must concatenate the ``default_filter`` and ``context_by``
     title_terms = [f for f in ind["default_filter"].values()] + [context_by]
@@ -307,13 +333,9 @@ def graph_json(request):
         ] + [choices.translates.get(universe, universe)]
 
         title_list = [item for item in title_list if item]
-        
+
         if scope != "article":
-            title = tools.generate_string(
-                title_list,
-                [start, end],
-                text="prática de"
-            )
+            title = tools.generate_string(title_list, [start, end], text="prática de")
         else:
             title = tools.generate_string(
                 title_list,
@@ -355,17 +377,43 @@ def graph_json(request):
         if request.GET.get("world_country"):
             filters["authorships.countries"] = request.GET.get("world_country")
 
-        if request.GET.get("world_region"):
-            filters["institutions.continent"] = request.GET.get("world_region")
+        # if request.GET.get("world_region"):
+        # filters["institutions.continent"] = request.GET.get("world_region")
 
-        ret = indicatorOA.Indicator(
-            filters=filters,
-            group_by=group_by,
-            range_filter={
-                "filter_name": "year",
-                "range": {"start": start, "end": end},
-            },
-        ).generate(key=True if group_by == "publication_year" else False)
+        world_region_count = IndicatorData.objects.get(data_type="count_regions").raw
+
+        if universe == "world_region":
+            if request.GET.get("world_region"):
+                ret = {
+                    request.GET.get("world_region"): world_region_count.get(
+                        request.GET.get("world_region")
+                    )
+                }
+            else:
+                ret = world_region_count
+
+        elif universe == "world_country":
+
+            world_country_count = IndicatorData.objects.get(data_type="count_countries").raw
+
+            if request.GET.get("world_country"):
+                ret = {
+                    request.GET.get("world_country"): world_country_count[
+                        request.GET.get("world_country")
+                    ]
+                }
+            else:
+                ret = world_country_count
+
+        else:
+            ret = indicatorOA.Indicator(
+                filters=filters,
+                group_by=group_by,
+                range_filter={
+                    "filter_name": "year",
+                    "range": {"start": start, "end": end},
+                },
+            ).generate(key=True if group_by == "publication_year" else False)
 
         # Realiza a tradução de alguns items da licença para outros
         if "best_oa_location.license" in group_by:
@@ -420,7 +468,8 @@ def graph_json(request):
         serie = {}
         serie_list = []
 
-        for item in ind.generate():
+
+        for item in ind.generate(keys):
 
             for serie_name_and_stack, data in item.items():
                 if data:
@@ -443,7 +492,7 @@ def graph_json(request):
                             "stack": "total",
                             "emphasis": {"focus": "series"},
                             "data": list(data.get("counts")),
-                            "label": {"show": graph_label },
+                            "label": {"show": graph_label},
                         }
                     )
                     filter_list = data.get("filters")

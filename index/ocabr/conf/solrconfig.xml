@@ -192,6 +192,7 @@
          <str name="facet.field">type</str>
          <str name="facet.field">record_status</str>
          <str name="facet.field">practice</str>
+         <str name="facet.field">classification</str>
          <str name="facet.field">action</str>
          <!-- melhor ficar só na pesquisa -->
          <str name="facet.field">institutions</str>

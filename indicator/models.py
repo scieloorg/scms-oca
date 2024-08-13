@@ -16,8 +16,8 @@ from taggit.managers import TaggableManager
 from wagtail.admin.panels import FieldPanel
 from wagtailautocomplete.edit_handlers import AutocompletePanel
 
+from core.models import CommonControlField, Source
 from core.utils import utils
-from core.models import CommonControlField
 from institution.models import Institution
 from location.models import Location
 from usefulmodels.models import ActionAndPractice, ThematicArea
@@ -795,3 +795,31 @@ class Indicator(CommonControlField):
             self.locations.set(locations)
             self.thematic_areas.set(thematic_areas)
             self.save()
+
+
+class IndicatorData(models.Model):
+
+    name = models.CharField(_("Name"), max_length=255, null=False, blank=False)
+
+    data_type = models.CharField(_("Data Type"), max_length=255, null=False, blank=False)
+
+    source = models.ForeignKey(
+        Source,
+        verbose_name=_("Source"),
+        null=True,
+        on_delete=models.CASCADE,
+    )
+
+    raw = models.JSONField(_("JSON File"), null=True, blank=True)
+
+    # Creation date
+    created = models.DateTimeField(verbose_name=_("Creation date"), auto_now_add=True)
+
+    # Update date
+    updated = models.DateTimeField(verbose_name=_("Last update date"), auto_now=True)
+
+    def __unicode__(self):
+        return str("%s") % (self.source)
+
+    def __str__(self):
+        return str("%s") % (self.source)

@@ -60,7 +60,7 @@ def remove_term(text, term):
 def generate_string(
     terms,
     year_range,
-    text="distribuição da produção científica por",
+    text="distribuição da produção científica",
 ):
     """
     Generates a custom string based on a list of terms and a year range.
@@ -72,9 +72,9 @@ def generate_string(
     Returns:
     A formatted string according to the specification.
     """
-    
+
     if len(terms) > 1:
-        terms_str = " por ".join(terms[:-1]) + " no " + terms[-1]
+        terms_str = "por " + terms[-2] + " no " + terms[-1]
     else:
         # inicial_text = remove_term(inicial_text, "por")
         terms_str = "no %s" % terms[0]

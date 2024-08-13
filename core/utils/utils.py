@@ -203,3 +203,21 @@ def parse_string_to_dicts(input_string, split_caracter=",", ret_type="list"):
                 ret_items.update({parts[0]: parts[1]})
 
     return ret_items
+
+
+def replace_spaces_broken_lines(dictionary):
+    """
+    Replaces spaces in dictionary keys with newlines.
+
+    Args:
+    dictionary: The dictionary with keys that may contain spaces.
+
+    Returns:
+    A new dictionary with the modified keys.
+    """
+
+    new_dict = {}
+    for key, value in dictionary.items():
+        new_key = key.replace(" ", "\n")
+        new_dict[new_key] = value
+    return new_dict

@@ -48,7 +48,7 @@ class Indicator:
         fill_range=True,
         fill_range_value=0,
         solr_instance=None,
-        include_all=False
+        include_all=False,
     ):
         """Initializes the instance indicator class.
 
@@ -182,7 +182,7 @@ class Indicator:
         """
         return self.get_facet(self.facet_by).keys()
 
-    def dynamic_filters(self):
+    def dynamic_filters(self, key_list=None):
         """
         This get the facets in index and update the filters attribute.
 
@@ -203,9 +203,16 @@ class Indicator:
 
         for context in self.context_by:
             context_result = self.get_facet(context, result)
-            context_list.append(
-                ['%s:"%s"' % (context, keys) for keys in context_result.keys()]
-            )
+            if key_list:
+                inter_list=[]
+                for key in context_result.keys():
+                    if key in key_list:
+                        inter_list.append('%s:"%s"' % (context, key))
+                context_list.append(inter_list)
+            else:
+                context_list.append(
+                    ['%s:"%s"' % (context, keys) for keys in context_result.keys()]
+                )
 
         context_prod = self._product(*context_list)
 
@@ -216,7 +223,7 @@ class Indicator:
 
         self.logger.info(self.filters)
 
-    def generate(self):
+    def generate(self, key_list=None):
         """This will produce the discrete mathematics based on filters to index.
 
         Args:
@@ -242,16 +249,16 @@ class Indicator:
         """
         ret = []
         q_list = []
-        
+
         if self.context_by:
-            self.dynamic_filters()
+            self.dynamic_filters(key_list)
 
         for filter in self.filters:
             filters = {}
             # add the default filter
             filters.update(filter)
             filters.update(self.default_filter)
-            
+
             if self.range_filter:
                 filters.update(
                     {
@@ -506,12 +513,10 @@ class Indicator:
                 for char in unwanted_chars:
                     clq = clq.replace(char, "_")
 
-                self.logger.info(
-                    "Filter: %s (%s)" % (q, len(data))
-                )
+                self.logger.info("Filter: %s (%s)" % (q, len(data)))
 
                 yield (
-                    "%s" % (str(re.sub(r'_{2,}', '_', clq.lower()))),
+                    "%s" % (str(re.sub(r"_{2,}", "_", clq.lower()))),
                     data,
                 )
         else:
@@ -531,11 +536,9 @@ class Indicator:
                 for char in unwanted_chars:
                     clq = clq.replace(char, "_")
 
-                self.logger.info(
-                    "Filter: %s (%s)" % (q, len(data))
-                )
+                self.logger.info("Filter: %s (%s)" % (q, len(data)))
 
                 yield (
-                    "%s" % (str(re.sub(r'_{2,}', '_', clq.lower()))),
+                    "%s" % (str(re.sub(r"_{2,}", "_", clq.lower()))),
                     data,
                 )
