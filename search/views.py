@@ -12,17 +12,15 @@ from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import redirect, render
 from django.template import loader
 from django.urls import reverse
-
-from indicator.models import Indicator, IndicatorFile, IndicatorData
-from search.graphic_data import GraphicData
-from indicator import indicator, indicatorOA
-from core.utils import utils
-from . import choices
-
-from . import tools
-
 from pyalex import Works
 
+from article.choices import DOCUMENT_TYPE, LICENSE
+from core.utils import utils
+from indicator import indicator, indicatorOA
+from indicator.models import Indicator, IndicatorData, IndicatorFile
+from search.graphic_data import GraphicData
+
+from . import choices, tools
 
 solr = pysolr.Solr(
     settings.HAYSTACK_CONNECTIONS["default"]["URL"],
@@ -417,7 +415,7 @@ def graph_json(request):
 
         # Realiza a tradução de alguns items da licença para outros
         if "best_oa_location.license" in group_by:
-            ret = tools.normalize_dictionary(ret)
+            ret = tools.normalize_dictionary(ret, static_list=LICENSE)
 
         if ret:
             if isinstance(ret, dict):
@@ -444,13 +442,13 @@ def graph_json(request):
                     },
                 )
             serie = {
-                "keys": [
+                "keys": sorted([
                     key
                     for key in range(
                         int(start),
                         int(end) + 1,
                     )
-                ],
+                ]),
                 "series": serie_list,
             }
         else:

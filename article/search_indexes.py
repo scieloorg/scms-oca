@@ -4,17 +4,12 @@ from django.conf import settings
 from django.utils.translation import gettext as _
 
 from article import models
+from article.choices import DOCUMENT_TYPE, LICENSE, DOCUMENT_CLASS
 
 
-LICENSE = [
-    "cc-by",
-    "cc-by-nc",
-    "cc-by-nc-nd",
-    "cc-by-nc-sa",
-    "cc-by-sa",
-    "cc-by-nd",
-    "cc0",
-]
+LICENSE = [i[0] for i in LICENSE]
+
+DOCUMENT_TYPE = [i[0] for i in DOCUMENT_TYPE]
 
 
 class ArticleIndex(indexes.SearchIndex, indexes.Indexable):
@@ -124,6 +119,16 @@ class ArticleIndex(indexes.SearchIndex, indexes.Indexable):
                 return obj.license
             else:
                 return "others"
+
+    def prepare_type(self, obj):
+        """
+        Find the classification for each type of document
+        """
+        for k, v in DOCUMENT_CLASS.items():
+            if obj.type in v:
+                return k
+        return "others"
+
 
     def _prepare_contributors(self, contributors):
 

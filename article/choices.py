@@ -55,6 +55,40 @@ LICENSE = [
     ("CC BY-NC-ND", "CC-BYNCND"),
 ]
 
+DOCUMENT_TYPE = [
+    ("", ""),
+    ("article", "Artigo"),
+    ("book", "Livro"),
+]
+
+DOCUMENT_CLASS = {
+    "article": [
+        "article",
+        "editorial",
+        "dissertation",
+        "paratext",
+        "erratum",
+        "journal",
+        "journalarticle",
+        "entry",
+        "letter",
+        "standard",
+    ],
+    "others": [
+        "proceedingsseries",
+        "series",
+        "Norma",
+        "peerreview",
+        "peer",
+        "reference",
+        "other",
+        "report",
+        "dataset",
+    ],
+    "book": ["book", "bookchapter", "chapter", "bookpart", "part"],
+}
+
+
 APC = [
     ("", ""),
     ("YES", "YES"),

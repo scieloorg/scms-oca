@@ -1,12 +1,12 @@
-from article.choices import LICENSE
+from article.choices import DOCUMENT_TYPE
 
 
-def normalize_dictionary(dictionary, licenses=LICENSE):
+def normalize_dictionary(dictionary, static_list=DOCUMENT_TYPE):
     """Normalized a dictionary of licenses, grouping unmatched entries under 'others'.
 
     Args:
         dictionary (dict): The dictionary of licenses.
-        licenses (list): The list of valid licenses.
+        static_list (list): The list of valid static_list.
 
     Returns:
         dict: The normalized dictionary.
@@ -17,8 +17,7 @@ def normalize_dictionary(dictionary, licenses=LICENSE):
 
     for key, value in dictionary.items():
         normalized_key = key.upper()
-        print(key)
-        if any(normalized_key in license for license in licenses):
+        if any(normalized_key in item for item in static_list):
             normalized_dict[key] = value
         else:
             others.extend(value)
