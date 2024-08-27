@@ -186,8 +186,8 @@
                 data-placeholder="Escolha tipo de objeto...">
                     <option value="all">Todos</option>
                     {% for type in facets.type|partition:2 %}
-                    <option value="{{ type.0 }}">{{ type.0|translate_data }}
-                    </option>
+                        <option value="{{ type.0 }}">{{ type.0|translate_data }}
+                        </option>
                     {% endfor %}
                 </select>
 
@@ -222,7 +222,7 @@
                     <b>Gráfico por: </b>
                 </div>
                 <select id="graph_type" name="graph_type" class="chzn-select ordem form-control">
-                    <option value="year" selected="">Ano</option>
+                    <option value="year" selected="">Todos</option>
                     <option value="thematic_level_0">Área temática</option>
                     <option value="open_access_status">Tipo de acesso aberto</option>
                     <option value="license">Licença</option>
@@ -685,6 +685,9 @@
             var toolbox_orient = "vertical"
             var legend_orient = data.graph_options.graph_legend_orient
 
+            // Realiza a ordenação do series 
+            data.data.series.sort((a, b) => a.name.localeCompare(b.name));
+
             // Get the size of the array series
             if (data.data.series.length > 10){
                 legend_type = 'scroll'
@@ -716,7 +719,7 @@
             chart.setOption({
                 title: [{
                     text: data.graph_options.title,
-                    subtext: "Fonte: " + $("#database").val().toUpperCase() + " - " + stringDataHora + " - Licença: " + "CC-BY" 
+                    subtext: "Fonte: " + $("#database").val().toUpperCase() + " - " + stringDataHora + " - " + "CC-BY" 
                     }
                 ],
                 legend: {
@@ -757,7 +760,12 @@
                         magicType: {
                             type: ['line', 'bar', 'stack', 'tield'],
                         },
-                        dataView: {},
+                        dataView: {
+                            show: true,
+                            title: 'Dados',
+                            readOnly: true,
+                            lang: ['', 'Fechar',]
+                          },
                         saveAsImage: { show: true },
                         restore: { show: true },
                         dataZoom: {}
@@ -765,10 +773,10 @@
                 },
                 tooltip: {},
                 xAxis: {
-                    type: 'category', data: data.data.keys    
+                    type: 'category', data: data.data.keys.sort()    
                 },
                 yAxis: [yaxis_param],
-                series: data.data.series
+                series: data.data.series.sort()
             }, true);
         });
 
