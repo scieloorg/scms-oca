@@ -1,4 +1,5 @@
 # coding: utf-8
+import random 
 from haystack import indexes
 from django.conf import settings
 from django.utils.translation import gettext as _
@@ -29,6 +30,7 @@ class InfraStructureIndex(indexes.SearchIndex, indexes.Indexable):
     states = indexes.MultiValueField(null=True)
     regions = indexes.MultiValueField(null=True)
     thematic_level_0 = indexes.MultiValueField(null=True)
+    year = indexes.CharField(null=True)
 
     text = indexes.CharField(document=True, use_template=True)
     title = indexes.CharField(model_attr="title", null=True)
@@ -54,6 +56,9 @@ class InfraStructureIndex(indexes.SearchIndex, indexes.Indexable):
     updated = indexes.CharField(null=False)
     creator = indexes.CharField(null=False)
     updated_by = indexes.CharField(null=False)
+
+    def prepare_year(self, obj):
+        return random.randint(2014, 2023)
 
     def prepare_created(self, obj):
         return obj.created.isoformat()

@@ -92,6 +92,7 @@
                 <select id="universe" class="chzn-select ordem form-control">
                     <option value="brazil" selected="">Brasil</option>
                     <option value="brazil_region">Brasil - Região</option>
+                    <option value="brazil_posgraduate">Brasil - Pós Graduação</option>
                     <option value="brazil_state">Brasil - Estado</option>
                     <option value="brazil_instituion">Brasil - Instituição</option>
                     <option value="world">Mundo</option>
@@ -189,6 +190,8 @@
                         <option value="{{ type.0 }}">{{ type.0|translate_data }}
                         </option>
                     {% endfor %}
+                    <option value="all">Arquivo de Dados</option>
+                    <option value="all">Preprints</option>
                 </select>
 
                 <select id="classification" name="classification" class="chzn-select ordem form-control"
