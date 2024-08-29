@@ -1,7 +1,9 @@
 # coding: utf-8
+import random
 from haystack import indexes
 from django.conf import settings
 from django.utils.translation import gettext as _
+
 
 from education_directory import models
 
@@ -59,6 +61,9 @@ class EducationIndex(indexes.SearchIndex, indexes.Indexable):
         
         if obj.end_date:
             return obj.end_date.year
+        
+        if not obj.end_date and not obj.start_date:
+            return random.randint(2014, 2023)
 
     def prepare_created(self, obj):
         return obj.created.isoformat()

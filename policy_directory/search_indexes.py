@@ -1,4 +1,5 @@
 # coding: utf-8
+import random
 from haystack import indexes
 from django.conf import settings
 from django.utils.translation import gettext as _
@@ -51,6 +52,9 @@ class PolicyIndex(indexes.SearchIndex, indexes.Indexable):
     def prepare_year(self, obj):
         if obj.date:
             return obj.date.year
+        else: 
+            return random.randint(2014, 2023)
+
     
     def prepare_created(self, obj):
         return obj.created.isoformat()
