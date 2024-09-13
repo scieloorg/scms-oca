@@ -39,10 +39,13 @@ class IndicatorFile(models.Model):
     """
 
     name = models.CharField(_("File name"), max_length=1024, null=False, blank=False)
+    label = models.CharField(_("Label"), max_length=1024, null=True, blank=True)
+    description = models.TextField(_("Descrição"), max_length=1024, null=True, blank=True)
     raw_data = models.FileField(_("JSONL Zip File"), null=True, blank=True)
     is_dynamic_data = models.BooleanField(
         _("Dynamic Data"), default=False, null=True, blank=True
     )
+    
     autocomplete_search_field = "name"
 
     def extension(self):

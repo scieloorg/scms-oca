@@ -173,7 +173,7 @@
                 </div>
                 
                 <select id="scope" class="chzn-select ordem form-control">
-                    <option value="article" selected="">Produção científica</option>
+                    <option value="document">Produção científica</option>
                     <option value="policy_directory">Políticas</option>
                     <option value="event_directory">Disseminação</option>
                     <option value="education_directory">Educação</option>
@@ -185,17 +185,17 @@
                 </div>
                 <select id="type" name="type" class="chzn-select ordem form-control"
                 data-placeholder="Escolha tipo de objeto...">
-                    <option value="all">Todos</option>
-                    {% for type in facets.type|partition:2 %}
+                   <option value="all">Todos</option>
+                     <!-- {% for type in facets.type|partition:2 %}
                         <option value="{{ type.0 }}">{{ type.0|translate_data }}
                         </option>
                     {% endfor %}
                     <option value="all">Arquivo de Dados</option>
-                    <option value="all">Preprints</option>
+                    <option value="all">Preprints</option> -->
                 </select>
 
                 <select id="classification" name="classification" class="chzn-select ordem form-control"
-                    data-placeholder="Escolha tipo de objeto...">
+                    data-placeholder="Escolha tipo de objeto..." style="display: none;">
                     <option value="all">Todos</option>
                     {% for classification in facets.classification|partition:2 %}
                     <option value="{{ classification.0 }}">{{ classification.0|translate_data }}
@@ -208,8 +208,7 @@
                 </div>
 
                 <select id="database" class="chzn-select ordem form-control">
-                    <option value="ocabr" selected="">OCABr</option>
-                    <option value="openalex">OpenAlex</option>
+                    <option value="ocabr+openalex" selected="">OCABr + OpenAlex</option>
                 </select>
 
                 <div class="mt-3 mb-2">
@@ -221,17 +220,14 @@
                     <option value="relative_frequency">Frequência relativa</option>
                 </select>
 
-                <div class="mt-3 mb-2">
-                    <b>Gráfico por: </b>
+                <div id="div_graph_type">
+                    <div class="mt-3 mb-2">
+                        <b>Gráfico por: </b>
+                    </div>
+                    <select id="graph_type" name="graph_type" class="chzn-select ordem form-control">
+                        <option value="year" selected="">Todos</option>
+                    </select>
                 </div>
-                <select id="graph_type" name="graph_type" class="chzn-select ordem form-control">
-                    <option value="year" selected="">Todos</option>
-                    <option value="thematic_level_0">Área temática</option>
-                    <option value="open_access_status">Tipo de acesso aberto</option>
-                    <option value="license">Licença</option>
-                    <!-- <option value="regions">Região</option> -->
-                    <option value="is_oa">Acesso aberto (sim/não)</option>
-                </select>
 
                 <div class="divider mt-3 mb-3"></div>
 
@@ -307,7 +303,7 @@
                                         {% endfor %}
                                 </select>
 
-                                <div id="universe_brazil">
+                                <!-- <div id="universe_brazil">
                                     <div class="mt-3">
                                         <label for="thematic_level_0" class="form-label">Áreas temáticas:</label>
                                     </div>
@@ -316,11 +312,11 @@
                                         data-placeholder="Escolha um ou mais área temática..." multiple>
                                         {% for the in facets.thematic_level_0|partition:2 %}
                                         <option value="{{ the.0 }}">{{ the.0|translate_data }}
-                                            <!-- ({{ the.1|intcomma }}) -->
+                                             ({{ the.1|intcomma }}) 
                                         </option>
                                         {% endfor %}
                                     </select>
-                                </div>
+                                </div> -->
                             </div>
                         </div>
                     </div>
@@ -412,66 +408,32 @@
                             <div id="graph" style="position: relative; height:75vh; width:60vw"></div>
                         </div>
                     </div>
-                    <!-- <div class="container">
-                        <div class="row">
-                          <div class="col-sm">
-                                <div class="mt-3">
-                                    <label for="title" class="form-label">Título:</label>
-                                </div>
-                                <textarea type="text" id="title" name="title" class="form-control"
-                                    placeholder="Adicione um título personalizado.">
-                                </textarea>
-
-                                <div class="mt-3">
-                                    <label for="type_graph" class="form-label">Tipo de gráfico:</label>
-                                </div>
-                                <select id="type_graph" name="type_graph" class="form-control">
-                                    <option value="bar">Barras</option>
-                                    <option value="line">Linha</option>
-                                    <option value="scatter">Pontos</option>
-                                </select>
-                          </div>
-                          <div class="col-sm">
-                                <div class="mt-3">
-                                    <label for="legend_orient" class="form-label">Orientação da legenda:</label>
-                                </div>
-                                <select id="legend_orient" name="legend_orient" class="form-control">
-                                    <option value="horizontal">Horizontal</option>
-                                    <option value="vertical">Vertical</option>
-                                </select>
-                                <div class="mt-3">
-                                    <label for="legend_top" class="form-label">Distancia da legenda para o topo:</label>
-                                </div>
-                                <select id="legend_top" name="legend_top" class="form-control">
-                                    <option value="bottom">Rodapé</option>
-                                    <option value="top">Topo</option>
-                                    <option value="middle">Meio</option>
-                                </select>
-                          </div>
-                          <div class="col-sm">
-                            <div class="mt-3">
-                                <label for="label" class="form-label">Mostra label de quantidade:</label>
-                            </div>
-                            <select id="label" name="label" class="form-control">
-                                <option value="true" selected>Sim</option>
-                                <option value="">Não</option>
-                            </select>
-                          </div>
-                        </div>
-                      </div> -->
                     <!-- Graph -->
 
                     <!-- Data -->
                     <div class="tab-pane fade" id="ex2-tabs-2" role="tabpanel" aria-labelledby="ex2-tab-2">
+                        <div class="alert alert-info" role="alert">
+                            Qualquer dúvida sobre os dados entre em contato pelo e-mail: <b>ocabr@ocabr.org</b>
+                          </div>
+                        <div class="m-3">
+                            <h4 >Sobre os dados</h4>
+                            
+                            <p>Atualmente disponibilizamos os dados brutos de diretórios(<b>OCABr</b>) e da produção científica brasiliera <b>(OCABr+OpenAlex)</b>. Os dados do mundo são os mesmo dados encontrados do projeto OpenAlex(<a href="https://openalex.org/">https://openalex.org/</a>).</p>
+
+                            </br>
+
+                            <p>A lista contém os dados brutos de Brasil separados por ano e a lista completa para os diretórios:</p>
+
+                        </div>
                         <div class="list-group">
                             {% for f in ind_files %}
                             <a href="{{ f.raw_data.url }}"
                                 class="list-group-item list-group-item-action flex-column align-items-start">
                                 <div class="d-flex w-100 justify-content-between">
-                                    <h5 class="mb-1">OCABr Articles {{ forloop.counter }}</h5>
+                                    <h5 class="mb-1">{{ f.label }}</h5>
                                     <small>{{ f.name }}</small>
                                 </div>
-                                <p class="mb-1">Arquivo compactado em .zip, contento os dados brutos utilizado para produção das métricas</p>
+                                <p class="mb-1">{{ f.description }}</p>
                                 <small>Tamanho: {{ f.raw_data.size|sizify }}</small>
                             </a>
                             {% endfor %}
@@ -569,7 +531,7 @@
         data["start"] = $('#start').val()
         data["end"] = $('#end').val()
 
-        data["default_filter"] = format_prefix($("#thematic_level_0").val(), "thematic_level_0")
+        //data["default_filter"] = format_prefix($("#thematic_level_0").val(), "thematic_level_0")
         //if ($("#region").val() != "all") {
         //    data["filters"] = "regions:" + $("#region").val()
         //}
@@ -585,18 +547,18 @@
         if ($("#license").val() != "all") {
             data["default_filter"] += "," + "license:" + $("#license").val()
         }
-        if ($("#type").val() != "all" && $("#scope").val() == "article") {
+        if ($("#type").val() != "all" && $("#scope").val() == "document") {
             data["default_filter"] += "," + "type:" + $("#type").val()
         }
         //if ($("#states").val() != "") {
         //    data["default_filter"] += "," + '"states:"' + $("#states").val()
         //}
-        if ($("#classification").val() != "all" && $("#scope").val() != "article") {
+        if ($("#classification").val() != "all" && $("#scope").val() != "document") {
             data["default_filter"] += "," + 'classification:"' + $("#classification").val() + '"'
         }
         if ($("#scope").val() != "") {
-            if ($("#scope").val() == "article"){
-                data["default_filter"] += "," + 'record_type:' + $("#scope").val()
+            if ($("#scope").val() == "document"){
+                data["default_filter"] += "," + 'scope:' + $("#scope").val()
             }else{
                 data["default_filter"] += "," + 'directory_type:' + $("#scope").val()
             }
@@ -612,8 +574,8 @@
         if ($("#universe").val()) {
             data["universe"] = $("#universe").val()
         }
-        if ($("#type").val()) {
-            data["type"] = $("#type").val()
+        if ($("#classification").val() != "all" && $("#classification").val()) {
+            data["classification"] = $("#classification").val()
         }
         if ($("#is_oa").val()) {
             data["is_oa"] = $("#is_oa").val()
@@ -633,11 +595,10 @@
         if ($("#institutions").val() != "") {
             data["institutions"] = $("#institutions").val()
         }
-        console.log($("#regions").val())
         
         console.log(data["default_filter"])
 
-        console.log(data);
+        //console.log(data);
 
         return data
     }
@@ -718,7 +679,7 @@
                 $("#legend_orient").prop("disabled", false);
                 $("#legend_top").prop("disabled", false); 
             }
-
+            
             chart.setOption({
                 title: [{
                     text: data.graph_options.title,
@@ -781,6 +742,30 @@
                 yAxis: [yaxis_param],
                 series: data.data.series.sort()
             }, true);
+        }).fail(function() {
+            
+            var msgOption = {
+                title: {
+                    show: true,
+                    textStyle:{
+                        color:'grey',
+                        fontSize:20
+                    },
+                    text: "No data available",
+                    left: 'center',
+                    top: 'center'
+                    },
+                xAxis: {
+                    show: false
+                },
+                yAxis: {
+                    show: false
+                },
+                series: []
+            };
+            chart.clear() 
+            chart.hideLoading()
+            chart.setOption(msgOption)
         });
 
         window.addEventListener('resize', chart.resize);
@@ -859,26 +844,33 @@
         }
         if ($("#universe").val() != "brazil" || $("#scope").val() != "article") {
         }
-        if ($("#scope").val() != "article"){
+
+        // Hide Graph Type
+        if ($("#universe").val() != "brazil" || $("#universe").val() == "world" ){
+            hide_components(["div_graph_type"]);
+        } 
+
+        // Show Graph Type
+        if ($("#universe").val() == "brazil" || $("#universe").val() == "world" ){
+            show_components(["div_graph_type"]);
+        } 
+
+        if ($("#scope").val() != "document"){
             show_components(["classification_chosen"]);
             hide_components(["type_chosen"]);
-            disable_options("graph_type", ["open_access_status", "license", "is_oa"]);
         }
-        if ($("#scope").val() == "article"){
+        if ($("#scope").val() == "document"){
             show_components(["type_chosen"]);
             hide_components(["classification_chosen"]);
-            enable_options("graph_type", ["open_access_status", "license", "is_oa"]);
         }
         if ($("#universe").val() == "world") {
-            disable_options("graph_type", ["thematic_level_0", "regions"]);
             $("#graph_type").trigger("chosen:updated");
-            hide_components(["universe_brazil"])
+            //hide_components(["universe_brazil"])
             hide_components(["div_world_region"])
         }
         if ($("#universe").val() == "brazil") {
-            enable_options("graph_type", ["thematic_level_0", "regions"]);
             $("#graph_type").trigger("chosen:updated");
-            show_components(["universe_brazil"])
+            //show_components(["universe_brazil"])
             hide_components(["div_world_country"])
             hide_components(["div_world_region"]) 
             hide_components(["div_brazil_region"])
@@ -890,6 +882,15 @@
             show_components(["div_brazil_region"])   
             hide_components(["div_world_country"])
             hide_components(["div_world_region"])    
+            hide_components(["div_brazil_institution"])    
+        }
+        if ($("#universe").val() == "brazil_posgraduate") {
+            hide_components(["div_world_country"])
+            hide_components(["div_world_region"]) 
+            hide_components(["div_brazil_region"])
+            hide_components(["div_brazil_institution"])   
+            hide_components(["div_brazil_state"])   
+            hide_components(["div_world_country"])    
         }
         if ($("#universe").val() == "brazil_state") {
             hide_components(["div_brazil_region"])   
@@ -928,20 +929,89 @@
 
     }
 
+    get_facets(q="universe:brazil");
     dynamic_fields();
     generate_graph(get_params());
 
+    
     document.addEventListener('keypress', function enterPress(e) {
         if (e.which == 13) {
             generate_graph(get_params());
         }
     });
 
+
+    function fill_components(data, trans, component_id, include_all=true, empty=true, empty_without_first=false){
+        
+        if (empty){
+            $(component_id).empty()
+        }
+
+        if (empty_without_first){
+            $(component_id + ' option:not(:first)').remove();
+        }
+
+        //Preciso descobrir como remover todos os items nenos o primeiro da lista.
+
+        if (include_all){
+            $(component_id).append(`<option value="" selected="">${trans["all"]}</option>`);
+        }
+
+        for (const item in data){
+            if (!Number.isInteger(data[item])){
+                name = data[item]
+                $(component_id).append(`<option value="${data[item]}">${trans[name]}</option>`);
+            }
+        }
+        $(".chzn-select").trigger("chosen:updated");
+    }
+
+
+    function get_facets(q){
+        $.ajax({
+            url: '/search/graph/context_facet', 
+            type: 'GET', 
+            data: {
+                q: q,
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            success: function(response) {
+                trans = response.translate;
+                console.log(response.facets.scope); 
+                //fill_components(response.facets.scope, trans, "#scope", include_all=false);
+                console.log(response.facets.type); 
+                fill_components(response.facets.type, trans, "#type", include_all=false, empty=false, empty_without_first=true);
+                console.log(response.facets.classification); 
+                fill_components(response.facets.classification, trans, "#classification", include_all=false, empty=false, empty_without_first=true);
+                console.log(response.facets.database); 
+                fill_components(response.facets.database, trans, "#database", include_all=false);
+                console.log(response.facets.graphs); 
+                fill_components(response.facets.graphs, trans, "#graph_type", include_all=true);
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+              console.log('Erro: ' + errorThrown);
+            }
+        });
+    }
+
+
+    // This event the components are changes the values
     window.addEventListener('load', function () {
         document.querySelectorAll('select').forEach(select => {
             $('#' + select.id).change(function () {
-                generate_graph(get_params());
+                
+                if(select.id == "universe"){
+                    if ($(this).val() == "brazil"){
+                        get_facets(q="universe:brazil");
+                    }
+                }
+
+                if(select.id == "scope"){
+                    get_facets(q="scope:" + $(this).val());
+                }
+
                 dynamic_fields();
+                generate_graph(get_params());
             })
         });
     })

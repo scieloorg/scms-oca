@@ -1,4 +1,5 @@
 from article.choices import DOCUMENT_TYPE
+from django.utils.translation import gettext as _
 
 
 def normalize_dictionary(dictionary, static_list=DOCUMENT_TYPE):
@@ -59,7 +60,10 @@ def remove_term(text, term):
 def generate_string(
     terms,
     year_range,
-    text="distribuição da produção científica",
+    inicial_text = _("Evolução anual da"),
+    medium_text = _("distribuição da produção científica"),
+    preposition_text = _("por "),
+    prol_text = ""
 ):
     """
     Generates a custom string based on a list of terms and a year range.
@@ -71,17 +75,20 @@ def generate_string(
     Returns:
     A formatted string according to the specification.
     """
-
     if len(terms) > 1:
-        terms_str = "por " + terms[-2] + " no " + terms[-1]
+        terms_str = preposition_text + ", ".join(terms[:-1]) + prol_text +  _(" no ") + terms[-1]
     else:
-        # inicial_text = remove_term(inicial_text, "por")
         terms_str = "no %s" % terms[0]
 
-    # Formats the year range
-    years_str = f"{year_range[0]}-{year_range[1]}"
-
+    if year_range[0] == year_range[1]:
+        inicial_text = _("Distribuição")
+        medium_text = _("da produção científica")
+        years_str = year_range[0]
+    else:
+        # Formats the year range
+        years_str = f"{year_range[0]}-{year_range[1]}"
     # Concatenates all parts of the string
-    final_string = f"Evolução da {text} {terms_str}, {years_str}"
+    
+    final_string = f"{inicial_text} {medium_text} {terms_str}, {years_str}"
 
     return final_string

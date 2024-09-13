@@ -92,6 +92,18 @@
    <field name="thematic_level_1" type="string" indexed="true" stored="true" multiValued="true"/>
    <field name="thematic_level_2" type="string" indexed="true" stored="true" multiValued="true"/>
 
+   <!-- Universe -->
+   <field name="universe" type="string" indexed="true" stored="true" multiValued="true"/>
+   
+   <!-- Scope -->
+   <field name="scope" type="string" indexed="true" stored="true" multiValued="true"/>
+
+   <!-- Database -->
+   <field name="database" type="string" indexed="true" stored="true" multiValued="true"/>
+
+   <!-- graphs -->
+   <field name="graphs" type="string" indexed="true" stored="true" multiValued="true"/>
+
    <!-- Dynamic field definitions -->
    <dynamicField name="*"  type="text" indexed="true" stored="true"  multiValued="false"/>
    <!-- <dynamicField name="*" type="ignored" /> -->
