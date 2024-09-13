@@ -272,4 +272,4 @@ class ArticleIndex(indexes.SearchIndex, indexes.Indexable):
         return models.Article
 
     def index_queryset(self, using=None):
-        return self.get_model().objects.filter(year=2020)
+        return self.get_model().objects.all()
