@@ -25,9 +25,11 @@ urlpatterns = [
     path(
         "graph/", views.graph, name="graph"
     ),
-
     path(
         "graph/json", views.graph_json, name="graph_json"
+    ),
+    path(
+        "graph/context_facet", views.context_facet, name="context_facet"
     ),
 
 ]

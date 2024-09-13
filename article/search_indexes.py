@@ -35,7 +35,7 @@ class ArticleIndex(indexes.SearchIndex, indexes.Indexable):
     apc = indexes.CharField(model_attr="apc", null=True)
 
     # control fields
-    record_type = indexes.CharField(null=False)
+    # record_type = indexes.CharField(null=False)
     record_status = indexes.CharField(null=True)
 
     # Foreign key field
@@ -57,6 +57,18 @@ class ArticleIndex(indexes.SearchIndex, indexes.Indexable):
     cities = indexes.MultiValueField(null=True)
     states = indexes.MultiValueField(null=True)
     regions = indexes.MultiValueField(null=True)
+
+    # Universe
+    universe = indexes.MultiValueField(null=True)
+
+    # Scope
+    scope = indexes.MultiValueField(null=True)
+
+    # Database
+    database = indexes.MultiValueField(null=True)
+
+    # Graphs
+    graphs = indexes.MultiValueField(null=True)
 
     text = indexes.CharField(document=True, use_template=True)
 
@@ -103,8 +115,25 @@ class ArticleIndex(indexes.SearchIndex, indexes.Indexable):
     def prepare_updated_by(self, obj):
         return obj.updated_by
 
-    def prepare_record_type(self, obj):
-        return "article"
+    # def prepare_record_type(self, obj):
+    #     return "article"
+
+    def prepare_universe(self, obj):
+        return ["brazil"]
+
+    def prepare_scope(self, obj):
+        return ["document"]
+
+    def prepare_database(self, obj):
+        return ["ocabr+openalex"]
+
+    def prepare_graphs(self, obj):
+        return [
+            "thematic_level_0",
+            "open_access_status",
+            "license",
+            "is_oa",
+        ]
 
     def prepare_record_status(self, obj):
         return "No Publisher"
@@ -128,7 +157,6 @@ class ArticleIndex(indexes.SearchIndex, indexes.Indexable):
             if obj.type in v:
                 return k
         return "others"
-
 
     def _prepare_contributors(self, contributors):
 
@@ -244,4 +272,4 @@ class ArticleIndex(indexes.SearchIndex, indexes.Indexable):
         return models.Article
 
     def index_queryset(self, using=None):
-        return self.get_model().objects.all()
+        return self.get_model().objects.filter(year=2020)

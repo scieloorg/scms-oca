@@ -147,12 +147,13 @@ class Indicator:
 
         facet = result.facets.get("facet_fields").get(facet_name)
 
-        if convert_dict:
-            return (
-                dict(sorted(self._convert_list_dict(facet).items())) if sort else facet
-            )
-        else:
-            return facet
+        if facet: 
+            if convert_dict:
+                return (
+                    dict(sorted(self._convert_list_dict(facet).items())) if sort else facet
+                )
+            else:
+                return facet
 
     def update_filters(self, filter_dict):
         """This update the self.filters, this check if exists default filter and

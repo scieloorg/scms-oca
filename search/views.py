@@ -12,6 +12,7 @@ from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import redirect, render
 from django.template import loader
 from django.urls import reverse
+from django.utils.translation import gettext as _
 from pyalex import Works
 
 from article.choices import DOCUMENT_TYPE, LICENSE
@@ -262,15 +263,19 @@ def graph_json(request):
         ind["filters"] = []
 
     if universe == "brazil_region":
-        ind["context_by"] = ["regions"] 
+        ind["context_by"] = ["regions"]
         ind["filters"] = []
 
     if universe == "brazil_state":
-        ind["context_by"] = ["states"] 
+        ind["context_by"] = ["states"]
         ind["filters"] = []
 
     if universe == "brazil_instituion":
-        ind["context_by"] = ["institutions"] 
+        ind["context_by"] = ["institutions"]
+        ind["filters"] = []
+
+    if universe == "brazil_posgraduate":
+        ind["context_by"] = ["posgraduate"]
         ind["filters"] = []
 
     default_filter = request.GET.get("default_filter", None)
@@ -303,37 +308,45 @@ def graph_json(request):
     filter_list = None
 
     scope = request.GET.get("scope", None)
+    classification = request.GET.get("classification", None)
 
     title = request.GET.get("title", None)
 
     regions = request.GET.getlist("regions", None)
     states = request.GET.getlist("states", None)
     institutions = request.GET.getlist("institutions", None)
-    
+
     # Set a key to generate the indicator
     # Brazil region and Brazil state and Brazil institution can be a key
-    keys = None  
-    if regions: 
-        keys=regions[0].split(",")
+    keys = None
+    if regions:
+        keys = regions[0].split(",")
     if states:
-        keys=states[0].split(",")
+        keys = states[0].split(",")
     if institutions:
-        keys=institutions[0].split(",")
+        keys = institutions[0].split(",")
 
     # Must concatenate the ``default_filter`` and ``context_by``
-    title_terms = [f for f in ind["default_filter"].values()] + [context_by]
+    title_terms = [f for f in ind["default_filter"].values()] + [context_by] + [classification]
 
     if not title:
         title_list = [
-            choices.translates.get(t, "")
+            choices.translates.get(t, "").lower()
             for t in title_terms
-            if t != "" and t != "article"
-        ] + [choices.translates.get(universe, universe)]
+            if t != "" and t != "document"
+        ] + [choices.translates.get(universe, universe).lower()]
 
         title_list = [item for item in title_list if item]
 
-        if scope != "article":
-            title = tools.generate_string(title_list, [start, end], text="prática de")
+        if scope != "document":
+            title = tools.generate_string(
+                title_list,
+                [start, end],
+                inicial_text = _("Evolução da"),
+                medium_text = _("ação"),
+                preposition_text = _("de "),
+                prol_text = _(" em prol de Ciência Aberta")
+            )
         else:
             title = tools.generate_string(
                 title_list,
@@ -392,7 +405,9 @@ def graph_json(request):
 
         elif universe == "world_country":
 
-            world_country_count = IndicatorData.objects.get(data_type="count_countries").raw
+            world_country_count = IndicatorData.objects.get(
+                data_type="count_countries"
+            ).raw
 
             if request.GET.get("world_country"):
                 ret = {
@@ -442,13 +457,15 @@ def graph_json(request):
                     },
                 )
             serie = {
-                "keys": sorted([
-                    key
-                    for key in range(
-                        int(start),
-                        int(end) + 1,
-                    )
-                ]),
+                "keys": sorted(
+                    [
+                        key
+                        for key in range(
+                            int(start),
+                            int(end) + 1,
+                        )
+                    ]
+                ),
                 "series": serie_list,
             }
         else:
@@ -459,13 +476,14 @@ def graph_json(request):
 
     else:
 
+        logging.info(80 * "*")
         logging.info("Indicator dict: %s" % ind)
+        logging.info(80 * "*")
 
         ind = indicator.Indicator(**ind)
 
         serie = {}
         serie_list = []
-
 
         for item in ind.generate(keys):
 
@@ -526,5 +544,26 @@ def graph_json(request):
             },
             "data": serie,
             "filters": filter_list,
+        }
+    )
+
+
+def context_facet(request):
+    """
+    This view function is responsible to return the facet to a specific context.
+    """
+    filters = {}
+
+    query = request.POST.get("q", "*:*")
+    query = request.GET.get("q", "*:*")
+
+    filters["f.grpahs.facet.sort"] = "index"
+
+    search_results = solr.search(query, **filters)
+
+    return JsonResponse(
+        {
+            "facets": search_results.facets["facet_fields"],
+            "translate": choices.translates,
         }
     )

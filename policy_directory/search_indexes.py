@@ -14,7 +14,7 @@ class PolicyIndex(indexes.SearchIndex, indexes.Indexable):
     """
 
     # Common fields between directory and article
-    record_type = indexes.CharField(null=False)
+    # record_type = indexes.CharField(null=False)
     record_status = indexes.CharField(model_attr="record_status", null=True)
     institutions = indexes.MultiValueField(null=True)
     cities = indexes.MultiValueField(null=True)
@@ -42,7 +42,18 @@ class PolicyIndex(indexes.SearchIndex, indexes.Indexable):
     institutional_contribution = indexes.CharField(
         model_attr="institutional_contribution", null=True
     )
-    
+    # Universe
+    universe = indexes.MultiValueField(null=True)
+
+    # Scope
+    scope = indexes.MultiValueField(null=True)
+
+    # Database
+    database = indexes.MultiValueField(null=True)
+
+    # Graphs
+    graphs = indexes.MultiValueField(null=True)
+
     # control fields
     created = indexes.CharField(null=False)
     updated = indexes.CharField(null=False)
@@ -65,8 +76,22 @@ class PolicyIndex(indexes.SearchIndex, indexes.Indexable):
     def prepare_creator(self, obj):
         return obj.creator
 
-    def prepare_record_type(self, obj):
-        return "directory"
+    # def prepare_record_type(self, obj):
+    #     return "directory"
+
+    def prepare_universe(self, obj):
+        return ["Brazil"]
+
+    def prepare_scope(self, obj):
+        return ["policy_directory"]
+
+    def prepare_database(self, obj):
+        return ["ocabr"]
+
+    def prepare_graphs(self, obj):
+        return [
+            "thematic_level_0",
+        ]
 
     def prepare_directory_type(self, obj):
         return "policy_directory"

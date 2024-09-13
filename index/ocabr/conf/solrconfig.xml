@@ -187,6 +187,10 @@
      <lst name="invariants">
          <str name="facet">true</str>
 
+         <str name="facet.field">universe</str>
+         <str name="facet.field">scope</str>
+         <str name="facet.field">graphs</str>
+         <str name="facet.field">database</str>
          <str name="facet.field">directory_type</str>
          <str name="facet.field">record_type</str>
          <str name="facet.field">type</str>
