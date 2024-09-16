@@ -557,13 +557,18 @@ def context_facet(request):
     query = request.POST.get("q", "*:*")
     query = request.GET.get("q", "*:*")
 
-    filters["f.grpahs.facet.sort"] = "index"
+    filters["f.graphs.facet.sort"] = "index"
 
-    search_results = solr.search(query, **filters)
-
+    # Get from database or index, when brazil is get from index otherwise database 
+    if query == "universe:brazil":
+        search_results = solr.search(query, **filters)
+        facets = search_results.facets["facet_fields"]
+    else: 
+        facets = IndicatorData.objects.get(data_type="facets").raw  
+    
     return JsonResponse(
         {
-            "facets": search_results.facets["facet_fields"],
+            "facets": facets,
             "translate": choices.translates,
         }
     )
