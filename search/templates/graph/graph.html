@@ -965,7 +965,7 @@
     }
 
 
-    function get_facets(q, scope=false){
+    function get_facets(q){
         $.ajax({
             url: '/search/graph/context_facet', 
             type: 'GET', 
@@ -975,9 +975,7 @@
             },
             success: function(response) {
                 trans = response.translate; 
-                if(scope){
-                    fill_components(response.facets.scope, trans, "#scope", include_all=false);
-                }
+                fill_components(response.facets.scope, trans, "#scope", include_all=false);
                 fill_components(response.facets.type, trans, "#type", include_all=false, empty=false, empty_without_first=true);
                 fill_components(response.facets.classification, trans, "#classification", include_all=false, empty=false, empty_without_first=true);
                 fill_components(response.facets.database, trans, "#database", include_all=false);
@@ -1000,7 +998,7 @@
                         get_facets(q="universe:brazil");
                     }
                     if ($(this).val() == "world"){
-                        get_facets(q="universe:world", scope=true);
+                        get_facets(q="universe:world");
                     }
                 }
 
