@@ -91,18 +91,18 @@
 
                 <select id="universe" class="chzn-select ordem form-control">
                     <option value="brazil" selected="">Brasil</option>
-                    <option value="brazil_region">Brasil - Região</option>
-                    <option value="brazil_posgraduate">Brasil - Pós Graduação</option>
-                    <option value="brazil_state">Brasil - Estado</option>
-                    <option value="brazil_instituion">Brasil - Instituição</option>
+                    <option value="brazil_region">Brasil por Região</option>
+                    <option value="brazil_posgraduate">Brasil por Pós Graduação</option>
+                    <option value="brazil_state">Brasil por Estado</option>
+                    <option value="brazil_instituion">Brasil por Instituição</option>
                     <option value="world">Mundo</option>
-                    <option value="world_region">Mundo - Região</option>
-                    <option value="world_country">Mundo - País</option>
+                    <option value="world_region">Mundo por Região</option>
+                    <option value="world_country">Mundo por País</option>
                 </select>
 
                 <div id="div_world_region" style="display:none">
                     <div class="mt-3 mb-2">
-                        <b>Regiões:</b>
+                        <b>Região:</b>
                     </div>
                     <select id="world_region" name="world_region" class="chzn-select ordem form-control"
                         data-placeholder="Escolha um ou mais regiões...">
@@ -116,7 +116,7 @@
 
                 <div id="div_world_country" style="display:none">
                     <div class="mt-3 mb-2">
-                        <b>Paises:</b>
+                        <b>País:</b>
                     </div>
                     <select id="world_country" name="world_country" class="chzn-select ordem form-control"
                         data-placeholder="Escolha um ou mais paises...">
@@ -129,7 +129,7 @@
 
                 <div id="div_brazil_region" style="display:none">
                     <div class="mt-3">
-                        <b>Regiões</b>
+                        <b>Região</b>
                     </div>
                     <select id="regions" name="regions" class="chzn-select ordem form-control"
                         data-placeholder="Escolha um ou mais região..." multiple>
@@ -142,7 +142,7 @@
 
                 <div id="div_brazil_state" style="display:none">
                     <div class="mt-3">
-                        <b>Estados</b>
+                        <b>Estado</b>
                     </div>
                     <select id="states" name="states"
                         class="chzn-select ordem form-control"
@@ -156,7 +156,7 @@
 
                 <div id="div_brazil_institution" style="display:none">
                     <div class="mt-3">
-                        <b>Institutições:</b>
+                        <b>Institutição:</b>
                     </div>
                     <select id="institutions" name="institutions" class="chzn-select ordem form-control"
                         data-placeholder="Escolha uma ou mais instituições..." multiple>
@@ -550,9 +550,9 @@
         if ($("#type").val() != "all" && $("#scope").val() == "document") {
             data["default_filter"] += "," + "type:" + $("#type").val()
         }
-        //if ($("#states").val() != "") {
-        //    data["default_filter"] += "," + '"states:"' + $("#states").val()
-        //}
+        if ($("#type").val() != "all") {
+            data["type"]= $("#type").val()
+        }
         if ($("#classification").val() != "all" && $("#scope").val() != "document") {
             data["default_filter"] += "," + 'classification:"' + $("#classification").val() + '"'
         }
@@ -951,8 +951,6 @@
             $(component_id + ' option:not(:first)').remove();
         }
 
-        //Preciso descobrir como remover todos os items nenos o primeiro da lista.
-
         if (include_all){
             $(component_id).append(`<option value="" selected="">${trans["all"]}</option>`);
         }
@@ -967,7 +965,7 @@
     }
 
 
-    function get_facets(q){
+    function get_facets(q, scope=false){
         $.ajax({
             url: '/search/graph/context_facet', 
             type: 'GET', 
@@ -976,16 +974,13 @@
                 csrfmiddlewaretoken: '{{ csrf_token }}'
             },
             success: function(response) {
-                trans = response.translate;
-                console.log(response.facets.scope); 
-                //fill_components(response.facets.scope, trans, "#scope", include_all=false);
-                console.log(response.facets.type); 
+                trans = response.translate; 
+                if(scope){
+                    fill_components(response.facets.scope, trans, "#scope", include_all=false);
+                }
                 fill_components(response.facets.type, trans, "#type", include_all=false, empty=false, empty_without_first=true);
-                console.log(response.facets.classification); 
                 fill_components(response.facets.classification, trans, "#classification", include_all=false, empty=false, empty_without_first=true);
-                console.log(response.facets.database); 
                 fill_components(response.facets.database, trans, "#database", include_all=false);
-                console.log(response.facets.graphs); 
                 fill_components(response.facets.graphs, trans, "#graph_type", include_all=true);
             },
             error: function(jqXHR, textStatus, errorThrown) {
@@ -1003,6 +998,9 @@
                 if(select.id == "universe"){
                     if ($(this).val() == "brazil"){
                         get_facets(q="universe:brazil");
+                    }
+                    if ($(this).val() == "world"){
+                        get_facets(q="universe:world", scope=true);
                     }
                 }
 

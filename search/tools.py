@@ -76,9 +76,9 @@ def generate_string(
     A formatted string according to the specification.
     """
     if len(terms) > 1:
-        terms_str = preposition_text + ", ".join(terms[:-1]) + prol_text +  _(" no ") + terms[-1]
+        terms_str = preposition_text + ", ".join(terms[:-1]) + prol_text +  _(" no ") + terms[-1].title()
     else:
-        terms_str = "no %s" % terms[0]
+        terms_str = "no %s" % terms[0].title()
 
     if year_range[0] == year_range[1]:
         inicial_text = _("Distribuição")

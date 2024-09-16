@@ -90,7 +90,7 @@ class EventIndex(indexes.SearchIndex, indexes.Indexable):
     #     return "directory"
 
     def prepare_universe(self, obj):
-        return ["Brazil"]
+        return ["brazil"]
 
     def prepare_scope(self, obj):
         return ["event_directory"]
