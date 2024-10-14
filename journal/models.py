@@ -8,7 +8,9 @@ class SourceJournal(models.Model):
     specific_id = models.CharField(
         _("Specific Id"), max_length=255, null=False, blank=False
     )
-    issn = models.CharField(_("DOI"), max_length=255, null=True, blank=False)
+    issns = models.CharField(_("ISSN"), max_length=255, null=True, blank=False)
+    issn_l = models.CharField(_("ISSN_L"), max_length=255, null=True, blank=False)
+    country_code = models.CharField(_("Country Code"), max_length=255, null=True, blank=False)
     title = models.CharField(_("Title"), max_length=1024, null=True, blank=False)
     updated = models.CharField(
         _("Source updated date"), max_length=50, null=True, blank=False
@@ -28,7 +30,12 @@ class SourceJournal(models.Model):
         indexes = [
             models.Index(
                 fields=[
-                    "issn",
+                    "issns",
+                ]
+            ),
+            models.Index(
+                fields=[
+                    "issn_l",
                 ]
             ),
             models.Index(
@@ -44,10 +51,10 @@ class SourceJournal(models.Model):
         ]
 
     def __unicode__(self):
-        return str("%s") % (self.issn or self.specific_id)
+        return str("%s") % (self.issns or self.specific_id)
 
     def __str__(self):
-        return str("%s") % (self.issn or self.specific_id)
+        return str("%s") % (self.issns or self.specific_id)
 
     @property
     def has_specific_id(self):
@@ -107,7 +114,9 @@ class SourceJournal(models.Model):
         The kwargs must be a dict, something like this:
 
             {
-                "issn": "1234-5678",
+                "issns": "1234-5678, 0987-6543",
+                "issn_l": "1987-9373",
+                "country_code": "BR",
                 "title": "Update the record",
                 "number": "999",
                 "volume": "9",
@@ -131,7 +140,10 @@ class SourceJournal(models.Model):
             print(_("The source journal table have duplicity...."))
             raise (SourceJournal.MultipleObjectsReturned)
 
-        journal.issn = kwargs.get("issn")
+        journal.issns = kwargs.get("issns")
+        journal.issn_l = kwargs.get("issn_l")
+        journal.title = kwargs.get("title")
+        journal.country_code = kwargs.get("country_code")
         journal.specific_id = kwargs.get("specific_id")
         journal.updated = kwargs.get("updated")
         journal.created = kwargs.get("created")

@@ -17,18 +17,19 @@ class SourceJournalAdmin(ModelAdmin):
     )
 
     list_display = (
-        "issn",
+        "issns",
+        "title",
         "specific_id",
         "updated",
         "created",
     )
 
     list_filter = (
-        "issn",
         "source",
+        "country_code",
     )
     search_fields = (
         "title"
-        "issn",
+        "issns",
         "specific_id",
     )
