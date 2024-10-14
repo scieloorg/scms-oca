@@ -1,19 +1,20 @@
 from django.utils.translation import gettext as _
-
 from wagtail.contrib.modeladmin.options import (
     ModelAdmin,
-    modeladmin_register,
     ModelAdminGroup,
+    modeladmin_register,
 )
 
+from journal.wagtail_hooks import SourceJournalAdmin
+
 from .models import (
-    Article,
-    SourceArticle,
-    Contributor,
     Affiliation,
+    Article,
+    Concepts,
+    Contributor,
     Journal,
     License,
-    Concepts
+    SourceArticle,
 )
 
 
@@ -223,6 +224,7 @@ class ArticleAdminGroup(ModelAdminGroup):
         LicenseAdmin,
         ConceptsAdmin,
         SourceArticleAdmin,
+        SourceJournalAdmin
     )
 
 
