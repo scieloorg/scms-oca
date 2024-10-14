@@ -130,6 +130,7 @@ LOCAL_APPS = [
     "wagtailautocomplete",
     # "provided_data",
     "article",
+    "journal",
 ]
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
@@ -374,6 +375,7 @@ BASE_URL = env.str("DJANGO_BASE_URL", default="https://ocabr")
 URL_API_CROSSREF = env.str("API_CROSSREF", default="https://api.crossref.org/works")
 URL_API_OPENALEX = env.str("API_OPENALEX", default="https://api.openalex.org/works")
 URL_API_OPENALEX_INSTITUTIONS = env.str("URL_API_OPENALEX_INSTITUTIONS", default="https://api.openalex.org/institutions")
+URL_API_OPENALEX_JOURNALS = env.str("URL_API_OPENALEX_JOURNALS", default="https://api.openalex.org/sources")
 
 LANGUAGES = [
     ("pt-BR", "Portuguese"),
