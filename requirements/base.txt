@@ -86,3 +86,8 @@ langcodes==3.3.0  # https://pypi.org/project/langcodes/
 # PyAlex
 # ------------------------------------------------------------------------------
 pyalex==0.14   # https://github.com/J535D165/pyalex
+
+
+# ElasticSearch 
+# ------------------------------------------------------------------------------
+elasticsearch==7.17.12  # https://elasticsearch-py.readthedocs.io/en/v7.17.12/
