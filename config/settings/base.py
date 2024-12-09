@@ -417,7 +417,14 @@ HAYSTACK_CONNECTIONS = {
         "URL": env("SOLR_URL", default="http://solr:8983/solr/ocabr/"),
         "SILENTLY_FAIL": False,
         "SOLR_TIMEOUT": 10,
-    }
+    },
+    'es': {
+        'ENGINE': 'haystack.backends.elasticsearch7_backend.Elasticsearch7SearchEngine',
+        'URL': env("ES_URL", default="http://elastic:xxxxx@host.docker.internal:9200/"),
+        'INDEX_NAME': 'oca',
+        "SOLR_TIMEOUT": 10,
+        "KWARGS": {"verify_certs":False}
+    },
 }
 
 USE_SOLR = env.str("USE_SOLR", "True") == "True"
