@@ -16,23 +16,16 @@ from core.api import api_router
 from core.search_site import views as search_views  # noqa isort:skip
 
 urlpatterns = [
-    # path("", TemplateView.as_view(template_name="home/home_page.html"), name="home"),
-    # path(
-    #     "graph/", TemplateView.as_view(template_name="graph/graph.html"), name="graph" 
-    # ),
-
+    path("dash/", TemplateView.as_view(template_name="dash/dash.html"), name="dash"),
     # Django Admin, use {% url "admin:index" %}
     path(settings.DJANGO_ADMIN_URL, admin.site.urls),
     # Wagtail Admin
     path(settings.WAGTAIL_ADMIN_URL, include(wagtailadmin_urls)),
     re_path(r"^documents/", include(wagtaildocs_urls)),
-
     # API V1 endpoint to custom models
     path("api/v1/", include("config.api_router")),
-
     # Swagger documentation to API v1
     path("swagger/", include("config.swagger_urls")),
-
     # Your stuff: custom urls includes go here
     # For anything not caught by a more specific rule above, hand over to
     # Wagtail’s page serving mechanism. This should be the last pattern in
@@ -52,10 +45,8 @@ urlpatterns += i18n_patterns(
     re_path(r"^search/", include("search.urls")),
     # Auto complete endpoint
     path("admin/autocomplete/", include(autocomplete_admin_urls)),
-
     # API V2 endpoint wagtail models
     path("api/v2/", api_router.urls),
-
     path("users/", include("core.users.urls", namespace="users")),
     path("i18n/", include("django.conf.urls.i18n")),
     path("", include("allauth.urls")),

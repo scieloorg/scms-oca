@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% load static %}
+{% load i18n %}
+{% load wagtailsettings_tags %}
+{% load sizify %}
+{% load partition %}
+{% load humanize %}
+{% load translate %}
+
+{% get_settings use_default_site=True %}
+
+{% block content %}
+
+    {{ settings.core_settings.CustomSettings.embed_dash|safe }}
+
+{% endblock %}
+
+{% block inline_javascript %}
+
+{% endblock %}
