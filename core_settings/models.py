@@ -57,11 +57,18 @@ class CustomSettings(BaseSiteSetting, ClusterableModel):
         related_name="+",
     )
 
+    embed_dash = models.TextField(
+        "Embed Dashboard",
+        null=True,
+        blank=True,
+    )
+
     site_panels = [
         FieldPanel("name"),
         FieldPanel("email"),
         FieldPanel("phone"),
         FieldPanel("footer_text", classname="full"),
+        FieldPanel("embed_dash", classname="full"),
         FieldPanel("favicon"),
         FieldPanel("site_logo"),
     ]
