@@ -81,10 +81,15 @@ class InfraStructureIndex(indexes.SearchIndex, indexes.Indexable):
         return obj.updated.isoformat()
     
     def prepare_creator(self, obj):
-        return obj.creator
+        if obj.creator:
+            return obj.creator.username
+        
+    def prepare_updated_by(self, obj):
+        if obj.updated_by:
+            return obj.updated_by.username
 
-    # def prepare_record_type(self, obj):
-    #     return "directory"
+    def prepare_type(self, obj):
+        return "directory"
 
     def prepare_universe(self, obj):
         return ["brazil"]
