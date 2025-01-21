@@ -58,6 +58,9 @@ class EducationIndex(indexes.SearchIndex, indexes.Indexable):
     # Database
     database = indexes.MultiValueField(null=True)
 
+    # Pipeline
+    pipeline = indexes.CharField(null=True)
+
     # Graphs
     graphs = indexes.MultiValueField(null=True)
 
@@ -104,6 +107,9 @@ class EducationIndex(indexes.SearchIndex, indexes.Indexable):
 
     def prepare_database(self, obj):
         return ["ocabr"]
+    
+    def prepare_pipeline(self, obj):
+        return "oca"
 
     def prepare_graphs(self, obj):
         return [

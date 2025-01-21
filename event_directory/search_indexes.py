@@ -58,6 +58,9 @@ class EventIndex(indexes.SearchIndex, indexes.Indexable):
     # Database
     database = indexes.MultiValueField(null=True)
 
+    # Pipeline
+    pipeline = indexes.CharField(null=True)
+
     # Graphs
     graphs = indexes.MultiValueField(null=True)
 
@@ -89,6 +92,9 @@ class EventIndex(indexes.SearchIndex, indexes.Indexable):
         if obj.creator:
             return obj.creator.username
         
+    def prepare_pipeline(self, obj):
+        return "oca"
+    
     def prepare_updated_by(self, obj):
         if obj.updated_by:
             return obj.updated_by.username
