@@ -67,6 +67,9 @@ class ArticleIndex(indexes.SearchIndex, indexes.Indexable):
     # Database
     database = indexes.MultiValueField(null=True)
 
+    # Pipeline
+    pipeline = indexes.CharField(null=True)
+
     # Graphs
     graphs = indexes.MultiValueField(null=True)
 
@@ -120,6 +123,9 @@ class ArticleIndex(indexes.SearchIndex, indexes.Indexable):
     # def prepare_record_type(self, obj):
     #     return "article"
 
+    def prepare_pipeline(self, obj):
+        return "oca"
+    
     def prepare_universe(self, obj):
         return ["brazil"]
 
