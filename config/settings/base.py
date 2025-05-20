@@ -421,10 +421,10 @@ HAYSTACK_CONNECTIONS = {
         "SILENTLY_FAIL": False,
         "SOLR_TIMEOUT": 10,
     },
-    'es': {
-        'ENGINE': 'haystack.backends.elasticsearch7_backend.Elasticsearch7SearchEngine',
-        'URL': env("ES_URL", default="http://elastic:xxxxx@host.docker.internal:9200/"),
-        'INDEX_NAME': 'oca',
+    "es": {
+        "ENGINE": "haystack.backends.elasticsearch7_backend.Elasticsearch7SearchEngine",
+        "URL": env("ES_URL", default="http://elastic:xxxxx@host.docker.internal:9200/"),
+        "INDEX_NAME": env("INDEX_NAME", default="opoca"),
         "SOLR_TIMEOUT": 10,
         "KWARGS": {"verify_certs":False}
     },
@@ -462,3 +462,8 @@ REST_FRAMEWORK = {
 }
 
 DIRECTORY_DEFAULT_CONTRIBUTOR = env.str("DIRECTORY_DEFAULT_CONTRIBUTOR", default="SciELO")
+
+INSTITUTION_INDEX = env.str("INSTITUTION_INDEX", "opinstitutions")
+REGION_INDEX = env.str("REGION_INDEX", "regionsbra")
+COUNTRY_INDEX = env.str("COUNTRY_INDEX", "regionscon")
+THEMATIC_AREA_INDEX = env.str("THEMATIC_AREA_INDEX", "thematicareas")
