@@ -1,0 +1,2003 @@
+[
+    {
+      "ISO-3166-alpha2-code": "AF",
+      "region": "Asia",
+      "scimago-region": "Asiatic Region",
+      "ISO-country-name": "Afghanistan",
+      "scielo-country-name": "Afghanistan",
+      "region OpenAlex": "Asia"
+    },
+    {
+      "ISO-3166-alpha2-code": "AL",
+      "region": "Europe",
+      "scimago-region": "Eastern Europe",
+      "ISO-country-name": "Albania",
+      "scielo-country-name": "Albania",
+      "region OpenAlex": "Europe"
+    },
+    {
+      "ISO-3166-alpha2-code": "DZ",
+      "region": "Africa",
+      "scimago-region": "Africa",
+      "ISO-country-name": "Algeria",
+      "scielo-country-name": "Algeria",
+      "region OpenAlex": "Africa"
+    },
+    {
+      "ISO-3166-alpha2-code": "AS",
+      "region": "Oceania",
+      "scimago-region": "Pacific Region",
+      "ISO-country-name": "American Samoa",
+      "scielo-country-name": "American Samoa",
+      "region OpenAlex": "Oceania"
+    },
+    {
+      "ISO-3166-alpha2-code": "AD",
+      "region": "Europe",
+      "scimago-region": "Western Europe",
+      "ISO-country-name": "Andorra",
+      "scielo-country-name": "Andorra",
+      "region OpenAlex": "Europe"
+    },
+    {
+      "ISO-3166-alpha2-code": "AO",
+      "region": "Africa",
+      "scimago-region": "Africa",
+      "ISO-country-name": "Angola",
+      "scielo-country-name": "Angola",
+      "region OpenAlex": "Africa"
+    },
+    {
+      "ISO-3166-alpha2-code": "AI",
+      "region": "Americas",
+      "scimago-region": "Latin America",
+      "ISO-country-name": "Anguilla",
+      "scielo-country-name": "Anguilla",
+      "region OpenAlex": "North America"
+    },
+    {
+      "ISO-3166-alpha2-code": "AQ",
+      "region": "Antarctica",
+      "scimago-region": "Antarctica",
+      "ISO-country-name": "Antarctica",
+      "scielo-country-name": "Antarctica",
+      "region OpenAlex": "Antarctica"
+    },
+    {
+      "ISO-3166-alpha2-code": "AG",
+      "region": "Americas",
+      "scimago-region": "Latin America",
+      "ISO-country-name": "Antigua and Barbuda",
+      "scielo-country-name": "Antigua and Barbuda",
+      "region OpenAlex": "North America"
+    },
+    {
+      "ISO-3166-alpha2-code": "AR",
+      "region": "Americas",
+      "scimago-region": "Latin America",
+      "ISO-country-name": "Argentina",
+      "scielo-country-name": "Argentina",
+      "region OpenAlex": "South America"
+    },
+    {
+      "ISO-3166-alpha2-code": "AM",
+      "region": "Asia",
+      "scimago-region": "Eastern Europe",
+      "ISO-country-name": "Armenia",
+      "scielo-country-name": "Armenia",
+      "region OpenAlex": "Asia"
+    },
+    {
+      "ISO-3166-alpha2-code": "AW",
+      "region": "Americas",
+      "scimago-region": "Latin America",
+      "ISO-country-name": "Aruba",
+      "scielo-country-name": "Aruba",
+      "region OpenAlex": "North America"
+    },
+    {
+      "ISO-3166-alpha2-code": "AU",
+      "region": "Oceania",
+      "scimago-region": "Pacific Region",
+      "ISO-country-name": "Australia",
+      "scielo-country-name": "Australia",
+      "region OpenAlex": "Oceania"
+    },
+    {
+      "ISO-3166-alpha2-code": "AT",
+      "region": "Europe",
+      "scimago-region": "Western Europe",
+      "ISO-country-name": "Austria",
+      "scielo-country-name": "Austria",
+      "region OpenAlex": "Europe"
+    },
+    {
+      "ISO-3166-alpha2-code": "AZ",
+      "region": "Asia",
+      "scimago-region": "Eastern Europe",
+      "ISO-country-name": "Azerbaijan",
+      "scielo-country-name": "Azerbaijan",
+      "region OpenAlex": "Asia"
+    },
+    {
+      "ISO-3166-alpha2-code": "BS",
+      "region": "Americas",
+      "scimago-region": "Latin America",
+      "ISO-country-name": "Bahamas",
+      "scielo-country-name": "Bahamas",
+      "region OpenAlex": "North America"
+    },
+    {
+      "ISO-3166-alpha2-code": "BH",
+      "region": "Asia",
+      "scimago-region": "Middle East",
+      "ISO-country-name": "Bahrain",
+      "scielo-country-name": "Bahrain",
+      "region OpenAlex": "Asia"
+    },
+    {
+      "ISO-3166-alpha2-code": "BD",
+      "region": "Asia",
+      "scimago-region": "Asiatic Region",
+      "ISO-country-name": "Bangladesh",
+      "scielo-country-name": "Bangladesh",
+      "region OpenAlex": "Asia"
+    },
+    {
+      "ISO-3166-alpha2-code": "BB",
+      "region": "Americas",
+      "scimago-region": "Latin America",
+      "ISO-country-name": "Barbados",
+      "scielo-country-name": "Barbados",
+      "region OpenAlex": "North America"
+    },
+    {
+      "ISO-3166-alpha2-code": "BY",
+      "region": "Europe",
+      "scimago-region": "Eastern Europe",
+      "ISO-country-name": "Belarus",
+      "scielo-country-name": "Belarus",
+      "region OpenAlex": "Europe"
+    },
+    {
+      "ISO-3166-alpha2-code": "BE",
+      "region": "Europe",
+      "scimago-region": "Western Europe",
+      "ISO-country-name": "Belgium",
+      "scielo-country-name": "Belgium",
+      "region OpenAlex": "Europe"
+    },
+    {
+      "ISO-3166-alpha2-code": "BZ",
+      "region": "Americas",
+      "scimago-region": "Latin America",
+      "ISO-country-name": "Belize",
+      "scielo-country-name": "Belize",
+      "region OpenAlex": "North America"
+    },
+    {
+      "ISO-3166-alpha2-code": "BJ",
+      "region": "Africa",
+      "scimago-region": "Africa",
+      "ISO-country-name": "Benin",
+      "scielo-country-name": "Benin",
+      "region OpenAlex": "Africa"
+    },
+    {
+      "ISO-3166-alpha2-code": "BM",
+      "region": "Americas",
+      "scimago-region": "Latin America",
+      "ISO-country-name": "Bermuda",
+      "scielo-country-name": "Bermuda",
+      "region OpenAlex": "North America"
+    },
+    {
+      "ISO-3166-alpha2-code": "BT",
+      "region": "Asia",
+      "scimago-region": "Asiatic Region",
+      "ISO-country-name": "Bhutan",
+      "scielo-country-name": "Bhutan",
+      "region OpenAlex": "Asia"
+    },
+    {
+      "ISO-3166-alpha2-code": "BO",
+      "region": "Americas",
+      "scimago-region": "Latin America",
+      "ISO-country-name": "Bolivia (Plurinational State of)",
+      "scielo-country-name": "Bolivia",
+      "region OpenAlex": "South America"
+    },
+    {
+      "ISO-3166-alpha2-code": "BQ",
+      "region": "Americas",
+      "scimago-region": "Latin America",
+      "ISO-country-name": "Bonaire, Sint Eustatius and Saba",
+      "scielo-country-name": "Bonaire, Sint Eustatius and Saba",
+      "region OpenAlex": "North America"
+    },
+    {
+      "ISO-3166-alpha2-code": "BA",
+      "region": "Europe",
+      "scimago-region": "Eastern Europe",
+      "ISO-country-name": "Bosnia and Herzegovina",
+      "scielo-country-name": "Bosnia and Herzegovina",
+      "region OpenAlex": "Europe"
+    },
+    {
+      "ISO-3166-alpha2-code": "BW",
+      "region": "Africa",
+      "scimago-region": "Africa",
+      "ISO-country-name": "Botswana",
+      "scielo-country-name": "Botswana",
+      "region OpenAlex": "Africa"
+    },
+    {
+      "ISO-3166-alpha2-code": "BV",
+      "region": "Americas",
+      "scimago-region": "Western Europe",
+      "ISO-country-name": "Bouvet Island",
+      "scielo-country-name": "Bouvet Island",
+      "region OpenAlex": "South America"
+    },
+    {
+      "ISO-3166-alpha2-code": "BR",
+      "region": "Americas",
+      "scimago-region": "Latin America",
+      "ISO-country-name": "Brazil",
+      "scielo-country-name": "Brazil",
+      "region OpenAlex": "South America"
+    },
+    {
+      "ISO-3166-alpha2-code": "IO",
+      "region": "Africa",
+      "scimago-region": "Africa",
+      "ISO-country-name": "British Indian Ocean Territory",
+      "scielo-country-name": "British Indian Ocean Territory",
+      "region OpenAlex": "Africa"
+    },
+    {
+      "ISO-3166-alpha2-code": "BN",
+      "region": "Asia",
+      "scimago-region": "Asiatic Region",
+      "ISO-country-name": "Brunei Darussalam",
+      "scielo-country-name": "Brunei Darussalam",
+      "region OpenAlex": "Asia"
+    },
+    {
+      "ISO-3166-alpha2-code": "BG",
+      "region": "Europe",
+      "scimago-region": "Eastern Europe",
+      "ISO-country-name": "Bulgaria",
+      "scielo-country-name": "Bulgaria",
+      "region OpenAlex": "Europe"
+    },
+    {
+      "ISO-3166-alpha2-code": "BF",
+      "region": "Africa",
+      "scimago-region": "Africa",
+      "ISO-country-name": "Burkina Faso",
+      "scielo-country-name": "Burkina Faso",
+      "region OpenAlex": "Africa"
+    },
+    {
+      "ISO-3166-alpha2-code": "BI",
+      "region": "Africa",
+      "scimago-region": "Africa",
+      "ISO-country-name": "Burundi",
+      "scielo-country-name": "Burundi",
+      "region OpenAlex": "Africa"
+    },
+    {
+      "ISO-3166-alpha2-code": "CV",
+      "region": "Africa",
+      "scimago-region": "Africa",
+      "ISO-country-name": "Cabo Verde",
+      "scielo-country-name": "Cabo Verde",
+      "region OpenAlex": "Africa"
+    },
+    {
+      "ISO-3166-alpha2-code": "KH",
+      "region": "Asia",
+      "scimago-region": "Asiatic Region",
+      "ISO-country-name": "Cambodia",
+      "scielo-country-name": "Cambodia",
+      "region OpenAlex": "Asia"
+    },
+    {
+      "ISO-3166-alpha2-code": "CM",
+      "region": "Africa",
+      "scimago-region": "Africa",
+      "ISO-country-name": "Cameroon",
+      "scielo-country-name": "Cameroon",
+      "region OpenAlex": "Africa"
+    },
+    {
+      "ISO-3166-alpha2-code": "CA",
+      "region": "Americas",
+      "scimago-region": "Northern America",
+      "ISO-country-name": "Canada",
+      "scielo-country-name": "Canada",
+      "region OpenAlex": "North America"
+    },
+    {
+      "ISO-3166-alpha2-code": "KY",
+      "region": "Americas",
+      "scimago-region": "Latin America",
+      "ISO-country-name": "Cayman Islands",
+      "scielo-country-name": "Cayman Islands",
+      "region OpenAlex": "North America"
+    },
+    {
+      "ISO-3166-alpha2-code": "CF",
+      "region": "Africa",
+      "scimago-region": "Africa",
+      "ISO-country-name": "Central African Republic",
+      "scielo-country-name": "Central African Republic",
+      "region OpenAlex": "Africa"
+    },
+    {
+      "ISO-3166-alpha2-code": "TD",
+      "region": "Africa",
+      "scimago-region": "Africa",
+      "ISO-country-name": "Chad",
+      "scielo-country-name": "Chad",
+      "region OpenAlex": "Africa"
+    },
+    {
+      "ISO-3166-alpha2-code": "CL",
+      "region": "Americas",
+      "scimago-region": "Latin America",
+      "ISO-country-name": "Chile",
+      "scielo-country-name": "Chile",
+      "region OpenAlex": "South America"
+    },
+    {
+      "ISO-3166-alpha2-code": "CN",
+      "region": "Asia",
+      "scimago-region": "Asiatic Region",
+      "ISO-country-name": "China",
+      "scielo-country-name": "China",
+      "region OpenAlex": "Asia"
+    },
+    {
+      "ISO-3166-alpha2-code": "CX",
+      "region": "Oceania",
+      "scimago-region": "Pacific Region",
+      "ISO-country-name": "Christmas Island",
+      "scielo-country-name": "Christmas Island",
+      "region OpenAlex": "Oceania"
+    },
+    {
+      "ISO-3166-alpha2-code": "CC",
+      "region": "Oceania",
+      "scimago-region": "Pacific Region",
+      "ISO-country-name": "Cocos (Keeling) Islands",
+      "scielo-country-name": "Cocos (Keeling) Islands",
+      "region OpenAlex": "Oceania"
+    },
+    {
+      "ISO-3166-alpha2-code": "CO",
+      "region": "Americas",
+      "scimago-region": "Latin America",
+      "ISO-country-name": "Colombia",
+      "scielo-country-name": "Colombia",
+      "region OpenAlex": "South America"
+    },
+    {
+      "ISO-3166-alpha2-code": "KM",
+      "region": "Africa",
+      "scimago-region": "Africa",
+      "ISO-country-name": "Comoros",
+      "scielo-country-name": "Comoros",
+      "region OpenAlex": "Africa"
+    },
+    {
+      "ISO-3166-alpha2-code": "CG",
+      "region": "Africa",
+      "scimago-region": "Africa",
+      "ISO-country-name": "Congo",
+      "scielo-country-name": "Congo",
+      "region OpenAlex": "Africa"
+    },
+    {
+      "ISO-3166-alpha2-code": "CD",
+      "region": "Africa",
+      "scimago-region": "Africa",
+      "ISO-country-name": "Congo, Democratic Republic of the",
+      "scielo-country-name": "Congo, Democratic Republic of the",
+      "region OpenAlex": "Africa"
+    },
+    {
+      "ISO-3166-alpha2-code": "CK",
+      "region": "Oceania",
+      "scimago-region": "Pacific Region",
+      "ISO-country-name": "Cook Islands",
+      "scielo-country-name": "Cook Islands",
+      "region OpenAlex": "Oceania"
+    },
+    {
+      "ISO-3166-alpha2-code": "CR",
+      "region": "Americas",
+      "scimago-region": "Latin America",
+      "ISO-country-name": "Costa Rica",
+      "scielo-country-name": "Costa Rica",
+      "region OpenAlex": "North America"
+    },
+    {
+      "ISO-3166-alpha2-code": "HR",
+      "region": "Europe",
+      "scimago-region": "Eastern Europe",
+      "ISO-country-name": "Croatia",
+      "scielo-country-name": "Croatia",
+      "region OpenAlex": "Europe"
+    },
+    {
+      "ISO-3166-alpha2-code": "CU",
+      "region": "Americas",
+      "scimago-region": "Latin America",
+      "ISO-country-name": "Cuba",
+      "scielo-country-name": "Cuba",
+      "region OpenAlex": "North America"
+    },
+    {
+      "ISO-3166-alpha2-code": "CW",
+      "region": "Americas",
+      "scimago-region": "Latin America",
+      "ISO-country-name": "Curaçao",
+      "scielo-country-name": "Curaçao",
+      "region OpenAlex": "North America"
+    },
+    {
+      "ISO-3166-alpha2-code": "CY",
+      "region": "Asia",
+      "scimago-region": "Western Europe",
+      "ISO-country-name": "Cyprus",
+      "scielo-country-name": "Cyprus",
+      "region OpenAlex": "Asia"
+    },
+    {
+      "ISO-3166-alpha2-code": "CZ",
+      "region": "Europe",
+      "scimago-region": "Eastern Europe",
+      "ISO-country-name": "Czechia",
+      "scielo-country-name": "Czechia",
+      "region OpenAlex": "Europe"
+    },
+    {
+      "ISO-3166-alpha2-code": "CI",
+      "region": "Africa",
+      "scimago-region": "Africa",
+      "ISO-country-name": "Côte d'Ivoire",
+      "scielo-country-name": "Côte d'Ivoire",
+      "region OpenAlex": "Africa"
+    },
+    {
+      "ISO-3166-alpha2-code": "DK",
+      "region": "Europe",
+      "scimago-region": "Western Europe",
+      "ISO-country-name": "Denmark",
+      "scielo-country-name": "Denmark",
+      "region OpenAlex": "Europe"
+    },
+    {
+      "ISO-3166-alpha2-code": "DJ",
+      "region": "Africa",
+      "scimago-region": "Africa",
+      "ISO-country-name": "Djibouti",
+      "scielo-country-name": "Djibouti",
+      "region OpenAlex": "Africa"
+    },
+    {
+      "ISO-3166-alpha2-code": "DM",
+      "region": "Americas",
+      "scimago-region": "Latin America",
+      "ISO-country-name": "Dominica",
+      "scielo-country-name": "Dominica",
+      "region OpenAlex": "North America"
+    },
+    {
+      "ISO-3166-alpha2-code": "DO",
+      "region": "Americas",
+      "scimago-region": "Latin America",
+      "ISO-country-name": "Dominican Republic",
+      "scielo-country-name": "Dominican Republic",
+      "region OpenAlex": "North America"
+    },
+    {
+      "ISO-3166-alpha2-code": "EC",
+      "region": "Americas",
+      "scimago-region": "Latin America",
+      "ISO-country-name": "Ecuador",
+      "scielo-country-name": "Ecuador",
+      "region OpenAlex": "South America"
+    },
+    {
+      "ISO-3166-alpha2-code": "EG",
+      "region": "Africa",
+      "scimago-region": "Africa",
+      "ISO-country-name": "Egypt",
+      "scielo-country-name": "Egypt",
+      "region OpenAlex": "Africa"
+    },
+    {
+      "ISO-3166-alpha2-code": "SV",
+      "region": "Americas",
+      "scimago-region": "Latin America",
+      "ISO-country-name": "El Salvador",
+      "scielo-country-name": "El Salvador",
+      "region OpenAlex": "North America"
+    },
+    {
+      "ISO-3166-alpha2-code": "GQ",
+      "region": "Africa",
+      "scimago-region": "Africa",
+      "ISO-country-name": "Equatorial Guinea",
+      "scielo-country-name": "Equatorial Guinea",
+      "region OpenAlex": "Africa"
+    },
+    {
+      "ISO-3166-alpha2-code": "ER",
+      "region": "Africa",
+      "scimago-region": "Africa",
+      "ISO-country-name": "Eritrea",
+      "scielo-country-name": "Eritrea",
+      "region OpenAlex": "Africa"
+    },
+    {
+      "ISO-3166-alpha2-code": "EE",
+      "region": "Europe",
+      "scimago-region": "Eastern Europe",
+      "ISO-country-name": "Estonia",
+      "scielo-country-name": "Estonia",
+      "region OpenAlex": "Europe"
+    },
+    {
+      "ISO-3166-alpha2-code": "SZ",
+      "region": "Africa",
+      "scimago-region": "Africa",
+      "ISO-country-name": "Eswatini",
+      "scielo-country-name": "Eswatini",
+      "region OpenAlex": "Africa"
+    },
+    {
+      "ISO-3166-alpha2-code": "ET",
+      "region": "Africa",
+      "scimago-region": "Africa",
+      "ISO-country-name": "Ethiopia",
+      "scielo-country-name": "Ethiopia",
+      "region OpenAlex": "Africa"
+    },
+    {
+      "ISO-3166-alpha2-code": "FK",
+      "region": "Americas",
+      "scimago-region": "Latin America",
+      "ISO-country-name": "Falkland Islands (Malvinas)",
+      "scielo-country-name": "Falkland Islands (Malvinas)",
+      "region OpenAlex": "South America"
+    },
+    {
+      "ISO-3166-alpha2-code": "FO",
+      "region": "Europe",
+      "scimago-region": "Western Europe",
+      "ISO-country-name": "Faroe Islands",
+      "scielo-country-name": "Faroe Islands",
+      "region OpenAlex": "Europe"
+    },
+    {
+      "ISO-3166-alpha2-code": "FJ",
+      "region": "Oceania",
+      "scimago-region": "Pacific Region",
+      "ISO-country-name": "Fiji",
+      "scielo-country-name": "Fiji",
+      "region OpenAlex": "Oceania"
+    },
+    {
+      "ISO-3166-alpha2-code": "FI",
+      "region": "Europe",
+      "scimago-region": "Western Europe",
+      "ISO-country-name": "Finland",
+      "scielo-country-name": "Finland",
+      "region OpenAlex": "Europe"
+    },
+    {
+      "ISO-3166-alpha2-code": "FR",
+      "region": "Europe",
+      "scimago-region": "Western Europe",
+      "ISO-country-name": "France",
+      "scielo-country-name": "France",
+      "region OpenAlex": "Europe"
+    },
+    {
+      "ISO-3166-alpha2-code": "GF",
+      "region": "Americas",
+      "scimago-region": "Latin America",
+      "ISO-country-name": "French Guiana",
+      "scielo-country-name": "French Guiana",
+      "region OpenAlex": "South America"
+    },
+    {
+      "ISO-3166-alpha2-code": "PF",
+      "region": "Oceania",
+      "scimago-region": "Pacific Region",
+      "ISO-country-name": "French Polynesia",
+      "scielo-country-name": "French Polynesia",
+      "region OpenAlex": "Oceania"
+    },
+    {
+      "ISO-3166-alpha2-code": "TF",
+      "region": "Africa",
+      "scimago-region": "Pacific Region",
+      "ISO-country-name": "French Southern Territories",
+      "scielo-country-name": "French Southern Territories",
+      "region OpenAlex": "Africa"
+    },
+    {
+      "ISO-3166-alpha2-code": "GA",
+      "region": "Africa",
+      "scimago-region": "Africa",
+      "ISO-country-name": "Gabon",
+      "scielo-country-name": "Gabon",
+      "region OpenAlex": "Africa"
+    },
+    {
+      "ISO-3166-alpha2-code": "GM",
+      "region": "Africa",
+      "scimago-region": "Africa",
+      "ISO-country-name": "Gambia",
+      "scielo-country-name": "Gambia",
+      "region OpenAlex": "Africa"
+    },
+    {
+      "ISO-3166-alpha2-code": "GE",
+      "region": "Asia",
+      "scimago-region": "Eastern Europe",
+      "ISO-country-name": "Georgia",
+      "scielo-country-name": "Georgia",
+      "region OpenAlex": "Asia"
+    },
+    {
+      "ISO-3166-alpha2-code": "DE",
+      "region": "Europe",
+      "scimago-region": "Western Europe",
+      "ISO-country-name": "Germany",
+      "scielo-country-name": "Germany",
+      "region OpenAlex": "Europe"
+    },
+    {
+      "ISO-3166-alpha2-code": "GH",
+      "region": "Africa",
+      "scimago-region": "Africa",
+      "ISO-country-name": "Ghana",
+      "scielo-country-name": "Ghana",
+      "region OpenAlex": "Africa"
+    },
+    {
+      "ISO-3166-alpha2-code": "GI",
+      "region": "Europe",
+      "scimago-region": "Western Europe",
+      "ISO-country-name": "Gibraltar",
+      "scielo-country-name": "Gibraltar",
+      "region OpenAlex": "Europe"
+    },
+    {
+      "ISO-3166-alpha2-code": "GR",
+      "region": "Europe",
+      "scimago-region": "Western Europe",
+      "ISO-country-name": "Greece",
+      "scielo-country-name": "Greece",
+      "region OpenAlex": "Europe"
+    },
+    {
+      "ISO-3166-alpha2-code": "GL",
+      "region": "Americas",
+      "scimago-region": "Northern America",
+      "ISO-country-name": "Greenland",
+      "scielo-country-name": "Greenland",
+      "region OpenAlex": "North America"
+    },
+    {
+      "ISO-3166-alpha2-code": "GD",
+      "region": "Americas",
+      "scimago-region": "Latin America",
+      "ISO-country-name": "Grenada",
+      "scielo-country-name": "Grenada",
+      "region OpenAlex": "North America"
+    },
+    {
+      "ISO-3166-alpha2-code": "GP",
+      "region": "Americas",
+      "scimago-region": "Latin America",
+      "ISO-country-name": "Guadeloupe",
+      "scielo-country-name": "Guadeloupe",
+      "region OpenAlex": "North America"
+    },
+    {
+      "ISO-3166-alpha2-code": "GU",
+      "region": "Oceania",
+      "scimago-region": "Pacific Region",
+      "ISO-country-name": "Guam",
+      "scielo-country-name": "Guam",
+      "region OpenAlex": "Oceania"
+    },
+    {
+      "ISO-3166-alpha2-code": "GT",
+      "region": "Americas",
+      "scimago-region": "Latin America",
+      "ISO-country-name": "Guatemala",
+      "scielo-country-name": "Guatemala",
+      "region OpenAlex": "North America"
+    },
+    {
+      "ISO-3166-alpha2-code": "GG",
+      "region": "Europe",
+      "scimago-region": "Western Europe",
+      "ISO-country-name": "Guernsey",
+      "scielo-country-name": "Guernsey",
+      "region OpenAlex": "Europe"
+    },
+    {
+      "ISO-3166-alpha2-code": "GN",
+      "region": "Africa",
+      "scimago-region": "Africa",
+      "ISO-country-name": "Guinea",
+      "scielo-country-name": "Guinea",
+      "region OpenAlex": "Africa"
+    },
+    {
+      "ISO-3166-alpha2-code": "GW",
+      "region": "Africa",
+      "scimago-region": "Africa",
+      "ISO-country-name": "Guinea-Bissau",
+      "scielo-country-name": "Guinea-Bissau",
+      "region OpenAlex": "Africa"
+    },
+    {
+      "ISO-3166-alpha2-code": "GY",
+      "region": "Americas",
+      "scimago-region": "Latin America",
+      "ISO-country-name": "Guyana",
+      "scielo-country-name": "Guyana",
+      "region OpenAlex": "South America"
+    },
+    {
+      "ISO-3166-alpha2-code": "HT",
+      "region": "Americas",
+      "scimago-region": "Latin America",
+      "ISO-country-name": "Haiti",
+      "scielo-country-name": "Haiti",
+      "region OpenAlex": "North America"
+    },
+    {
+      "ISO-3166-alpha2-code": "HM",
+      "region": "Oceania",
+      "scimago-region": "Pacific Region",
+      "ISO-country-name": "Heard Island and McDonald Islands",
+      "scielo-country-name": "Heard Island and McDonald Islands",
+      "region OpenAlex": "Oceania"
+    },
+    {
+      "ISO-3166-alpha2-code": "VA",
+      "region": "Europe",
+      "scimago-region": "Western Europe",
+      "ISO-country-name": "Holy See",
+      "scielo-country-name": "Holy See",
+      "region OpenAlex": "Europe"
+    },
+    {
+      "ISO-3166-alpha2-code": "HN",
+      "region": "Americas",
+      "scimago-region": "Latin America",
+      "ISO-country-name": "Honduras",
+      "scielo-country-name": "Honduras",
+      "region OpenAlex": "North America"
+    },
+    {
+      "ISO-3166-alpha2-code": "HK",
+      "region": "Asia",
+      "scimago-region": "Asiatic Region",
+      "ISO-country-name": "Hong Kong",
+      "scielo-country-name": "Hong Kong",
+      "region OpenAlex": "Asia"
+    },
+    {
+      "ISO-3166-alpha2-code": "HU",
+      "region": "Europe",
+      "scimago-region": "Eastern Europe",
+      "ISO-country-name": "Hungary",
+      "scielo-country-name": "Hungary",
+      "region OpenAlex": "Europe"
+    },
+    {
+      "ISO-3166-alpha2-code": "IS",
+      "region": "Europe",
+      "scimago-region": "Western Europe",
+      "ISO-country-name": "Iceland",
+      "scielo-country-name": "Iceland",
+      "region OpenAlex": "Europe"
+    },
+    {
+      "ISO-3166-alpha2-code": "IN",
+      "region": "Asia",
+      "scimago-region": "Asiatic Region",
+      "ISO-country-name": "India",
+      "scielo-country-name": "India",
+      "region OpenAlex": "Asia"
+    },
+    {
+      "ISO-3166-alpha2-code": "ID",
+      "region": "Asia",
+      "scimago-region": "Asiatic Region",
+      "ISO-country-name": "Indonesia",
+      "scielo-country-name": "Indonesia",
+      "region OpenAlex": "Asia"
+    },
+    {
+      "ISO-3166-alpha2-code": "IR",
+      "region": "Asia",
+      "scimago-region": "Middle East",
+      "ISO-country-name": "Iran (Islamic Republic of)",
+      "scielo-country-name": "Iran",
+      "region OpenAlex": "Asia"
+    },
+    {
+      "ISO-3166-alpha2-code": "IQ",
+      "region": "Asia",
+      "scimago-region": "Middle East",
+      "ISO-country-name": "Iraq",
+      "scielo-country-name": "Iraq",
+      "region OpenAlex": "Asia"
+    },
+    {
+      "ISO-3166-alpha2-code": "IE",
+      "region": "Europe",
+      "scimago-region": "Western Europe",
+      "ISO-country-name": "Ireland",
+      "scielo-country-name": "Ireland",
+      "region OpenAlex": "Europe"
+    },
+    {
+      "ISO-3166-alpha2-code": "IM",
+      "region": "Europe",
+      "scimago-region": "Western Europe",
+      "ISO-country-name": "Isle of Man",
+      "scielo-country-name": "Isle of Man",
+      "region OpenAlex": "Europe"
+    },
+    {
+      "ISO-3166-alpha2-code": "IL",
+      "region": "Asia",
+      "scimago-region": "Middle East",
+      "ISO-country-name": "Israel",
+      "scielo-country-name": "Israel",
+      "region OpenAlex": "Asia"
+    },
+    {
+      "ISO-3166-alpha2-code": "IT",
+      "region": "Europe",
+      "scimago-region": "Western Europe",
+      "ISO-country-name": "Italy",
+      "scielo-country-name": "Italy",
+      "region OpenAlex": "Europe"
+    },
+    {
+      "ISO-3166-alpha2-code": "JM",
+      "region": "Americas",
+      "scimago-region": "Latin America",
+      "ISO-country-name": "Jamaica",
+      "scielo-country-name": "Jamaica",
+      "region OpenAlex": "North America"
+    },
+    {
+      "ISO-3166-alpha2-code": "JP",
+      "region": "Asia",
+      "scimago-region": "Asiatic Region",
+      "ISO-country-name": "Japan",
+      "scielo-country-name": "Japan",
+      "region OpenAlex": "Asia"
+    },
+    {
+      "ISO-3166-alpha2-code": "JE",
+      "region": "Europe",
+      "scimago-region": "Western Europe",
+      "ISO-country-name": "Jersey",
+      "scielo-country-name": "Jersey",
+      "region OpenAlex": "Europe"
+    },
+    {
+      "ISO-3166-alpha2-code": "JO",
+      "region": "Asia",
+      "scimago-region": "Middle East",
+      "ISO-country-name": "Jordan",
+      "scielo-country-name": "Jordan",
+      "region OpenAlex": "Asia"
+    },
+    {
+      "ISO-3166-alpha2-code": "KZ",
+      "region": "Asia",
+      "scimago-region": "Asiatic Region",
+      "ISO-country-name": "Kazakhstan",
+      "scielo-country-name": "Kazakhstan",
+      "region OpenAlex": "Asia"
+    },
+    {
+      "ISO-3166-alpha2-code": "KE",
+      "region": "Africa",
+      "scimago-region": "Africa",
+      "ISO-country-name": "Kenya",
+      "scielo-country-name": "Kenya",
+      "region OpenAlex": "Africa"
+    },
+    {
+      "ISO-3166-alpha2-code": "KI",
+      "region": "Oceania",
+      "scimago-region": "Pacific Region",
+      "ISO-country-name": "Kiribati",
+      "scielo-country-name": "Kiribati",
+      "region OpenAlex": "Oceania"
+    },
+    {
+      "ISO-3166-alpha2-code": "KP",
+      "region": "Asia",
+      "scimago-region": "Asiatic Region",
+      "ISO-country-name": "Korea (Democratic People's Republic of)",
+      "scielo-country-name": "North Korea",
+      "region OpenAlex": "Asia"
+    },
+    {
+      "ISO-3166-alpha2-code": "KR",
+      "region": "Asia",
+      "scimago-region": "Asiatic Region",
+      "ISO-country-name": "Korea, Republic of",
+      "scielo-country-name": "South Korea",
+      "region OpenAlex": "Asia"
+    },
+    {
+      "ISO-3166-alpha2-code": "KW",
+      "region": "Asia",
+      "scimago-region": "Middle East",
+      "ISO-country-name": "Kuwait",
+      "scielo-country-name": "Kuwait",
+      "region OpenAlex": "Asia"
+    },
+    {
+      "ISO-3166-alpha2-code": "KG",
+      "region": "Asia",
+      "scimago-region": "Asiatic Region",
+      "ISO-country-name": "Kyrgyzstan",
+      "scielo-country-name": "Kyrgyzstan",
+      "region OpenAlex": "Asia"
+    },
+    {
+      "ISO-3166-alpha2-code": "LA",
+      "region": "Asia",
+      "scimago-region": "Asiatic Region",
+      "ISO-country-name": "Lao People's Democratic Republic",
+      "scielo-country-name": "Lao People's Democratic Republic",
+      "region OpenAlex": "Asia"
+    },
+    {
+      "ISO-3166-alpha2-code": "LV",
+      "region": "Europe",
+      "scimago-region": "Eastern Europe",
+      "ISO-country-name": "Latvia",
+      "scielo-country-name": "Latvia",
+      "region OpenAlex": "Europe"
+    },
+    {
+      "ISO-3166-alpha2-code": "LB",
+      "region": "Asia",
+      "scimago-region": "Middle East",
+      "ISO-country-name": "Lebanon",
+      "scielo-country-name": "Lebanon",
+      "region OpenAlex": "Asia"
+    },
+    {
+      "ISO-3166-alpha2-code": "LS",
+      "region": "Africa",
+      "scimago-region": "Africa",
+      "ISO-country-name": "Lesotho",
+      "scielo-country-name": "Lesotho",
+      "region OpenAlex": "Africa"
+    },
+    {
+      "ISO-3166-alpha2-code": "LR",
+      "region": "Africa",
+      "scimago-region": "Africa",
+      "ISO-country-name": "Liberia",
+      "scielo-country-name": "Liberia",
+      "region OpenAlex": "Africa"
+    },
+    {
+      "ISO-3166-alpha2-code": "LY",
+      "region": "Africa",
+      "scimago-region": "Africa",
+      "ISO-country-name": "Libya",
+      "scielo-country-name": "Libya",
+      "region OpenAlex": "Africa"
+    },
+    {
+      "ISO-3166-alpha2-code": "LI",
+      "region": "Europe",
+      "scimago-region": "Western Europe",
+      "ISO-country-name": "Liechtenstein",
+      "scielo-country-name": "Liechtenstein",
+      "region OpenAlex": "Europe"
+    },
+    {
+      "ISO-3166-alpha2-code": "LT",
+      "region": "Europe",
+      "scimago-region": "Eastern Europe",
+      "ISO-country-name": "Lithuania",
+      "scielo-country-name": "Lithuania",
+      "region OpenAlex": "Europe"
+    },
+    {
+      "ISO-3166-alpha2-code": "LU",
+      "region": "Europe",
+      "scimago-region": "Western Europe",
+      "ISO-country-name": "Luxembourg",
+      "scielo-country-name": "Luxembourg",
+      "region OpenAlex": "Europe"
+    },
+    {
+      "ISO-3166-alpha2-code": "MO",
+      "region": "Asia",
+      "scimago-region": "Asiatic Region",
+      "ISO-country-name": "Macao",
+      "scielo-country-name": "Macao",
+      "region OpenAlex": "Asia"
+    },
+    {
+      "ISO-3166-alpha2-code": "MG",
+      "region": "Africa",
+      "scimago-region": "Africa",
+      "ISO-country-name": "Madagascar",
+      "scielo-country-name": "Madagascar",
+      "region OpenAlex": "Africa"
+    },
+    {
+      "ISO-3166-alpha2-code": "MW",
+      "region": "Africa",
+      "scimago-region": "Africa",
+      "ISO-country-name": "Malawi",
+      "scielo-country-name": "Malawi",
+      "region OpenAlex": "Africa"
+    },
+    {
+      "ISO-3166-alpha2-code": "MY",
+      "region": "Asia",
+      "scimago-region": "Asiatic Region",
+      "ISO-country-name": "Malaysia",
+      "scielo-country-name": "Malaysia",
+      "region OpenAlex": "Asia"
+    },
+    {
+      "ISO-3166-alpha2-code": "MV",
+      "region": "Asia",
+      "scimago-region": "Asiatic Region",
+      "ISO-country-name": "Maldives",
+      "scielo-country-name": "Maldives",
+      "region OpenAlex": "Asia"
+    },
+    {
+      "ISO-3166-alpha2-code": "ML",
+      "region": "Africa",
+      "scimago-region": "Africa",
+      "ISO-country-name": "Mali",
+      "scielo-country-name": "Mali",
+      "region OpenAlex": "Africa"
+    },
+    {
+      "ISO-3166-alpha2-code": "MT",
+      "region": "Europe",
+      "scimago-region": "Western Europe",
+      "ISO-country-name": "Malta",
+      "scielo-country-name": "Malta",
+      "region OpenAlex": "Europe"
+    },
+    {
+      "ISO-3166-alpha2-code": "MH",
+      "region": "Oceania",
+      "scimago-region": "Pacific Region",
+      "ISO-country-name": "Marshall Islands",
+      "scielo-country-name": "Marshall Islands",
+      "region OpenAlex": "Oceania"
+    },
+    {
+      "ISO-3166-alpha2-code": "MQ",
+      "region": "Americas",
+      "scimago-region": "Latin America",
+      "ISO-country-name": "Martinique",
+      "scielo-country-name": "Martinique",
+      "region OpenAlex": "North America"
+    },
+    {
+      "ISO-3166-alpha2-code": "MR",
+      "region": "Africa",
+      "scimago-region": "Africa",
+      "ISO-country-name": "Mauritania",
+      "scielo-country-name": "Mauritania",
+      "region OpenAlex": "Africa"
+    },
+    {
+      "ISO-3166-alpha2-code": "MU",
+      "region": "Africa",
+      "scimago-region": "Africa",
+      "ISO-country-name": "Mauritius",
+      "scielo-country-name": "Mauritius",
+      "region OpenAlex": "Africa"
+    },
+    {
+      "ISO-3166-alpha2-code": "YT",
+      "region": "Africa",
+      "scimago-region": "Africa",
+      "ISO-country-name": "Mayotte",
+      "scielo-country-name": "Mayotte",
+      "region OpenAlex": "Africa"
+    },
+    {
+      "ISO-3166-alpha2-code": "MX",
+      "region": "Americas",
+      "scimago-region": "Latin America",
+      "ISO-country-name": "Mexico",
+      "scielo-country-name": "Mexico",
+      "region OpenAlex": "North America"
+    },
+    {
+      "ISO-3166-alpha2-code": "FM",
+      "region": "Oceania",
+      "scimago-region": "Pacific Region",
+      "ISO-country-name": "Micronesia (Federated States of)",
+      "scielo-country-name": "Micronesia",
+      "region OpenAlex": "Oceania"
+    },
+    {
+      "ISO-3166-alpha2-code": "MD",
+      "region": "Europe",
+      "scimago-region": "Eastern Europe",
+      "ISO-country-name": "Moldova, Republic of",
+      "scielo-country-name": "Moldova",
+      "region OpenAlex": "Europe"
+    },
+    {
+      "ISO-3166-alpha2-code": "MC",
+      "region": "Europe",
+      "scimago-region": "Western Europe",
+      "ISO-country-name": "Monaco",
+      "scielo-country-name": "Monaco",
+      "region OpenAlex": "Europe"
+    },
+    {
+      "ISO-3166-alpha2-code": "MN",
+      "region": "Asia",
+      "scimago-region": "Asiatic Region",
+      "ISO-country-name": "Mongolia",
+      "scielo-country-name": "Mongolia",
+      "region OpenAlex": "Asia"
+    },
+    {
+      "ISO-3166-alpha2-code": "ME",
+      "region": "Europe",
+      "scimago-region": "Eastern Europe",
+      "ISO-country-name": "Montenegro",
+      "scielo-country-name": "Montenegro",
+      "region OpenAlex": "Europe"
+    },
+    {
+      "ISO-3166-alpha2-code": "MS",
+      "region": "Americas",
+      "scimago-region": "Latin America",
+      "ISO-country-name": "Montserrat",
+      "scielo-country-name": "Montserrat",
+      "region OpenAlex": "North America"
+    },
+    {
+      "ISO-3166-alpha2-code": "MA",
+      "region": "Africa",
+      "scimago-region": "Africa",
+      "ISO-country-name": "Morocco",
+      "scielo-country-name": "Morocco",
+      "region OpenAlex": "Africa"
+    },
+    {
+      "ISO-3166-alpha2-code": "MZ",
+      "region": "Africa",
+      "scimago-region": "Africa",
+      "ISO-country-name": "Mozambique",
+      "scielo-country-name": "Mozambique",
+      "region OpenAlex": "Africa"
+    },
+    {
+      "ISO-3166-alpha2-code": "MM",
+      "region": "Asia",
+      "scimago-region": "Asiatic Region",
+      "ISO-country-name": "Myanmar",
+      "scielo-country-name": "Myanmar",
+      "region OpenAlex": "Asia"
+    },
+    {
+      "ISO-3166-alpha2-code": "NA",
+      "region": "Africa",
+      "scimago-region": "Africa",
+      "ISO-country-name": "Namibia",
+      "scielo-country-name": "Namibia",
+      "region OpenAlex": "Africa"
+    },
+    {
+      "ISO-3166-alpha2-code": "NR",
+      "region": "Oceania",
+      "scimago-region": "Pacific Region",
+      "ISO-country-name": "Nauru",
+      "scielo-country-name": "Nauru",
+      "region OpenAlex": "Oceania"
+    },
+    {
+      "ISO-3166-alpha2-code": "NP",
+      "region": "Asia",
+      "scimago-region": "Asiatic Region",
+      "ISO-country-name": "Nepal",
+      "scielo-country-name": "Nepal",
+      "region OpenAlex": "Asia"
+    },
+    {
+      "ISO-3166-alpha2-code": "NL",
+      "region": "Europe",
+      "scimago-region": "Western Europe",
+      "ISO-country-name": "Netherlands",
+      "scielo-country-name": "Netherlands",
+      "region OpenAlex": "Europe"
+    },
+    {
+      "ISO-3166-alpha2-code": "NC",
+      "region": "Oceania",
+      "scimago-region": "Pacific Region",
+      "ISO-country-name": "New Caledonia",
+      "scielo-country-name": "New Caledonia",
+      "region OpenAlex": "Oceania"
+    },
+    {
+      "ISO-3166-alpha2-code": "NZ",
+      "region": "Oceania",
+      "scimago-region": "Pacific Region",
+      "ISO-country-name": "New Zealand",
+      "scielo-country-name": "New Zealand",
+      "region OpenAlex": "Oceania"
+    },
+    {
+      "ISO-3166-alpha2-code": "NI",
+      "region": "Americas",
+      "scimago-region": "Latin America",
+      "ISO-country-name": "Nicaragua",
+      "scielo-country-name": "Nicaragua",
+      "region OpenAlex": "North America"
+    },
+    {
+      "ISO-3166-alpha2-code": "NE",
+      "region": "Africa",
+      "scimago-region": "Africa",
+      "ISO-country-name": "Niger",
+      "scielo-country-name": "Niger",
+      "region OpenAlex": "Africa"
+    },
+    {
+      "ISO-3166-alpha2-code": "NG",
+      "region": "Africa",
+      "scimago-region": "Africa",
+      "ISO-country-name": "Nigeria",
+      "scielo-country-name": "Nigeria",
+      "region OpenAlex": "Africa"
+    },
+    {
+      "ISO-3166-alpha2-code": "NU",
+      "region": "Oceania",
+      "scimago-region": "Pacific Region",
+      "ISO-country-name": "Niue",
+      "scielo-country-name": "Niue",
+      "region OpenAlex": "Oceania"
+    },
+    {
+      "ISO-3166-alpha2-code": "NF",
+      "region": "Oceania",
+      "scimago-region": "Pacific Region",
+      "ISO-country-name": "Norfolk Island",
+      "scielo-country-name": "Norfolk Island",
+      "region OpenAlex": "Oceania"
+    },
+    {
+      "ISO-3166-alpha2-code": "MK",
+      "region": "Europe",
+      "scimago-region": "Eastern Europe",
+      "ISO-country-name": "North Macedonia",
+      "scielo-country-name": "North Macedonia",
+      "region OpenAlex": "Europe"
+    },
+    {
+      "ISO-3166-alpha2-code": "MP",
+      "region": "Oceania",
+      "scimago-region": "Asiatic Region",
+      "ISO-country-name": "Northern Mariana Islands",
+      "scielo-country-name": "Northern Mariana Islands",
+      "region OpenAlex": "Oceania"
+    },
+    {
+      "ISO-3166-alpha2-code": "NO",
+      "region": "Europe",
+      "scimago-region": "Western Europe",
+      "ISO-country-name": "Norway",
+      "scielo-country-name": "Norway",
+      "region OpenAlex": "Europe"
+    },
+    {
+      "ISO-3166-alpha2-code": "OM",
+      "region": "Asia",
+      "scimago-region": "Middle East",
+      "ISO-country-name": "Oman",
+      "scielo-country-name": "Oman",
+      "region OpenAlex": "Asia"
+    },
+    {
+      "ISO-3166-alpha2-code": "PK",
+      "region": "Asia",
+      "scimago-region": "Asiatic Region",
+      "ISO-country-name": "Pakistan",
+      "scielo-country-name": "Pakistan",
+      "region OpenAlex": "Asia"
+    },
+    {
+      "ISO-3166-alpha2-code": "PW",
+      "region": "Oceania",
+      "scimago-region": "Pacific Region",
+      "ISO-country-name": "Palau",
+      "scielo-country-name": "Palau",
+      "region OpenAlex": "Oceania"
+    },
+    {
+      "ISO-3166-alpha2-code": "PS",
+      "region": "Asia",
+      "scimago-region": "Middle East",
+      "ISO-country-name": "Palestine, State of",
+      "scielo-country-name": "Palestine",
+      "region OpenAlex": "Asia"
+    },
+    {
+      "ISO-3166-alpha2-code": "PA",
+      "region": "Americas",
+      "scimago-region": "Latin America",
+      "ISO-country-name": "Panama",
+      "scielo-country-name": "Panama",
+      "region OpenAlex": "North America"
+    },
+    {
+      "ISO-3166-alpha2-code": "PG",
+      "region": "Oceania",
+      "scimago-region": "Pacific Region",
+      "ISO-country-name": "Papua New Guinea",
+      "scielo-country-name": "Papua New Guinea",
+      "region OpenAlex": "Oceania"
+    },
+    {
+      "ISO-3166-alpha2-code": "PY",
+      "region": "Americas",
+      "scimago-region": "Latin America",
+      "ISO-country-name": "Paraguay",
+      "scielo-country-name": "Paraguay",
+      "region OpenAlex": "South America"
+    },
+    {
+      "ISO-3166-alpha2-code": "PE",
+      "region": "Americas",
+      "scimago-region": "Latin America",
+      "ISO-country-name": "Peru",
+      "scielo-country-name": "Peru",
+      "region OpenAlex": "South America"
+    },
+    {
+      "ISO-3166-alpha2-code": "PH",
+      "region": "Asia",
+      "scimago-region": "Asiatic Region",
+      "ISO-country-name": "Philippines",
+      "scielo-country-name": "Philippines",
+      "region OpenAlex": "Asia"
+    },
+    {
+      "ISO-3166-alpha2-code": "PN",
+      "region": "Oceania",
+      "scimago-region": "Pacific Region",
+      "ISO-country-name": "Pitcairn",
+      "scielo-country-name": "Pitcairn",
+      "region OpenAlex": "Oceania"
+    },
+    {
+      "ISO-3166-alpha2-code": "PL",
+      "region": "Europe",
+      "scimago-region": "Eastern Europe",
+      "ISO-country-name": "Poland",
+      "scielo-country-name": "Poland",
+      "region OpenAlex": "Europe"
+    },
+    {
+      "ISO-3166-alpha2-code": "PT",
+      "region": "Europe",
+      "scimago-region": "Western Europe",
+      "ISO-country-name": "Portugal",
+      "scielo-country-name": "Portugal",
+      "region OpenAlex": "Europe"
+    },
+    {
+      "ISO-3166-alpha2-code": "PR",
+      "region": "Americas",
+      "scimago-region": "Latin America",
+      "ISO-country-name": "Puerto Rico",
+      "scielo-country-name": "Puerto Rico",
+      "region OpenAlex": "North America"
+    },
+    {
+      "ISO-3166-alpha2-code": "QA",
+      "region": "Asia",
+      "scimago-region": "Middle East",
+      "ISO-country-name": "Qatar",
+      "scielo-country-name": "Qatar",
+      "region OpenAlex": "Asia"
+    },
+    {
+      "ISO-3166-alpha2-code": "RO",
+      "region": "Europe",
+      "scimago-region": "Eastern Europe",
+      "ISO-country-name": "Romania",
+      "scielo-country-name": "Romania",
+      "region OpenAlex": "Europe"
+    },
+    {
+      "ISO-3166-alpha2-code": "RU",
+      "region": "Europe",
+      "scimago-region": "Eastern Europe",
+      "ISO-country-name": "Russian Federation",
+      "scielo-country-name": "Russia",
+      "region OpenAlex": "Europe"
+    },
+    {
+      "ISO-3166-alpha2-code": "RW",
+      "region": "Africa",
+      "scimago-region": "Africa",
+      "ISO-country-name": "Rwanda",
+      "scielo-country-name": "Rwanda",
+      "region OpenAlex": "Africa"
+    },
+    {
+      "ISO-3166-alpha2-code": "RE",
+      "region": "Africa",
+      "scimago-region": "Africa",
+      "ISO-country-name": "Réunion",
+      "scielo-country-name": "Réunion",
+      "region OpenAlex": "Africa"
+    },
+    {
+      "ISO-3166-alpha2-code": "BL",
+      "region": "Americas",
+      "scimago-region": "Latin America",
+      "ISO-country-name": "Saint Barthélemy",
+      "scielo-country-name": "Saint Barthélemy",
+      "region OpenAlex": "North America"
+    },
+    {
+      "ISO-3166-alpha2-code": "SH",
+      "region": "Africa",
+      "scimago-region": "Africa",
+      "ISO-country-name": "Saint Helena, Ascension and Tristan da Cunha",
+      "scielo-country-name": "Saint Helena, Ascension and Tristan da Cunha",
+      "region OpenAlex": "Africa"
+    },
+    {
+      "ISO-3166-alpha2-code": "KN",
+      "region": "Americas",
+      "scimago-region": "Latin America",
+      "ISO-country-name": "Saint Kitts and Nevis",
+      "scielo-country-name": "Saint Kitts and Nevis",
+      "region OpenAlex": "North America"
+    },
+    {
+      "ISO-3166-alpha2-code": "LC",
+      "region": "Americas",
+      "scimago-region": "Latin America",
+      "ISO-country-name": "Saint Lucia",
+      "scielo-country-name": "Saint Lucia",
+      "region OpenAlex": "North America"
+    },
+    {
+      "ISO-3166-alpha2-code": "MF",
+      "region": "Americas",
+      "scimago-region": "Latin America",
+      "ISO-country-name": "Saint Martin (French part)",
+      "scielo-country-name": "Saint Martin (French part)",
+      "region OpenAlex": "North America"
+    },
+    {
+      "ISO-3166-alpha2-code": "PM",
+      "region": "Americas",
+      "scimago-region": "Northern America",
+      "ISO-country-name": "Saint Pierre and Miquelon",
+      "scielo-country-name": "Saint Pierre and Miquelon",
+      "region OpenAlex": "North America"
+    },
+    {
+      "ISO-3166-alpha2-code": "VC",
+      "region": "Americas",
+      "scimago-region": "Latin America",
+      "ISO-country-name": "Saint Vincent and the Grenadines",
+      "scielo-country-name": "Saint Vincent and the Grenadines",
+      "region OpenAlex": "North America"
+    },
+    {
+      "ISO-3166-alpha2-code": "WS",
+      "region": "Oceania",
+      "scimago-region": "Pacific Region",
+      "ISO-country-name": "Samoa",
+      "scielo-country-name": "Samoa",
+      "region OpenAlex": "Oceania"
+    },
+    {
+      "ISO-3166-alpha2-code": "SM",
+      "region": "Europe",
+      "scimago-region": "Western Europe",
+      "ISO-country-name": "San Marino",
+      "scielo-country-name": "San Marino",
+      "region OpenAlex": "Europe"
+    },
+    {
+      "ISO-3166-alpha2-code": "ST",
+      "region": "Africa",
+      "scimago-region": "Africa",
+      "ISO-country-name": "Sao Tome and Principe",
+      "scielo-country-name": "Sao Tome and Principe",
+      "region OpenAlex": "Africa"
+    },
+    {
+      "ISO-3166-alpha2-code": "SA",
+      "region": "Asia",
+      "scimago-region": "Middle East",
+      "ISO-country-name": "Saudi Arabia",
+      "scielo-country-name": "Saudi Arabia",
+      "region OpenAlex": "Asia"
+    },
+    {
+      "ISO-3166-alpha2-code": "SN",
+      "region": "Africa",
+      "scimago-region": "Africa",
+      "ISO-country-name": "Senegal",
+      "scielo-country-name": "Senegal",
+      "region OpenAlex": "Africa"
+    },
+    {
+      "ISO-3166-alpha2-code": "RS",
+      "region": "Europe",
+      "scimago-region": "Eastern Europe",
+      "ISO-country-name": "Serbia",
+      "scielo-country-name": "Serbia",
+      "region OpenAlex": "Europe"
+    },
+    {
+      "ISO-3166-alpha2-code": "SC",
+      "region": "Africa",
+      "scimago-region": "Africa",
+      "ISO-country-name": "Seychelles",
+      "scielo-country-name": "Seychelles",
+      "region OpenAlex": "Africa"
+    },
+    {
+      "ISO-3166-alpha2-code": "SL",
+      "region": "Africa",
+      "scimago-region": "Africa",
+      "ISO-country-name": "Sierra Leone",
+      "scielo-country-name": "Sierra Leone",
+      "region OpenAlex": "Africa"
+    },
+    {
+      "ISO-3166-alpha2-code": "SG",
+      "region": "Asia",
+      "scimago-region": "Asiatic Region",
+      "ISO-country-name": "Singapore",
+      "scielo-country-name": "Singapore",
+      "region OpenAlex": "Asia"
+    },
+    {
+      "ISO-3166-alpha2-code": "SX",
+      "region": "Americas",
+      "scimago-region": "Latin America",
+      "ISO-country-name": "Sint Maarten (Dutch part)",
+      "scielo-country-name": "Sint Maarten (Dutch part)",
+      "region OpenAlex": "North America"
+    },
+    {
+      "ISO-3166-alpha2-code": "SK",
+      "region": "Europe",
+      "scimago-region": "Eastern Europe",
+      "ISO-country-name": "Slovakia",
+      "scielo-country-name": "Slovakia",
+      "region OpenAlex": "Europe"
+    },
+    {
+      "ISO-3166-alpha2-code": "SI",
+      "region": "Europe",
+      "scimago-region": "Eastern Europe",
+      "ISO-country-name": "Slovenia",
+      "scielo-country-name": "Slovenia",
+      "region OpenAlex": "Europe"
+    },
+    {
+      "ISO-3166-alpha2-code": "SB",
+      "region": "Oceania",
+      "scimago-region": "Pacific Region",
+      "ISO-country-name": "Solomon Islands",
+      "scielo-country-name": "Solomon Islands",
+      "region OpenAlex": "Oceania"
+    },
+    {
+      "ISO-3166-alpha2-code": "SO",
+      "region": "Africa",
+      "scimago-region": "Africa",
+      "ISO-country-name": "Somalia",
+      "scielo-country-name": "Somalia",
+      "region OpenAlex": "Africa"
+    },
+    {
+      "ISO-3166-alpha2-code": "ZA",
+      "region": "Africa",
+      "scimago-region": "Africa",
+      "ISO-country-name": "South Africa",
+      "scielo-country-name": "South Africa",
+      "region OpenAlex": "Africa"
+    },
+    {
+      "ISO-3166-alpha2-code": "GS",
+      "region": "Americas",
+      "scimago-region": "Latin America",
+      "ISO-country-name": "South Georgia and the South Sandwich Islands",
+      "scielo-country-name": "South Georgia and the South Sandwich Islands",
+      "region OpenAlex": "South America"
+    },
+    {
+      "ISO-3166-alpha2-code": "SS",
+      "region": "Africa",
+      "scimago-region": "Africa",
+      "ISO-country-name": "South Sudan",
+      "scielo-country-name": "South Sudan",
+      "region OpenAlex": "Africa"
+    },
+    {
+      "ISO-3166-alpha2-code": "ES",
+      "region": "Europe",
+      "scimago-region": "Western Europe",
+      "ISO-country-name": "Spain",
+      "scielo-country-name": "Spain",
+      "region OpenAlex": "Europe"
+    },
+    {
+      "ISO-3166-alpha2-code": "LK",
+      "region": "Asia",
+      "scimago-region": "Asiatic Region",
+      "ISO-country-name": "Sri Lanka",
+      "scielo-country-name": "Sri Lanka",
+      "region OpenAlex": "Asia"
+    },
+    {
+      "ISO-3166-alpha2-code": "SD",
+      "region": "Africa",
+      "scimago-region": "Africa",
+      "ISO-country-name": "Sudan",
+      "scielo-country-name": "Sudan",
+      "region OpenAlex": "Africa"
+    },
+    {
+      "ISO-3166-alpha2-code": "SR",
+      "region": "Americas",
+      "scimago-region": "Latin America",
+      "ISO-country-name": "Suriname",
+      "scielo-country-name": "Suriname",
+      "region OpenAlex": "South America"
+    },
+    {
+      "ISO-3166-alpha2-code": "SJ",
+      "region": "Europe",
+      "scimago-region": "Western Europe",
+      "ISO-country-name": "Svalbard and Jan Mayen",
+      "scielo-country-name": "Svalbard and Jan Mayen",
+      "region OpenAlex": "Europe"
+    },
+    {
+      "ISO-3166-alpha2-code": "SE",
+      "region": "Europe",
+      "scimago-region": "Western Europe",
+      "ISO-country-name": "Sweden",
+      "scielo-country-name": "Sweden",
+      "region OpenAlex": "Europe"
+    },
+    {
+      "ISO-3166-alpha2-code": "CH",
+      "region": "Europe",
+      "scimago-region": "Western Europe",
+      "ISO-country-name": "Switzerland",
+      "scielo-country-name": "Switzerland",
+      "region OpenAlex": "Europe"
+    },
+    {
+      "ISO-3166-alpha2-code": "SY",
+      "region": "Asia",
+      "scimago-region": "Middle East",
+      "ISO-country-name": "Syrian Arab Republic",
+      "scielo-country-name": "Syrian Arab Republic",
+      "region OpenAlex": "Asia"
+    },
+    {
+      "ISO-3166-alpha2-code": "TW",
+      "region": "Asia",
+      "scimago-region": "Asiatic Region",
+      "ISO-country-name": "Taiwan, Province of China",
+      "scielo-country-name": "Taiwan",
+      "region OpenAlex": "Asia"
+    },
+    {
+      "ISO-3166-alpha2-code": "TJ",
+      "region": "Asia",
+      "scimago-region": "Asiatic Region",
+      "ISO-country-name": "Tajikistan",
+      "scielo-country-name": "Tajikistan",
+      "region OpenAlex": "Asia"
+    },
+    {
+      "ISO-3166-alpha2-code": "TZ",
+      "region": "Africa",
+      "scimago-region": "Africa",
+      "ISO-country-name": "Tanzania, United Republic of",
+      "scielo-country-name": "Tanzania",
+      "region OpenAlex": "Africa"
+    },
+    {
+      "ISO-3166-alpha2-code": "TH",
+      "region": "Asia",
+      "scimago-region": "Asiatic Region",
+      "ISO-country-name": "Thailand",
+      "scielo-country-name": "Thailand",
+      "region OpenAlex": "Asia"
+    },
+    {
+      "ISO-3166-alpha2-code": "TL",
+      "region": "Asia",
+      "scimago-region": "Asiatic Region",
+      "ISO-country-name": "Timor-Leste",
+      "scielo-country-name": "Timor-Leste",
+      "region OpenAlex": "Asia"
+    },
+    {
+      "ISO-3166-alpha2-code": "TG",
+      "region": "Africa",
+      "scimago-region": "Africa",
+      "ISO-country-name": "Togo",
+      "scielo-country-name": "Togo",
+      "region OpenAlex": "Africa"
+    },
+    {
+      "ISO-3166-alpha2-code": "TK",
+      "region": "Oceania",
+      "scimago-region": "Pacific Region",
+      "ISO-country-name": "Tokelau",
+      "scielo-country-name": "Tokelau",
+      "region OpenAlex": "Oceania"
+    },
+    {
+      "ISO-3166-alpha2-code": "TO",
+      "region": "Oceania",
+      "scimago-region": "Pacific Region",
+      "ISO-country-name": "Tonga",
+      "scielo-country-name": "Tonga",
+      "region OpenAlex": "Oceania"
+    },
+    {
+      "ISO-3166-alpha2-code": "TT",
+      "region": "Americas",
+      "scimago-region": "Latin America",
+      "ISO-country-name": "Trinidad and Tobago",
+      "scielo-country-name": "Trinidad and Tobago",
+      "region OpenAlex": "North America"
+    },
+    {
+      "ISO-3166-alpha2-code": "TN",
+      "region": "Africa",
+      "scimago-region": "Africa",
+      "ISO-country-name": "Tunisia",
+      "scielo-country-name": "Tunisia",
+      "region OpenAlex": "Africa"
+    },
+    {
+      "ISO-3166-alpha2-code": "TR",
+      "region": "Asia",
+      "scimago-region": "Middle East",
+      "ISO-country-name": "Turkey",
+      "scielo-country-name": "Turkey",
+      "region OpenAlex": "Asia"
+    },
+    {
+      "ISO-3166-alpha2-code": "TM",
+      "region": "Asia",
+      "scimago-region": "Asiatic Region",
+      "ISO-country-name": "Turkmenistan",
+      "scielo-country-name": "Turkmenistan",
+      "region OpenAlex": "Asia"
+    },
+    {
+      "ISO-3166-alpha2-code": "TC",
+      "region": "Americas",
+      "scimago-region": "Latin America",
+      "ISO-country-name": "Turks and Caicos Islands",
+      "scielo-country-name": "Turks and Caicos Islands",
+      "region OpenAlex": "North America"
+    },
+    {
+      "ISO-3166-alpha2-code": "TV",
+      "region": "Oceania",
+      "scimago-region": "Pacific Region",
+      "ISO-country-name": "Tuvalu",
+      "scielo-country-name": "Tuvalu",
+      "region OpenAlex": "Oceania"
+    },
+    {
+      "ISO-3166-alpha2-code": "UG",
+      "region": "Africa",
+      "scimago-region": "Africa",
+      "ISO-country-name": "Uganda",
+      "scielo-country-name": "Uganda",
+      "region OpenAlex": "Africa"
+    },
+    {
+      "ISO-3166-alpha2-code": "UA",
+      "region": "Europe",
+      "scimago-region": "Eastern Europe",
+      "ISO-country-name": "Ukraine",
+      "scielo-country-name": "Ukraine",
+      "region OpenAlex": "Europe"
+    },
+    {
+      "ISO-3166-alpha2-code": "AE",
+      "region": "Asia",
+      "scimago-region": "Middle East",
+      "ISO-country-name": "United Arab Emirates",
+      "scielo-country-name": "United Arab Emirates",
+      "region OpenAlex": "Asia"
+    },
+    {
+      "ISO-3166-alpha2-code": "GB",
+      "region": "Europe",
+      "scimago-region": "Western Europe",
+      "ISO-country-name": "United Kingdom of Great Britain and Northern Ireland",
+      "scielo-country-name": "United Kingdom",
+      "region OpenAlex": "Europe"
+    },
+    {
+      "ISO-3166-alpha2-code": "UM",
+      "region": "Oceania",
+      "scimago-region": "Pacific Region",
+      "ISO-country-name": "United States Minor Outlying Islands",
+      "scielo-country-name": "United States Minor Outlying Islands",
+      "region OpenAlex": "Oceania"
+    },
+    {
+      "ISO-3166-alpha2-code": "US",
+      "region": "Americas",
+      "scimago-region": "Northern America",
+      "ISO-country-name": "United States of America",
+      "scielo-country-name": "United States of America",
+      "region OpenAlex": "North America"
+    },
+    {
+      "ISO-3166-alpha2-code": "UY",
+      "region": "Americas",
+      "scimago-region": "Latin America",
+      "ISO-country-name": "Uruguay",
+      "scielo-country-name": "Uruguay",
+      "region OpenAlex": "South America"
+    },
+    {
+      "ISO-3166-alpha2-code": "UZ",
+      "region": "Asia",
+      "scimago-region": "Asiatic Region",
+      "ISO-country-name": "Uzbekistan",
+      "scielo-country-name": "Uzbekistan",
+      "region OpenAlex": "Asia"
+    },
+    {
+      "ISO-3166-alpha2-code": "VU",
+      "region": "Oceania",
+      "scimago-region": "Pacific Region",
+      "ISO-country-name": "Vanuatu",
+      "scielo-country-name": "Vanuatu",
+      "region OpenAlex": "Oceania"
+    },
+    {
+      "ISO-3166-alpha2-code": "VE",
+      "region": "Americas",
+      "scimago-region": "Latin America",
+      "ISO-country-name": "Venezuela (Bolivarian Republic of)",
+      "scielo-country-name": "Venezuela",
+      "region OpenAlex": "South America"
+    },
+    {
+      "ISO-3166-alpha2-code": "VN",
+      "region": "Asia",
+      "scimago-region": "Asiatic Region",
+      "ISO-country-name": "Viet Nam",
+      "scielo-country-name": "Viet Nam",
+      "region OpenAlex": "Asia"
+    },
+    {
+      "ISO-3166-alpha2-code": "VG",
+      "region": "Americas",
+      "scimago-region": "Latin America",
+      "ISO-country-name": "Virgin Islands (British)",
+      "scielo-country-name": "Virgin Islands (British)",
+      "region OpenAlex": "North America"
+    },
+    {
+      "ISO-3166-alpha2-code": "VI",
+      "region": "Americas",
+      "scimago-region": "Latin America",
+      "ISO-country-name": "Virgin Islands (U.S.)",
+      "scielo-country-name": "Virgin Islands (U.S.)",
+      "region OpenAlex": "North America"
+    },
+    {
+      "ISO-3166-alpha2-code": "WF",
+      "region": "Oceania",
+      "scimago-region": "Pacific Region",
+      "ISO-country-name": "Wallis and Futuna",
+      "scielo-country-name": "Wallis and Futuna",
+      "region OpenAlex": "Oceania"
+    },
+    {
+      "ISO-3166-alpha2-code": "EH",
+      "region": "Africa",
+      "scimago-region": "Africa",
+      "ISO-country-name": "Western Sahara",
+      "scielo-country-name": "Western Sahara",
+      "region OpenAlex": "Africa"
+    },
+    {
+      "ISO-3166-alpha2-code": "YE",
+      "region": "Asia",
+      "scimago-region": "Middle East",
+      "ISO-country-name": "Yemen",
+      "scielo-country-name": "Yemen",
+      "region OpenAlex": "Asia"
+    },
+    {
+      "ISO-3166-alpha2-code": "ZM",
+      "region": "Africa",
+      "scimago-region": "Africa",
+      "ISO-country-name": "Zambia",
+      "scielo-country-name": "Zambia",
+      "region OpenAlex": "Africa"
+    },
+    {
+      "ISO-3166-alpha2-code": "ZW",
+      "region": "Africa",
+      "scimago-region": "Africa",
+      "ISO-country-name": "Zimbabwe",
+      "scielo-country-name": "Zimbabwe",
+      "region OpenAlex": "Africa"
+    },
+    {
+      "ISO-3166-alpha2-code": "AX",
+      "region": "Europe",
+      "scimago-region": "Western Europe",
+      "ISO-country-name": "Åland Islands",
+      "scielo-country-name": "Åland Islands",
+      "region OpenAlex": "Europe"
+    },
+    {
+      "ISO-3166-alpha2-code": "XK",
+      "region": "Europe",
+      "scimago-region": "Eastern Europe",
+      "ISO-country-name": "Kosovo",
+      "scielo-country-name": "Kosovo",
+      "region OpenAlex": "Europe"
+    }
+  ]
+

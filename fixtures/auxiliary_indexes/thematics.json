@@ -1,0 +1,217 @@
+{
+    "food science": {
+        "level0": "Ciências da Vida",
+        "level1": "Ciências Agrárias",
+        "level2": "Ciência de Alimentos"
+    },
+    "agricultural science": {
+        "level0": "Ciências da Vida",
+        "level1": "Ciências Agrárias",
+        "level2": "Ciências Agrárias I"
+    },
+    "veterinary medicine": {
+        "level0": "Ciências da Vida",
+        "level1": "Ciências Agrárias",
+        "level2": "Medicina Veterinária"
+    },
+    "animal science": {
+        "level0": "Ciências da Vida",
+        "level1": "Ciências Agrárias",
+        "level2": "Zootecnia / Recursos Pesqueiros"
+    },
+    "biodiversity": {
+        "level0": "Ciências da Vida",
+        "level1": "Ciências Biológicas",
+        "level2": "Biodiversidade"
+    },
+    "biology": {
+        "level0": "Ciências da Vida",
+        "level1": "Ciências Biológicas",
+        "level2": "Ciências Biológicas I"
+    },
+    "physical education": {
+        "level0": "Ciências da Vida",
+        "level1": "Ciências da Saúde",
+        "level2": "Educação Física"
+    },
+    "nursing science": {
+        "level0": "Ciências da Vida",
+        "level1": "Ciências da Saúde",
+        "level2": "Enfermagem"
+    },
+    "pharmacy": {
+        "level0": "Ciências da Vida",
+        "level1": "Ciências da Saúde",
+        "level2": "Farmácia"
+    },
+    "medicine": {
+        "level0": "Ciências da Vida",
+        "level1": "Ciências da Saúde",
+        "level2": "medicine"
+    },
+    "nutritional science": {
+        "level0": "Ciências da Vida",
+        "level1": "Ciências da Saúde",
+        "level2": "Nutrição"
+    },
+    "dentistry": {
+        "level0": "Ciências da Vida",
+        "level1": "Ciências da Saúde",
+        "level2": "Odontologia"
+    },
+    "public health": {
+        "level0": "Ciências da Vida",
+        "level1": "Ciências da Saúde",
+        "level2": "Saúde Coletiva"
+    },
+    "anthropology": {
+        "level0": "Humanidades",
+        "level1": "Ciências Humanas",
+        "level2": "Antropologia / Arqueologia"
+    },
+    "political science": {
+        "level0": "Humanidades",
+        "level1": "Ciências Humanas",
+        "level2": "Ciência Política e Relações Internacionais"
+    },
+    "theology": {
+        "level0": "Humanidades",
+        "level1": "Ciências Humanas",
+        "level2": "Ciências da Religião e Teologia"
+    },
+    "formal education": {
+        "level0": "Humanidades",
+        "level1": "Ciências Humanas",
+        "level2": "Educação"
+    },
+    "philosophy": {
+        "level0": "Humanidades",
+        "level1": "Ciências Humanas",
+        "level2": "Filosofia"
+    },
+    "geography": {
+        "level0": "Humanidades",
+        "level1": "Ciências Humanas",
+        "level2": "Geografia"
+    },
+    "history": {
+        "level0": "Humanidades",
+        "level1": "Ciências Humanas",
+        "level2": "História"
+    },
+    "psychology": {
+        "level0": "Humanidades",
+        "level1": "Ciências Humanas",
+        "level2": "Psicologia"
+    },
+    "sociology": {
+        "level0": "Humanidades",
+        "level1": "Ciências Humanas",
+        "level2": "Sociologia"
+    },
+    "business": {
+        "level0": "Humanidades",
+        "level1": "Ciências Sociais Aplicadas",
+        "level2": "Administração Pública e de Empresas, Ciências Contábeis e Turismo"
+    },
+    "architecture": {
+        "level0": "Humanidades",
+        "level1": "Ciências Sociais Aplicadas",
+        "level2": "Arquitetura, Urbanismo e Design"
+    },
+    "information and communications technology": {
+        "level0": "Humanidades",
+        "level1": "Ciências Sociais Aplicadas",
+        "level2": "Comunicação e Informação"
+    },
+    "law": {
+        "level0": "Humanidades",
+        "level1": "Ciências Sociais Aplicadas",
+        "level2": "Direito"
+    },
+    "economics": {
+        "level0": "Humanidades",
+        "level1": "Ciências Sociais Aplicadas",
+        "level2": "Economia"
+    },
+    "urban planning": {
+        "level0": "Humanidades",
+        "level1": "Ciências Sociais Aplicadas",
+        "level2": "Planejamento Urbano e Regional / Demografia"
+    },
+    "business": {
+        "level0": "Humanidades",
+        "level1": "Ciências Sociais Aplicadas",
+        "level2": "Administração Pública e de Empresas, Ciências Contábeis e Turismo"
+    },
+    "art": {
+        "level0": "Humanidades",
+        "level1": "Linguística, Letras e Artes",
+        "level2": "Artes"
+    },
+    "linguistics": {
+        "level0": "Humanidades",
+        "level1": "Linguística, Letras e Artes",
+        "level2": "Linguística e Literatura"
+    },
+    "physics": {
+        "level0": "Ciências Exatas, Tecnológicas e Multidisciplinar",
+        "level1": "Ciências Exatas e da Terra",
+        "level2": "Astronomia / Física"
+    },
+    "computer science": {
+        "level0": "Ciências Exatas, Tecnológicas e Multidisciplinar",
+        "level1": "Ciências Exatas e da Terra",
+        "level2": "Ciência da Computação"
+    },
+    "mathematics": {
+        "level0": "Ciências Exatas, Tecnológicas e Multidisciplinar",
+        "level1": "Ciências Exatas e da Terra",
+        "level2": "Matemática / Probabilidade e Estatística"
+    },
+    "geology": {
+        "level0": "Ciências Exatas, Tecnológicas e Multidisciplinar",
+        "level1": "Ciências Exatas e da Terra",
+        "level2": "Geociências"
+    },
+    "chemistry": {
+        "level0": "Ciências Exatas, Tecnológicas e Multidisciplinar",
+        "level1": "Ciências Exatas e da Terra",
+        "level2": "Química"
+    },
+    "engineering": {
+        "level0": "Ciências Exatas, Tecnológicas e Multidisciplinar",
+        "level1": "Engenharias",
+        "level2": "Engenharias I"
+    },
+    "environmental science": {
+        "level0": "Ciências Exatas, Tecnológicas e Multidisciplinar",
+        "level1": "Multidisciplinar",
+        "level2": "Ciências Ambientais"
+    },
+    "biotechnology": {
+        "level0": "Ciências Exatas, Tecnológicas e Multidisciplinar",
+        "level1": "Multidisciplinar",
+        "level2": "Biotecnologia"
+    },
+    "biogeosciences": {
+        "level0": "Ciências Exatas, Tecnológicas e Multidisciplinar",
+        "level1": "Multidisciplinar",
+        "level2": "Ciências Ambientais"
+    },
+    "higher education": {
+        "level0": "Ciências Exatas, Tecnológicas e Multidisciplinar",
+        "level1": "Multidisciplinar",
+        "level2": "Ensino"
+    },
+    "interdisciplinarity": {
+        "level0": "Ciências Exatas, Tecnológicas e Multidisciplinar",
+        "level1": "Multidisciplinar",
+        "level2": "Interdisciplinar"
+    },
+    "materials science": {
+        "level0": "Ciências Exatas, Tecnológicas e Multidisciplinar",
+        "level1": "Multidisciplinar",
+        "level2": "Materiais"
+    }
+}
