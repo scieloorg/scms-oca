@@ -2,13 +2,19 @@
 {% load wagtailcore_tags %}
 
 {% block content %}
-    
-  <section id="content">
-    <div class="content-wrap p-1">
-      <div class="container clearfix">
-        {{ page.body|richtext }}
-      </div>
-    </div>
-  </section>
 
+   {% if not page.specific.use_only_embed %}
+      <section id="content">
+        <div class="content-wrap p-1">
+          <div class="container clearfix">
+            {{ page.body|richtext }}
+          </div>
+        </div>
+      </section>
+   {% endif %}
+   
+   {% if page.specific.embed %}
+     {{ page.specific.embed|safe }}
+   {% endif %}
+   
 {% endblock content %}
