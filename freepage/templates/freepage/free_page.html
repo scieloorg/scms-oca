@@ -12,9 +12,11 @@
         </div>
       </section>
    {% endif %}
-   
-   {% if page.specific.embed %}
-     {{ page.specific.embed|safe }}
-   {% endif %}
+
+   <div class="container py-0 fixed-height-3024">
+    {% if page.specific.embed %}
+      {{ page.specific.embed|safe }}  
+    {% endif %}
+   </div>
    
 {% endblock content %}
