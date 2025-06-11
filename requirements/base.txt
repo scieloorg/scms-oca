@@ -12,7 +12,7 @@ xmltodict==0.13.0  # https://github.com/martinblech/xmltodict.git
 
 # Django
 # ------------------------------------------------------------------------------
-django==4.1.6  # pyup: < 4.0  # https://www.djangoproject.com/
+django==4.2.22  # pyup: < 4.0  # https://www.djangoproject.com/
 django-environ==0.8.1  # https://github.com/joke2k/django-environ
 django-model-utils==4.3.1  # https://github.com/jazzband/django-model-utils
 django-allauth==0.54.0  # https://github.com/pennersr/django-allauth
@@ -91,3 +91,4 @@ pyalex==0.14   # https://github.com/J535D165/pyalex
 # ------------------------------------------------------------------------------
 elasticsearch==7.17.12  # https://elasticsearch-py.readthedocs.io/en/v7.17.12/
 
+requests>=2.32.4 # not directly required, pinned by Snyk to avoid a vulnerability
