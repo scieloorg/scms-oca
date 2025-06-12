@@ -91,3 +91,4 @@ pyalex==0.14   # https://github.com/J535D165/pyalex
 # ------------------------------------------------------------------------------
 elasticsearch==7.17.12  # https://elasticsearch-py.readthedocs.io/en/v7.17.12/
 
+tornado>=6.5 # not directly required, pinned by Snyk to avoid a vulnerability
