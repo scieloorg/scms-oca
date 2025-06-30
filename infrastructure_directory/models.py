@@ -55,6 +55,7 @@ class InfrastructureDirectory(CommonControlField):
         blank=False,
         help_text=help_fields.DIRECTORY_TITLE_HELP,
     )
+    
     link = models.URLField(
         _("Link"), null=False, blank=False, help_text=help_fields.DIRECTORY_LINK_HELP
     )
@@ -275,6 +276,66 @@ class InfrastructureDirectory(CommonControlField):
             .iterator()
         )
 
+    def get_title(self):
+        return self.title
+    get_title.short_description = "title"
+
+    def get_link(self):
+        return self.link
+    get_link.short_description = "Link"
+
+    def get_description(self):
+        return self.link
+    get_description.short_description = "Description"
+
+    def get_institutions(self):
+        return "| ".join([a.name for a in self.institutions.all()])
+    get_institutions.short_description = "Institution Name"
+
+    def get_institutions_country(self):
+        return "| ".join([a.location.country.name_pt for a in self.institutions.all() if a.location])
+    get_institutions_country.short_description = "Institution Country"
+    
+    def get_institutions_state(self):
+        return "| ".join([a.location.state.name for a in self.institutions.all() if a.location and a.location.state])
+    get_institutions_state.short_description = "Institution State"
+    
+    def get_institutions_city(self):
+        return "| ".join([a.location.city.name for a in self.institutions.all() if a.location and a.location.city])
+    get_institutions_city.short_description = "Institution City"
+    
+    def get_thematic_areas_level0(self):
+        return "| ".join([t.level0 for t in self.thematic_areas.all()])
+    get_thematic_areas_level0.short_description = "Thematic Area Level0"
+    
+    def get_thematic_areas_level1(self):
+        return "| ".join([t.level1 for t in self.thematic_areas.all()])
+    get_thematic_areas_level1.short_description = "Thematic Area Level1"
+    
+    def get_thematic_areas_level2(self):
+        return "| ".join([t.level2 for t in self.thematic_areas.all()])
+    get_thematic_areas_level2.short_description = "Thematic Area Level2"
+    
+    def get_keywords(self):
+        return "| ".join([t.name for t in self.keywords.all()])
+    get_keywords.short_description = "Keywords"
+    
+    def get_classification(self):
+        return self.classification 
+    get_classification.short_description = "Classification"
+    
+    def get_practice(self):
+        return self.practice
+    get_practice.short_description = "Practice"
+    
+    def get_action(self):
+        return self.action
+    get_action.short_description = "Action"
+    
+    def get_source(self):
+        return self.source
+    get_source.short_description = "Source"
+    
     base_form_class = InfrastructureDirectoryForm
 
 
