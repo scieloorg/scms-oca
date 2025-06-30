@@ -6,6 +6,10 @@ classification = (
     ("plataforma", _("Plataforma")),
     ("servidor", _("Servidor")),
     ("repositório", _("Repositório")),
+    ("repositório_de_dados", _("Repositório de dados")),
+    ("repositório_de_dados_de_pesquisa", _("Repositório de dados de pesquisa")),
+    ("portal_de_periódicos", _("Portal de periódicos")),
+    ("websites","Websites"),
     ("serviço", _("Serviço")),
     ("outras", _("Outras")),
 )
@@ -17,3 +21,4 @@ status = (
     ("PUBLISHED", _("PUBLISHED")),
     ("NOT PUBLISHED", _("NOT PUBLISHED")),
 )
+

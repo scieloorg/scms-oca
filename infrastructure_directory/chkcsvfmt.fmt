@@ -1,3 +1,7 @@
+[Id]
+data_required=False
+type=integer
+
 [Title]
 data_required=True
 type=String

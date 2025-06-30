@@ -195,7 +195,13 @@ def import_file(request):
             data = csv.DictReader(csvfile, delimiter=";")
 
             for line, row in enumerate(data):
-                isd = InfrastructureDirectory()
+
+                record_id = row.get("Id", "").strip()
+                if record_id and InfrastructureDirectory.objects.filter(id=record_id).exists():
+                    isd = InfrastructureDirectory.objects.get(id=record_id)
+                else:
+                    isd = InfrastructureDirectory()
+
                 isd.title = row["Title"]
                 isd.link = row["Link"]
                 isd.description = row["Description"]
@@ -241,7 +247,7 @@ def import_file(request):
                         pratice = Practice.objects.get(name=practice_name)
                         isd.practice = pratice
                     else:
-                        messages.error(
+                        messages.warning(
                             request, _("Unknown Practice, line: %s") % str(line + 1)
                         )
 
