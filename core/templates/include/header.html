@@ -20,7 +20,7 @@
 
         <div class="header-misc">
 
-          {% include 'include/language.html' %}
+          <!-- {% include 'include/language.html' %} -->
 
           {% comment %} <div id="top-search" class="header-misc-icon">
             <a href="#" id="top-search-trigger"><i class="icon-line-search"></i><i class="icon-line-cross"></i></a>
@@ -38,17 +38,26 @@
             </path>
           </svg>
         </div>
+        
+        <nav class="navbar navbar-expand-lg navbar-light">
+          <div class="container-fluid">
+            <div class="collapse navbar-collapse" id="navbarMega">
+              <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                {% flat_menu 'observacoes' max_levels=3 template="menus/mega_menu.html" %}
+              </ul>
+            </div>
+          </div>
+        </nav>
 
         {% for handle in config.WAGTAILMENUS_FLAT_MENUS_HANDLE_CHOICES %}
 
           {% flat_menu handle.0 max_levels=2 show_menu_heading=True fall_back_to_default_site_menus=True %}
 
         {% endfor %}
-
-        <form class="top-search-form" action="search.html" method="get" style="width: 1296px;">
+        <!-- <form class="top-search-form" action="search.html" method="get" style="width: 1296px;">
           <input type="text" name="q" class="form-control" value=""
             placeholder="{% trans 'Buscar por conteúdo do site...' %}" autocomplete="off">
-        </form>
+        </form> -->
       </div>
     </div>
   </div>
