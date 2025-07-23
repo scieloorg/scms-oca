@@ -285,7 +285,7 @@ class InfrastructureDirectory(CommonControlField):
     get_link.short_description = "Link"
 
     def get_description(self):
-        return self.link
+        return self.description
     get_description.short_description = "Description"
 
     def get_institutions(self):
