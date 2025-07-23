@@ -38,6 +38,16 @@
             </path>
           </svg>
         </div>
+        
+        <nav class="navbar navbar-expand-lg navbar-light">
+          <div class="container-fluid">
+            <div class="collapse navbar-collapse" id="navbarMega">
+              <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                {% include 'menus/mega_menu.html' %}
+              </ul>
+            </div>
+          </div>
+        </nav>
 
         {% for handle in config.WAGTAILMENUS_FLAT_MENUS_HANDLE_CHOICES %}
 
