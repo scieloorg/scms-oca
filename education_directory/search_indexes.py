@@ -39,7 +39,7 @@ class EducationIndex(indexes.SearchIndex, indexes.Indexable):
     practice = indexes.CharField(model_attr="practice", null=True)
     action = indexes.CharField(model_attr="action", null=True)
     classification = indexes.CharField(model_attr="classification", null=True)
-    keywords = indexes.MultiValueField(null=True)
+    # keywords = indexes.MultiValueField(null=True)
     countries = indexes.MultiValueField(null=True)
 
     source = indexes.CharField(model_attr="action", null=True)
@@ -103,7 +103,7 @@ class EducationIndex(indexes.SearchIndex, indexes.Indexable):
         return ["brazil"]
 
     def prepare_scope(self, obj):
-        return ["education_directory"]
+        return ["Educação"]
 
     def prepare_database(self, obj):
         return ["ocabr"]
@@ -117,7 +117,7 @@ class EducationIndex(indexes.SearchIndex, indexes.Indexable):
         ]
 
     def prepare_directory_type(self, obj):
-        return "education_directory"
+        return "diretório de educação"
 
     def prepare_institutions(self, obj):
         if obj.institutions:
@@ -132,9 +132,9 @@ class EducationIndex(indexes.SearchIndex, indexes.Indexable):
                 thematic_areas.add(thematic_area.level2.strip())
             return thematic_areas
 
-    def prepare_keywords(self, obj):
-        if obj.keywords.names():
-            return [name for name in obj.keywords.names()]
+    # def prepare_keywords(self, obj):
+    #     if obj.keywords.names():
+    #         return [name for name in obj.keywords.names()]
 
     def prepare_countries(self, obj):
         countries = set()
