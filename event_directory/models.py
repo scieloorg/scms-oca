@@ -322,6 +322,67 @@ class EventDirectory(CommonControlField):
             .iterator()
         )
 
+    def get_title(self):
+        return self.title
+    get_title.short_description = "Title"
+
+    def get_link(self):
+        return self.link
+    get_link.short_description = "Link"
+
+    def get_description(self):
+        return self.description
+    get_description.short_description = "Description"
+
+    def get_start_date(self):
+        return self.start_date
+    get_start_date.short_start_date = "Start Date"
+
+    def get_end_date(self):
+        return self.end_date
+    get_end_date.short_end_date = "End Date"
+
+    def get_start_time(self):
+        return self.start_time
+    get_start_time.short_start_time = "Start Time"
+
+    def get_end_time(self):
+        return self.end_time
+    get_end_time.short_end_time = "End Time"
+
+    def get_thematic_areas_level0(self):
+        return "| ".join([t.level0 for t in self.thematic_areas.all()])
+    get_thematic_areas_level0.short_description = "Thematic Area Level0"
+    
+    def get_thematic_areas_level1(self):
+        return "| ".join([t.level1 for t in self.thematic_areas.all()])
+    get_thematic_areas_level1.short_description = "Thematic Area Level1"
+    
+    def get_thematic_areas_level2(self):
+        return "| ".join([t.level2 for t in self.thematic_areas.all()])
+    get_thematic_areas_level2.short_description = "Thematic Area Level2"
+
+    def get_keywords(self):
+        return "| ".join([t.name for t in self.keywords.all()])
+    get_keywords.short_description = "Keywords"
+    
+    def get_classification(self):
+        return self.classification 
+    get_classification.short_description = "Classification"
+    
+    def get_practice(self):
+        return self.practice
+    get_practice.short_description = "Practice"
+    
+    def get_action(self):
+        return self.action
+    get_action.short_description = "Action"
+    
+    def get_source(self):
+        return self.source
+    get_source.short_description = "Source"
+
+
     base_form_class = EventDirectoryForm
 
 

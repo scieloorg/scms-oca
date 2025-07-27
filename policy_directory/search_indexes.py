@@ -21,7 +21,7 @@ class PolicyIndex(indexes.SearchIndex, indexes.Indexable):
     states = indexes.MultiValueField(null=True)
     regions = indexes.MultiValueField(null=True)
     thematic_level_0 = indexes.MultiValueField(null=True)
-    year = indexes.CharField(null=True)
+    publication_year = indexes.CharField(index_fieldname="publication_year", null=True)
 
     text = indexes.CharField(document=True, use_template=True)
     title = indexes.CharField(model_attr="title", null=True)
@@ -34,7 +34,7 @@ class PolicyIndex(indexes.SearchIndex, indexes.Indexable):
     practice = indexes.CharField(model_attr="practice", null=True)
     action = indexes.CharField(model_attr="action", null=True)
     classification = indexes.CharField(model_attr="classification", null=True)
-    keywords = indexes.MultiValueField(null=True)
+    # keywords = indexes.MultiValueField(null=True)
     countries = indexes.MultiValueField(null=True)
 
     source = indexes.CharField(model_attr="action", null=True)
@@ -65,7 +65,7 @@ class PolicyIndex(indexes.SearchIndex, indexes.Indexable):
     creator = indexes.CharField(null=False)
     updated_by = indexes.CharField(null=False)
 
-    def prepare_year(self, obj):
+    def prepare_publication_year(self, obj):
         if obj.date:
             return obj.date.year
         else: 
@@ -93,7 +93,7 @@ class PolicyIndex(indexes.SearchIndex, indexes.Indexable):
         return ["brazil"]
 
     def prepare_scope(self, obj):
-        return ["policy_directory"]
+        return ["Politica"]
 
     def prepare_database(self, obj):
         return ["ocabr"]
@@ -107,7 +107,7 @@ class PolicyIndex(indexes.SearchIndex, indexes.Indexable):
         ]
 
     def prepare_directory_type(self, obj):
-        return "policy_directory"
+        return "diretório de politica"
 
     def prepare_institutions(self, obj):
         if obj.institutions:
@@ -122,9 +122,9 @@ class PolicyIndex(indexes.SearchIndex, indexes.Indexable):
                 thematic_areas.add(thematic_area.level2)
             return thematic_areas
 
-    def prepare_keywords(self, obj):
-        if obj.keywords.names():
-            return [name for name in obj.keywords.names()]
+    # def prepare_keywords(self, obj):
+    #     if obj.keywords.names():
+    #         return [name for name in obj.keywords.names()]
 
     def prepare_countries(self, obj):
         countries = set()

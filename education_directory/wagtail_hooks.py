@@ -42,7 +42,7 @@ class EducationDirectoryAdmin(ModelAdmin):
         "institutional_contribution",
     )
     search_fields = ("title", "description")
-    list_export = ("title", "link", "description")
+    list_export = ("id", "get_title", "get_description", "get_institutions", "get_institutions_country", "get_institutions_state", "get_institutions_city", "get_thematic_areas_level0", "get_thematic_areas_level1", "get_thematic_areas_level2", "get_keywords", "get_classification", "get_practice", "get_action", "get_source")
     export_filename = "education_directory"
 
     def get_queryset(self, request):

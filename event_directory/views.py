@@ -194,7 +194,13 @@ def import_file(request):
         data = csv.DictReader(csvfile, delimiter=";")
 
         for line, row in enumerate(data):
-            di = EventDirectory()
+
+            record_id = row.get("Id", "").strip()
+            if record_id and EventDirectory.objects.filter(id=record_id).exists():
+                di = EventDirectory.objects.get(id=record_id)
+            else:
+                di = EventDirectory()
+
             di.title = row["Title"]
             di.link = row["Link"]
             di.description = row["Description"]
