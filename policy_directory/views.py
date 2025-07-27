@@ -193,79 +193,86 @@ def import_file(request):
 
     file_path = file_upload.attachment.file.path
 
-    # try:
-    with open(file_path, "r") as csvfile:
-        data = csv.DictReader(csvfile, delimiter=";")
+    try:
+        with open(file_path, "r") as csvfile:
+            data = csv.DictReader(csvfile, delimiter=";")
 
-        for line, row in enumerate(data):
-            po = PolicyDirectory()
-            po.title = row["Title"]
-            po.link = row["Link"]
-            po.description = row["Description"]
-            if row["Date"]:
-                po.date = datetime.strptime(row["Date"], "%d/%m/%Y")
-            po.creator = request.user
-            po.save()
+            for line, row in enumerate(data):
+                po = PolicyDirectory()
 
-            # Institution
-            inst_name = row["Institution Name"]
-            if inst_name:
-                inst_country = row["Institution Country"]
-                inst_state = row["Institution State"]
-                inst_city = row["Institution City"]
-
-                institution = Institution.get_or_create(
-                    inst_name, inst_country, inst_state, inst_city, request.user
-                )
-                po.institutions.add(institution)
-
-            # Thematic Area
-            level0 = row["Thematic Area Level0"]
-            if level0:
-                level1 = row["Thematic Area Level1"]
-                level2 = row["Thematic Area Level2"]
-                the_area = ThematicArea.get_or_create(
-                    level0, level1, level2, request.user
-                )
-
-                po.thematic_areas.add(the_area)
-
-            # Keywords
-            if row["Keywords"]:
-                for key in row["Keywords"].split("|"):
-                    po.keywords.add(key)
-
-            if row["Classification"]:
-                po.classification = row["Classification"]
-
-            # Practice
-            if row["Practice"]:
-                practice_name = row["Practice"]
-                if Practice.objects.filter(name=practice_name).exists():
-                    practice = Practice.objects.get(name=practice_name)
-                    po.practice = practice
+                record_id = row.get("Id", "").strip()
+                if record_id and PolicyDirectory.objects.filter(id=record_id).exists():
+                    isd = PolicyDirectory.objects.get(id=record_id)
                 else:
-                    messages.error(
-                        request, _("Unknown Practice, line: %s") % str(line + 2)
+                    isd = PolicyDirectory()
+
+                po.title = row["Title"]
+                po.link = row["Link"]
+                po.description = row["Description"]
+                if row["Date"]:
+                    po.date = datetime.strptime(row["Date"], "%d/%m/%Y")
+                po.creator = request.user
+                po.save()
+
+                # Institution
+                inst_name = row["Institution Name"]
+                if inst_name:
+                    inst_country = row["Institution Country"]
+                    inst_state = row["Institution State"]
+                    inst_city = row["Institution City"]
+
+                    institution = Institution.get_or_create(
+                        inst_name, inst_country, inst_state, inst_city, request.user
+                    )
+                    po.institutions.add(institution)
+
+                # Thematic Area
+                level0 = row["Thematic Area Level0"]
+                if level0:
+                    level1 = row["Thematic Area Level1"]
+                    level2 = row["Thematic Area Level2"]
+                    the_area = ThematicArea.get_or_create(
+                        level0, level1, level2, request.user
                     )
 
-            # Action
-            if row["Action"]:
-                if Action.objects.filter(
-                    name__icontains="políticas públicas e institucionais"
-                ).exists():
-                    po.action = Action.objects.get(
+                    po.thematic_areas.add(the_area)
+
+                # Keywords
+                if row["Keywords"]:
+                    for key in row["Keywords"].split("|"):
+                        po.keywords.add(key)
+
+                if row["Classification"]:
+                    po.classification = row["Classification"]
+
+                # Practice
+                if row["Practice"]:
+                    practice_name = row["Practice"]
+                    if Practice.objects.filter(name=practice_name).exists():
+                        practice = Practice.objects.get(name=practice_name)
+                        po.practice = practice
+                    else:
+                        messages.error(
+                            request, _("Unknown Practice, line: %s") % str(line + 2)
+                        )
+
+                # Action
+                if row["Action"]:
+                    if Action.objects.filter(
                         name__icontains="políticas públicas e institucionais"
-                    )
+                    ).exists():
+                        po.action = Action.objects.get(
+                            name__icontains="políticas públicas e institucionais"
+                        )
 
-            if row["Source"]:
-                po.source = row["Source"]
+                if row["Source"]:
+                    po.source = row["Source"]
 
-            po.save()
-    # except Exception as ex:
-    #     messages.error(request, _("Import error: %s, Line: %s") % (ex, str(line + 2)))
-    # else:
-    #    messages.success(request, _("File imported successfully!"))
+                po.save()
+    except Exception as ex:
+        messages.error(request, _("Import error: %s, Line: %s") % (ex, str(line + 2)))
+    else:
+       messages.success(request, _("File imported successfully!"))
 
     return redirect(request.META.get("HTTP_REFERER"))
 
