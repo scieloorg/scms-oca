@@ -196,7 +196,13 @@ def import_file(request):
             data = csv.DictReader(csvfile, delimiter=";")
 
             for line, row in enumerate(data):
-                ed = EducationDirectory()
+
+                record_id = row.get("Id", "").strip()
+                if record_id and EducationDirectory.objects.filter(id=record_id).exists():
+                    ed = EducationDirectory.objects.get(id=record_id)
+                else:
+                    ed = EducationDirectory()
+
                 ed.title = row["Title"]
                 ed.link = row["Link"]
                 ed.description = row["Description"]
