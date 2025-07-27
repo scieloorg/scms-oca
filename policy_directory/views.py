@@ -202,9 +202,9 @@ def import_file(request):
 
                 record_id = row.get("Id", "").strip()
                 if record_id and PolicyDirectory.objects.filter(id=record_id).exists():
-                    isd = PolicyDirectory.objects.get(id=record_id)
+                    po = PolicyDirectory.objects.get(id=record_id)
                 else:
-                    isd = PolicyDirectory()
+                    po = PolicyDirectory()
 
                 po.title = row["Title"]
                 po.link = row["Link"]
