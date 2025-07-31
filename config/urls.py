@@ -43,6 +43,7 @@ urlpatterns += i18n_patterns(
     re_path(r"^search_site/", search_views.search, name="search_site"),
     # Index search
     re_path(r"^search/", include("search.urls")),
+    re_path(r"^chart/", include("chart.urls")),
     # Auto complete endpoint
     path("admin/autocomplete/", include(autocomplete_admin_urls)),
     # API V2 endpoint wagtail models

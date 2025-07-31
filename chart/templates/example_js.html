@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard OpenAlex - Elasticsearch + ECharts</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+        
+        .controls {
+            padding: 30px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .control-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .control-group label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #495057;
+        }
+        
+        .control-group input, .control-group select {
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+        
+        .control-group input:focus, .control-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: transform 0.2s ease;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .charts-container {
+            padding: 30px;
+        }
+        
+        .chart-wrapper {
+            margin-bottom: 40px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+        
+        .chart-title {
+            padding: 20px 30px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        .chart {
+            width: 100%;
+            height: 500px;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+        }
+        
+        .loading.show {
+            display: block;
+        }
+        
+        .error {
+            display: none;
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .error.show {
+            display: block;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 2em;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            color: #6c757d;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Dashboard OpenAlex</h1>
+            <p>Análise de Publicações por Ano e País usando Elasticsearch + ECharts</p>
+        </div>
+        
+        <div class="controls">
+            <div class="controls-grid">
+                <div class="control-group">
+                    <label for="elasticsearchUrl">URL do Elasticsearch:</label>
+                    <input type="text" id="elasticsearchUrl" value="https://node01-elk.scielo.org:9200" placeholder="https://node01-elk.scielo.org:9200">
+                </div>
+                
+                <div class="control-group">
+                    <label for="elasticsearchUser">Usuário:</label>
+                    <input type="text" id="elasticsearchUser" value="elastic" placeholder="elastic">
+                </div>
+                
+                <div class="control-group">
+                    <label for="elasticsearchPassword">Senha:</label>
+                    <input type="password" id="elasticsearchPassword" value="YK4OZ+RJfMj=T66EmBNC" placeholder="Senha do Elasticsearch">
+                </div>
+                
+                <div class="control-group">
+                    <label for="indexName">Nome do Índice:</label>
+                    <input type="text" id="indexName" value="openalex" placeholder="openalex">
+                </div>
+                
+                <div class="control-group">
+                    <label for="startYear">Ano Inicial:</label>
+                    <input type="number" id="startYear" value="2020" min="1900" max="2024">
+                </div>
+                
+                <div class="control-group">
+                    <label for="endYear">Ano Final:</label>
+                    <input type="number" id="endYear" value="2024" min="1900" max="2024">
+                </div>
+                
+                <div class="control-group">
+                    <label for="topCountries">Top Países:</label>
+                    <select id="topCountries">
+                        <option value="5">Top 5</option>
+                        <option value="10" selected>Top 10</option>
+                        <option value="15">Top 15</option>
+                        <option value="20">Top 20</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <label for="testConnection">Teste de Conexão:</label>
+                    <button type="button" class="btn" onclick="testConnection()" style="background: linear-gradient(135deg, #28a745, #20c997); margin-top: 8px;">
+                        🔗 Testar Conexão
+                    </button>
+                </div>
+            </div>
+            
+            <button class="btn" onclick="loadData()">🔍 Carregar Dados</button>
+        </div>
+        
+        <div class="error" id="errorMessage"></div>
+        <div class="loading" id="loading">
+            <h3>🔄 Carregando dados do Elasticsearch...</h3>
+            <p>Isso pode levar alguns segundos...</p>
+        </div>
+        
+        <div class="charts-container">
+            <div class="stats" id="stats" style="display: none;"></div>
+            
+            <div class="chart-wrapper">
+                <div class="chart-title">📈 Publicações por Ano (Empilhado por País)</div>
+                <div id="stackedChart" class="chart"></div>
+            </div>
+            
+            <div class="chart-wrapper">
+                <div class="chart-title">📊 Total de Publicações por País</div>
+                <div id="countryChart" class="chart"></div>
+            </div>
+            
+            <div class="chart-wrapper">
+                <div class="chart-title">📉 Tendência Temporal por País (Top 5)</div>
+                <div id="lineChart" class="chart"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuração dos gráficos ECharts
+        let stackedChart, countryChart, lineChart;
+        
+        // Inicializar gráficos
+        function initCharts() {
+            stackedChart = echarts.init(document.getElementById('stackedChart'));
+            countryChart = echarts.init(document.getElementById('countryChart'));
+            lineChart = echarts.init(document.getElementById('lineChart'));
+            
+            // Redimensionar gráficos quando a janela muda de tamanho
+            window.addEventListener('resize', () => {
+                stackedChart.resize();
+                countryChart.resize();
+                lineChart.resize();
+            });
+        }
+        
+        // Função para fazer consulta ao Elasticsearch
+        async function queryElasticsearch(query) {
+            const url = document.getElementById('elasticsearchUrl').value;
+            const index = document.getElementById('indexName').value;
+            const username = document.getElementById('elasticsearchUser').value;
+            const password = document.getElementById('elasticsearchPassword').value;
+            
+            // Criar header de autenticação Basic
+            const credentials = btoa(`${username}:${password}`);
+            
+            try {
+                const response = await fetch(`${url}/${index}/_search`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Basic ${credentials}`,
+                        // Adicionar headers para CORS se necessário
+                        'Access-Control-Allow-Origin': '*',
+                        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+                        'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+                    },
+                    body: JSON.stringify(query)
+                });
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}\n${errorText}`);
+                }
+                
+                return await response.json();
+            } catch (error) {
+                if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                    throw new Error(`Erro de conexão: Verifique se o Elasticsearch está acessível e se as credenciais estão corretas. Erro original: ${error.message}`);
+                }
+                throw new Error(`Erro na consulta: ${error.message}`);
+            }
+        }
+        
+        // Função principal para carregar dados
+        async function loadData() {
+            const startYear = parseInt(document.getElementById('startYear').value);
+            const endYear = parseInt(document.getElementById('endYear').value);
+            const topCountries = parseInt(document.getElementById('topCountries').value);
+            
+            showLoading(true);
+            hideError();
+            
+            try {
+                // Query para agregação por ano e país
+                const query = {
+                    "size": 0,
+                    "query": {
+                        "bool": {
+                            "must": [
+                                {
+                                    "range": {
+                                        "publication_year": {
+                                            "gte": startYear,
+                                            "lte": endYear
+                                        }
+                                    }
+                                },
+                                {
+                                    "exists": {
+                                        "field": "authorships.countries"
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "aggs": {
+                        "years": {
+                            "terms": {
+                                "field": "publication_year",
+                                "size": endYear - startYear + 1,
+                                "order": {"_key": "asc"}
+                            },
+                            "aggs": {
+                                "countries": {
+                                    "terms": {
+                                        "field": "authorships.countries.keyword",
+                                        "size": topCountries
+                                    }
+                                }
+                            }
+                        },
+                        "total_by_country": {
+                            "terms": {
+                                "field": "authorships.countries.keyword",
+                                "size": topCountries
+                            }
+                        }
+                    }
+                };
+                
+                const result = await queryElasticsearch(query);
+                processAndDisplayData(result, startYear, endYear);
+                
+            } catch (error) {
+                showError(error.message);
+            } finally {
+                showLoading(false);
+            }
+        }
+        
+        // Processar dados e criar gráficos
+        function processAndDisplayData(data, startYear, endYear) {
+            const yearsBuckets = data.aggregations.years.buckets;
+            const countryBuckets = data.aggregations.total_by_country.buckets;
+            
+            // Processar dados para gráfico empilhado
+            const years = [];
+            const countriesData = {};
+            
+            // Obter lista de países principais
+            const topCountries = countryBuckets.slice(0, 10).map(bucket => bucket.key);
+            
+            // Inicializar estrutura de dados
+            topCountries.forEach(country => {
+                countriesData[country] = [];
+            });
+            
+            // Gerar lista completa de anos
+            for (let year = startYear; year <= endYear; year++) {
+                years.push(year.toString());
+            }
+            
+            // Preencher dados por ano
+            years.forEach(year => {
+                const yearBucket = yearsBuckets.find(b => b.key.toString() === year);
+                
+                topCountries.forEach(country => {
+                    if (yearBucket) {
+                        const countryBucket = yearBucket.countries.buckets.find(c => c.key === country);
+                        countriesData[country].push(countryBucket ? countryBucket.doc_count : 0);
+                    } else {
+                        countriesData[country].push(0);
+                    }
+                });
+            });
+            
+            // Criar gráficos
+            createStackedChart(years, countriesData, topCountries);
+            createCountryChart(countryBuckets);
+            createLineChart(years, countriesData, topCountries.slice(0, 5));
+            createStats(data);
+        }
+        
+        // Gráfico empilhado por ano
+        function createStackedChart(years, countriesData, countries) {
+            const series = countries.map(country => ({
+                name: country,
+                type: 'bar',
+                stack: 'total',
+                emphasis: { focus: 'series' },
+                data: countriesData[country]
+            }));
+            
+            const option = {
+                title: {
+                    text: 'Distribuição de Publicações por Ano e País',
+                    left: 'center',
+                    textStyle: { fontSize: 16, fontWeight: 'normal' }
+                },
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: { type: 'shadow' },
+                    formatter: function(params) {
+                        let tooltip = `<strong>${params[0].axisValue}</strong><br/>`;
+                        let total = 0;
+                        params.forEach(param => {
+                            total += param.value;
+                            tooltip += `${param.marker} ${param.seriesName}: ${param.value.toLocaleString()}<br/>`;
+                        });
+                        tooltip += `<strong>Total: ${total.toLocaleString()}</strong>`;
+                        return tooltip;
+                    }
+                },
+                legend: {
+                    type: 'scroll',
+                    top: 30,
+                    data: countries
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    top: '80px',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    data: years,
+                    axisLabel: { rotate: 45 }
+                },
+                yAxis: {
+                    type: 'value',
+                    axisLabel: {
+                        formatter: function(value) {
+                            return value >= 1000 ? (value/1000).toFixed(1) + 'k' : value;
+                        }
+                    }
+                },
+                series: series,
+                color: ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de', '#3ba272', '#fc8452', '#9a60b4', '#ea7ccc', '#ff9f7f']
+            };
+            
+            stackedChart.setOption(option);
+        }
+        
+        // Gráfico de barras por país
+        function createCountryChart(countryBuckets) {
+            const countries = countryBuckets.map(bucket => bucket.key);
+            const values = countryBuckets.map(bucket => bucket.doc_count);
+            
+            const option = {
+                title: {
+                    text: 'Total de Publicações por País',
+                    left: 'center',
+                    textStyle: { fontSize: 16, fontWeight: 'normal' }
+                },
+                tooltip: {
+                    trigger: 'axis',
+                    formatter: function(params) {
+                        return `<strong>${params[0].axisValue}</strong><br/>${params[0].value.toLocaleString()} publicações`;
+                    }
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    top: '60px',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    data: countries,
+                    axisLabel: { 
+                        rotate: 45,
+                        interval: 0
+                    }
+                },
+                yAxis: {
+                    type: 'value',
+                    axisLabel: {
+                        formatter: function(value) {
+                            return value >= 1000 ? (value/1000).toFixed(1) + 'k' : value;
+                        }
+                    }
+                },
+                series: [{
+                    type: 'bar',
+                    data: values,
+                    itemStyle: {
+                        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                            {offset: 0, color: '#667eea'},
+                            {offset: 1, color: '#764ba2'}
+                        ])
+                    },
+                    emphasis: {
+                        itemStyle: {
+                            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                                {offset: 0, color: '#91cc75'},
+                                {offset: 1, color: '#5470c6'}
+                            ])
+                        }
+                    }
+                }]
+            };
+            
+            countryChart.setOption(option);
+        }
+        
+        // Gráfico de linhas (tendência)
+        function createLineChart(years, countriesData, topCountries) {
+            const series = topCountries.map(country => ({
+                name: country,
+                type: 'line',
+                smooth: true,
+                symbol: 'circle',
+                symbolSize: 6,
+                lineStyle: { width: 3 },
+                data: countriesData[country]
+            }));
+            
+            const option = {
+                title: {
+                    text: 'Tendência Temporal - Top 5 Países',
+                    left: 'center',
+                    textStyle: { fontSize: 16, fontWeight: 'normal' }
+                },
+                tooltip: {
+                    trigger: 'axis',
+                    formatter: function(params) {
+                        let tooltip = `<strong>${params[0].axisValue}</strong><br/>`;
+                        params.forEach(param => {
+                            tooltip += `${param.marker} ${param.seriesName}: ${param.value.toLocaleString()}<br/>`;
+                        });
+                        return tooltip;
+                    }
+                },
+                legend: {
+                    top: 30,
+                    data: topCountries
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    top: '80px',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    data: years,
+                    boundaryGap: false
+                },
+                yAxis: {
+                    type: 'value',
+                    axisLabel: {
+                        formatter: function(value) {
+                            return value >= 1000 ? (value/1000).toFixed(1) + 'k' : value;
+                        }
+                    }
+                },
+                series: series,
+                color: ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de']
+            };
+            
+            lineChart.setOption(option);
+        }
+        
+        // Criar cards de estatísticas
+        function createStats(data) {
+            const totalDocs = data.hits.total.value || data.hits.total;
+            const totalCountries = data.aggregations.total_by_country.buckets.length;
+            const totalYears = data.aggregations.years.buckets.length;
+            
+            const avgPerYear = totalYears > 0 ? Math.round(totalDocs / totalYears) : 0;
+            
+            const statsHtml = `
+                <div class="stat-card">
+                    <div class="stat-value">${totalDocs.toLocaleString()}</div>
+                    <div class="stat-label">Total de Publicações</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${totalCountries}</div>
+                    <div class="stat-label">Países Diferentes</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${totalYears}</div>
+                    <div class="stat-label">Anos Analisados</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${avgPerYear.toLocaleString()}</div>
+                    <div class="stat-label">Média por Ano</div>
+                </div>
+            `;
+            
+            document.getElementById('stats').innerHTML = statsHtml;
+            document.getElementById('stats').style.display = 'grid';
+        }
+        
+        // Função para testar conexão com Elasticsearch
+        async function testConnection() {
+            const url = document.getElementById('elasticsearchUrl').value;
+            const index = document.getElementById('indexName').value;
+            const username = document.getElementById('elasticsearchUser').value;
+            const password = document.getElementById('elasticsearchPassword').value;
+            
+            const credentials = btoa(`${username}:${password}`);
+            const testBtn = document.querySelector('button[onclick="testConnection()"]');
+            
+            testBtn.disabled = true;
+            testBtn.textContent = '🔄 Testando...';
+            hideError();
+            
+            try {
+                // Primeiro testar se o cluster está acessível
+                const clusterResponse = await fetch(`${url}/_cluster/health`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Basic ${credentials}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!clusterResponse.ok) {
+                    throw new Error(`Erro de autenticação ou conexão (${clusterResponse.status})`);
+                }
+                
+                // Testar se o índice existe
+                const indexResponse = await fetch(`${url}/${index}`, {
+                    method: 'HEAD',
+                    headers: {
+                        'Authorization': `Basic ${credentials}`
+                    }
+                });
+                
+                if (!indexResponse.ok) {
+                    throw new Error(`Índice '${index}' não encontrado (${indexResponse.status})`);
+                }
+                
+                // Fazer uma consulta simples para verificar os dados
+                const testQuery = {
+                    "size": 0,
+                    "query": {"match_all": {}},
+                    "aggs": {
+                        "total_docs": {"value_count": {"field": "_id"}}
+                    }
+                };
+                
+                const searchResponse = await fetch(`${url}/${index}/_search`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Basic ${credentials}`
+                    },
+                    body: JSON.stringify(testQuery)
+                });
+                
+                if (!searchResponse.ok) {
+                    throw new Error(`Erro na consulta de teste (${searchResponse.status})`);
+                }
+                
+                const result = await searchResponse.json();
+                const totalDocs = result.hits.total.value || result.hits.total;
+                
+                alert(`✅ Conexão bem-sucedida!\n\n` +
+                      `• Cluster: OK\n` +
+                      `• Índice '${index}': Encontrado\n` +
+                      `• Total de documentos: ${totalDocs.toLocaleString()}\n\n` +
+                      `Pronto para carregar os dados!`);
+                
+            } catch (error) {
+                let errorMsg = '❌ Falha na conexão:\n\n';
+                
+                if (error.message.includes('TypeError') || error.message.includes('fetch')) {
+                    errorMsg += '• Verifique se a URL está correta\n';
+                    errorMsg += '• Confirme se o servidor está acessível\n';
+                    errorMsg += '• Problemas de CORS podem impedir a conexão\n';
+                } else if (error.message.includes('401') || error.message.includes('403')) {
+                    errorMsg += '• Credenciais inválidas\n';
+                    errorMsg += '• Verifique usuário e senha\n';
+                } else if (error.message.includes('404')) {
+                    errorMsg += '• Índice não encontrado\n';
+                    errorMsg += '• Verifique o nome do índice\n';
+                } else {
+                    errorMsg += `• ${error.message}`;
+                }
+                
+                showError(errorMsg);
+            } finally {
+                testBtn.disabled = false;
+                testBtn.textContent = '🔗 Testar Conexão';
+            }
+        }
+            document.getElementById('loading').className = show ? 'loading show' : 'loading';
+        }
+        
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.className = 'error show';
+        }
+        
+        function hideError() {
+            document.getElementById('errorMessage').className = 'error';
+        }
+        
+        // Inicializar aplicação
+        document.addEventListener('DOMContentLoaded', function() {
+            initCharts();
+            
+            // Permitir Enter nos campos de input
+            document.querySelectorAll('input').forEach(input => {
+                input.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        loadData();
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
