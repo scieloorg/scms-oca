@@ -468,3 +468,5 @@ INSTITUTION_INDEX = env.str("INSTITUTION_INDEX", "opinstitutions")
 REGION_INDEX = env.str("REGION_INDEX", "regionsbra")
 COUNTRY_INDEX = env.str("COUNTRY_INDEX", "regionscon")
 THEMATIC_AREA_INDEX = env.str("THEMATIC_AREA_INDEX", "thematicareas")
+
+DIRECTORY_IMPORT_DELIMITER = env.str("DIRECTORY_IMPORT_DELIMITER", default=",")
