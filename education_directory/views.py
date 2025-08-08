@@ -6,6 +6,7 @@ from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
 from django.utils.translation import gettext as _
 from django.template.loader import render_to_string
+from django.conf import settings
 from wagtail.admin import messages
 from wagtail.contrib.modeladmin.views import CreateView, EditView
 
@@ -193,7 +194,7 @@ def import_file(request):
 
     try:
         with open(file_path, "r") as csvfile:
-            data = csv.DictReader(csvfile, delimiter=";")
+            data = csv.DictReader(csvfile, delimiter=settings.DIRECTORY_IMPORT_DELIMITER)
 
             for line, row in enumerate(data):
 
