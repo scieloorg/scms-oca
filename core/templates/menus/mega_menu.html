@@ -48,7 +48,35 @@
             transform: translateY(0);
         }
     }
-    
+
+    .mega-menu{
+        background-color: #FFF;
+        box-shadow: 0px 13px 42px 11px rgba(0, 0, 0, 0.05);
+        border: 1px solid #EEE;
+        border-top: 2px solid #034E8E;
+        color: #666;
+    }
+
+
+    .mega-menu a{
+        color: #666;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0;
+        font-family: 'Lato', sans-serif;
+        font-weight: 700
+    }
+    .mega-menu a:hover{
+        color: #034E8E;
+    }
+
+    .menu-item-empty{
+        padding: 0.25rem 1.5rem;
+    }
+
+    .menu-link.dropdown-toggle.show{
+        color: #034E8E;
+    }
 </style>
 
 <div class="collapse navbar-collapse" id="navbarMega">
@@ -78,7 +106,7 @@
                     <li class="fw-semibold">Países/Regiões</li>
                     <li><a class="dropdown-item" href="/chart?menu_scope=evolucao-producao-mundo-pais-documentos">Documentos</a></li>
                     <li><a class="dropdown-item" href="/chart?menu_scope=evolucao-producao-mundo-pais-citacoes">Citações</a></li>
-                    <li><a href="#" class="dropdown-item">&nbsp;</a></li>
+                    <li class="menu-item-empty">&nbsp;</li>
                     <li class="fw-semibold mt-2">Instituições</li>
                     <li><a class="dropdown-item" href="/chart?menu_scope=evolucao-producao-mundo-instituicao-pais-documentos">Documentos</a></li>
                     <li><a class="dropdown-item" href="/chart?menu_scope=evolucao-producao-mundo-instituicao-pais-citacoes">Citações</a></li>
@@ -90,7 +118,7 @@
                     <li class="fw-semibold">Países/Regiões</li>
                     <li><a class="dropdown-item" href="/chart?menu_scope=evolucao-producao-brasil-pais-documentos">Documentos</a></li>
                     <li><a class="dropdown-item" href="/chart?menu_scope=evolucao-producao-brasil-pais-citacoes">Citações</a></li>
-                    <li><a href="#" class="dropdown-item">&nbsp;</a></li>
+                    <li class="menu-item-empty">&nbsp;</li>
                     <li class="fw-semibold mt-2">Instituições</li>
                     <li><a class="dropdown-item" href="/chart?menu_scope=evolucao-producao-brasil-instituicao-pais-documentos">Documentos</a></li>
                     <li><a class="dropdown-item" href="/chart?menu_scope=evolucao-producao-brasil-instituicao-pais-citacoes">Citações</a></li>
@@ -117,7 +145,7 @@
                 <ul class="list-unstyled ps-4">
                     <li class="fw-semibold">Países/Regiões</li>
                     <li><a class="dropdown-item" href="/chart?menu_scope=evolucao-producaosocial-pais-documentos">Documentos</a></li>
-                    <li><a href="#" class="dropdown-item">&nbsp;</a></li>
+                    <li class="menu-item-empty">&nbsp;</li>
                 </ul>
                 </div>
             </div>
