@@ -1,6 +1,6 @@
 -r base.txt
 
-Werkzeug==2.2.3 # https://github.com/pallets/werkzeug
+Werkzeug==2.3.8 # https://github.com/pallets/werkzeug
 ipdb==0.13.13  # https://github.com/gotcha/ipdb
 psycopg2==2.9.3  # https://github.com/psycopg/psycopg2
 watchgod==0.7  # https://github.com/samuelcolvin/watchgod
@@ -35,3 +35,5 @@ django-debug-toolbar  # https://github.com/jazzband/django-debug-toolbar
 django-extensions==3.2.1  # https://github.com/django-extensions/django-extensions
 django-coverage-plugin==2.0.2  # https://github.com/nedbat/django_coverage_plugin
 pytest-django==4.5.2  # https://github.com/pytest-dev/pytest-django
+setuptools>=65.5.1 # not directly required, pinned by Snyk to avoid a vulnerability
+tornado>=6.3.3 # not directly required, pinned by Snyk to avoid a vulnerability
