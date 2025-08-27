@@ -19,8 +19,8 @@
         <div class="row bg-light rounded my-3">
             <div class="col">
                 <header class="my-2">
-                    <h1 class="mb-1">Indicadores</h1>
-                    <p class="text-muted">Painel de dados do Observatório OCABr</p>
+                    <h1 class="mb-1"></h1>
+                    <p class="text-muted">{{ selected_chart.scope}}</p>
                 </header>
             </div>
         </div>
@@ -37,7 +37,7 @@
             {% endif %}
 
             <div class="col mb-2">
-                <label for="chart_label" class="fw-bold">Escolha o gráfico:</label>
+                <label for="chart_label" class="fw-bold">Select an observation table:</label>
                 <form method="post" action="">
                     {% csrf_token %} 
                     <select name="chart_label" id="chart_label" class="form-control mt-2">
