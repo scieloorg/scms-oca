@@ -1,4 +1,5 @@
 from django.http import HttpResponseRedirect
+from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.utils.translation import gettext as _
 from wagtail.contrib.modeladmin.views import CreateView, EditView
@@ -7,6 +8,13 @@ from core import tasks
 from core_settings.models import Moderation
 
 from .permission_helper import IndicatorPermissionHelper
+
+
+def indicators_view(request):
+    """
+    View aimed at displaying the indicators page.
+    """
+    return render(request, "indicators.html")
 
 
 class IndicatorDirectoryEditView(EditView):

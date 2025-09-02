@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% load static %}
+{% load i18n %}
+{% load wagtailsettings_tags %}
+{% load sizify %}
+{% load partition %}
+{% load humanize %}
+{% load translate %}
+
+{% get_settings use_default_site=True %}
+
+
+{% block content %}
+<section id="content" class="mt-5">
+  <div class="container">
+    <div class="row">
+      <div class="col pl-0">
+
+        <div class="page-title-row mb-4" style="background:#F9F9F9;border-radius:4px;">
+          <div class="page-title-content py-2 px-2">
+            <h1 class="mb-1">Indicators</h1>
+            <span>Data panel of the OCABr Observatory</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="row mb-3">
+
+      <!-- Menu -->
+      <div class="col-lg-3 card pt-2 filters-aside">
+        
+        <!-- Graph Options -->
+        <div>
+          {% include "graph_options_menu.html" %}
+        </div>
+
+        <!-- Filters -->
+        <div>
+          {% include "filters_menu.html" %}
+        </div>
+
+      </div>
+
+      <!-- Content -->
+      <div class="col-lg-9">
+
+        <!-- Graph -->
+        <div class="mt-4 px-4 row">
+
+          <div class="mb-2 mx-auto" style="max-width: 100%; min-height: 100%;">
+            <div id="main-chart" style="position: relative; height:75vh; width:60vw"></div>
+          </div>
+          
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block inline_javascript %}
+  <script src="{% static 'js/echarts/echarts.min.js' %}"></script>
+  <script>
+    function renderChart(data) {
+      var chartContainer = document.getElementById('main-chart');
+            
+      var chartObj = echarts.init(chartContainer);
+      
+      var chartOpts = {
+        title: { text: 'Number of Documents per Year' },
+        tooltip: {},
+        grid: {
+          top: 110,
+          left: 0,
+          right: 200,
+          bottom: '10%',
+          containLabel: true
+        },
+        toolbox: {
+            orient: "vertical",
+            feature: {
+                magicType: {
+                    type: ['line', 'bar', 'stack', 'tield'],
+                },
+                dataView: {
+                    show: true,
+                    title: 'Data',
+                    readOnly: true,
+                    lang: ['', 'Close',]
+                  },
+                saveAsImage: { show: true },
+                restore: { show: true },
+                dataZoom: {}
+            }
+        },
+        xAxis: { type: 'category', data: data.years || [] },
+        yAxis: { type: 'value' },
+        series: [{
+          name: 'Documents',
+          type: 'bar',
+          data: data.ndocs_per_year || []
+        }]
+      };
+
+      chartObj.setOption(chartOpts);
+      window.addEventListener('resize', chartObj.resize);
+    }
+  </script>
+{% endblock %}
