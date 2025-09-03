@@ -9,16 +9,14 @@ from urllib.parse import urlparse
 
 
 ES_URL = getattr(settings, "HAYSTACK_CONNECTIONS", {}).get("es", {}).get("URL", "http://localhost:9200/")
-# ES_API_KEY = getattr(settings, "ES_API_KEY", None)
 INDEX_NAME = getattr(settings, "HAYSTACK_CONNECTIONS", {}).get("es", {}).get("INDEX_NAME", "openalex_works")
+VERIFY_CERTS = getattr(settings, "HAYSTACK_CONNECTIONS", {}).get("es", {}).get("KWARGS", {}).get("verify_certs", False)
 
 parsed = urlparse(ES_URL)
 host_url = f"{parsed.scheme}://{parsed.hostname}:{parsed.port or 9200}"
-es_kwargs = {"hosts": [host_url]}
+es_kwargs = {"hosts": [host_url], "verify_certs": VERIFY_CERTS}
 if parsed.username and parsed.password:
 	es_kwargs["http_auth"] = (parsed.username, parsed.password)
-#if ES_API_KEY:
-#	es_kwargs["api_key"] = ES_API_KEY
 
 es = Elasticsearch(**es_kwargs)
 
