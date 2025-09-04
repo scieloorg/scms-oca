@@ -428,7 +428,8 @@ HAYSTACK_CONNECTIONS = {
         "INDEX_NAME": env("INDEX_NAME", default="openalex_works"),
         "SOLR_TIMEOUT": 10,
         "KWARGS": {
-            "verify_certs": env.bool("ES_VERIFY_CERTS", default=False)
+            "verify_certs": env.bool("ES_VERIFY_CERTS", default=False),
+            "ca_certs": env("ES_CA_CERTS", default=None),
         }
     },
 }
