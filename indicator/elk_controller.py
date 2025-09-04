@@ -130,3 +130,48 @@ def build_query(filters):
             must.append({"term": {es_field: value}})
     
     return {"bool": {"must": must}} if must else {"match_all": {}}
+
+def build_citations_per_year_aggs():
+    """
+    Build the aggregations for citations per year.
+    """
+    return {
+        "citations_per_year": {
+            "terms": {
+                "field": "publication_year",
+                "order": {"_key": "asc"}
+            },
+            "aggs": {
+                "total_citations": {
+                    "sum": {"field": "cited_by_count"}
+                }
+            }
+        }
+    }
+
+def parse_citations_per_year_response(res):
+    """
+    Extract the number of citations per year from the aggregation result.
+    Returns absolute counts and percentages (global and filtered).
+    """
+    aggs = res.get("aggregations", {})
+    buckets = aggs.get("citations_per_year", {}).get("buckets", [])
+
+    years = []
+    total_citations = []
+    doc_counts = []
+
+    for bucket in buckets:
+        year = str(bucket["key"])
+        citations = int(bucket["total_citations"]["value"])
+        ndocs = bucket["doc_count"]
+
+        years.append(year)
+        total_citations.append(citations)
+        doc_counts.append(ndocs)
+    
+    return {
+        "years": years,
+        "total_citations_per_year": total_citations,
+        "ndocs_per_year": doc_counts,
+    }
