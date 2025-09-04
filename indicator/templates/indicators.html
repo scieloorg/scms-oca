@@ -47,6 +47,13 @@
       <!-- Content -->
       <div class="col-lg-9">
 
+        <!-- Applied Filters -->
+        <div class="px-4 row">
+          <div class="col">
+            <div id="applied-filters" class="alert alert-light border small d-none"></div>
+          </div>
+        </div>
+
         <!-- Graph -->
         <div class="mt-4 px-4 row">
 
@@ -66,13 +73,23 @@
 {% block inline_javascript %}
   <script src="{% static 'js/echarts/echarts.min.js' %}"></script>
   <script>
-    function renderChart(data) {
+    function renderChart(data, unit_study) {
       var chartContainer = document.getElementById('main-chart');
-            
       var chartObj = echarts.init(chartContainer);
-      
+
+      var seriesData, seriesName, title;
+      if (unit_study === "citation") {
+        seriesData = data.total_citations_per_year || [];
+        seriesName = "Citations";
+        title = "Number of Citations per Year";
+      } else {
+        seriesData = data.ndocs_per_year || [];
+        seriesName = "Documents";
+        title = "Number of Documents per Year";
+      }
+
       var chartOpts = {
-        title: { text: 'Number of Documents per Year' },
+        title: { text: title },
         tooltip: {},
         grid: {
           top: 110,
@@ -85,7 +102,7 @@
             orient: "vertical",
             feature: {
                 magicType: {
-                    type: ['line', 'bar', 'stack', 'tield'],
+                    type: ['line', 'bar', 'tield'],
                 },
                 dataView: {
                     show: true,
@@ -101,14 +118,70 @@
         xAxis: { type: 'category', data: data.years || [] },
         yAxis: { type: 'value' },
         series: [{
-          name: 'Documents',
+          name: seriesName,
           type: 'bar',
-          data: data.ndocs_per_year || []
+          data: seriesData
         }]
       };
 
       chartObj.setOption(chartOpts);
       window.addEventListener('resize', chartObj.resize);
     }
+
+    // Handle form submission
+    function updateAppliedFiltersFromForm() {
+      var container = document.getElementById('applied-filters');
+      if (!container) return;
+      var form = document.getElementById('filters-form');
+      if (!form) return;
+
+      // Study Unit
+      var studyUnitSelect = document.getElementById('study-unit-select');
+      var studyUnitText = '';
+      if (studyUnitSelect) {
+        var selected = studyUnitSelect.options[studyUnitSelect.selectedIndex];
+        if (selected && selected.value) {
+          studyUnitText = selected.textContent;
+        }
+      }
+
+      // Metric
+      var metricSelect = document.getElementById('metric-select');
+      var metricText = '';
+      if (metricSelect) {
+        var selected = metricSelect.options[metricSelect.selectedIndex];
+        if (selected && selected.value) {
+          metricText = selected.textContent;
+        }
+      }
+
+      var tags = [];
+      if (studyUnitText) {
+        tags.push('<span class="mr-1"><strong>Unit:</strong> ' + studyUnitText + '</span>');
+      }
+      if (metricText) {
+        tags.push('<span class="mr-1"><strong>Metric:</strong> ' + metricText + '</span>');
+      }
+
+      var pieces = [];
+      form.querySelectorAll('select').forEach(function(sel) {
+        var selectedTexts = Array.from(sel.selectedOptions).map(function(opt) { return opt.textContent; });
+        if (selectedTexts.length) {
+          var labelEl = form.querySelector('label[for="' + sel.id + '"]');
+          var label = labelEl ? labelEl.textContent.trim() : sel.name;
+          pieces.push(label + ': ' + selectedTexts.join(', '));
+        }
+      });
+
+      if (pieces.length || tags.length) {
+        container.classList.remove('d-none');
+        container.innerHTML = tags.join(' ') + (pieces.length ? '<strong>Applied Filters:</strong> ' + pieces.join(' | ') : '');
+      } else {
+        container.classList.add('d-none');
+        container.innerHTML = '';
+      }
+    }
+
+    window.updateAppliedFiltersFromForm = updateAppliedFiltersFromForm;
   </script>
 {% endblock %}
