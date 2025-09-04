@@ -425,7 +425,7 @@ HAYSTACK_CONNECTIONS = {
     "es": {
         "ENGINE": "haystack.backends.elasticsearch7_backend.Elasticsearch7SearchEngine",
         "URL": env("ES_URL", default="http://elastic:xxxxx@host.docker.internal:9200/"),
-        "INDEX_NAME": env("INDEX_NAME", default="opoca"),
+        "INDEX_NAME": env("INDEX_NAME", default="openalex_works"),
         "SOLR_TIMEOUT": 10,
         "KWARGS": {
             "verify_certs": env.bool("ES_VERIFY_CERTS", default=False)
