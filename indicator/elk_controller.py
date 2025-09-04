@@ -66,22 +66,30 @@ def get_filters(request):
 @csrf_exempt
 @require_POST
 def get_indicators(request):
-	"""
-	Endpoint to return aggregated indicators based on filters.
-	"""
-	filters = json.loads(request.body.decode())
-	
-	query = build_query(filters)
-	
-	aggs = build_indicators_aggs()
-	
-	body = {"size": 0, "query": query, "aggs": aggs}
-		
-	res = es.search(index=INDEX_NAME, body=body)
-	
-	indicators = parse_indicators_response(res)
-	
-	return JsonResponse(indicators)
+    """
+    Endpoint para retornar indicadores, agora com suporte a métricas absolutas e relativas.
+    """
+    filters = json.loads(request.body.decode())
+    unit_study = filters.pop("unit_study", "document")
+    metric = filters.pop("metric", "absolute")
+
+    query = build_query(filters)
+
+    if unit_study == "citation":
+        aggs = build_citations_per_year_aggs()
+    else:
+        aggs = build_documents_per_year_aggs()
+
+    body = {"size": 0, "query": query, "aggs": aggs}
+    res = es.search(index=ES_INDEX, body=body)
+
+    if unit_study == "citation":
+        indicators = parse_citations_per_year_response(res)
+    else:
+        indicators = parse_documents_per_year_response(res)
+
+    indicators["metric"] = metric
+    return JsonResponse(indicators)
 
 def build_query(filters):
 	"""
