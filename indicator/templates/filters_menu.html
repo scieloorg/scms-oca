@@ -1,22 +1,49 @@
 {# filters_menu.html - Filters Menu for Indicators #}
+<style>
+  .floating-actions {
+    position: sticky;
+    bottom: 0;
+    height: 0;
+    z-index: 3;
+    pointer-events: none;
+  }
+  .floating-actions__inner {
+    position: absolute;
+    right: 0;
+    bottom: 1rem;
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+    pointer-events: auto;
+  }
+  .floating-actions__inner .btn {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.18), 0 1.5px 4px rgba(0,0,0,0.12);
+  }
+  @media (max-width: 576px) {
+    .floating-actions__inner .btn {
+      width: calc(100% - 32px);
+    }
+  }
+</style>
+
 <h4 style="margin: 0; padding-top: 0.5em; padding-bottom: 0.5em;">Filters</h4>
 <div id="filters-menu" class="filters-menu">
-  <form id="filters-form" class="mb-4">
+  <form id="filters-form" class="mb-3">
     <div>
-      <label for="publication_year">Publication Year</label>
-      <select id="publication_year" name="publication_year" class="form-control" multiple></select>
+      <label for="source_index">Source Index</label>
+      <select id="source_index" name="source_index" class="form-control" multiple></select>
     </div>
 
     <div>
       <label for="source_type">Source Type</label>
       <select id="source_type" name="source_type" class="form-control" multiple></select>
     </div>
-    
+
     <div>
-      <label for="source_index">Source Index</label>
-      <select id="source_index" name="source_index" class="form-control" multiple></select>
+      <label for="publication_year">Publication Year</label>
+      <select id="publication_year" name="publication_year" class="form-control" multiple></select>
     </div>
-    
+
     <div>
       <label for="document_type">Document Type</label>
       <select id="document_type" name="document_type" class="form-control" multiple></select>
@@ -24,11 +51,7 @@
     
     <div>
       <label for="open_access">Open Access</label>
-      <select id="open_access" name="open_access" class="form-control">
-        <option value="">All</option>
-        <option value="true">Yes</option>
-        <option value="false">No</option>
-      </select>
+      <select id="open_access" name="open_access" class="form-control" multiple></select>
     </div>
     
     <div>
@@ -52,19 +75,22 @@
     </div>
     
     <div>
-      <label for="country">Country</label>
+      <label for="country">Country (Author)</label>
       <select id="country" name="country" class="form-control" multiple></select>
     </div>
 
-    <div style="margin-top: 1em;">
-      <button type="submit" class="btn btn-primary">Generate Graph</button>
+    <div class="floating-actions">
+      <div class="floating-actions__inner">
+        <button type="button" id="reset-filters-btn" class="btn btn-secondary mr-2">Reset Filters</button>
+        <button type="submit" class="btn btn-primary">Generate Graph</button>
+      </div>
     </div>
   </form>
 </div>
 
 <script>
-
 document.addEventListener('DOMContentLoaded', function() {
+  // Load filter options
   fetch('/indicators/filters/')
     .then(response => response.json())
     .then(data => {
@@ -74,8 +100,14 @@ document.addEventListener('DOMContentLoaded', function() {
           select.innerHTML = '';
           values.forEach(v => {
             const opt = document.createElement('option');
-            opt.value = v;
-            opt.textContent = v;
+            if (key === 'open_access') {
+              const mapped = (v == 1) ? 'True' : 'False';
+              opt.value = v;
+              opt.textContent = mapped;
+            } else {
+              opt.value = v;
+              opt.textContent = v;
+            }
             select.appendChild(opt);
           });
         }
@@ -86,6 +118,8 @@ document.addEventListener('DOMContentLoaded', function() {
     e.preventDefault();
     const formData = new FormData(this);
     const filters = {};
+
+    // Collect selected filters
     for (const [key, value] of formData.entries()) {
       if (filters[key]) {
         if (Array.isArray(filters[key])) {
@@ -97,6 +131,40 @@ document.addEventListener('DOMContentLoaded', function() {
         filters[key] = value;
       }
     }
+
+    // Map study unit selection
+    var studyUnitSelect = document.getElementById('study-unit-select');
+    var unit_study = null;
+    if (studyUnitSelect) {
+      var val = studyUnitSelect.value;
+      if (val === 'unit_citation') {
+        unit_study = 'citation';
+      } else if (val === 'unit_document') {
+        unit_study = 'document';
+      } else if (val === 'unit_journal') {
+        unit_study = 'journal';
+      }
+    }
+    if (unit_study) {
+      filters['unit_study'] = unit_study;
+    }
+
+    // Map metric selection
+    var metricSelect = document.getElementById('metric-select');
+    var metric = null;
+    if (metricSelect) {
+      metric = metricSelect.value;
+    }
+    if (metric) {
+      filters['metric'] = metric;
+    }
+
+    // Update applied filters display
+    if (typeof updateAppliedFiltersFromForm === 'function') {
+      setTimeout(updateAppliedFiltersFromForm, 0);
+    }
+
+    // Fetch filtered data and update chart
     fetch('/indicators/indicators/', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
@@ -106,9 +174,25 @@ document.addEventListener('DOMContentLoaded', function() {
     .then(data => {
       console.log(data);
       if (typeof renderChart === 'function') {
-        renderChart(data);
+        renderChart(data, unit_study, metric);
       }
     });
   });
+
+  // Reset filters
+  document.getElementById('reset-filters-btn').addEventListener('click', function() {
+    const form = document.getElementById('filters-form');
+    if (!form) return;
+
+    form.reset();
+    form.querySelectorAll('select').forEach(function(sel) {
+      Array.from(sel.options).forEach(function(opt) { opt.selected = false; });
+    });
+
+    if (typeof updateAppliedFiltersFromForm === 'function') {
+      updateAppliedFiltersFromForm();
+    }
+  });
+
 });
 </script>
