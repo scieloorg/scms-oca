@@ -1,4 +1,6 @@
 import json
+import urllib3
+import warnings
 
 from django.conf import settings
 from django.http import JsonResponse
@@ -6,19 +8,32 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
 from elasticsearch import Elasticsearch
 from urllib.parse import urlparse
+from urllib3.exceptions import InsecureRequestWarning
 
 
-ES_URL = getattr(settings, "HAYSTACK_CONNECTIONS", {}).get("es", {}).get("URL", "http://localhost:9200/")
-INDEX_NAME = getattr(settings, "HAYSTACK_CONNECTIONS", {}).get("es", {}).get("INDEX_NAME", "openalex_works")
-VERIFY_CERTS = getattr(settings, "HAYSTACK_CONNECTIONS", {}).get("es", {}).get("KWARGS", {}).get("verify_certs", False)
+urllib3.disable_warnings(InsecureRequestWarning)
+warnings.filterwarnings(
+    "ignore",
+    message="Connecting to .* using TLS with verify_certs=False is insecure",
+    category=Warning,
+)
 
-parsed = urlparse(ES_URL)
-host_url = f"{parsed.scheme}://{parsed.hostname}:{parsed.port or 9200}"
-es_kwargs = {"hosts": [host_url], "verify_certs": VERIFY_CERTS}
-if parsed.username and parsed.password:
-	es_kwargs["http_auth"] = (parsed.username, parsed.password)
+es_url = settings.HAYSTACK_CONNECTIONS['es']['URL']  # ex: http://user:pass@host:9200/
+parsed_url = urlparse(es_url)
 
-es = Elasticsearch(**es_kwargs)
+ES_HOST = f"{parsed_url.scheme}://{parsed_url.hostname}:{parsed_url.port}"
+ES_USER = parsed_url.username or 'elastic'
+ES_PASSWORD = parsed_url.password or ''
+ES_INDEX = settings.HAYSTACK_CONNECTIONS['es']['INDEX_NAME']
+ES_VERIFY_CERTS = settings.HAYSTACK_CONNECTIONS['es'].get('KWARGS', {}).get('verify_certs', False)
+ES_CA_CERTS = settings.HAYSTACK_CONNECTIONS['es'].get('KWARGS', {}).get('ca_certs', None)
+
+es = Elasticsearch(
+    ES_HOST,
+    http_auth=(ES_USER, ES_PASSWORD),
+    verify_certs=ES_VERIFY_CERTS,
+    ca_certs=ES_CA_CERTS,
+)
 
 
 @require_GET
