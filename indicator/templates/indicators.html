@@ -73,13 +73,23 @@
 {% block inline_javascript %}
   <script src="{% static 'js/echarts/echarts.min.js' %}"></script>
   <script>
-    function renderChart(data) {
+    function renderChart(data, unit_study) {
       var chartContainer = document.getElementById('main-chart');
-            
       var chartObj = echarts.init(chartContainer);
-      
+
+      var seriesData, seriesName, title;
+      if (unit_study === "citation") {
+        seriesData = data.total_citations_per_year || [];
+        seriesName = "Citations";
+        title = "Number of Citations per Year";
+      } else {
+        seriesData = data.ndocs_per_year || [];
+        seriesName = "Documents";
+        title = "Number of Documents per Year";
+      }
+
       var chartOpts = {
-        title: { text: 'Number of Documents per Year' },
+        title: { text: title },
         tooltip: {},
         grid: {
           top: 110,
@@ -92,7 +102,7 @@
             orient: "vertical",
             feature: {
                 magicType: {
-                    type: ['line', 'bar', 'stack', 'tield'],
+                    type: ['line', 'bar', 'tield'],
                 },
                 dataView: {
                     show: true,
@@ -108,9 +118,9 @@
         xAxis: { type: 'category', data: data.years || [] },
         yAxis: { type: 'value' },
         series: [{
-          name: 'Documents',
+          name: seriesName,
           type: 'bar',
-          data: data.ndocs_per_year || []
+          data: seriesData
         }]
       };
 
