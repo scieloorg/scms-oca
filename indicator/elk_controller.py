@@ -38,29 +38,30 @@ es = Elasticsearch(
 
 @require_GET
 def get_filters(request):
-	"""
-	Endpoint to return available filter options.
-	"""
-	aggs = {
-		"publication_year": {"terms": {"field": "publication_year", "size": 6, "order": {"_key": "desc"}}},
-		"source_type": {"terms": {"field": "best_oa_location.source.type.keyword", "size": 5}},
-		"source_index": {"terms": {"field": "indexed_in.keyword", "size": 5}},
-		"document_type": {"terms": {"field": "type.keyword", "size": 20}},
-		"open_access": {"terms": {"field": "open_access.is_oa", "size": 2}},
-		"open_access_type": {"terms": {"field": "open_access.oa_status.keyword", "size": 6}},
-		"country": {"terms": {"field": "authorships.countries.keyword", "size": 247}},
-		"thematic_area_level_0": {"terms": {"field": "thematic_areas.level0.keyword", "size": 3}},
-		"thematic_area_level_1": {"terms": {"field": "thematic_areas.level1.keyword", "size": 9}},
-		"thematic_area_level_2": {"terms": {"field": "thematic_areas.level2.keyword", "size": 41}},
-	}
-	
-	body = {"size": 0, "aggs": aggs}
-	
-	res = es.search(index=INDEX_NAME, body=body)
-	
-	filtros = {k: [b["key"] for b in v["buckets"]] for k, v in res["aggregations"].items()}
-	
-	return JsonResponse(filtros)
+    """
+    Endpoint to return available filter options.
+    """
+    aggs = {
+        "publication_year": {"terms": {"field": "publication_year", "size": 6, "order": {"_key": "desc"}}},
+        "source_type": {"terms": {"field": "best_oa_location.source.type.keyword", "size": 5}},
+        "source_index": {"terms": {"field": "indexed_in.keyword", "size": 5}},
+        "document_type": {"terms": {"field": "type.keyword", "size": 20}},
+        "open_access": {"terms": {"field": "open_access.is_oa", "size": 2}},
+        "open_access_type": {"terms": {"field": "open_access.oa_status.keyword", "size": 6}},
+        "country": {"terms": {"field": "authorships.countries.keyword", "size": 247}},
+        "thematic_area_level_0": {"terms": {"field": "thematic_areas.level0.keyword", "size": 3}},
+        "thematic_area_level_1": {"terms": {"field": "thematic_areas.level1.keyword", "size": 9}},
+        "thematic_area_level_2": {"terms": {"field": "thematic_areas.level2.keyword", "size": 41}},
+    }
+
+    body = {"size": 0, "aggs": aggs}
+
+    try:
+        res = es.search(index=ES_INDEX, body=body)
+        filters = {k: [b["key"] for b in v["buckets"]] for k, v in res["aggregations"].items()}
+        return JsonResponse(filters)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
 
 @csrf_exempt
 @require_POST
