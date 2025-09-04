@@ -175,3 +175,38 @@ def parse_citations_per_year_response(res):
         "total_citations_per_year": total_citations,
         "ndocs_per_year": doc_counts,
     }
+
+def build_documents_per_year_aggs():
+    """
+    Build the aggregations for the number of documents per year, total documents, and total citations.
+    """
+    return {
+        "per_year": {
+            "terms": {
+                "field": "publication_year",
+                "order": {"_key": "asc"}
+            }
+        },
+        "total_documents": {"value_count": {"field": "id.keyword"}},
+    }
+
+def parse_documents_per_year_response(res):
+    """
+    Extract the number of documents per year from the aggregation result.
+    Returns absolute counts, percentage relative to global total,
+    and percentage relative to the filtered set.
+    """
+    aggs = res.get("aggregations", {})
+
+    years = []
+    ndocs_per_year = []
+
+    for bucket in aggs.get("per_year", {}).get("buckets", []):
+        count = bucket["doc_count"]
+        years.append(str(bucket["key"]))
+        ndocs_per_year.append(count)
+
+    return {
+        "years": years,
+        "ndocs_per_year": ndocs_per_year,
+    }
