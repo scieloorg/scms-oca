@@ -48,6 +48,11 @@
       <label for="document_type">Document Type</label>
       <select id="document_type" name="document_type" class="form-control" multiple></select>
     </div>
+
+    <div>
+      <label for="document_language">Document Language</label>
+      <select id="document_language" name="document_language" class="form-control" multiple></select>
+    </div>
     
     <div>
       <label for="open_access">Open Access</label>
@@ -55,25 +60,30 @@
     </div>
     
     <div>
-      <label for="open_access_type">Open Access Type</label>
-      <select id="open_access_type" name="open_access_type" class="form-control" multiple></select>
+      <label for="access_type">Access Type</label>
+      <select id="access_type" name="access_type" class="form-control" multiple></select>
     </div>
         
     <div>
-      <label for="thematic_area_level_0">Thematic Area Level 0</label>
-      <select id="thematic_area_level_0" name="thematic_area_level_0" class="form-control" multiple></select>
+      <label for="subject_area_level_0">Subject Area Level 0</label>
+      <select id="subject_area_level_0" name="subject_area_level_0" class="form-control" multiple></select>
     </div>
 
     <div>
-      <label for="thematic_area_level_1">Thematic Area Level 1</label>
-      <select id="thematic_area_level_1" name="thematic_area_level_1" class="form-control" multiple></select>
+      <label for="subject_area_level_1">Subject Area Level 1</label>
+      <select id="subject_area_level_1" name="subject_area_level_1" class="form-control" multiple></select>
     </div>
 
     <div>
-      <label for="thematic_area_level_2">Thematic Area Level 2</label>
-      <select id="thematic_area_level_2" name="thematic_area_level_2" class="form-control" multiple></select>
+      <label for="subject_area_level_2">Subject Area Level 2</label>
+      <select id="subject_area_level_2" name="subject_area_level_2" class="form-control" multiple></select>
     </div>
-    
+
+    <div>
+      <label for="region_world">Region (World)</label>
+      <select id="region_world" name="region_world" class="form-control" multiple></select>
+    </div>
+
     <div>
       <label for="country">Country (Author)</label>
       <select id="country" name="country" class="form-control" multiple></select>
@@ -111,6 +121,37 @@ document.addEventListener('DOMContentLoaded', function() {
             select.appendChild(opt);
           });
         }
+      }
+
+      // Fill breakdown variable options
+      const breakdownSelect = document.getElementById('breakdown-variable-select');
+      if (breakdownSelect) {
+        breakdownSelect.innerHTML = '<option value="">Select a variable</option>';
+
+        // List of variables that make sense for breakdown
+        const breakdownVars = [
+          'source_index',
+          'source_type',
+          'publication_year',
+          'document_type',
+          'document_language',
+          'open_access',
+          'access_type',
+          'subject_area_level_0',
+          'subject_area_level_1',
+          'subject_area_level_2',
+          'region_world',
+          'country'
+        ];
+
+        breakdownVars.forEach(key => {
+          if (data[key]) {
+            // Get label from corresponding filter label
+            let label = document.querySelector('label[for="' + key + '"]');
+            label = label ? label.textContent.trim() : key.replace(/_/g, ' ');
+            breakdownSelect.innerHTML += `<option value="${key}">${label}</option>`;
+          }
+        });
       }
     });
 
