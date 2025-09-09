@@ -76,28 +76,42 @@ def get_filters(request):
 @require_POST
 def get_indicators(request):
     """
-    Endpoint para retornar indicadores, agora com suporte a métricas absolutas e relativas.
+    Endpoint to return indicators.
     """
     filters = json.loads(request.body.decode())
-    unit_study = filters.pop("unit_study", "document")
-    metric = filters.pop("metric", "absolute")
+    study_unit = filters.pop("study_unit", "document")
+    breakdown_variable = filters.pop("breakdown_variable", None)
 
     query = build_query(filters)
 
-    if unit_study == "citation":
-        aggs = build_citations_per_year_aggs()
+    # Choose main aggregation
+    if breakdown_variable:
+        if study_unit == "citation":
+            aggs = build_breakdown_citation_per_year_aggs(breakdown_variable)
+        else:
+            aggs = build_breakdown_documents_per_year_aggs(breakdown_variable)
     else:
-        aggs = build_documents_per_year_aggs()
+        if study_unit == "citation":
+            aggs = build_citations_per_year_aggs()
+        else:
+            aggs = build_documents_per_year_aggs()
 
     body = {"size": 0, "query": query, "aggs": aggs}
     res = es.search(index=ES_INDEX, body=body)
 
-    if unit_study == "citation":
-        indicators = parse_citations_per_year_response(res)
+    # Parse response
+    if breakdown_variable:
+        if study_unit == "citation":
+            indicators = parse_breakdown_citation_per_year_response(res)
+        else:
+            indicators = parse_breakdown_documents_per_year_response(res)
+        indicators["breakdown_variable"] = breakdown_variable
     else:
-        indicators = parse_documents_per_year_response(res)
+        if study_unit == "citation":
+            indicators = parse_citations_per_year_response(res)
+        else:
+            indicators = parse_documents_per_year_response(res)        
 
-    indicators["metric"] = metric
     return JsonResponse(indicators)
 
 def build_query(filters):
