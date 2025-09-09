@@ -229,6 +229,209 @@
       window.addEventListener('resize', chartObj.resize);
     }
 
+    // Function to render the percentage chart
+    function renderPercentageChart(data, study_unit) {
+      var chartContainer = document.getElementById('percentage-chart');
+
+      // Destroy previous chart instance if exists
+      if (chartContainer && chartContainer._chartInstance) {
+        chartContainer._chartInstance.dispose();
+        chartContainer._chartInstance = null;
+      }
+      
+      // Initialize new chart instance
+      var chartObj = echarts.init(chartContainer);
+      chartContainer._chartInstance = chartObj;
+      var title, chartOpts;
+
+      // Percentage stacked bar chart
+      if (data.breakdown_variable && data.series && data.years) {
+        var breakdownLabel = document.querySelector('label[for="' + data.breakdown_variable + '"]');
+        breakdownLabel = breakdownLabel ? breakdownLabel.textContent.trim() : data.breakdown_variable.replace(/_/g, ' ');
+        title = 'Percentage Breakdown by ' + breakdownLabel;
+        chartOpts = {
+          title: { text: title },
+          tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, formatter: function (params) {
+            var tar = params[0];
+            var total = 0;
+            params.forEach(function(p) { total += p.value; });
+            var result = tar.axisValueLabel + '<br/>';
+            params.forEach(function(p) {
+              result += p.marker + p.seriesName + ': ' + p.value + '%<br/>';
+            });
+            return result;
+          }},
+          legend: {
+            data: data.breakdown_keys,
+            orient: 'horizontal',
+            bottom: 0
+          },
+          grid: {
+            top: 110,
+            left: 0,
+            right: 200,
+            bottom: 40,
+            containLabel: true
+          },
+          toolbox: {
+              orient: "vertical",
+              feature: {
+                  magicType: {
+                      type: ['bar', 'tield'],
+                  },
+                  dataView: {
+                      show: true,
+                      title: 'Data',
+                      readOnly: true,
+                      lang: ['', 'Close',]
+                    },
+                  saveAsImage: { show: true },
+                  restore: { show: true },
+                  dataZoom: {}
+              }
+          },
+          xAxis: { type: 'category', data: data.years },
+          yAxis: { type: 'value', axisLabel: { formatter: '{value} %' } },
+          series: (data.series || []).map(function(s) {
+            return {
+              name: s.name,
+              type: 'bar',
+              stack: 'total',
+              emphasis: { focus: 'series' },
+              label: {
+                show: false,
+                position: 'inside',
+                formatter: function(params) {
+                  var total = 0;
+                  var series = params.seriesIndex;
+                  var yearIndex = params.dataIndex;
+                  (data.series || []).forEach(function(s) { total += s.data[yearIndex]; });
+                  var percent = total ? ((params.value / total) * 100).toFixed(2) : 0;
+                  return percent + '%';
+                }
+              },
+              data: s.data.map(function(value, index) {
+                var total = 0;
+                (data.series || []).forEach(function(s) { total += s.data[index]; });
+                var percent = total ? ((value / total) * 100).toFixed(2) : 0;
+                return percent;
+              }),
+            };
+          })
+        };
+      // Simple percentage bar chart for citations
+      } else if (study_unit === "citation") {
+        var xAxisData = data.years || [];
+        var seriesData = data.total_citations_per_year || [];
+        var seriesName = "Citations";
+        title = "Percentage of Citations per Year";
+        chartOpts = {
+          title: { text: title },
+          tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, formatter: function (params) {
+            var tar = params[0];
+            var total = 0;
+            params.forEach(function(p) { total += p.value; });
+            var result = tar.axisValueLabel + '<br/>';
+            params.forEach(function(p) {
+              // var percent = total ? ((p.value / total) * 100).toFixed(2) : 0;
+              // result += p.marker + p.seriesName + ': ' + p.value + ' (' + percent + '%)<br/>';
+              result += p.marker + p.seriesName + ': ' + p.value + '%<br/>';
+            });
+            return result;
+          }},
+          grid: {
+            top: 110,
+            left: 0,
+            right: 200,
+            bottom: '10%',
+            containLabel: true
+          },
+          toolbox: {
+              orient: "vertical",
+              feature: {
+                  magicType: {
+                      type: ['bar', 'tield'],
+                  },
+                  dataView: {
+                      show: true,
+                      title: 'Data',
+                      readOnly: true,
+                      lang: ['', 'Close',]
+                    },
+                  saveAsImage: { show: true },
+                  restore: { show: true },
+                  dataZoom: {}
+              }
+          },
+          xAxis: { type: 'category', data: xAxisData },
+          yAxis: { type: 'value', axisLabel: { formatter: '{value} %' } },
+          series: [{
+            name: seriesName,
+            type: 'bar',
+            data: seriesData.map(function(value, index) {
+              var total = 0;
+              (data.total_citations_per_year || []).forEach(function(v) { total += v; });
+              var percent = total ? ((value / total) * 100).toFixed(2) : 0;
+              return percent;
+            }),
+          }]
+        };
+      // Simple percentage bar chart for documents
+      } else {
+        var xAxisData = data.years || [];
+        var seriesData = data.ndocs_per_year || [];
+        var seriesName = "Documents";
+        title = "Percentage of Documents per Year";
+        chartOpts = {
+          title: { text: title },
+          tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, formatter: function (params) {
+            var tar = params[0];
+            var total = 0;
+            params.forEach(function(p) { total += p.value; });
+            var result = tar.axisValueLabel + '<br/>';
+            params.forEach(function(p) {
+              result += p.marker + p.seriesName + ': ' + p.value + '%<br/>';
+            });
+            return result;
+          }},
+          grid: {
+            top: 110,
+            left: 0,
+            right: 200,
+            bottom: '10%',
+            containLabel: true
+          },
+          toolbox: {
+              orient: "vertical",
+              feature: {
+                  magicType: {
+                      type: ['bar', 'tield'],
+                  },
+                  dataView: {
+                      show: true,
+                      title: 'Data',
+                      readOnly: true,
+                      lang: ['', 'Close',]
+                    },
+                  saveAsImage: { show: true },
+                  restore: { show: true },
+                  dataZoom: {}
+              }
+          },
+          xAxis: { type: 'category', data: xAxisData },
+          yAxis: { type: 'value', axisLabel: { formatter: '{value} %' } },
+          series: [{
+            name: seriesName,
+            type: 'bar',
+            data: seriesData.map(function(value, index) {
+              var total = 0;
+              (data.ndocs_per_year || []).forEach(function(v) { total += v; });
+              var percent = total ? ((value / total) * 100).toFixed(2) : 0;
+              return percent;
+            }),
+          }]
+        };
+      }
       chartObj.setOption(chartOpts);
       window.addEventListener('resize', chartObj.resize);
     }
