@@ -1,6 +1,4 @@
 import json
-import urllib3
-import warnings
 
 from django.conf import settings
 from django.http import JsonResponse
@@ -8,15 +6,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
 from elasticsearch import Elasticsearch
 from urllib.parse import urlparse
-from urllib3.exceptions import InsecureRequestWarning
 
-
-urllib3.disable_warnings(InsecureRequestWarning)
-warnings.filterwarnings(
-    "ignore",
-    message="Connecting to .* using TLS with verify_certs=False is insecure",
-    category=Warning,
-)
 
 es_url = settings.HAYSTACK_CONNECTIONS['es']['URL']  # ex: http://user:pass@host:9200/
 parsed_url = urlparse(es_url)
@@ -34,6 +24,23 @@ es = Elasticsearch(
     verify_certs=ES_VERIFY_CERTS,
     ca_certs=ES_CA_CERTS,
 )
+
+# Field mapping global
+FIELD_MAP = {
+    "year": "publication_year",
+    "publication_year": "publication_year",
+    "source_type": "best_oa_location.source.type.keyword",
+    "source_index": "indexed_in.keyword",
+    "document_type": "type.keyword",
+    "document_language": "language.keyword",
+    "open_access": "open_access.is_oa",
+    "access_type": "open_access.oa_status.keyword",
+    "region_world": "geos.scimago_regions.keyword",
+    "country": "authorships.countries.keyword",
+    "subject_area_level_0": "thematic_areas.level0.keyword",
+    "subject_area_level_1": "thematic_areas.level1.keyword",
+    "subject_area_level_2": "thematic_areas.level2.keyword",
+}
 
 
 @require_GET
