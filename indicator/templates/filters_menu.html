@@ -175,29 +175,33 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Map study unit selection
     var studyUnitSelect = document.getElementById('study-unit-select');
-    var unit_study = null;
+    var study_unit = null;
     if (studyUnitSelect) {
       var val = studyUnitSelect.value;
       if (val === 'unit_citation') {
-        unit_study = 'citation';
+        study_unit = 'citation';
       } else if (val === 'unit_document') {
-        unit_study = 'document';
-      } else if (val === 'unit_journal') {
-        unit_study = 'journal';
+        study_unit = 'document';
       }
     }
-    if (unit_study) {
-      filters['unit_study'] = unit_study;
+    if (study_unit) {
+      filters['study_unit'] = study_unit;
     }
 
-    // Map metric selection
-    var metricSelect = document.getElementById('metric-select');
-    var metric = null;
-    if (metricSelect) {
-      metric = metricSelect.value;
+    // Map breakdown variable selection
+    var breakdownSelect = document.getElementById('breakdown-variable-select');
+    var breakdown_variable = null;
+    if (breakdownSelect) {
+      breakdown_variable = breakdownSelect.value;
     }
-    if (metric) {
-      filters['metric'] = metric;
+
+    if (breakdown_variable) {
+      filters['breakdown_variable'] = breakdown_variable;
+    } else {
+      // Remove breakdown_variable if not selected
+      if ('breakdown_variable' in filters) {
+        delete filters['breakdown_variable'];
+      }
     }
 
     // Update applied filters display
@@ -213,14 +217,13 @@ document.addEventListener('DOMContentLoaded', function() {
     })
     .then(response => response.json())
     .then(data => {
-      console.log(data);
       if (typeof renderChart === 'function') {
-        renderChart(data, unit_study, metric);
+        renderChart(data, study_unit);
       }
     });
   });
 
-  // Reset filters
+  // Reset form (filters and breakdown variable)
   document.getElementById('reset-filters-btn').addEventListener('click', function() {
     const form = document.getElementById('filters-form');
     if (!form) return;
@@ -229,6 +232,12 @@ document.addEventListener('DOMContentLoaded', function() {
     form.querySelectorAll('select').forEach(function(sel) {
       Array.from(sel.options).forEach(function(opt) { opt.selected = false; });
     });
+
+    // Reset breakdown variable select
+    var breakdownSelect = document.getElementById('breakdown-variable-select');
+    if (breakdownSelect) {
+      breakdownSelect.value = '';
+    }
 
     if (typeof updateAppliedFiltersFromForm === 'function') {
       updateAppliedFiltersFromForm();
