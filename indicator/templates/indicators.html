@@ -436,7 +436,7 @@
       window.addEventListener('resize', chartObj.resize);
     }
 
-    // Handle form submission
+    // Function to update applied filters display
     function updateAppliedFiltersFromForm() {
       var container = document.getElementById('applied-filters');
       if (!container) return;
@@ -453,22 +453,15 @@
         }
       }
 
-      // Metric
-      var metricSelect = document.getElementById('metric-select');
-      var metricText = '';
-      if (metricSelect) {
-        var selected = metricSelect.options[metricSelect.selectedIndex];
-        if (selected && selected.value) {
-          metricText = selected.textContent;
-        }
-      }
-
       var tags = [];
       if (studyUnitText) {
-        tags.push('<span class="mr-1"><strong>Unit:</strong> ' + studyUnitText + '</span>');
+        tags.push('<span class="mr-1"><strong>Study Unit:</strong> ' + studyUnitText + '</span>');
       }
-      if (metricText) {
-        tags.push('<span class="mr-1"><strong>Metric:</strong> ' + metricText + '</span>');
+
+      if (typeof data !== 'undefined' && data && data.breakdown_variable) {
+        var breakdownLabel = document.querySelector('label[for="' + data.breakdown_variable + '"]');
+        breakdownLabel = breakdownLabel ? breakdownLabel.textContent.trim() : data.breakdown_variable.replace(/_/g, ' ');
+        tags.push('<span class="mr-1"><strong>Breakdown:</strong> ' + breakdownLabel + '</span>');
       }
 
       var pieces = [];
@@ -489,6 +482,70 @@
         container.innerHTML = '';
       }
     }
+
+    // Intercept form submission to send correct params
+    document.addEventListener('DOMContentLoaded', function() {
+      var form = document.getElementById('filters-form');
+      if (!form) return;
+
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+      
+        var formData = new FormData(form);
+        var filters = {};
+      
+        for (const [key, value] of formData.entries()) {
+          if (filters[key]) {
+            if (Array.isArray(filters[key])) {
+              filters[key].push(value);
+            } else {
+              filters[key] = [filters[key], value];
+            }
+          } else {
+            filters[key] = value;
+          }
+        }
+
+        // Map study unit selection
+        var studyUnitSelect = document.getElementById('study-unit-select');
+        var study_unit = null;
+        if (studyUnitSelect) {
+          var val = studyUnitSelect.value;
+          if (val === 'unit_citation') {
+            study_unit = 'citation';
+          } else if (val === 'unit_document') {
+            study_unit = 'document';
+          }
+        }
+        if (study_unit) {
+          filters['study_unit'] = study_unit;
+        }
+
+        // Map breakdown variable selection
+        var breakdownSelect = document.getElementById('breakdown-variable-select');
+        var breakdown_variable = null;
+        if (breakdownSelect) {
+          breakdown_variable = breakdownSelect.value;
+        }
+        if (breakdown_variable) {
+          filters['breakdown_variable'] = breakdown_variable;
+        }
+
+        // Fetch filtered data and update chart
+        fetch('/indicators/indicators/', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(filters)
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (typeof renderChart === 'function') {
+            renderChart(data, study_unit);
+            renderPercentageChart(data, study_unit);
+          }
+        });
+      });
+    });
 
     window.updateAppliedFiltersFromForm = updateAppliedFiltersFromForm;
   </script>
