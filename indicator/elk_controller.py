@@ -306,3 +306,39 @@ def parse_breakdown_citation_per_year_response(res):
         "breakdown_keys": breakdown_keys,
         "series": series,
     }
+
+def parse_breakdown_documents_per_year_response(res):
+    """
+    Extract the breakdown of document counts per year from the aggregation result.
+    """
+    per_year_buckets = res.get("aggregations", {}).get("per_year", {}).get("buckets", [])
+    years = [str(b["key"]) for b in per_year_buckets]
+    breakdown_keys_set = set()
+
+    # Collect all possible breakdowns
+    for year_bucket in per_year_buckets:
+        for b in year_bucket.get("breakdown", {}).get("buckets", []):
+            breakdown_keys_set.add(str(b["key"]))
+
+    breakdown_keys = sorted(list(breakdown_keys_set))
+
+    # Build counts matrix: each row = breakdown, each column = year
+    series = []
+    for breakdown in breakdown_keys:
+        data = []
+        for year_bucket in per_year_buckets:
+            found = False
+            for b in year_bucket.get("breakdown", {}).get("buckets", []):
+                if str(b["key"]) == breakdown:
+                    data.append(b["doc_count"])
+                    found = True
+                    break
+            if not found:
+                data.append(0)
+        series.append({"name": breakdown, "data": data})
+
+    return {
+        "years": years,
+        "breakdown_keys": breakdown_keys,
+        "series": series,
+    }
