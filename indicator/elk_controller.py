@@ -118,22 +118,10 @@ def build_query(filters):
     """
     Build the Elasticsearch query from the received filters, mapping friendly names to real fields.
     """
-    field_map = {
-        "year": "publication_year",
-        "source_type": "best_oa_location.source.type.keyword",
-        "source_index": "indexed_in.keyword",
-        "document_type": "type.keyword",
-        "open_access": "open_access.is_oa",
-        "open_access_type": "open_access.oa_status.keyword",
-        "country": "authorships.countries.keyword",
-        "thematic_area_level_0": "thematic_areas.level0.keyword",
-        "thematic_area_level_1": "thematic_areas.level1.keyword",
-        "thematic_area_level_2": "thematic_areas.level2.keyword",
-    }
     must = []
 
     for field, value in filters.items():
-        es_field = field_map.get(field, field)
+        es_field = FIELD_MAP.get(field, field)
 
         if field == "open_access":
             def to_bool(v):
