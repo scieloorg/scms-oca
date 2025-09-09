@@ -221,3 +221,30 @@ def parse_documents_per_year_response(res):
         "years": years,
         "ndocs_per_year": ndocs_per_year,
     }
+
+def build_breakdown_citation_per_year_aggs(breakdown_variable):
+    """
+    Build the aggregations for breakdown of citations per year.
+    """
+    es_field = FIELD_MAP.get(breakdown_variable, breakdown_variable)
+    return {
+        "per_year": {
+            "terms": {
+                "field": "publication_year",
+                "order": {"_key": "asc"},
+            },
+            "aggs": {
+                "breakdown": {
+                    "terms": {
+                        "field": es_field,
+                        "order": {"_key": "asc"}
+                    },
+                    "aggs": {
+                        "total_citations": {
+                            "sum": {"field": "cited_by_count"}
+                        }
+                    }
+                }
+            }
+        }
+    }
