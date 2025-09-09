@@ -1,6 +1,4 @@
 import json
-import urllib3
-import warnings
 
 from django.conf import settings
 from django.http import JsonResponse
@@ -8,15 +6,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
 from elasticsearch import Elasticsearch
 from urllib.parse import urlparse
-from urllib3.exceptions import InsecureRequestWarning
 
-
-urllib3.disable_warnings(InsecureRequestWarning)
-warnings.filterwarnings(
-    "ignore",
-    message="Connecting to .* using TLS with verify_certs=False is insecure",
-    category=Warning,
-)
 
 es_url = settings.HAYSTACK_CONNECTIONS['es']['URL']  # ex: http://user:pass@host:9200/
 parsed_url = urlparse(es_url)
@@ -35,6 +25,23 @@ es = Elasticsearch(
     ca_certs=ES_CA_CERTS,
 )
 
+# Field mapping global
+FIELD_MAP = {
+    "year": "publication_year",
+    "publication_year": "publication_year",
+    "source_type": "best_oa_location.source.type.keyword",
+    "source_index": "indexed_in.keyword",
+    "document_type": "type.keyword",
+    "document_language": "language.keyword",
+    "open_access": "open_access.is_oa",
+    "access_type": "open_access.oa_status.keyword",
+    "region_world": "geos.scimago_regions.keyword",
+    "country": "authorships.countries.keyword",
+    "subject_area_level_0": "thematic_areas.level0.keyword",
+    "subject_area_level_1": "thematic_areas.level1.keyword",
+    "subject_area_level_2": "thematic_areas.level2.keyword",
+}
+
 
 @require_GET
 def get_filters(request):
@@ -46,12 +53,14 @@ def get_filters(request):
         "source_type": {"terms": {"field": "best_oa_location.source.type.keyword", "size": 5}},
         "source_index": {"terms": {"field": "indexed_in.keyword", "size": 5}},
         "document_type": {"terms": {"field": "type.keyword", "size": 20}},
+        "document_language": {"terms": {"field": "language.keyword", "size": 20}},
         "open_access": {"terms": {"field": "open_access.is_oa", "size": 2}},
-        "open_access_type": {"terms": {"field": "open_access.oa_status.keyword", "size": 6}},
+        "access_type": {"terms": {"field": "open_access.oa_status.keyword", "size": 6}},
+        "region_world": {"terms": {"field": "geos.scimago_regions.keyword", "size": 8}},
         "country": {"terms": {"field": "authorships.countries.keyword", "size": 247}},
-        "thematic_area_level_0": {"terms": {"field": "thematic_areas.level0.keyword", "size": 3}},
-        "thematic_area_level_1": {"terms": {"field": "thematic_areas.level1.keyword", "size": 9}},
-        "thematic_area_level_2": {"terms": {"field": "thematic_areas.level2.keyword", "size": 41}},
+        "subject_area_level_0": {"terms": {"field": "thematic_areas.level0.keyword", "size": 3}},
+        "subject_area_level_1": {"terms": {"field": "thematic_areas.level1.keyword", "size": 9}},
+        "subject_area_level_2": {"terms": {"field": "thematic_areas.level2.keyword", "size": 41}},
     }
 
     body = {"size": 0, "aggs": aggs}
@@ -67,50 +76,52 @@ def get_filters(request):
 @require_POST
 def get_indicators(request):
     """
-    Endpoint para retornar indicadores, agora com suporte a métricas absolutas e relativas.
+    Endpoint to return indicators.
     """
     filters = json.loads(request.body.decode())
-    unit_study = filters.pop("unit_study", "document")
-    metric = filters.pop("metric", "absolute")
+    study_unit = filters.pop("study_unit", "document")
+    breakdown_variable = filters.pop("breakdown_variable", None)
 
     query = build_query(filters)
 
-    if unit_study == "citation":
-        aggs = build_citations_per_year_aggs()
+    # Choose main aggregation
+    if breakdown_variable:
+        if study_unit == "citation":
+            aggs = build_breakdown_citation_per_year_aggs(breakdown_variable)
+        else:
+            aggs = build_breakdown_documents_per_year_aggs(breakdown_variable)
     else:
-        aggs = build_documents_per_year_aggs()
+        if study_unit == "citation":
+            aggs = build_citations_per_year_aggs()
+        else:
+            aggs = build_documents_per_year_aggs()
 
     body = {"size": 0, "query": query, "aggs": aggs}
     res = es.search(index=ES_INDEX, body=body)
 
-    if unit_study == "citation":
-        indicators = parse_citations_per_year_response(res)
+    # Parse response
+    if breakdown_variable:
+        if study_unit == "citation":
+            indicators = parse_breakdown_citation_per_year_response(res)
+        else:
+            indicators = parse_breakdown_documents_per_year_response(res)
+        indicators["breakdown_variable"] = breakdown_variable
     else:
-        indicators = parse_documents_per_year_response(res)
+        if study_unit == "citation":
+            indicators = parse_citations_per_year_response(res)
+        else:
+            indicators = parse_documents_per_year_response(res)        
 
-    indicators["metric"] = metric
     return JsonResponse(indicators)
 
 def build_query(filters):
     """
     Build the Elasticsearch query from the received filters, mapping friendly names to real fields.
     """
-    field_map = {
-        "year": "publication_year",
-        "source_type": "best_oa_location.source.type.keyword",
-        "source_index": "indexed_in.keyword",
-        "document_type": "type.keyword",
-        "open_access": "open_access.is_oa",
-        "open_access_type": "open_access.oa_status.keyword",
-        "country": "authorships.countries.keyword",
-        "thematic_area_level_0": "thematic_areas.level0.keyword",
-        "thematic_area_level_1": "thematic_areas.level1.keyword",
-        "thematic_area_level_2": "thematic_areas.level2.keyword",
-    }
     must = []
 
     for field, value in filters.items():
-        es_field = field_map.get(field, field)
+        es_field = FIELD_MAP.get(field, field)
 
         if field == "open_access":
             def to_bool(v):
@@ -209,4 +220,125 @@ def parse_documents_per_year_response(res):
     return {
         "years": years,
         "ndocs_per_year": ndocs_per_year,
+    }
+
+def build_breakdown_citation_per_year_aggs(breakdown_variable):
+    """
+    Build the aggregations for breakdown of citations per year.
+    """
+    es_field = FIELD_MAP.get(breakdown_variable, breakdown_variable)
+    return {
+        "per_year": {
+            "terms": {
+                "field": "publication_year",
+                "order": {"_key": "asc"},
+            },
+            "aggs": {
+                "breakdown": {
+                    "terms": {
+                        "field": es_field,
+                        "order": {"_key": "asc"}
+                    },
+                    "aggs": {
+                        "total_citations": {
+                            "sum": {"field": "cited_by_count"}
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+def build_breakdown_documents_per_year_aggs(breakdown_variable):
+    """
+    Build the aggregations for breakdown per year.
+    """
+    es_field = FIELD_MAP.get(breakdown_variable, breakdown_variable)
+    return {
+        "per_year": {
+            "terms": {
+                "field": "publication_year",
+                "order": {"_key": "asc"},
+            },
+            "aggs": {
+                "breakdown": {
+                    "terms": {
+                        "field": es_field,
+                        "order": {"_key": "asc"}
+                    }
+                }
+            }
+        }
+    }
+
+def parse_breakdown_citation_per_year_response(res):
+    """
+    Extract the breakdown of citation counts per year from the aggregation result.
+    """
+    per_year_buckets = res.get("aggregations", {}).get("per_year", {}).get("buckets", [])
+    years = [str(b["key"]) for b in per_year_buckets]
+    breakdown_keys_set = set()
+
+    # Collect all possible breakdowns
+    for year_bucket in per_year_buckets:
+        for b in year_bucket.get("breakdown", {}).get("buckets", []):
+            breakdown_keys_set.add(str(b["key"]))
+
+    breakdown_keys = sorted(list(breakdown_keys_set))
+
+    # Build counts matrix: each row = breakdown, each column = year
+    series = []
+    for breakdown in breakdown_keys:
+        data = []
+        for year_bucket in per_year_buckets:
+            found = False
+            for b in year_bucket.get("breakdown", {}).get("buckets", []):
+                if str(b["key"]) == breakdown:
+                    data.append(int(b.get("total_citations", {}).get("value", 0)))
+                    found = True
+                    break
+            if not found:
+                data.append(0)
+        series.append({"name": breakdown, "data": data})
+
+    return {
+        "years": years,
+        "breakdown_keys": breakdown_keys,
+        "series": series,
+    }
+
+def parse_breakdown_documents_per_year_response(res):
+    """
+    Extract the breakdown of document counts per year from the aggregation result.
+    """
+    per_year_buckets = res.get("aggregations", {}).get("per_year", {}).get("buckets", [])
+    years = [str(b["key"]) for b in per_year_buckets]
+    breakdown_keys_set = set()
+
+    # Collect all possible breakdowns
+    for year_bucket in per_year_buckets:
+        for b in year_bucket.get("breakdown", {}).get("buckets", []):
+            breakdown_keys_set.add(str(b["key"]))
+
+    breakdown_keys = sorted(list(breakdown_keys_set))
+
+    # Build counts matrix: each row = breakdown, each column = year
+    series = []
+    for breakdown in breakdown_keys:
+        data = []
+        for year_bucket in per_year_buckets:
+            found = False
+            for b in year_bucket.get("breakdown", {}).get("buckets", []):
+                if str(b["key"]) == breakdown:
+                    data.append(b["doc_count"])
+                    found = True
+                    break
+            if not found:
+                data.append(0)
+        series.append({"name": breakdown, "data": data})
+
+    return {
+        "years": years,
+        "breakdown_keys": breakdown_keys,
+        "series": series,
     }
