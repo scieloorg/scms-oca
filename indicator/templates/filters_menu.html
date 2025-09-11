@@ -28,7 +28,7 @@
 
 <h4 style="margin: 0; padding-top: 0.5em; padding-bottom: 0.5em;">Filters</h4>
 <div id="filters-menu" class="filters-menu">
-  <form id="filters-form" class="mb-3">
+  <form id="filters-form">
     <div>
       <label for="source_index">Source Index</label>
       <select id="source_index" name="source_index" class="form-control" multiple></select>
@@ -80,7 +80,7 @@
     </div>
 
     <div>
-      <label for="region_world">Region (World)</label>
+      <label for="region_world">Region - World (Author)</label>
       <select id="region_world" name="region_world" class="form-control" multiple></select>
     </div>
 
@@ -89,7 +89,7 @@
       <select id="country" name="country" class="form-control" multiple></select>
     </div>
 
-    <div class="floating-actions">
+    <div class="floating-actions mt-6">
       <div class="floating-actions__inner">
         <button type="button" id="reset-filters-btn" class="btn btn-secondary mr-2">Reset Filters</button>
         <button type="submit" class="btn btn-primary">Generate Graph</button>
@@ -111,13 +111,19 @@ document.addEventListener('DOMContentLoaded', function() {
           values.forEach(v => {
             const opt = document.createElement('option');
             if (key === 'open_access') {
-              const mapped = (v == 1) ? 'True' : 'False';
+              const mapped = (v == 1) ? 'Yes' : 'No';
               opt.value = v;
               opt.textContent = mapped;
             } else {
               opt.value = v;
               opt.textContent = v;
             }
+
+            // Initialize publication_year with all options selected
+            if (key === 'publication_year') {
+              opt.selected = true;
+            }
+
             select.appendChild(opt);
           });
         }
@@ -233,10 +239,10 @@ document.addEventListener('DOMContentLoaded', function() {
       Array.from(sel.options).forEach(function(opt) { opt.selected = false; });
     });
 
-    // Reset breakdown variable select
-    var breakdownSelect = document.getElementById('breakdown-variable-select');
-    if (breakdownSelect) {
-      breakdownSelect.value = '';
+    // Re-select all publication years
+    const pubYearSelect = document.getElementById('publication_year');
+    if (pubYearSelect) {
+      Array.from(pubYearSelect.options).forEach(function(opt) { opt.selected = true; });
     }
 
     if (typeof updateAppliedFiltersFromForm === 'function') {

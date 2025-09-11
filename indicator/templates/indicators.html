@@ -88,6 +88,13 @@
         chartContainer._chartInstance = null;
       }
 
+      // Destroy percentage graph if breakdown variable is not set
+      var percentageChartContainer = document.getElementById('percentage-chart');
+      if (percentageChartContainer && percentageChartContainer._chartInstance && !data.breakdown_variable) {
+        percentageChartContainer._chartInstance.dispose();
+        percentageChartContainer._chartInstance = null;
+      }
+
       // Initialize new chart instance
       var chartObj = echarts.init(chartContainer);
       chartContainer._chartInstance = chartObj;
@@ -98,11 +105,30 @@
         var breakdownLabel = document.querySelector('label[for="' + data.breakdown_variable + '"]');
         breakdownLabel = breakdownLabel ? breakdownLabel.textContent.trim() : data.breakdown_variable.replace(/_/g, ' ');
         title = 'Breakdown by ' + breakdownLabel;
+        var seriesTotals = (data.series || []).map(function(s) {
+          return {
+            name: s.name,
+            total: s.data.reduce(function(a, b) { return a + b; }, 0),
+            data: s.data
+          };
+        });
+
+        seriesTotals.sort(function(a, b) { return b.total - a.total; });
+        var orderedKeys = seriesTotals.map(function(s) { return s.name; });
+        var orderedSeries = seriesTotals.map(function(s) {
+          return {
+            name: s.name,
+            type: 'bar',
+            stack: 'total',
+            data: s.data
+          };
+        });
         chartOpts = {
           title: { text: title },
           tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
           legend: {
-            data: data.breakdown_keys,
+            type: 'scroll',
+              data: orderedKeys,
             orient: 'horizontal',
             bottom: 0
           },
@@ -132,14 +158,7 @@
           },
           xAxis: { type: 'category', data: data.years },
           yAxis: { type: 'value' },
-          series: (data.series || []).map(function(s) {
-            return {
-              name: s.name,
-              type: 'bar',
-              stack: 'total',
-              data: s.data,
-            };
-          })
+            series: orderedSeries
         };
       // Simple bar chart for citations
       } else if (study_unit === "citation") {
@@ -249,6 +268,41 @@
         var breakdownLabel = document.querySelector('label[for="' + data.breakdown_variable + '"]');
         breakdownLabel = breakdownLabel ? breakdownLabel.textContent.trim() : data.breakdown_variable.replace(/_/g, ' ');
         title = 'Percentage Breakdown by ' + breakdownLabel;
+        var seriesTotals = (data.series || []).map(function(s) {
+          var total = s.data.reduce(function(a, b) { return a + b; }, 0);
+          return {
+            name: s.name,
+            total: total,
+            data: s.data
+          };
+        });
+        seriesTotals.sort(function(a, b) { return b.total - a.total; });
+        var orderedKeys = seriesTotals.map(function(s) { return s.name; });
+        var orderedSeries = seriesTotals.map(function(s) {
+          return {
+            name: s.name,
+            type: 'bar',
+            stack: 'total',
+            emphasis: { focus: 'series' },
+            label: {
+              show: false,
+              position: 'inside',
+              formatter: function(params) {
+                var total = 0;
+                var yearIndex = params.dataIndex;
+                (seriesTotals || []).forEach(function(s) { total += s.data[yearIndex]; });
+                var percent = total ? ((params.value / total) * 100).toFixed(2) : 0;
+                return percent + '%';
+              }
+            },
+            data: s.data.map(function(value, index) {
+              var total = 0;
+              (seriesTotals || []).forEach(function(s) { total += s.data[index]; });
+              var percent = total ? ((value / total) * 100).toFixed(2) : 0;
+              return percent;
+            })
+          };
+        });
         chartOpts = {
           title: { text: title },
           tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, formatter: function (params) {
@@ -262,7 +316,8 @@
             return result;
           }},
           legend: {
-            data: data.breakdown_keys,
+            type: 'scroll',
+              data: orderedKeys,
             orient: 'horizontal',
             bottom: 0
           },
@@ -292,32 +347,7 @@
           },
           xAxis: { type: 'category', data: data.years },
           yAxis: { type: 'value', axisLabel: { formatter: '{value} %' } },
-          series: (data.series || []).map(function(s) {
-            return {
-              name: s.name,
-              type: 'bar',
-              stack: 'total',
-              emphasis: { focus: 'series' },
-              label: {
-                show: false,
-                position: 'inside',
-                formatter: function(params) {
-                  var total = 0;
-                  var series = params.seriesIndex;
-                  var yearIndex = params.dataIndex;
-                  (data.series || []).forEach(function(s) { total += s.data[yearIndex]; });
-                  var percent = total ? ((params.value / total) * 100).toFixed(2) : 0;
-                  return percent + '%';
-                }
-              },
-              data: s.data.map(function(value, index) {
-                var total = 0;
-                (data.series || []).forEach(function(s) { total += s.data[index]; });
-                var percent = total ? ((value / total) * 100).toFixed(2) : 0;
-                return percent;
-              }),
-            };
-          })
+            series: orderedSeries
         };
       // Simple percentage bar chart for citations
       } else if (study_unit === "citation") {
@@ -333,8 +363,6 @@
             params.forEach(function(p) { total += p.value; });
             var result = tar.axisValueLabel + '<br/>';
             params.forEach(function(p) {
-              // var percent = total ? ((p.value / total) * 100).toFixed(2) : 0;
-              // result += p.marker + p.seriesName + ': ' + p.value + ' (' + percent + '%)<br/>';
               result += p.marker + p.seriesName + ': ' + p.value + '%<br/>';
             });
             return result;
@@ -541,7 +569,9 @@
         .then(data => {
           if (typeof renderChart === 'function') {
             renderChart(data, study_unit);
-            renderPercentageChart(data, study_unit);
+            if (filters["breakdown_variable"]) {
+              renderPercentageChart(data, study_unit);
+            }
           }
         });
       });

@@ -49,15 +49,15 @@ def get_filters(request):
     Endpoint to return available filter options.
     """
     aggs = {
-        "publication_year": {"terms": {"field": "publication_year", "size": 6, "order": {"_key": "desc"}}},
-        "source_type": {"terms": {"field": "best_oa_location.source.type.keyword", "size": 5}},
-        "source_index": {"terms": {"field": "indexed_in.keyword", "size": 5}},
-        "document_type": {"terms": {"field": "type.keyword", "size": 20}},
-        "document_language": {"terms": {"field": "language.keyword", "size": 20}},
+        "publication_year": {"terms": {"field": "publication_year", "size": 100, "order": {"_key": "desc"}}},
+        "source_type": {"terms": {"field": "best_oa_location.source.type.keyword", "size": 100}},
+        "source_index": {"terms": {"field": "indexed_in.keyword", "size": 100}},
+        "document_type": {"terms": {"field": "type.keyword", "size": 100}},
+        "document_language": {"terms": {"field": "language.keyword", "size": 100}},
         "open_access": {"terms": {"field": "open_access.is_oa", "size": 2}},
-        "access_type": {"terms": {"field": "open_access.oa_status.keyword", "size": 6}},
-        "region_world": {"terms": {"field": "geos.scimago_regions.keyword", "size": 8}},
-        "country": {"terms": {"field": "authorships.countries.keyword", "size": 247}},
+        "access_type": {"terms": {"field": "open_access.oa_status.keyword", "size": 20}},
+        "region_world": {"terms": {"field": "geos.scimago_regions.keyword", "size": 20}},
+        "country": {"terms": {"field": "authorships.countries.keyword", "size": 500}},
         "subject_area_level_0": {"terms": {"field": "thematic_areas.level0.keyword", "size": 3}},
         "subject_area_level_1": {"terms": {"field": "thematic_areas.level1.keyword", "size": 9}},
         "subject_area_level_2": {"terms": {"field": "thematic_areas.level2.keyword", "size": 41}},
@@ -301,6 +301,8 @@ def parse_breakdown_citation_per_year_response(res):
                 data.append(0)
         series.append({"name": breakdown, "data": data})
 
+    breakdown_keys = standardize_breakdown_keys(breakdown_keys, series)
+
     return {
         "years": years,
         "breakdown_keys": breakdown_keys,
@@ -337,8 +339,19 @@ def parse_breakdown_documents_per_year_response(res):
                 data.append(0)
         series.append({"name": breakdown, "data": data})
 
+    breakdown_keys = standardize_breakdown_keys(breakdown_keys, series)
+
     return {
         "years": years,
         "breakdown_keys": breakdown_keys,
         "series": series,
     }
+
+def standardize_breakdown_keys(keys, series):
+    # Transform Open Access boolean values to Yes/No strings if applicable
+    oa_map = {"1": "Yes", "0": "No"}
+    if set(keys) == set(oa_map.keys()):
+        for s in series:
+            s["name"] = oa_map.get(s["name"], s["name"])
+
+    return [oa_map.get(k, k) for k in keys]
