@@ -342,3 +342,12 @@ def parse_breakdown_documents_per_year_response(res):
         "breakdown_keys": breakdown_keys,
         "series": series,
     }
+
+def standardize_breakdown_keys(keys, series):
+    # Transform Open Access boolean values to Yes/No strings if applicable
+    oa_map = {"1": "Yes", "0": "No"}
+    if set(keys) == set(oa_map.keys()):
+        for s in series:
+            s["name"] = oa_map.get(s["name"], s["name"])
+
+    return [oa_map.get(k, k) for k in keys]
