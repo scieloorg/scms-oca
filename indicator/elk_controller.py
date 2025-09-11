@@ -49,15 +49,15 @@ def get_filters(request):
     Endpoint to return available filter options.
     """
     aggs = {
-        "publication_year": {"terms": {"field": "publication_year", "size": 6, "order": {"_key": "desc"}}},
-        "source_type": {"terms": {"field": "best_oa_location.source.type.keyword", "size": 5}},
-        "source_index": {"terms": {"field": "indexed_in.keyword", "size": 5}},
-        "document_type": {"terms": {"field": "type.keyword", "size": 20}},
-        "document_language": {"terms": {"field": "language.keyword", "size": 20}},
+        "publication_year": {"terms": {"field": "publication_year", "size": 100, "order": {"_key": "desc"}}},
+        "source_type": {"terms": {"field": "best_oa_location.source.type.keyword", "size": 100}},
+        "source_index": {"terms": {"field": "indexed_in.keyword", "size": 100}},
+        "document_type": {"terms": {"field": "type.keyword", "size": 100}},
+        "document_language": {"terms": {"field": "language.keyword", "size": 100}},
         "open_access": {"terms": {"field": "open_access.is_oa", "size": 2}},
-        "access_type": {"terms": {"field": "open_access.oa_status.keyword", "size": 6}},
-        "region_world": {"terms": {"field": "geos.scimago_regions.keyword", "size": 8}},
-        "country": {"terms": {"field": "authorships.countries.keyword", "size": 247}},
+        "access_type": {"terms": {"field": "open_access.oa_status.keyword", "size": 20}},
+        "region_world": {"terms": {"field": "geos.scimago_regions.keyword", "size": 20}},
+        "country": {"terms": {"field": "authorships.countries.keyword", "size": 500}},
         "subject_area_level_0": {"terms": {"field": "thematic_areas.level0.keyword", "size": 3}},
         "subject_area_level_1": {"terms": {"field": "thematic_areas.level1.keyword", "size": 9}},
         "subject_area_level_2": {"terms": {"field": "thematic_areas.level2.keyword", "size": 41}},
