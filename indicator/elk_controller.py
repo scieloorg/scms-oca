@@ -301,6 +301,8 @@ def parse_breakdown_citation_per_year_response(res):
                 data.append(0)
         series.append({"name": breakdown, "data": data})
 
+    breakdown_keys = standardize_breakdown_keys(breakdown_keys, series)
+
     return {
         "years": years,
         "breakdown_keys": breakdown_keys,
@@ -336,6 +338,8 @@ def parse_breakdown_documents_per_year_response(res):
             if not found:
                 data.append(0)
         series.append({"name": breakdown, "data": data})
+
+    breakdown_keys = standardize_breakdown_keys(breakdown_keys, series)
 
     return {
         "years": years,
