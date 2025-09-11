@@ -340,8 +340,6 @@
             params.forEach(function(p) { total += p.value; });
             var result = tar.axisValueLabel + '<br/>';
             params.forEach(function(p) {
-              // var percent = total ? ((p.value / total) * 100).toFixed(2) : 0;
-              // result += p.marker + p.seriesName + ': ' + p.value + ' (' + percent + '%)<br/>';
               result += p.marker + p.seriesName + ': ' + p.value + '%<br/>';
             });
             return result;
