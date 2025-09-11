@@ -233,10 +233,10 @@ document.addEventListener('DOMContentLoaded', function() {
       Array.from(sel.options).forEach(function(opt) { opt.selected = false; });
     });
 
-    // Reset breakdown variable select
-    var breakdownSelect = document.getElementById('breakdown-variable-select');
-    if (breakdownSelect) {
-      breakdownSelect.value = '';
+    // Re-select all publication years
+    const pubYearSelect = document.getElementById('publication_year');
+    if (pubYearSelect) {
+      Array.from(pubYearSelect.options).forEach(function(opt) { opt.selected = true; });
     }
 
     if (typeof updateAppliedFiltersFromForm === 'function') {
