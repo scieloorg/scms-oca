@@ -118,6 +118,12 @@ document.addEventListener('DOMContentLoaded', function() {
               opt.value = v;
               opt.textContent = v;
             }
+
+            // Initialize publication_year with all options selected
+            if (key === 'publication_year') {
+              opt.selected = true;
+            }
+
             select.appendChild(opt);
           });
         }
