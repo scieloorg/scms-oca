@@ -111,7 +111,7 @@ document.addEventListener('DOMContentLoaded', function() {
           values.forEach(v => {
             const opt = document.createElement('option');
             if (key === 'open_access') {
-              const mapped = (v == 1) ? 'True' : 'False';
+              const mapped = (v == 1) ? 'Yes' : 'No';
               opt.value = v;
               opt.textContent = mapped;
             } else {
