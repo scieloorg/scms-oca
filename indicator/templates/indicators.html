@@ -88,6 +88,13 @@
         chartContainer._chartInstance = null;
       }
 
+      // Destroy percentage graph if breakdown variable is not set
+      var percentageChartContainer = document.getElementById('percentage-chart');
+      if (percentageChartContainer && percentageChartContainer._chartInstance && !data.breakdown_variable) {
+        percentageChartContainer._chartInstance.dispose();
+        percentageChartContainer._chartInstance = null;
+      }
+
       // Initialize new chart instance
       var chartObj = echarts.init(chartContainer);
       chartContainer._chartInstance = chartObj;
@@ -541,7 +548,9 @@
         .then(data => {
           if (typeof renderChart === 'function') {
             renderChart(data, study_unit);
-            renderPercentageChart(data, study_unit);
+            if (filters["breakdown_variable"]) {
+              renderPercentageChart(data, study_unit);
+            }
           }
         });
       });
