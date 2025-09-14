@@ -143,23 +143,34 @@ def get_indicators(request):
     filters = json.loads(request.body.decode())
     study_unit = filters.pop("study_unit", "document")
     breakdown_variable = filters.pop("breakdown_variable", None)
+    data_source = filters.pop("data_source", None) or request.GET.get("data_source", None) or request.POST.get("data_source", None) or ""
+    country_unit = filters.pop("country_unit", None) or request.GET.get("country_unit", None) or request.POST.get("country_unit", None) or ""
 
-    query = build_query(filters)
+    es_index, flag_brazil, flag_social_production = get_es_index_and_flags(data_source, country_unit)
+
+    if data_source.lower() == "scielo":
+        field_map = FIELD_MAP_SCIELO
+    elif data_source.lower() == "social_production":
+        field_map = FIELD_MAP_SOCIAL_PRODUCTION
+    else:
+        field_map = FIELD_MAP_OPENALEX_WORKS
+
+    query = build_query(filters, field_map, flag_brazil, flag_social_production)
 
     # Choose main aggregation
     if breakdown_variable:
         if study_unit == "citation":
-            aggs = build_breakdown_citation_per_year_aggs(breakdown_variable)
+            aggs = build_breakdown_citation_per_year_aggs(field_map, breakdown_variable)
         else:
-            aggs = build_breakdown_documents_per_year_aggs(breakdown_variable)
+            aggs = build_breakdown_documents_per_year_aggs(field_map, breakdown_variable, flag_social_production)
     else:
         if study_unit == "citation":
-            aggs = build_citations_per_year_aggs()
+            aggs = build_citations_per_year_aggs(field_map)
         else:
-            aggs = build_documents_per_year_aggs()
+            aggs = build_documents_per_year_aggs(field_map, flag_social_production)
 
     body = {"size": 0, "query": query, "aggs": aggs}
-    res = es.search(index=ES_INDEX, body=body)
+    res = es.search(index=es_index, body=body)
 
     # Parse response
     if breakdown_variable:
