@@ -14,7 +14,9 @@ def indicators_view(request):
     """
     View aimed at displaying the indicators page.
     """
-    return render(request, "indicators.html")
+    data_source = request.GET.get('data_source', 'openalex_works')
+    country_unit = request.GET.get('country_unit', None)
+    return render(request, "indicators.html", {"data_source": data_source, "country_unit": country_unit})
 
 
 class IndicatorDirectoryEditView(EditView):

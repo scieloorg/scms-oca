@@ -29,66 +29,7 @@
 <h4 style="margin: 0; padding-top: 0.5em; padding-bottom: 0.5em;">Filters</h4>
 <div id="filters-menu" class="filters-menu">
   <form id="filters-form">
-    <div>
-      <label for="source_index">Source Index</label>
-      <select id="source_index" name="source_index" class="form-control" multiple></select>
-    </div>
-
-    <div>
-      <label for="source_type">Source Type</label>
-      <select id="source_type" name="source_type" class="form-control" multiple></select>
-    </div>
-
-    <div>
-      <label for="publication_year">Publication Year</label>
-      <select id="publication_year" name="publication_year" class="form-control" multiple></select>
-    </div>
-
-    <div>
-      <label for="document_type">Document Type</label>
-      <select id="document_type" name="document_type" class="form-control" multiple></select>
-    </div>
-
-    <div>
-      <label for="document_language">Document Language</label>
-      <select id="document_language" name="document_language" class="form-control" multiple></select>
-    </div>
-    
-    <div>
-      <label for="open_access">Open Access</label>
-      <select id="open_access" name="open_access" class="form-control" multiple></select>
-    </div>
-    
-    <div>
-      <label for="access_type">Access Type</label>
-      <select id="access_type" name="access_type" class="form-control" multiple></select>
-    </div>
-        
-    <div>
-      <label for="subject_area_level_0">Subject Area Level 0</label>
-      <select id="subject_area_level_0" name="subject_area_level_0" class="form-control" multiple></select>
-    </div>
-
-    <div>
-      <label for="subject_area_level_1">Subject Area Level 1</label>
-      <select id="subject_area_level_1" name="subject_area_level_1" class="form-control" multiple></select>
-    </div>
-
-    <div>
-      <label for="subject_area_level_2">Subject Area Level 2</label>
-      <select id="subject_area_level_2" name="subject_area_level_2" class="form-control" multiple></select>
-    </div>
-
-    <div>
-      <label for="region_world">Region - World (Author)</label>
-      <select id="region_world" name="region_world" class="form-control" multiple></select>
-    </div>
-
-    <div>
-      <label for="country">Country (Author)</label>
-      <select id="country" name="country" class="form-control" multiple></select>
-    </div>
-
+    <div id="filters-fields"></div>
     <div class="floating-actions mt-6">
       <div class="floating-actions__inner">
         <button type="button" id="reset-filters-btn" class="btn btn-secondary mr-2">Reset Filters</button>
@@ -100,62 +41,140 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  // Load filter options
-  fetch('/indicators/filters/')
+  // References to loading spinner and filters container
+  var menuLoading = document.getElementById('optionsLoading');
+
+  // Load filter options and render fields dynamically
+  var data_source = window.data_source;
+  var country_unit = window.country_unit;
+
+  var url = '/indicators/filters/?data_source=' + encodeURIComponent(data_source);
+  if (country_unit && country_unit !== '') {
+    url += '&country_unit=' + encodeURIComponent(country_unit);
+  }
+
+  fetch(url)
     .then(response => response.json())
     .then(data => {
-      for (const [key, values] of Object.entries(data)) {
-        const select = document.getElementById(key);
-        if (select) {
-          select.innerHTML = '';
-          values.forEach(v => {
-            const opt = document.createElement('option');
-            if (key === 'open_access') {
-              const mapped = (v == 1) ? 'Yes' : 'No';
+      // Define which fields to show for each index
+      var fieldsByIndex = {
+        'openalex_works': [
+          {key: 'source_index', label: 'Source Index'},
+          {key: 'source_type', label: 'Source Type'},
+          {key: 'publication_year', label: 'Publication Year'},
+          {key: 'document_type', label: 'Document Type'},
+          {key: 'document_language', label: 'Document Language'},
+          {key: 'open_access', label: 'Open Access'},
+          {key: 'access_type', label: 'Access Type'},
+          {key: 'subject_area_level_0', label: 'Subject Area Level 0'},
+          {key: 'subject_area_level_1', label: 'Subject Area Level 1'},
+          {key: 'subject_area_level_2', label: 'Subject Area Level 2'},
+          {key: 'region_world', label: 'Region - World (Author)'},
+          {key: 'country', label: 'Country (Author)'}
+        ],
+        'scielo': [
+          {key: 'journal', label: 'Journal'},
+          {key: 'publication_year', label: 'Publication Year'},
+          {key: 'document_type', label: 'Document Type'},
+          {key: 'document_language', label: 'Document Language'},
+          {key: 'access_type', label: 'Access Type'},
+          {key: 'country', label: 'Country (Author)'}
+        ],
+        'social_production': [
+          {key: 'publication_year', label: 'Publication Year'},
+          {key: 'directory_type', label: 'Directory Type'},
+          {key: 'action', label: 'Action'},
+          {key: 'classification', label: 'Classification'},
+          {key: 'institutions', label: 'Institutions'},
+          {key: 'cities', label: 'Cities'},
+          {key: 'states', label: 'States'},
+          {key: 'practice', label: 'Practice'},
+        ]
+      };
+
+      var fields = fieldsByIndex[data_source];
+      var fieldsFieldsContainer = document.getElementById('filters-fields');
+      fieldsFieldsContainer.innerHTML = '';
+
+      fields.forEach(field => {
+        if (data[field.key]) {
+          var div = document.createElement('div');
+          var label = document.createElement('label');
+          if (data_source === "social_production") {
+            label.setAttribute('for', field.key + ".enum");
+          } else {
+            label.setAttribute('for', field.key);
+          }
+          label.textContent = field.label;
+
+          var select = document.createElement('select');
+          if (data_source === "social_production") {
+            select.id = field.key + ".enum"
+          } else {
+            select.id = field.key;
+          }
+          select.name = field.key;
+          select.className = 'form-control';
+          select.multiple = true;
+
+          data[field.key].forEach(v => {
+            var opt = document.createElement('option');
+            if (field.key === 'open_access') {
               opt.value = v;
-              opt.textContent = mapped;
+              opt.textContent = (v == 1) ? 'Yes' : 'No';
             } else {
               opt.value = v;
               opt.textContent = v;
             }
-
-            // Initialize publication_year with all options selected
-            if (key === 'publication_year') {
-              opt.selected = true;
+            if (field.key === 'publication_year') {
+              // Pre-select all publication years >= 2014
+              if (!isNaN(v) && Number(v) >= 2014) {
+                opt.selected = true;
+              }
             }
-
             select.appendChild(opt);
           });
+
+          div.appendChild(label);
+          div.appendChild(select);
+
+          // Special handling: if data source is openalex_works and country is Brazil, do not show country filter
+          if (!(data_source === "openalex_works" && country_unit && country_unit == "BR" && field.key === "country")) {
+            fieldsFieldsContainer.appendChild(div);
+          }
+        }
+      });
+
+      // Remove 'citations' option from graph options when data source is 'scielo' or 'social_production'
+      var graphOptionsContainer = document.getElementById('graph-options-menu');
+      if (graphOptionsContainer) {
+        if (data_source === 'scielo' || data_source === 'social_production') {
+          const unitCitationOption = graphOptionsContainer.querySelector('option[value="unit_citation"]');
+          if (unitCitationOption) {
+            unitCitationOption.remove();
+          }
         }
       }
+
+      // Hide loading spinner and show filters
+      if (optionsLoading) optionsLoading.style.display = 'none';
 
       // Fill breakdown variable options
       const breakdownSelect = document.getElementById('breakdown-variable-select');
       if (breakdownSelect) {
         breakdownSelect.innerHTML = '<option value="">Select a variable</option>';
 
-        // List of variables that make sense for breakdown
-        const breakdownVars = [
-          'source_index',
-          'source_type',
-          'publication_year',
-          'document_type',
-          'document_language',
-          'open_access',
-          'access_type',
-          'subject_area_level_0',
-          'subject_area_level_1',
-          'subject_area_level_2',
-          'region_world',
-          'country'
-        ];
+        // Exclude publication_year, journal and document_languages from breakdown options
+        var breakdownVars = fields.map(f => f.key).filter(key => (key !== 'publication_year'));
 
         breakdownVars.forEach(key => {
           if (data[key]) {
-            // Get label from corresponding filter label
-            let label = document.querySelector('label[for="' + key + '"]');
-            label = label ? label.textContent.trim() : key.replace(/_/g, ' ');
-            breakdownSelect.innerHTML += `<option value="${key}">${label}</option>`;
+            let label = fields.find(f => f.key === key)?.label || key.replace(/_/g, ' ');
+            if (data_source === "social_production" && key != "publication_year") {
+              breakdownSelect.innerHTML += `<option value="${key}.enum">${label}</option>`;
+            } else {
+              breakdownSelect.innerHTML += `<option value="${key}">${label}</option>`;
+            }
           }
         });
       }
@@ -210,6 +229,12 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     }
 
+    // Add data source to filters
+    filters['data_source'] = data_source;
+
+    // Add country unit to filters
+    filters['country_unit'] = country_unit;
+
     // Update applied filters display
     if (typeof updateAppliedFiltersFromForm === 'function') {
       setTimeout(updateAppliedFiltersFromForm, 0);
@@ -229,7 +254,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
-  // Reset form (filters and breakdown variable)
+  // Reset form (filters
   document.getElementById('reset-filters-btn').addEventListener('click', function() {
     const form = document.getElementById('filters-form');
     if (!form) return;
@@ -239,10 +264,17 @@ document.addEventListener('DOMContentLoaded', function() {
       Array.from(sel.options).forEach(function(opt) { opt.selected = false; });
     });
 
-    // Re-select all publication years
-    const pubYearSelect = document.getElementById('publication_year');
+    // Re-select all publication years >= 2014
+    let pubYearSelect;
+    if (data_source === "social_production") {
+      pubYearSelect = document.getElementById('publication_year.enum');
+    } else {
+      pubYearSelect = document.getElementById('publication_year');
+    }
     if (pubYearSelect) {
-      Array.from(pubYearSelect.options).forEach(function(opt) { opt.selected = true; });
+      Array.from(pubYearSelect.options).forEach(function(opt) {
+        opt.selected = !isNaN(opt.value) && Number(opt.value) >= 2014;
+      });
     }
 
     if (typeof updateAppliedFiltersFromForm === 'function') {

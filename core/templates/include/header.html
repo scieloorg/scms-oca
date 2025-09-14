@@ -41,15 +41,14 @@
         
         <nav class="primary-menu">
 
-          <ul class="menu-container">
-            <ul class="menu-container">
-              <li class="menu-item">
-                  <a class="menu-link" href="{% url 'indicators' %}" style="padding-top: 39px; padding-bottom: 39px;">
-                    <div>Indicators</div>
-                  </a>
-              </li>
-            </ul>
-          </ul>
+        <nav class="navbar navbar-expand-lg navbar-light">
+          <div class="container-fluid">
+            <div class="collapse navbar-collapse" id="navbarMega">
+              <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                {% include 'menus/mega_menu_indicators.html' %}
+              </ul>
+            </div>
+          </div>
         </nav>
 
         <nav class="navbar navbar-expand-lg navbar-light">

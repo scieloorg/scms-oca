@@ -12,13 +12,13 @@
 
 
 {% block content %}
-<section id="content" class="mt-5">
+<section id="content" class="mt-3">
   <div class="container">
     <div class="row">
-      <div class="col pl-0">
+      <div class="col pl-0 pr-0">
 
-        <div class="page-title-row mb-4" style="background:#F9F9F9;border-radius:4px;">
-          <div class="page-title-content py-2 px-2">
+        <div class="card mb-2 p-3" style="background:#F9F9F9;">
+          <div class="page-title-content">
             <h1 class="mb-1">Indicators</h1>
             <span>Data panel of the OCABr Observatory</span>
           </div>
@@ -27,42 +27,53 @@
       </div>
     </div>
 
-    <div class="row mb-3">
+    <div class="row card mb-2 p-3" style="background:#F9F9F9;">
+      {% if data_source == "scielo" %}
+        <h4 class="my-0">Scientific Production - SciELO Network</h4>
+      {% elif data_source == "openalex_works" and country_unit == "BR" %}
+        <h4 class="my-0">Scientific Production - Brazil</h4>
+      {% elif data_source == "openalex_works" %}
+        <h4 class="my-0">Scientific Production - World</h4>
+      {% elif data_source == "social_production" %}
+        <h4 class="my-0">Social Production</h4>
+      {% endif %}
+    </div>
+
+    <div class="row mb-3" id="mainContent">
+      <!-- Loading Overlay -->
+      <div id="optionsLoading" style="display:none; position:absolute; width:100%; height:100%; background:rgba(255,255,255,0.8); z-index:10; justify-content:center; align-items:flex-start; text-align:center; margin-top: 1em;">
+        <div class="spinner-border text-primary" role="status" style="width:3rem; height:3rem;">
+          <span class="sr-only">Loading...</span>
+        </div>
+      </div>
 
       <!-- Menu -->
       <div class="col-lg-3 card pt-2 filters-aside">
-        
         <!-- Graph Options -->
-        <div>
+        <div id="graph-options-container">
           {% include "graph_options_menu.html" %}
         </div>
 
         <!-- Filters -->
-        <div>
+        <div id="filters-container">
           {% include "filters_menu.html" %}
         </div>
-
       </div>
 
       <!-- Content -->
       <div class="col-lg-9">
-
         <!-- Applied Filters -->
-        <div class="px-4 row">
-          <div class="col">
-            <div id="applied-filters" class="alert alert-light border small d-none"></div>
-          </div>
-        </div>
+        <div class="row m-2 p-2" id="applied-filters"></div>
 
         <!-- Main Graph -->
-        <div class="mt-4 px-4 row">
+        <div class="row mt-2 mx-1">
           <div class="mb-2 mx-auto" style="max-width: 100%; min-height: 100%;">
             <div id="main-chart" style="position: relative; height:75vh; width:60vw"></div>
           </div>
         </div>
 
         <!-- Percentage Graph -->
-        <div class="mt-4 px-4 row">
+        <div class="row mt-4 mx-1">
           <div class="mb-2 mx-auto" style="max-width: 100%; min-height: 100%;">
             <div id="percentage-chart" style="position: relative; height:75vh; width:60vw"></div>
           </div>
@@ -78,6 +89,9 @@
 {% block inline_javascript %}
   <script src="{% static 'js/echarts/echarts.min.js' %}"></script>
   <script>
+    window.data_source = "{{ data_source }}";
+    window.country_unit = "{{ country_unit }}";
+
     // Function to render the main chart
     function renderChart(data, study_unit) {
       var chartContainer = document.getElementById('main-chart');
@@ -468,6 +482,7 @@
     function updateAppliedFiltersFromForm() {
       var container = document.getElementById('applied-filters');
       if (!container) return;
+
       var form = document.getElementById('filters-form');
       if (!form) return;
 
@@ -483,13 +498,7 @@
 
       var tags = [];
       if (studyUnitText) {
-        tags.push('<span class="mr-1"><strong>Study Unit:</strong> ' + studyUnitText + '</span>');
-      }
-
-      if (typeof data !== 'undefined' && data && data.breakdown_variable) {
-        var breakdownLabel = document.querySelector('label[for="' + data.breakdown_variable + '"]');
-        breakdownLabel = breakdownLabel ? breakdownLabel.textContent.trim() : data.breakdown_variable.replace(/_/g, ' ');
-        tags.push('<span class="mr-1"><strong>Breakdown:</strong> ' + breakdownLabel + '</span>');
+        tags.push('<span class="mr-2"><strong>Study Unit:</strong> ' + studyUnitText + '</span>');
       }
 
       var pieces = [];
@@ -504,7 +513,7 @@
 
       if (pieces.length || tags.length) {
         container.classList.remove('d-none');
-        container.innerHTML = tags.join(' ') + (pieces.length ? '<strong>Applied Filters:</strong> ' + pieces.join(' | ') : '');
+        container.innerHTML = tags.join(' ') + (pieces.length ? '<strong>Applied Filters: </strong> ' + pieces.join(' | ') : '');
       } else {
         container.classList.add('d-none');
         container.innerHTML = '';
@@ -518,10 +527,16 @@
 
       form.addEventListener('submit', function(e) {
         e.preventDefault();
-      
+
+        // Show loading overlay
+        var loadingDiv = document.getElementById('optionsLoading');
+        var contentDiv = document.getElementById('mainContent');
+        if (loadingDiv) loadingDiv.style.display = 'flex';
+        if (contentDiv) contentDiv.style.opacity = '0.3';
+
         var formData = new FormData(form);
         var filters = {};
-      
+
         for (const [key, value] of formData.entries()) {
           if (filters[key]) {
             if (Array.isArray(filters[key])) {
@@ -560,7 +575,7 @@
         }
 
         // Fetch filtered data and update chart
-        fetch('/indicators/indicators/', {
+        fetch('/indicators/indicators/?data_source=' + encodeURIComponent(window.data_source) + '&country_unit=' + encodeURIComponent(window.country_unit), {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify(filters)
@@ -573,8 +588,16 @@
               renderPercentageChart(data, study_unit);
             }
           }
+        })
+        .finally(() => {
+          // Hide loading overlay
+          if (optionsLoading) optionsLoading.style.display = 'none';
+          if (contentDiv) contentDiv.style.opacity = '1';
         });
       });
+
+    // Initial chart rendering
+    updateAppliedFiltersFromForm();
     });
 
     window.updateAppliedFiltersFromForm = updateAppliedFiltersFromForm;

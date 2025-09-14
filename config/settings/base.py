@@ -473,3 +473,8 @@ COUNTRY_INDEX = env.str("COUNTRY_INDEX", "regionscon")
 THEMATIC_AREA_INDEX = env.str("THEMATIC_AREA_INDEX", "thematicareas")
 
 DIRECTORY_IMPORT_DELIMITER = env.str("DIRECTORY_IMPORT_DELIMITER", default=",")
+
+ES_INDEX_WORLD = env.str("ES_INDEX_WORLD", "openalex_works")
+ES_INDEX_BRAZIL = env.str("ES_INDEX_BRAZIL", "openalex_works")
+ES_INDEX_SCIELO = env.str("ES_INDEX_SCIELO", "scielo")
+ES_INDEX_SOCIAL_PRODUCTION = env.str("ES_INDEX_SOCIAL_PRODUCTION", "opoca")

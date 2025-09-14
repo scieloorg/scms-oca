@@ -4,7 +4,7 @@ from django.conf import settings
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
-from elasticsearch import Elasticsearch
+from elasticsearch import Elasticsearch, ConnectionError
 from urllib.parse import urlparse
 
 
@@ -14,7 +14,6 @@ parsed_url = urlparse(es_url)
 ES_HOST = f"{parsed_url.scheme}://{parsed_url.hostname}:{parsed_url.port}"
 ES_USER = parsed_url.username or 'elastic'
 ES_PASSWORD = parsed_url.password or ''
-ES_INDEX = settings.HAYSTACK_CONNECTIONS['es']['INDEX_NAME']
 ES_VERIFY_CERTS = settings.HAYSTACK_CONNECTIONS['es'].get('KWARGS', {}).get('verify_certs', False)
 ES_CA_CERTS = settings.HAYSTACK_CONNECTIONS['es'].get('KWARGS', {}).get('ca_certs', None)
 
@@ -25,9 +24,8 @@ es = Elasticsearch(
     ca_certs=ES_CA_CERTS,
 )
 
-# Field mapping global
-FIELD_MAP = {
-    "year": "publication_year",
+# Field mapping OpenAlex Works
+FIELD_MAP_OPENALEX_WORKS = {
     "publication_year": "publication_year",
     "source_type": "best_oa_location.source.type.keyword",
     "source_index": "indexed_in.keyword",
@@ -42,32 +40,96 @@ FIELD_MAP = {
     "subject_area_level_2": "thematic_areas.level2.keyword",
 }
 
+# Field mapping for SciELO
+FIELD_MAP_SCIELO = {
+    "publication_year": "publication_year",
+    "document_type": "type.keyword",
+    "document_language": "languages.keyword",
+    "access_type": "open_access.oa_status.keyword",
+    "journal": "journal.keyword",
+    "country": "authorships.countries.keyword",
+}
+
+# Field mapping for Social Production
+FIELD_MAP_SOCIAL_PRODUCTION = {
+    "action": "action.enum",
+    "classification": "classification.enum",
+    "directory_type": "directory_type.enum",
+    "institutions": "institutions.enum",
+    "cities": "cities.enum",
+    "states": "states.enum",
+    "practice": "practice.enum",
+    "publication_year": "year",
+}
+
+
+FILTERS_CACHE = {}
 
 @require_GET
 def get_filters(request):
     """
     Endpoint to return available filter options.
+    Select ES index via GET parameter (data_source=...)
     """
-    aggs = {
-        "publication_year": {"terms": {"field": "publication_year", "size": 100, "order": {"_key": "desc"}}},
-        "source_type": {"terms": {"field": "best_oa_location.source.type.keyword", "size": 100}},
-        "source_index": {"terms": {"field": "indexed_in.keyword", "size": 100}},
-        "document_type": {"terms": {"field": "type.keyword", "size": 100}},
-        "document_language": {"terms": {"field": "language.keyword", "size": 100}},
-        "open_access": {"terms": {"field": "open_access.is_oa", "size": 2}},
-        "access_type": {"terms": {"field": "open_access.oa_status.keyword", "size": 20}},
-        "region_world": {"terms": {"field": "geos.scimago_regions.keyword", "size": 20}},
-        "country": {"terms": {"field": "authorships.countries.keyword", "size": 500}},
-        "subject_area_level_0": {"terms": {"field": "thematic_areas.level0.keyword", "size": 3}},
-        "subject_area_level_1": {"terms": {"field": "thematic_areas.level1.keyword", "size": 9}},
-        "subject_area_level_2": {"terms": {"field": "thematic_areas.level2.keyword", "size": 41}},
-    }
+    data_source = request.GET.get('data_source', 'openalex_works')
+    cache_key = data_source.lower() if data_source else ""
+    if cache_key in FILTERS_CACHE:
+        return JsonResponse(FILTERS_CACHE[cache_key])
+
+    es_index, _, _ = get_es_index_and_flags(data_source, None)
+
+    # Choose mapping and fields for aggs
+    if data_source.lower() == "scielo":
+        aggs_fields = [
+            ("publication_year", "publication_year", 100, {"_key": "desc"}),
+            ("document_type", "type.keyword", 100, None),
+            ("document_language", "languages.keyword", 100, None),
+            ("access_type", "open_access.oa_status.keyword", 20, None),
+            ("journal", "journal.keyword", 2500, None),
+            ("country", "authorships.countries.keyword", 500, None),
+        ]
+    elif data_source.lower() == "social_production":
+        aggs_fields = [
+            ("publication_year", "year", 1000, {"_key": "desc"}),
+            ("action", "action.enum", 1000, None),
+            ("classification", "classification.enum", 1000, None),
+            ("institutions", "institutions.enum", 1000, None),
+            ("cities", "cities.enum", 1000, None),
+            ("states", "states.enum", 1000, None),
+            ("practice", "practice.enum", 1000, None),
+            ("directory_type", "directory_type.enum", 1000, None),
+        ]
+    elif data_source.lower() == "openalex_works":
+        aggs_fields = [
+            ("publication_year", "publication_year", 100, {"_key": "desc"}),
+            ("source_type", "best_oa_location.source.type.keyword", 100, None),
+            ("source_index", "indexed_in.keyword", 100, None),
+            ("document_type", "type.keyword", 100, None),
+            ("document_language", "language.keyword", 100, None),
+            ("open_access", "open_access.is_oa", 2, None),
+            ("access_type", "open_access.oa_status.keyword", 20, None),
+            ("region_world", "geos.scimago_regions.keyword", 20, None),
+            ("country", "authorships.countries.keyword", 500, None),
+            ("subject_area_level_0", "thematic_areas.level0.keyword", 3, None),
+            ("subject_area_level_1", "thematic_areas.level1.keyword", 9, None),
+            ("subject_area_level_2", "thematic_areas.level2.keyword", 41, None),
+        ]
+    else:
+        return JsonResponse({"error": "Invalid or missing data_source parameter."}, status=400)
+
+    aggs = {}
+    for name, field, size, order in aggs_fields:
+        terms = {"field": field, "size": size}
+        if order:
+            terms["order"] = order
+        aggs[name] = {"terms": terms}
 
     body = {"size": 0, "aggs": aggs}
 
     try:
-        res = es.search(index=ES_INDEX, body=body)
+        res = es.search(index=es_index, body=body)
         filters = {k: [b["key"] for b in v["buckets"]] for k, v in res["aggregations"].items()}
+        FILTERS_CACHE[cache_key] = filters
         return JsonResponse(filters)
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
@@ -81,23 +143,34 @@ def get_indicators(request):
     filters = json.loads(request.body.decode())
     study_unit = filters.pop("study_unit", "document")
     breakdown_variable = filters.pop("breakdown_variable", None)
+    data_source = filters.pop("data_source", None) or request.GET.get("data_source", None) or request.POST.get("data_source", None) or ""
+    country_unit = filters.pop("country_unit", None) or request.GET.get("country_unit", None) or request.POST.get("country_unit", None) or ""
 
-    query = build_query(filters)
+    es_index, flag_brazil, flag_social_production = get_es_index_and_flags(data_source, country_unit)
+
+    if data_source.lower() == "scielo":
+        field_map = FIELD_MAP_SCIELO
+    elif data_source.lower() == "social_production":
+        field_map = FIELD_MAP_SOCIAL_PRODUCTION
+    else:
+        field_map = FIELD_MAP_OPENALEX_WORKS
+
+    query = build_query(filters, field_map, flag_brazil, flag_social_production)
 
     # Choose main aggregation
     if breakdown_variable:
         if study_unit == "citation":
-            aggs = build_breakdown_citation_per_year_aggs(breakdown_variable)
+            aggs = build_breakdown_citation_per_year_aggs(field_map, breakdown_variable)
         else:
-            aggs = build_breakdown_documents_per_year_aggs(breakdown_variable)
+            aggs = build_breakdown_documents_per_year_aggs(field_map, breakdown_variable, flag_social_production)
     else:
         if study_unit == "citation":
-            aggs = build_citations_per_year_aggs()
+            aggs = build_citations_per_year_aggs(field_map)
         else:
-            aggs = build_documents_per_year_aggs()
+            aggs = build_documents_per_year_aggs(field_map, flag_social_production)
 
     body = {"size": 0, "query": query, "aggs": aggs}
-    res = es.search(index=ES_INDEX, body=body)
+    res = es.search(index=es_index, body=body)
 
     # Parse response
     if breakdown_variable:
@@ -114,14 +187,24 @@ def get_indicators(request):
 
     return JsonResponse(indicators)
 
-def build_query(filters):
+def build_query(filters, field_map, flag_brazil, flag_social_production):
     """
     Build the Elasticsearch query from the received filters, mapping friendly names to real fields.
     """
     must = []
 
+    # Add Brazil filter
+    if flag_brazil:
+        es_field = field_map.get("country", "country")
+        must.append({"term": {es_field: "BR"}})
+
+    # Add social production filter
+    if flag_social_production:
+        es_field = field_map.get("action", "action")
+        must.append({"exists": {"field": es_field}})
+
     for field, value in filters.items():
-        es_field = FIELD_MAP.get(field, field)
+        es_field = field_map.get(field, field)
 
         if field == "open_access":
             def to_bool(v):
@@ -134,15 +217,15 @@ def build_query(filters):
                 value = [to_bool(v) for v in value]
             else:
                 value = to_bool(value)
-        
+
         if isinstance(value, list):
             must.append({"terms": {es_field: value}})
         else:
             must.append({"term": {es_field: value}})
-    
+
     return {"bool": {"must": must}} if must else {"match_all": {}}
 
-def build_citations_per_year_aggs():
+def build_citations_per_year_aggs(field_map):
     """
     Build the aggregations for citations per year.
     """
@@ -187,18 +270,20 @@ def parse_citations_per_year_response(res):
         "ndocs_per_year": doc_counts,
     }
 
-def build_documents_per_year_aggs():
+def build_documents_per_year_aggs(field_map, flag_social_production):
     """
     Build the aggregations for the number of documents per year, total documents, and total citations.
     """
+    year_var = "publication_year" if not flag_social_production else "year"
+    count_var = "directory_type.enum" if flag_social_production else "id.keyword"
     return {
         "per_year": {
             "terms": {
-                "field": "publication_year",
+                "field": year_var,
                 "order": {"_key": "asc"}
             }
         },
-        "total_documents": {"value_count": {"field": "id.keyword"}},
+        "total_documents": {"value_count": {"field": count_var}},
     }
 
 def parse_documents_per_year_response(res):
@@ -222,11 +307,11 @@ def parse_documents_per_year_response(res):
         "ndocs_per_year": ndocs_per_year,
     }
 
-def build_breakdown_citation_per_year_aggs(breakdown_variable):
+def build_breakdown_citation_per_year_aggs(field_map, breakdown_variable):
     """
     Build the aggregations for breakdown of citations per year.
     """
-    es_field = FIELD_MAP.get(breakdown_variable, breakdown_variable)
+    es_field = field_map.get(breakdown_variable, breakdown_variable)
     return {
         "per_year": {
             "terms": {
@@ -237,7 +322,8 @@ def build_breakdown_citation_per_year_aggs(breakdown_variable):
                 "breakdown": {
                     "terms": {
                         "field": es_field,
-                        "order": {"_key": "asc"}
+                        "order": {"_key": "asc"},
+                        "size": 2500
                     },
                     "aggs": {
                         "total_citations": {
@@ -249,22 +335,25 @@ def build_breakdown_citation_per_year_aggs(breakdown_variable):
         }
     }
 
-def build_breakdown_documents_per_year_aggs(breakdown_variable):
+def build_breakdown_documents_per_year_aggs(field_map, breakdown_variable, flag_social_production):
     """
     Build the aggregations for breakdown per year.
     """
-    es_field = FIELD_MAP.get(breakdown_variable, breakdown_variable)
+    es_field = field_map.get(breakdown_variable, breakdown_variable)
+    year_var = "publication_year" if not flag_social_production else "year"
+
     return {
         "per_year": {
             "terms": {
-                "field": "publication_year",
+                "field": year_var,
                 "order": {"_key": "asc"},
             },
             "aggs": {
                 "breakdown": {
                     "terms": {
                         "field": es_field,
-                        "order": {"_key": "asc"}
+                        "order": {"_key": "asc"},
+                        "size": 2500
                     }
                 }
             }
@@ -348,10 +437,34 @@ def parse_breakdown_documents_per_year_response(res):
     }
 
 def standardize_breakdown_keys(keys, series):
-    # Transform Open Access boolean values to Yes/No strings if applicable
+    """
+    Standardize certain known breakdown keys for better readability.
+    E.g., for open_access field, convert "1"/"0" to "Yes"/"No".
+    """
     oa_map = {"1": "Yes", "0": "No"}
     if set(keys) == set(oa_map.keys()):
         for s in series:
             s["name"] = oa_map.get(s["name"], s["name"])
 
     return [oa_map.get(k, k) for k in keys]
+
+def get_es_index_and_flags(data_source, country_unit):
+    """
+    Determine the Elasticsearch index and flags based on data source and country unit.
+
+    Returns:
+    - index (str): The Elasticsearch index to use.
+    - flag_is_brazil (bool): True if country_unit is "BR", else False
+    - flag_is_social_production (bool): True if data_source is "social_production", else False
+    """
+    flag_is_brazil = True if country_unit == "BR" else False
+    flag_is_social_production = True if data_source.lower() == "social_production" else False
+
+    if data_source.lower() == "social_production":
+        es_index = settings.ES_INDEX_SOCIAL_PRODUCTION
+    elif data_source.lower() == "scielo":
+        es_index = settings.ES_INDEX_SCIELO
+    elif data_source.lower() == "openalex_works":
+        es_index = settings.ES_INDEX_WORLD
+
+    return es_index, flag_is_brazil, flag_is_social_production
