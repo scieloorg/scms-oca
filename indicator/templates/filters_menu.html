@@ -229,6 +229,12 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     }
 
+    // Add data source to filters
+    filters['data_source'] = data_source;
+
+    // Add country unit to filters
+    filters['country_unit'] = country_unit;
+
     // Update applied filters display
     if (typeof updateAppliedFiltersFromForm === 'function') {
       setTimeout(updateAppliedFiltersFromForm, 0);
@@ -248,7 +254,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
-  // Reset form (filters and breakdown variable)
+  // Reset form (filters
   document.getElementById('reset-filters-btn').addEventListener('click', function() {
     const form = document.getElementById('filters-form');
     if (!form) return;
@@ -258,10 +264,17 @@ document.addEventListener('DOMContentLoaded', function() {
       Array.from(sel.options).forEach(function(opt) { opt.selected = false; });
     });
 
-    // Re-select all publication years
-    const pubYearSelect = document.getElementById('publication_year');
+    // Re-select all publication years >= 2014
+    let pubYearSelect;
+    if (data_source === "social_production") {
+      pubYearSelect = document.getElementById('publication_year.enum');
+    } else {
+      pubYearSelect = document.getElementById('publication_year');
+    }
     if (pubYearSelect) {
-      Array.from(pubYearSelect.options).forEach(function(opt) { opt.selected = true; });
+      Array.from(pubYearSelect.options).forEach(function(opt) {
+        opt.selected = !isNaN(opt.value) && Number(opt.value) >= 2014;
+      });
     }
 
     if (typeof updateAppliedFiltersFromForm === 'function') {
