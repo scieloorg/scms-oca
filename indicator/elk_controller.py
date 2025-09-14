@@ -4,7 +4,7 @@ from django.conf import settings
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
-from elasticsearch import Elasticsearch
+from elasticsearch import Elasticsearch, ConnectionError
 from urllib.parse import urlparse
 
 
@@ -14,7 +14,6 @@ parsed_url = urlparse(es_url)
 ES_HOST = f"{parsed_url.scheme}://{parsed_url.hostname}:{parsed_url.port}"
 ES_USER = parsed_url.username or 'elastic'
 ES_PASSWORD = parsed_url.password or ''
-ES_INDEX = settings.HAYSTACK_CONNECTIONS['es']['INDEX_NAME']
 ES_VERIFY_CERTS = settings.HAYSTACK_CONNECTIONS['es'].get('KWARGS', {}).get('verify_certs', False)
 ES_CA_CERTS = settings.HAYSTACK_CONNECTIONS['es'].get('KWARGS', {}).get('ca_certs', None)
 
@@ -25,9 +24,8 @@ es = Elasticsearch(
     ca_certs=ES_CA_CERTS,
 )
 
-# Field mapping global
-FIELD_MAP = {
-    "year": "publication_year",
+# Field mapping OpenAlex Works
+FIELD_MAP_OPENALEX_WORKS = {
     "publication_year": "publication_year",
     "source_type": "best_oa_location.source.type.keyword",
     "source_index": "indexed_in.keyword",
@@ -42,6 +40,27 @@ FIELD_MAP = {
     "subject_area_level_2": "thematic_areas.level2.keyword",
 }
 
+# Field mapping for SciELO
+FIELD_MAP_SCIELO = {
+    "publication_year": "publication_year",
+    "document_type": "type.keyword",
+    "document_language": "languages.keyword",
+    "access_type": "open_access.oa_status.keyword",
+    "journal": "journal.keyword",
+    "country": "authorships.countries.keyword",
+}
+
+# Field mapping for Social Production
+FIELD_MAP_SOCIAL_PRODUCTION = {
+    "action": "action.enum",
+    "classification": "classification.enum",
+    "directory_type": "directory_type.enum",
+    "institutions": "institutions.enum",
+    "cities": "cities.enum",
+    "states": "states.enum",
+    "practice": "practice.enum",
+    "publication_year": "year",
+}
 
 @require_GET
 def get_filters(request):
