@@ -437,10 +437,34 @@ def parse_breakdown_documents_per_year_response(res):
     }
 
 def standardize_breakdown_keys(keys, series):
-    # Transform Open Access boolean values to Yes/No strings if applicable
+    """
+    Standardize certain known breakdown keys for better readability.
+    E.g., for open_access field, convert "1"/"0" to "Yes"/"No".
+    """
     oa_map = {"1": "Yes", "0": "No"}
     if set(keys) == set(oa_map.keys()):
         for s in series:
             s["name"] = oa_map.get(s["name"], s["name"])
 
     return [oa_map.get(k, k) for k in keys]
+
+def get_es_index_and_flags(data_source, country_unit):
+    """
+    Determine the Elasticsearch index and flags based on data source and country unit.
+
+    Returns:
+    - index (str): The Elasticsearch index to use.
+    - flag_is_brazil (bool): True if country_unit is "BR", else False
+    - flag_is_social_production (bool): True if data_source is "social_production", else False
+    """
+    flag_is_brazil = True if country_unit == "BR" else False
+    flag_is_social_production = True if data_source.lower() == "social_production" else False
+
+    if data_source.lower() == "social_production":
+        es_index = settings.ES_INDEX_SOCIAL_PRODUCTION
+    elif data_source.lower() == "scielo":
+        es_index = settings.ES_INDEX_SCIELO
+    elif data_source.lower() == "openalex_works":
+        es_index = settings.ES_INDEX_WORLD
+
+    return es_index, flag_is_brazil, flag_is_social_production
