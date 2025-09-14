@@ -187,14 +187,24 @@ def get_indicators(request):
 
     return JsonResponse(indicators)
 
-def build_query(filters):
+def build_query(filters, field_map, flag_brazil, flag_social_production):
     """
     Build the Elasticsearch query from the received filters, mapping friendly names to real fields.
     """
     must = []
 
+    # Add Brazil filter
+    if flag_brazil:
+        es_field = field_map.get("country", "country")
+        must.append({"term": {es_field: "BR"}})
+
+    # Add social production filter
+    if flag_social_production:
+        es_field = field_map.get("action", "action")
+        must.append({"exists": {"field": es_field}})
+
     for field, value in filters.items():
-        es_field = FIELD_MAP.get(field, field)
+        es_field = field_map.get(field, field)
 
         if field == "open_access":
             def to_bool(v):
@@ -207,15 +217,15 @@ def build_query(filters):
                 value = [to_bool(v) for v in value]
             else:
                 value = to_bool(value)
-        
+
         if isinstance(value, list):
             must.append({"terms": {es_field: value}})
         else:
             must.append({"term": {es_field: value}})
-    
+
     return {"bool": {"must": must}} if must else {"match_all": {}}
 
-def build_citations_per_year_aggs():
+def build_citations_per_year_aggs(field_map):
     """
     Build the aggregations for citations per year.
     """
@@ -260,18 +270,20 @@ def parse_citations_per_year_response(res):
         "ndocs_per_year": doc_counts,
     }
 
-def build_documents_per_year_aggs():
+def build_documents_per_year_aggs(field_map, flag_social_production):
     """
     Build the aggregations for the number of documents per year, total documents, and total citations.
     """
+    year_var = "publication_year" if not flag_social_production else "year"
+    count_var = "directory_type.enum" if flag_social_production else "id.keyword"
     return {
         "per_year": {
             "terms": {
-                "field": "publication_year",
+                "field": year_var,
                 "order": {"_key": "asc"}
             }
         },
-        "total_documents": {"value_count": {"field": "id.keyword"}},
+        "total_documents": {"value_count": {"field": count_var}},
     }
 
 def parse_documents_per_year_response(res):
@@ -295,11 +307,11 @@ def parse_documents_per_year_response(res):
         "ndocs_per_year": ndocs_per_year,
     }
 
-def build_breakdown_citation_per_year_aggs(breakdown_variable):
+def build_breakdown_citation_per_year_aggs(field_map, breakdown_variable):
     """
     Build the aggregations for breakdown of citations per year.
     """
-    es_field = FIELD_MAP.get(breakdown_variable, breakdown_variable)
+    es_field = field_map.get(breakdown_variable, breakdown_variable)
     return {
         "per_year": {
             "terms": {
@@ -310,7 +322,8 @@ def build_breakdown_citation_per_year_aggs(breakdown_variable):
                 "breakdown": {
                     "terms": {
                         "field": es_field,
-                        "order": {"_key": "asc"}
+                        "order": {"_key": "asc"},
+                        "size": 2500
                     },
                     "aggs": {
                         "total_citations": {
@@ -322,22 +335,25 @@ def build_breakdown_citation_per_year_aggs(breakdown_variable):
         }
     }
 
-def build_breakdown_documents_per_year_aggs(breakdown_variable):
+def build_breakdown_documents_per_year_aggs(field_map, breakdown_variable, flag_social_production):
     """
     Build the aggregations for breakdown per year.
     """
-    es_field = FIELD_MAP.get(breakdown_variable, breakdown_variable)
+    es_field = field_map.get(breakdown_variable, breakdown_variable)
+    year_var = "publication_year" if not flag_social_production else "year"
+
     return {
         "per_year": {
             "terms": {
-                "field": "publication_year",
+                "field": year_var,
                 "order": {"_key": "asc"},
             },
             "aggs": {
                 "breakdown": {
                     "terms": {
                         "field": es_field,
-                        "order": {"_key": "asc"}
+                        "order": {"_key": "asc"},
+                        "size": 2500
                     }
                 }
             }
