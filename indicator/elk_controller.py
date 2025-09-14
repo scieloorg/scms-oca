@@ -62,31 +62,74 @@ FIELD_MAP_SOCIAL_PRODUCTION = {
     "publication_year": "year",
 }
 
+
+FILTERS_CACHE = {}
+
 @require_GET
 def get_filters(request):
     """
     Endpoint to return available filter options.
+    Select ES index via GET parameter (data_source=...)
     """
-    aggs = {
-        "publication_year": {"terms": {"field": "publication_year", "size": 100, "order": {"_key": "desc"}}},
-        "source_type": {"terms": {"field": "best_oa_location.source.type.keyword", "size": 100}},
-        "source_index": {"terms": {"field": "indexed_in.keyword", "size": 100}},
-        "document_type": {"terms": {"field": "type.keyword", "size": 100}},
-        "document_language": {"terms": {"field": "language.keyword", "size": 100}},
-        "open_access": {"terms": {"field": "open_access.is_oa", "size": 2}},
-        "access_type": {"terms": {"field": "open_access.oa_status.keyword", "size": 20}},
-        "region_world": {"terms": {"field": "geos.scimago_regions.keyword", "size": 20}},
-        "country": {"terms": {"field": "authorships.countries.keyword", "size": 500}},
-        "subject_area_level_0": {"terms": {"field": "thematic_areas.level0.keyword", "size": 3}},
-        "subject_area_level_1": {"terms": {"field": "thematic_areas.level1.keyword", "size": 9}},
-        "subject_area_level_2": {"terms": {"field": "thematic_areas.level2.keyword", "size": 41}},
-    }
+    data_source = request.GET.get('data_source', 'openalex_works')
+    cache_key = data_source.lower() if data_source else ""
+    if cache_key in FILTERS_CACHE:
+        return JsonResponse(FILTERS_CACHE[cache_key])
+
+    es_index, _, _ = get_es_index_and_flags(data_source, None)
+
+    # Choose mapping and fields for aggs
+    if data_source.lower() == "scielo":
+        aggs_fields = [
+            ("publication_year", "publication_year", 100, {"_key": "desc"}),
+            ("document_type", "type.keyword", 100, None),
+            ("document_language", "languages.keyword", 100, None),
+            ("access_type", "open_access.oa_status.keyword", 20, None),
+            ("journal", "journal.keyword", 2500, None),
+            ("country", "authorships.countries.keyword", 500, None),
+        ]
+    elif data_source.lower() == "social_production":
+        aggs_fields = [
+            ("publication_year", "year", 1000, {"_key": "desc"}),
+            ("action", "action.enum", 1000, None),
+            ("classification", "classification.enum", 1000, None),
+            ("institutions", "institutions.enum", 1000, None),
+            ("cities", "cities.enum", 1000, None),
+            ("states", "states.enum", 1000, None),
+            ("practice", "practice.enum", 1000, None),
+            ("directory_type", "directory_type.enum", 1000, None),
+        ]
+    elif data_source.lower() == "openalex_works":
+        aggs_fields = [
+            ("publication_year", "publication_year", 100, {"_key": "desc"}),
+            ("source_type", "best_oa_location.source.type.keyword", 100, None),
+            ("source_index", "indexed_in.keyword", 100, None),
+            ("document_type", "type.keyword", 100, None),
+            ("document_language", "language.keyword", 100, None),
+            ("open_access", "open_access.is_oa", 2, None),
+            ("access_type", "open_access.oa_status.keyword", 20, None),
+            ("region_world", "geos.scimago_regions.keyword", 20, None),
+            ("country", "authorships.countries.keyword", 500, None),
+            ("subject_area_level_0", "thematic_areas.level0.keyword", 3, None),
+            ("subject_area_level_1", "thematic_areas.level1.keyword", 9, None),
+            ("subject_area_level_2", "thematic_areas.level2.keyword", 41, None),
+        ]
+    else:
+        return JsonResponse({"error": "Invalid or missing data_source parameter."}, status=400)
+
+    aggs = {}
+    for name, field, size, order in aggs_fields:
+        terms = {"field": field, "size": size}
+        if order:
+            terms["order"] = order
+        aggs[name] = {"terms": terms}
 
     body = {"size": 0, "aggs": aggs}
 
     try:
-        res = es.search(index=ES_INDEX, body=body)
+        res = es.search(index=es_index, body=body)
         filters = {k: [b["key"] for b in v["buckets"]] for k, v in res["aggregations"].items()}
+        FILTERS_CACHE[cache_key] = filters
         return JsonResponse(filters)
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
