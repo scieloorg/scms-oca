@@ -671,34 +671,25 @@
       var form = document.getElementById('filters-form');
       if (!form) return;
 
-      // Study Unit
-      var studyUnitSelect = document.getElementById('study-unit-select');
-      var studyUnitText = '';
-      if (studyUnitSelect) {
-        var selected = studyUnitSelect.options[studyUnitSelect.selectedIndex];
-        if (selected && selected.value) {
-          studyUnitText = selected.textContent;
-        }
-      }
-
-      var tags = [];
-      if (studyUnitText) {
-        tags.push('<span class="mr-2"><strong>Study Unit:</strong> ' + studyUnitText + '</span>');
-      }
-
       var pieces = [];
       form.querySelectorAll('select').forEach(function(sel) {
         var selectedTexts = Array.from(sel.selectedOptions).map(function(opt) { return opt.textContent; });
         if (selectedTexts.length) {
           var labelEl = form.querySelector('label[for="' + sel.id + '"]');
           var label = labelEl ? labelEl.textContent.trim() : sel.name;
+          if (label === "Publication Year") {
+            var years = selectedTexts.map(function(text) { return parseInt(text); }).filter(function(y) { return !isNaN(y); });
+            if (years.length) {
+              selectedTexts = [yearsToRanges(years)];
+            }
+          }
           pieces.push(label + ': ' + selectedTexts.join(', '));
         }
       });
 
-      if (pieces.length || tags.length) {
+      if (pieces.length) {
         container.classList.remove('d-none');
-        container.innerHTML = tags.join(' ') + (pieces.length ? '<strong>Applied Filters: </strong> ' + pieces.join(' | ') : '');
+        container.innerHTML = pieces.length ? '<strong>Applied Filters</strong>' + pieces.join(' | ') : '';
       } else {
         container.classList.add('d-none');
         container.innerHTML = '';
@@ -769,22 +760,53 @@
         .then(data => {
           if (typeof renderChart === 'function') {
             renderChart(data, study_unit);
+            // Determine if there are filters other than publication_year
+            var ignoredKeys = new Set(['publication_year','study_unit','breakdown_variable','data_source','country_unit']);
+            var hasOtherFilters = Object.keys(filters).some(function(k){ return !ignoredKeys.has(k); });
             if (filters["breakdown_variable"]) {
-              renderPercentageChart(data, study_unit);
+              renderInnerPercentageChart(data, study_unit);
+              if (hasOtherFilters) {
+                renderOuterPercentageChart(data, study_unit);
+              }
+            }
+            // Show/hide chart containers appropriately
+            var applied = document.getElementById('applied-filters');
+            var mainDiv = document.getElementById('main-chart-div');
+            var innerDiv = document.getElementById('inner-percentage-chart-div');
+            var outerDiv = document.getElementById('outer-percentage-chart-div');
+            
+            if (applied) applied.classList.remove('d-none');
+            if (mainDiv) mainDiv.classList.remove('d-none');
+            
+            var hasBreakdown = !!filters['breakdown_variable'];
+            if (innerDiv) innerDiv.classList.toggle('d-none', !hasBreakdown);
+            if (outerDiv) outerDiv.classList.toggle('d-none', !(hasBreakdown && hasOtherFilters));
+            
+            // Ensure inner/outer charts are disposed when hidden
+            if (!hasBreakdown) {
+              var innerChart = document.getElementById('inner-percentage-chart');
+              if (innerChart && innerChart._chartInstance) {
+                innerChart._chartInstance.dispose();
+                innerChart._chartInstance = null;
+              }
+            }
+            if (!hasBreakdown || !hasOtherFilters) {
+              var outerChart = document.getElementById('outer-percentage-chart');
+              if (outerChart && outerChart._chartInstance) {
+                outerChart._chartInstance.dispose();
+                outerChart._chartInstance = null;
+              }
             }
           }
         })
         .finally(() => {
           // Hide loading overlay
-          if (optionsLoading) optionsLoading.style.display = 'none';
+          var loadingDiv = document.getElementById('optionsLoading');
+          if (loadingDiv) loadingDiv.style.display = 'none';
           if (contentDiv) contentDiv.style.opacity = '1';
         });
       });
-
-    // Initial chart rendering
-    updateAppliedFiltersFromForm();
     });
-
     window.updateAppliedFiltersFromForm = updateAppliedFiltersFromForm;
   </script>
 {% endblock %}
