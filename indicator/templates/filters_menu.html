@@ -250,6 +250,38 @@ document.addEventListener('DOMContentLoaded', function() {
     .then(data => {
       if (typeof renderChart === 'function') {
         renderChart(data, study_unit);
+        // Render percentage charts if breakdown
+        // Determine if there are filters other than publication_year
+        var ignoredKeys = new Set(['publication_year','study_unit','breakdown_variable','data_source','country_unit']);
+        var hasOtherFilters = Object.keys(filters).some(function(k){ return !ignoredKeys.has(k); });
+        if (filters['breakdown_variable']) {
+          if (typeof renderInnerPercentageChart === 'function') {
+            renderInnerPercentageChart(data, study_unit);
+          }
+          if (typeof renderOuterPercentageChart === 'function') {
+            if (hasOtherFilters) {
+              renderOuterPercentageChart(data, study_unit);
+            }
+          }
+        }
+        // Ensure containers are visible appropriately
+        var applied = document.getElementById('applied-filters');
+        var mainDiv = document.getElementById('main-chart-div');
+        var innerDiv = document.getElementById('inner-percentage-chart-div');
+        var outerDiv = document.getElementById('outer-percentage-chart-div');
+        if (applied) applied.classList.remove('d-none');
+        if (mainDiv) mainDiv.classList.remove('d-none');
+        var hasBreakdown = !!filters['breakdown_variable'];
+        if (innerDiv) innerDiv.classList.toggle('d-none', !hasBreakdown);
+        if (outerDiv) outerDiv.classList.toggle('d-none', !(hasBreakdown && hasOtherFilters));
+        if (!hasBreakdown) {
+          var innerChart = document.getElementById('inner-percentage-chart');
+          if (innerChart && innerChart._chartInstance) { innerChart._chartInstance.dispose(); innerChart._chartInstance = null; }
+        }
+        if (!hasBreakdown || !hasOtherFilters) {
+          var outerChart = document.getElementById('outer-percentage-chart');
+          if (outerChart && outerChart._chartInstance) { outerChart._chartInstance.dispose(); outerChart._chartInstance = null; }
+        }
       }
     });
   });
