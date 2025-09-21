@@ -62,6 +62,11 @@ FIELD_MAP_SOCIAL_PRODUCTION = {
     "publication_year": "year",
 }
 
+# Dictionary 
+MAX_BUCKETS = {
+    "publication_year": 1000,
+    "year": 1000,
+}
 
 FILTERS_CACHE = {}
 
@@ -233,7 +238,8 @@ def build_citations_per_year_aggs(field_map):
         "citations_per_year": {
             "terms": {
                 "field": "publication_year",
-                "order": {"_key": "asc"}
+                "order": {"_key": "asc"},
+                "size": MAX_BUCKETS.get("publication_year", 1000),
             },
             "aggs": {
                 "total_citations": {
@@ -280,7 +286,8 @@ def build_documents_per_year_aggs(field_map, flag_social_production):
         "per_year": {
             "terms": {
                 "field": year_var,
-                "order": {"_key": "asc"}
+                "order": {"_key": "asc"},
+                "size": MAX_BUCKETS.get(year_var, 1000),
             }
         },
         "total_documents": {"value_count": {"field": count_var}},
@@ -317,6 +324,7 @@ def build_breakdown_citation_per_year_aggs(field_map, breakdown_variable):
             "terms": {
                 "field": "publication_year",
                 "order": {"_key": "asc"},
+                "size": MAX_BUCKETS.get("publication_year", 1000),
             },
             "aggs": {
                 "breakdown": {
@@ -347,6 +355,7 @@ def build_breakdown_documents_per_year_aggs(field_map, breakdown_variable, flag_
             "terms": {
                 "field": year_var,
                 "order": {"_key": "asc"},
+                "size": MAX_BUCKETS.get(year_var, 1000),
             },
             "aggs": {
                 "breakdown": {
