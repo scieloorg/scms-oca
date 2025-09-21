@@ -641,6 +641,28 @@
       window.addEventListener('resize', chartObj.resize);
     }
 
+    // Helper function to convert years array to ranges
+    function yearsToRanges(years) {
+      if (!Array.isArray(years) || years.length === 0) return '';
+
+      const uniq = Array.from(new Set(years.map(Number))).sort((a, b) => a - b);
+
+      const ranges = [];
+      let start = uniq[0], end = uniq[0];
+
+      for (let i = 1; i < uniq.length; i++) {
+        const y = uniq[i];
+        if (y === end + 1) {
+          end = y;
+        } else {
+          ranges.push(start === end ? `${start}` : `${start} to ${end}`);
+          start = end = y;
+        }
+      }
+      ranges.push(start === end ? `${start}` : `${start} to ${end}`);
+      return ranges.join(', ');
+    }
+
     // Function to update applied filters display
     function updateAppliedFiltersFromForm() {
       var container = document.getElementById('applied-filters');
