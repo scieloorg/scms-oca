@@ -48,7 +48,7 @@
       </div>
 
       <!-- Menu -->
-      <div class="col-lg-3 card pt-2 filters-aside">
+      <div class="col-lg-3 card mb-2 pt-2">
         <!-- Graph Options -->
         <div id="graph-options-container">
           {% include "graph_options_menu.html" %}
@@ -60,25 +60,31 @@
         </div>
       </div>
 
-      <!-- Content -->
-      <div class="col-lg-9">
+      <!-- Graphs -->
+      <div class="col-lg-9 mx-0 px-0">
         <!-- Applied Filters -->
-        <div class="row m-2 p-2" id="applied-filters"></div>
+        <div class="card mb-2 ml-2 p-3 d-none" id="applied-filters"></div>
 
         <!-- Main Graph -->
-        <div class="row mt-2 mx-1">
-          <div class="mb-2 mx-auto" style="max-width: 100%; min-height: 100%;">
-            <div id="main-chart" style="position: relative; height:75vh; width:60vw"></div>
+        <div class="card mb-2 ml-2 p-3 d-none" id="main-chart-div" style="height:75vh;">
+          <div class="mx-auto" style="width:100%; height:100%;">
+            <div id="main-chart" style="width:100%; height:100%;"></div>
           </div>
         </div>
 
-        <!-- Percentage Graph -->
-        <div class="row mt-4 mx-1">
-          <div class="mb-2 mx-auto" style="max-width: 100%; min-height: 100%;">
-            <div id="percentage-chart" style="position: relative; height:75vh; width:60vw"></div>
+        <!-- Inner Percentage Graph -->
+        <div class="card mb-2 ml-2 p-3 d-none" id="inner-percentage-chart-div" style="height:75vh;">
+          <div class="mx-auto" style="width:100%; height:100%;">
+            <div id="inner-percentage-chart" style="width:100%; height:100%;"></div>
           </div>
         </div>
 
+        <!-- Outer Percentage Graph -->
+        <div class="card mb-2 ml-2 p-3 d-none" id="outer-percentage-chart-div" style="height:75vh;">
+          <div class="mx-auto" style="width:100%; height:100%;">
+            <div id="outer-percentage-chart" style="width:100%; height:100%;"></div>
+          </div>
+        </div>
       </div>
 
     </div>
