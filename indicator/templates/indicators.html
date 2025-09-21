@@ -282,26 +282,169 @@
       window.addEventListener('resize', chartObj.resize);
     }
 
-    // Function to render the percentage chart
-    function renderPercentageChart(data, study_unit) {
-      var chartContainer = document.getElementById('percentage-chart');
+    // Function to render the outer percentage chart
+    function renderOuterPercentageChart(data, study_unit) {
+      var percentageChartContainer = document.getElementById('outer-percentage-chart');
+      // Only applicable when there is a breakdown
+      if (!data || !data.breakdown_variable || !Array.isArray(data.series) || !Array.isArray(data.years)) {
+        if (percentageChartContainer && percentageChartContainer._chartInstance) {
+            percentageChartContainer._chartInstance.dispose();
+            percentageChartContainer._chartInstance = null;
+        }
+        return;
+      }
 
       // Destroy previous chart instance if exists
-      if (chartContainer && chartContainer._chartInstance) {
-        chartContainer._chartInstance.dispose();
-        chartContainer._chartInstance = null;
+      if (percentageChartContainer && percentageChartContainer._chartInstance) {
+          percentageChartContainer._chartInstance.dispose();
+          percentageChartContainer._chartInstance = null;
+      }
+
+      // Prepare baseline request (unfiltered, same data_source/country_unit, same study_unit and breakdown)
+      var baselinePayload = {
+        study_unit: study_unit === 'citation' ? 'citation' : 'document',
+        breakdown_variable: data.breakdown_variable
+      };
+
+      // Fetch baseline data (no filters in body apart from study_unit/breakdown)
+      fetch('/indicators/indicators/?data_source=' + encodeURIComponent(window.data_source) + '&country_unit=' + encodeURIComponent(window.country_unit), {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(baselinePayload)
+      })
+      .then(function(response) { return response.json(); })
+      .then(function(baseline) {
+        // Initialize chart instance
+        var chartObj = echarts.init(percentageChartContainer);
+        percentageChartContainer._chartInstance = chartObj;
+
+        // Build maps for fast lookup and year alignment
+        var filteredYears = data.years || [];
+        var filteredSeries = data.series || [];
+        var baselineYears = (baseline && baseline.years) ? baseline.years.map(String) : [];
+        var baselineSeries = (baseline && baseline.series) ? baseline.series : [];
+
+        // baselineMap[name][year] = value
+        var baselineMap = {};
+        (baselineSeries || []).forEach(function(s) {
+          var name = String(s.name);
+          baselineMap[name] = baselineMap[name] || {};
+          (s.data || []).forEach(function(val, idx) {
+            var y = baselineYears[idx];
+            if (typeof y !== 'undefined') baselineMap[name][String(y)] = Number(val || 0);
+          });
+        });
+
+        // Sort series by total filtered values (desc), keep names order accordingly
+        var seriesTotals = (filteredSeries || []).map(function(s) {
+          var total = (s.data || []).reduce(function(a, b) { return a + b; }, 0);
+          return { name: String(s.name), total: total, data: s.data || [] };
+        }).sort(function(a, b) { return b.total - a.total; });
+
+        var orderedKeys = seriesTotals.map(function(s) { return s.name; });
+
+        // Compose percentage series relative to baseline: (filtered / baseline) * 100
+        var percentSeries = seriesTotals.map(function(s) {
+          var baseByYear = baselineMap[s.name] || {};
+          var pctData = (s.data || []).map(function(val, idx) {
+            var year = String(filteredYears[idx]);
+            var baseVal = Number(baseByYear[year] || 0);
+            if (!baseVal) return 0;
+            return ((Number(val) / baseVal) * 100).toFixed(2);
+          });
+          return {
+            name: s.name,
+            type: 'bar',
+            stack: 'total',
+            emphasis: { focus: 'series' },
+            data: pctData
+          };
+        });
+
+        var breakdownLabelEl = document.querySelector('label[for="' + data.breakdown_variable + '"]');
+        var breakdownLabel = breakdownLabelEl ? breakdownLabelEl.textContent.trim() : data.breakdown_variable.replace(/_/g, ' ');
+        var studyUnitSubtitle = (study_unit === 'citation') ? 'Study Unit: Citation' : 'Study Unit: Document';
+
+        var chartOpts = {
+          title: { text: 'Breakdown by ' + breakdownLabel + ' (% relative to unfiltered data)', subtext: studyUnitSubtitle },
+          tooltip: {
+            trigger: 'axis',
+            axisPointer: { type: 'shadow' },
+            confine: true,
+            enterable: true,
+            extraCssText: 'max-height:50vh; overflow-y:auto;',
+            formatter: function(params) {
+              var yearIdx = params && params.length ? params[0].dataIndex : 0;
+              var yearLabel = String(filteredYears[yearIdx]);
+              var lines = [];
+              lines.push(params[0].axisValueLabel);
+              params.forEach(function(p) {
+                var name = p.seriesName;
+                var baseVal = Number((baselineMap[name] || {})[yearLabel] || 0);
+                var filt = (filteredSeries.find(function(s) { return String(s.name) === String(name); }) || {data:[]}).data[yearIdx] || 0;
+                lines.push(p.marker + name + ': ' + p.value + '% (' + filt + ' / ' + baseVal + ')');
+              });
+              return lines.join('<br/>');
+            }
+          },
+          legend: { type: 'scroll', data: orderedKeys, orient: 'horizontal', bottom: 0 },
+          grid: { top: 110, left: 0, right: 200, bottom: 40, containLabel: true },
+          toolbox: {
+            orient: 'vertical',
+            feature: {
+              magicType: { type: ['bar', 'tield'] },
+              dataView: { show: true, title: 'Data', readOnly: true, lang: ['', 'Close'] },
+              saveAsImage: { show: true },
+              restore: { show: true },
+              dataZoom: {}
+            }
+          },
+          xAxis: { type: 'category', data: filteredYears },
+          yAxis: { type: 'value', axisLabel: { formatter: '{value} %' } },
+          series: percentSeries
+        };
+
+        chartObj.setOption(chartOpts);
+        window.addEventListener('resize', chartObj.resize);
+      })
+      .catch(function(err) {
+        // If baseline fails, clear chart to avoid misleading results
+        if (percentageChartContainer && percentageChartContainer._chartInstance) {
+          percentageChartContainer._chartInstance.dispose();
+          percentageChartContainer._chartInstance = null;
+        }
+        // Swallow error silently for now
+      });
+    }
+
+    // Function to render the percentage chart
+    function renderInnerPercentageChart(data, study_unit) {
+      var percentageChartContainer = document.getElementById('inner-percentage-chart');
+
+      // Set subtitle based on study_unit
+      var studyUnitSubtitle = '';
+      if (study_unit === 'citation') {
+        studyUnitSubtitle = 'Study Unit: Citation';
+      } else {
+        studyUnitSubtitle = 'Study Unit: Document';
+      }
+
+      // Destroy previous inner percentage chart instance if exists
+      if (percentageChartContainer && percentageChartContainer._chartInstance) {
+        percentageChartContainer._chartInstance.dispose();
+        percentageChartContainer._chartInstance = null;
       }
       
       // Initialize new chart instance
-      var chartObj = echarts.init(chartContainer);
-      chartContainer._chartInstance = chartObj;
+      var chartObj = echarts.init(percentageChartContainer);
+      percentageChartContainer._chartInstance = chartObj;
       var title, chartOpts;
 
       // Percentage stacked bar chart
       if (data.breakdown_variable && data.series && data.years) {
         var breakdownLabel = document.querySelector('label[for="' + data.breakdown_variable + '"]');
         breakdownLabel = breakdownLabel ? breakdownLabel.textContent.trim() : data.breakdown_variable.replace(/_/g, ' ');
-        title = 'Percentage Breakdown by ' + breakdownLabel;
+        title = 'Breakdown by ' + breakdownLabel + ' (% within filtered data)';
         var seriesTotals = (data.series || []).map(function(s) {
           var total = s.data.reduce(function(a, b) { return a + b; }, 0);
           return {
@@ -338,8 +481,8 @@
           };
         });
         chartOpts = {
-          title: { text: title },
-          tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, formatter: function (params) {
+          title: { text: title, subtext: studyUnitSubtitle },
+          tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, confine: true, enterable: true, extraCssText: 'max-height:50vh; overflow-y:auto;', formatter: function (params) {
             var tar = params[0];
             var total = 0;
             params.forEach(function(p) { total += p.value; });
@@ -390,8 +533,8 @@
         var seriesName = "Citations";
         title = "Percentage of Citations per Year";
         chartOpts = {
-          title: { text: title },
-          tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, formatter: function (params) {
+          title: { text: title, subtext: studyUnitSubtitle },
+          tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, confine: true, enterable: true, extraCssText: 'max-height:50vh; overflow-y:auto;', formatter: function (params) {
             var tar = params[0];
             var total = 0;
             params.forEach(function(p) { total += p.value; });
@@ -445,8 +588,8 @@
         var seriesName = "Documents";
         title = "Percentage of Documents per Year";
         chartOpts = {
-          title: { text: title },
-          tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, formatter: function (params) {
+          title: { text: title, subtext: studyUnitSubtitle },
+          tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, confine: true, enterable: true, extraCssText: 'max-height:50vh; overflow-y:auto;', formatter: function (params) {
             var tar = params[0];
             var total = 0;
             params.forEach(function(p) { total += p.value; });
