@@ -48,7 +48,7 @@
       </div>
 
       <!-- Menu -->
-      <div class="col-lg-3 card pt-2 filters-aside">
+      <div class="col-lg-3 card mb-2 pt-2">
         <!-- Graph Options -->
         <div id="graph-options-container">
           {% include "graph_options_menu.html" %}
@@ -60,25 +60,31 @@
         </div>
       </div>
 
-      <!-- Content -->
-      <div class="col-lg-9">
+      <!-- Graphs -->
+      <div class="col-lg-9 mx-0 px-0">
         <!-- Applied Filters -->
-        <div class="row m-2 p-2" id="applied-filters"></div>
+        <div class="card mb-2 ml-2 p-3 d-none" id="applied-filters"></div>
 
         <!-- Main Graph -->
-        <div class="row mt-2 mx-1">
-          <div class="mb-2 mx-auto" style="max-width: 100%; min-height: 100%;">
-            <div id="main-chart" style="position: relative; height:75vh; width:60vw"></div>
+        <div class="card mb-2 ml-2 p-3 d-none" id="main-chart-div" style="height:75vh;">
+          <div class="mx-auto" style="width:100%; height:100%;">
+            <div id="main-chart" style="width:100%; height:100%;"></div>
           </div>
         </div>
 
-        <!-- Percentage Graph -->
-        <div class="row mt-4 mx-1">
-          <div class="mb-2 mx-auto" style="max-width: 100%; min-height: 100%;">
-            <div id="percentage-chart" style="position: relative; height:75vh; width:60vw"></div>
+        <!-- Inner Percentage Graph -->
+        <div class="card mb-2 ml-2 p-3 d-none" id="inner-percentage-chart-div" style="height:75vh;">
+          <div class="mx-auto" style="width:100%; height:100%;">
+            <div id="inner-percentage-chart" style="width:100%; height:100%;"></div>
           </div>
         </div>
 
+        <!-- Outer Percentage Graph -->
+        <div class="card mb-2 ml-2 p-3 d-none" id="outer-percentage-chart-div" style="height:75vh;">
+          <div class="mx-auto" style="width:100%; height:100%;">
+            <div id="outer-percentage-chart" style="width:100%; height:100%;"></div>
+          </div>
+        </div>
       </div>
 
     </div>
@@ -95,6 +101,13 @@
     // Function to render the main chart
     function renderChart(data, study_unit) {
       var chartContainer = document.getElementById('main-chart');
+      // Set subtitle based on study_unit
+      var studyUnitSubtitle = '';
+      if (study_unit === 'citation') {
+        studyUnitSubtitle = 'Study Unit: Citation';
+      } else {
+        studyUnitSubtitle = 'Study Unit: Document';
+      }
 
       // Destroy previous chart instance if exists
       if (chartContainer && chartContainer._chartInstance) {
@@ -102,11 +115,18 @@
         chartContainer._chartInstance = null;
       }
 
-      // Destroy percentage graph if breakdown variable is not set
-      var percentageChartContainer = document.getElementById('percentage-chart');
-      if (percentageChartContainer && percentageChartContainer._chartInstance && !data.breakdown_variable) {
-        percentageChartContainer._chartInstance.dispose();
-        percentageChartContainer._chartInstance = null;
+      // Destroy inner percentage graph if breakdown variable is not set
+      var innerPercentageChartContainer = document.getElementById('inner-percentage-chart');
+      if (innerPercentageChartContainer && innerPercentageChartContainer._chartInstance && !data.breakdown_variable) {
+        innerPercentageChartContainer._chartInstance.dispose();
+        innerPercentageChartContainer._chartInstance = null;
+      }
+
+      // Destroy outer percentage graph if breakdown variable is not set
+      var outerPercentageChartContainer = document.getElementById('outer-percentage-chart');
+      if (outerPercentageChartContainer && outerPercentageChartContainer._chartInstance && !data.breakdown_variable) {
+        outerPercentageChartContainer._chartInstance.dispose();
+        outerPercentageChartContainer._chartInstance = null;
       }
 
       // Initialize new chart instance
@@ -138,8 +158,8 @@
           };
         });
         chartOpts = {
-          title: { text: title },
-          tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+          title: { text: title, subtext: studyUnitSubtitle },
+          tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, confine: true, enterable: true, extraCssText: 'max-height:50vh; overflow-y:auto;' },
           legend: {
             type: 'scroll',
               data: orderedKeys,
@@ -156,9 +176,9 @@
           toolbox: {
               orient: "vertical",
               feature: {
-                  magicType: {
-                      type: ['line', 'bar', 'tield'],
-                  },
+          magicType: {
+            type: ['line', 'bar', 'tiled'],
+          },
                   dataView: {
                       show: true,
                       title: 'Data',
@@ -181,8 +201,8 @@
         var seriesName = "Citations";
         title = "Number of Citations per Year";
         chartOpts = {
-          title: { text: title },
-          tooltip: {},
+          title: { text: title, subtext: studyUnitSubtitle },
+          tooltip: { confine: true, enterable: true, extraCssText: 'max-height:50vh; overflow-y:auto;' },
           grid: {
             top: 110,
             left: 0,
@@ -193,9 +213,9 @@
           toolbox: {
               orient: "vertical",
               feature: {
-                  magicType: {
-                      type: ['line', 'bar', 'tield'],
-                  },
+          magicType: {
+            type: ['line', 'bar', 'tiled'],
+          },
                   dataView: {
                       show: true,
                       title: 'Data',
@@ -222,8 +242,8 @@
         var seriesName = "Documents";
         title = "Number of Documents per Year";
         chartOpts = {
-          title: { text: title },
-          tooltip: {},
+          title: { text: title, subtext: studyUnitSubtitle },
+          tooltip: { confine: true, enterable: true, extraCssText: 'max-height:50vh; overflow-y:auto;' },
           grid: {
             top: 110,
             left: 0,
@@ -234,9 +254,9 @@
           toolbox: {
               orient: "vertical",
               feature: {
-                  magicType: {
-                      type: ['line', 'bar', 'tield'],
-                  },
+          magicType: {
+            type: ['line', 'bar', 'tiled'],
+          },
                   dataView: {
                       show: true,
                       title: 'Data',
@@ -262,26 +282,169 @@
       window.addEventListener('resize', chartObj.resize);
     }
 
-    // Function to render the percentage chart
-    function renderPercentageChart(data, study_unit) {
-      var chartContainer = document.getElementById('percentage-chart');
+    // Function to render the outer percentage chart
+    function renderOuterPercentageChart(data, study_unit) {
+      var percentageChartContainer = document.getElementById('outer-percentage-chart');
+      // Only applicable when there is a breakdown
+      if (!data || !data.breakdown_variable || !Array.isArray(data.series) || !Array.isArray(data.years)) {
+        if (percentageChartContainer && percentageChartContainer._chartInstance) {
+            percentageChartContainer._chartInstance.dispose();
+            percentageChartContainer._chartInstance = null;
+        }
+        return;
+      }
 
       // Destroy previous chart instance if exists
-      if (chartContainer && chartContainer._chartInstance) {
-        chartContainer._chartInstance.dispose();
-        chartContainer._chartInstance = null;
+      if (percentageChartContainer && percentageChartContainer._chartInstance) {
+          percentageChartContainer._chartInstance.dispose();
+          percentageChartContainer._chartInstance = null;
+      }
+
+      // Prepare baseline request (unfiltered, same data_source/country_unit, same study_unit and breakdown)
+      var baselinePayload = {
+        study_unit: study_unit === 'citation' ? 'citation' : 'document',
+        breakdown_variable: data.breakdown_variable
+      };
+
+      // Fetch baseline data (no filters in body apart from study_unit/breakdown)
+      fetch('/indicators/indicators/?data_source=' + encodeURIComponent(window.data_source) + '&country_unit=' + encodeURIComponent(window.country_unit), {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(baselinePayload)
+      })
+      .then(function(response) { return response.json(); })
+      .then(function(baseline) {
+        // Initialize chart instance
+        var chartObj = echarts.init(percentageChartContainer);
+        percentageChartContainer._chartInstance = chartObj;
+
+        // Build maps for fast lookup and year alignment
+        var filteredYears = data.years || [];
+        var filteredSeries = data.series || [];
+        var baselineYears = (baseline && baseline.years) ? baseline.years.map(String) : [];
+        var baselineSeries = (baseline && baseline.series) ? baseline.series : [];
+
+        // baselineMap[name][year] = value
+        var baselineMap = {};
+        (baselineSeries || []).forEach(function(s) {
+          var name = String(s.name);
+          baselineMap[name] = baselineMap[name] || {};
+          (s.data || []).forEach(function(val, idx) {
+            var y = baselineYears[idx];
+            if (typeof y !== 'undefined') baselineMap[name][String(y)] = Number(val || 0);
+          });
+        });
+
+        // Sort series by total filtered values (desc), keep names order accordingly
+        var seriesTotals = (filteredSeries || []).map(function(s) {
+          var total = (s.data || []).reduce(function(a, b) { return a + b; }, 0);
+          return { name: String(s.name), total: total, data: s.data || [] };
+        }).sort(function(a, b) { return b.total - a.total; });
+
+        var orderedKeys = seriesTotals.map(function(s) { return s.name; });
+
+        // Compose percentage series relative to baseline: (filtered / baseline) * 100
+        var percentSeries = seriesTotals.map(function(s) {
+          var baseByYear = baselineMap[s.name] || {};
+          var pctData = (s.data || []).map(function(val, idx) {
+            var year = String(filteredYears[idx]);
+            var baseVal = Number(baseByYear[year] || 0);
+            if (!baseVal) return 0;
+            return ((Number(val) / baseVal) * 100).toFixed(2);
+          });
+          return {
+            name: s.name,
+            type: 'bar',
+            stack: 'total',
+            emphasis: { focus: 'series' },
+            data: pctData
+          };
+        });
+
+        var breakdownLabelEl = document.querySelector('label[for="' + data.breakdown_variable + '"]');
+        var breakdownLabel = breakdownLabelEl ? breakdownLabelEl.textContent.trim() : data.breakdown_variable.replace(/_/g, ' ');
+        var studyUnitSubtitle = (study_unit === 'citation') ? 'Study Unit: Citation' : 'Study Unit: Document';
+
+        var chartOpts = {
+          title: { text: 'Breakdown by ' + breakdownLabel + ' (% relative to unfiltered data)', subtext: studyUnitSubtitle },
+          tooltip: {
+            trigger: 'axis',
+            axisPointer: { type: 'shadow' },
+            confine: true,
+            enterable: true,
+            extraCssText: 'max-height:50vh; overflow-y:auto;',
+            formatter: function(params) {
+              var yearIdx = params && params.length ? params[0].dataIndex : 0;
+              var yearLabel = String(filteredYears[yearIdx]);
+              var lines = [];
+              lines.push(params[0].axisValueLabel);
+              params.forEach(function(p) {
+                var name = p.seriesName;
+                var baseVal = Number((baselineMap[name] || {})[yearLabel] || 0);
+                var filt = (filteredSeries.find(function(s) { return String(s.name) === String(name); }) || {data:[]}).data[yearIdx] || 0;
+                lines.push(p.marker + name + ': ' + p.value + '% (' + filt + ' / ' + baseVal + ')');
+              });
+              return lines.join('<br/>');
+            }
+          },
+          legend: { type: 'scroll', data: orderedKeys, orient: 'horizontal', bottom: 0 },
+          grid: { top: 110, left: 0, right: 200, bottom: 40, containLabel: true },
+          toolbox: {
+            orient: 'vertical',
+            feature: {
+              magicType: { type: ['bar', 'tield'] },
+              dataView: { show: true, title: 'Data', readOnly: true, lang: ['', 'Close'] },
+              saveAsImage: { show: true },
+              restore: { show: true },
+              dataZoom: {}
+            }
+          },
+          xAxis: { type: 'category', data: filteredYears },
+          yAxis: { type: 'value', axisLabel: { formatter: '{value} %' } },
+          series: percentSeries
+        };
+
+        chartObj.setOption(chartOpts);
+        window.addEventListener('resize', chartObj.resize);
+      })
+      .catch(function(err) {
+        // If baseline fails, clear chart to avoid misleading results
+        if (percentageChartContainer && percentageChartContainer._chartInstance) {
+          percentageChartContainer._chartInstance.dispose();
+          percentageChartContainer._chartInstance = null;
+        }
+        // Swallow error silently for now
+      });
+    }
+
+    // Function to render the percentage chart
+    function renderInnerPercentageChart(data, study_unit) {
+      var percentageChartContainer = document.getElementById('inner-percentage-chart');
+
+      // Set subtitle based on study_unit
+      var studyUnitSubtitle = '';
+      if (study_unit === 'citation') {
+        studyUnitSubtitle = 'Study Unit: Citation';
+      } else {
+        studyUnitSubtitle = 'Study Unit: Document';
+      }
+
+      // Destroy previous inner percentage chart instance if exists
+      if (percentageChartContainer && percentageChartContainer._chartInstance) {
+        percentageChartContainer._chartInstance.dispose();
+        percentageChartContainer._chartInstance = null;
       }
       
       // Initialize new chart instance
-      var chartObj = echarts.init(chartContainer);
-      chartContainer._chartInstance = chartObj;
+      var chartObj = echarts.init(percentageChartContainer);
+      percentageChartContainer._chartInstance = chartObj;
       var title, chartOpts;
 
       // Percentage stacked bar chart
       if (data.breakdown_variable && data.series && data.years) {
         var breakdownLabel = document.querySelector('label[for="' + data.breakdown_variable + '"]');
         breakdownLabel = breakdownLabel ? breakdownLabel.textContent.trim() : data.breakdown_variable.replace(/_/g, ' ');
-        title = 'Percentage Breakdown by ' + breakdownLabel;
+        title = 'Breakdown by ' + breakdownLabel + ' (% within filtered data)';
         var seriesTotals = (data.series || []).map(function(s) {
           var total = s.data.reduce(function(a, b) { return a + b; }, 0);
           return {
@@ -318,8 +481,8 @@
           };
         });
         chartOpts = {
-          title: { text: title },
-          tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, formatter: function (params) {
+          title: { text: title, subtext: studyUnitSubtitle },
+          tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, confine: true, enterable: true, extraCssText: 'max-height:50vh; overflow-y:auto;', formatter: function (params) {
             var tar = params[0];
             var total = 0;
             params.forEach(function(p) { total += p.value; });
@@ -370,8 +533,8 @@
         var seriesName = "Citations";
         title = "Percentage of Citations per Year";
         chartOpts = {
-          title: { text: title },
-          tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, formatter: function (params) {
+          title: { text: title, subtext: studyUnitSubtitle },
+          tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, confine: true, enterable: true, extraCssText: 'max-height:50vh; overflow-y:auto;', formatter: function (params) {
             var tar = params[0];
             var total = 0;
             params.forEach(function(p) { total += p.value; });
@@ -425,8 +588,8 @@
         var seriesName = "Documents";
         title = "Percentage of Documents per Year";
         chartOpts = {
-          title: { text: title },
-          tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, formatter: function (params) {
+          title: { text: title, subtext: studyUnitSubtitle },
+          tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, confine: true, enterable: true, extraCssText: 'max-height:50vh; overflow-y:auto;', formatter: function (params) {
             var tar = params[0];
             var total = 0;
             params.forEach(function(p) { total += p.value; });
@@ -478,6 +641,28 @@
       window.addEventListener('resize', chartObj.resize);
     }
 
+    // Helper function to convert years array to ranges
+    function yearsToRanges(years) {
+      if (!Array.isArray(years) || years.length === 0) return '';
+
+      const uniq = Array.from(new Set(years.map(Number))).sort((a, b) => a - b);
+
+      const ranges = [];
+      let start = uniq[0], end = uniq[0];
+
+      for (let i = 1; i < uniq.length; i++) {
+        const y = uniq[i];
+        if (y === end + 1) {
+          end = y;
+        } else {
+          ranges.push(start === end ? `${start}` : `${start} to ${end}`);
+          start = end = y;
+        }
+      }
+      ranges.push(start === end ? `${start}` : `${start} to ${end}`);
+      return ranges.join(', ');
+    }
+
     // Function to update applied filters display
     function updateAppliedFiltersFromForm() {
       var container = document.getElementById('applied-filters');
@@ -486,34 +671,25 @@
       var form = document.getElementById('filters-form');
       if (!form) return;
 
-      // Study Unit
-      var studyUnitSelect = document.getElementById('study-unit-select');
-      var studyUnitText = '';
-      if (studyUnitSelect) {
-        var selected = studyUnitSelect.options[studyUnitSelect.selectedIndex];
-        if (selected && selected.value) {
-          studyUnitText = selected.textContent;
-        }
-      }
-
-      var tags = [];
-      if (studyUnitText) {
-        tags.push('<span class="mr-2"><strong>Study Unit:</strong> ' + studyUnitText + '</span>');
-      }
-
       var pieces = [];
       form.querySelectorAll('select').forEach(function(sel) {
         var selectedTexts = Array.from(sel.selectedOptions).map(function(opt) { return opt.textContent; });
         if (selectedTexts.length) {
           var labelEl = form.querySelector('label[for="' + sel.id + '"]');
           var label = labelEl ? labelEl.textContent.trim() : sel.name;
+          if (label === "Publication Year") {
+            var years = selectedTexts.map(function(text) { return parseInt(text); }).filter(function(y) { return !isNaN(y); });
+            if (years.length) {
+              selectedTexts = [yearsToRanges(years)];
+            }
+          }
           pieces.push(label + ': ' + selectedTexts.join(', '));
         }
       });
 
-      if (pieces.length || tags.length) {
+      if (pieces.length) {
         container.classList.remove('d-none');
-        container.innerHTML = tags.join(' ') + (pieces.length ? '<strong>Applied Filters: </strong> ' + pieces.join(' | ') : '');
+        container.innerHTML = pieces.length ? '<strong>Applied Filters</strong>' + pieces.join(' | ') : '';
       } else {
         container.classList.add('d-none');
         container.innerHTML = '';
@@ -584,22 +760,53 @@
         .then(data => {
           if (typeof renderChart === 'function') {
             renderChart(data, study_unit);
+            // Determine if there are filters other than publication_year
+            var ignoredKeys = new Set(['publication_year','study_unit','breakdown_variable','data_source','country_unit']);
+            var hasOtherFilters = Object.keys(filters).some(function(k){ return !ignoredKeys.has(k); });
             if (filters["breakdown_variable"]) {
-              renderPercentageChart(data, study_unit);
+              renderInnerPercentageChart(data, study_unit);
+              if (hasOtherFilters) {
+                renderOuterPercentageChart(data, study_unit);
+              }
+            }
+            // Show/hide chart containers appropriately
+            var applied = document.getElementById('applied-filters');
+            var mainDiv = document.getElementById('main-chart-div');
+            var innerDiv = document.getElementById('inner-percentage-chart-div');
+            var outerDiv = document.getElementById('outer-percentage-chart-div');
+            
+            if (applied) applied.classList.remove('d-none');
+            if (mainDiv) mainDiv.classList.remove('d-none');
+            
+            var hasBreakdown = !!filters['breakdown_variable'];
+            if (innerDiv) innerDiv.classList.toggle('d-none', !hasBreakdown);
+            if (outerDiv) outerDiv.classList.toggle('d-none', !(hasBreakdown && hasOtherFilters));
+            
+            // Ensure inner/outer charts are disposed when hidden
+            if (!hasBreakdown) {
+              var innerChart = document.getElementById('inner-percentage-chart');
+              if (innerChart && innerChart._chartInstance) {
+                innerChart._chartInstance.dispose();
+                innerChart._chartInstance = null;
+              }
+            }
+            if (!hasBreakdown || !hasOtherFilters) {
+              var outerChart = document.getElementById('outer-percentage-chart');
+              if (outerChart && outerChart._chartInstance) {
+                outerChart._chartInstance.dispose();
+                outerChart._chartInstance = null;
+              }
             }
           }
         })
         .finally(() => {
           // Hide loading overlay
-          if (optionsLoading) optionsLoading.style.display = 'none';
+          var loadingDiv = document.getElementById('optionsLoading');
+          if (loadingDiv) loadingDiv.style.display = 'none';
           if (contentDiv) contentDiv.style.opacity = '1';
         });
       });
-
-    // Initial chart rendering
-    updateAppliedFiltersFromForm();
     });
-
     window.updateAppliedFiltersFromForm = updateAppliedFiltersFromForm;
   </script>
 {% endblock %}
