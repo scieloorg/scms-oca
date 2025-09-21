@@ -101,6 +101,13 @@
     // Function to render the main chart
     function renderChart(data, study_unit) {
       var chartContainer = document.getElementById('main-chart');
+      // Set subtitle based on study_unit
+      var studyUnitSubtitle = '';
+      if (study_unit === 'citation') {
+        studyUnitSubtitle = 'Study Unit: Citation';
+      } else {
+        studyUnitSubtitle = 'Study Unit: Document';
+      }
 
       // Destroy previous chart instance if exists
       if (chartContainer && chartContainer._chartInstance) {
@@ -108,11 +115,18 @@
         chartContainer._chartInstance = null;
       }
 
-      // Destroy percentage graph if breakdown variable is not set
-      var percentageChartContainer = document.getElementById('percentage-chart');
-      if (percentageChartContainer && percentageChartContainer._chartInstance && !data.breakdown_variable) {
-        percentageChartContainer._chartInstance.dispose();
-        percentageChartContainer._chartInstance = null;
+      // Destroy inner percentage graph if breakdown variable is not set
+      var innerPercentageChartContainer = document.getElementById('inner-percentage-chart');
+      if (innerPercentageChartContainer && innerPercentageChartContainer._chartInstance && !data.breakdown_variable) {
+        innerPercentageChartContainer._chartInstance.dispose();
+        innerPercentageChartContainer._chartInstance = null;
+      }
+
+      // Destroy outer percentage graph if breakdown variable is not set
+      var outerPercentageChartContainer = document.getElementById('outer-percentage-chart');
+      if (outerPercentageChartContainer && outerPercentageChartContainer._chartInstance && !data.breakdown_variable) {
+        outerPercentageChartContainer._chartInstance.dispose();
+        outerPercentageChartContainer._chartInstance = null;
       }
 
       // Initialize new chart instance
@@ -144,8 +158,8 @@
           };
         });
         chartOpts = {
-          title: { text: title },
-          tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+          title: { text: title, subtext: studyUnitSubtitle },
+          tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, confine: true, enterable: true, extraCssText: 'max-height:50vh; overflow-y:auto;' },
           legend: {
             type: 'scroll',
               data: orderedKeys,
@@ -162,9 +176,9 @@
           toolbox: {
               orient: "vertical",
               feature: {
-                  magicType: {
-                      type: ['line', 'bar', 'tield'],
-                  },
+          magicType: {
+            type: ['line', 'bar', 'tiled'],
+          },
                   dataView: {
                       show: true,
                       title: 'Data',
@@ -187,8 +201,8 @@
         var seriesName = "Citations";
         title = "Number of Citations per Year";
         chartOpts = {
-          title: { text: title },
-          tooltip: {},
+          title: { text: title, subtext: studyUnitSubtitle },
+          tooltip: { confine: true, enterable: true, extraCssText: 'max-height:50vh; overflow-y:auto;' },
           grid: {
             top: 110,
             left: 0,
@@ -199,9 +213,9 @@
           toolbox: {
               orient: "vertical",
               feature: {
-                  magicType: {
-                      type: ['line', 'bar', 'tield'],
-                  },
+          magicType: {
+            type: ['line', 'bar', 'tiled'],
+          },
                   dataView: {
                       show: true,
                       title: 'Data',
@@ -228,8 +242,8 @@
         var seriesName = "Documents";
         title = "Number of Documents per Year";
         chartOpts = {
-          title: { text: title },
-          tooltip: {},
+          title: { text: title, subtext: studyUnitSubtitle },
+          tooltip: { confine: true, enterable: true, extraCssText: 'max-height:50vh; overflow-y:auto;' },
           grid: {
             top: 110,
             left: 0,
@@ -240,9 +254,9 @@
           toolbox: {
               orient: "vertical",
               feature: {
-                  magicType: {
-                      type: ['line', 'bar', 'tield'],
-                  },
+          magicType: {
+            type: ['line', 'bar', 'tiled'],
+          },
                   dataView: {
                       show: true,
                       title: 'Data',
