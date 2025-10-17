@@ -87,37 +87,37 @@ def get_filters(request):
     if data_source.lower() == "scielo":
         aggs_fields = [
             ("publication_year", "publication_year", 100, {"_key": "desc"}),
-            ("document_type", "type.keyword", 100, None),
-            ("document_language", "languages.keyword", 100, None),
-            ("access_type", "open_access.oa_status.keyword", 20, None),
-            ("journal", "journal.keyword", 2500, None),
-            ("country", "authorships.countries.keyword", 500, None),
+            ("document_type", "type.keyword", 100, {"_key": "asc"}),
+            ("document_language", "languages.keyword", 100, {"_key": "asc"}),
+            ("access_type", "open_access.oa_status.keyword", 20, {"_key": "asc"}),
+            ("journal", "journal.keyword", 2500, {"_key": "asc"}),
+            ("country", "authorships.countries.keyword", 500, {"_key": "asc"}),
         ]
     elif data_source.lower() == "social_production":
         aggs_fields = [
             ("publication_year", "year", 1000, {"_key": "desc"}),
-            ("action", "action.enum", 1000, None),
-            ("classification", "classification.enum", 1000, None),
-            ("institutions", "institutions.enum", 1000, None),
-            ("cities", "cities.enum", 1000, None),
-            ("states", "states.enum", 1000, None),
-            ("practice", "practice.enum", 1000, None),
-            ("directory_type", "directory_type.enum", 1000, None),
+            ("action", "action.enum", 1000, {"_key": "asc"}),
+            ("classification", "classification.enum", 1000, {"_key": "asc"}),
+            ("institutions", "institutions.enum", 1000, {"_key": "asc"}),
+            ("cities", "cities.enum", 1000, {"_key": "asc"}),
+            ("states", "states.enum", 1000, {"_key": "asc"}),
+            ("practice", "practice.enum", 1000, {"_key": "asc"}),
+            ("directory_type", "directory_type.enum", 1000, {"_key": "asc"}),
         ]
     elif data_source.lower() == "openalex_works":
         aggs_fields = [
             ("publication_year", "publication_year", 100, {"_key": "desc"}),
-            ("source_type", "best_oa_location.source.type.keyword", 100, None),
-            ("source_index", "indexed_in.keyword", 100, None),
-            ("document_type", "type.keyword", 100, None),
-            ("document_language", "language.keyword", 100, None),
-            ("open_access", "open_access.is_oa", 2, None),
-            ("access_type", "open_access.oa_status.keyword", 20, None),
-            ("region_world", "geos.scimago_regions.keyword", 20, None),
-            ("country", "authorships.countries.keyword", 500, None),
-            ("subject_area_level_0", "thematic_areas.level0.keyword", 3, None),
-            ("subject_area_level_1", "thematic_areas.level1.keyword", 9, None),
-            ("subject_area_level_2", "thematic_areas.level2.keyword", 41, None),
+            ("source_type", "best_oa_location.source.type.keyword", 100, {"_key": "asc"}),
+            ("source_index", "indexed_in.keyword", 100, {"_key": "asc"}),
+            ("document_type", "type.keyword", 100, {"_key": "asc"}),
+            ("document_language", "language.keyword", 100, {"_key": "asc"}),
+            ("open_access", "open_access.is_oa", 2, {"_key": "asc"}),
+            ("access_type", "open_access.oa_status.keyword", 20, {"_key": "asc"}),
+            ("region_world", "geos.scimago_regions.keyword", 20, {"_key": "asc"}),
+            ("country", "authorships.countries.keyword", 500, {"_key": "asc"}),
+            ("subject_area_level_0", "thematic_areas.level0.keyword", 3, {"_key": "asc"}),
+            ("subject_area_level_1", "thematic_areas.level1.keyword", 9, {"_key": "asc"}),
+            ("subject_area_level_2", "thematic_areas.level2.keyword", 41, {"_key": "asc"}),
         ]
     else:
         return JsonResponse({"error": "Invalid or missing data_source parameter."}, status=400)
