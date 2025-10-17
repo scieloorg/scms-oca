@@ -7,7 +7,7 @@
 
     .tab-links {
         display: flex;
-        gap: 2rem;
+        gap: 1.25rem;
         cursor: pointer;
     }
 
@@ -49,44 +49,77 @@
         }
     }
 
-    .mega-menu{
+    .mega-menu-item {
+        position: static;
+    }
+
+    .mega-menu {
         background-color: #FFF;
         box-shadow: 0px 13px 42px 11px rgba(0, 0, 0, 0.05);
         border: 1px solid #EEE;
         border-top: 2px solid #034E8E;
         color: #666;
+        width: min(1000px, calc(100vw - 2rem));
+        max-width: none;
+        overflow-x: auto;
+        overflow-y: visible;
     }
 
+    .mega-menu-item .dropdown-menu.mega-menu {
+        right: auto;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+    }
 
-    .mega-menu a{
+    .mega-menu a {
         color: #666;
         text-transform: uppercase;
         font-size: 0.75rem;
         letter-spacing: 0;
         font-family: 'Lato', sans-serif;
-        font-weight: 700
+        font-weight: 700;
     }
-    .mega-menu a:hover{
+
+    .mega-menu a:hover {
         color: #034E8E;
     }
 
-    .menu-item-empty{
+    .menu-item-empty {
         padding: 0.25rem 1.5rem;
     }
 
-    .menu-link.dropdown-toggle.show{
+    .menu-link.dropdown-toggle.show {
         color: #034E8E;
+    }
+
+    @media (max-width: 991.98px) {
+        .mega-menu {
+            box-shadow: none;
+            border: none;
+            border-top: 1px solid #EEE;
+            width: 100%;
+            min-width: 100%;
+            margin-top: 0.5rem;
+        }
+
+        .mega-menu-item .dropdown-menu.mega-menu {
+            position: static !important;
+            transform: none !important;
+        }
+
+        .tab-links {
+            flex-direction: column;
+            gap: 1rem;
+        }
     }
 </style>
 
-<div class="collapse navbar-collapse" id="navbarMega">
-    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-    <li class="nav-item dropdown">
-        <a class="--nav-link menu-link dropdown-toggle" href="#" id="megaMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="true">
+<li class="nav-item dropdown mega-menu-item">
+    <a class="nav-link menu-link dropdown-toggle" href="#" id="megaMenuLink" role="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
         Observation
-        </a>
+    </a>
 
-        <div class="dropdown-menu dropdown-menu-right p-4 mega-menu" aria-labelledby="megaMenuLink" style="min-width: 900px;" data-bs-popper="static">
+    <div class="dropdown-menu p-3 mega-menu" aria-labelledby="megaMenuLink">
 
         <!-- Tab Links -->
         <div class="tab-links">
@@ -98,11 +131,11 @@
         <div class="tab-content">
             <!-- TAB 1 -->
             <div class="tab-pane" id="tab1">
-            <h5 class="fw-bold mb-3 ms-3">Scientific Production</h5>
+            <h5 class="fw-bold mb-3 ms-2">Scientific Production</h5>
             <div class="row">
-                <div class="col-md-4 ps-4 border-end">
-                <h6 class="fw-bold ms-3">World</h6>
-                <ul class="list-unstyled ps-4">
+                <div class="col-md-4 ps-3 border-end">
+                <h6 class="fw-bold ms-2">World</h6>
+                <ul class="list-unstyled ps-3">
                     <!-- <li class="fw-semibold">Country/Regions</li> -->
                     <li><a class="dropdown-item" href="/chart?menu_scope=evolucao-producao-mundo-pais-documentos">Documents</a></li>
                     <li><a class="dropdown-item" href="/chart?menu_scope=evolucao-producao-mundo-pais-citacoes">Citation</a></li>
@@ -112,7 +145,7 @@
                     <li><a class="dropdown-item" href="/chart?menu_scope=evolucao-producao-mundo-instituicao-pais-citacoes">Citation</a></li> -->
                 </ul>
                 </div>
-                <div class="col-md-4 border-end">
+                <div class="col-md-4 ps-3 border-end">
                 <h6 class="fw-bold">Brazil</h6>
                 <ul class="list-unstyled ps-2">
                     <!-- <li class="fw-semibold">Country/Regions</li> -->
@@ -124,7 +157,7 @@
                     <li><a class="dropdown-item" href="/chart?menu_scope=evolucao-producao-brasil-instituicao-pais-citacoes">Citation</a></li> -->
                 </ul>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-4 ps-3">
                 <h6 class="fw-bold">SciELO Network</h6>
                 <ul class="list-unstyled ps-2">
                     <!-- <li class="fw-semibold">Country/Regions</li> -->
@@ -138,11 +171,11 @@
                 </ul>
                 </div>
             </div>
-            <h5 class="fw-bold mb-3 ms-3">Social Production</h5>
+            <h5 class="fw-bold mb-3 ms-2">Social Production</h5>
             <div class="row">
-                <div class="col-md-4 ps-4 border-end">
-                <h6 class="fw-bold ms-3">Brazil</h6>
-                <ul class="list-unstyled ps-4">
+                <div class="col-md-4 ps-3 border-end">
+                <h6 class="fw-bold ms-2">Brazil</h6>
+                <ul class="list-unstyled ps-3">
                     <!-- <li class="fw-semibold">Country/Regions</li> -->
                     <li><a class="dropdown-item" href="/chart?menu_scope=evolucao-producaosocial-pais-documentos">Documents</a></li>
                     <li class="menu-item-empty">&nbsp;</li>
@@ -153,11 +186,11 @@
 
             <!-- TAB 2 -->
             <div class="tab-pane" id="tab2">
-            <h5 class="fw-bold mb-3 ms-3">Scientific Production</h5>
+            <h5 class="fw-bold mb-3 ms-2">Scientific Production</h5>
             <div class="row">
-                <div class="col-md-4 ps-4 border-end">
-                <h6 class="fw-bold ms-3">World</h6>
-                <ul class="list-unstyled ps-4">
+                <div class="col-md-4 ps-3 border-end">
+                <h6 class="fw-bold ms-2">World</h6>
+                <ul class="list-unstyled ps-3">
                     <!-- <li class="fw-semibold">Country/Regions</li> -->
                     <li><a class="dropdown-item" href="#">Documents*</a></li>
                     <li><a class="dropdown-item" href="#">Citation*</a></li>
@@ -167,7 +200,7 @@
                     <li><a class="dropdown-item" href="#">Citation*</a></li> -->
                 </ul>
                 </div>
-                <div class="col-md-4 border-end">
+                <div class="col-md-4 ps-3 border-end">
                 <h6 class="fw-bold">Brazil</h6>
                 <ul class="list-unstyled ps-2">
                     <!-- <li class="fw-semibold">Country/Regions</li> -->
@@ -179,7 +212,7 @@
                     <li><a class="dropdown-item" href="#">Citation*</a></li> -->
                 </ul>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-4 ps-3">
                 <h6 class="fw-bold">SciELO Network</h6>
                 <ul class="list-unstyled ps-2">
                     <!-- <li class="fw-semibold">Country/Regions</li> -->
@@ -197,29 +230,29 @@
 
         </div>
 
-        </div>
-    </li>
-    </ul>
-    
-</div>
+    </div>
+</li>
 
 <script>
-    const tabs = document.querySelectorAll('.tab-links h4');
-    const panes = document.querySelectorAll('.tab-pane');
+    (function () {
+        var tabs = document.querySelectorAll('.tab-links h4');
+        var panes = document.querySelectorAll('.tab-pane');
 
-    tabs.forEach(tab => {
-        const target = document.querySelector(tab.dataset.target);
-        tab.addEventListener('mouseenter', () => {
-            panes.forEach(p => p.classList.remove('active'));
-            tabs.forEach(t => t.classList.remove('active'));
-            target.classList.add('active');
-            tab.classList.add('active');
+        tabs.forEach(function (tab) {
+            var target = document.querySelector(tab.dataset.target);
+            tab.addEventListener('mouseenter', function () {
+                panes.forEach(function (p) { return p.classList.remove('active'); });
+                tabs.forEach(function (t) { return t.classList.remove('active'); });
+                if (target) {
+                    target.classList.add('active');
+                }
+                tab.classList.add('active');
+            });
         });
-    });
 
-    // Exibir o primeiro por padrão
-    if (panes.length) {
-        panes[0].classList.add('active');
-        tabs[0].classList.add('active');
-    }
+        if (panes.length && tabs.length) {
+            panes[0].classList.add('active');
+            tabs[0].classList.add('active');
+        }
+    })();
 </script>

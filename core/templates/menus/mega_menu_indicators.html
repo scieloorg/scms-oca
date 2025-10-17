@@ -7,7 +7,7 @@
 
     .tab-links-indicators {
         display: flex;
-        gap: 2rem;
+        gap: 1.25rem;
         cursor: pointer;
     }
 
@@ -49,12 +49,26 @@
         }
     }
 
+    .mega-menu-item-indicators {
+        position: static;
+    }
+
     .mega-menu-indicators {
         background-color: #FFF;
         box-shadow: 0px 13px 42px 11px rgba(0, 0, 0, 0.05);
         border: 1px solid #EEE;
         border-top: 2px solid #034E8E;
         color: #666;
+        width: min(1000px, calc(100vw - 2rem));
+        max-width: none;
+        overflow-x: auto;
+        overflow-y: visible;
+    }
+
+    .mega-menu-item-indicators .dropdown-menu.mega-menu-indicators {
+        right: auto;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
     }
 
     .mega-menu-indicators a {
@@ -72,62 +86,83 @@
     .menu-link.dropdown-toggle.show {
         color: #034E8E;
     }
+
+    @media (max-width: 991.98px) {
+        .mega-menu-indicators {
+            box-shadow: none;
+            border: none;
+            border-top: 1px solid #EEE;
+            width: 100%;
+            min-width: 100%;
+            margin-top: 0.5rem;
+        }
+
+        .mega-menu-item-indicators .dropdown-menu.mega-menu-indicators {
+            position: static !important;
+            transform: none !important;
+        }
+
+        .tab-links-indicators {
+            flex-direction: column;
+            gap: 1rem;
+        }
+    }
 </style>
 
-<div class="collapse navbar-collapse" id="navbarMegaIndicators">
-    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-        <li class="nav-item dropdown">
-            <a class="--nav-link menu-link dropdown-toggle" href="#" id="megaMenuLinkIndicators" role="button" data-bs-toggle="dropdown" aria-expanded="true">
-            Indicators
-            </a>
+<li class="nav-item dropdown mega-menu-item-indicators">
+    <a class="nav-link menu-link dropdown-toggle" href="#" id="megaMenuLinkIndicators" role="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+        Indicators
+    </a>
 
-            <div class="dropdown-menu dropdown-menu-right p-4 mega-menu-indicators" aria-labelledby="megaMenuLinkIndicators" style="min-width: 900px;" data-bs-popper="static">
+    <div class="dropdown-menu p-3 mega-menu-indicators" aria-labelledby="megaMenuLinkIndicators">
 
-                <!-- Tab Links -->
-                <div class="tab-links-indicators">
-                    <h4 data-target="#tab1Indicators">Annual Evolution</h4>
-                </div>
+        <!-- Tab Links -->
+        <div class="tab-links-indicators">
+            <h4 data-target="#tab1Indicators">Annual Evolution</h4>
+        </div>
 
-                <!-- Tab Content -->
-                <div class="tab-content-indicators">
-                    <!-- TAB 1 -->
-                    <div class="tab-pane-indicators" id="tab1Indicators">
-                        <h5 class="fw-bold mb-3 ms-3">Scientific Production</h5>
-                        <div class="row">
-                            <div class="col-md-4 ps-4 border-end">
-                                <h6 class="fw-bold"><a href="{% url 'indicators' %}?data_source=openalex_works">World</a></h6>
-                            </div>
-                            <div class="col-md-4 border-end">
-                                <h6 class="fw-bold"><a href="{% url 'indicators' %}?data_source=openalex_works&country_unit=BR">Brazil</a></h6>
-                            </div>
-                            <div class="col-md-4">
-                                <h6 class="fw-bold"><a href="{% url 'indicators' %}?data_source=scielo">SciELO Network</a></h6>
-                            </div>
-                        </div>
-                        <h5 class="fw-bold mb-3 ms-3"><a href="{% url 'indicators' %}?data_source=social_production">Social Production</a></h5>
+        <!-- Tab Content -->
+        <div class="tab-content-indicators">
+            <!-- TAB 1 -->
+            <div class="tab-pane-indicators" id="tab1Indicators">
+                <h5 class="fw-bold mb-3 ms-2">Scientific Production</h5>
+                <div class="row">
+                    <div class="col-md-4 ps-3 border-end">
+                        <h6 class="fw-bold"><a href="{% url 'indicators' %}?data_source=openalex_works">World</a></h6>
+                    </div>
+                    <div class="col-md-4 ps-3 border-end">
+                        <h6 class="fw-bold"><a href="{% url 'indicators' %}?data_source=openalex_works&country_unit=BR">Brazil</a></h6>
+                    </div>
+                    <div class="col-md-4 ps-3">
+                        <h6 class="fw-bold"><a href="{% url 'indicators' %}?data_source=scielo">SciELO Network</a></h6>
                     </div>
                 </div>
+                <h5 class="fw-bold mb-3 ms-2"><a href="{% url 'indicators' %}?data_source=social_production">Social Production</a></h5>
             </div>
-        </li>
-    </ul>
-</div>
+        </div>
+    </div>
+</li>
 
 <script>
-    const tabsIndicators = document.querySelectorAll('.tab-links-indicators h4');
-    const panesIndicators = document.querySelectorAll('.tab-pane-indicators');
+    (function () {
+        var tabsIndicators = document.querySelectorAll('.tab-links-indicators h4');
+        var panesIndicators = document.querySelectorAll('.tab-pane-indicators');
 
-    tabsIndicators.forEach(tab => {
-        const target = document.querySelector(tab.dataset.target);
-        tab.addEventListener('mouseenter', () => {
-            panesIndicators.forEach(p => p.classList.remove('active'));
-            tabsIndicators.forEach(t => t.classList.remove('active'));
-            target.classList.add('active');
-            tab.classList.add('active');
+        tabsIndicators.forEach(function (tab) {
+            var target = document.querySelector(tab.dataset.target);
+            tab.addEventListener('mouseenter', function () {
+                panesIndicators.forEach(function (p) { return p.classList.remove('active'); });
+                tabsIndicators.forEach(function (t) { return t.classList.remove('active'); });
+                if (target) {
+                    target.classList.add('active');
+                }
+                tab.classList.add('active');
+            });
         });
-    });
 
-    if (panesIndicators.length) {
-        panesIndicators[0].classList.add('active');
-        tabsIndicators[0].classList.add('active');
-    }
+        if (panesIndicators.length && tabsIndicators.length) {
+            panesIndicators[0].classList.add('active');
+            tabsIndicators[0].classList.add('active');
+        }
+    })();
 </script>
