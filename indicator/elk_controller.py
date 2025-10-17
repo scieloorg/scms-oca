@@ -62,6 +62,9 @@ FIELD_MAP_SOCIAL_PRODUCTION = {
     "publication_year": "year",
 }
 
+# Fields that must match all selected values (logical AND) instead of any (OR)
+MATCH_ALL_LIST_FIELDS = {"document_language", "country"}
+
 # Dictionary 
 MAX_BUCKETS = {
     "publication_year": 1000,
@@ -77,7 +80,7 @@ def get_filters(request):
     Select ES index via GET parameter (data_source=...)
     """
     data_source = request.GET.get('data_source', 'openalex_works')
-    cache_key = data_source.lower() if data_source else ""
+    cache_key = data_source.lower() if data_source else ""    
     if cache_key in FILTERS_CACHE:
         return JsonResponse(FILTERS_CACHE[cache_key])
 
@@ -87,37 +90,37 @@ def get_filters(request):
     if data_source.lower() == "scielo":
         aggs_fields = [
             ("publication_year", "publication_year", 100, {"_key": "desc"}),
-            ("document_type", "type.keyword", 100, None),
-            ("document_language", "languages.keyword", 100, None),
-            ("access_type", "open_access.oa_status.keyword", 20, None),
-            ("journal", "journal.keyword", 2500, None),
-            ("country", "authorships.countries.keyword", 500, None),
+            ("document_type", "type.keyword", 100, {"_key": "asc"}),
+            ("document_language", "languages.keyword", 100, {"_key": "asc"}),
+            ("access_type", "open_access.oa_status.keyword", 20, {"_key": "asc"}),
+            ("journal", "journal.keyword", 2500, {"_key": "asc"}),
+            ("country", "authorships.countries.keyword", 500, {"_key": "asc"}),
         ]
     elif data_source.lower() == "social_production":
         aggs_fields = [
             ("publication_year", "year", 1000, {"_key": "desc"}),
-            ("action", "action.enum", 1000, None),
-            ("classification", "classification.enum", 1000, None),
-            ("institutions", "institutions.enum", 1000, None),
-            ("cities", "cities.enum", 1000, None),
-            ("states", "states.enum", 1000, None),
-            ("practice", "practice.enum", 1000, None),
-            ("directory_type", "directory_type.enum", 1000, None),
+            ("action", "action.enum", 1000, {"_key": "asc"}),
+            ("classification", "classification.enum", 1000, {"_key": "asc"}),
+            ("institutions", "institutions.enum", 1000, {"_key": "asc"}),
+            ("cities", "cities.enum", 1000, {"_key": "asc"}),
+            ("states", "states.enum", 1000, {"_key": "asc"}),
+            ("practice", "practice.enum", 1000, {"_key": "asc"}),
+            ("directory_type", "directory_type.enum", 1000, {"_key": "asc"}),
         ]
     elif data_source.lower() == "openalex_works":
         aggs_fields = [
             ("publication_year", "publication_year", 100, {"_key": "desc"}),
-            ("source_type", "best_oa_location.source.type.keyword", 100, None),
-            ("source_index", "indexed_in.keyword", 100, None),
-            ("document_type", "type.keyword", 100, None),
-            ("document_language", "language.keyword", 100, None),
-            ("open_access", "open_access.is_oa", 2, None),
-            ("access_type", "open_access.oa_status.keyword", 20, None),
-            ("region_world", "geos.scimago_regions.keyword", 20, None),
-            ("country", "authorships.countries.keyword", 500, None),
-            ("subject_area_level_0", "thematic_areas.level0.keyword", 3, None),
-            ("subject_area_level_1", "thematic_areas.level1.keyword", 9, None),
-            ("subject_area_level_2", "thematic_areas.level2.keyword", 41, None),
+            ("source_type", "best_oa_location.source.type.keyword", 100, {"_key": "asc"}),
+            ("source_index", "indexed_in.keyword", 100, {"_key": "asc"}),
+            ("document_type", "type.keyword", 100, {"_key": "asc"}),
+            ("document_language", "language.keyword", 100, {"_key": "asc"}),
+            ("open_access", "open_access.is_oa", 2, {"_key": "asc"}),
+            ("access_type", "open_access.oa_status.keyword", 20, {"_key": "asc"}),
+            ("region_world", "geos.scimago_regions.keyword", 20, {"_key": "asc"}),
+            ("country", "authorships.countries.keyword", 500, {"_key": "asc"}),
+            ("subject_area_level_0", "thematic_areas.level0.keyword", 3, {"_key": "asc"}),
+            ("subject_area_level_1", "thematic_areas.level1.keyword", 9, {"_key": "asc"}),
+            ("subject_area_level_2", "thematic_areas.level2.keyword", 41, {"_key": "asc"}),
         ]
     else:
         return JsonResponse({"error": "Invalid or missing data_source parameter."}, status=400)
@@ -145,13 +148,34 @@ def get_indicators(request):
     """
     Endpoint to return indicators.
     """
-    filters = json.loads(request.body.decode())
+    body_text = request.body.decode()
+    filters = json.loads(body_text) if body_text else {}
+    filters = dict(filters)
+    
+    # Read special parameters for query construction
+    language_operator = str(filters.pop("document_language_operator", None) or "and").lower()
+    country_operator = str(filters.pop("country_operator", None) or "or").lower()
+
+    # Read study unit and breakdown variable    
     study_unit = filters.pop("study_unit", "document")
     breakdown_variable = filters.pop("breakdown_variable", None)
+    
     data_source = filters.pop("data_source", None) or request.GET.get("data_source", None) or request.POST.get("data_source", None) or ""
     country_unit = filters.pop("country_unit", None) or request.GET.get("country_unit", None) or request.POST.get("country_unit", None) or ""
 
     es_index, flag_brazil, flag_social_production = get_es_index_and_flags(data_source, country_unit)
+
+    # Determine which fields require all values to match (AND) vs any (OR)
+    match_all_fields = set(MATCH_ALL_LIST_FIELDS)
+    if language_operator == "or":
+        match_all_fields.discard("document_language")
+    else:
+        match_all_fields.add("document_language")
+
+    if country_operator == "and":
+        match_all_fields.add("country")
+    else:
+        match_all_fields.discard("country")
 
     if data_source.lower() == "scielo":
         field_map = FIELD_MAP_SCIELO
@@ -160,7 +184,7 @@ def get_indicators(request):
     else:
         field_map = FIELD_MAP_OPENALEX_WORKS
 
-    query = build_query(filters, field_map, flag_brazil, flag_social_production)
+    query = build_query(filters, field_map, flag_brazil, flag_social_production, match_all_fields)
 
     # Choose main aggregation
     if breakdown_variable:
@@ -175,6 +199,7 @@ def get_indicators(request):
             aggs = build_documents_per_year_aggs(field_map, flag_social_production)
 
     body = {"size": 0, "query": query, "aggs": aggs}
+
     res = es.search(index=es_index, body=body)
 
     # Parse response
@@ -188,11 +213,11 @@ def get_indicators(request):
         if study_unit == "citation":
             indicators = parse_citations_per_year_response(res)
         else:
-            indicators = parse_documents_per_year_response(res)        
+            indicators = parse_documents_per_year_response(res)
 
     return JsonResponse(indicators)
 
-def build_query(filters, field_map, flag_brazil, flag_social_production):
+def build_query(filters, field_map, flag_brazil, flag_social_production, match_all_list_fields):
     """
     Build the Elasticsearch query from the received filters, mapping friendly names to real fields.
     """
@@ -211,6 +236,7 @@ def build_query(filters, field_map, flag_brazil, flag_social_production):
     for field, value in filters.items():
         es_field = field_map.get(field, field)
 
+        # Special handling for boolean field
         if field == "open_access":
             def to_bool(v):
                 if isinstance(v, bool):
@@ -223,10 +249,55 @@ def build_query(filters, field_map, flag_brazil, flag_social_production):
             else:
                 value = to_bool(value)
 
+        # Handle list values
         if isinstance(value, list):
-            must.append({"terms": {es_field: value}})
+            normalized_values = []
+            seen = set()
+
+            # Normalize values (trim, case) and remove duplicates
+            for item in value:
+                if item in (None, ""):
+                    continue
+
+                key = str(item).strip()
+                stored_value = item
+
+                # Normalize keys for specific fields
+                if field == "document_language":
+                    stored_value = key.lower()
+                    key = stored_value
+                elif field == "country":
+                    stored_value = key.upper()
+                    key = stored_value
+                else:
+                    stored_value = item
+                
+                if key in seen:
+                    continue
+                
+                seen.add(key)
+                normalized_values.append(stored_value)
+
+            if not normalized_values:
+                continue
+
+            # Decide between "terms" (OR) and multiple "term" (AND)
+            if field in match_all_list_fields:
+                for single_value in normalized_values:
+                    must.append({"term": {es_field: single_value}})
+            else:
+                must.append({"terms": {es_field: normalized_values}})
+
         else:
-            must.append({"term": {es_field: value}})
+            if value in (None, ""):
+                continue
+            if field == "document_language":
+                term_value = str(value).strip().lower()
+            elif field == "country":
+                term_value = str(value).strip().upper()
+            else:
+                term_value = value
+            must.append({"term": {es_field: term_value}})
 
     return {"bool": {"must": must}} if must else {"match_all": {}}
 
