@@ -199,6 +199,7 @@ def get_indicators(request):
             aggs = build_documents_per_year_aggs(field_map, flag_social_production)
 
     body = {"size": 0, "query": query, "aggs": aggs}
+
     res = es.search(index=es_index, body=body)
 
     # Parse response
@@ -212,11 +213,11 @@ def get_indicators(request):
         if study_unit == "citation":
             indicators = parse_citations_per_year_response(res)
         else:
-            indicators = parse_documents_per_year_response(res)        
+            indicators = parse_documents_per_year_response(res)
 
     return JsonResponse(indicators)
 
-def build_query(filters, field_map, flag_brazil, flag_social_production):
+def build_query(filters, field_map, flag_brazil, flag_social_production, match_all_list_fields):
     """
     Build the Elasticsearch query from the received filters, mapping friendly names to real fields.
     """
