@@ -235,6 +235,7 @@ def build_query(filters, field_map, flag_brazil, flag_social_production):
     for field, value in filters.items():
         es_field = field_map.get(field, field)
 
+        # Special handling for boolean field
         if field == "open_access":
             def to_bool(v):
                 if isinstance(v, bool):
@@ -247,10 +248,55 @@ def build_query(filters, field_map, flag_brazil, flag_social_production):
             else:
                 value = to_bool(value)
 
+        # Handle list values
         if isinstance(value, list):
-            must.append({"terms": {es_field: value}})
+            normalized_values = []
+            seen = set()
+
+            # Normalize values (trim, case) and remove duplicates
+            for item in value:
+                if item in (None, ""):
+                    continue
+
+                key = str(item).strip()
+                stored_value = item
+
+                # Normalize keys for specific fields
+                if field == "document_language":
+                    stored_value = key.lower()
+                    key = stored_value
+                elif field == "country":
+                    stored_value = key.upper()
+                    key = stored_value
+                else:
+                    stored_value = item
+                
+                if key in seen:
+                    continue
+                
+                seen.add(key)
+                normalized_values.append(stored_value)
+
+            if not normalized_values:
+                continue
+
+            # Decide between "terms" (OR) and multiple "term" (AND)
+            if field in match_all_list_fields:
+                for single_value in normalized_values:
+                    must.append({"term": {es_field: single_value}})
+            else:
+                must.append({"terms": {es_field: normalized_values}})
+
         else:
-            must.append({"term": {es_field: value}})
+            if value in (None, ""):
+                continue
+            if field == "document_language":
+                term_value = str(value).strip().lower()
+            elif field == "country":
+                term_value = str(value).strip().upper()
+            else:
+                term_value = value
+            must.append({"term": {es_field: term_value}})
 
     return {"bool": {"must": must}} if must else {"match_all": {}}
 
