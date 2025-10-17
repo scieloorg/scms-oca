@@ -62,6 +62,9 @@ FIELD_MAP_SOCIAL_PRODUCTION = {
     "publication_year": "year",
 }
 
+# Fields that must match all selected values (logical AND) instead of any (OR)
+MATCH_ALL_LIST_FIELDS = {"document_language", "country"}
+
 # Dictionary 
 MAX_BUCKETS = {
     "publication_year": 1000,
@@ -77,7 +80,7 @@ def get_filters(request):
     Select ES index via GET parameter (data_source=...)
     """
     data_source = request.GET.get('data_source', 'openalex_works')
-    cache_key = data_source.lower() if data_source else ""
+    cache_key = data_source.lower() if data_source else ""    
     if cache_key in FILTERS_CACHE:
         return JsonResponse(FILTERS_CACHE[cache_key])
 
@@ -145,13 +148,34 @@ def get_indicators(request):
     """
     Endpoint to return indicators.
     """
-    filters = json.loads(request.body.decode())
+    body_text = request.body.decode()
+    filters = json.loads(body_text) if body_text else {}
+    filters = dict(filters)
+    
+    # Read special parameters for query construction
+    language_operator = str(filters.pop("document_language_operator", None) or "and").lower()
+    country_operator = str(filters.pop("country_operator", None) or "or").lower()
+
+    # Read study unit and breakdown variable    
     study_unit = filters.pop("study_unit", "document")
     breakdown_variable = filters.pop("breakdown_variable", None)
+    
     data_source = filters.pop("data_source", None) or request.GET.get("data_source", None) or request.POST.get("data_source", None) or ""
     country_unit = filters.pop("country_unit", None) or request.GET.get("country_unit", None) or request.POST.get("country_unit", None) or ""
 
     es_index, flag_brazil, flag_social_production = get_es_index_and_flags(data_source, country_unit)
+
+    # Determine which fields require all values to match (AND) vs any (OR)
+    match_all_fields = set(MATCH_ALL_LIST_FIELDS)
+    if language_operator == "or":
+        match_all_fields.discard("document_language")
+    else:
+        match_all_fields.add("document_language")
+
+    if country_operator == "and":
+        match_all_fields.add("country")
+    else:
+        match_all_fields.discard("country")
 
     if data_source.lower() == "scielo":
         field_map = FIELD_MAP_SCIELO
@@ -160,7 +184,7 @@ def get_indicators(request):
     else:
         field_map = FIELD_MAP_OPENALEX_WORKS
 
-    query = build_query(filters, field_map, flag_brazil, flag_social_production)
+    query = build_query(filters, field_map, flag_brazil, flag_social_production, match_all_fields)
 
     # Choose main aggregation
     if breakdown_variable:
