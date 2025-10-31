@@ -1,22 +1,72 @@
-from django.http import HttpResponseRedirect
+import json
+
+from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.utils.translation import gettext as _
+from django.views.decorators.http import require_GET
+from django.views.decorators.http import require_POST
 from wagtail.contrib.modeladmin.views import CreateView, EditView
 
 from core import tasks
 from core_settings.models import Moderation
 
+from . import constants, controller
 from .permission_helper import IndicatorPermissionHelper
 
 
-def indicators_view(request):
-    """
-    View aimed at displaying the indicators page.
-    """
-    data_source = request.GET.get('data_source', 'openalex_works')
-    country_unit = request.GET.get('country_unit', None)
-    return render(request, "indicators.html", {"data_source": data_source, "country_unit": country_unit})
+# Create a filters cache to avoid repeated ES queries
+FILTERS_CACHE = {}
+
+
+@require_GET
+def filters_view(request):
+    # Get data source from request
+    data_source = request.GET.get('data_source')
+
+    # Extract index name from data source
+    index_name = controller.get_index_name_from_data_source(data_source)
+
+    # Use cached filters if available
+    if index_name in FILTERS_CACHE:
+        return JsonResponse(FILTERS_CACHE[index_name])
+
+    # Get aggregations based on data source
+    field_settings = constants.DSNAME_TO_FIELD_SETTINGS.get(data_source)
+    if not field_settings:
+        return JsonResponse({"error": "Invalid data source"}, status=400)
+
+    # FIXME: move this logic to controller
+    # Build aggregations
+    aggs = {}
+    for form_field_name, field_info in field_settings.items():
+        name = field_info.get("index_field_name")
+        size = field_info.get("filter", {}).get("size")
+        order = field_info.get("filter", {}).get("order")
+
+        terms = {"field": name, "size": size}
+
+        if order:
+            terms["order"] = order
+
+        aggs[form_field_name] = {"terms": terms}
+
+    # Build ES query body
+    body = {"size": 0, "aggs": aggs}
+
+    # Execute ES query
+    try:
+        res = controller.es.search(index=index_name, body=body)
+        filters = {k: [b["key"] for b in v["buckets"]] for k, v in res["aggregations"].items()}
+
+        # Cache the filters
+        FILTERS_CACHE[index_name] = filters
+
+        return JsonResponse(filters)
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
 def world_view(request):
     selected_filters = request.GET.dict()
     context = {
