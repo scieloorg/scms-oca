@@ -1,0 +1,206 @@
+<h4 class="my-2">Graph Options</h4>
+
+<div class="form-group mb-3">
+  <label for="study_unit" class="form-label">Study Unit</label>
+  <select id="study_unit" class="form-control" name="study_unit">
+    <option value="journal" disabled>Journal</option>
+    <option value="document" selected>Document</option>
+    <option value="citation">Citation</option>
+  </select>
+</div>
+
+<div class="form-group mb-3">
+  <label for="breakdown_variable" class="form-label">Breakdown Variable</label>
+  <select id="breakdown_variable" class="form-control" name="breakdown_variable">
+    <option value="">Select a variable</option>
+    <option value="source_index_open_alex">Source Index (OpenAlex)</option>
+    <option value="source_index_scielo">Source Index (SciELO)</option>
+    <option value="source_type">Source Type</option>
+    <option value="document_type">Document Type</option>
+    <option value="document_language">Document Language</option>
+    <option value="open_access">Open Access</option>
+    <option value="access_type">Access Type</option>
+    <option value="subject_area_level_0">Subject Area Level 0</option>
+    <option value="subject_area_level_1">Subject Area Level 1</option>
+    <option value="subject_area_level_2">Subject Area Level 2</option>
+    <option value="region_world">Author Affiliation - Region (World)</option>
+  </select>
+</div>
+
+<h4 class="my-2 pt-1">Filters</h4>
+
+<div class="form-group mb-3">
+    <label class="form-label" for="source_index_open_alex">Source Index (OpenAlex)</label>
+    <select multiple id="source_index_open_alex" class="form-control" name="source_index_open_alex" aria-label="Source Index (OpenAlex)">
+    </select>
+</div>
+
+<div class="form-group mb-3">
+    <label class="form-label" for="source_index_scielo">Source Index (SciELO)</label>
+    <select multiple id="source_index_scielo" class="form-control" name="source_index_scielo" aria-label="Source Index (SciELO)">
+    </select>
+</div>
+
+<div class="form-group mb-3">
+    <label class="form-label" for="source_type">Source Type</label>
+    <select multiple id="source_type" class="form-control" name="source_type" aria-label="Source Type">
+    </select>
+</div>
+
+<div class="h6 pb-2 mt-4 border-bottom text-primary">
+  <strong>Document</strong>
+</div>
+
+<div class="form-group mb-3">
+  <label class="form-label" for="publication_year_start">Publication Year</label>
+  <div class="input-group">
+    <input
+      id="document_publication_year_start"
+      name="document_publication_year_start"
+      type="number"
+      class="form-control"
+      aria-label="Publication Year Start"
+      min="1900"
+      max="2100"
+      placeholder="Start"
+      value="2015"
+    />
+    <input
+      id="document_publication_year_end"
+      name="document_publication_year_end"
+      type="number"
+      class="form-control"
+      aria-label="Publication Year End"
+      min="1900"
+      max="2100"
+      placeholder="End"
+      value="2024"
+    />
+  </div>
+</div>
+
+<div class="form-group mb-3">
+    <label class="form-label" for="document_type">Document Type</label>
+    <select multiple id="document_type" class="form-control" name="document_type" aria-label="Type"></select>
+</div>
+
+<div class="form-group mb-3">
+    <label class="form-label" for="document_language">Document Language</label>
+    <select id="document_language" class="form-control" name="document_language" aria-label="Language">
+        <option value="" selected>All languages</option>
+    </select>
+</div>
+
+<div class="form-group mb-3">
+    <label class="form-label" for="open_access">Open Access</label>
+    <select id="open_access" class="form-control" name="open_access" aria-label="Open Access">
+        <option value="" selected>All options</option>
+        <option value="Yes">Yes</option>
+        <option value="No">No</option>
+    </select>
+</div>
+
+<div class="form-group mb-3">
+    <label class="form-label" for="access_type">Access Type</label>
+    <select multiple id="access_type" class="form-control" name="access_type" aria-label="Access Type">
+    </select>
+</div>
+
+<div class="form-group mb-3">
+    <label class="form-label" for="subject_area_level_0">Subject Area Level 0</label>
+    <select multiple id="subject_area_level_0" class="form-control" name="subject_area_level_0" aria-label="Subject Area Level 0">
+    </select>
+</div>
+
+<div class="form-group mb-3">
+    <label class="form-label" for="subject_area_level_1">Subject Area Level 1</label>
+    <select multiple id="subject_area_level_1" class="form-control" name="subject_area_level_1" aria-label="Subject Area Level 1">
+    </select>
+</div>
+
+<div class="form-group mb-3">
+    <label class="form-label" for="subject_area_level_2">Subject Area Level 2</label>
+    <select multiple id="subject_area_level_2" class="form-control" name="subject_area_level_2" aria-label="Subject Area Level 2">
+    </select>
+</div>
+
+<div class="h6 pb-2 mt-4 border-bottom text-primary">
+  <strong>Author Affiliation</strong>
+</div>
+
+<div class="form-group mb-3">
+    <label class="form-label" for="region_world">Region (World)</label>
+    <select multiple id="region_world" class="form-control" name="region_world" aria-label="Region (World)">
+    </select>
+</div>
+
+<div class="form-group mb-3">
+    <label class="form-label" for="country">Country</label>
+    <select multiple id="country" class="form-control" name="country" aria-label="Country">
+    </select>
+</div>
+
+<div class="form-group mb-3">
+    <label class="form-label" for="country_operator">Country Query Operator</label>
+    <select id="country_operator" name="country_operator" class="form-control" aria-label="Country Query Operator">
+        <option value="and">AND</option>
+        <option value="or" selected>OR</option>
+    </select>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        // Populate filters
+        const data = await fetchFilters('world');
+        populateSelectFilters(
+            // Filters data retrieved from the index API
+            data,
+            // Fields that we don't want to populate because they are handled differently
+            [
+              'breakdown_variable',
+              'study_unit',
+              'open_access',
+              'document_publication_year_start',
+              'document_publication_year_end',
+              'country_operator'
+            ]
+        );
+    } catch (error) {
+        console.error('Error loading filters', error);
+    }
+
+    try {
+        // Initialize Select2 for multi select fields
+        const selectFields = [
+            'source_index_open_alex',
+            'source_index_scielo',
+            'source_type',
+            'document_type',
+            'access_type',
+            'subject_area_level_0',
+            'subject_area_level_1',
+            'subject_area_level_2',
+            'region_world',
+            'country'
+        ];
+        selectFields.forEach(fieldId => {
+            const selectElement = document.getElementById(fieldId);
+            if (selectElement) {
+                $(selectElement).select2(
+                  {placeholder: 'Start typing to search...'}
+                );
+            }
+        });
+
+        // Initialize Select2 for single select fields
+        const documentLanguageSelect = document.getElementById('document_language');
+        if (documentLanguageSelect) {
+          $(documentLanguageSelect).select2();
+        }
+    } catch (error) {
+        console.error('Error initializing Select2', error);
+    }
+});
+
+</script>
