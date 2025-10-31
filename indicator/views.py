@@ -1,22 +1,186 @@
-from django.http import HttpResponseRedirect
+import json
+
+from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.utils.translation import gettext as _
+from django.views.decorators.http import require_GET
+from django.views.decorators.http import require_POST
 from wagtail.contrib.modeladmin.views import CreateView, EditView
 
 from core import tasks
 from core_settings.models import Moderation
 
+from . import constants, controller
 from .permission_helper import IndicatorPermissionHelper
 
 
-def indicators_view(request):
-    """
-    View aimed at displaying the indicators page.
-    """
-    data_source = request.GET.get('data_source', 'openalex_works')
-    country_unit = request.GET.get('country_unit', None)
-    return render(request, "indicators.html", {"data_source": data_source, "country_unit": country_unit})
+# Create a filters cache to avoid repeated ES queries
+FILTERS_CACHE = {}
+
+
+@require_GET
+def filters_view(request):
+    # Get data source from request
+    data_source = request.GET.get('data_source')
+
+    # Extract index name from data source
+    index_name = controller.get_index_name_from_data_source(data_source)
+
+    # Use cached filters if available
+    if index_name in FILTERS_CACHE:
+        return JsonResponse(FILTERS_CACHE[index_name])
+
+    # Get aggregations based on data source
+    field_settings = constants.DSNAME_TO_FIELD_SETTINGS.get(data_source)
+    if not field_settings:
+        return JsonResponse({"error": "Invalid data source"}, status=400)
+
+    # FIXME: move this logic to controller
+    # Build aggregations
+    aggs = {}
+    for form_field_name, field_info in field_settings.items():
+        name = field_info.get("index_field_name")
+        size = field_info.get("filter", {}).get("size")
+        order = field_info.get("filter", {}).get("order")
+
+        terms = {"field": name, "size": size}
+
+        if order:
+            terms["order"] = order
+
+        aggs[form_field_name] = {"terms": terms}
+
+    # Build ES query body
+    body = {"size": 0, "aggs": aggs}
+
+    # Execute ES query
+    try:
+        res = controller.es.search(index=index_name, body=body)
+        filters = {k: [b["key"] for b in v["buckets"]] for k, v in res["aggregations"].items()}
+
+        # Cache the filters
+        FILTERS_CACHE[index_name] = filters
+
+        return JsonResponse(filters)
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+
+@require_POST
+def data_view(request):
+    # Read data source from request GET parameters
+    data_source = request.GET.get("data_source")
+    if not data_source:
+        return JsonResponse({"error": "Missing data_source parameter in request URL"}, status=400)
+    
+    # Read filters from the request body sent by the indicator form
+    body_text = request.body.decode()
+    payload = json.loads(body_text) if body_text else {}
+
+    filters = payload.get("filters", {})
+    filters = dict(filters)
+    
+    # Read language query operator
+    language_query_operator = filters.pop("document_language_operator", None)
+
+    # Read country query operator
+    country_query_operator = filters.pop("country_operator", None)
+
+    # Read study unit
+    study_unit = filters.pop("study_unit", None)
+
+    # Read breakdown variable
+    breakdown_variable = filters.pop("breakdown_variable", None)
+
+    # Extract index name from data source
+    index_name = controller.get_index_name_from_data_source(data_source)
+
+    # Get field mapping for the data source
+    field_settings = constants.DSNAME_TO_FIELD_SETTINGS.get(data_source)
+
+    # Build the query to filter documents
+    query = controller.build_query(
+        filters, 
+        field_settings, 
+        data_source,
+        language_query_operator,
+        country_query_operator
+    )
+
+    # FIXME: move this logic to controller
+    # Choose main aggregation
+    aggs = {}
+    if breakdown_variable:
+        if study_unit == "citation":
+            aggs = controller.build_breakdown_citation_per_year_aggs(field_settings, breakdown_variable)
+        elif study_unit == "document":
+            aggs = controller.build_breakdown_documents_per_year_aggs(field_settings, breakdown_variable, data_source)
+    else:
+        if study_unit == "citation":
+            aggs = controller.build_citations_per_year_aggs()
+        elif study_unit == "document":
+            aggs = controller.build_documents_per_year_aggs(data_source)
+
+    body = {"size": 0, "query": query, "aggs": aggs}
+
+    # Execute search
+    try:
+        res = controller.es.search(index=index_name, body=body)
+    except Exception:
+        return JsonResponse({"error": "Error executing search"}, status=500)
+
+    # FIXME: move this logic to controller
+    # Parse response
+    data = {}
+    if breakdown_variable:
+        if study_unit == "citation":
+            data = controller.parse_breakdown_citation_per_year_response(res)
+        elif study_unit == "document":
+            data = controller.parse_breakdown_documents_per_year_response(res)
+        data["breakdown_variable"] = breakdown_variable
+    else:
+        if study_unit == "citation":
+            data = controller.parse_citations_per_year_response(res)
+        elif study_unit == "document":
+            data = controller.parse_documents_per_year_response(res)
+
+    return JsonResponse(data)
+
+
+def world_view(request):
+    selected_filters = request.GET.dict()
+    context = {
+        "data_source": "world",
+        "data_source_display_name": _("Scientific Production - World"),
+        "selected_filters": selected_filters,
+    }
+    return render(request, "indicator.html", context)
+
+
+def brazil_view(request):
+    context = {
+        "data_source": "brazil",
+        "data_source_display_name": _("Scientific Production - Brazil"),
+    }
+    return render(request, "indicator.html", context)
+
+
+def scielo_view(request):
+    context = {
+        "data_source": "scielo",
+        "data_source_display_name": _("Scientific Production - SciELO Network"),
+    }
+    return render(request, "indicator.html", context)
+
+
+def social_view(request):
+    context = {
+        "data_source": "social",
+        "data_source_display_name": _("Social Production"),
+    }
+    return render(request, "indicator.html", context)
 
 
 class IndicatorDirectoryEditView(EditView):

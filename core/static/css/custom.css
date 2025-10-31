@@ -50,6 +50,10 @@
     align-items: center;
   }
 
+  body:not(.primary-menu-open) .flat-primary-menu {
+    display: none;
+  }
+
   #header .header-row .primary-menu .navbar-collapse {
     position: absolute;
     top: 100%;

@@ -1,0 +1,202 @@
+<h4 class="my-2">Graph Options</h4>
+
+<div class="form-group mb-3">
+  <label for="study_unit" class="form-label">Study Unit</label>
+  <select id="study_unit" class="form-control" name="study_unit">
+    <option value="journal" disabled>Journal</option>
+    <option value="document" selected>Document</option>
+    <option value="citation" disabled>Citation</option>
+  </select>
+</div>
+
+<div class="form-group mb-3">
+  <label for="breakdown_variable" class="form-label">Breakdown Variable</label>
+  <select id="breakdown_variable" name="breakdown_variable" class="form-control">
+    <option value="">Select a variable</option>
+    <option value="collection">Collection</option>
+    <option value="document_type">Document Type</option>
+    <option value="document_language">Document Language</option>
+    <option value="access_type">Access Type</option>
+  </select>
+</div>
+
+<h4 class="my-2 pt-1">Filters</h4>
+
+<div class="form-group mb-3">
+    <label class="form-label" for="collection">Collection</label>
+    <select id="collection" name="collection" class="form-control" aria-label="Collection">
+        <option value="" selected>Select a Collection</option>
+        <option value="arg">Argentina</option>
+        <option value="bol">Bolivia</option>
+        <option value="scl">Brazil</option>
+        <option value="chl">Chile</option>
+        <option value="col">Colombia</option>
+        <option value="cri">Costa Rica</option>
+        <option value="cub">Cuba</option>
+        <option value="ecu">Ecuador</option>
+        <option value="mex">Mexico</option>
+        <option value="per">Peru</option>
+        <option value="prt">Portugal</option>
+        <option value="pry">Paraguay</option>
+        <option value="esp">Spain</option>
+        <option value="sza">South Africa</option>
+        <option value="ury">Uruguay</option>
+        <option value="ven">Venezuela</option>
+        <option value="wid">West Indies</option>
+        <option value="cic">Science and Culture</option>
+        <option value="psi">PEPSIC</option>
+        <option value="spa">Public Health</option>
+        <option value="rve">REVENF</option>
+    </select>
+</div>
+
+<div class="form-group mb-3">
+    <label class="form-label" for="publisher">Publisher</label>
+    <select id="publisher" name="publisher" class="form-control" aria-label="Publisher">
+      <option value="" selected>Select a Publisher</option>
+    </select>
+</div>
+
+<div class="form-group mb-3">
+    <label class="form-label" for="journal">Journal</label>
+    <select id="journal" name="journal" class="form-control" aria-label="Journal">
+      <option value="" selected>Select a Journal</option>
+    </select>
+</div>
+
+<div class="h6 pb-2 mt-4 border-bottom text-primary">
+  <strong>Document</strong>
+</div>
+
+<div class="form-group mb-3">
+  <label class="form-label" for="document_publication_year_start">Publication Year</label>
+  <div class="input-group">
+    <input
+      id="document_publication_year_start"
+      name="document_publication_year_start"
+      type="number"
+      class="form-control"
+      aria-label="Publication Year Start"
+      min="1900"
+      max="2100"
+      placeholder="Start"
+      value="2015"
+    />
+    <input
+      id="document_publication_year_end"
+      name="document_publication_year_end"
+      type="number"
+      class="form-control"
+      aria-label="Publication Year End"
+      min="1900"
+      max="2100"
+      placeholder="End"
+      value="2024"
+    />
+  </div>
+</div>
+
+<div class="form-group mb-3">
+    <label class="form-label" for="document_type">Document Type</label>
+    <select multiple id="document_type" name="document_type" class="form-control" aria-label="Type"></select>
+</div>
+
+<div class="form-group mb-3">
+    <label class="form-label" for="document_language">Document Language</label>
+    <select multiple id="document_language" name="document_language" class="form-control" aria-label="Language"></select>
+</div>
+
+<div class="form-group mb-3">
+    <label class="form-label" for="document_language_operator">Language Query Operator</label>
+    <select id="document_language_operator" name="document_language_operator" class="form-control" aria-label="Language Query Operator">
+        <option value="and">AND</option>
+        <option value="or">OR</option>
+    </select>
+</div>
+
+<div class="form-group mb-3">
+    <label class="form-label" for="access_type">Access Type</label>
+    <select multiple id="access_type" name="access_type" class="form-control" aria-label="Access Type"></select>
+</div>
+
+<div class="h6 pb-2 mt-4 border-bottom text-primary">
+  <strong>Author Affiliation</strong>
+</div>
+
+<div class="form-group mb-3">
+    <label class="form-label" for="institution">Institution</label>
+    <select multiple id="institution" name="institution" class="form-control" aria-label="Institution"></select>
+</div>
+
+<div class="form-group mb-3">
+    <label class="form-label" for="country">Country</label>
+    <select multiple id="country" name="country" class="form-control" aria-label="Country"></select>
+</div>
+
+<div class="form-group mb-3">
+    <label class="form-label" for="country_operator">Country Query Operator</label>
+    <select id="country_operator" name="country_operator" class="form-control" aria-label="Country Query Operator">
+        <option value="and">AND</option>
+        <option value="or" selected>OR</option>
+    </select>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        // Populate filters
+        const data = await fetchFilters('scielo');
+        populateSelectFilters(
+            // Filters data retrieved from the index API
+            data,
+            // Fields that we don't want to populate because they are handled differently
+            [
+              'collection',
+              'breakdown_variable',
+              'study_unit',
+              'document_publication_year_start',
+              'document_publication_year_end',
+              'document_language_operator',
+              'country_operator',
+            ]
+        );
+    } catch (error) {
+        console.error('Error loading filters', error);
+    }
+
+    try {
+        // Initialize Select2 for select fields (multiple)
+        const selectFields = [
+            "access_type",
+            "country",
+            "document_language",
+            "document_type",
+            "institution",
+        ];
+        selectFields.forEach(fieldId => {
+            const selectElement = document.getElementById(fieldId);
+            if (selectElement) {
+                $(selectElement).select2(
+                  {placeholder: 'Start typing to search...'}
+                );
+            }
+        });
+
+        // Initialize Select2 for select fields (single)
+        const selectFieldsSingle = [
+          "collection",
+          "journal",
+          "publisher",
+        ]
+        selectFieldsSingle.forEach(fieldId => {
+          const selectElement = document.getElementById(fieldId);
+          if (selectElement) {
+            $(selectElement).select2();
+          }
+        })
+
+    } catch (error) {
+        console.error('Error initializing Select2', error);
+    }
+});
+</script>

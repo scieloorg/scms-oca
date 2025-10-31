@@ -1,0 +1,34 @@
+<div>
+  <form id="menu-form">
+    {% csrf_token %} 
+    <div id="menu-fields">
+      {% if data_source == "world" %}
+        {% include "filters/sci_prod_world.html" %}
+    
+      {% elif data_source == "brazil" %}
+        {% include "filters/sci_prod_brazil.html" %}
+    
+      {% elif data_source == "scielo" %}
+        {% include "filters/sci_prod_scielo.html" %}
+    
+      {% elif data_source == "social" %}
+        {% include "filters/soc_prod.html" %}
+      {% endif %}
+    </div>
+
+    <div class="menu-floating-actions mt-6">
+      <div class="menu-floating-actions__inner">
+        <button id="menu-reset" type="button" class="btn btn-secondary mr-2">Reset Filters</button>
+        <button id="menu-submit" type="submit" class="btn btn-primary">Generate Graph</button>
+      </div>
+    </div>
+  </form>
+</div>
+
+<script>
+  // Initialize the menu with the appropriate data source
+  document.addEventListener('DOMContentLoaded', () => {
+    const dataSource = "{{ data_source|escapejs }}";
+    initializeIndicatorMenu(dataSource);
+  });
+</script>
