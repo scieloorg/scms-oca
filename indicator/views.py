@@ -67,6 +67,88 @@ def filters_view(request):
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
 
+
+@require_POST
+def data_view(request):
+    # Read data source from request GET parameters
+    data_source = request.GET.get("data_source")
+    if not data_source:
+        return JsonResponse({"error": "Missing data_source parameter in request URL"}, status=400)
+    
+    # Read filters from the request body sent by the indicator form
+    body_text = request.body.decode()
+    payload = json.loads(body_text) if body_text else {}
+
+    filters = payload.get("filters", {})
+    filters = dict(filters)
+    
+    # Read language query operator
+    language_query_operator = filters.pop("document_language_operator", None)
+
+    # Read country query operator
+    country_query_operator = filters.pop("country_operator", None)
+
+    # Read study unit
+    study_unit = filters.pop("study_unit", None)
+
+    # Read breakdown variable
+    breakdown_variable = filters.pop("breakdown_variable", None)
+
+    # Extract index name from data source
+    index_name = controller.get_index_name_from_data_source(data_source)
+
+    # Get field mapping for the data source
+    field_settings = constants.DSNAME_TO_FIELD_SETTINGS.get(data_source)
+
+    # Build the query to filter documents
+    query = controller.build_query(
+        filters, 
+        field_settings, 
+        data_source,
+        language_query_operator,
+        country_query_operator
+    )
+
+    # FIXME: move this logic to controller
+    # Choose main aggregation
+    aggs = {}
+    if breakdown_variable:
+        if study_unit == "citation":
+            aggs = controller.build_breakdown_citation_per_year_aggs(field_settings, breakdown_variable)
+        elif study_unit == "document":
+            aggs = controller.build_breakdown_documents_per_year_aggs(field_settings, breakdown_variable, data_source)
+    else:
+        if study_unit == "citation":
+            aggs = controller.build_citations_per_year_aggs()
+        elif study_unit == "document":
+            aggs = controller.build_documents_per_year_aggs(data_source)
+
+    body = {"size": 0, "query": query, "aggs": aggs}
+
+    # Execute search
+    try:
+        res = controller.es.search(index=index_name, body=body)
+    except Exception:
+        return JsonResponse({"error": "Error executing search"}, status=500)
+
+    # FIXME: move this logic to controller
+    # Parse response
+    data = {}
+    if breakdown_variable:
+        if study_unit == "citation":
+            data = controller.parse_breakdown_citation_per_year_response(res)
+        elif study_unit == "document":
+            data = controller.parse_breakdown_documents_per_year_response(res)
+        data["breakdown_variable"] = breakdown_variable
+    else:
+        if study_unit == "citation":
+            data = controller.parse_citations_per_year_response(res)
+        elif study_unit == "document":
+            data = controller.parse_documents_per_year_response(res)
+
+    return JsonResponse(data)
+
+
 def world_view(request):
     selected_filters = request.GET.dict()
     context = {
