@@ -17,6 +17,38 @@ def indicators_view(request):
     data_source = request.GET.get('data_source', 'openalex_works')
     country_unit = request.GET.get('country_unit', None)
     return render(request, "indicators.html", {"data_source": data_source, "country_unit": country_unit})
+def world_view(request):
+    selected_filters = request.GET.dict()
+    context = {
+        "data_source": "world",
+        "data_source_display_name": _("Scientific Production - World"),
+        "selected_filters": selected_filters,
+    }
+    return render(request, "indicator.html", context)
+
+
+def brazil_view(request):
+    context = {
+        "data_source": "brazil",
+        "data_source_display_name": _("Scientific Production - Brazil"),
+    }
+    return render(request, "indicator.html", context)
+
+
+def scielo_view(request):
+    context = {
+        "data_source": "scielo",
+        "data_source_display_name": _("Scientific Production - SciELO Network"),
+    }
+    return render(request, "indicator.html", context)
+
+
+def social_view(request):
+    context = {
+        "data_source": "social",
+        "data_source_display_name": _("Social Production"),
+    }
+    return render(request, "indicator.html", context)
 
 
 class IndicatorDirectoryEditView(EditView):
