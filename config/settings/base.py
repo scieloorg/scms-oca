@@ -479,7 +479,14 @@ THEMATIC_AREA_INDEX = env.str("THEMATIC_AREA_INDEX", "thematicareas")
 
 DIRECTORY_IMPORT_DELIMITER = env.str("DIRECTORY_IMPORT_DELIMITER", default=",")
 
-ES_INDEX_WORLD = env.str("ES_INDEX_WORLD", "openalex_works")
-ES_INDEX_BRAZIL = env.str("ES_INDEX_BRAZIL", "openalex_works")
-ES_INDEX_SCIELO = env.str("ES_INDEX_SCIELO", "scielo")
-ES_INDEX_SOCIAL_PRODUCTION = env.str("ES_INDEX_SOCIAL_PRODUCTION", "opoca")
+# Elasticsearch indices for indicators
+ES_INDEX_SCI_PROD_WORLD = env.str("ES_INDEX_SCI_PROD_WORLD", "openalex_works")
+ES_INDEX_SCI_PROD_BRAZIL = env.str("ES_INDEX_SCI_PROD_BRAZIL", "openalex_works")
+ES_INDEX_SCI_PROD_SCIELO = env.str("ES_INDEX_SCI_PROD_SCIELO", "scielo_works")
+ES_INDEX_SOC_PROD = env.str("ES_INDEX_SOC_PROD", "opoca")
+
+# Data source names for indicators
+DSNAME_SCI_PROD_WORLD = env.str("DSNAME_SCI_PROD_WORLD", "world")
+DSNAME_SCI_PROD_BRAZIL = env.str("DSNAME_SCI_PROD_BRAZIL", "brazil")
+DSNAME_SCI_PROD_SCIELO = env.str("DSNAME_SCI_PROD_SCIELO", "scielo")
+DSNAME_SOC_PROD = env.str("DSNAME_SOC_PROD", "social")
