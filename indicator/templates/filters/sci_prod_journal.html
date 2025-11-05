@@ -1,0 +1,173 @@
+<!-- Hidden study unit field to identify the type of indicator -->
+<select id="study_unit" hidden class="form-control" name="study_unit"></select>
+
+<h4 class="my-2 pt-1">Filters</h4>
+
+<div class="form-group mb-3">
+    <label class="form-label" for="journal">Journal</label>
+    <select id="journal" class="form-control" name="journal" aria-label="Journal"></select>
+</div>
+
+<div class="form-group mb-3">
+    <label class="form-label" for="issns">ISSN</label>
+    <select id="issns" class="form-control" name="issns" aria-label="ISSN"></select>
+</div>
+
+<div class="form-group mb-3">
+    <label class="form-label" for="source">Source Index</label>
+    <select id="source" class="form-control" name="source" aria-label="Source">
+        <option></option>
+    </select>
+</div>
+
+<div class="form-group mb-3">
+    <label class="form-label" for="publisher_name">Publisher</label>
+    <select id="publisher_name" class="form-control" name="publisher_name" aria-label="Publisher"></select>
+</div>
+
+<div class="form-group mb-3">
+    <label class="form-label" for="openalex_region">Region</label>
+    <select id="openalex_region" class="form-control" name="openalex_region" aria-label="Region">
+        <option></option>
+    </select>
+</div>
+
+<div class="form-group mb-3">
+    <label class="form-label" for="country">Country</label>
+    <select id="country" class="form-control" name="country" aria-label="Country">
+        <option></option>
+    </select>
+</div>
+
+<div class="form-group mb-3">
+    <label class="form-label" for="year_of_creation">Year Founded</label>
+    <input 
+        id="year_of_creation"
+        class="form-control"
+        name="year_of_creation"
+        aria-label="Year Founded"
+        type="number"
+        min="1900"
+        max="2100"
+        placeholder="Select a Year"
+    />
+</div>
+
+<div class="h6 pb-2 mt-4 border-bottom text-primary">
+  <strong>SciELO</strong>
+</div>
+
+<div class="form-group mb-3">
+    <label class="form-label" for="is_scielo">Is SciELO</label>
+    <select id="is_scielo" class="form-control" name="is_scielo" aria-label="Is SciELO">
+        <option value="" selected>Select an option</option>
+        <option>Yes</option>
+        <option>No</option>
+    </select>
+</div>
+
+<div class="form-group mb-3">
+    <label class="form-label" for="scielo_collection_name">Collection</label>
+    <select id="scielo_collection_name" class="form-control" name="scielo_collection_name" aria-label="Collection (SciELO)">
+        <option></option>
+    </select>
+</div>
+
+<div class="form-group mb-3">
+    <label class="form-label" for="scielo_thematic_area">Thematic Area</label>
+    <select id="scielo_thematic_area" class="form-control" name="scielo_thematic_area" aria-label="Thematic Area">
+        <option></option>
+    </select>
+</div>
+
+<div class="h6 pb-2 mt-4 border-bottom text-primary">
+  <strong>Metric Settings</strong>
+</div>
+
+<div class="form-group mb-3">
+    <label class="form-label" for="year">Metric Year</label>
+    <input 
+        id="year"
+        class="form-control"
+        name="year"
+        aria-label="Metric Year"
+        type="number"
+        min="1900"
+        max="2100"
+        value="2024"
+        placeholder="Metric Year"
+    />
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        // Populate filters
+        const data = await fetchFilters('journal_metrics');
+        populateSelectFilters(
+            // Filters data retrieved from the index API
+            data,
+            // Fields that we don't want to populate because they are handled differently
+            [
+              'is_scielo',
+              'issn',
+              'journal',
+              'publisher_name',
+              'study_unit',
+            ]
+        );
+    } catch (error) {
+        console.error('Error loading filters', error);
+    }
+
+    try {
+        // Initialize Select2 for single-select fields
+        const selectFields = [
+            "country",
+            "is_scielo",
+            "openalex_region",
+            "scielo_collection_name",
+            "scielo_thematic_area",
+            "source"
+        ];
+        selectFields.forEach(fieldId => {
+            const selectElement = document.getElementById(fieldId);
+            if (selectElement) {
+                $(selectElement).select2(
+                {
+                    placeholder: 'Select an option',
+                    allowClear: true,
+                    minimumResultsForSearch: Infinity,
+                    theme: 'bootstrap4',
+                });
+            }
+        });
+    } catch (error) {
+        console.error('Error initializing Select2', error);
+    }
+
+    // Initialize Select2 for special fields
+    const specialSelectFields = ['journal', 'issn', 'publisher_name'];
+    specialSelectFields.forEach(fieldId => {
+        const selectElement = document.getElementById(fieldId);
+        if (selectElement) {
+            $(selectElement).select2({
+                ajax: {
+                    url: `/indicators/journal/search/?field_name=${fieldId}&data_source=journal_metrics`,
+                    dataType: 'json',
+                    delay: 300,
+                    data: params => ({ q: params.term }),
+                    processResults: data => data,
+                },
+                minimumInputLength: 2,
+                placeholder: 'Start typing to search...',
+                theme: 'bootstrap4',
+                allowClear: true,
+            }).on('select2:open', function(e) {
+                document.querySelector(`[aria-controls="select2-${e.target.id}-results"]`).focus();
+            });
+        }
+    });
+});
+
+</script>

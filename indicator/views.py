@@ -183,6 +183,53 @@ def social_view(request):
     return render(request, "indicator.html", context)
 
 
+def journal_view(request):
+    context = {
+        "data_source": "journal_metrics",
+        "data_source_display_name": _("Journal Metrics"),
+    }
+    return render(request, "indicator.html", context)
+
+
+def search_item(request):
+    # Read query parameters
+    q = request.GET.get("q", "")
+    req_data_source_name = request.GET.get("data_source", "journal_metrics")
+    req_field_name = request.GET.get("field_name", "journal")
+
+    # Extract index name from data source
+    index_name = controller.get_index_name_from_data_source(req_data_source_name)
+
+    # Get field settings for the data source
+    field_settings = controller.get_field_settings(req_data_source_name)
+    
+    # Determine field name
+    fl_name = (field_settings.get(req_field_name, {}).get("index_field_name", req_field_name))
+
+    # Determine if the field supports search-as-you-type
+    fl_support_search_as_you_type = field_settings.get(req_field_name, {}).get("filter", {}).get("search_as_you_type", False)
+
+    # Build search body
+    if fl_support_search_as_you_type:
+        body = controller.build_search_as_you_type_body(fl_name, q)
+    else:
+        body = controller.build_term_search_body(fl_name, q)
+
+    # Execute search
+    try:
+        res = controller.es.search(index=index_name, body=body)
+    except Exception:
+        return JsonResponse({"error": "Error executing search"}, status=500)
+
+    # Parse results
+    try:
+        parsed_results = controller.parse_search_item_response(res)
+    except Exception:
+        return JsonResponse({"error": "Error parsing search results"}, status=500)
+
+    return JsonResponse({"results": parsed_results})
+
+
 class IndicatorDirectoryEditView(EditView):
     def get_moderation(self):
         if Moderation.objects.filter(model=self.model.__name__, status=True).exists():

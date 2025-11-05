@@ -57,6 +57,11 @@ var languageDisplay = hasIntlDisplay ? new Intl.DisplayNames(['en'], { type: 'la
 function standardizeCountryCode(countryCode) {
     if (!countryCode) return '';
 
+    // If code is longer than 3 characters, return as-is
+    if (countryCode.length > 3) {
+        return String(countryCode).trim();
+    }
+
     var normalized = String(countryCode).toUpperCase();
     var label = countryDisplay ? countryDisplay.of(normalized) : null;
 

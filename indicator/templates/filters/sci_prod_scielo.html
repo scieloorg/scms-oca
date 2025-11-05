@@ -5,7 +5,7 @@
   <select id="study_unit" class="form-control" name="study_unit">
     <option value="journal" disabled>Journal</option>
     <option value="document" selected>Document</option>
-    <option value="citation" disabled>Citation</option>
+    <option value="citation">Citation</option>
   </select>
 </div>
 
@@ -52,16 +52,12 @@
 
 <div class="form-group mb-3">
     <label class="form-label" for="publisher">Publisher</label>
-    <select id="publisher" name="publisher" class="form-control" aria-label="Publisher">
-      <option value="" selected>Select a Publisher</option>
-    </select>
+    <select id="publisher" name="publisher" class="form-control" aria-label="Publisher"></select>
 </div>
 
 <div class="form-group mb-3">
     <label class="form-label" for="journal">Journal</label>
-    <select id="journal" name="journal" class="form-control" aria-label="Journal">
-      <option value="" selected>Select a Journal</option>
-    </select>
+    <select id="journal" name="journal" class="form-control" aria-label="Journal"></select>
 </div>
 
 <div class="h6 pb-2 mt-4 border-bottom text-primary">
@@ -151,13 +147,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             data,
             // Fields that we don't want to populate because they are handled differently
             [
-              'collection',
               'breakdown_variable',
-              'study_unit',
-              'document_publication_year_start',
-              'document_publication_year_end',
-              'document_language_operator',
+              'collection',
               'country_operator',
+              'document_language_operator',
+              'document_publication_year_end',
+              'document_publication_year_start',
+              'institution',
+              'journal',
+              'publisher',
+              'study_unit'
             ]
         );
     } catch (error) {
@@ -165,35 +164,55 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     try {
-        // Initialize Select2 for select fields (multiple)
-        const selectFields = [
+        // Initialize Select2 for singleSelect fields
+        const singleSelectFields = [
             "access_type",
             "country",
             "document_language",
             "document_type",
-            "institution",
         ];
-        selectFields.forEach(fieldId => {
+        singleSelectFields.forEach(fieldId => {
             const selectElement = document.getElementById(fieldId);
             if (selectElement) {
                 $(selectElement).select2(
-                  {placeholder: 'Start typing to search...'}
-                );
+                  {
+                    placeholder: 'Start typing to search...', 
+                    theme: 'bootstrap4',
+                  }
+                ).on('select2:open', function(e) {
+                    document.querySelector(`[aria-controls="select2-${e.target.id}-results"]`).focus();
+                });
             }
         });
 
-        // Initialize Select2 for select fields (single)
-        const selectFieldsSingle = [
-          "collection",
-          "journal",
-          "publisher",
-        ]
-        selectFieldsSingle.forEach(fieldId => {
-          const selectElement = document.getElementById(fieldId);
-          if (selectElement) {
-            $(selectElement).select2();
-          }
-        })
+        // Initialize Select2 for special select fields
+        const searchFields = [
+            "journal",
+            "institution",
+            "publisher"
+        ];
+        searchFields.forEach(fieldId => {
+            const selectElement = document.getElementById(fieldId);
+            if (selectElement) {
+                $(selectElement).select2(
+                  {
+                    ajax: {
+                        url: `/indicators/search/?field_name=${fieldId}&data_source=scielo`,
+                        dataType: 'json',
+                        delay: 300,
+                        data: params => ({ q: params.term }),
+                        processResults: data => data,
+                    },
+                    minimumInputLength: 2,
+                    placeholder: 'Start typing to search...', 
+                    theme: 'bootstrap4',
+                    allowClear: true
+                  }
+                ).on('select2:open', function(e) {
+                    document.querySelector(`[aria-controls="select2-${e.target.id}-results"]`).focus();
+                });
+            }
+        });
 
     } catch (error) {
         console.error('Error initializing Select2', error);

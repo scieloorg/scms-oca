@@ -442,5 +442,81 @@ def get_index_name_from_data_source(data_source):
     elif data_source_stz == settings.DSNAME_SOC_PROD:
         return settings.ES_INDEX_SOC_PROD
     
+    elif data_source_stz == settings.DSNAME_JOURNAL_METRICS:
+        return settings.ES_INDEX_JOURNAL_METRICS
+    
+    elif data_source_stz == settings.DSNAME_SOURCES:
+        return settings.ES_INDEX_SOURCES
+    
     # Default to scientific production world
     return settings.ES_INDEX_SCI_PROD_WORLD
+
+
+def get_index_field_name_from_data_source(data_source, field_name):
+    data_source_stz = data_source.lower() if data_source else ""
+    field_settings = constants.DSNAME_TO_FIELD_SETTINGS.get(data_source_stz, {})
+
+    if field_name in field_settings:
+        return field_settings[field_name].get("index_field_name")
+
+    return field_name
+
+
+def get_field_settings(data_source):
+    data_source_stz = data_source.lower() if data_source else ""
+    return constants.DSNAME_TO_FIELD_SETTINGS.get(data_source_stz, {})
+
+
+def build_search_as_you_type_body(field_name, query, agg_size=20):
+    return {
+        "size": 0, 
+        "query": {
+            "multi_match": {
+                "query": query,
+                "type": "bool_prefix",
+                "fields": [
+                    f"{field_name}",
+                    f"{field_name}._2gram",
+                    f"{field_name}._3gram"
+                ],
+            }
+        },
+        "aggs": {
+            "unique_items": {
+                "terms": {
+                    "field": f"{field_name}.keyword", 
+                    "size": agg_size
+                }
+            }
+        }
+    }
+
+
+def build_term_search_body(field_name, query, aggregation_size=20):
+    fn_cleaned = field_name.replace(".keyword", "")
+
+    return {
+        "size": 0,
+        "query": {
+            "match_phrase_prefix": {
+                fn_cleaned: query
+            }
+        },
+        "aggs": {
+            "unique_items": {
+                "terms": {
+                    "field": f'{fn_cleaned}.keyword',
+                    "size": aggregation_size
+                }
+            }
+        }
+    }
+
+
+def parse_search_item_response(response):
+    buckets = response.get("aggregations", {}).get("unique_items", {}).get("buckets", [])
+    results = [
+        {"id": b["key"], "text": b["key"]}
+        for b in buckets
+    ]
+    return results
