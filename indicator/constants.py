@@ -74,4 +74,44 @@ DSNAME_TO_FIELD_SETTINGS = {
         "institution": {"index_field_name": "institutions.enum", "filter":{"size": 100, "order": {"_key": "asc"}, "support_query_operator": False}},
         "practice": {"index_field_name": "practice.enum", "filter":{"size": 1000, "order": {"_key": "asc"}, "support_query_operator": False}},
     },
+    # journal_metrics
+    settings.DSNAME_JOURNAL_METRICS: {
+        # Journal identification fields
+        "country": {"index_field_name": "country", "filter": {"size": 300, "order": {"_key": "asc"}, "support_query_operator": False}},
+        "journal": {"index_field_name": "journal.keyword", "filter": {"size": 1, "order": {"_key": "asc"}, "support_query_operator": False, "support_search_as_you_type": True}},
+        "openalex_publisher_name": {"index_field_name": "openalex_publisher_name.keyword", "filter": {"size": 1, "order": {"_key": "asc"}, "support_query_operator": False, "support_search_as_you_type": True}},
+        "openalex_region": {"index_field_name": "openalex_region", "filter": {"size": 100, "order": {"_key": "asc"}, "support_query_operator": False}}, 
+        "publisher_name": {"index_field_name": "publisher_name.keyword", "filter": {"size": 1, "order": {"_key": "asc"}, "support_query_operator": False, "support_search_as_you_type": True}},
+        "scielo_collection_name": {"index_field_name": "scielo_collection_name", "filter": {"size": 100, "order": {"_key": "asc"}, "support_query_operator": False}},
+        "scielo_publisher_name": {"index_field_name": "scielo_publisher_name.keyword", "filter": {"size": 1, "order": {"_key": "asc"}, "support_query_operator": False, "support_search_as_you_type": True}},
+        "scielo_thematic_area": {"index_field_name": "scielo_thematic_areas", "filter": {"size": 20, "order": {"_key": "asc"}, "support_query_operator": True}},
+        "scimago_region": {"index_field_name": "scimago_region", "filter": {"size": 20, "order": {"_key": "asc"}, "support_query_operator": False}},
+        "source": {"index_field_name": "source", "filter": {"size": 10, "order": {"_key": "asc"}, "support_query_operator": True}},
+        "issn": {"index_field_name": "issns", "filter": {"size": 1, "order": {"_key": "desc"}, "support_query_operator": False, "support_search_as_you_type": True}},
+        "year_of_creation": {"index_field_name": "year_of_creation_of_the_periodical", "filter": {"size": 1000, "order": {"_key": "desc"}, "support_query_operator": False}},
+        # Metric year field 
+        "year": {"index_field_name": "year", "filter": {"size": 100, "order": {"_key": "desc"}, "support_query_operator": False}},
+        # Journal metric fields
+        "cwts_snip": {"index_field_name": "cwts_snip", "filter": {"use": False, "size": 1, "order": {"_key": "desc"}, "support_query_operator": False}},
+        "doaj_num_docs": {"index_field_name": "doaj_num_docs", "filter": {"use": False, "size": 1, "order": {"_key": "desc"}, "support_query_operator": False}},
+        "openalex_num_docs": {"index_field_name": "openalex_num_docs", "filter": {"use": False, "size": 1, "order": {"_key": "desc"}, "support_query_operator": False}},        
+        "scielo_num_docs": {"index_field_name": "scielo_num_docs", "filter": {"use": False, "size": 1, "order": {"_key": "desc"}, "support_query_operator": False}},
+        "scimago_best_quartile": {"index_field_name": "scimago_best_quartile.keyword", "filter": {"use": False, "size": 1, "order": {"_key": "asc"}, "support_query_operator": False}},
+        "scimago_citable_docs_3_years": {"index_field_name": "scimago_citable_docs_3_years", "filter": {"use": False, "size": 1, "order": {"_key": "desc"}, "support_query_operator": False}},
+        "scimago_cites_by_doc_2_years": {"index_field_name": "scimago_cites_by_doc_2_years", "filter": {"use": False, "size": 1, "order": {"_key": "desc"}, "support_query_operator": False}},
+        "scimago_estimated_apc": {"index_field_name": "scimago_estimated_apc", "filter": {"use": False, "size": 1, "order": {"_key": "desc"}, "support_query_operator": False}},
+        "scimago_estimated_value": {"index_field_name": "scimago_estimated_value", "filter": {"use": False, "size": 1, "order": {"_key": "desc"}, "support_query_operator": False}},
+        "scimago_female_authors_percent": {"index_field_name": "scimago_female_authors_percent", "filter": {"use": False, "size": 1, "order": {"_key": "desc"}, "support_query_operator": False}},
+        "scimago_overton": {"index_field_name": "scimago_overton", "filter": {"use": False, "size": 1, "order": {"_key": "desc"}, "support_query_operator": False}},
+        "scimago_sdg": {"index_field_name": "scimago_sdg", "filter": {"use": False, "size": 1, "order": {"_key": "desc"}, "support_query_operator": False}},
+        "scimago_sjr": {"index_field_name": "scimago_sjr", "filter": {"use": False, "size": 1, "order": {"_key": "desc"}, "support_query_operator": False}},
+        "scimago_total_cites_3_years": {"index_field_name": "scimago_total_cites_3_years", "filter": {"use": False, "size": 1, "order": {"_key": "desc"}, "support_query_operator": False}},
+        "scimago_total_docs_3_years": {"index_field_name": "scimago_total_docs_3_years", "filter": {"use": False, "size": 1, "order": {"_key": "desc"}, "support_query_operator": False}},
+    },
+    # sources
+    settings.DSNAME_SOURCES: {
+        "source_country": {"index_field_name": "country.keyword", "filter": {"size": 300, "order": {"_key": "asc"}, "support_query_operator": False, "support_search_as_you_type": False}},
+        "source_name": {"index_field_name": "display_name.keyword", "filter": {"size": 5, "order": {"_key": "asc"}, "support_query_operator": False, "support_search_as_you_type": False}},
+        "issn": {"index_field_name": "issn.keyword", "filter": {"size": 5, "order": {"_key": "asc"}, "support_query_operator": False, "support_search_as_you_type": False}}
+    }
 }
