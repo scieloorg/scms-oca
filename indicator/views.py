@@ -183,6 +183,13 @@ def social_view(request):
     return render(request, "indicator.html", context)
 
 
+def journal_view(request):
+    context = {
+        "data_source": "journal_metrics",
+        "data_source_display_name": _("Journal Metrics"),
+    }
+    return render(request, "indicator.html", context)
+
 class IndicatorDirectoryEditView(EditView):
     def get_moderation(self):
         if Moderation.objects.filter(model=self.model.__name__, status=True).exists():
