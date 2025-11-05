@@ -484,9 +484,13 @@ ES_INDEX_SCI_PROD_WORLD = env.str("ES_INDEX_SCI_PROD_WORLD", "openalex_works")
 ES_INDEX_SCI_PROD_BRAZIL = env.str("ES_INDEX_SCI_PROD_BRAZIL", "openalex_works")
 ES_INDEX_SCI_PROD_SCIELO = env.str("ES_INDEX_SCI_PROD_SCIELO", "scielo_works")
 ES_INDEX_SOC_PROD = env.str("ES_INDEX_SOC_PROD", "opoca")
+ES_INDEX_JOURNAL_METRICS = env.str("ES_INDEX_JOURNAL_METRICS", "journal_annual_metrics")
+ES_INDEX_SOURCES = env.str("ES_INDEX_SOURCES", "journals")
 
 # Data source names for indicators
 DSNAME_SCI_PROD_WORLD = env.str("DSNAME_SCI_PROD_WORLD", "world")
 DSNAME_SCI_PROD_BRAZIL = env.str("DSNAME_SCI_PROD_BRAZIL", "brazil")
 DSNAME_SCI_PROD_SCIELO = env.str("DSNAME_SCI_PROD_SCIELO", "scielo")
 DSNAME_SOC_PROD = env.str("DSNAME_SOC_PROD", "social")
+DSNAME_JOURNAL_METRICS = env.str("DSNAME_JOURNAL_METRICS", "journal_metrics")
+DSNAME_SOURCES = env.str("DSNAME_SOURCES", "sources")
