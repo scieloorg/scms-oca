@@ -442,6 +442,12 @@ def get_index_name_from_data_source(data_source):
     elif data_source_stz == settings.DSNAME_SOC_PROD:
         return settings.ES_INDEX_SOC_PROD
     
+    elif data_source_stz == settings.DSNAME_JOURNAL_METRICS:
+        return settings.ES_INDEX_JOURNAL_METRICS
+    
+    elif data_source_stz == settings.DSNAME_SOURCES:
+        return settings.ES_INDEX_SOURCES
+    
     # Default to scientific production world
     return settings.ES_INDEX_SCI_PROD_WORLD
 
