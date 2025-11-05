@@ -1,0 +1,312 @@
+{% load humanize %}
+{% load static %}
+{% load i18n %}
+{% load wagtailsettings_tags %}
+{% load wagtailcore_tags %}
+
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+    
+    body {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        background-color: #f5f5f5;
+    }
+    
+    .search-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .search-form {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .search-form label {
+        display: block;
+        margin-bottom: 15px;
+        font-weight: bold;
+    }
+    
+    .search-form input[type="search"] {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 16px;
+        margin-top: 5px;
+    }
+    
+    .search-form select {
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        margin-top: 5px;
+    }
+    
+    .search-form button {
+        background: #007bff;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+    
+    .search-form button:hover {
+        background: #0056b3;
+    }
+    
+    .main-content {
+        display: grid;
+        grid-template-columns: 250px 1fr;
+        gap: 20px;
+    }
+    
+    .filters {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        height: fit-content;
+    }
+    
+    .filter-section {
+        margin-bottom: 25px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .filter-section:last-child {
+        border-bottom: none;
+    }
+    
+    .filter-section h3 {
+        font-size: 16px;
+        margin-bottom: 10px;
+        color: #555;
+    }
+    
+    .filter-section label {
+        display: block;
+        padding: 5px 0;
+        cursor: pointer;
+        font-size: 14px;
+    }
+    
+    .filter-section input[type="checkbox"] {
+        margin-right: 8px;
+        cursor: pointer;
+    }
+    
+    .filter-section label:hover {
+        background: #f9f9f9;
+    }
+    
+    .results-container {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .results-header {
+        padding-bottom: 15px;
+        margin-bottom: 20px;
+        border-bottom: 2px solid #eee;
+        font-weight: bold;
+        color: #555;
+    }
+    
+    .article {
+        padding: 20px;
+        margin-bottom: 15px;
+        border: 1px solid #eee;
+        border-radius: 4px;
+        background: #fafafa;
+    }
+    
+    .article h3 {
+        color: #007bff;
+        margin-bottom: 10px;
+        font-size: 18px;
+    }
+    
+    .article p {
+        margin: 5px 0;
+        font-size: 14px;
+        color: #666;
+    }
+    
+    .no-results {
+        text-align: center;
+        padding: 40px;
+        color: #999;
+    }
+    
+    .pagination {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 20px;
+        padding: 15px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .pagination .btn {
+        padding: 8px 16px;
+        background: #007bff;
+        color: white;
+        text-decoration: none;
+        border-radius: 4px;
+    }
+    
+    .pagination .btn:hover {
+        background: #0056b3;
+    }
+    
+    .pagination .page-info {
+        font-weight: bold;
+        color: #555;
+    }
+    
+    .doc-count {
+        color: #999;
+        font-size: 12px;
+    }
+</style>
+
+<div class="search-container">
+    <form method="get" action="{% pageurl page %}" class="search-form">
+        <label>
+            Buscar:
+            <input type="search" name="search" placeholder="Buscar artigos..." value="{{ search_query }}">
+        </label>
+
+        <label>
+            Itens por página:
+            <select name="itensPage">
+                <option value="10" {% if itens_by_page == 10 %}selected{% endif %}>10 por página</option>
+                <option value="25" {% if itens_by_page == 25 %}selected{% endif %}>25 por página</option>
+                <option value="50" {% if itens_by_page == 50 %}selected{% endif %}>50 por página</option>
+                <option value="100" {% if itens_by_page == 100 %}selected{% endif %}>100 por página</option>
+            </select>
+        </label>
+
+        <button type="submit">Buscar</button>
+    </form>
+
+    <div class="main-content">
+        <aside class="filters">
+            <form action="{% pageurl page %}" method="get" id="filter-form">
+                <input type="hidden" name="q" value="{{ search_query }}">
+                <input type="hidden" name="itensPage" value="{{ itens_by_page }}">
+                
+                <div class="filter-section">
+                    <h3>Ano de Publicação</h3>
+                    {% for bucket in aggregations.years %}
+                        <label>
+                            <input type="checkbox" name="year" value="{{ bucket.key }}" 
+                                {% if bucket.key in selected_filters.publication_year %}checked{% endif %}>
+                            {{ bucket.key }} <span class="doc-count">({{ bucket.doc_count|intcomma }})</span>
+                        </label>
+                    {% endfor %}
+                </div>
+
+                <div class="filter-section">
+                    <h3>Open Access</h3>
+                    {% for bucket in aggregations.open_access %}
+                        <label>
+                            <input type="checkbox" name="open_access_status" value="{{ bucket.key }}" 
+                                {% if bucket.key in selected_filters.open_access_status %}checked{% endif %}>
+                            {{ bucket.key }} <span class="doc-count">({{ bucket.doc_count|intcomma }})</span>
+                        </label>
+                    {% endfor %}
+                </div>
+
+                <div class="filter-section">
+                    <h3>Idioma</h3>
+                    {% for bucket in aggregations.languages %}
+                        <label>
+                            <input type="checkbox" name="languages" value="{{ bucket.key }}" 
+                                {% if bucket.key in selected_filters.languages %}checked{% endif %}>
+                            {{ bucket.key|upper }} <span class="doc-count">({{ bucket.doc_count|intcomma }})</span>
+                        </label>
+                    {% endfor %}
+                </div>
+            </form>
+        </aside>
+
+        <main>
+            <div class="results-container">
+                <div class="results-header">
+                    Total de resultados: {{ total_results|intcomma }}
+                </div>
+                
+                {% for hit in search_results %}
+                <article class="article">
+                    <h3>{{ hit.source.title }}</h3>
+                    <p><strong>ID:</strong> {{ hit.id }}</p>
+                    {% if hit.source.primary_location.doi %}
+                        <p><strong>DOI:</strong> {{ hit.source.primary_location.doi }}</p>
+                    {% endif %}
+                </article>
+                {% empty %}
+                <div class="no-results">
+                    <p>Nenhum resultado encontrado.</p>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="pagination">
+                {% if has_previous %}
+                    <a href="?q={{ search_query }}&page={{ current_page|add:"-1" }}&itensPage={{ itens_by_page }}" class="btn">
+                        ← Anterior
+                    </a>
+                {% else %}
+                    <span></span>
+                {% endif %}
+                
+                <span class="page-info">
+                    Página {{ current_page }} de {{ total_pages }}
+                </span>
+                
+                {% if has_next %}
+                    <a href="?q={{ search_query }}&page={{ current_page|add:"1" }}&itensPage={{ itens_by_page }}" class="btn">
+                        Próxima →
+                    </a>
+                {% else %}
+                    <span></span>
+                {% endif %}
+            </div>
+        </main>
+    </div>
+</div>
+
+<script>
+    let submitTimeout;
+    const form = document.getElementById('filter-form');
+    const checkboxes = form.querySelectorAll('input[type="checkbox"]');
+    
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            clearTimeout(submitTimeout);
+            submitTimeout = setTimeout(() => {
+                form.submit();
+            }, 300);
+        });
+    });
+</script>
