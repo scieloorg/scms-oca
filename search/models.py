@@ -6,34 +6,6 @@ ELASTICSEARCH_HOST = os.getenv("ELASTICSEARCH_HOST", "http://elasticsearch:9200"
 ELASTICSEARCH_API_KEY = os.getenv("ELASTICSEARCH_API_KEY")
 
 
-def normalize_languages(languages):
-    """
-    Normaliza o index languages do ElasticSearch
-    Params:
-        languages: Param de query que é uma lista de idiomas
-        Ex: 'languages': [{'key': 'en', 'doc_count': 442196}, {'key': 'En', 'doc_count': 1}, {'key': 'EN', 'doc_count': 1}]
-    """
-    languages_normalized = []
-    seen = set()
-    for item in languages:
-        key_lower = item["key"].lower()
-        if key_lower not in seen:
-            total = sum(
-                lang.get("doc_count")
-                for lang in languages
-                if lang["key"].lower() == key_lower
-            )
-            languages_normalized.append({"key": key_lower, "doc_count": total})
-            seen.add(key_lower)
-
-    # Ordena por doc_count em ordem decrescente
-    languages_normalized = sorted(
-        languages_normalized, key=lambda x: x["doc_count"], reverse=True
-    )
-
-    return languages_normalized
-
-
 class SingletonElasticSearchHandler(type):
     _instances = {}
 
