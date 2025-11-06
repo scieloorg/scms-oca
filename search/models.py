@@ -1,11 +1,9 @@
+import os
 from elasticsearch import Elasticsearch
 from wagtail.models import Page
 
-# client = Elasticsearch(
-#     "http://elasticsearch:9200",
-#     api_key="WDZkOU5ab0JOeF9zc3RuS3FHQzU6Y2lhM3dvbmZJLUpMbUJldnphcVdKZw=="
-# )
-
+ELASTICSEARCH_HOST = os.getenv("ELASTICSEARCH_HOST", "http://elasticsearch:9200")
+ELASTICSEARCH_API_KEY = os.getenv("ELASTICSEARCH_API_KEY")  
 
 def normalize_languages(languages):
     """
@@ -218,7 +216,7 @@ class ElasticSearchQueryObject:
 
 
 class ElasticSearchHandler(metaclass=SingletonElasticSearchHandler):
-    def __init__(self, index, host="http://elasticsearch:9200", api_key=None):
+    def __init__(self, index, host=ELASTICSEARCH_HOST, api_key=None):
         self.index = index
         self.client = Elasticsearch(host, api_key=api_key)
 
@@ -250,7 +248,7 @@ class ElasticSearchHandler(metaclass=SingletonElasticSearchHandler):
 
 client = ElasticSearchHandler(
     index="openalex_works",
-    api_key="WDZkOU5ab0JOeF9zc3RuS3FHQzU6Y2lhM3dvbmZJLUpMbUJldnphcVdKZw==",
+    api_key=ELASTICSEARCH_API_KEY,
 )
 
 
