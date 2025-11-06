@@ -3,7 +3,8 @@ from elasticsearch import Elasticsearch
 from wagtail.models import Page
 
 ELASTICSEARCH_HOST = os.getenv("ELASTICSEARCH_HOST", "http://elasticsearch:9200")
-ELASTICSEARCH_API_KEY = os.getenv("ELASTICSEARCH_API_KEY")  
+ELASTICSEARCH_API_KEY = os.getenv("ELASTICSEARCH_API_KEY")
+
 
 def normalize_languages(languages):
     """
@@ -32,11 +33,6 @@ def normalize_languages(languages):
 
     return languages_normalized
 
-def is_doi(doi):
-    """
-    Verifica se a query é doi
-    """
-
 
 class SingletonElasticSearchHandler(type):
     _instances = {}
@@ -50,7 +46,14 @@ class SingletonElasticSearchHandler(type):
 
 class ElasticSearchQueryObject:
     @classmethod
-    def query_multi_match(cls, search_query, search_after=None, size=10, from_offset=0, filter_clauses=None):
+    def query_multi_match(
+        cls,
+        search_query,
+        search_after=None,
+        size=10,
+        from_offset=0,
+        filter_clauses=None,
+    ):
         """
         Busca por relevancia
         """
@@ -74,14 +77,14 @@ class ElasticSearchQueryObject:
                             "tie_breaker": 0.3,
                         }
                     },
-                    "filter": filter_clauses if filter_clauses else []
+                    "filter": filter_clauses if filter_clauses else [],
                 }
-            }
+            },
         }
 
         if search_after:
             query["search_after"] = search_after
-        
+
         return query
 
     @classmethod
@@ -120,7 +123,7 @@ class ElasticSearchQueryObject:
 
     @classmethod
     def query_multi_all_with_filters(
-        cls,  search_query, size=10, search_after=None, from_offset=0, filters=None
+        cls, search_query, size=10, search_after=None, from_offset=0, filters=None
     ):
         filter_clauses = cls.build_filters(filters or {})
         query = cls.query_multi_match(
@@ -238,13 +241,16 @@ class ElasticSearchHandler(metaclass=SingletonElasticSearchHandler):
     def _transform_search_results(self, search_results):
         transformed_hits = []
         for hit in search_results["hits"]["hits"]:
-            transformed_hits.append({
-                "index": hit.get("_index"),
-                "id": hit.get("_id"),
-                "source": hit.get("_source", {}),
-                "score": hit.get("_score"),
-            })
+            transformed_hits.append(
+                {
+                    "index": hit.get("_index"),
+                    "id": hit.get("_id"),
+                    "source": hit.get("_source", {}),
+                    "score": hit.get("_score"),
+                }
+            )
         return transformed_hits
+
 
 client = ElasticSearchHandler(
     index="openalex_works",
@@ -276,8 +282,13 @@ class SearchPage(Page):
         from_offset = self.calculate_offset(page_number, itens_by_page)
 
         if search_query:
-            query_elastic_search = self.elastic_query_object.query_multi_all_with_filters(
-                search_query=search_query, size=itens_by_page, from_offset=from_offset, filters=selected_filters
+            query_elastic_search = (
+                self.elastic_query_object.query_multi_all_with_filters(
+                    search_query=search_query,
+                    size=itens_by_page,
+                    from_offset=from_offset,
+                    filters=selected_filters,
+                )
             )
             search_results = client.search_results(body=query_elastic_search)
         else:
