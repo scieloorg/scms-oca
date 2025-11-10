@@ -3,6 +3,7 @@
 {% load i18n %}
 {% load wagtailsettings_tags %}
 {% load wagtailcore_tags %}
+{% load custom_filters %}
 
 <style>
     * {
@@ -210,45 +211,24 @@
     </form>
 
     <div class="main-content">
-        <aside class="filters">
+        <div class="filters">
             <form action="{% pageurl page %}" method="get" id="filter-form">
                 <input type="hidden" name="q" value="{{ search_query }}">
                 <input type="hidden" name="itensPage" value="{{ itens_by_page }}">
-                
-                <div class="filter-section">
-                    <h3>Ano de Publicação</h3>
-                    {% for bucket in aggregations.years %}
-                        <label>
-                            <input type="checkbox" name="year" value="{{ bucket.key }}" 
-                                {% if bucket.key in selected_filters.publication_year %}checked{% endif %}>
-                            {{ bucket.key }} <span class="doc-count">({{ bucket.doc_count|intcomma }})</span>
-                        </label>
-                    {% endfor %}
-                </div>
-
-                <div class="filter-section">
-                    <h3>Open Access</h3>
-                    {% for bucket in aggregations.open_access %}
-                        <label>
-                            <input type="checkbox" name="open_access_status" value="{{ bucket.key }}" 
-                                {% if bucket.key in selected_filters.open_access_status %}checked{% endif %}>
-                            {{ bucket.key }} <span class="doc-count">({{ bucket.doc_count|intcomma }})</span>
-                        </label>
-                    {% endfor %}
-                </div>
-
-                <div class="filter-section">
-                    <h3>Idioma</h3>
-                    {% for bucket in aggregations.languages %}
-                        <label>
-                            <input type="checkbox" name="languages" value="{{ bucket.key }}" 
-                                {% if bucket.key in selected_filters.languages %}checked{% endif %}>
-                            {{ bucket.key|upper }} <span class="doc-count">({{ bucket.doc_count|intcomma }})</span>
-                        </label>
-                    {% endfor %}
-                </div>
+                {% for agg_name, buckets in aggregations.items %}
+                    <div class="filter-section">
+                        <h4>{{ agg_name}}</h4>
+                        {% for bucket in buckets %}
+                            <label>
+                                <input type="checkbox" name="{{ agg_name }}" value="{{ bucket.key }}" 
+                                    {% if bucket.key in selected_filters|get_item:agg_name %}checked{% endif %}>
+                                    {{ bucket.key }} <span class="doc-count">({{ bucket.doc_count|intcomma }})</span>
+                            </label>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
             </form>
-        </aside>
+        </div>
 
         <main>
             <div class="results-container">
