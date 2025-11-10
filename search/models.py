@@ -18,8 +18,8 @@ class SingletonElasticSearchHandler(type):
 
 FILTERS = {
     "publication_year": {"field": "publication_year", "size": 100, "order": {"_key": "desc"}},
-    "languages": {"field": "language.keyword", "size": 100},
     "open_access_status": {"field": "open_access.oa_status.keyword", "size": 10},
+    "languages": {"field": "language.keyword", "size": 100},
 }
 
 
@@ -290,5 +290,8 @@ class SearchPage(Page):
             search_query, selected_years
         )
         response = client.handler_search_response(body=agg_query)
-        aggregations = {key: response["aggregations"][key]["buckets"] for key in response["aggregations"].keys()}
+        aggregations = {}
+        for key in FILTERS.keys():
+            if key in response["aggregations"].keys():
+                aggregations[key] = response["aggregations"][key]["buckets"]
         return aggregations
