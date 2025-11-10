@@ -16,6 +16,13 @@ class SingletonElasticSearchHandler(type):
         return cls._instances[cls]
 
 
+FILTERS = {
+    "publication_year": {"field": "publication_year", "size": 100, "order": {"_key": "desc"}},
+    "languages": {"field": "language.keyword", "size": 100},
+    "open_access_status": {"field": "open_access.oa_status.keyword", "size": 10},
+}
+
+
 class ElasticSearchQueryObject:
     @classmethod
     def query_multi_match(
@@ -112,23 +119,11 @@ class ElasticSearchQueryObject:
         """
         Contrói os filtros do ElasticSearch
         """
-
         must_filters = []
 
-        if publication_year := filters.get("publication_year"):
-            must_filters.append({"terms": {"publication_year": publication_year}})
-
-        if languages := filters.get("languages"):
-            must_filters.append({"terms": {"language.keyword": languages}})
-
-        if type := filters.get("type"):
-            must_filters.append({"terms": {"type.keyword": type}})
-
-        if open_access_status := filters.get("open_access_status"):
-            must_filters.append(
-                {"terms": {"open_access.oa_status": open_access_status}}
-            )
-
+        for key, value in filters.items():
+            if key in FILTERS.keys():
+                must_filters.append({"terms": {FILTERS[key]["field"]: value}})
         return must_filters
 
     @classmethod
@@ -165,28 +160,11 @@ class ElasticSearchQueryObject:
         agg_query = {
             "query": query_part,
             "size": 0,  # Não retornar documentos
-            "aggs": {
-                "years": {
-                    "terms": {
-                        "field": "publication_year",
-                        "size": 100,
-                        "order": {"_key": "desc"},
-                    }
-                },
-                "languages": {
-                    "terms": {
-                        "field": "language.keyword",
-                        "size": 20,
-                    }
-                },
-                "oa_status": {
-                    "terms": {
-                        "field": "open_access.oa_status.keyword",
-                        "size": 10,
-                    }
-                },
-            },
+            "aggs": {},
         }
+
+        for key, value in FILTERS.items():
+            agg_query["aggs"].update({key: {"terms": value}})
         return agg_query
 
 
@@ -296,20 +274,13 @@ class SearchPage(Page):
 
     def extract_filters_from_request(self, request):
         filters = {}
-        if year := request.GET.getlist("year"):
-            filters["publication_year"] = [int(y) for y in year]
-
-        if languages := request.GET.getlist("languages"):
-            filters["languages"] = languages
-
-        if type := request.GET.getlist("type"):
-            filters["type"] = type
-
-        if open_access_status := request.GET.getlist("open_access_status"):
-            filters["open_access_status"] = open_access_status
-
-        if scopo := request.GET.getlist("scopo"):
-            filters["scope"] = scopo
+        
+        for key in FILTERS.keys():
+            if value := request.GET.getlist(key):
+                if key == "publication_year":
+                    filters[key] = [int(y) for y in value]
+                else:
+                    filters[key] = value
 
         return filters
 
@@ -319,9 +290,5 @@ class SearchPage(Page):
             search_query, selected_years
         )
         response = client.handler_search_response(body=agg_query)
-
-        return {
-            "years": response["aggregations"]["years"]["buckets"],
-            "languages": response["aggregations"]["languages"]["buckets"],
-            "open_access": response["aggregations"]["oa_status"]["buckets"],
-        }
+        aggregations = {key: response["aggregations"][key]["buckets"] for key in response["aggregations"].keys()}
+        return aggregations
