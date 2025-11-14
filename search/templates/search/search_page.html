@@ -191,15 +191,15 @@
 </style>
 
 <div class="search-container">
-    <form method="get" action="{% pageurl page %}" class="search-form">
+    <form method="get" action="{% pageurl page %}" class="search-form" id="search-form">
         <label>
             Buscar:
-            <input type="search" name="search" placeholder="Buscar artigos..." value="{{ search_query }}">
+            <input type="search" name="search" id="search-input" placeholder="Buscar artigos..." value="{{ search_query }}">
         </label>
 
         <label>
             Itens por página:
-            <select name="itensPage">
+            <select name="itensPage" id="items-per-page">
                 <option value="10" {% if itens_by_page == 10 %}selected{% endif %}>10 por página</option>
                 <option value="25" {% if itens_by_page == 25 %}selected{% endif %}>25 por página</option>
                 <option value="50" {% if itens_by_page == 50 %}selected{% endif %}>50 por página</option>
@@ -211,61 +211,74 @@
     </form>
 
     <div class="main-content">
-        <div class="filters">
+        <div class="filters" id="filters-container">
             <form action="{% pageurl page %}" method="get" id="filter-form">
-                <input type="hidden" name="q" value="{{ search_query }}">
-                <input type="hidden" name="itensPage" value="{{ itens_by_page }}">
-                {% for agg_name, buckets in aggregations.items %}
-                    <div class="filter-section">
-                        <h4>{{ agg_name}}</h4>
-                        {% for bucket in buckets %}
-                            <label>
-                                <input type="checkbox" name="{{ agg_name }}" value="{{ bucket.key }}" 
-                                    {% if bucket.key in selected_filters|get_item:agg_name %}checked{% endif %}>
-                                    {{ bucket.key }} <span class="doc-count">({{ bucket.doc_count|intcomma }})</span>
-                            </label>
-                        {% endfor %}
-                    </div>
-                {% endfor %}
+                <input type="hidden" name="search" id="hidden-search" value="{{ search_query }}">
+                <input type="hidden" name="itensPage" id="hidden-items-page" value="{{ itens_by_page }}">
+                <div id="filters-list">
+                    {% for agg_name, buckets in aggregations.items %}
+                        <div class="filter-section" data-filter-name="{{ agg_name }}">
+                            <h4>{{ agg_name|get_translation }}</h4>
+                            {% for bucket in buckets %}
+                                <label>
+                                    <input type="checkbox" name="{{ agg_name }}" value="{{ bucket.key }}" 
+                                        {% if bucket.key in selected_filters|get_item:agg_name %}checked{% endif %}>
+                                        {% if agg_name == 'languages' %}
+                                            {{ bucket.key|translate_language }}
+                                        {% else %}
+                                            {{ bucket.key }}
+                                        {% endif %}
+                                        <span class="doc-count">({{ bucket.doc_count|intcomma }})</span>
+                                </label>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+                </div>
             </form>
         </div>
 
         <main>
-            <div class="results-container">
-                <div class="results-header">
-                    Total de resultados: {{ total_results|intcomma }}
+            <div class="results-container" id="results-container">
+                <div class="results-header" id="results-header">
+                    Total de resultados: <span id="total-results">{{ total_results|intcomma }}</span>
                 </div>
                 
-                {% for hit in search_results %}
-                <article class="article">
-                    <h3>{{ hit.source.title }}</h3>
-                    <p><strong>ID:</strong> {{ hit.id }}</p>
-                    {% if hit.source.primary_location.doi %}
-                        <p><strong>DOI:</strong> {{ hit.source.primary_location.doi }}</p>
-                    {% endif %}
-                </article>
-                {% empty %}
-                <div class="no-results">
-                    <p>Nenhum resultado encontrado.</p>
+                <div id="results-list">
+                    {% for hit in search_results %}
+                    <article class="article">
+                        <h3>{{ hit.source.title }}</h3>
+                        <p><strong>ID:</strong> {{ hit.id }}</p>
+                        {% if hit.source.primary_location.doi %}
+                            <p><strong>DOI:</strong> {{ hit.source.primary_location.doi }}</p>
+                        {% endif %}
+                        <p><strong>Autores:</strong></p>
+                        {% for author in hit.source.authorships %}
+                            <p><strong>Name:</strong> {{ author.author.display_name }}. <strong>ORCID:</strong> {{ author.author.orcid }}. <strong>ID OpenAlex:</strong> {{ author.author.id }}</p>
+                        {% endfor %}
+                    </article>
+                    {% empty %}
+                    <div class="no-results">
+                        <p>Nenhum resultado encontrado.</p>
+                    </div>
+                    {% endfor %}
                 </div>
-                {% endfor %}
             </div>
 
-            <div class="pagination">
+            <div class="pagination" id="pagination">
                 {% if has_previous %}
-                    <a href="?q={{ search_query }}&page={{ current_page|add:"-1" }}&itensPage={{ itens_by_page }}" class="btn">
+                    <a href="?search={{ search_query }}&page={{ current_page|add:"-1" }}&itensPage={{ itens_by_page }}" class="btn prev-page">
                         ← Anterior
                     </a>
                 {% else %}
                     <span></span>
                 {% endif %}
                 
-                <span class="page-info">
-                    Página {{ current_page }} de {{ total_pages }}
+                <span class="page-info" id="page-info">
+                    Página <span id="current-page">{{ current_page }}</span> de <span id="total-pages">{{ total_pages }}</span>
                 </span>
                 
                 {% if has_next %}
-                    <a href="?q={{ search_query }}&page={{ current_page|add:"1" }}&itensPage={{ itens_by_page }}" class="btn">
+                    <a href="?search={{ search_query }}&page={{ current_page|add:"1" }}&itensPage={{ itens_by_page }}" class="btn next-page">
                         Próxima →
                     </a>
                 {% else %}
