@@ -470,3 +470,31 @@ COUNTRY_INDEX = env.str("COUNTRY_INDEX", "regionscon")
 THEMATIC_AREA_INDEX = env.str("THEMATIC_AREA_INDEX", "thematicareas")
 
 DIRECTORY_IMPORT_DELIMITER = env.str("DIRECTORY_IMPORT_DELIMITER", default=",")
+
+
+# CONFIGURAÇÕES DO ELASTICSEARCH
+ELASTICSEARCH_AGGREGATION_CONFIGS = {
+    "publication_year": {"terms": {"field": "publication_year", "size": 100, "order": {"_count": "desc"}}, "type": int},
+    "open_access_status": {"terms": {"field": "open_access.oa_status.keyword", "size": 10}, "type": str},
+    "type_crossref": {"terms": {"field": "type_crossref.keyword", "size": 40, "order": {"_count": "desc"}}, "type": str},
+    "is_open_access": {"terms": {"field": "open_access.is_oa", "size": 3}, "type": bool},
+    "scope": {"terms": {"field": "scope.keyword", "size": 10, "order": {"_count": "desc"}}, "type": str},
+    "database": {"terms": {"field": "database.keyword", "size": 10, "order": {"_count": "desc"}}, "type": str},
+    "subject_level_0": {"terms": {"field": "thematic_areas.level0.keyword", "size": 20, "order": {"_count": "desc"}}, "type": str},
+    "subject_level_1": {"terms": {"field": "thematic_areas.level1.keyword", "size": 20, "order": {"_count": "desc"}}, "type": str},
+    "subject_level_2": {"terms": {"field": "thematic_areas.level2.keyword", "size": 20, "order": {"_count": "desc"}}, "type": str},
+    "languages": {"terms": {"field": "language.keyword", "size": 100, "order": {"_count": "desc"}}, "type": str},
+}
+
+
+SEARCH_FILTER_LABELS = {
+    "publication_year": _("Ano de Publicação"),
+    "open_access_status": _("Status de Acesso Aberto"),
+    "type_crossref": _("Tipo Crossref"),
+    "is_open_access": _("Acesso Aberto"),
+    "scope": _("Escopo"),
+    "subject_level_0": _("Área Temática Nível 0"),
+    "subject_level_1": _("Área Temática Nível 1"),
+    "subject_level_2": _("Área Temática Nível 2"),
+    "languages": _("Idioma"),
+}

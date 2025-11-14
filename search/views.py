@@ -13,15 +13,14 @@ from django.shortcuts import redirect, render
 from django.template import loader
 from django.urls import reverse
 from django.utils.translation import gettext as _
-from pyalex import Works
 
-from article.choices import DOCUMENT_TYPE, LICENSE
+from article.choices import LICENSE
 from core.utils import utils
 from indicator import indicator, indicatorOA
 from indicator.models import Indicator, IndicatorData, IndicatorFile
-from search.graphic_data import GraphicData
 
 from . import choices, tools
+from .models import SearchPage
 
 solr = pysolr.Solr(
     settings.HAYSTACK_CONNECTIONS["default"]["URL"],
@@ -572,3 +571,8 @@ def context_facet(request):
             "translate": choices.translates,
         }
     )
+
+
+def get_search_results_json(request):
+    search_data = SearchPage._get_search_data(request)
+    return JsonResponse(search_data)
