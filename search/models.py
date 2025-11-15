@@ -23,7 +23,7 @@ class SearchPage(Page):
     @staticmethod
     def _get_search_data(request):
         search_query = request.GET.get("search", "")
-        itens_by_page = request.GET.get("itensPage", 10)
+        itens_by_page = request.GET.get("itensPage", 20)
 
         itens_by_page = get_save_number(itens_by_page, 10)
         page_number = get_save_number(request.GET.get("page", 1), 1)
