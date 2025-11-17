@@ -111,6 +111,58 @@
     />
 </div>
 
+<div class="form-group mb-3">
+    <label class="form-label" for="scimago_best_quartile">Scimago Best Quartile</label>
+    <select id="scimago_best_quartile" class="form-control" name="scimago_best_quartile" aria-label="Scimago Best Quartile">
+        <option value="">Select an option</option>
+        <option value="Q1" {% if applied_filters.scimago_best_quartile == "Q1" %}selected{% endif %}>Q1</option>
+        <option value="Q2" {% if applied_filters.scimago_best_quartile == "Q2" %}selected{% endif %}>Q2</option>
+        <option value="Q3" {% if applied_filters.scimago_best_quartile == "Q3" %}selected{% endif %}>Q3</option>
+        <option value="Q4" {% if applied_filters.scimago_best_quartile == "Q4" %}selected{% endif %}>Q4</option>
+    </select>
+</div>
+
+<div class="form-group mb-3">
+    <label class="form-label" for="openalex_docs_2024_5">OpenAlex Total Docs 2024 > 5</label>
+    <select id="openalex_docs_2024_5" class="form-control" name="openalex_docs_2024_5" aria-label="OpenAlex Total Docs 2024 > 5">
+        <option value="">Select an option</option>
+        <option value="true" {% if applied_filters.openalex_docs_2024_5 == "true" %}selected{% endif %}>Yes</option>
+        <option value="false" {% if applied_filters.openalex_docs_2024_5 == "false" %}selected{% endif %}>No</option>
+    </select>
+</div>
+
+<div class="form-group mb-3">
+    <label class="form-label" for="ranking_metric">Ranking metric</label>
+    <select id="ranking_metric" class="form-control" name="ranking_metric" aria-label="Ranking metric">
+        <option {% if applied_filters.ranking_metric == "cwts_snip" or not applied_filters.ranking_metric %}selected{% endif %} value="cwts_snip">CWTS SNIP</option>
+        <option {% if applied_filters.ranking_metric == "scielo_num_docs" %}selected{% endif %} value="scielo_num_docs">SciELO Total Docs</option>
+        <optgroup label="Scimago">
+            <option {% if applied_filters.ranking_metric == "scimago_cites_by_doc_2_years" %}selected{% endif %} value="scimago_cites_by_doc_2_years">Citations / Doc. (2 years)</option>
+            <option {% if applied_filters.ranking_metric == "scimago_estimated_apc" %}selected{% endif %} value="scimago_estimated_apc">Estimated APC (USD)</option>
+            <option {% if applied_filters.ranking_metric == "scimago_estimated_value" %}selected{% endif %} value="scimago_estimated_value">Estimated Value (USD)</option>
+            <option {% if applied_filters.ranking_metric == "scimago_female_authors_percent" %}selected{% endif %} value="scimago_female_authors_percent">% Female</option>
+            <option {% if applied_filters.ranking_metric == "scimago_overton" %}selected{% endif %} value="scimago_overton">Overton</option>
+            <option {% if applied_filters.ranking_metric == "scimago_sdg" %}selected{% endif %} value="scimago_sdg">SDG</option>
+            <option {% if applied_filters.ranking_metric == "scimago_sjr" %}selected{% endif %} value="scimago_sjr">SJR</option>
+            <option {% if applied_filters.ranking_metric == "scimago_total_cites_3_years" %}selected{% endif %} value="scimago_total_cites_3_years">Total Citations (3 years)</option>
+            <option {% if applied_filters.ranking_metric == "scimago_total_docs" %}selected{% endif %} value="scimago_total_docs">Total Docs</option>
+        </optgroup>
+    </select>
+</div>
+
+<div class="form-group mb-3">
+    <label class="form-label" for="limit">Number of results</label>
+    <select id="limit" class="form-control" name="limit" aria-label="Number of results">
+        <option value="10" {% if applied_filters.limit == "10" %}selected{% endif %}>10</option>
+        <option value="25" {% if applied_filters.limit == "25" %}selected{% endif %}>25</option>
+        <option value="50" {% if applied_filters.limit == "50" %}selected{% endif %}>50</option>
+        <option value="100" {% if applied_filters.limit == "100" %}selected{% endif %}>100</option>
+        <option value="200" {% if applied_filters.limit == "200" %}selected{% endif %}>200</option>
+        <option value="500" {% if applied_filters.limit == "500" or not applied_filters.limit %}selected{% endif %}>500</option>
+        <option value="1000" {% if applied_filters.limit == "1000" %}selected{% endif %}>1000</option>
+    </select>
+</div>
+
 <script>
 document.addEventListener('DOMContentLoaded', async () => {
     try {
