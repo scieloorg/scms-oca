@@ -24,48 +24,12 @@ def filters_view(request):
     # Get data source from request
     data_source = request.GET.get('data_source')
 
-    # Extract index name from data source
-    index_name = controller.get_index_name_from_data_source(data_source)
+    filters = controller.get_filters_data(data_source)
 
-    # Use cached filters if available
-    if index_name in FILTERS_CACHE:
-        return JsonResponse(FILTERS_CACHE[index_name])
-
-    # Get aggregations based on data source
-    field_settings = constants.DSNAME_TO_FIELD_SETTINGS.get(data_source)
-    if not field_settings:
-        return JsonResponse({"error": "Invalid data source"}, status=400)
-
-    # FIXME: move this logic to controller
-    # Build aggregations
-    aggs = {}
-    for form_field_name, field_info in field_settings.items():
-        name = field_info.get("index_field_name")
-        size = field_info.get("filter", {}).get("size")
-        order = field_info.get("filter", {}).get("order")
-
-        terms = {"field": name, "size": size}
-
-        if order:
-            terms["order"] = order
-
-        aggs[form_field_name] = {"terms": terms}
-
-    # Build ES query body
-    body = {"size": 0, "aggs": aggs}
-
-    # Execute ES query
-    try:
-        res = controller.es.search(index=index_name, body=body)
-        filters = {k: [b["key"] for b in v["buckets"]] for k, v in res["aggregations"].items()}
-
-        # Cache the filters
-        FILTERS_CACHE[index_name] = filters
-
+    if filters:
         return JsonResponse(filters)
-
-    except Exception as e:
-        return JsonResponse({"error": str(e)}, status=500)
+    
+    return JsonResponse({"error": "Error retrieving filters"}, status=500)
 
 
 @require_POST
@@ -119,7 +83,7 @@ def data_view(request):
             aggs = controller.build_breakdown_documents_per_year_aggs(field_settings, breakdown_variable, data_source)
     else:
         if study_unit == "citation":
-            aggs = controller.build_citations_per_year_aggs()
+            aggs = controller.build_citations_per_year_aggs(field_settings)
         elif study_unit == "document":
             aggs = controller.build_documents_per_year_aggs(data_source)
 
@@ -132,7 +96,6 @@ def data_view(request):
         return JsonResponse({"error": "Error executing search"}, status=500)
 
     # FIXME: move this logic to controller
-    # Parse response
     data = {}
     if breakdown_variable:
         if study_unit == "citation":
