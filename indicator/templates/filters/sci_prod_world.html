@@ -233,7 +233,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 $(selectElement).select2(
                   {
                     placeholder: 'Start typing to search...',
-                    theme: 'bootstrap4',
+                    theme: 'bootstrap-5',
                   }
                 ).on('select2:open', function(e) {
                   document.querySelector(`[aria-controls="select2-${e.target.id}-results"]`).focus();
@@ -243,8 +243,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // Initialize Select2 for single-select fields
         const singleSelectFields = [
-            'document_language',
-            'open_access',
+          'document_language',
+          'open_access',
+          'study_unit',
+          'breakdown_variable',
+          'country_operator',
         ];
         singleSelectFields.forEach(fieldId => {
             const selectElement = document.getElementById(fieldId);
@@ -253,7 +256,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                   {
                     placeholder: 'Start typing to search...',
                     allowClear: true,
-                    theme: 'bootstrap4',
+                    theme: 'bootstrap-5',
                   }
                 ).on('select2:open', function(e) {
                     document.querySelector(`[aria-controls="select2-${e.target.id}-results"]`).focus();
@@ -288,7 +291,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     },
                     minimumInputLength: 2,
                     placeholder: 'Start typing to search...',
-                    theme: 'bootstrap4',
+                    theme: 'bootstrap-5',
                     allowClear: true
                   }
                 ).on('select2:open', function(e) {
