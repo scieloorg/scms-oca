@@ -14,16 +14,12 @@
       {% elif data_source == "social" %}
         {% include "filters/soc_prod.html" %}
       {% endif %}
-
-      {% if data_source == "journal_metrics" %}
-        {% include "filters/sci_prod_journal.html" %}
-      {% endif %}
     </div>
 
     <div class="menu-floating-actions mt-6">
       <div class="menu-floating-actions__inner">
-        <button id="menu-reset" type="button" class="btn btn-secondary mr-2">Reset Filters</button>
-        <button id="menu-submit" type="submit" class="btn btn-primary">Generate Graph</button>
+        <button id="menu-reset" type="button" class="btn btn-secondary me-2">Reset</button>
+        <button id="menu-submit" type="submit" class="btn btn-primary">Generate</button>
       </div>
     </div>
   </form>
@@ -33,6 +29,6 @@
   // Initialize the menu with the appropriate data source
   document.addEventListener('DOMContentLoaded', () => {
     const dataSource = "{{ data_source|escapejs }}";
-    initializeIndicatorMenu(dataSource);
+    initIndicatorForm(dataSource);
   });
 </script>
