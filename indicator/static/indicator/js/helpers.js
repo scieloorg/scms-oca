@@ -175,6 +175,7 @@ function updateAppliedFiltersDisplay() {
             'document_publication_year_start', 
             'document_language_operator',
             'study_unit',
+            'ranking_metric',
         ].includes(key)) {
             continue;
         }
@@ -312,6 +313,7 @@ function standardizeCollectionToName(collectionCode) {
         'col': 'Colombia',
         'cri': 'Costa Rica',
         'cub': 'Cuba',
+        'dom': 'Dominican Republic',
         'ecu': 'Ecuador',
         'esp': 'Spain',
         'mex': 'Mexico',
