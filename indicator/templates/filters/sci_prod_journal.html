@@ -40,15 +40,14 @@
 </div>
 
 <div class="form-group mb-3">
-    <label class="form-label" for="year_of_creation">Year Founded</label>
+    <label class="form-label" for="year_founded">Year Founded</label>
     <input 
-        id="year_of_creation"
+        id="year_founded"
         class="form-control"
-        name="year_of_creation"
+        name="year_founded"
         aria-label="Year Founded"
-        type="number"
-        min="1900"
-        max="2100"
+        type="text"
+        value="{{ applied_filters.year_founded|default:'' }}"
         placeholder="Select a Year"
     />
 </div>
@@ -85,16 +84,14 @@
 </div>
 
 <div class="form-group mb-3">
-    <label class="form-label" for="year">Metric Year</label>
+    <label class="form-label" for="year">Year</label>
     <input 
         id="year"
         class="form-control"
         name="year"
         aria-label="Metric Year"
-        type="number"
-        min="1900"
-        max="2100"
-        value="2024"
+        type="text"
+        value="{{ applied_filters.year|default:'2024' }}"
         placeholder="Metric Year"
     />
 </div>
@@ -145,6 +142,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     } catch (error) {
         console.error('Error initializing Select2', error);
     }
+
+    // Initialize Bootstrap Datepicker for year fields
+    const yearFields = [
+        'year',
+        'year_founded',
+    ];
+    yearFields.forEach(fieldId => {
+        const yearInput = document.getElementById(fieldId);
+        if (yearInput) {
+            $(yearInput).datepicker({
+                format: "yyyy",
+                viewMode: "years",
+                minViewMode: "years",
+                autoclose: true,
+                startDate: '1800',
+                endDate: '2100'
+            });
+        }
+    });
 
     // Initialize Select2 for special fields
     const specialSelectFields = ['journal', 'issn', 'publisher_name'];
