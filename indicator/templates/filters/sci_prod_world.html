@@ -143,6 +143,12 @@
 </div>
 
 <div class="form-group mb-3">
+    <label class="form-label" for="institution">Institution</label>
+    <select multiple id="institution" class="form-control" name="institution" aria-label="Institution">
+    </select>
+</div>
+
+<div class="form-group mb-3">
     <label class="form-label" for="region_world">Region (World)</label>
     <select multiple id="region_world" class="form-control" name="region_world" aria-label="Region (World)">
     </select>
@@ -181,6 +187,7 @@ document.addEventListener('DOMContentLoaded', async () => {
               'source_name',
               'source_country',
               'issn',
+              'institution',
             ]
         );
     } catch (error) {
@@ -259,14 +266,21 @@ document.addEventListener('DOMContentLoaded', async () => {
           'source_country',
           'source_name',
           'issn',
+          'institution',
         ];
         specialSelectFields.forEach(fieldId => {
             const selectElement = document.getElementById(fieldId);
             if (selectElement) {
+                let dsname;
+                if (fieldId === 'institution') {
+                  dsname = 'world';
+                } else {
+                  dsname = 'sources';
+                }
                 $(selectElement).select2(
                   {
                     ajax: {
-                        url: `/indicators/search/?field_name=${fieldId}&data_source=sources`,
+                        url: `/indicators/search/?field_name=${fieldId}&data_source=${dsname}`,
                         dataType: 'json',
                         delay: 300,
                         data: params => ({ q: params.term }),
