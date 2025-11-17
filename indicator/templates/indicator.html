@@ -41,6 +41,13 @@
         </div>
       </div>
 
+      {% if data_source == "journal_metrics" %}
+        <!-- Ranking Area -->
+        {% include "ranking.html" %}
+      {% else %}
+        <!-- Charts Area -->
+        {% include "chart.html" %}
+      {% endif %}
     </div>
   </div>
 </section>
