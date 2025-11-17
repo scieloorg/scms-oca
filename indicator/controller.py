@@ -530,6 +530,114 @@ def parse_search_item_response(response):
     return results
 
 
+def build_journal_metrics_query(selected_year, query):
+    yearly_query = {"bool": {"must": []}}
+
+    if query and "bool" in query and "must" in query["bool"]:
+        for condition in query["bool"]["must"]:
+            if "term" in condition:
+                for field, value in condition["term"].items():
+                    field_stz = field.replace(".keyword", "")
+                    if field_stz in ("scimago_best_quartile", "openalex_docs_2024_5"):
+                        yearly_query["bool"]["must"].append({
+                            "term": {
+                                f"yearly_info.{selected_year}.{field_stz}": value
+                            }
+                        }) 
+                    else:
+                        yearly_query["bool"]["must"].append({
+                            "term": {
+                                field: value
+                            }
+                        })
+
+    return yearly_query
+
+
+def build_journal_metrics_body(selected_year=None, ranking_metric=None, size=500, query=None):
+    if not selected_year:
+        # FIXME: use constant or make configurable
+        selected_year = "2024"
+
+    if not ranking_metric:
+        # FIXME: use constant or make configurable
+        ranking_metric = "cwts_snip"
+
+    return {
+        "query": query if query else {"match_all": {}},
+        "size": size,
+        "sort": [
+            {
+                f"yearly_info.{selected_year}.{ranking_metric}": {
+                    "order": "desc",
+                    "missing": 0
+                }
+            }
+        ],
+        "_source": [
+            "journal",
+            "issns",
+            f"yearly_info.{selected_year}.cwts_snip",
+            f"yearly_info.{selected_year}.doaj_num_docs",
+            f"yearly_info.{selected_year}.openalex_docs_2024_5",
+            f"yearly_info.{selected_year}.scielo_num_docs",
+            f"yearly_info.{selected_year}.scimago_best_quartile",
+            f"yearly_info.{selected_year}.scimago_cites_by_doc_2_years",
+            f"yearly_info.{selected_year}.scimago_estimated_apc",
+            f"yearly_info.{selected_year}.scimago_estimated_value",
+            f"yearly_info.{selected_year}.scimago_female_authors_percent",
+            f"yearly_info.{selected_year}.scimago_overton",
+            f"yearly_info.{selected_year}.scimago_sdg",
+            f"yearly_info.{selected_year}.scimago_sjr",
+            f"yearly_info.{selected_year}.scimago_total_cites_3_years",
+            f"yearly_info.{selected_year}.scimago_total_docs"
+        ]
+    }
+
+
+def parse_journal_metrics_response(response, selected_year=None, ranking_metric=None):
+    if not selected_year:
+        # FIXME: use constant or make configurable
+        selected_year = "2024"
+
+    if not ranking_metric:
+        # FIXME: use constant or make configurable
+        ranking_metric = "cwts_snip"
+
+    hits = response.get("hits", {}).get("hits", [])
+
+    journals = []
+    for hit in hits:
+        source = hit.get("_source", {})
+        journal = {
+            "title": source.get("journal", "Unknown"),
+            "issns": source.get("issns", []),
+            "cwts_snip": source.get("yearly_info", {}).get(selected_year, {}).get("cwts_snip", 0),
+            "doaj_num_docs": source.get("yearly_info", {}).get(selected_year, {}).get("doaj_num_docs", 0),
+            "openalex_docs_2024_5": source.get("yearly_info", {}).get(selected_year, {}).get("openalex_docs_2024_5", 0),
+            "scielo_num_docs": source.get("yearly_info", {}).get(selected_year, {}).get("scielo_num_docs", 0),
+            "scimago_best_quartile": source.get("yearly_info", {}).get(selected_year, {}).get("scimago_best_quartile", 0),
+            "scimago_cites_by_doc_2_years": source.get("yearly_info", {}).get(selected_year, {}).get("scimago_cites_by_doc_2_years", 0),
+            "scimago_estimated_apc": source.get("yearly_info", {}).get(selected_year, {}).get("scimago_estimated_apc", 0),
+            "scimago_estimated_value": source.get("yearly_info", {}).get(selected_year, {}).get("scimago_estimated_value", 0),
+            "scimago_female_authors_percent": source.get("yearly_info", {}).get(selected_year, {}).get("scimago_female_authors_percent", 0),
+            "scimago_overton": source.get("yearly_info", {}).get(selected_year, {}).get("scimago_overton", 0),
+            "scimago_sdg": source.get("yearly_info", {}).get(selected_year, {}).get("scimago_sdg", 0),
+            "scimago_sjr": source.get("yearly_info", {}).get(selected_year, {}).get("scimago_sjr", 0),
+            "scimago_total_cites_3_years": source.get("yearly_info", {}).get(selected_year, {}).get("scimago_total_cites_3_years", 0),
+            "scimago_total_docs": source.get("yearly_info", {}).get(selected_year, {}).get("scimago_total_docs", 0)
+        }
+        journals.append(journal)
+
+    journals.sort(key=lambda x: x[ranking_metric], reverse=True)
+
+    return {
+        "journals": journals,
+        "total_journals": len(journals),
+        "year": selected_year,
+    }
+
+
 def get_filters_data(data_source):
     # Extract index name from data source
     index_name = get_index_name_from_data_source(data_source)
