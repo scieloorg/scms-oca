@@ -146,11 +146,56 @@ def social_view(request):
     return render(request, "indicator.html", context)
 
 
-def journal_view(request):
+def journal_metrics_view(request):
     context = {
         "data_source": "journal_metrics",
         "data_source_display_name": _("Journal Metrics"),
+        "applied_filters": {},
     }
+
+    filters_data = controller.get_filters_data("journal_metrics")
+    if filters_data:
+        context["filters_data"] = filters_data
+
+    if request.method == "POST":
+        form_filters = request.POST.dict()
+
+        context["applied_filters"]["year"] = form_filters.pop("year", None)
+        context["applied_filters"]["ranking_metric"] = form_filters.pop("ranking_metric", "cwts_snip")
+        context["applied_filters"]["limit"] = form_filters.pop("limit", 500)
+
+        cleaned_filters = clean_form_filters(form_filters)
+        context["applied_filters"].update(cleaned_filters)
+
+        # Build query (general filters)
+        field_settings = constants.DSNAME_TO_FIELD_SETTINGS.get("journal_metrics")
+        query = controller.build_query(cleaned_filters, field_settings, "journal_metrics")
+
+        # Build query (yearly filters)
+        jm_query = controller.build_journal_metrics_query(
+            context["applied_filters"].get("year"), 
+            query,
+        )
+
+        # Build body for journal metrics
+        body = controller.build_journal_metrics_body(
+            selected_year=context["applied_filters"].get("year"),
+            ranking_metric=context["applied_filters"].get("ranking_metric"),
+            query=jm_query,
+            size=context["applied_filters"].get("limit"),
+        )
+
+        # Execute search
+        try:
+            index_name = controller.get_index_name_from_data_source("journal_metrics")
+            res = controller.es.search(index=index_name, body=body)
+            context.update({"ranking_data": controller.parse_journal_metrics_response(res, selected_year=context["applied_filters"].get("year"), ranking_metric=context["applied_filters"].get("ranking_metric"))})
+        except Exception as e:
+            context["error"] = _("Error executing search: %s") % str(e)
+
+    # Convert applied_filters to JSON for JavaScript
+    context["applied_filters_json"] = json.dumps(context["applied_filters"])
+    
     return render(request, "indicator.html", context)
 
 
@@ -191,6 +236,16 @@ def search_item(request):
         return JsonResponse({"error": "Error parsing search results"}, status=500)
 
     return JsonResponse({"results": parsed_results})
+
+
+def clean_form_filters(filters_dict):
+    # Remove empty filters
+    cleaned = {k: v for k, v in filters_dict.items() if v}
+    
+    # Remove CSRF token
+    cleaned.pop("csrfmiddlewaretoken", None)
+    
+    return cleaned
 
 
 class IndicatorDirectoryEditView(EditView):
