@@ -40,8 +40,6 @@
 
       <link href="https://fonts.googleapis.com/css?family=Lato:300,400,400i,700|Poppins:300,400,500,600,700|PT+Serif:400,400i&display=swap" rel="stylesheet" type="text/css" />
 
-      <meta name="viewport" content="width=device-width, initial-scale=1" />
-
       {% if settings.core_settings.CustomSettings.favicon %}
         {% image settings.core_settings.CustomSettings.favicon original as favicon %}
           <link href="{{ favicon.url }}" rel="shortcut icon" type="image/x-icon">
@@ -90,7 +88,6 @@
 
       <!-- Footer Scripts-->
       <script src="{% static 'js/functions.js' %}"></script>
-      <script src="{% static 'js/formplugins/chzn-chosen/chosen.jquery.js' %}"></script>
       <script src="{% static 'js/formplugins/chzn-chosen/chosen.jquery.js' %}"></script>
 
       <!-- Your stuff: Third-party javascript libraries go here -->
