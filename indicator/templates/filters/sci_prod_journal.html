@@ -166,33 +166,16 @@
 <script>
 document.addEventListener('DOMContentLoaded', async () => {
     try {
-        // Populate filters
-        const data = await fetchFilters('journal_metrics');
-        populateSelectFilters(
-            // Filters data retrieved from the index API
-            data,
-            // Fields that we don't want to populate because they are handled differently
-            [
-              'is_scielo',
-              'issn',
-              'journal',
-              'publisher_name',
-              'study_unit',
-            ]
-        );
-    } catch (error) {
-        console.error('Error loading filters', error);
-    }
-
-    try {
         // Initialize Select2 for single-select fields
         const selectFields = [
-            "country",
             "is_scielo",
             "openalex_region",
             "scielo_collection_name",
             "scielo_thematic_area",
-            "source"
+            "source_index",
+            "scimago_best_quartile",
+            "openalex_docs_2024_5",
+            "limit",
         ];
         selectFields.forEach(fieldId => {
             const selectElement = document.getElementById(fieldId);
@@ -202,7 +185,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                     placeholder: 'Select an option',
                     allowClear: true,
                     minimumResultsForSearch: Infinity,
-                    theme: 'bootstrap4',
+                    theme: 'bootstrap-5',
+                }).on('select2:open', function(e) {
+                    document.querySelector(`[aria-controls="select2-${e.target.id}-results"]`).focus();
                 });
             }
         });
@@ -229,14 +214,38 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
+    // Initialize Select2 for searchable single select fields
+    const searchableSingleSelectFields = [
+        "country",
+        "ranking_metric",
+    ];
+    searchableSingleSelectFields.forEach(fieldId => {
+        const selectElement = document.getElementById(fieldId);
+        if (selectElement) {
+            $(selectElement).select2(
+                {
+                placeholder: 'Start typing to search...', 
+                allowClear: true,
+                theme: 'bootstrap-5',
+                }
+            ).on('select2:open', function(e) {
+                document.querySelector(`[aria-controls="select2-${e.target.id}-results"]`).focus();
+            });
+        }
+    });
+
     // Initialize Select2 for special fields
     const specialSelectFields = ['journal', 'issn', 'publisher_name'];
+    
+    // Get applied filters from Django template context
+    const appliedFilters = {{ applied_filters|safe|default:'{}' }};
+    
     specialSelectFields.forEach(fieldId => {
         const selectElement = document.getElementById(fieldId);
         if (selectElement) {
             $(selectElement).select2({
                 ajax: {
-                    url: `/indicators/journal/search/?field_name=${fieldId}&data_source=journal_metrics`,
+                    url: `/indicators/search/?field_name=${fieldId}&data_source=journal_metrics`,
                     dataType: 'json',
                     delay: 300,
                     data: params => ({ q: params.term }),
@@ -244,13 +253,65 @@ document.addEventListener('DOMContentLoaded', async () => {
                 },
                 minimumInputLength: 2,
                 placeholder: 'Start typing to search...',
-                theme: 'bootstrap4',
+                theme: 'bootstrap-5',
                 allowClear: true,
             }).on('select2:open', function(e) {
                 document.querySelector(`[aria-controls="select2-${e.target.id}-results"]`).focus();
             });
+
+            // Set pre-selected value if exists in applied filters
+            if (appliedFilters[fieldId]) {
+                const option = new Option(appliedFilters[fieldId], appliedFilters[fieldId], true, true);
+                $(selectElement).append(option).trigger('change');
+            }
         }
     });
+
+    // Handle reset button
+    const resetButton = document.getElementById('menu-reset-journal-metrics');
+    const menuForm = document.getElementById('menu-form-journal-metrics');
+    
+    if (resetButton && menuForm) {
+        resetButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Reset all regular form fields
+            menuForm.reset();
+            
+            // Clear all Select2 fields
+            $(menuForm).find('select').each(function() {
+                if ($(this).hasClass('select2-hidden-accessible')) {
+                    $(this).val(null).trigger('change');
+                }
+            });
+            
+            // Reset specific fields to their defaults
+            const yearField = document.getElementById('year');
+            if (yearField) yearField.value = '2024';
+            
+            const rankingMetricField = document.getElementById('ranking_metric');
+            if (rankingMetricField) {
+                $(rankingMetricField).val('cwts_snip').trigger('change');
+            }
+            
+            const limitField = document.getElementById('limit');
+            if (limitField) {
+                $(limitField).val('500').trigger('change');
+            }
+            
+            // Hide applied filters display
+            const appliedFiltersContainer = document.getElementById('applied-filters-journal-metrics');
+            if (appliedFiltersContainer) {
+                appliedFiltersContainer.style.display = 'none';
+            }
+            
+            // Hide ranking table
+            const rankingContainer = document.getElementById('ranking-container');
+            if (rankingContainer) {
+                rankingContainer.style.display = 'none';
+            }
+        });
+    }
 });
 
 </script>
