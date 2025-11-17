@@ -208,24 +208,29 @@ function updateAppliedFiltersDisplay() {
     // Handle country and language query operators
     const countryOp = formData.get('country_operator');
     const languageOp = formData.get('document_language_operator');
-    const operatorStrings = [];
+    const queryOperators = [];
 
     const countryFilter = filtersToDisplay.find(f => f.label === 'Country');
     if (countryOp && countryFilter && countryFilter.values.length > 1) {
-        operatorStrings.push(`<span>Country: <span class="badge badge-secondary">${countryOp.toUpperCase()}</span></span>`);
+        queryOperators.push(`<span>Country: <span class="badge">${countryOp.toUpperCase()}</span></span>`);
     }
 
     const languageFilter = filtersToDisplay.find(f => f.label === 'Document Language');
     if (languageOp && languageFilter && languageFilter.values.length > 1) {
-        operatorStrings.push(`<span>Document Language: <span class="badge badge-secondary">${languageOp.toUpperCase()}</span></span>`);
+        queryOperators.push(`<span>Document Language: <span class="badge">${languageOp.toUpperCase()}</span></span>`);
     }
 
     // Build the final HTML string
-    let finalHtml = `<strong class="text-primary">Applied Filters</strong><span>${allFilterStrings.join('<span class="badge badge-secondary mx-2">AND</span>')}</span>`;
-    if (operatorStrings.length > 0) {
-        finalHtml += `<strong class="mt-1 text-primary">Query Operators</strong>${operatorStrings.join(' ')}`;
+    let finalHtml = `<strong class="text-primary">Applied Filters</strong><span>${allFilterStrings.join('<span class="badge mx-2">AND</span>')}</span>`;
+    if (queryOperators.length > 0) {
+        finalHtml += `<strong class="mt-1 text-primary">Search Options</strong>${queryOperators.join(' ')}`;
     }
-    finalHtml += `<strong class="mt-1 text-primary">Study Unit</strong>${toTitleCase(formData.get('study_unit'))}`;
+
+    // Include study unit if specified
+    const studyUnit = formData.get('study_unit');
+    if (studyUnit) {
+        finalHtml += `<strong class="mt-1 text-primary">Study Unit</strong>${toTitleCase(studyUnit)}`;
+    }
 
     // Join and display all filter strings
     if (allFilterStrings.length) {
