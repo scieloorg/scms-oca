@@ -14,9 +14,12 @@
 </div>
 
 <div class="form-group mb-3">
-    <label class="form-label" for="source">Source Index</label>
-    <select id="source" class="form-control" name="source" aria-label="Source">
+    <label class="form-label" for="source_index">Source Index</label>
+    <select id="source_index" class="form-control" name="source_index" aria-label="Source Index">
         <option></option>
+        {% for option in filters_data.source_index %}
+            <option value="{{ option }}" {% if applied_filters.source_index == option %}selected{% endif %}>{{ option }}</option>
+        {% endfor %}
     </select>
 </div>
 
@@ -29,6 +32,9 @@
     <label class="form-label" for="openalex_region">Region</label>
     <select id="openalex_region" class="form-control" name="openalex_region" aria-label="Region">
         <option></option>
+        {% for option in filters_data.openalex_region %}
+            <option value="{{ option }}" {% if applied_filters.openalex_region == option %}selected{% endif %}>{{ option }}</option>
+        {% endfor %}
     </select>
 </div>
 
@@ -36,6 +42,9 @@
     <label class="form-label" for="country">Country</label>
     <select id="country" class="form-control" name="country" aria-label="Country">
         <option></option>
+        {% for option in filters_data.country %}
+            <option value="{{ option }}" {% if applied_filters.country == option %}selected{% endif %}>{{ option }}</option>
+        {% endfor %}
     </select>
 </div>
 
@@ -59,9 +68,9 @@
 <div class="form-group mb-3">
     <label class="form-label" for="is_scielo">Is SciELO</label>
     <select id="is_scielo" class="form-control" name="is_scielo" aria-label="Is SciELO">
-        <option value="" selected>Select an option</option>
-        <option>Yes</option>
-        <option>No</option>
+        <option value="">Select an option</option>
+        <option value="true" {% if applied_filters.is_scielo == "true" %}selected{% endif %}>Yes</option>
+        <option value="false" {% if applied_filters.is_scielo == "false" %}selected{% endif %}>No</option>
     </select>
 </div>
 
@@ -69,6 +78,9 @@
     <label class="form-label" for="scielo_collection_name">Collection</label>
     <select id="scielo_collection_name" class="form-control" name="scielo_collection_name" aria-label="Collection (SciELO)">
         <option></option>
+        {% for option in filters_data.scielo_collection_name %}
+            <option value="{{ option }}" {% if applied_filters.scielo_collection_name == option %}selected{% endif %}>{{ option }}</option>
+        {% endfor %}
     </select>
 </div>
 
@@ -76,11 +88,14 @@
     <label class="form-label" for="scielo_thematic_area">Thematic Area</label>
     <select id="scielo_thematic_area" class="form-control" name="scielo_thematic_area" aria-label="Thematic Area">
         <option></option>
+        {% for option in filters_data.scielo_thematic_area %}
+            <option value="{{ option }}" {% if applied_filters.scielo_thematic_area == option %}selected{% endif %}>{{ option }}</option>
+        {% endfor %}
     </select>
 </div>
 
 <div class="h6 pb-2 mt-4 border-bottom text-primary">
-  <strong>Metric Settings</strong>
+  <strong>Metrics</strong>
 </div>
 
 <div class="form-group mb-3">
