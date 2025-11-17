@@ -1,4 +1,4 @@
-function initializeIndicatorMenu(dataSource) {
+function initIndicatorForm(dataSource) {
   const menuForm = document.getElementById('menu-form');
   if (!menuForm) return;
 
@@ -10,22 +10,16 @@ function initializeIndicatorMenu(dataSource) {
     event.preventDefault();
     submitButton.disabled = true;
 
+    // Create FormData object from the form
     const formData = new FormData(menuForm);
-    const filters = {};
 
     // Collect filters from the form data
-    for (const [key, value] of formData.entries()) {
-      if (Object.prototype.hasOwnProperty.call(filters, key)) {
-        if (!Array.isArray(filters[key])) {
-          filters[key] = [filters[key]];
-        }
-        filters[key].push(value);
-      } else {
-        filters[key] = value;
-      }
-    }
+    const filters = collectFiltersFromForm(formData);
 
+    // Extract study unit
     const studyUnit = formData.get('study_unit');
+
+    // Extract breakdown variable
     const breakdownVariable = formData.get('breakdown_variable');
 
     // Prepare payload for the POST request
@@ -35,6 +29,7 @@ function initializeIndicatorMenu(dataSource) {
       filters: filters
     };
 
+    // Send POST request to fetch data
     fetch(`/indicators/data/?data_source=${dataSource}`, {
       method: 'POST',
       headers: {
@@ -51,14 +46,8 @@ function initializeIndicatorMenu(dataSource) {
       // Update applied filters display
       updateAppliedFiltersDisplay();
 
-      // Render main chart
-      window.Indicators.renderMainChart(data, studyUnit);
-
-      // Render inner percentage chart
-      window.Indicators.renderInnerPercentageChart(data, studyUnit);
-
-      // Render outer percentage chart
-      window.Indicators.renderOuterPercentageChart(data, studyUnit, dataSource, formData.get('csrfmiddlewaretoken'));
+      // Render charts or tables based on data source
+      renderChartsContainer(data, studyUnit, dataSource, formData.get('csrfmiddlewaretoken'));
     })
     .catch(error => console.error('Error:', error))
     .finally(() => {
@@ -78,10 +67,18 @@ function initializeIndicatorMenu(dataSource) {
     menuForm.reset();
     $(menuForm).find('select').val(null).trigger('change');
 
+    // Restore preserved fields with Select2
     for (const [name, value] of Object.entries(fieldsToPreserve)) {
         const field = menuForm.querySelector(`select[name="${name}"]`);
-        if (field && value !== null) {
-            field.value = value;
+        if (field && value !== null && value !== undefined) {
+            // Check if the field is a Select2 element
+            if ($(field).hasClass('select2-hidden-accessible')) {
+                // Use Select2 API to set the value
+                $(field).val(value).trigger('change');
+              } else {
+                // Regular select field
+                field.value = value;
+            }
         }
     }
 
@@ -92,8 +89,21 @@ function initializeIndicatorMenu(dataSource) {
     clearGraphsContainer();
   };
 
+  // Attach event listeners
   menuForm.addEventListener('submit', handleFormSubmit);
   if (resetButton) {
     resetButton.addEventListener('click', handleFormReset);
   }
+}
+
+// Render charts
+function renderChartsContainer(data, studyUnit, dataSource, csrfMiddlewareToken) {
+  // Render main chart
+  window.Indicators.renderMainChart(data, studyUnit);
+
+  // Render inner percentage chart
+  window.Indicators.renderInnerPercentageChart(data, studyUnit);
+
+  // Render outer percentage chart
+  window.Indicators.renderOuterPercentageChart(data, studyUnit, dataSource, csrfMiddlewareToken);
 }
