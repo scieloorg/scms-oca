@@ -54,15 +54,12 @@
 {% endblock %}
 
 {% block extra_css %}
-  <link rel="stylesheet" href="{% static 'css/select2.min.css' %}">
-  <link rel="stylesheet" href="{% static 'css/select2-bootstrap4.min.css' %}">
   <link rel="stylesheet" href="{% static 'indicator/css/custom.css' %}">
 {% endblock %}
 
 {% block inline_javascript %}
   <script src="{% static 'js/echarts/echarts.min.js' %}"></script>
-  <script src="{% static 'js/select2.min.js' %}"></script>
   <script src="{% static 'indicator/js/helpers.js' %}"></script>
   <script src="{% static 'indicator/js/charts.js' %}"></script>
-  <script src="{% static 'indicator/js/indicator-menu.js' %}"></script>
+  <script src="{% static 'indicator/js/menu.js' %}"></script>
 {% endblock %}
