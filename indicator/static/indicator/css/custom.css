@@ -25,3 +25,12 @@
     width: calc(100% - 32px);
   }
 }
+
+.is-invisible {
+  visibility: hidden;
+}
+
+div.dt-container select.dt-input {
+  margin-right: 1rem;
+  padding: 4px;
+}

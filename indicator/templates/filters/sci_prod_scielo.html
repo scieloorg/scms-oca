@@ -3,7 +3,6 @@
 <div class="form-group mb-3">
   <label for="study_unit" class="form-label">Study Unit</label>
   <select id="study_unit" class="form-control" name="study_unit">
-    <option value="journal" disabled>Journal</option>
     <option value="document" selected>Document</option>
     <option value="citation">Citation</option>
   </select>
@@ -33,6 +32,7 @@
         <option value="col">Colombia</option>
         <option value="cri">Costa Rica</option>
         <option value="cub">Cuba</option>
+        <option value="dom">Dominican Republic</option>
         <option value="ecu">Ecuador</option>
         <option value="mex">Mexico</option>
         <option value="per">Peru</option>
@@ -70,22 +70,18 @@
     <input
       id="document_publication_year_start"
       name="document_publication_year_start"
-      type="number"
+      type="text"
       class="form-control"
       aria-label="Publication Year Start"
-      min="1900"
-      max="2100"
       placeholder="Start"
       value="2015"
     />
     <input
       id="document_publication_year_end"
       name="document_publication_year_end"
-      type="number"
+      type="text"
       class="form-control"
       aria-label="Publication Year End"
-      min="1900"
-      max="2100"
       placeholder="End"
       value="2024"
     />
@@ -163,6 +159,25 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.error('Error loading filters', error);
     }
 
+    // Initialize Bootstrap Datepicker for year fields
+    const yearFields = [
+        'document_publication_year_start',
+        'document_publication_year_end',
+    ];
+    yearFields.forEach(fieldId => {
+        const yearInput = document.getElementById(fieldId);
+        if (yearInput) {
+            $(yearInput).datepicker({
+                format: "yyyy",
+                viewMode: "years",
+                minViewMode: "years",
+                autoclose: true,
+                startDate: '1900',
+                endDate: '2100'
+            });
+        }
+    });
+
     try {
         // Initialize Select2 for singleSelect fields
         const singleSelectFields = [
@@ -170,6 +185,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             "country",
             "document_language",
             "document_type",
+            'study_unit',
+            'breakdown_variable',
+            'country_operator',
+            'document_language_operator',
+            'collection',
         ];
         singleSelectFields.forEach(fieldId => {
             const selectElement = document.getElementById(fieldId);
@@ -177,7 +197,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 $(selectElement).select2(
                   {
                     placeholder: 'Start typing to search...', 
-                    theme: 'bootstrap4',
+                    allowClear: true,
+                    theme: 'bootstrap-5',
                   }
                 ).on('select2:open', function(e) {
                     document.querySelector(`[aria-controls="select2-${e.target.id}-results"]`).focus();
@@ -205,7 +226,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     },
                     minimumInputLength: 2,
                     placeholder: 'Start typing to search...', 
-                    theme: 'bootstrap4',
+                    theme: 'bootstrap-5',
                     allowClear: true
                   }
                 ).on('select2:open', function(e) {

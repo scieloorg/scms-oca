@@ -3,7 +3,6 @@
 <div class="form-group mb-3">
   <label for="study_unit" class="form-label">Study Unit</label>
   <select id="study_unit" class="form-control" name="study_unit">
-    <option value="journal" disabled>Journal</option>
     <option value="document" selected>Document</option>
     <option value="citation">Citation</option>
   </select>
@@ -76,22 +75,18 @@
     <input
       id="document_publication_year_start"
       name="document_publication_year_start"
-      type="number"
+      type="text"
       class="form-control"
       aria-label="Publication Year Start"
-      min="1900"
-      max="2100"
       placeholder="Start"
       value="2015"
     />
     <input
       id="document_publication_year_end"
       name="document_publication_year_end"
-      type="number"
+      type="text"
       class="form-control"
       aria-label="Publication Year End"
-      min="1900"
-      max="2100"
       placeholder="End"
       value="2024"
     />
@@ -148,6 +143,12 @@
 </div>
 
 <div class="form-group mb-3">
+    <label class="form-label" for="institution">Institution</label>
+    <select multiple id="institution" class="form-control" name="institution" aria-label="Institution">
+    </select>
+</div>
+
+<div class="form-group mb-3">
     <label class="form-label" for="region_world">Region (World)</label>
     <select multiple id="region_world" class="form-control" name="region_world" aria-label="Region (World)">
     </select>
@@ -186,11 +187,31 @@ document.addEventListener('DOMContentLoaded', async () => {
               'source_name',
               'source_country',
               'issn',
+              'institution',
             ]
         );
     } catch (error) {
         console.error('Error loading filters', error);
     }
+
+    // Initialize Bootstrap Datepicker for year fields
+    const yearFields = [
+        'document_publication_year_start',
+        'document_publication_year_end',
+    ];
+    yearFields.forEach(fieldId => {
+        const yearInput = document.getElementById(fieldId);
+        if (yearInput) {
+            $(yearInput).datepicker({
+                format: "yyyy",
+                viewMode: "years",
+                minViewMode: "years",
+                autoclose: true,
+                startDate: '1900',
+                endDate: '2100'
+            });
+        }
+    });
 
     try {
         // Initialize Select2 for multi-select fields
@@ -212,7 +233,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 $(selectElement).select2(
                   {
                     placeholder: 'Start typing to search...',
-                    theme: 'bootstrap4',
+                    theme: 'bootstrap-5',
                   }
                 ).on('select2:open', function(e) {
                   document.querySelector(`[aria-controls="select2-${e.target.id}-results"]`).focus();
@@ -222,8 +243,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // Initialize Select2 for single-select fields
         const singleSelectFields = [
-            'document_language',
-            'open_access',
+          'document_language',
+          'open_access',
+          'study_unit',
+          'breakdown_variable',
+          'country_operator',
         ];
         singleSelectFields.forEach(fieldId => {
             const selectElement = document.getElementById(fieldId);
@@ -232,7 +256,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                   {
                     placeholder: 'Start typing to search...',
                     allowClear: true,
-                    theme: 'bootstrap4',
+                    theme: 'bootstrap-5',
                   }
                 ).on('select2:open', function(e) {
                     document.querySelector(`[aria-controls="select2-${e.target.id}-results"]`).focus();
@@ -245,14 +269,21 @@ document.addEventListener('DOMContentLoaded', async () => {
           'source_country',
           'source_name',
           'issn',
+          'institution',
         ];
         specialSelectFields.forEach(fieldId => {
             const selectElement = document.getElementById(fieldId);
             if (selectElement) {
+                let dsname;
+                if (fieldId === 'institution') {
+                  dsname = 'world';
+                } else {
+                  dsname = 'sources';
+                }
                 $(selectElement).select2(
                   {
                     ajax: {
-                        url: `/indicators/search/?field_name=${fieldId}&data_source=sources`,
+                        url: `/indicators/search/?field_name=${fieldId}&data_source=${dsname}`,
                         dataType: 'json',
                         delay: 300,
                         data: params => ({ q: params.term }),
@@ -260,7 +291,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     },
                     minimumInputLength: 2,
                     placeholder: 'Start typing to search...',
-                    theme: 'bootstrap4',
+                    theme: 'bootstrap-5',
                     allowClear: true
                   }
                 ).on('select2:open', function(e) {

@@ -24,48 +24,12 @@ def filters_view(request):
     # Get data source from request
     data_source = request.GET.get('data_source')
 
-    # Extract index name from data source
-    index_name = controller.get_index_name_from_data_source(data_source)
+    filters = controller.get_filters_data(data_source)
 
-    # Use cached filters if available
-    if index_name in FILTERS_CACHE:
-        return JsonResponse(FILTERS_CACHE[index_name])
-
-    # Get aggregations based on data source
-    field_settings = constants.DSNAME_TO_FIELD_SETTINGS.get(data_source)
-    if not field_settings:
-        return JsonResponse({"error": "Invalid data source"}, status=400)
-
-    # FIXME: move this logic to controller
-    # Build aggregations
-    aggs = {}
-    for form_field_name, field_info in field_settings.items():
-        name = field_info.get("index_field_name")
-        size = field_info.get("filter", {}).get("size")
-        order = field_info.get("filter", {}).get("order")
-
-        terms = {"field": name, "size": size}
-
-        if order:
-            terms["order"] = order
-
-        aggs[form_field_name] = {"terms": terms}
-
-    # Build ES query body
-    body = {"size": 0, "aggs": aggs}
-
-    # Execute ES query
-    try:
-        res = controller.es.search(index=index_name, body=body)
-        filters = {k: [b["key"] for b in v["buckets"]] for k, v in res["aggregations"].items()}
-
-        # Cache the filters
-        FILTERS_CACHE[index_name] = filters
-
+    if filters:
         return JsonResponse(filters)
-
-    except Exception as e:
-        return JsonResponse({"error": str(e)}, status=500)
+    
+    return JsonResponse({"error": "Error retrieving filters"}, status=500)
 
 
 @require_POST
@@ -119,7 +83,7 @@ def data_view(request):
             aggs = controller.build_breakdown_documents_per_year_aggs(field_settings, breakdown_variable, data_source)
     else:
         if study_unit == "citation":
-            aggs = controller.build_citations_per_year_aggs()
+            aggs = controller.build_citations_per_year_aggs(field_settings)
         elif study_unit == "document":
             aggs = controller.build_documents_per_year_aggs(data_source)
 
@@ -132,7 +96,6 @@ def data_view(request):
         return JsonResponse({"error": "Error executing search"}, status=500)
 
     # FIXME: move this logic to controller
-    # Parse response
     data = {}
     if breakdown_variable:
         if study_unit == "citation":
@@ -183,11 +146,56 @@ def social_view(request):
     return render(request, "indicator.html", context)
 
 
-def journal_view(request):
+def journal_metrics_view(request):
     context = {
         "data_source": "journal_metrics",
         "data_source_display_name": _("Journal Metrics"),
+        "applied_filters": {},
     }
+
+    filters_data = controller.get_filters_data("journal_metrics")
+    if filters_data:
+        context["filters_data"] = filters_data
+
+    if request.method == "POST":
+        form_filters = request.POST.dict()
+
+        context["applied_filters"]["year"] = form_filters.pop("year", None)
+        context["applied_filters"]["ranking_metric"] = form_filters.pop("ranking_metric", "cwts_snip")
+        context["applied_filters"]["limit"] = form_filters.pop("limit", 500)
+
+        cleaned_filters = clean_form_filters(form_filters)
+        context["applied_filters"].update(cleaned_filters)
+
+        # Build query (general filters)
+        field_settings = constants.DSNAME_TO_FIELD_SETTINGS.get("journal_metrics")
+        query = controller.build_query(cleaned_filters, field_settings, "journal_metrics")
+
+        # Build query (yearly filters)
+        jm_query = controller.build_journal_metrics_query(
+            context["applied_filters"].get("year"), 
+            query,
+        )
+
+        # Build body for journal metrics
+        body = controller.build_journal_metrics_body(
+            selected_year=context["applied_filters"].get("year"),
+            ranking_metric=context["applied_filters"].get("ranking_metric"),
+            query=jm_query,
+            size=context["applied_filters"].get("limit"),
+        )
+
+        # Execute search
+        try:
+            index_name = controller.get_index_name_from_data_source("journal_metrics")
+            res = controller.es.search(index=index_name, body=body)
+            context.update({"ranking_data": controller.parse_journal_metrics_response(res, selected_year=context["applied_filters"].get("year"), ranking_metric=context["applied_filters"].get("ranking_metric"))})
+        except Exception as e:
+            context["error"] = _("Error executing search: %s") % str(e)
+
+    # Convert applied_filters to JSON for JavaScript
+    context["applied_filters_json"] = json.dumps(context["applied_filters"])
+    
     return render(request, "indicator.html", context)
 
 
@@ -228,6 +236,16 @@ def search_item(request):
         return JsonResponse({"error": "Error parsing search results"}, status=500)
 
     return JsonResponse({"results": parsed_results})
+
+
+def clean_form_filters(filters_dict):
+    # Remove empty filters
+    cleaned = {k: v for k, v in filters_dict.items() if v}
+    
+    # Remove CSRF token
+    cleaned.pop("csrfmiddlewaretoken", None)
+    
+    return cleaned
 
 
 class IndicatorDirectoryEditView(EditView):

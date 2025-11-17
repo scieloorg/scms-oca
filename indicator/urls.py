@@ -10,6 +10,6 @@ urlpatterns = [
     path('brazil/', views.brazil_view, name='sci_prod_brazil'),
     path('scielo/', views.scielo_view, name='sci_prod_scielo'),
     path('social/', views.social_view, name='soc_prod'),
-    path('journal/', views.journal_view, name='journal_metrics'),
+    path('journal/', views.journal_metrics_view, name='sci_prod_journal_metrics'),
     path('search/', views.search_item, name='search_item'),
 ]
