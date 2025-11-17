@@ -1,0 +1,105 @@
+{% load l10n %}
+{% load custom_filters %}
+
+<div class="col-lg-9 mx-0 ps-2 pe-0">
+    <!-- Applied Filters -->
+    {% if applied_filters and applied_filters.items %}
+    <div class="card mb-2 p-3 bg-light" id="applied-filters-journal-metrics">
+        <strong class="text-primary">Applied Filters</strong>
+        <span>
+            {% for key, value in applied_filters.items %}
+                {{ key|stz_filter }}: {{ value|stz_filter }}
+                {% if not forloop.last %}
+                    <span class="badge badge-secondary mx-2">AND</span>
+                {% endif %}
+            {% endfor %}
+        </span>
+    </div>
+    {% endif %}
+
+    <!-- Ranking Table -->
+    {% if ranking_data %}
+    <div class="box px-2 py-0 border rounded is-invisible" id="ranking-container">
+        <table id="ranking-table" class="table table-striped display nowrap">
+            <thead>
+                <tr>
+                    <th scope="col">Rank</th>
+                    <th scope="col">Journal</th>
+                    <th scope="col">ISSN</th>
+                    <th scope="col">CWTS SNIP</th>
+                    <th scope="col">Scimago SJR</th>
+                    <th scope="col">Scimago Citations / Doc. (2 Years)</th>
+                    <th scope="col">Scimago Total Citations (3 Years)</th>
+                    <th scope="col">SciELO Total Docs</th>
+                    <th scope="col">Scimago Total Docs</th>
+                    <th scope="col">Scimago % Female</th>
+                    <th scope="col">Scimago Estimated APC (USD)</th>
+                    <th scope="col">Scimago Estimated Value (USD)</th>
+                    <th scope="col">Scimago Overton</th>
+                    <th scope="col">Scimago SDG</th>
+                </tr>
+            </thead>
+            {% localize off %}
+            <tbody id="ranking-table-body">
+                {% for entry in ranking_data.journals %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ entry.title }}</td>
+                    <td>{{ entry.issns|join:", " }}</td>
+                    <td>{{ entry.cwts_snip }}</td>
+                    <td>{{ entry.scimago_sjr }}</td>
+                    <td>{{ entry.scimago_cites_by_doc_2_years }}</td>
+                    <td>{{ entry.scimago_total_cites_3_years }}</td>
+                    <td>{{ entry.scielo_num_docs }}</td>
+                    <td>{{ entry.scimago_total_docs }}</td>
+                    <td>{{ entry.scimago_female_authors_percent }}</td>
+                    <td>{{ entry.scimago_estimated_apc }}</td>
+                    <td>{{ entry.scimago_estimated_value }}</td>
+                    <td>{{ entry.scimago_overton }}</td>
+                    <td>{{ entry.scimago_sdg }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            {% endlocalize %}
+        </table>
+    </div>
+    {% endif %}
+</div>
+
+{% if ranking_data %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const tableContainer = document.getElementById('ranking-container');
+        const table = $('#ranking-table').DataTable({
+            columns: [
+                { type: 'num' },    // Rank
+                { type: 'string' }, // Journal
+                { type: 'string'},  // ISSN codes
+                { type: 'num' },    // CWTS SNIP
+                { type: 'num' },    // Scimago SJR
+                { type: 'num' },    // Scimago Citations / Doc. (2 Years)
+                { type: 'num' },    // Scimago Total Citations (3 Years)
+                { type: 'num' },    // SciELO Total Docs
+                { type: 'num' },    // Scimago Total Docs
+                { type: 'num' },    // Scimago % Female
+                { type: 'num' },    // Scimago Estimated APC (USD)
+                { type: 'num' },    // Scimago Estimated Value (USD)
+                { type: 'num' },    // Scimago Overton
+                { type: 'num' }     // Scimago SDG
+            ],
+            order: [[0, 'asc']],
+            scrollX: true,
+            pageLength: 25,
+            layout: {
+                topStart: {
+                    buttons: ['copy', 'csv', 'excel', 'pdf']
+                },
+                bottomStart: 'pageLength',
+            },
+            initComplete: function() {
+                tableContainer.classList.remove('is-invisible');
+            }
+        });
+    });
+</script>
+{% endif %}
