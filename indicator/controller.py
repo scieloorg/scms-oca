@@ -22,6 +22,8 @@ es = Elasticsearch(
     ca_certs=ES_CA_CERTS,
 )
 
+FILTERS_CACHE = {}
+
 
 def translate_fields(filters, field_settings):
     """
@@ -201,7 +203,9 @@ def build_query(filters, field_settings, data_source, language_query_operator=No
     return {"bool": {"must": must}} if must else {"match_all": {}}
 
 
-def build_citations_per_year_aggs():
+def build_citations_per_year_aggs(field_settings):
+    fl_cited_by_count = field_settings.get("cited_by_count", {}).get("index_field_name")
+    
     return {
         "citations_per_year": {
             "terms": {
@@ -211,7 +215,7 @@ def build_citations_per_year_aggs():
             },
             "aggs": {
                 "total_citations": {
-                    "sum": {"field": "cited_by_count"}
+                    "sum": {"field": fl_cited_by_count}
                 }
             }
         }
@@ -283,7 +287,9 @@ def build_breakdown_citation_per_year_aggs(field_settings, breakdown_variable):
     """
     Build the aggregations for breakdown of citations per year.
     """
-    name = field_settings.get(breakdown_variable, {}).get("index_field_name")
+    fl_breakdown_variable = field_settings.get(breakdown_variable, {}).get("index_field_name")
+    fl_cited_by_count = field_settings.get("cited_by_count", {}).get("index_field_name")
+    
     return {
         "per_year": {
             "terms": {
@@ -294,13 +300,13 @@ def build_breakdown_citation_per_year_aggs(field_settings, breakdown_variable):
             "aggs": {
                 "breakdown": {
                     "terms": {
-                        "field": name,
+                        "field": fl_breakdown_variable,
                         "order": {"_key": "asc"},
                         "size": 2500    # FIXME: use constant
                     },
                     "aggs": {
                         "total_citations": {
-                            "sum": {"field": "cited_by_count"}
+                            "sum": {"field": fl_cited_by_count}
                         }
                     }
                 }
@@ -515,8 +521,60 @@ def build_term_search_body(field_name, query, aggregation_size=20):
 
 def parse_search_item_response(response):
     buckets = response.get("aggregations", {}).get("unique_items", {}).get("buckets", [])
+
     results = [
         {"id": b["key"], "text": b["key"]}
         for b in buckets
     ]
+
     return results
+
+
+def get_filters_data(data_source):
+    # Extract index name from data source
+    index_name = get_index_name_from_data_source(data_source)
+
+    # Use cached filters if available
+    if index_name in FILTERS_CACHE:
+        return FILTERS_CACHE[index_name]
+
+    # Get aggregations based on data source
+    field_settings = constants.DSNAME_TO_FIELD_SETTINGS.get(data_source)
+    if not field_settings:
+        return None
+
+    # Build aggregations
+    aggs = {}
+    for form_field_name, field_info in field_settings.items():
+        fl_name = field_info.get("index_field_name")
+        fl_size = field_info.get("filter", {}).get("size")
+        fl_order = field_info.get("filter", {}).get("order")
+        fl_type = field_info.get("field_type")
+
+        # Guarantee we are using the keyword field for aggregations
+        if not fl_name.endswith(".keyword") and fl_type != "keyword":
+            name_keyword = f"{fl_name}.keyword"
+        else:
+            name_keyword = fl_name
+        terms = {"field": name_keyword, "size": fl_size}
+
+        if fl_order:
+            terms["order"] = fl_order
+
+        aggs[form_field_name] = {"terms": terms}
+
+    # Build ES query body
+    body = {"size": 0, "aggs": aggs}
+
+    # Execute ES query
+    try:
+        res = es.search(index=index_name, body=body)
+        filters = {k: [b["key"] for b in v["buckets"]] for k, v in res["aggregations"].items()}
+
+        # Cache the filters
+        FILTERS_CACHE[index_name] = filters
+
+        return filters
+
+    except Exception as e:
+        return None
