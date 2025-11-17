@@ -46,6 +46,26 @@ async function populateSelectFilters(data, exclude=[]) {
     }
 }
 
+/**
+ * Collect filters from FormData into an object.
+ */
+function collectFiltersFromForm(formData) {
+  const filters = {};
+
+  for (const [key, value] of formData.entries()) {
+    if (Object.prototype.hasOwnProperty.call(filters, key)) {
+      if (!Array.isArray(filters[key])) {
+        filters[key] = [filters[key]];
+      }
+      filters[key].push(value);
+    } else {
+      filters[key] = value;
+    }
+  }
+
+  return filters;
+}
+
 // Intl.DisplayNames to standardize country and language codes
 var hasIntlDisplay = typeof Intl !== 'undefined' && typeof Intl.DisplayNames === 'function';
 var countryDisplay = hasIntlDisplay ? new Intl.DisplayNames(['en'], { type: 'region' }) : null;
