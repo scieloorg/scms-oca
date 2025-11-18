@@ -121,7 +121,6 @@ class ElasticSearchQueryObject:
         Busca agregações para popular o filtro
         Retorna contagens de cada faceta
         """
-        filter_clauses = cls.build_filters(current_filters or {})
         agg_query = {
             "size": 0,  # Não retornar documentos
             "aggs": {},
