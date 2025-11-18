@@ -1,0 +1,36 @@
+.menu-floating-actions {
+  position: sticky;
+  bottom: 0;
+  height: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.menu-floating-actions__inner {
+  position: absolute;
+  right: 0;
+  bottom: 1rem;
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+  pointer-events: auto;
+}
+
+.menu-floating-actions__inner .btn {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.18), 0 1.5px 4px rgba(0,0,0,0.12);
+}
+
+@media (max-width: 576px) {
+  .menu-floating-actions__inner .btn {
+    width: calc(100% - 32px);
+  }
+}
+
+.is-invisible {
+  visibility: hidden;
+}
+
+div.dt-container select.dt-input {
+  margin-right: 1rem;
+  padding: 4px;
+}

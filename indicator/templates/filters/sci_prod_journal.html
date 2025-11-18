@@ -1,0 +1,317 @@
+<!-- Hidden study unit field to identify the type of indicator -->
+<select id="study_unit" hidden class="form-control" name="study_unit"></select>
+
+<h4 class="my-2 pt-1">Filters</h4>
+
+<div class="form-group mb-3">
+    <label class="form-label" for="journal">Journal</label>
+    <select id="journal" class="form-control" name="journal" aria-label="Journal"></select>
+</div>
+
+<div class="form-group mb-3">
+    <label class="form-label" for="issn">ISSN</label>
+    <select id="issn" class="form-control" name="issn" aria-label="ISSN"></select>
+</div>
+
+<div class="form-group mb-3">
+    <label class="form-label" for="source_index">Source Index</label>
+    <select id="source_index" class="form-control" name="source_index" aria-label="Source Index">
+        <option></option>
+        {% for option in filters_data.source_index %}
+            <option value="{{ option }}" {% if applied_filters.source_index == option %}selected{% endif %}>{{ option }}</option>
+        {% endfor %}
+    </select>
+</div>
+
+<div class="form-group mb-3">
+    <label class="form-label" for="publisher_name">Publisher</label>
+    <select id="publisher_name" class="form-control" name="publisher_name" aria-label="Publisher"></select>
+</div>
+
+<div class="form-group mb-3">
+    <label class="form-label" for="openalex_region">Region</label>
+    <select id="openalex_region" class="form-control" name="openalex_region" aria-label="Region">
+        <option></option>
+        {% for option in filters_data.openalex_region %}
+            <option value="{{ option }}" {% if applied_filters.openalex_region == option %}selected{% endif %}>{{ option }}</option>
+        {% endfor %}
+    </select>
+</div>
+
+<div class="form-group mb-3">
+    <label class="form-label" for="country">Country</label>
+    <select id="country" class="form-control" name="country" aria-label="Country">
+        <option></option>
+        {% for option in filters_data.country %}
+            <option value="{{ option }}" {% if applied_filters.country == option %}selected{% endif %}>{{ option }}</option>
+        {% endfor %}
+    </select>
+</div>
+
+<div class="form-group mb-3">
+    <label class="form-label" for="year_founded">Year Founded</label>
+    <input 
+        id="year_founded"
+        class="form-control"
+        name="year_founded"
+        aria-label="Year Founded"
+        type="text"
+        value="{{ applied_filters.year_founded|default:'' }}"
+        placeholder="Select a Year"
+    />
+</div>
+
+<div class="h6 pb-2 mt-4 border-bottom text-primary">
+  <strong>SciELO</strong>
+</div>
+
+<div class="form-group mb-3">
+    <label class="form-label" for="is_scielo">Is SciELO</label>
+    <select id="is_scielo" class="form-control" name="is_scielo" aria-label="Is SciELO">
+        <option value="">Select an option</option>
+        <option value="true" {% if applied_filters.is_scielo == "true" %}selected{% endif %}>Yes</option>
+        <option value="false" {% if applied_filters.is_scielo == "false" %}selected{% endif %}>No</option>
+    </select>
+</div>
+
+<div class="form-group mb-3">
+    <label class="form-label" for="scielo_collection_name">Collection</label>
+    <select id="scielo_collection_name" class="form-control" name="scielo_collection_name" aria-label="Collection (SciELO)">
+        <option></option>
+        {% for option in filters_data.scielo_collection_name %}
+            <option value="{{ option }}" {% if applied_filters.scielo_collection_name == option %}selected{% endif %}>{{ option }}</option>
+        {% endfor %}
+    </select>
+</div>
+
+<div class="form-group mb-3">
+    <label class="form-label" for="scielo_thematic_area">Thematic Area</label>
+    <select id="scielo_thematic_area" class="form-control" name="scielo_thematic_area" aria-label="Thematic Area">
+        <option></option>
+        {% for option in filters_data.scielo_thematic_area %}
+            <option value="{{ option }}" {% if applied_filters.scielo_thematic_area == option %}selected{% endif %}>{{ option }}</option>
+        {% endfor %}
+    </select>
+</div>
+
+<div class="h6 pb-2 mt-4 border-bottom text-primary">
+  <strong>Metrics</strong>
+</div>
+
+<div class="form-group mb-3">
+    <label class="form-label" for="year">Year</label>
+    <input 
+        id="year"
+        class="form-control"
+        name="year"
+        aria-label="Metric Year"
+        type="text"
+        value="{{ applied_filters.year|default:'2024' }}"
+        placeholder="Metric Year"
+    />
+</div>
+
+<div class="form-group mb-3">
+    <label class="form-label" for="scimago_best_quartile">Scimago Best Quartile</label>
+    <select id="scimago_best_quartile" class="form-control" name="scimago_best_quartile" aria-label="Scimago Best Quartile">
+        <option value="">Select an option</option>
+        <option value="Q1" {% if applied_filters.scimago_best_quartile == "Q1" %}selected{% endif %}>Q1</option>
+        <option value="Q2" {% if applied_filters.scimago_best_quartile == "Q2" %}selected{% endif %}>Q2</option>
+        <option value="Q3" {% if applied_filters.scimago_best_quartile == "Q3" %}selected{% endif %}>Q3</option>
+        <option value="Q4" {% if applied_filters.scimago_best_quartile == "Q4" %}selected{% endif %}>Q4</option>
+    </select>
+</div>
+
+<div class="form-group mb-3">
+    <label class="form-label" for="openalex_docs_2024_5">OpenAlex Total Docs 2024 > 5</label>
+    <select id="openalex_docs_2024_5" class="form-control" name="openalex_docs_2024_5" aria-label="OpenAlex Total Docs 2024 > 5">
+        <option value="">Select an option</option>
+        <option value="true" {% if applied_filters.openalex_docs_2024_5 == "true" %}selected{% endif %}>Yes</option>
+        <option value="false" {% if applied_filters.openalex_docs_2024_5 == "false" %}selected{% endif %}>No</option>
+    </select>
+</div>
+
+<div class="form-group mb-3">
+    <label class="form-label" for="ranking_metric">Ranking metric</label>
+    <select id="ranking_metric" class="form-control" name="ranking_metric" aria-label="Ranking metric">
+        <option {% if applied_filters.ranking_metric == "cwts_snip" or not applied_filters.ranking_metric %}selected{% endif %} value="cwts_snip">CWTS SNIP</option>
+        <option {% if applied_filters.ranking_metric == "scielo_num_docs" %}selected{% endif %} value="scielo_num_docs">SciELO Total Docs</option>
+        <optgroup label="Scimago">
+            <option {% if applied_filters.ranking_metric == "scimago_cites_by_doc_2_years" %}selected{% endif %} value="scimago_cites_by_doc_2_years">Citations / Doc. (2 years)</option>
+            <option {% if applied_filters.ranking_metric == "scimago_estimated_apc" %}selected{% endif %} value="scimago_estimated_apc">Estimated APC (USD)</option>
+            <option {% if applied_filters.ranking_metric == "scimago_estimated_value" %}selected{% endif %} value="scimago_estimated_value">Estimated Value (USD)</option>
+            <option {% if applied_filters.ranking_metric == "scimago_female_authors_percent" %}selected{% endif %} value="scimago_female_authors_percent">% Female</option>
+            <option {% if applied_filters.ranking_metric == "scimago_overton" %}selected{% endif %} value="scimago_overton">Overton</option>
+            <option {% if applied_filters.ranking_metric == "scimago_sdg" %}selected{% endif %} value="scimago_sdg">SDG</option>
+            <option {% if applied_filters.ranking_metric == "scimago_sjr" %}selected{% endif %} value="scimago_sjr">SJR</option>
+            <option {% if applied_filters.ranking_metric == "scimago_total_cites_3_years" %}selected{% endif %} value="scimago_total_cites_3_years">Total Citations (3 years)</option>
+            <option {% if applied_filters.ranking_metric == "scimago_total_docs" %}selected{% endif %} value="scimago_total_docs">Total Docs</option>
+        </optgroup>
+    </select>
+</div>
+
+<div class="form-group mb-3">
+    <label class="form-label" for="limit">Number of results</label>
+    <select id="limit" class="form-control" name="limit" aria-label="Number of results">
+        <option value="10" {% if applied_filters.limit == "10" %}selected{% endif %}>10</option>
+        <option value="25" {% if applied_filters.limit == "25" %}selected{% endif %}>25</option>
+        <option value="50" {% if applied_filters.limit == "50" %}selected{% endif %}>50</option>
+        <option value="100" {% if applied_filters.limit == "100" %}selected{% endif %}>100</option>
+        <option value="200" {% if applied_filters.limit == "200" %}selected{% endif %}>200</option>
+        <option value="500" {% if applied_filters.limit == "500" or not applied_filters.limit %}selected{% endif %}>500</option>
+        <option value="1000" {% if applied_filters.limit == "1000" %}selected{% endif %}>1000</option>
+    </select>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        // Initialize Select2 for single-select fields
+        const selectFields = [
+            "is_scielo",
+            "openalex_region",
+            "scielo_collection_name",
+            "scielo_thematic_area",
+            "source_index",
+            "scimago_best_quartile",
+            "openalex_docs_2024_5",
+            "limit",
+        ];
+        selectFields.forEach(fieldId => {
+            const selectElement = document.getElementById(fieldId);
+            if (selectElement) {
+                $(selectElement).select2(
+                {
+                    placeholder: 'Select an option',
+                    allowClear: true,
+                    minimumResultsForSearch: Infinity,
+                    theme: 'bootstrap-5',
+                }).on('select2:open', function(e) {
+                    document.querySelector(`[aria-controls="select2-${e.target.id}-results"]`).focus();
+                });
+            }
+        });
+    } catch (error) {
+        console.error('Error initializing Select2', error);
+    }
+
+    // Initialize Bootstrap Datepicker for year fields
+    const yearFields = [
+        'year',
+        'year_founded',
+    ];
+    yearFields.forEach(fieldId => {
+        const yearInput = document.getElementById(fieldId);
+        if (yearInput) {
+            $(yearInput).datepicker({
+                format: "yyyy",
+                viewMode: "years",
+                minViewMode: "years",
+                autoclose: true,
+                startDate: '1800',
+                endDate: '2100'
+            });
+        }
+    });
+
+    // Initialize Select2 for searchable single select fields
+    const searchableSingleSelectFields = [
+        "country",
+        "ranking_metric",
+    ];
+    searchableSingleSelectFields.forEach(fieldId => {
+        const selectElement = document.getElementById(fieldId);
+        if (selectElement) {
+            $(selectElement).select2(
+                {
+                placeholder: 'Start typing to search...', 
+                allowClear: true,
+                theme: 'bootstrap-5',
+                }
+            ).on('select2:open', function(e) {
+                document.querySelector(`[aria-controls="select2-${e.target.id}-results"]`).focus();
+            });
+        }
+    });
+
+    // Initialize Select2 for special fields
+    const specialSelectFields = ['journal', 'issn', 'publisher_name'];
+    
+    // Get applied filters from Django template context
+    const appliedFilters = {{ applied_filters|safe|default:'{}' }};
+    
+    specialSelectFields.forEach(fieldId => {
+        const selectElement = document.getElementById(fieldId);
+        if (selectElement) {
+            $(selectElement).select2({
+                ajax: {
+                    url: `/indicators/search/?field_name=${fieldId}&data_source=journal_metrics`,
+                    dataType: 'json',
+                    delay: 300,
+                    data: params => ({ q: params.term }),
+                    processResults: data => data,
+                },
+                minimumInputLength: 2,
+                placeholder: 'Start typing to search...',
+                theme: 'bootstrap-5',
+                allowClear: true,
+            }).on('select2:open', function(e) {
+                document.querySelector(`[aria-controls="select2-${e.target.id}-results"]`).focus();
+            });
+
+            // Set pre-selected value if exists in applied filters
+            if (appliedFilters[fieldId]) {
+                const option = new Option(appliedFilters[fieldId], appliedFilters[fieldId], true, true);
+                $(selectElement).append(option).trigger('change');
+            }
+        }
+    });
+
+    // Handle reset button
+    const resetButton = document.getElementById('menu-reset-journal-metrics');
+    const menuForm = document.getElementById('menu-form-journal-metrics');
+    
+    if (resetButton && menuForm) {
+        resetButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Reset all regular form fields
+            menuForm.reset();
+            
+            // Clear all Select2 fields
+            $(menuForm).find('select').each(function() {
+                if ($(this).hasClass('select2-hidden-accessible')) {
+                    $(this).val(null).trigger('change');
+                }
+            });
+            
+            // Reset specific fields to their defaults
+            const yearField = document.getElementById('year');
+            if (yearField) yearField.value = '2024';
+            
+            const rankingMetricField = document.getElementById('ranking_metric');
+            if (rankingMetricField) {
+                $(rankingMetricField).val('cwts_snip').trigger('change');
+            }
+            
+            const limitField = document.getElementById('limit');
+            if (limitField) {
+                $(limitField).val('500').trigger('change');
+            }
+            
+            // Hide applied filters display
+            const appliedFiltersContainer = document.getElementById('applied-filters-journal-metrics');
+            if (appliedFiltersContainer) {
+                appliedFiltersContainer.style.display = 'none';
+            }
+            
+            // Hide ranking table
+            const rankingContainer = document.getElementById('ranking-container');
+            if (rankingContainer) {
+                rankingContainer.style.display = 'none';
+            }
+        });
+    }
+});
+
+</script>

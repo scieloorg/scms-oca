@@ -7,8 +7,8 @@ from django.utils.translation import gettext_lazy as _
 import environ
 
 ROOT_DIR = Path(__file__).resolve(strict=True).parent.parent.parent
-# core/
 APPS_DIR = ROOT_DIR / "core"
+INDICATORS_DIR = ROOT_DIR / "indicator"
 env = environ.Env()
 
 READ_DOT_ENV_FILE = env.bool("DJANGO_READ_DOT_ENV_FILE", default=False)
@@ -199,8 +199,13 @@ MIDDLEWARE = [
 STATIC_ROOT = str(ROOT_DIR / "staticfiles")
 # https://docs.djangoproject.com/en/dev/ref/settings/#static-url
 STATIC_URL = "/static/"
+
 # https://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/#std:setting-STATICFILES_DIRS
-STATICFILES_DIRS = [str(APPS_DIR / "static")]
+STATICFILES_DIRS = [
+    str(APPS_DIR / "static"),
+    str(INDICATORS_DIR / "static"),
+]
+
 # https://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/#staticfiles-finders
 STATICFILES_FINDERS = [
     "django.contrib.staticfiles.finders.FileSystemFinder",
@@ -425,9 +430,12 @@ HAYSTACK_CONNECTIONS = {
     "es": {
         "ENGINE": "haystack.backends.elasticsearch7_backend.Elasticsearch7SearchEngine",
         "URL": env("ES_URL", default="http://elastic:xxxxx@host.docker.internal:9200/"),
-        "INDEX_NAME": env("INDEX_NAME", default="opoca"),
+        "INDEX_NAME": env("INDEX_NAME", default="openalex_works"),
         "SOLR_TIMEOUT": 10,
-        "KWARGS": {"verify_certs":False}
+        "KWARGS": {
+            "verify_certs": env.bool("ES_VERIFY_CERTS", default=False),
+            "ca_certs": env("ES_CA_CERTS", default=None),
+        }
     },
 }
 
@@ -471,7 +479,6 @@ THEMATIC_AREA_INDEX = env.str("THEMATIC_AREA_INDEX", "thematicareas")
 
 DIRECTORY_IMPORT_DELIMITER = env.str("DIRECTORY_IMPORT_DELIMITER", default=",")
 
-
 # CONFIGURAÇÕES DO ELASTICSEARCH
 ELASTICSEARCH_AGGREGATION_CONFIGS = {
     "publication_year": {"terms": {"field": "publication_year", "size": 100, "order": {"_count": "desc"}}, "type": int},
@@ -498,3 +505,20 @@ SEARCH_FILTER_LABELS = {
     "subject_level_2": _("Área Temática Nível 2"),
     "languages": _("Idioma"),
 }
+
+# Elasticsearch indices for indicators
+ES_INDEX_SCI_PROD_WORLD = env.str("ES_INDEX_SCI_PROD_WORLD", "openalex_works")
+ES_INDEX_SCI_PROD_BRAZIL = env.str("ES_INDEX_SCI_PROD_BRAZIL", "openalex_works")
+ES_INDEX_SCI_PROD_SCIELO = env.str("ES_INDEX_SCI_PROD_SCIELO", "scielo_works")
+ES_INDEX_SOC_PROD = env.str("ES_INDEX_SOC_PROD", "opoca")
+ES_INDEX_JOURNAL_METRICS = env.str("ES_INDEX_JOURNAL_METRICS", "journal_annual_metrics")
+ES_INDEX_SOURCES = env.str("ES_INDEX_SOURCES", "journals")
+
+# Data source names for indicators
+DSNAME_SCI_PROD_WORLD = env.str("DSNAME_SCI_PROD_WORLD", "world")
+DSNAME_SCI_PROD_BRAZIL = env.str("DSNAME_SCI_PROD_BRAZIL", "brazil")
+DSNAME_SCI_PROD_SCIELO = env.str("DSNAME_SCI_PROD_SCIELO", "scielo")
+DSNAME_SOC_PROD = env.str("DSNAME_SOC_PROD", "social")
+DSNAME_JOURNAL_METRICS = env.str("DSNAME_JOURNAL_METRICS", "journal_metrics")
+DSNAME_SOURCES = env.str("DSNAME_SOURCES", "sources")
+

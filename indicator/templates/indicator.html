@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% load static %}
+{% load i18n %}
+{% load wagtailsettings_tags %}
+{% load sizify %}
+{% load partition %}
+{% load humanize %}
+{% load translate %}
+
+{% get_settings use_default_site=True %}
+
+
+{% block content %}
+<section id="content" class="mt-3">
+  <div class="container">
+    <div class="row mx-1">
+        <div class="card mb-2 p-3 bg-light">
+          <div class="page-title-content">
+            <h1 class="mb-1">Indicators</h1>
+            <span class="text-muted">Data panel of the OCABr Observatory</span>
+          </div>
+        </div>
+    </div>
+
+    <div class="row mx-1">
+      <div class="card mb-2 p-3 bg-light">
+        <h4 class="my-0">{{ data_source_display_name }}</h4>
+      </div>
+    </div>
+
+    <div class="row mx-1" id="mainContent">
+      <!-- Menu -->
+      <div class="col-lg-3 card mb-2 pt-2 bg-light">
+        <div id="menu-container">
+          {% if data_source == "journal_metrics" %}
+            {% include "menu_ranking.html" %}
+          {% else %}
+            {% include "menu.html" %}
+          {% endif %}
+        </div>
+      </div>
+
+      {% if data_source == "journal_metrics" %}
+        <!-- Ranking Area -->
+        {% include "ranking.html" %}
+      {% else %}
+        <!-- Charts Area -->
+        {% include "chart.html" %}
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'indicator/css/custom.css' %}">
+{% endblock %}
+
+{% block inline_javascript %}
+  <script src="{% static 'js/echarts/echarts.min.js' %}"></script>
+  <script src="{% static 'indicator/js/helpers.js' %}"></script>
+  <script src="{% static 'indicator/js/charts.js' %}"></script>
+  <script src="{% static 'indicator/js/menu.js' %}"></script>
+{% endblock %}
