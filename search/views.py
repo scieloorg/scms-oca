@@ -8,7 +8,7 @@ from collections import OrderedDict
 
 import pysolr
 from django.conf import settings
-from django.http import Http404, HttpResponse, JsonResponse
+from django.http import Http404, HttpResponse, JsonResponse, HttpResponseNotAllowed
 from django.shortcuts import redirect, render
 from django.template import loader
 from django.urls import reverse
@@ -574,5 +574,12 @@ def context_facet(request):
 
 
 def get_search_results_json(request):
-    search_data = SearchPage._get_search_data(request)
-    return JsonResponse(search_data)
+    if request.method != "GET":
+        return HttpResponseNotAllowed(["GET"])
+    try:
+        search_data = SearchPage._get_search_data(request)
+        return JsonResponse(search_data)
+    except Exception as e:
+        logging.exception("Error in get_search_results_json")
+        return JsonResponse({"error": str(e)}, status=500)
+    
