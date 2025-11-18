@@ -3,11 +3,18 @@ import os
 from django.conf import settings
 from django.utils.translation import gettext as _
 from elasticsearch import Elasticsearch
+from urllib.parse import urlparse
 
-
-ELASTICSEARCH_HOST = os.getenv("ELASTICSEARCH_HOST", "http://elasticsearch:9200")
 ELASTICSEARCH_API_KEY = os.getenv("ELASTICSEARCH_API_KEY")
-INDEX_NAME_ELASTICSEARCH = os.getenv("INDEX_NAME_ELASTICSEARCH", "openalex_works")
+
+es_url = settings.HAYSTACK_CONNECTIONS['es']['URL']  # ex: http://user:pass@host:9200/
+parsed_url = urlparse(es_url)
+
+ES_HOST = f"{parsed_url.scheme}://{parsed_url.hostname}:{parsed_url.port}"
+ES_USER = parsed_url.username or 'elastic'
+ES_PASSWORD = parsed_url.password or ''
+ES_VERIFY_CERTS = settings.HAYSTACK_CONNECTIONS['es'].get('KWARGS', {}).get('verify_certs', False)
+ES_CA_CERTS = settings.HAYSTACK_CONNECTIONS['es'].get('KWARGS', {}).get('ca_certs', None)
 
 
 class ElasticSearchQueryObject:
@@ -104,7 +111,7 @@ class ElasticSearchQueryObject:
     @classmethod
     def build_filters(cls, filters):
         """
-        Contrói os filtros do ElasticSearch
+        Constrói os filtros do ElasticSearch
         """
         must_filters = []
 
@@ -126,8 +133,11 @@ class ElasticSearchQueryObject:
             "aggs": {},
         }
 
+        def omit_key(d, key):
+            return dict((k, v) for k, v in d.items() if k != key)
+
         for key, value in settings.ELASTICSEARCH_AGGREGATION_CONFIGS.items():
-            agg_filters = {k: v for k, v in (current_filters or {}).items() if k != key}
+            agg_filters = omit_key(current_filters or {}, key)
             filter_clauses_for_agg = cls.build_filters(agg_filters)
 
             if search_query:
@@ -171,9 +181,28 @@ class ElasticSearchQueryObject:
 
 
 class ElasticSearchHandler:
-    def __init__(self, index, host=ELASTICSEARCH_HOST, api_key=None):
+    def __init__(self, index, 
+        host=ES_HOST, 
+        username='', 
+        password='', 
+        api_key=None,
+        verify_certs=False,
+        ca_certs=None
+    ):
         self.index = index
-        self.client = Elasticsearch(host, api_key=api_key)
+
+        if username and password:
+            http_auth=(username, password)
+        else:
+            http_auth=None
+
+        self.client = Elasticsearch(
+            host,
+            http_auth=http_auth,
+            verify_certs=verify_certs,
+            api_key=api_key,
+            ca_certs=ca_certs
+        )
 
     def handler_search_response(self, body=None):
         return self.client.search(index=self.index, body=body)
@@ -221,6 +250,11 @@ class ElasticSearchHandler:
 
 
 client = ElasticSearchHandler(
-    index=INDEX_NAME_ELASTICSEARCH,
+    host=ES_HOST,
+    index=settings.ES_INDEX_SCI_PROD_WORLD,
     api_key=ELASTICSEARCH_API_KEY,
+    username=ES_USER,
+    password=ES_PASSWORD,
+    verify_certs=ES_VERIFY_CERTS,
+    ca_certs=ES_CA_CERTS,
 )
