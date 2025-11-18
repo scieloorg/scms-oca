@@ -7,6 +7,7 @@ from elasticsearch import Elasticsearch
 
 ELASTICSEARCH_HOST = os.getenv("ELASTICSEARCH_HOST", "http://elasticsearch:9200")
 ELASTICSEARCH_API_KEY = os.getenv("ELASTICSEARCH_API_KEY")
+INDEX_NAME_ELASTICSEARCH = os.getenv("INDEX_NAME_ELASTICSEARCH", "openalex_works")
 
 
 class ElasticSearchQueryObject:
@@ -221,6 +222,6 @@ class ElasticSearchHandler:
 
 
 client = ElasticSearchHandler(
-    index="openalex_works",
+    index=INDEX_NAME_ELASTICSEARCH,
     api_key=ELASTICSEARCH_API_KEY,
 )
