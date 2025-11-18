@@ -23,9 +23,9 @@ class SearchPage(Page):
     @staticmethod
     def _get_search_data(request):
         search_query = request.GET.get("search", "")
-        itens_by_page = request.GET.get("itensPage", 20)
+        itens_by_page = request.GET.get("itensPage", 50)
 
-        itens_by_page = get_save_number(itens_by_page, 10)
+        itens_by_page = get_save_number(itens_by_page, 50)
         page_number = get_save_number(request.GET.get("page", 1), 1)
 
         selected_filters = SearchPage.extract_filters_from_request(request)
@@ -50,7 +50,7 @@ class SearchPage(Page):
         aggregations = ElasticSearchHandler.get_filter_aggregations(
             search_query, selected_filters
         )
-        total_pages = (search_results["total_results"] - 1) // itens_by_page
+        total_pages = (search_results["total_results"] + itens_by_page - 1) // itens_by_page
         has_next = page_number < total_pages
         
         return {
