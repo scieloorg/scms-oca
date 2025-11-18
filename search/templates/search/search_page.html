@@ -446,7 +446,7 @@
             const resultsHTML = data.search_results && data.search_results.length > 0 
                 ? data.search_results.map(hit => `
                     <article class="article">
-                        <h3>${escapeHtml(hit.source.title || 'Sem título')}</h3>
+                        <h3><a href="${hit.id}" target="_blank">${escapeHtml(hit.source.title)}</a></h3>
                         <p><strong>ID:</strong> ${escapeHtml(hit.id)}</p>
                         ${hit.source.primary_location?.doi ? `<p><strong>DOI:</strong> ${escapeHtml(hit.source.primary_location.doi)}</p>` : ''}
                         ${hit.source.authorships && hit.source.authorships.length > 0 ? `
