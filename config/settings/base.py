@@ -7,8 +7,8 @@ from django.utils.translation import gettext_lazy as _
 import environ
 
 ROOT_DIR = Path(__file__).resolve(strict=True).parent.parent.parent
-# core/
 APPS_DIR = ROOT_DIR / "core"
+INDICATORS_DIR = ROOT_DIR / "indicator"
 env = environ.Env()
 
 READ_DOT_ENV_FILE = env.bool("DJANGO_READ_DOT_ENV_FILE", default=False)
@@ -199,8 +199,13 @@ MIDDLEWARE = [
 STATIC_ROOT = str(ROOT_DIR / "staticfiles")
 # https://docs.djangoproject.com/en/dev/ref/settings/#static-url
 STATIC_URL = "/static/"
+
 # https://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/#std:setting-STATICFILES_DIRS
-STATICFILES_DIRS = [str(APPS_DIR / "static")]
+STATICFILES_DIRS = [
+    str(APPS_DIR / "static"),
+    str(INDICATORS_DIR / "static"),
+]
+
 # https://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/#staticfiles-finders
 STATICFILES_FINDERS = [
     "django.contrib.staticfiles.finders.FileSystemFinder",
@@ -425,9 +430,12 @@ HAYSTACK_CONNECTIONS = {
     "es": {
         "ENGINE": "haystack.backends.elasticsearch7_backend.Elasticsearch7SearchEngine",
         "URL": env("ES_URL", default="http://elastic:xxxxx@host.docker.internal:9200/"),
-        "INDEX_NAME": env("INDEX_NAME", default="opoca"),
+        "INDEX_NAME": env("INDEX_NAME", default="openalex_works"),
         "SOLR_TIMEOUT": 10,
-        "KWARGS": {"verify_certs":False}
+        "KWARGS": {
+            "verify_certs": env.bool("ES_VERIFY_CERTS", default=False),
+            "ca_certs": env("ES_CA_CERTS", default=None),
+        }
     },
 }
 
@@ -470,3 +478,46 @@ COUNTRY_INDEX = env.str("COUNTRY_INDEX", "regionscon")
 THEMATIC_AREA_INDEX = env.str("THEMATIC_AREA_INDEX", "thematicareas")
 
 DIRECTORY_IMPORT_DELIMITER = env.str("DIRECTORY_IMPORT_DELIMITER", default=",")
+
+# CONFIGURAÇÕES DO ELASTICSEARCH
+ELASTICSEARCH_AGGREGATION_CONFIGS = {
+    "source_index_open_alex": {"terms": {"field": "indexed_in.keyword", "size": 100, "order": {"_key": "asc"}}, "type": str},
+    "source_index_scielo": {"terms": {"field": "primary_location.source.scl.indexed_in.keyword", "size": 100, "order": {"_key": "asc"}}, "type": str},
+    "source_type": {"terms": {"field": "primary_location.source.type.keyword", "size": 100, "order": {"_key": "asc"}}, "type": str},
+    "source_name": {"terms": {"field": "primary_location.source.display_name.keyword", "size": 100, "order":  {"_key": "asc"}}, "type": str},
+    "publication_year": {"terms": {"field": "publication_year", "size": 100, "order": {"_count": "desc"}}, "type": int},
+    "document_type": {"terms": {"field": "type.keyword", "size": 100, "order": {"_count": "desc"}}, "type": str},
+    "languages": {"terms": {"field": "language.keyword", "size": 100, "order": {"_count": "desc"}}, "type": str},
+    "is_open_access": {"terms": {"field": "open_access.is_oa", "size": 3}, "type": bool},
+    "open_access_status": {"terms": {"field": "open_access.oa_status.keyword", "size": 10}, "type": str},
+    "subject_level_0": {"terms": {"field": "thematic_areas.level0.keyword", "size": 3, "order": {"_count": "desc"}}, "type": str},
+    "subject_level_1": {"terms": {"field": "thematic_areas.level1.keyword", "size": 9, "order": {"_count": "desc"}}, "type": str},
+    "subject_level_2": {"terms": {"field": "thematic_areas.level2.keyword", "size": 41, "order": {"_count": "desc"}}, "type": str},
+    # "scope": {"terms": {"field": "scope.keyword", "size": 10, "order": {"_count": "desc"}}, "type": str},
+    # "database": {"terms": {"field": "database.keyword", "size": 10, "order": {"_count": "desc"}}, "type": str},
+}
+
+
+SEARCH_FILTER_LABELS = {
+    "source_index_open_alex": _("Source Index (OpenAlex)"),
+    "source_index_scielo": _("Source Index (SciELO)"),
+    "source_type": _("Source Type"),
+    "source_name": _("Source Name"),
+    "publication_year": _("Publication Year"),
+    "open_access_status": _("Access Type"),
+    "document_type": _("Document Type"),
+    "is_open_access": _("Open Access"),
+    "scope": _("Escopo"),
+    "subject_level_0": _("Subject Area Level 0"),
+    "subject_level_1": _("Subject Area Level 1"),
+    "subject_level_2": _("Subject Area Level 2"),
+    "languages": _("Document Language"),
+}
+
+# Elasticsearch indices for indicators
+ES_INDEX_SCI_PROD_WORLD = env.str("ES_INDEX_SCI_PROD_WORLD", "openalex_works")
+ES_INDEX_SCI_PROD_BRAZIL = env.str("ES_INDEX_SCI_PROD_BRAZIL", "openalex_works")
+ES_INDEX_SCI_PROD_SCIELO = env.str("ES_INDEX_SCI_PROD_SCIELO", "scielo_works")
+ES_INDEX_SOC_PROD = env.str("ES_INDEX_SOC_PROD", "opoca")
+ES_INDEX_JOURNAL_METRICS = env.str("ES_INDEX_JOURNAL_METRICS", "journal_annual_metrics")
+ES_INDEX_SOURCES = env.str("ES_INDEX_SOURCES", "journals")

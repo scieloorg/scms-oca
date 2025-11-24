@@ -91,3 +91,7 @@ pyalex==0.14   # https://github.com/J535D165/pyalex
 # ------------------------------------------------------------------------------
 elasticsearch==7.17.12  # https://elasticsearch-py.readthedocs.io/en/v7.17.12/
 
+
+# ISO 639-1
+# ------------------------------------------------------------------------------
+iso639-lang==2.6.3  # https://pypi.org/project/iso639-lang/

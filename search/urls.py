@@ -1,7 +1,7 @@
 from django.urls import path
-from django.views.generic import TemplateView
 
 from search import views
+from .views import get_search_results_json
 
 app_name = "search"
 urlpatterns = [
@@ -31,5 +31,5 @@ urlpatterns = [
     path(
         "graph/context_facet", views.context_facet, name="context_facet"
     ),
-
+    path("api/search-results/", get_search_results_json, name="search_results_elastic_json"),
 ]
