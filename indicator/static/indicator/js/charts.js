@@ -3,11 +3,11 @@ const Indicators = {};
 
 // Builds a tooltip configuration
 function buildTooltip(overrides) {
-    return { 
+    return {
         confine: true,
         enterable: true,
         extraCssText: 'max-height:50vh; overflow-y:auto;',
-        ...overrides 
+        ...overrides
     };
 }
 
@@ -19,7 +19,7 @@ function buildGrid(overrides) {
         right: 200,
         bottom: 40,
         containLabel: true,
-        ...overrides 
+        ...overrides
     };
 }
 
@@ -28,7 +28,7 @@ function buildToolbox(magicTypes) {
   return {
     orient: 'vertical',
     feature: {
-      magicType: { type: magicTypes || ['line', 'bar', 'tiled'] },
+      magicType: { type: magicTypes || ['bar', "line"] },
       dataView: { show: true, title: 'Data', readOnly: true, lang: ['', 'Close'] },
       saveAsImage: { show: true },
       restore: { show: true },
@@ -59,23 +59,20 @@ function destroyChartInstance(container) {
 
 // Clears the charts container and destroys chart instances
 function clearGraphsContainer() {
-    const mainChartDiv = document.getElementById('main-chart-div');
-    const innerPercentageChartDiv = document.getElementById('inner-percentage-chart-div');
-    const outerPercentageChartDiv = document.getElementById('outer-percentage-chart-div');
-
-    if (mainChartDiv) mainChartDiv.classList.add('d-none');
-    if (innerPercentageChartDiv) innerPercentageChartDiv.classList.add('d-none');
-    if (outerPercentageChartDiv) outerPercentageChartDiv.classList.add('d-none');
-
-    const chartInstances = [
-        mainChartDiv._chartInstance,
-        innerPercentageChartDiv._chartInstance,
-        outerPercentageChartDiv._chartInstance
+    const chartDivs = [
+        'docs-chart-div',
+        'citations-chart-div',
+        'citations-per-doc-chart-div'
     ];
 
-    chartInstances.forEach(chartInstance => {
-        if (chartInstance) {
-            destroyChartInstance(chartInstance.getDom());
+    chartDivs.forEach(divId => {
+        const div = document.getElementById(divId);
+        if (div) {
+            div.classList.add('d-none');
+            const chart = document.getElementById(divId.replace('-div', ''));
+            if (chart) {
+                destroyChartInstance(chart);
+            }
         }
     });
 }
@@ -94,255 +91,78 @@ function initChartInstance(container) {
 }
 
 /**
- * Render the main chart based on the provided data and study unit
- * @param {object} data - The indicator data received from the API.
- * @param {string} studyUnit - The study unit ('journal', 'document', 'citation').
+ * Renders a chart based on the provided data and series type.
+ * @param {object} options - The options for rendering the chart.
+ * @param {string} options.chartId - The ID of the chart container element.
+ * @param {string} options.chartDivId - The ID of the chart div container element.
+ * @param {object} options.data - The indicator data received from the API.
+ * @param {string} options.seriesType - The type of series to render ('Documents', 'Citations', 'Citations per Document').
+ * @param {string} options.title - The title of the chart.
  */
-Indicators.renderMainChart = function(data, studyUnit) {
-    const chartContainer = document.getElementById('main-chart');
+Indicators.renderChart = function({ chartId, chartDivId, data, seriesType, title }) {
+    const chartContainer = document.getElementById(chartId);
     if (!chartContainer) return;
 
-    const chartContainerParent = document.getElementById('main-chart-div');
+    const chartContainerParent = document.getElementById(chartDivId);
     if (!chartContainerParent) return;
 
-    // Remove hidden class to display the chart container
     chartContainerParent.classList.remove('d-none');
 
     const chartObj = initChartInstance(chartContainer);
-    const studyUnitSubtitle = `Study Unit: ${studyUnit.charAt(0).toUpperCase() + studyUnit.slice(1)}`;
+    const chartType = 'bar';
 
-    let chartOpts;
+    let series;
+    if (data.breakdown_variable) {
+        if (seriesType === 'Citations per Document') {
+            const docSeries = data.series.filter(s => s.name.endsWith('(Documents)'));
+            const citSeries = data.series.filter(s => s.name.endsWith('(Citations)'));
 
-    if (data.breakdown_variable && data.series && data.years) {
-        const breakdownLabelElement = document.querySelector(`label[for="${data.breakdown_variable}"]`);
-        const breakdownLabel = breakdownLabelElement ? breakdownLabelElement.textContent.trim() : data.breakdown_variable.replace(/_/g, ' ');
-        const title = `Breakdown by ${breakdownLabel}`;
-
-        const seriesTotals = (data.series || []).map(series => ({
-            name: series.name,
-            total: (series.data || []).reduce((sum, value) => sum + value, 0),
-            data: series.data
-        })).sort((a, b) => b.total - a.total);
-
-        const orderedKeys = seriesTotals.map(series => series.name);
-        const orderedSeries = seriesTotals.map(series => ({
-            name: series.name,
-            type: 'bar',
-            stack: 'total',
-            data: series.data
-        }));
-
-        chartOpts = {
-            title: { text: title, subtext: studyUnitSubtitle },
-            tooltip: buildTooltip({ trigger: 'axis', axisPointer: { type: 'shadow' } }),
-            grid: buildGrid(),
-            toolbox: buildToolbox(['line', 'bar', 'tiled']),
-            xAxis: { type: 'category', data: data.years },
-            yAxis: { type: 'value' },
-            series: orderedSeries,
-            legend: buildLegend(orderedKeys)
-        };
-
+            series = docSeries.map(ds => {
+                const cs = citSeries.find(cs => cs.name.replace(' (Citations)', '') === ds.name.replace(' (Documents)', ''));
+                const cpdData = ds.data.map((ndocs, i) => {
+                    return ndocs > 0 ? (cs.data[i] / ndocs).toFixed(2) : 0;
+                });
+                let seriesName = ds.name.replace(' (Documents)', '');
+                return { name: seriesName, type: chartType, data: cpdData, stack: 'total' };
+            });
+        } else {
+            series = data.series
+                .filter(s => s.name.endsWith(`(${seriesType})`))
+                .map(s => {
+                    let seriesName = s.name.replace(` (${seriesType})`, '');
+                    return { ...s, name: seriesName, type: chartType, stack: 'total' };
+                });
+        }
     } else {
-        const isCitation = studyUnit === 'citation';
-        const title = `Number of ${isCitation ? 'Citations' : 'Documents'} per Year`;
-        const seriesName = isCitation ? 'Citations' : 'Documents';
-        const seriesData = isCitation ? data.total_citations_per_year : data.ndocs_per_year;
-
-        chartOpts = {
-            title: { text: title, subtext: studyUnitSubtitle },
-            tooltip: buildTooltip(),
-            grid: buildGrid({ bottom: '10%' }),
-            toolbox: buildToolbox(['line', 'bar']),
-            xAxis: { type: 'category', data: data.years || [] },
-            yAxis: { type: 'value' },
-            series: [{ name: seriesName, type: 'bar', data: seriesData || [] }]
-        };
+        if (seriesType === 'Documents') {
+            series = [{ name: 'Documents', type: chartType, data: data.ndocs_per_year }];
+        } else if (seriesType === 'Citations') {
+            series = [{ name: 'Citations', type: chartType, data: data.total_citations_per_year }];
+        } else if (seriesType === 'Citations per Document') {
+            const cpdData = data.ndocs_per_year.map((ndocs, i) => {
+                return ndocs > 0 ? (data.total_citations_per_year[i] / ndocs).toFixed(4) : 0;
+            });
+            series = [{ name: 'Citations per Document', type: chartType, data: cpdData }];
+        }
     }
-    chartObj.setOption(chartOpts, true);
-}
-
-/**
- * Render the inner percentage chart (% within filtered data).
- * @param {object} data - The indicator data received from the API.
- * @param {string} studyUnit - The study unit.
- */
-Indicators.renderInnerPercentageChart = function(data, studyUnit) {
-    const chartContainer = document.getElementById('inner-percentage-chart');
-    if (!chartContainer) return;
-
-    // If there is no breakdown variable, there is nothing to show.
-    if (!data.breakdown_variable || !data.series || !data.series.length) {
-        destroyChartInstance(chartContainer);
-        return;
-    }
-
-    const chartContainerParent = document.getElementById('inner-percentage-chart-div');
-    if (!chartContainerParent) return;
-
-    // Remove hidden class to display the chart container
-    chartContainerParent.classList.remove('d-none');
-
-    const chartObj = initChartInstance(chartContainer);
-    const studyUnitSubtitle = `Study Unit: ${studyUnit.charAt(0).toUpperCase() + studyUnit.slice(1)}`;
-    const breakdownLabelElement = document.querySelector(`label[for="${data.breakdown_variable}"]`);
-    const breakdownLabel = breakdownLabelElement ? breakdownLabelElement.textContent.trim() : data.breakdown_variable.replace(/_/g, ' ');
-    const title = `Breakdown by ${breakdownLabel} (% within filtered data)`;
-
-    const years = data.years || [];
-    const series = data.series || [];
-
-    // Calculate the total for each year
-    const yearlyTotals = years.map((_, yearIndex) =>
-        series.reduce((total, s) => total + (s.data[yearIndex] || 0), 0)
-    );
-
-    // Calculate the percentage data
-    const percentSeries = series.map(s => ({
-        name: s.name,
-        type: 'bar',
-        stack: 'total',
-        emphasis: { focus: 'series' },
-        data: s.data.map((value, yearIndex) => {
-            const total = yearlyTotals[yearIndex];
-            return total > 0 ? ((value / total) * 100).toFixed(2) : 0;
-        })
-    }));
 
     const chartOpts = {
-        title: { text: title, subtext: studyUnitSubtitle },
-        tooltip: buildTooltip({
-            trigger: 'axis',
-            axisPointer: { type: 'shadow' },
-            formatter: (params) => {
-                let tooltip = `${params[0].axisValueLabel}<br/>`;
-                params.forEach(param => {
-                    tooltip += `${param.marker} ${param.seriesName}: ${param.value}%<br/>`;
-                });
-                return tooltip;
-            }
-        }),
+        title: { text: title },
+        tooltip: buildTooltip({ trigger: 'axis', axisPointer: { type: 'shadow' } }),
         grid: buildGrid(),
-        toolbox: buildToolbox(['bar', 'tiled']),
-        xAxis: { type: 'category', data: years },
-        yAxis: { type: 'value', axisLabel: { formatter: '{value} %' } },
-        series: percentSeries,
+        toolbox: buildToolbox(['bar', 'line']),
+        xAxis: { type: 'category', data: data.years },
+        yAxis: { type: 'value' },
+        series: series,
         legend: buildLegend(series.map(s => s.name))
     };
 
     chartObj.setOption(chartOpts, true);
-};
-
-/**
- * Render the outer percentage chart (comparison with unfiltered data).
- * @param {object} data - The indicator data received from the API.
- * @param {string} studyUnit - The study unit.
- * @param {string} dataSource - The data source (e.g., 'world').
- */
-Indicators.renderOuterPercentageChart = function(data, studyUnit, dataSource, csrfToken) {
-    const chartContainer = document.getElementById('outer-percentage-chart');
-    if (!chartContainer) return;
-
-    // If there is no breakdown variable, there is nothing to show.
-    if (!data.breakdown_variable || !data.series || !data.series.length) {
-        destroyChartInstance(chartContainer);
-        return;
-    }
-
-    const chartContainerParent = document.getElementById('outer-percentage-chart-div');
-    if (!chartContainerParent) return;
-
-    // Remove hidden class to display the chart container
-    chartContainerParent.classList.remove('d-none');
-
-    const baselinePayload = {
-        study_unit: studyUnit,
-        breakdown_variable: data.breakdown_variable,
-        filters: {
-            study_unit: studyUnit,
-            breakdown_variable: data.breakdown_variable
-        }
-    };
-
-    // Fetch the baseline data (without filters) for comparison
-    fetch(`/indicators/data/?data_source=${dataSource}`, {
-        method: 'POST',
-        headers: { 
-            'Content-Type': 'application/json',
-            'X-CSRFToken': csrfToken,
-        },
-        body: JSON.stringify(baselinePayload)
-    })
-    .then(response => response.json())
-    .then(baselineData => {
-        const chartObj = initChartInstance(chartContainer);
-        const studyUnitSubtitle = `Study Unit: ${studyUnit.charAt(0).toUpperCase() + studyUnit.slice(1)}`;
-        const breakdownLabelElement = document.querySelector(`label[for="${data.breakdown_variable}"]`);
-        const breakdownLabel = breakdownLabelElement ? breakdownLabelElement.textContent.trim() : data.breakdown_variable.replace(/_/g, ' ');
-        const title = `Breakdown by ${breakdownLabel} (% relative to unfiltered data)`;
-
-        const filteredYears = data.years || [];
-        const filteredSeries = data.series || [];
-        
-        // Create a map for baseline data for quick lookup
-        const baselineMap = {};
-        (baselineData.series || []).forEach(s => {
-            baselineMap[s.name] = {};
-            (baselineData.years || []).forEach((year, i) => {
-                baselineMap[s.name][year] = s.data[i];
-            });
-        });
-
-        const percentSeries = filteredSeries.map(s => ({
-            name: s.name,
-            type: 'bar',
-            emphasis: { focus: 'series' },
-            data: s.data.map((value, i) => {
-                const year = filteredYears[i];
-                const baselineValue = baselineMap[s.name] ? baselineMap[s.name][year] : 0;
-                return baselineValue > 0 ? ((value / baselineValue) * 100).toFixed(2) : 0;
-            })
-        }));
-
-        const chartOpts = {
-            title: { text: title, subtext: studyUnitSubtitle },
-            tooltip: buildTooltip({
-                trigger: 'axis',
-                axisPointer: { type: 'shadow' },
-                formatter: (params) => {
-                    let tooltip = `${params[0].axisValueLabel}<br/>`;
-                    params.forEach(param => {
-                        tooltip += `${param.marker} ${param.seriesName}: ${param.value}%<br/>`;
-                    });
-                    return tooltip;
-                }
-            }),
-            grid: buildGrid(),
-            toolbox: buildToolbox(['bar', 'tiled']),
-            xAxis: { type: 'category', data: filteredYears },
-            yAxis: { type: 'value', axisLabel: { formatter: '{value} %' } },
-            series: percentSeries,
-            legend: buildLegend(filteredSeries.map(s => s.name))
-        };
-
-        chartObj.setOption(chartOpts, true);
-    })
-    .catch(error => {
-        console.error('Error fetching baseline data for outer percentage chart:', error);
-        destroyChartInstance(chartContainer);
-    });
-};
-
-// Clears all chart instances
-Indicators.clearCharts = function() {
-    destroyChartInstance(document.getElementById('main-chart'));
-    destroyChartInstance(document.getElementById('inner-percentage-chart'));
-    destroyChartInstance(document.getElementById('outer-percentage-chart'));
 }
 
 // Handle window resize to adjust charts
 window.addEventListener('resize', () => {
-    ['main-chart', 'inner-percentage-chart', 'outer-percentage-chart'].forEach(id => {
+    ['docs-chart', 'citations-chart', 'citations-per-doc-chart'].forEach(id => {
         const el = document.getElementById(id);
         if (el && el._chartInstance) {
             el._chartInstance.resize();
