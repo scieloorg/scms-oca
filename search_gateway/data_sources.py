@@ -138,3 +138,20 @@ DATA_SOURCES = {
         }
     }
 }
+
+
+def get_index_name_from_data_source(data_source):
+    return DATA_SOURCES.get(data_source, {}).get("index_name")
+
+
+def get_index_field_name_from_data_source(data_source, field_name):
+    field_settings = DATA_SOURCES.get(data_source, {}).get("field_settings", {})
+
+    if field_name in field_settings:
+        return field_settings[field_name].get("index_field_name")
+
+    return field_name
+
+
+def get_field_settings(data_source):
+    return DATA_SOURCES.get(data_source, {}).get("field_settings", {})
