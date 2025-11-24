@@ -14,6 +14,7 @@ from wagtailautocomplete.urls.admin import urlpatterns as autocomplete_admin_url
 from core.api import api_router
 from core.search_site import views as search_views  # noqa isort:skip
 from indicator import urls as indicator_urls
+from search_gateway import urls as search_gateway_urls
 
 urlpatterns = [
     path("dash/", TemplateView.as_view(template_name="dash/dash.html"), name="dash"),
@@ -22,6 +23,7 @@ urlpatterns = [
     # Wagtail Admin
     path(settings.WAGTAIL_ADMIN_URL, include(wagtailadmin_urls)),
     path('indicators/', include(indicator_urls)),
+    path('search-gateway/', include(search_gateway_urls)),
     re_path(r"^documents/", include(wagtaildocs_urls)),
     # API V1 endpoint to custom models
     path("api/v1/", include("config.api_router")),
