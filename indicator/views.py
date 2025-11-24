@@ -4,248 +4,78 @@ from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.utils.translation import gettext as _
-from django.views.decorators.http import require_GET
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_GET, require_POST
 from wagtail.contrib.modeladmin.views import CreateView, EditView
 
 from core import tasks
 from core_settings.models import Moderation
+from search_gateway import data_sources
+from search_gateway.controller import get_filters_data
 
-from . import constants, controller
+from .search import controller, utils
 from .permission_helper import IndicatorPermissionHelper
-
-
-# Create a filters cache to avoid repeated ES queries
-FILTERS_CACHE = {}
-
-
-@require_GET
-def filters_view(request):
-    # Get data source from request
-    data_source = request.GET.get('data_source')
-
-    filters = controller.get_filters_data(data_source)
-
-    if filters:
-        return JsonResponse(filters)
-    
-    return JsonResponse({"error": "Error retrieving filters"}, status=500)
 
 
 @require_POST
 def data_view(request):
-    # Read data source from request GET parameters
-    data_source = request.GET.get("data_source")
-    if not data_source:
-        return JsonResponse({"error": "Missing data_source parameter in request URL"}, status=400)
-    
-    # Read filters from the request body sent by the indicator form
+    data_source_name = request.GET.get("data_source")
+    if not data_source_name:
+        return JsonResponse({"error": "Missing data_source parameter"}, status=400)
+
     body_text = request.body.decode()
     payload = json.loads(body_text) if body_text else {}
-
     filters = payload.get("filters", {})
-    filters = dict(filters)
-    
-    # Read language query operator
-    language_query_operator = filters.pop("document_language_operator", None)
 
-    # Read country query operator
-    country_query_operator = filters.pop("country_operator", None)
-
-    # Read study unit
-    study_unit = filters.pop("study_unit", None)
-
-    # Read breakdown variable
-    breakdown_variable = filters.pop("breakdown_variable", None)
-
-    # Extract index name from data source
-    index_name = controller.get_index_name_from_data_source(data_source)
-
-    # Get field mapping for the data source
-    field_settings = constants.DSNAME_TO_FIELD_SETTINGS.get(data_source)
-
-    # Build the query to filter documents
-    query = controller.build_query(
-        filters, 
-        field_settings, 
-        data_source,
-        language_query_operator,
-        country_query_operator
-    )
-
-    # FIXME: move this logic to controller
-    # Choose main aggregation
-    aggs = {}
-    if breakdown_variable:
-        if study_unit == "citation":
-            aggs = controller.build_breakdown_citation_per_year_aggs(field_settings, breakdown_variable)
-        elif study_unit == "document":
-            aggs = controller.build_breakdown_documents_per_year_aggs(field_settings, breakdown_variable, data_source)
-    else:
-        if study_unit == "citation":
-            aggs = controller.build_citations_per_year_aggs(field_settings)
-        elif study_unit == "document":
-            aggs = controller.build_documents_per_year_aggs(data_source)
-
-    body = {"size": 0, "query": query, "aggs": aggs}
-
-    # Execute search
-    try:
-        res = controller.es.search(index=index_name, body=body)
-    except Exception:
-        return JsonResponse({"error": "Error executing search"}, status=500)
-
-    # FIXME: move this logic to controller
-    data = {}
-    if breakdown_variable:
-        if study_unit == "citation":
-            data = controller.parse_breakdown_citation_per_year_response(res)
-        elif study_unit == "document":
-            data = controller.parse_breakdown_documents_per_year_response(res)
-        data["breakdown_variable"] = breakdown_variable
-    else:
-        if study_unit == "citation":
-            data = controller.parse_citations_per_year_response(res)
-        elif study_unit == "document":
-            data = controller.parse_documents_per_year_response(res)
+    data, error = controller.get_indicator_data(data_source_name, dict(filters))
+    if error:
+        status_code = 503 if error == "Service unavailable" else 400 if error == "Invalid data_source" else 500
+        return JsonResponse({"error": error}, status=status_code)
 
     return JsonResponse(data)
 
 
-def world_view(request):
-    selected_filters = request.GET.dict()
+def indicator_view(request, data_source_name):
+    if data_source_name not in data_sources.DATA_SOURCES or data_source_name == "journal_metrics":
+        return JsonResponse({"error": "Invalid data_source"}, status=404)
+
+    data_source = data_sources.DATA_SOURCES[data_source_name]
+
+    cleaned_filters = utils.clean_form_filters(request.GET.dict())
     context = {
-        "data_source": "world",
-        "data_source_display_name": _("Scientific Production - World"),
-        "selected_filters": selected_filters,
+        "data_source": data_source_name,
+        "data_source_display_name": data_source.get("display_name"),
+        "applied_filters": cleaned_filters,
     }
-    return render(request, "indicator.html", context)
-
-
-def brazil_view(request):
-    context = {
-        "data_source": "brazil",
-        "data_source_display_name": _("Scientific Production - Brazil"),
-    }
-    return render(request, "indicator.html", context)
-
-
-def scielo_view(request):
-    context = {
-        "data_source": "scielo",
-        "data_source_display_name": _("Scientific Production - SciELO Network"),
-    }
-    return render(request, "indicator.html", context)
-
-
-def social_view(request):
-    context = {
-        "data_source": "social",
-        "data_source_display_name": _("Social Production"),
-    }
+    context["applied_filters_json"] = json.dumps(context["applied_filters"])
     return render(request, "indicator.html", context)
 
 
 def journal_metrics_view(request):
+    data_source_name = "journal_metrics"
+    data_source = data_sources.DATA_SOURCES[data_source_name]
+
+    cleaned_get_filters = utils.clean_form_filters(request.GET.dict())
     context = {
-        "data_source": "journal_metrics",
-        "data_source_display_name": _("Journal Metrics"),
-        "applied_filters": {},
+        "data_source": data_source_name,
+        "data_source_display_name": data_source.get("display_name"),
+        "applied_filters": cleaned_get_filters,
     }
 
-    filters_data = controller.get_filters_data("journal_metrics")
-    if filters_data:
-        context["filters_data"] = filters_data
+    context["filters_data"], _ = get_filters_data(data_source_name)
 
     if request.method == "POST":
         form_filters = request.POST.dict()
+        cleaned_post_filters = utils.clean_form_filters(form_filters.copy())
+        context["applied_filters"].update(cleaned_post_filters)
 
-        context["applied_filters"]["year"] = form_filters.pop("year", None)
-        context["applied_filters"]["ranking_metric"] = form_filters.pop("ranking_metric", "cwts_snip")
-        context["applied_filters"]["limit"] = form_filters.pop("limit", 500)
+        ranking_data, error = controller.get_journal_metrics_data(form_filters)
+        if error:
+            context["error"] = _("Error executing search: %s") % error
+        else:
+            context["ranking_data"] = ranking_data
 
-        cleaned_filters = clean_form_filters(form_filters)
-        context["applied_filters"].update(cleaned_filters)
-
-        # Build query (general filters)
-        field_settings = constants.DSNAME_TO_FIELD_SETTINGS.get("journal_metrics")
-        query = controller.build_query(cleaned_filters, field_settings, "journal_metrics")
-
-        # Build query (yearly filters)
-        jm_query = controller.build_journal_metrics_query(
-            context["applied_filters"].get("year"), 
-            query,
-        )
-
-        # Build body for journal metrics
-        body = controller.build_journal_metrics_body(
-            selected_year=context["applied_filters"].get("year"),
-            ranking_metric=context["applied_filters"].get("ranking_metric"),
-            query=jm_query,
-            size=context["applied_filters"].get("limit"),
-        )
-
-        # Execute search
-        try:
-            index_name = controller.get_index_name_from_data_source("journal_metrics")
-            res = controller.es.search(index=index_name, body=body)
-            context.update({"ranking_data": controller.parse_journal_metrics_response(res, selected_year=context["applied_filters"].get("year"), ranking_metric=context["applied_filters"].get("ranking_metric"))})
-        except Exception as e:
-            context["error"] = _("Error executing search: %s") % str(e)
-
-    # Convert applied_filters to JSON for JavaScript
     context["applied_filters_json"] = json.dumps(context["applied_filters"])
-    
     return render(request, "indicator.html", context)
-
-
-def search_item(request):
-    # Read query parameters
-    q = request.GET.get("q", "")
-    req_data_source_name = request.GET.get("data_source", "journal_metrics")
-    req_field_name = request.GET.get("field_name", "journal")
-
-    # Extract index name from data source
-    index_name = controller.get_index_name_from_data_source(req_data_source_name)
-
-    # Get field settings for the data source
-    field_settings = controller.get_field_settings(req_data_source_name)
-    
-    # Determine field name
-    fl_name = (field_settings.get(req_field_name, {}).get("index_field_name", req_field_name))
-
-    # Determine if the field supports search-as-you-type
-    fl_support_search_as_you_type = field_settings.get(req_field_name, {}).get("filter", {}).get("search_as_you_type", False)
-
-    # Build search body
-    if fl_support_search_as_you_type:
-        body = controller.build_search_as_you_type_body(fl_name, q)
-    else:
-        body = controller.build_term_search_body(fl_name, q)
-
-    # Execute search
-    try:
-        res = controller.es.search(index=index_name, body=body)
-    except Exception:
-        return JsonResponse({"error": "Error executing search"}, status=500)
-
-    # Parse results
-    try:
-        parsed_results = controller.parse_search_item_response(res)
-    except Exception:
-        return JsonResponse({"error": "Error parsing search results"}, status=500)
-
-    return JsonResponse({"results": parsed_results})
-
-
-def clean_form_filters(filters_dict):
-    # Remove empty filters
-    cleaned = {k: v for k, v in filters_dict.items() if v}
-    
-    # Remove CSRF token
-    cleaned.pop("csrfmiddlewaretoken", None)
-    
-    return cleaned
 
 
 class IndicatorDirectoryEditView(EditView):
@@ -255,87 +85,55 @@ class IndicatorDirectoryEditView(EditView):
 
     @property
     def must_moderate(self):
-        # if user is a staff must no moderate
         if self.request.user.is_staff:
             return False
-
-        return IndicatorPermissionHelper(model=self.model).must_be_moderate(
-            self.request.user
-        )
+        return IndicatorPermissionHelper(model=self.model).must_be_moderate(self.request.user)
 
     def form_valid(self, form):
         self.object = form.save_all(self.request.user)
-
-        # check if have moderation and if the record_status is diferent from ``PUBLISHED``
         if self.must_moderate and self.object.record_status != "PUBLISHED":
             if self.get_moderation():
-                # fix the status to ``TO MODERATE``
                 self.object.record_status = "TO MODERATE"
                 self.object.save()
-
         return HttpResponseRedirect(self.get_success_url())
 
 
 class IndicatorDirectoryCreateView(CreateView):
     def get_moderation(self):
-        # check if exists a moderation and if is enabled
         if Moderation.objects.filter(model=self.model.__name__, status=True).exists():
             return Moderation.objects.get(model=self.model.__name__)
 
     @property
     def must_moderate(self):
         if self.get_moderation():
-            # if user is a staff must no moderate
             if self.request.user.is_staff:
                 return False
-
-            return IndicatorPermissionHelper(model=self.model).must_be_moderate(
-                self.request.user
-            )
+            return IndicatorPermissionHelper(model=self.model).must_be_moderate(self.request.user)
 
     def form_valid(self, form):
         self.object = form.save_all(self.request.user)
-
-        # check if have moderation
         if self.must_moderate:
             moderation = self.get_moderation()
-
             if moderation:
-                # fix the status to ``TO MODERATE``
                 self.object.record_status = "TO MODERATE"
                 self.object.save()
-
-                # check if must send e-mail
                 if moderation.send_mail:
-                    # get user
                     user_email = self.get_moderation().moderator.email or None
-                    group_mails = []
-
-                    if self.get_moderation().group_moderator:
-                        # get group
-                        group_mails = [
-                            user.email
-                            for user in self.get_moderation().group_moderator.user_set.all()
-                            if user.email
-                        ]
+                    group_mails = [
+                        user.email
+                        for user in self.get_moderation().group_moderator.user_set.all()
+                        if user.email
+                    ] if self.get_moderation().group_moderator else []
                     tasks.send_mail(
-                        _(
-                            "Novo conteúdo para moderação - %s"
-                            % self.model._meta.verbose_name.title()
-                        ),
+                        _("Novo conteúdo para moderação - %s" % self.model._meta.verbose_name.title()),
                         render_to_string(
                             "email/moderate_email.html",
-                            {
-                                "obj": self.object,
-                                "user": self.request.user,
-                                "request": self.request,
-                            },
+                            {"obj": self.object, "user": self.request.user, "request": self.request},
                         ),
                         to_list=[user_email],
                         bcc_list=group_mails,
                         html=True,
                     )
-
         return HttpResponseRedirect(self.get_success_url())
 
     def get_context_data(self, **kwargs):
