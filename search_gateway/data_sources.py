@@ -145,7 +145,7 @@ def get_index_name_from_data_source(data_source):
 
 
 def get_index_field_name_from_data_source(data_source, field_name):
-    field_settings = DATA_SOURCES.get(data_source, {}).get("field_settings", {})
+    field_settings = get_field_settings(data_source)
 
     if field_name in field_settings:
         return field_settings[field_name].get("index_field_name")
@@ -155,3 +155,20 @@ def get_index_field_name_from_data_source(data_source, field_name):
 
 def get_field_settings(data_source):
     return DATA_SOURCES.get(data_source, {}).get("field_settings", {})
+
+
+def get_query_operator_fields(data_source):
+    """
+    Get the fields that support query operators for a given data source.
+    """
+    supported_query_fields = {}
+    ds_field_settings = get_field_settings(data_source)
+
+    if not ds_field_settings:
+        return {}
+
+    for field_name, data in ds_field_settings.items():
+        if data.get("filter", {}).get("support_query_operator"):
+            supported_query_fields[field_name] = data.get("index_field_name")
+
+    return supported_query_fields
