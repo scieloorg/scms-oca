@@ -1,14 +1,6 @@
 <h4 class="my-2">Graph Options</h4>
 
 <div class="form-group mb-3">
-  <label for="study_unit" class="form-label">Study Unit</label>
-  <select id="study_unit" class="form-control" name="study_unit">
-    <option value="document" selected>Document</option>
-    <option value="citation" disabled>Citation</option>
-  </select>
-</div>
-
-<div class="form-group mb-3">
   <label for="breakdown_variable" class="form-label">Breakdown Variable</label>
   <select id="breakdown_variable" class="form-control" name="breakdown_variable">
     <option value="">Select a variable</option>
@@ -25,7 +17,7 @@
 <h4 class="my-2 pt-1">Filters</h4>
 
 <div class="form-group mb-3">
-  <label class="form-label" for="publication_year_start">Publication Year</label>
+  <label class="form-label" for="document_publication_year_start">Publication Year</label>
   <div class="input-group">
     <input
       id="document_publication_year_start"
@@ -98,7 +90,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Fields that we don't want to populate because they are handled differently
             [
               'document_publication_year_start',
-              'document_publication_year_end', 
+              'document_publication_year_end',
             ]
         );
     } catch (error) {
@@ -126,7 +118,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Initialize Select2 for single select fields
     const singleSelectFields = [
-        'study_unit',
         'breakdown_variable',
     ];
     singleSelectFields.forEach(fieldId => {
@@ -134,7 +125,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (selectElement) {
             $(selectElement).select2(
               {
-                placeholder: 'Start typing to search...', 
+                placeholder: 'Start typing to search...',
                 allowClear: true,
                 theme: 'bootstrap-5',
               }

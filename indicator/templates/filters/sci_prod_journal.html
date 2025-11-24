@@ -1,6 +1,3 @@
-<!-- Hidden study unit field to identify the type of indicator -->
-<select id="study_unit" hidden class="form-control" name="study_unit"></select>
-
 <h4 class="my-2 pt-1">Filters</h4>
 
 <div class="form-group mb-3">
@@ -50,7 +47,7 @@
 
 <div class="form-group mb-3">
     <label class="form-label" for="year_founded">Year Founded</label>
-    <input 
+    <input
         id="year_founded"
         class="form-control"
         name="year_founded"
@@ -100,7 +97,7 @@
 
 <div class="form-group mb-3">
     <label class="form-label" for="year">Year</label>
-    <input 
+    <input
         id="year"
         class="form-control"
         name="year"
@@ -224,7 +221,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (selectElement) {
             $(selectElement).select2(
                 {
-                placeholder: 'Start typing to search...', 
+                placeholder: 'Start typing to search...',
                 allowClear: true,
                 theme: 'bootstrap-5',
                 }
@@ -236,16 +233,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Initialize Select2 for special fields
     const specialSelectFields = ['journal', 'issn', 'publisher_name'];
-    
+
     // Get applied filters from Django template context
     const appliedFilters = {{ applied_filters|safe|default:'{}' }};
-    
+
     specialSelectFields.forEach(fieldId => {
         const selectElement = document.getElementById(fieldId);
         if (selectElement) {
             $(selectElement).select2({
                 ajax: {
-                    url: `/indicators/search/?field_name=${fieldId}&data_source=journal_metrics`,
+                    url: `/search-gateway/search-item/?field_name=${fieldId}&data_source=journal_metrics`,
                     dataType: 'json',
                     delay: 300,
                     data: params => ({ q: params.term }),
@@ -270,41 +267,41 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Handle reset button
     const resetButton = document.getElementById('menu-reset-journal-metrics');
     const menuForm = document.getElementById('menu-form-journal-metrics');
-    
+
     if (resetButton && menuForm) {
         resetButton.addEventListener('click', function(e) {
             e.preventDefault();
-            
+
             // Reset all regular form fields
             menuForm.reset();
-            
+
             // Clear all Select2 fields
             $(menuForm).find('select').each(function() {
                 if ($(this).hasClass('select2-hidden-accessible')) {
                     $(this).val(null).trigger('change');
                 }
             });
-            
+
             // Reset specific fields to their defaults
             const yearField = document.getElementById('year');
             if (yearField) yearField.value = '2024';
-            
+
             const rankingMetricField = document.getElementById('ranking_metric');
             if (rankingMetricField) {
                 $(rankingMetricField).val('cwts_snip').trigger('change');
             }
-            
+
             const limitField = document.getElementById('limit');
             if (limitField) {
                 $(limitField).val('500').trigger('change');
             }
-            
+
             // Hide applied filters display
             const appliedFiltersContainer = document.getElementById('applied-filters-journal-metrics');
             if (appliedFiltersContainer) {
                 appliedFiltersContainer.style.display = 'none';
             }
-            
+
             // Hide ranking table
             const rankingContainer = document.getElementById('ranking-container');
             if (rankingContainer) {

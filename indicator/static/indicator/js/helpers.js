@@ -1,8 +1,9 @@
+
 /**
  * Fetch filters from the server for a given data source
  */
 async function fetchFilters(dataSource) {
-    const url = `/indicators/filters/?data_source=${encodeURIComponent(dataSource)}`;
+    const url = `/search-gateway/filters/?data_source=${encodeURIComponent(dataSource)}`;
     const response = await fetch(url);
 
     if (!response.ok) throw new Error('GET filters has failed');
@@ -97,7 +98,17 @@ function standardizeLanguageCode(langCode) {
     var normalized = String(langCode).trim();
     if (!normalized) return '';
 
-    var bcp47 = normalized.replace(/_/g, '-');
+    // Extract the language part and any suffix like " (Documents)" or " (Citations)"
+    const suffixMatch = normalized.match(/^(.*?)\s+\((Documents|Citations)\)$/i);
+    let languageOnly = normalized;
+    let suffix = '';
+
+    if (suffixMatch) {
+        languageOnly = suffixMatch[1];
+        suffix = ` (${suffixMatch[2]})`;
+    }
+
+    var bcp47 = languageOnly.replace(/_/g, '-');
     var parts = bcp47.split('-');
     var languagePart = parts[0].toLowerCase();
     var regionPart = parts.length > 1 ? parts[1].toUpperCase() : null;
@@ -111,7 +122,48 @@ function standardizeLanguageCode(langCode) {
       label += ' (' + (regionLabel || regionPart) + ')';
     }
 
-    return label;
+    return label + suffix; // Re-append the original suffix
+}
+
+/**
+ * Standardize collection code to collection name.
+ */
+function standardizeCollectionToName(collectionCode) {
+    const collectionMap = {
+        'arg': 'Argentina',
+        'bol': 'Bolivia',
+        'chl': 'Chile',
+        'cic': 'Science and Culture',
+        'col': 'Colombia',
+        'cri': 'Costa Rica',
+        'cub': 'Cuba',
+        'dom': 'Dominican Republic',
+        'ecu': 'Ecuador',
+        'esp': 'Spain',
+        'mex': 'Mexico',
+        'per': 'Peru',
+        'prt': 'Portugal',
+        'pry': 'Paraguay',
+        'psi': 'PEPSIC',
+        'rve': 'REVENF',
+        'scl': 'Brazil',
+        'spa': 'Public Health',
+        'sza': 'South Africa',
+        'ury': 'Uruguay',
+        'ven': 'Venezuela',
+        'wid': 'West Indies',
+    };
+
+    return collectionMap[collectionCode] || collectionCode;
+}
+
+/**
+ * Standardize Open Access values (0 to No, 1 to Yes).
+ */
+function standardizeOpenAccessValue(value) {
+    if (value === '0') return 'No';
+    if (value === '1') return 'Yes';
+    return value;
 }
 
 /**
@@ -131,10 +183,14 @@ function standardizeFieldValue(field, value) {
         return standardizeCollectionToName(value);
     }
 
+    if (field === 'open_access' || field === 'Open Access') {
+        return standardizeOpenAccessValue(value);
+    }
+
     return value;
 }
 
-/** 
+/**
  * Clear applied filters display area
  */
 function clearAppliedFiltersContainer() {
@@ -145,8 +201,8 @@ function clearAppliedFiltersContainer() {
     }
 }
 
-/** 
- * Update applied filters display area 
+/**
+ * Update applied filters display area
 */
 function updateAppliedFiltersDisplay() {
     const container = document.getElementById('applied-filters');
@@ -168,13 +224,12 @@ function updateAppliedFiltersDisplay() {
     for (const [key, value] of formData.entries()) {
         // Ignore fields that shouldn't be displayed or are empty or will be handled separately
         if (!value || [
-            'breakdown_variable', 
+            'breakdown_variable',
             'country_operator',
-            'csrfmiddlewaretoken', 
+            'csrfmiddlewaretoken',
             'document_publication_year_end',
-            'document_publication_year_start', 
+            'document_publication_year_start',
             'document_language_operator',
-            'study_unit',
             'ranking_metric',
         ].includes(key)) {
             continue;
@@ -205,7 +260,6 @@ function updateAppliedFiltersDisplay() {
     if (rangeLabel) {
         allFilterStrings.push(`Publication Year: ${rangeLabel}`);
     }
-
     // Handle country and language query operators
     const countryOp = formData.get('country_operator');
     const languageOp = formData.get('document_language_operator');
@@ -225,12 +279,6 @@ function updateAppliedFiltersDisplay() {
     let finalHtml = `<strong class="text-primary">Applied Filters</strong><span>${allFilterStrings.join('<span class="badge mx-2">AND</span>')}</span>`;
     if (queryOperators.length > 0) {
         finalHtml += `<strong class="mt-1 text-primary">Search Options</strong>${queryOperators.join(' ')}`;
-    }
-
-    // Include study unit if specified
-    const studyUnit = formData.get('study_unit');
-    if (studyUnit) {
-        finalHtml += `<strong class="mt-1 text-primary">Study Unit</strong>${toTitleCase(studyUnit)}`;
     }
 
     // Join and display all filter strings
@@ -275,7 +323,7 @@ function formatYearRange(startYear, endYear) {
     if (!years.length) return '';
 
     if (years.length === 1) return String(years[0]);
-    
+
     return `${years[0]} to ${years[years.length - 1]}`;
 }
 
@@ -299,36 +347,4 @@ function standardizeIndicatorSeriesNames(indicators) {
             s.name = standardizeFieldValue(indicators.breakdown_variable, s.name);
         });
     }
-}
-
-/**
- * Standardize collection code to collection name.
- */
-function standardizeCollectionToName(collectionCode) {
-    const collectionMap = {
-        'arg': 'Argentina',
-        'bol': 'Bolivia',
-        'chl': 'Chile',
-        'cic': 'Science and Culture',
-        'col': 'Colombia',
-        'cri': 'Costa Rica',
-        'cub': 'Cuba',
-        'dom': 'Dominican Republic',
-        'ecu': 'Ecuador',
-        'esp': 'Spain',
-        'mex': 'Mexico',
-        'per': 'Peru',
-        'prt': 'Portugal',
-        'pry': 'Paraguay',
-        'psi': 'PEPSIC',
-        'rve': 'REVENF',
-        'scl': 'Brazil',
-        'spa': 'Public Health',
-        'sza': 'South Africa',
-        'ury': 'Uruguay',
-        'ven': 'Venezuela',
-        'wid': 'West Indies',
-    };
-
-    return collectionMap[collectionCode] || collectionCode;
 }

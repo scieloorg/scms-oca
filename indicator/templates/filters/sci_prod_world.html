@@ -1,29 +1,26 @@
+
 <h4 class="my-2">Graph Options</h4>
 
-<div class="form-group mb-3">
-  <label for="study_unit" class="form-label">Study Unit</label>
-  <select id="study_unit" class="form-control" name="study_unit">
-    <option value="document" selected>Document</option>
-    <option value="citation">Citation</option>
-  </select>
-</div>
-
-<div class="form-group mb-3">
-  <label for="breakdown_variable" class="form-label">Breakdown Variable</label>
-  <select id="breakdown_variable" class="form-control" name="breakdown_variable">
-    <option value="">Select a variable</option>
-    <option value="source_index_open_alex">Source Index (OpenAlex)</option>
-    <option value="source_index_scielo">Source Index (SciELO)</option>
-    <option value="source_type">Source Type</option>
-    <option value="document_type">Document Type</option>
-    <option value="document_language">Document Language</option>
-    <option value="open_access">Open Access</option>
-    <option value="access_type">Access Type</option>
-    <option value="subject_area_level_0">Subject Area Level 0</option>
-    <option value="subject_area_level_1">Subject Area Level 1</option>
-    <option value="subject_area_level_2">Subject Area Level 2</option>
-    <option value="region_world">Author Affiliation - Region (World)</option>
-  </select>
+<div class="row">
+  <div class="col-md-12">
+    <div class="form-group mb-3">
+      <label for="breakdown_variable" class="form-label">Breakdown Variable</label>
+      <select id="breakdown_variable" class="form-control" name="breakdown_variable">
+        <option value="">Select a variable</option>
+        <option value="source_index_open_alex">Source Index (OpenAlex)</option>
+        <option value="source_index_scielo">Source Index (SciELO)</option>
+        <option value="source_type">Source Type</option>
+        <option value="document_type">Document Type</option>
+        <option value="document_language">Document Language</option>
+        <option value="open_access">Open Access</option>
+        <option value="access_type">Access Type</option>
+        <option value="subject_area_level_0">Subject Area Level 0</option>
+        <option value="subject_area_level_1">Subject Area Level 1</option>
+        <option value="subject_area_level_2">Subject Area Level 2</option>
+        <option value="region_world">Author Affiliation - Region (World)</option>
+      </select>
+    </div>
+  </div>
 </div>
 
 <h4 class="my-2 pt-1">Filters</h4>
@@ -49,7 +46,6 @@
     <select multiple id="source_type" class="form-control" name="source_type" aria-label="Source Type">
     </select>
 </div>
-
 <div class="form-group mb-3">
     <label class="form-label" for="source_name">Source Name</label>
     <select id="source_name" class="form-control" name="source_name" aria-label="Source Name"></select>
@@ -70,7 +66,7 @@
 </div>
 
 <div class="form-group mb-3">
-  <label class="form-label" for="publication_year_start">Publication Year</label>
+  <label class="form-label" for="document_publication_year_start">Publication Year</label>
   <div class="input-group">
     <input
       id="document_publication_year_start"
@@ -179,7 +175,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Fields that we don't want to populate because they are handled differently
             [
               'breakdown_variable',
-              'study_unit',
               'open_access',
               'document_publication_year_start',
               'document_publication_year_end',
@@ -245,7 +240,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         const singleSelectFields = [
           'document_language',
           'open_access',
-          'study_unit',
           'breakdown_variable',
           'country_operator',
         ];
@@ -283,7 +277,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 $(selectElement).select2(
                   {
                     ajax: {
-                        url: `/indicators/search/?field_name=${fieldId}&data_source=${dsname}`,
+                        url: `/search-gateway/search-item/?field_name=${fieldId}&data_source=${dsname}`,
                         dataType: 'json',
                         delay: 300,
                         data: params => ({ q: params.term }),

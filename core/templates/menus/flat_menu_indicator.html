@@ -17,23 +17,23 @@
                 <span class="menu-link"><div>Document or Citation</div></span>
                 <ul class="sub-menu-container">
                   <li class="menu-item">
-                    <a class="menu-link" href="{% url 'sci_prod_world' %}"><div>World</div></a>
+                    <a class="menu-link" href="{% url 'indicator' 'world' %}"><div>World</div></a>
                   </li>
                   <li class="menu-item">
-                    <a class="menu-link" href="{% url 'sci_prod_brazil' %}"><div>Brazil</div></a>
+                    <a class="menu-link" href="{% url 'indicator' 'brazil' %}"><div>Brazil</div></a>
                   </li>
                   <li class="menu-item">
-                    <a class="menu-link" href="{% url 'sci_prod_scielo' %}"><div>SciELO Network</div></a>
+                    <a class="menu-link" href="{% url 'indicator_home' %}"><div>SciELO Network</div></a>
                   </li>
                 </ul>
               </li>
               <li class="menu-item">
-                <a class="menu-link" href="{% url 'sci_prod_journal_metrics' %}"><div>Journal</div></a>
+                <a class="menu-link" href="{% url 'indicator_journal_metrics' %}"><div>Journal</div></a>
               </li>
             </ul>
           </li>
           <li class="menu-item">
-            <a class="menu-link" href="{% url 'soc_prod' %}"><div>Social Production</div></a>
+            <a class="menu-link" href="{% url 'indicator' 'social' %}"><div>Social Production</div></a>
           </li>
         </ul>
       </li>

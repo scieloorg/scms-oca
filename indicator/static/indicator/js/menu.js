@@ -16,15 +16,11 @@ function initIndicatorForm(dataSource) {
     // Collect filters from the form data
     const filters = collectFiltersFromForm(formData);
 
-    // Extract study unit
-    const studyUnit = formData.get('study_unit');
-
     // Extract breakdown variable
     const breakdownVariable = formData.get('breakdown_variable');
 
     // Prepare payload for the POST request
     const payload = {
-      study_unit: studyUnit,
       breakdown_variable: breakdownVariable,
       filters: filters
     };
@@ -47,7 +43,7 @@ function initIndicatorForm(dataSource) {
       updateAppliedFiltersDisplay();
 
       // Render charts or tables based on data source
-      renderChartsContainer(data, studyUnit, dataSource, formData.get('csrfmiddlewaretoken'));
+      renderChartsContainer(data, dataSource, formData.get('csrfmiddlewaretoken'));
     })
     .catch(error => console.error('Error:', error))
     .finally(() => {
@@ -58,7 +54,6 @@ function initIndicatorForm(dataSource) {
   // Handler for the reset button
   const handleFormReset = () => {
     const fieldsToPreserve = {
-      study_unit: menuForm.querySelector('select[name="study_unit"]')?.value,
       breakdown_variable: menuForm.querySelector('select[name="breakdown_variable"]')?.value,
       country_operator: menuForm.querySelector('select[name="country_operator"]')?.value,
       document_language_operator: menuForm.querySelector('select[name="document_language_operator"]')?.value,
@@ -96,14 +91,34 @@ function initIndicatorForm(dataSource) {
   }
 }
 
-// Render charts
-function renderChartsContainer(data, studyUnit, dataSource, csrfMiddlewareToken) {
-  // Render main chart
-  window.Indicators.renderMainChart(data, studyUnit);
+function renderChartsContainer(data, dataSource, csrfMiddlewareToken) {
+  const breakdownVariable = data.breakdown_variable;
+  const breakdownLabel = breakdownVariable ? ` by ${breakdownVariable.replace(/_/g, ' ')}` : ' per Year';
 
-  // Render inner percentage chart
-  window.Indicators.renderInnerPercentageChart(data, studyUnit);
+  // Render documents chart
+  window.Indicators.renderChart({
+    chartId: 'docs-chart',
+    chartDivId: 'docs-chart-div',
+    data: data,
+    seriesType: 'Documents',
+    title: `Documents${breakdownLabel}`,
+  });
 
-  // Render outer percentage chart
-  window.Indicators.renderOuterPercentageChart(data, studyUnit, dataSource, csrfMiddlewareToken);
+  // Render citations chart
+  window.Indicators.renderChart({
+    chartId: 'citations-chart',
+    chartDivId: 'citations-chart-div',
+    data: data,
+    seriesType: 'Citations',
+    title: `Citations${breakdownLabel}`,
+  });
+
+  // Render citations per document chart
+  window.Indicators.renderChart({
+    chartId: 'citations-per-doc-chart',
+    chartDivId: 'citations-per-doc-chart-div',
+    data: data,
+    seriesType: 'Citations per Document',
+    title: `Citations per Document${breakdownLabel}`,
+  });
 }
