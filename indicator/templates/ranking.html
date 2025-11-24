@@ -4,7 +4,7 @@
 <div class="col-lg-9 mx-0 ps-2 pe-0">
     <!-- Applied Filters -->
     {% if applied_filters and applied_filters.items %}
-    <div class="card mb-2 p-3 bg-light" id="applied-filters-journal-metrics">
+    <div class="card mb-2 p-3 bg-light shadow-sm" id="applied-filters-journal-metrics">
         <strong class="text-primary">Applied Filters</strong>
         <span>
             {% for key, value in applied_filters.items %}
@@ -19,7 +19,7 @@
 
     <!-- Ranking Table -->
     {% if ranking_data %}
-    <div class="box px-2 py-0 border rounded is-invisible" id="ranking-container">
+    <div class="box px-2 py-0 border rounded is-invisible shadow-sm" id="ranking-container">
         <table id="ranking-table" class="table table-striped display nowrap">
             <thead>
                 <tr>
