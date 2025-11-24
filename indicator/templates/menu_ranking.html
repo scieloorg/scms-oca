@@ -1,6 +1,6 @@
 <div>
-  <form method="POST" action="{% url 'sci_prod_journal_metrics' %}" id="menu-form-journal-metrics">
-    {% csrf_token %} 
+  <form method="POST" action="{% url 'indicator_journal_metrics' %}" id="menu-form-journal-metrics">
+    {% csrf_token %}
     <div id="menu-fields-journal-metrics">
         {% include "filters/sci_prod_journal.html" %}
     </div>
