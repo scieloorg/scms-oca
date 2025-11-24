@@ -1,14 +1,6 @@
 <h4 class="my-2">Graph Options</h4>
 
 <div class="form-group mb-3">
-  <label for="study_unit" class="form-label">Study Unit</label>
-  <select id="study_unit" class="form-control" name="study_unit">
-    <option value="document" selected>Document</option>
-    <option value="citation">Citation</option>
-  </select>
-</div>
-
-<div class="form-group mb-3">
   <label for="breakdown_variable" class="form-label">Breakdown Variable</label>
   <select id="breakdown_variable" name="breakdown_variable" class="form-control">
     <option value="">Select a variable</option>
@@ -152,7 +144,6 @@ document.addEventListener('DOMContentLoaded', async () => {
               'institution',
               'journal',
               'publisher',
-              'study_unit'
             ]
         );
     } catch (error) {
@@ -185,7 +176,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             "country",
             "document_language",
             "document_type",
-            'study_unit',
             'breakdown_variable',
             'country_operator',
             'document_language_operator',
@@ -196,7 +186,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (selectElement) {
                 $(selectElement).select2(
                   {
-                    placeholder: 'Start typing to search...', 
+                    placeholder: 'Start typing to search...',
                     allowClear: true,
                     theme: 'bootstrap-5',
                   }
@@ -218,14 +208,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                 $(selectElement).select2(
                   {
                     ajax: {
-                        url: `/indicators/search/?field_name=${fieldId}&data_source=scielo`,
+                        url: `/search-gateway/search-item/?field_name=${fieldId}&data_source=scielo`,
                         dataType: 'json',
                         delay: 300,
                         data: params => ({ q: params.term }),
                         processResults: data => data,
                     },
                     minimumInputLength: 2,
-                    placeholder: 'Start typing to search...', 
+                    placeholder: 'Start typing to search...',
                     theme: 'bootstrap-5',
                     allowClear: true
                   }
