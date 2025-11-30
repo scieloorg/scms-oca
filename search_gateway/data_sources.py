@@ -946,6 +946,14 @@ def get_aggregation_qualified_field_name(index_field_name, filter_aggregation_ty
 
     return index_field_name
 
+
+def get_index_field_name_from_qualified_name(qualified_index_field_name):
+    for w in ("keyword", "enum"):
+        qualified_index_field_name = qualified_index_field_name.replace(f".{w}", "")
+
+    return qualified_index_field_name
+
+
 def get_query_operator_fields(data_source):
     """
     Get the fields that support query operators for a given data source.
