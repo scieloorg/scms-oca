@@ -121,7 +121,7 @@ def _apply_mapping(keys, series, mapping):
     return [mapping.get(str(k), k) for k in keys]
 
 
-def _transform_boolean_yes_no(value):
+def transform_boolean_yes_no(value):
     """
     Transforms a 'Yes'/'No' string to a boolean.
     """
@@ -132,17 +132,17 @@ def _transform_boolean_yes_no(value):
     return None
 
 
-def _transform_year_range(filters, settings):
+def transform_year_range(filters, settings):
     """
     Transforms start and end year fields into a list of years.
     """
-    source_fields = settings.get("source_fields", [])
-    if len(source_fields) != 2:
+    source_field_names = settings.get("filter", {}).get("transform", {}).get("sources", [])
+    if len(source_field_names) != 2:
         return None
 
-    start_year = filters.get(source_fields[0])
-    end_year = filters.get(source_fields[1])
+    start_year_name, end_year_name = source_field_names
 
-    if start_year and end_year:
-        return year_range_to_list(start_year, end_year)
-    return None
+    start_year_value = filters.get(start_year_name)
+    end_year_value = filters.get(end_year_name)
+
+    return year_range_to_list(start_year_value, end_year_value)
