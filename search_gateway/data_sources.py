@@ -940,6 +940,12 @@ def get_field_settings(data_source):
     return DATA_SOURCES.get(data_source, {}).get("field_settings", {})
 
 
+def get_aggregation_qualified_field_name(index_field_name, filter_aggregation_type):
+    if filter_aggregation_type in ("keyword", "enum"):
+        return f"{index_field_name}.{filter_aggregation_type}"
+
+    return index_field_name
+
 def get_query_operator_fields(data_source):
     """
     Get the fields that support query operators for a given data source.
