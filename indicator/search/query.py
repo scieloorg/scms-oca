@@ -24,6 +24,7 @@ def build_journal_metrics_query(selected_year, query):
 def build_journal_metrics_body(selected_year=None, ranking_metric=None, size=500, query=None):
     if not selected_year:
         selected_year = "2024"
+
     if not ranking_metric:
         ranking_metric = "cwts_snip"
 
@@ -46,50 +47,29 @@ def build_journal_metrics_body(selected_year=None, ranking_metric=None, size=500
 
 def build_query(filters, field_settings, data_source):
     translated_filters = utils.translate_fields(filters, field_settings)
+
     must = []
 
     if data_source == "brazil":
-        name = field_settings.get("country", {}).get("index_field_name")
-        must.append({"term": {name: "BR"}})
+        add_must_term_to_brazil_data_source(field_settings, must)
+
     if data_source == "social":
-        name = field_settings.get("action", {}).get("index_field_name")
-        must.append({"exists": {"field": name}})
+        add_must_term_to_social_data_source(field_settings, must)
 
     query_operator_fields = data_sources.get_query_operator_fields(data_source)
+    index_field_name_to_filter_name_map = data_sources.get_index_field_name_to_filter_name_map(data_source)
 
-    reverse_field_map = {
-        setting.get("index_field_name"): key
-        for key, setting in field_settings.items()
-        if setting.get("index_field_name")
-    }
+    for qualified_index_field_name, value in translated_filters.items():
+        index_field_name = data_sources.get_index_field_name_from_qualified_name(qualified_index_field_name)
 
-    for field, value in translated_filters.items():
+        filter_name = index_field_name_to_filter_name_map.get(index_field_name)
+        if not filter_name:
+            continue
+
         if isinstance(value, list):
-            original_field_name = reverse_field_map.get(field)
-
-            if original_field_name:
-                operator_key = f"{original_field_name}_operator"
-            else:
-                operator_key = f"{field.split('.')[0]}_operator"
-
-            use_and_operator = (
-                filters.get(operator_key) == "and"
-                and field in query_operator_fields.values()
-            )
-
-            normalized_values = sorted(list(set(str(item).strip() for item in value if item)))
-            if not normalized_values:
-                continue
-
-            if use_and_operator:
-                for single_value in normalized_values:
-                    must.append({"term": {field: single_value}})
-            else:
-                must.append({"terms": {field: normalized_values}})
+            add_must_list(filters, filter_name, qualified_index_field_name, query_operator_fields, value, must)
         else:
-            if value in (None, ""):
-                continue
-            must.append({"term": {field: value}})
+            add_must_term(qualified_index_field_name, value, must)
 
     return {"bool": {"must": must}} if must else {"match_all": {}}
 
