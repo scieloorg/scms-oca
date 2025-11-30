@@ -92,7 +92,7 @@ pyalex==0.14   # https://github.com/J535D165/pyalex
 elasticsearch==7.17.12  # https://elasticsearch-py.readthedocs.io/en/v7.17.12/
 
 # OpenSearch
-opensearch-py==3.1.0
+opensearch-py==3.0.0
 
 # ISO 639-1
 # ------------------------------------------------------------------------------
