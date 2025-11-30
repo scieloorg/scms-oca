@@ -1,3 +1,6 @@
+from search_gateway.data_sources import  get_aggregation_qualified_field_name
+
+
 def clean_form_filters(filters_dict):
     """
     Removes empty filters and the CSRF token from a dictionary of form filters.
@@ -30,6 +33,14 @@ def standardize_breakdown_keys(keys, series):
     # If no keys match, return the original keys, leaving the series unmodified.
     return keys
 
+
+def standardize_values(values: list, sort=True):
+    vals = list(set(str(item).strip() for item in values if item))
+
+    if sort:
+        return sorted(vals)
+
+    return vals
 
 def translate_fields(filters, field_settings):
     """
