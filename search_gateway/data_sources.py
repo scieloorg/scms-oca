@@ -959,13 +959,25 @@ def get_query_operator_fields(data_source):
     Get the fields that support query operators for a given data source.
     """
     supported_query_fields = {}
-    ds_field_settings = get_field_settings(data_source)
+    field_settings = get_field_settings(data_source)
 
-    if not ds_field_settings:
+    if not field_settings:
         return {}
 
-    for field_name, data in ds_field_settings.items():
+    for field_name, data in field_settings.items():
         if data.get("filter", {}).get("support_query_operator"):
             supported_query_fields[field_name] = data.get("index_field_name")
 
     return supported_query_fields
+
+
+def get_index_field_name_to_filter_name_map(data_source):
+    field_settings = get_field_settings(data_source)
+    if not field_settings:
+        return {}
+
+    return {
+        setting.get("index_field_name"): key
+        for key, setting in field_settings.items()
+        if setting.get("index_field_name")
+    }
