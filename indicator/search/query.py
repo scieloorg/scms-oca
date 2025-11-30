@@ -117,21 +117,39 @@ def build_indicator_aggs(field_settings, breakdown_variable, data_source_name):
 
     aggs = {
         "per_year": {
-            "terms": {"field": year_var, "order": {"_key": "asc"}, "size": 1000},
-            "aggs": {
-                "total_citations": {"sum": {"field": cited_by_count_field}}
-            }
+            "terms": {
+                "field": year_var,
+                "order": {"_key": "asc"},
+                "size": 1000
+            },
+            "aggs": {},
         }
     }
 
+    if cited_by_count_field:
+        aggs["per_year"]["aggs"] = {
+            "total_citations": {"sum": {"field": cited_by_count_field}}
+        }
+
     if breakdown_variable:
-        breakdown_field = field_settings.get(breakdown_variable, {}).get("index_field_name")
-        if breakdown_field:
+        breakdown_field_name = field_settings.get(breakdown_variable, {}).get("index_field_name")
+        breakdown_aggregation_type = field_settings.get(breakdown_variable, {}).get("filter", {}).get("aggregation_type")
+
+        breakdown_variable_qualified_name = data_sources.get_aggregation_qualified_field_name(
+            breakdown_field_name,
+            breakdown_aggregation_type,
+        )
+
+        if breakdown_field_name:
             aggs["per_year"]["aggs"]["breakdown"] = {
-                "terms": {"field": breakdown_field, "order": {"_key": "asc"}, "size": 2500},
-                "aggs": {
-                    "total_citations": {"sum": {"field": cited_by_count_field}}
-                }
+                "terms": {
+                    "field": breakdown_variable_qualified_name,
+                    "order": {"_key": "asc"},
+                    "size": 2500
+                },
             }
+
+            if cited_by_count_field:
+                aggs["per_year"]["aggs"]["breakdown"]["aggs"] = {"total_citations": {"sum": {"field": cited_by_count_field}}}
 
     return aggs
