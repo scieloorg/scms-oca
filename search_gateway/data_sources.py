@@ -9,159 +9,132 @@ DATA_SOURCES = {
     "display_name": _("Scientific Production - World"),
     "field_settings": {
       "source_index_open_alex": {
-        "index_field_name": "indexed_in.keyword",
+        "index_field_name": "indexed_in",
         "filter": {
+          "aggregation_type": "keyword",
           "size": 100,
           "order": {
             "_key": "asc"
           },
-          "support_query_operator": False
         }
       },
       "source_index_scielo": {
-        "index_field_name": "primary_location.source.scl.indexed_in.keyword",
+        "index_field_name": "primary_location.source.scl.indexed_in",
         "filter": {
+          "aggregation_type": "keyword",
           "size": 100,
           "order": {
             "_key": "asc"
           },
-          "support_query_operator": False
         }
       },
       "source_type": {
-        "index_field_name": "primary_location.source.type.keyword",
+        "index_field_name": "primary_location.source.type",
         "filter": {
+          "aggregation_type": "keyword",
           "size": 100,
           "order": {
             "_key": "asc"
           },
-          "support_query_operator": False
         }
       },
       "access_type": {
-        "index_field_name": "open_access.oa_status.keyword",
+        "index_field_name": "open_access.oa_status",
         "filter": {
+          "aggregation_type": "keyword",
           "size": 20,
           "order": {
             "_key": "asc"
           },
-          "support_query_operator": False
         }
       },
       "document_language": {
-        "index_field_name": "language.keyword",
+        "index_field_name": "language",
         "filter": {
-          "size": 100,
+          "aggregation_type": "keyword",
+          "size": 200,
           "order": {
             "_key": "asc"
           },
-          "support_query_operator": False
         }
       },
       "document_type": {
-        "index_field_name": "type.keyword",
+        "index_field_name": "type",
         "filter": {
+          "aggregation_type": "keyword",
           "size": 100,
           "order": {
             "_key": "asc"
           },
-          "support_query_operator": False
         }
       },
       "open_access": {
         "index_field_name": "open_access.is_oa",
         "filter": {
-          "size": 3,
+          "aggregation_type": "ignore",
+          "transform": {
+            "type": "boolean"
+          },
+          "size": 2,
           "order": {
             "_key": "asc"
           },
-          "support_query_operator": False
         }
       },
       "publication_year": {
         "index_field_name": "publication_year",
         "filter": {
+          "aggregation_type": "ignore",
           "size": 100,
           "order": {
             "_key": "desc"
           },
-          "support_query_operator": False
-        }
-      },
-      "document_publication_year_start": {
-        "transform": "year_range",
-        "source_fields": [
-          "document_publication_year_start",
-          "document_publication_year_end"
-        ],
-        "index_field_name": "publication_year",
-        "filter": {
-          "size": 1000,
-          "order": {
-            "_key": "asc"
-          },
-          "support_query_operator": False
-        }
-      },
-      "document_publication_year_end": {
-        "transform": "year_range",
-        "source_fields": [
-          "document_publication_year_start",
-          "document_publication_year_end"
-        ],
-        "index_field_name": "publication_year",
-        "filter": {
-          "size": 1000,
-          "order": {
-            "_key": "asc"
-          },
-          "support_query_operator": False
         }
       },
       "subject_area_level_0": {
-        "index_field_name": "thematic_areas.level0.keyword",
+        "index_field_name": "thematic_areas.level0",
         "filter": {
+          "aggregation_type": "keyword",
           "size": 10,
           "order": {
             "_key": "asc"
           },
-          "support_query_operator": False
         }
       },
       "subject_area_level_1": {
-        "index_field_name": "thematic_areas.level1.keyword",
+        "index_field_name": "thematic_areas.level1",
         "filter": {
+          "aggregation_type": "keyword",
           "size": 20,
           "order": {
             "_key": "asc"
           },
-          "support_query_operator": False
         }
       },
       "subject_area_level_2": {
-        "index_field_name": "thematic_areas.level2.keyword",
+        "index_field_name": "thematic_areas.level2",
         "filter": {
+          "aggregation_type": "keyword",
           "size": 50,
           "order": {
             "_key": "asc"
           },
-          "support_query_operator": False
         }
       },
       "institution": {
-        "index_field_name": "authorships.institutions.display_name.keyword",
+        "index_field_name": "authorships.institutions.display_name",
         "filter": {
-          "size": 5,
+          "aggregation_type": "keyword",
+          "size": 1,
           "order": {
             "_key": "asc"
           },
-          "support_query_operator": False,
-          "support_search_as_you_type": False
         }
       },
       "country": {
-        "index_field_name": "authorships.countries.keyword",
+        "index_field_name": "authorships.countries",
         "filter": {
+          "aggregation_type": "keyword",
           "size": 400,
           "order": {
             "_key": "asc"
@@ -170,13 +143,13 @@ DATA_SOURCES = {
         }
       },
       "region_world": {
-        "index_field_name": "geos.scimago_regions.keyword",
+        "index_field_name": "geos.scimago_regions",
         "filter": {
+          "aggregation_type": "keyword",
           "size": 20,
           "order": {
             "_key": "asc"
           },
-          "support_query_operator": False
         }
       },
       "cited_by_count": {
@@ -186,40 +159,36 @@ DATA_SOURCES = {
           "order": {
             "_key": "desc"
           },
-          "support_query_operator": False
         }
       },
       "source_country": {
-        "index_field_name": "journal_metadata.country.keyword",
+        "index_field_name": "journal_metadata.country",
         "filter": {
+          "aggregation_type": "keyword",
           "size": 300,
           "order": {
             "_key": "asc"
           },
-          "support_query_operator": False,
-          "support_search_as_you_type": False
         }
       },
       "source_name": {
-        "index_field_name": "primary_location.source.display_name.keyword",
+        "index_field_name": "primary_location.source.display_name",
         "filter": {
-          "size": 5,
+          "aggregation_type": "keyword",
+          "size": 1,
           "order": {
             "_key": "asc"
           },
-          "support_query_operator": False,
-          "support_search_as_you_type": False
         }
       },
       "issn": {
-        "index_field_name": "primary_location.source.issn.keyword",
+        "index_field_name": "primary_location.source.issn",
         "filter": {
-          "size": 5,
+          "aggregation_type": "keyword",
+          "size": 1,
           "order": {
             "_key": "asc"
           },
-          "support_query_operator": False,
-          "support_search_as_you_type": False
         }
       }
     }
@@ -229,159 +198,132 @@ DATA_SOURCES = {
     "display_name": _("Scientific Production - Brazil"),
     "field_settings": {
       "source_index_open_alex": {
-        "index_field_name": "indexed_in.keyword",
+        "index_field_name": "indexed_in",
         "filter": {
+          "aggregation_type": "keyword",
           "size": 100,
           "order": {
             "_key": "asc"
           },
-          "support_query_operator": False
         }
       },
       "source_index_scielo": {
-        "index_field_name": "primary_location.source.scl.indexed_in.keyword",
+        "index_field_name": "primary_location.source.scl.indexed_in",
         "filter": {
+          "aggregation_type": "keyword",
           "size": 100,
           "order": {
             "_key": "asc"
           },
-          "support_query_operator": False
         }
       },
       "source_type": {
-        "index_field_name": "primary_location.source.type.keyword",
+        "index_field_name": "primary_location.source.type",
         "filter": {
+          "aggregation_type": "keyword",
           "size": 100,
           "order": {
             "_key": "asc"
           },
-          "support_query_operator": False
         }
       },
       "access_type": {
-        "index_field_name": "open_access.oa_status.keyword",
+        "index_field_name": "open_access.oa_status",
         "filter": {
+          "aggregation_type": "keyword",
           "size": 20,
           "order": {
             "_key": "asc"
           },
-          "support_query_operator": False
         }
       },
       "document_language": {
-        "index_field_name": "language.keyword",
+        "index_field_name": "language",
         "filter": {
-          "size": 100,
+          "aggregation_type": "keyword",
+          "size": 200,
           "order": {
             "_key": "asc"
           },
-          "support_query_operator": False
         }
       },
       "document_type": {
-        "index_field_name": "type.keyword",
+        "index_field_name": "type",
         "filter": {
+          "aggregation_type": "keyword",
           "size": 100,
           "order": {
             "_key": "asc"
           },
-          "support_query_operator": False
         }
       },
       "open_access": {
         "index_field_name": "open_access.is_oa",
         "filter": {
-          "size": 3,
+          "aggregation_type": "ignore",
+          "transform": {
+            "type": "boolean"
+          },
+          "size": 2,
           "order": {
             "_key": "asc"
           },
-          "support_query_operator": False
         }
       },
       "publication_year": {
         "index_field_name": "publication_year",
         "filter": {
+          "aggregation_type": "ignore",
           "size": 100,
           "order": {
             "_key": "desc"
           },
-          "support_query_operator": False
-        }
-      },
-      "document_publication_year_start": {
-        "transform": "year_range",
-        "source_fields": [
-          "document_publication_year_start",
-          "document_publication_year_end"
-        ],
-        "index_field_name": "publication_year",
-        "filter": {
-          "size": 1000,
-          "order": {
-            "_key": "asc"
-          },
-          "support_query_operator": False
-        }
-      },
-      "document_publication_year_end": {
-        "transform": "year_range",
-        "source_fields": [
-          "document_publication_year_start",
-          "document_publication_year_end"
-        ],
-        "index_field_name": "publication_year",
-        "filter": {
-          "size": 1000,
-          "order": {
-            "_key": "asc"
-          },
-          "support_query_operator": False
         }
       },
       "subject_area_level_0": {
-        "index_field_name": "thematic_areas.level0.keyword",
+        "index_field_name": "thematic_areas.level0",
         "filter": {
+          "aggregation_type": "keyword",
           "size": 10,
           "order": {
             "_key": "asc"
           },
-          "support_query_operator": False
         }
       },
       "subject_area_level_1": {
-        "index_field_name": "thematic_areas.level1.keyword",
+        "index_field_name": "thematic_areas.level1",
         "filter": {
+          "aggregation_type": "keyword",
           "size": 20,
           "order": {
             "_key": "asc"
           },
-          "support_query_operator": False
         }
       },
       "subject_area_level_2": {
-        "index_field_name": "thematic_areas.level2.keyword",
+        "index_field_name": "thematic_areas.level2",
         "filter": {
+          "aggregation_type": "keyword",
           "size": 50,
           "order": {
             "_key": "asc"
           },
-          "support_query_operator": False
         }
       },
       "institution": {
-        "index_field_name": "authorships.institutions.display_name.keyword",
+        "index_field_name": "authorships.institutions.display_name",
         "filter": {
-          "size": 5,
+          "aggregation_type": "keyword",
+          "size": 1,
           "order": {
             "_key": "asc"
           },
-          "support_query_operator": False,
-          "support_search_as_you_type": False
         }
       },
       "country": {
-        "index_field_name": "authorships.countries.keyword",
+        "index_field_name": "authorships.countries",
         "filter": {
+          "aggregation_type": "keyword",
           "size": 400,
           "order": {
             "_key": "asc"
@@ -390,13 +332,13 @@ DATA_SOURCES = {
         }
       },
       "region_world": {
-        "index_field_name": "geos.scimago_regions.keyword",
+        "index_field_name": "geos.scimago_regions",
         "filter": {
+          "aggregation_type": "keyword",
           "size": 20,
           "order": {
             "_key": "asc"
           },
-          "support_query_operator": False
         }
       },
       "cited_by_count": {
@@ -406,40 +348,36 @@ DATA_SOURCES = {
           "order": {
             "_key": "desc"
           },
-          "support_query_operator": False
         }
       },
       "source_country": {
-        "index_field_name": "journal_metadata.country.keyword",
+        "index_field_name": "journal_metadata.country",
         "filter": {
+          "aggregation_type": "keyword",
           "size": 300,
           "order": {
             "_key": "asc"
           },
-          "support_query_operator": False,
-          "support_search_as_you_type": False
         }
       },
       "source_name": {
-        "index_field_name": "primary_location.source.display_name.keyword",
+        "index_field_name": "primary_location.source.display_name",
         "filter": {
-          "size": 5,
+          "aggregation_type": "keyword",
+          "size": 1,
           "order": {
             "_key": "asc"
           },
-          "support_query_operator": False,
-          "support_search_as_you_type": False
         }
       },
       "issn": {
-        "index_field_name": "primary_location.source.issn.keyword",
+        "index_field_name": "primary_location.source.issn",
         "filter": {
-          "size": 5,
+          "aggregation_type": "keyword",
+          "size": 1,
           "order": {
             "_key": "asc"
           },
-          "support_query_operator": False,
-          "support_search_as_you_type": False
         }
       }
     }
@@ -449,50 +387,49 @@ DATA_SOURCES = {
     "display_name": _("Scientific Production - SciELO Network"),
     "field_settings": {
       "collection": {
-        "index_field_name": "collection.keyword",
+        "index_field_name": "collection",
         "filter": {
-          "size": 30,
+          "aggregation_type": "keyword",
+          "size": 50,
           "order": {
             "_key": "asc"
           },
-          "support_query_operator": False
         }
       },
       "publisher": {
-        "index_field_name": "publisher.keyword",
+        "index_field_name": "publisher",
         "filter": {
+          "aggregation_type": "keyword",
           "size": 1,
           "order": {
             "_key": "asc"
           },
-          "support_query_operator": False,
-          "support_search_as_you_type": False
         }
       },
       "journal": {
-        "index_field_name": "journal.keyword",
+        "index_field_name": "journal",
         "filter": {
+          "aggregation_type": "keyword",
           "size": 1,
           "order": {
             "_key": "asc"
           },
-          "support_query_operator": False,
-          "support_search_as_you_type": False
         }
       },
       "access_type": {
-        "index_field_name": "open_access_oa_status.keyword",
+        "index_field_name": "open_access_oa_status",
         "filter": {
+          "aggregation_type": "keyword",
           "size": 20,
           "order": {
             "_key": "asc"
           },
-          "support_query_operator": False
         }
       },
       "document_language": {
-        "index_field_name": "languages.keyword",
+        "index_field_name": "languages",
         "filter": {
+          "aggregation_type": "keyword",
           "size": 500,
           "order": {
             "_key": "asc"
@@ -501,57 +438,51 @@ DATA_SOURCES = {
         }
       },
       "document_type": {
-        "index_field_name": "type.keyword",
+        "index_field_name": "type",
         "filter": {
           "size": 100,
           "order": {
             "_key": "asc"
           },
-          "support_query_operator": False
-        }
-      },
-      "publication_year": {
-        "index_field_name": "publication_year",
-        "filter": {
-          "size": 200,
-          "order": {
-            "_key": "asc"
-          },
-          "support_query_operator": False
         }
       },
       "document_publication_year_start": {
-        "transform": "year_range",
-        "source_fields": [
-          "document_publication_year_start",
-          "document_publication_year_end"
-        ],
         "index_field_name": "publication_year",
         "filter": {
-          "size": 1000,
+          "transform": {
+            "type": "year_range",
+            "sources": [
+              "document_publication_year_start",
+              "document_publication_year_end",
+            ]
+          },
+          "aggregation_type": "ignore",
+          "size": 500,
           "order": {
             "_key": "asc"
           },
-          "support_query_operator": False
         }
       },
       "document_publication_year_end": {
-        "transform": "year_range",
-        "source_fields": [
-          "document_publication_year_start",
-          "document_publication_year_end"
-        ],
         "index_field_name": "publication_year",
         "filter": {
-          "size": 1000,
+          "transform": {
+            "type": "year_range",
+            "sources": [
+              "document_publication_year_start",
+              "document_publication_year_end",
+            ]
+          },
+          "aggregation_type": "ignore",
+          "size": 500,
           "order": {
             "_key": "asc"
           },
-          "support_query_operator": False
         }
       },
       "country": {
-        "index_field_name": "authorships_countries.keyword",
+        "index_field_name": "authorships_countries",
+        "aggregation_type": "keyword",
         "filter": {
           "size": 300,
           "order": {
@@ -561,14 +492,13 @@ DATA_SOURCES = {
         }
       },
       "institution": {
-        "index_field_name": "authorships_institutions_display_name.keyword",
+        "index_field_name": "authorships_institutions_display_name",
         "filter": {
+          "aggregation_type": "keyword",
           "size": 1,
           "order": {
             "_key": "asc"
           },
-          "support_query_operator": False,
-          "support_search_as_you_type": False
         }
       },
       "cited_by_count": {
@@ -578,7 +508,6 @@ DATA_SOURCES = {
           "order": {
             "_key": "desc"
           },
-          "support_query_operator": False
         }
       }
     }
@@ -587,116 +516,110 @@ DATA_SOURCES = {
     "index_name": settings.ES_INDEX_SOC_PROD,
     "display_name": _("Social Production"),
     "field_settings": {
-      "publication_year": {
-        "index_field_name": "year",
-        "filter": {
-          "size": 1000,
-          "order": {
-            "_key": "asc"
-          },
-          "support_query_operator": False
-        }
-      },
       "document_publication_year_start": {
-        "transform": "year_range",
-        "source_fields": [
-          "document_publication_year_start",
-          "document_publication_year_end"
-        ],
         "index_field_name": "year",
         "filter": {
+          "transform": {
+                "type": "year_range",
+                "sources": [
+                    "document_publication_year_start",
+                    "document_publication_year_end",
+                ]
+          },
+          "aggregation_type": "ignore",
           "size": 1000,
           "order": {
             "_key": "asc"
           },
-          "support_query_operator": False
         }
       },
       "document_publication_year_end": {
-        "transform": "year_range",
-        "source_fields": [
-          "document_publication_year_start",
-          "document_publication_year_end"
-        ],
         "index_field_name": "year",
         "filter": {
-          "size": 1000,
-          "order": {
-            "_key": "asc"
-          },
-          "support_query_operator": False
+            "transform": {
+                "type": "year_range",
+                "sources": [
+                    "document_publication_year_start",
+                    "document_publication_year_end",
+                ]
+            },
+            "aggregation_type": "ignore",
+            "size": 1000,
+            "order": {
+                "_key": "asc"
+            },
         }
       },
       "city_brazil": {
-        "index_field_name": "cities.enum",
+        "index_field_name": "cities",
         "filter": {
+          "aggregation_type": "enum",
           "size": 1000,
           "order": {
             "_key": "asc"
           },
-          "support_query_operator": False
         }
       },
       "state_brazil": {
-        "index_field_name": "states.enum",
+        "index_field_name": "states",
         "filter": {
+          "aggregation_type": "enum",
           "size": 27,
           "order": {
             "_key": "asc"
           },
-          "support_query_operator": False
         }
       },
       "action": {
-        "index_field_name": "action.enum",
+        "index_field_name": "action",
         "filter": {
+          "aggregation_type": "enum",
           "size": 1000,
           "order": {
             "_key": "asc"
           },
-          "support_query_operator": False
         }
       },
       "classification": {
-        "index_field_name": "classification.enum",
+        "index_field_name": "classification",
         "filter": {
+          "aggregation_type": "enum",
           "size": 1000,
           "order": {
             "_key": "asc"
           },
-          "support_query_operator": False
         }
       },
       "directory_type": {
-        "index_field_name": "directory_type.enum",
+        "index_field_name": "directory_type",
         "filter": {
+          "aggregation_type": "enum",
           "size": 1000,
           "order": {
             "_key": "asc"
           },
-          "support_query_operator": False
         }
       },
       "institution": {
-        "index_field_name": "institutions.enum",
+        "index_field_name": "institutions",
         "filter": {
+          "aggregation_type": "enum",
           "size": 100,
           "order": {
             "_key": "asc"
           },
-          "support_query_operator": False
         }
       },
       "practice": {
-        "index_field_name": "practice.enum",
+        "index_field_name": "practice",
         "filter": {
+          "aggregation_type": "enum",
           "size": 1000,
           "order": {
             "_key": "asc"
           },
-          "support_query_operator": False
         }
-      }
+      },
     }
   },
   "journal_metrics": {
@@ -705,64 +628,55 @@ DATA_SOURCES = {
     "field_settings": {
       "country": {
         "index_field_name": "country",
-        "field_type": "keyword",
         "filter": {
           "size": 300,
           "order": {
             "_key": "asc"
           },
-          "support_query_operator": False
         }
       },
       "journal": {
-        "index_field_name": "journal.keyword",
+        "index_field_name": "journal",
         "filter": {
           "size": 1,
           "order": {
             "_key": "asc"
           },
-          "support_query_operator": False,
           "support_search_as_you_type": True
         }
       },
       "openalex_region": {
         "index_field_name": "openalex_region",
-        "field_type": "keyword",
         "filter": {
           "size": 100,
           "order": {
             "_key": "asc"
           },
-          "support_query_operator": False
         }
       },
       "publisher_name": {
-        "index_field_name": "publisher_name.keyword",
+        "index_field_name": "publisher_name",
         "filter": {
           "size": 1,
           "order": {
             "_key": "asc"
           },
-          "support_query_operator": False,
           "support_search_as_you_type": True
         }
       },
       "scielo_collection_name": {
         "index_field_name": "scielo_collection_name",
-        "field_type": "keyword",
         "filter": {
           "size": 100,
           "order": {
             "_key": "asc"
           },
-          "support_query_operator": False
         }
       },
       "scielo_thematic_area": {
         "index_field_name": "scielo_thematic_areas",
-        "field_type": "keyword",
         "filter": {
-          "size": 20,
+          "size": 50,
           "order": {
             "_key": "asc"
           },
@@ -771,20 +685,17 @@ DATA_SOURCES = {
       },
       "scimago_region": {
         "index_field_name": "scimago_region",
-        "field_type": "keyword",
         "filter": {
           "size": 20,
           "order": {
             "_key": "asc"
           },
-          "support_query_operator": False
         }
       },
       "source_index": {
         "index_field_name": "source",
-        "field_type": "keyword",
         "filter": {
-          "size": 10,
+          "size": 50,
           "order": {
             "_key": "asc"
           },
@@ -798,98 +709,40 @@ DATA_SOURCES = {
           "order": {
             "_key": "asc"
           },
-          "support_query_operator": False,
           "support_search_as_you_type": True
         }
       },
       "year_founded": {
         "index_field_name": "year_of_creation_of_the_periodical",
         "filter": {
+          "aggregation_type": "ignore",
           "size": 1000,
           "order": {
             "_key": "asc"
           },
-          "support_query_operator": False
-        }
-      },
-      "journal_year_founded_start": {
-        "transform": "year_range",
-        "source_fields": [
-          "journal_year_founded_start",
-          "journal_year_founded_end"
-        ],
-        "index_field_name": "year_of_creation_of_the_periodical",
-        "filter": {
-          "size": 1000,
-          "order": {
-            "_key": "asc"
-          },
-          "support_query_operator": False
-        }
-      },
-      "journal_year_founded_end": {
-        "transform": "year_range",
-        "source_fields": [
-          "journal_year_founded_start",
-          "journal_year_founded_end"
-        ],
-        "index_field_name": "year_of_creation_of_the_periodical",
-        "filter": {
-          "size": 1000,
-          "order": {
-            "_key": "asc"
-          },
-          "support_query_operator": False
         }
       },
       "is_scielo": {
         "index_field_name": "is_scielo",
         "filter": {
-          "size": 3,
+            "aggregation_type": "ignore",
+            "transform": {
+                "type": "boolean"
+          },
+          "size": 2,
           "order": {
             "_key": "asc"
           },
-          "support_query_operator": False
         }
       },
       "year": {
         "index_field_name": "year",
         "filter": {
+          "aggregation_type": "ignore",
           "size": 200,
           "order": {
             "_key": "asc"
           },
-          "support_query_operator": False
-        }
-      },
-      "journal_year_start": {
-        "transform": "year_range",
-        "source_fields": [
-          "journal_year_start",
-          "journal_year_end"
-        ],
-        "index_field_name": "year",
-        "filter": {
-          "size": 1000,
-          "order": {
-            "_key": "asc"
-          },
-          "support_query_operator": False
-        }
-      },
-      "journal_year_end": {
-        "transform": "year_range",
-        "source_fields": [
-          "journal_year_start",
-          "journal_year_end"
-        ],
-        "index_field_name": "year",
-        "filter": {
-          "size": 1000,
-          "order": {
-            "_key": "asc"
-          },
-          "support_query_operator": False
         }
       },
       "cwts_snip": {
@@ -900,7 +753,6 @@ DATA_SOURCES = {
           "order": {
             "_key": "desc"
           },
-          "support_query_operator": False
         }
       },
       "openalex_num_docs": {
@@ -911,7 +763,6 @@ DATA_SOURCES = {
           "order": {
             "_key": "desc"
           },
-          "support_query_operator": False
         }
       },
       "scielo_num_docs": {
@@ -922,18 +773,16 @@ DATA_SOURCES = {
           "order": {
             "_key": "desc"
           },
-          "support_query_operator": False
         }
       },
       "scimago_best_quartile": {
-        "index_field_name": "scimago_best_quartile.keyword",
+        "index_field_name": "scimago_best_quartile",
         "filter": {
           "use": False,
           "size": 1,
           "order": {
             "_key": "asc"
           },
-          "support_query_operator": False
         }
       },
       "scimago_citable_docs_3_years": {
@@ -944,7 +793,6 @@ DATA_SOURCES = {
           "order": {
             "_key": "desc"
           },
-          "support_query_operator": False
         }
       },
       "scimago_cites_by_doc_2_years": {
@@ -955,7 +803,6 @@ DATA_SOURCES = {
           "order": {
             "_key": "desc"
           },
-          "support_query_operator": False
         }
       },
       "scimago_estimated_apc": {
@@ -966,7 +813,6 @@ DATA_SOURCES = {
           "order": {
             "_key": "desc"
           },
-          "support_query_operator": False
         }
       },
       "scimago_estimated_value": {
@@ -977,7 +823,6 @@ DATA_SOURCES = {
           "order": {
             "_key": "desc"
           },
-          "support_query_operator": False
         }
       },
       "scimago_female_authors_percent": {
@@ -988,7 +833,6 @@ DATA_SOURCES = {
           "order": {
             "_key": "desc"
           },
-          "support_query_operator": False
         }
       },
       "scimago_overton": {
@@ -999,7 +843,6 @@ DATA_SOURCES = {
           "order": {
             "_key": "desc"
           },
-          "support_query_operator": False
         }
       },
       "scimago_sdg": {
@@ -1010,7 +853,6 @@ DATA_SOURCES = {
           "order": {
             "_key": "desc"
           },
-          "support_query_operator": False
         }
       },
       "scimago_sjr": {
@@ -1021,7 +863,6 @@ DATA_SOURCES = {
           "order": {
             "_key": "desc"
           },
-          "support_query_operator": False
         }
       },
       "scimago_total_cites_3_years": {
@@ -1032,7 +873,6 @@ DATA_SOURCES = {
           "order": {
             "_key": "desc"
           },
-          "support_query_operator": False
         }
       },
       "scimago_total_docs_3_years": {
@@ -1043,7 +883,6 @@ DATA_SOURCES = {
           "order": {
             "_key": "desc"
           },
-          "support_query_operator": False
         }
       }
     }
@@ -1053,36 +892,30 @@ DATA_SOURCES = {
     "display_name": _("Sources"),
     "field_settings": {
       "source_country": {
-        "index_field_name": "country.keyword",
+        "index_field_name": "country",
         "filter": {
           "size": 300,
           "order": {
             "_key": "asc"
           },
-          "support_query_operator": False,
-          "support_search_as_you_type": False
         }
       },
       "source_name": {
-        "index_field_name": "display_name.keyword",
+        "index_field_name": "display_name",
         "filter": {
-          "size": 5,
+          "size": 1,
           "order": {
             "_key": "asc"
           },
-          "support_query_operator": False,
-          "support_search_as_you_type": False
         }
       },
       "issn": {
-        "index_field_name": "issn.keyword",
+        "index_field_name": "issn",
         "filter": {
-          "size": 5,
+          "size": 1,
           "order": {
             "_key": "asc"
           },
-          "support_query_operator": False,
-          "support_search_as_you_type": False
         }
       }
     }
@@ -1107,18 +940,44 @@ def get_field_settings(data_source):
     return DATA_SOURCES.get(data_source, {}).get("field_settings", {})
 
 
+def get_aggregation_qualified_field_name(index_field_name, filter_aggregation_type):
+    if filter_aggregation_type in ("keyword", "enum"):
+        return f"{index_field_name}.{filter_aggregation_type}"
+
+    return index_field_name
+
+
+def get_index_field_name_from_qualified_name(qualified_index_field_name):
+    for w in ("keyword", "enum"):
+        qualified_index_field_name = qualified_index_field_name.replace(f".{w}", "")
+
+    return qualified_index_field_name
+
+
 def get_query_operator_fields(data_source):
     """
     Get the fields that support query operators for a given data source.
     """
     supported_query_fields = {}
-    ds_field_settings = get_field_settings(data_source)
+    field_settings = get_field_settings(data_source)
 
-    if not ds_field_settings:
+    if not field_settings:
         return {}
 
-    for field_name, data in ds_field_settings.items():
+    for field_name, data in field_settings.items():
         if data.get("filter", {}).get("support_query_operator"):
             supported_query_fields[field_name] = data.get("index_field_name")
 
     return supported_query_fields
+
+
+def get_index_field_name_to_filter_name_map(data_source):
+    field_settings = get_field_settings(data_source)
+    if not field_settings:
+        return {}
+
+    return {
+        setting.get("index_field_name"): key
+        for key, setting in field_settings.items()
+        if setting.get("index_field_name")
+    }

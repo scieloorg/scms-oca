@@ -1,3 +1,6 @@
+from search_gateway.data_sources import  get_aggregation_qualified_field_name
+
+
 def clean_form_filters(filters_dict):
     """
     Removes empty filters and the CSRF token from a dictionary of form filters.
@@ -31,53 +34,79 @@ def standardize_breakdown_keys(keys, series):
     return keys
 
 
+def standardize_values(values: list, sort=True):
+    vals = list(set(str(item).strip() for item in values if item))
+
+    if sort:
+        return sorted(vals)
+
+    return vals
+
+
 def translate_fields(filters, field_settings):
     """
     Translate form field names to Elasticsearch index field names
     based on the provided field settings, applying transformations as needed.
     """
     translated = {}
+    searchable = {}
 
     # A set to keep track of form fields that are handled by a transformation
     # and should not be processed again in the main loop.
     handled_by_transform = set()
 
     # First, handle fields with special transformations
-    for field, settings in field_settings.items():
-        transform = settings.get("transform")
-        if not transform:
+    for fl_name, fl_settings in field_settings.items():
+        transform_type = fl_settings.get("filter", {}).get("transform", {}).get("type")
+        if not transform_type:
             continue
 
-        index_field_name = settings.get("index_field_name")
+        index_field_name = fl_settings.get("index_field_name")
         if not index_field_name:
             continue
 
         value = None
-        if transform == "boolean_yes_no":
-            value = _transform_boolean_yes_no(filters.get(field))
-            handled_by_transform.add(field)
+        if transform_type == "boolean":
+            value = transform_boolean_yes_no(filters.get(fl_name))
+            handled_by_transform.add(fl_name)
 
-        elif transform == "year_range":
-            value = _transform_year_range(filters, settings)
+        elif transform_type == "year_range":
+            value = transform_year_range(filters, fl_settings)
             # Add the source fields to the handled set
-            handled_by_transform.update(settings.get("source_fields", []))
+            handled_by_transform.update(fl_settings.get("filter", {}).get("transform", {}).get("sources", []))
 
         if value is not None:
-            translated[index_field_name] = value
+            translated[fl_name] = {
+                "filter_name": fl_name,
+                "value": value,
+            }
 
     # Second, handle the rest of the fields (simple name translation)
-    for field, value in filters.items():
+    for fl_name, value in filters.items():
         # Skip fields that were already processed by a transformation
-        if field in handled_by_transform:
+        if fl_name in handled_by_transform:
             continue
 
-        settings = field_settings.get(field, {})
-        index_field_name = settings.get("index_field_name")
+        fl_settings = field_settings.get(fl_name, {})
+        index_field_name = fl_settings.get("index_field_name")
 
         if index_field_name and value:
-            translated[index_field_name] = value
+            translated[fl_name] = {
+                "filter_name": fl_name,
+                "value": value,
+            }
 
-    return translated
+    # Third, handle field type
+    for fl_name, data in translated.items():
+        index_field_name = field_settings.get(fl_name, {}).get("index_field_name")
+        fl_aggr_type = field_settings.get(fl_name, {}).get("filter", {}).get("aggregation_type", "keyword")
+        aggegation_qualified_field_name = get_aggregation_qualified_field_name(
+            index_field_name,
+            fl_aggr_type,
+        )
+        searchable[aggegation_qualified_field_name] = data.get("value")
+
+    return searchable
 
 
 def _apply_mapping(keys, series, mapping):
@@ -92,7 +121,7 @@ def _apply_mapping(keys, series, mapping):
     return [mapping.get(str(k), k) for k in keys]
 
 
-def _transform_boolean_yes_no(value):
+def transform_boolean_yes_no(value):
     """
     Transforms a 'Yes'/'No' string to a boolean.
     """
@@ -103,17 +132,17 @@ def _transform_boolean_yes_no(value):
     return None
 
 
-def _transform_year_range(filters, settings):
+def transform_year_range(filters, settings):
     """
     Transforms start and end year fields into a list of years.
     """
-    source_fields = settings.get("source_fields", [])
-    if len(source_fields) != 2:
+    source_field_names = settings.get("filter", {}).get("transform", {}).get("sources", [])
+    if len(source_field_names) != 2:
         return None
 
-    start_year = filters.get(source_fields[0])
-    end_year = filters.get(source_fields[1])
+    start_year_name, end_year_name = source_field_names
 
-    if start_year and end_year:
-        return year_range_to_list(start_year, end_year)
-    return None
+    start_year_value = filters.get(start_year_name)
+    end_year_value = filters.get(end_year_name)
+
+    return year_range_to_list(start_year_value, end_year_value)

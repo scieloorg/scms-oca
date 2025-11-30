@@ -1,7 +1,15 @@
-def build_search_as_you_type_body(field_name, query, agg_size=20):
+from .data_sources import get_aggregation_qualified_field_name
+
+
+def build_search_as_you_type_body(field_name, query, filter_aggregation_type="keyword", aggregation_size=20):
     """
     Builds the body for a search-as-you-type query.
     """
+    aggregation_qualified_field_name = get_aggregation_qualified_field_name(
+        field_name,
+        filter_aggregation_type,
+    )
+
     return {
         "size": 0,
         "query": {
@@ -17,25 +25,35 @@ def build_search_as_you_type_body(field_name, query, agg_size=20):
         },
         "aggs": {
             "unique_items": {
-                "terms": {"field": f"{field_name}.keyword", "size": agg_size}
+                "terms": {
+                    "field": aggregation_qualified_field_name,
+                    "size": aggregation_size,
+                }
             }
         },
     }
 
 
-def build_term_search_body(field_name, query, aggregation_size=20):
+def build_term_search_body(field_name, query, filter_aggregation_type="keyword", aggregation_size=20):
     """
     Builds the body for a term-based search query.
     """
-    fn_cleaned = field_name.replace(".keyword", "")
+    aggregation_qualified_field_name = get_aggregation_qualified_field_name(
+        field_name,
+        filter_aggregation_type,
+    )
 
     return {
         "size": 0,
-        "query": {"match_phrase_prefix": {fn_cleaned: query}},
+        "query": {
+            "match_phrase_prefix": {
+                field_name: query
+            }
+        },
         "aggs": {
             "unique_items": {
                 "terms": {
-                    "field": f"{fn_cleaned}.keyword",
+                    "field": aggregation_qualified_field_name,
                     "size": aggregation_size,
                 }
             }
@@ -50,19 +68,22 @@ def build_filters_aggs(field_settings):
     aggs = {}
     for form_field_name, field_info in field_settings.items():
         fl_name = field_info.get("index_field_name")
-        fl_size = field_info.get("filter", {}).get("size")
-        fl_order = field_info.get("filter", {}).get("order")
-        fl_type = field_info.get("field_type")
+        if not fl_name:
+            continue
 
-        # Ensure we are using the keyword field for aggregations
-        if not fl_name.endswith(".keyword") and fl_type != "keyword":
-            name_keyword = f"{fl_name}.keyword"
-        else:
-            name_keyword = fl_name
-        terms = {"field": name_keyword, "size": fl_size}
+        fl_size = field_info.get("filter", {}).get("size") or 0
+        fl_order = field_info.get("filter", {}).get("order") or "asc"
+        fl_aggregation_type = field_info.get("filter", {}).get("aggregation_type", "keyword")
+        fl_aggregation_qualified_name = get_aggregation_qualified_field_name(fl_name, fl_aggregation_type)
+
+        terms = {
+            "field": fl_aggregation_qualified_name,
+            "size": fl_size
+        }
 
         if fl_order:
             terms["order"] = fl_order
 
         aggs[form_field_name] = {"terms": terms}
+
     return aggs
