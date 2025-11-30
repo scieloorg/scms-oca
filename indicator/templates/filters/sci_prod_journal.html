@@ -66,8 +66,8 @@
     <label class="form-label" for="is_scielo">Is SciELO</label>
     <select id="is_scielo" class="form-control" name="is_scielo" aria-label="Is SciELO">
         <option value="">Select an option</option>
-        <option value="true" {% if applied_filters.is_scielo == "true" %}selected{% endif %}>Yes</option>
-        <option value="false" {% if applied_filters.is_scielo == "false" %}selected{% endif %}>No</option>
+        <option value="Yes" {% if applied_filters.is_scielo == "Yes" %}selected{% endif %}>Yes</option>
+        <option value="No" {% if applied_filters.is_scielo == "No" %}selected{% endif %}>No</option>
     </select>
 </div>
 
