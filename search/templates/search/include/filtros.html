@@ -1,0 +1,29 @@
+{% load custom_filters %}
+{% load filters_label %}
+
+<h4 class="my-2">Filters</h4>
+
+<div id="filters-container">
+    {% for key, options in filters.items %}
+        <div class="form-group mb-3">
+        <label class="form-label" for="{{ key }}">{{ key|get_translation_data_source:data_source_name }}</label>
+            {% if key == 'document_publication_year_range' %}
+                {# Campo RANGE especial #}
+                {% include "search/include/filters/range.html" with key=key %}
+            {% else %}
+                {# Campos SELECT normais #}
+                {% include "search/include/filters/select2.html" %}
+            {% endif %}
+        </div>
+    {% endfor %}
+</div>
+
+<div class="d-grid gap-2 mt-3">
+    <button type="button" id="clear-filters-btn" class="btn btn-outline-secondary btn-sm">
+        <i class="icon-remove"></i> Limpar Filtros
+    </button>
+</div>
+
+<div id="filter-status" class="mt-3 text-muted small text-center">
+    <!-- Status de loading -->
+</div>
