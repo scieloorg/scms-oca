@@ -14,8 +14,6 @@ def get_save_number(item, default: int):
         return default
 
 class SearchPage(Page):
-    template = "search/search_base.html"
-    
     def get_context(self, request, *args, **kwargs):
         context = super().get_context(request, *args, **kwargs)
         search_query = request.GET.get("search", "")
