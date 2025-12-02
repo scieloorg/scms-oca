@@ -132,6 +132,7 @@ LOCAL_APPS = [
     "article",
     "journal",
     "chart",
+    "search_gateway",
 ]
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
@@ -429,7 +430,7 @@ HAYSTACK_CONNECTIONS = {
     },
     "es": {
         "ENGINE": "haystack.backends.elasticsearch7_backend.Elasticsearch7SearchEngine",
-        "URL": env("ES_URL", default="http://elastic:xxxxx@host.docker.internal:9200/"),
+        "URL": env("ES_URL", default="http://elastic:JpnbXdmA@elasticsearch:9200/"),
         "INDEX_NAME": env("INDEX_NAME", default="openalex_works"),
         "SOLR_TIMEOUT": 10,
         "KWARGS": {
@@ -504,14 +505,16 @@ SEARCH_FILTER_LABELS = {
     "source_type": _("Source Type"),
     "source_name": _("Source Name"),
     "publication_year": _("Publication Year"),
-    "open_access_status": _("Access Type"),
+    "access_type": _("Access Type"),
     "document_type": _("Document Type"),
-    "is_open_access": _("Open Access"),
+    "open_access": _("Open Access"),
     "scope": _("Escopo"),
-    "subject_level_0": _("Subject Area Level 0"),
-    "subject_level_1": _("Subject Area Level 1"),
-    "subject_level_2": _("Subject Area Level 2"),
-    "languages": _("Document Language"),
+    "subject_area_level_0": _("Subject Area Level 0"),
+    "subject_area_level_1": _("Subject Area Level 1"),
+    "subject_area_level_2": _("Subject Area Level 2"),
+    "document_language": _("Document Language"),
+    "region_world": _("Region (World)"),
+    "country": _("Country"),
 }
 
 # Elasticsearch indices for indicators
