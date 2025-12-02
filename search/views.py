@@ -7,17 +7,19 @@ import os
 from collections import OrderedDict
 
 import pysolr
-from django.conf import settings
-from django.http import Http404, HttpResponse, JsonResponse, HttpResponseNotAllowed
-from django.shortcuts import redirect, render
-from django.template import loader
-from django.urls import reverse
-from django.utils.translation import gettext as _
-
 from article.choices import LICENSE
 from core.utils import utils
+from django.conf import settings
+from django.http import Http404, HttpResponse, HttpResponseNotAllowed, JsonResponse
+from django.shortcuts import redirect, render
+from django.template import loader
+from django.template.loader import render_to_string
+from django.urls import reverse
+from django.utils.translation import gettext as _
+from django.views.decorators.http import require_GET
 from indicator import indicator, indicatorOA
 from indicator.models import Indicator, IndicatorData, IndicatorFile
+from search_gateway.controller import get_filters_data
 
 from . import choices, tools
 from .models import SearchPage
@@ -582,4 +584,36 @@ def get_search_results_json(request):
     except Exception as e:
         logging.exception("Error in get_search_results_json")
         return JsonResponse({"error": str(e)}, status=500)
-    
+
+
+@require_GET
+def search_view_list(request):
+    filters, erros = get_filters_data(
+        "world",
+        exclude_fields=[
+            "source_index_scielo",
+            "cited_by_count",
+        ],
+    )
+    selected_filters = {}
+    for filter_key in filters.keys():
+        values = request.GET.getlist(filter_key)
+        if values:
+            cleaned_values = [v for v in values if v]
+            if cleaned_values:
+                selected_filters[filter_key] = cleaned_values
+
+    results_data = SearchPage.get_results_data(
+        request,
+        "world",
+        request.GET.get("search", ""),
+        selected_filters,
+    )
+    results_html = render_to_string("search/include/results_list.html", {"results_data": results_data}, request=request)
+
+    return JsonResponse(
+        {
+            "search_results_html": results_html,
+            "search_results": results_data,
+        }
+    )
