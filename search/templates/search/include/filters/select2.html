@@ -1,0 +1,17 @@
+{% load custom_filters %}
+{% load filters_label %}
+
+{# Campos SELECT normais #}
+    <select 
+        multiple
+        id="{{ key }}" 
+        name="{{ key }}" 
+        class="form-control filter-select" 
+        data-filter-key="{{ key }}"
+        aria-label="{{ key|title }}">
+        {% if not autocomplete_fields|get_item:key %}
+            {% for option in options %}
+                <option value="{{ option }}">{{ option }}</option>
+            {% endfor %}
+        {% endif %}
+    </select>
