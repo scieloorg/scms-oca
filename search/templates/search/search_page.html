@@ -1,0 +1,239 @@
+{% extends "search/search.html" %}
+{% load custom_filters %}
+{% load filters_label %}
+
+
+{% block search_sidebar %}
+    {% include "search/include/filtros.html" %}
+{% endblock %}
+
+{% block search_content %}
+    <div class="card mb-3 p-3 bg-white shadow-sm">
+        <form method="get" action="." id="search-form">
+            <div class="row g-2 align-items-end">
+                <div class="col-md-10">
+                    <label for="search-input" class="form-label">
+                        <i class="icon-search"></i> Buscar
+                    </label>
+                    <input 
+                        type="search" 
+                        name="search" 
+                        id="search-input" 
+                        class="form-control" 
+                        placeholder="Digite sua pesquisa..." 
+                        value="{{ search_query }}"
+                        autocomplete="off"
+                    >
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100" style="padding-bottom: 0% !important; margin-bottom: 0% !important; text-align: center;">
+                        Buscar
+                    </button>
+                </div>
+            </div>
+        </form>
+        
+        {% if search_query %}
+        <div class="mt-3 pt-2 border-top">
+            <small class="text-muted">
+                <span class="badge bg-info">Busca: "{{ search_query }}"</span>
+            </small>
+        </div>
+        {% endif %}
+    </div>
+    {% include "search/include/results.html" %}
+{% endblock %}
+
+{% block javascript %}
+{{ block.super }}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        let currentSearchQuery = '{{ search_query|escapejs }}';
+
+        // Mapa de fields range (detectados do template)
+        const rangeFields = {};
+        {% for key, options in filters.items %}
+            {% with metadata=filter_metadata|get_item:key %}
+                {% if metadata.class_filter == 'range' %}
+                    rangeFields['{{ key }}'] = {
+                        start: '{{ key }}_start',
+                        end: '{{ key }}_end'
+                    };
+                {% endif %}
+            {% endwith %}
+        {% endfor %}
+
+                
+        // Função para aplicar filtros via AJAX
+        function applyFiltersAjax() {
+            const resultsContainer = document.getElementById('results-list');
+            const resultsCount = document.getElementById('results-count');
+            const filterStatus = document.getElementById('filter-status');
+            
+            // Mostrar loading
+            if (filterStatus) {
+                filterStatus.innerHTML = '<i class="icon-spinner icon-spin"></i> Carregando...';
+            }
+            if (resultsContainer) {
+                resultsContainer.innerHTML = '<div class="text-center p-5"><i class="icon-spinner icon-spin icon-2x"></i></div>';
+            }
+            
+            // Montar parâmetros da query
+            const params = new URLSearchParams();
+            
+            // Adicionar busca atual
+            if (currentSearchQuery) {
+                params.append('search', currentSearchQuery);
+            }
+            
+            // Adicionar filtros selecionados
+            {% for key, options in filters.items %}
+            const select_{{ key }} = document.getElementById('{{ key }}');
+            if (select_{{ key }}) {
+                const selectedValues = $(select_{{ key }}).val();
+                if (selectedValues && selectedValues.length > 0) {
+                    selectedValues.forEach(value => {
+                        params.append('{{ key }}', value);
+                    });
+                }
+            }
+            {% endfor %}
+            
+            // Fazer fetch para API JSON
+            fetch('/search/api/search-results-list/?' + params.toString())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Atualizar contador
+                    if (resultsCount) {
+                        resultsCount.innerHTML = data.total_results 
+                            ? `<p class="text-muted"><strong>${data.total_results}</strong> resultado(s) encontrado(s)</p>`
+                            : '';
+                    }
+                    
+                    // Renderizar resultados
+                    if (resultsContainer) {
+                        if (data.search_results_html) {
+                            resultsContainer.innerHTML = data.search_results_html;
+                        } else {
+                            resultsContainer.innerHTML = `
+                                <div class="alert alert-info" role="alert">
+                                    <i class="icon-info-sign"></i> 
+                                    Nenhum resultado encontrado. Tente ajustar sua busca ou filtros.
+                                </div>
+                            `;
+                        }
+                    }
+                    
+                    // Atualizar status
+                    if (filterStatus) {
+                        filterStatus.innerHTML = '<i class="icon-ok text-success"></i> Filtros aplicados';
+                        setTimeout(() => {
+                            filterStatus.innerHTML = '';
+                        }, 2000);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error applying filters:', error);
+                    if (resultsContainer) {
+                        resultsContainer.innerHTML = `
+                            <div class="alert alert-danger" role="alert">
+                                <i class="icon-exclamation-sign"></i> 
+                                Erro ao carregar resultados. Tente novamente.
+                            </div>
+                        `;
+                    }
+                    if (filterStatus) {
+                        filterStatus.innerHTML = '<i class="icon-exclamation-sign text-danger"></i> Erro';
+                    }
+                });
+        }
+        
+        // Função para limpar filtros
+        function clearFilters() {
+            $('select[multiple]').val(null).trigger('change');
+            applyFiltersAjax();
+        }
+        
+        try {
+            // Inicializar Select2 para todos os filtros
+            {% for key, options in filters.items %}
+            const selectElement_{{ key }} = document.getElementById('{{ key }}');
+            if (selectElement_{{ key }}) {
+                {% if autocomplete_fields|get_item:key %}
+                // Select2 com AJAX
+                $(selectElement_{{ key }}).select2({
+                    ajax: {
+                        url: '/search-gateway/search-as-you-type/',
+                        dataType: 'json',
+                        delay: 300,
+                        data: function(params) {
+                            return {
+                                q: params.term,
+                                field_name: '{{ key }}',
+                                data_source: '{{ data_source_name }}'
+                            };
+                        },
+                        processResults: function(data) {
+                            return {
+                                results: data.map(item => ({
+                                    id: item.key,
+                                    text: item.key,
+                                }))
+                            };
+                        }
+                    },
+                    minimumInputLength: 2,
+                    placeholder: 'Start typing to search...',
+                    theme: 'bootstrap-5',
+                    allowClear: false
+                });
+                {% else %}
+                    // Select2 básico
+                    $(selectElement_{{ key }}).select2({
+                        placeholder: 'Start typing to search...',
+                        theme: 'bootstrap-5',
+                        allowClear: false
+                    });
+                {% endif %}
+                
+                // Auto-foco
+                $(selectElement_{{ key }}).on('select2:open', function(e) {
+                    const searchField = document.querySelector(`[aria-controls="select2-${e.target.id}-results"]`);
+                    if (searchField) searchField.focus();
+                });
+                
+                // AJAX ao mudar filtro
+                $(selectElement_{{ key }}).on('change', function() {
+                    applyFiltersAjax();
+                });
+            }
+            {% endfor %}
+        } catch (error) {
+            console.error('Error initializing Select2', error);
+        }
+        
+        // Botão limpar
+        const clearFiltersBtn = document.getElementById('clear-filters-btn');
+        if (clearFiltersBtn) {
+            clearFiltersBtn.addEventListener('click', clearFilters);
+        }
+        
+        // Pré-selecionar filtros da URL
+        const urlParams = new URLSearchParams(window.location.search);
+        {% for key, options in filters.items %}
+        const urlValues_{{ key }} = urlParams.getAll('{{ key }}');
+        if (urlValues_{{ key }}.length > 0) {
+            const select_{{ key }} = document.getElementById('{{ key }}');
+            if (select_{{ key }}) {
+                $(select_{{ key }}).val(urlValues_{{ key }}).trigger('change.select2');
+            }
+        }
+        {% endfor %}
+    });
+    </script>
+{% endblock %}
