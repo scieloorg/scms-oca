@@ -1,0 +1,56 @@
+
+{% extends "base.html" %}
+{% load humanize %}
+{% load static %}
+{% load i18n %}
+{% load wagtailsettings_tags %}
+{% load sizify %}
+{% load partition %}
+{% load humanize %}
+{% load translate %}
+
+{% get_settings use_default_site=True %}
+
+
+{% block content %}
+<section id="content" class="mt-3">
+  <div class="container">
+    <div class="row mx-1">
+        <div class="card mb-2 p-3 bg-light shadow-sm">
+          <div class="page-title-content">
+            <h1 class="mb-1">Search</h1>
+            <span class="text-muted">Data of the OCABr Observatory</span>
+          </div>
+        </div>
+    </div>
+    <div class="row mx-1">
+      <div class="card mb-2 p-3 bg-light shadow-sm">
+        <h4 class="my-0">{{ current_data_source }}</h4>
+      </div>
+    </div>
+
+    <div class="row mx-1" id="mainContent">
+      <!-- Menu -->
+      <div class="col-lg-3 card mb-2 pt-2 bg-light shadow-sm align-self-start">
+        <div id="menu-container">
+            {% block search_sidebar %}
+            {% endblock %}
+        </div>
+      </div>
+      
+      <div class="col-lg-9 mx-0 ps-2 pe-0">
+        {% block search_content %}
+        {% endblock %}
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'indicator/css/custom.css' %}">
+{% endblock %}
+
+{% block javascript %}
+  {{ block.super }}
+{% endblock %}

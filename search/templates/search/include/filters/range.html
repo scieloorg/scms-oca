@@ -1,0 +1,28 @@
+{% load filters_label %}
+
+<div class="row g-2">
+    <div class="col-6">
+        <input 
+            type="number" 
+            id="document_publication_year_start" 
+            name="document_publication_year_start"
+            class="form-control range-filter" 
+            placeholder="Start"
+            min="1900"
+            max="2100"
+            value="{{ request.GET.document_publication_year_start }}"
+        >
+    </div>
+    <div class="col-6">
+        <input 
+            type="number" 
+            id="document_publication_year_end" 
+            name="document_publication_year_end"
+            class="form-control range-filter" 
+            placeholder="End"
+            min="1900"
+            max="2100"
+            value="{{ request.GET.document_publication_year_end }}"
+        >
+    </div>
+</div>

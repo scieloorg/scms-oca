@@ -1,0 +1,15 @@
+{% load humanize %}
+
+<div id="results-count" class="mb-3">
+    {% if results_data.total_results %}
+    <p class="text-muted">
+        <strong>{{ results_data.total_results|default:"0" }}</strong> resultado(s) encontrado(s)
+    </p>
+    {% endif %}
+</div>
+
+<div id="results-list" class="results-list">
+    {% for doc in results_data.search_results %}
+        {% include "search/include/result_item.html" %}
+    {% endfor %}
+</div>

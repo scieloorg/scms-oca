@@ -25,3 +25,16 @@ def search_item_view(request):
         return JsonResponse({"error": error}, status=status_code)
 
     return JsonResponse(results)
+
+
+@require_GET
+def search_as_you_type_view(request):
+    q = request.GET.get("q", "")
+    data_source_name = request.GET.get("data_source", "world")
+    field_name = request.GET.get("field_name", "journal")
+
+    try:
+        results = controller.search_as_you_type(data_source_name, q, field_name)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500) # TODO: Handle different error codes
+    return JsonResponse(results, safe=False)
