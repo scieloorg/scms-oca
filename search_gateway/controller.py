@@ -1,83 +1,113 @@
-from . import data_sources, data_sources_with_settings
+from . import data_sources_with_settings
+from . import data_sources
 from . import parser as response_parser
 from . import query as query_builder
 from .client import get_es_client
-
-FILTERS_CACHE = {}
+from .services import FILTERS_CACHE
 
 
 def get_mapped_filters(filters, field_settings):
     """
-    Function to map the filters to the real field names.
+    Map form filter names to Elasticsearch field names.
+    
     Args:
-        filters: The filters to apply to the search.
-        field_settings: The field settings to use to map the filters.
+        filters: Dict of filters with form field names.
+        field_settings: Field settings from data source configuration.
+    
     Returns:
-        A dictionary containing the mapped filters.
+        Dict with Elasticsearch field names as keys.
     """
-
-    if filters:
-        mapped_filters = {}
-        for key, value in filters.items():
-            if key in field_settings:
-                real_field_name = field_settings[key].get("index_field_name")
-                mapped_filters[real_field_name] = value
-        return mapped_filters
-    return None
+    if not filters:
+        return None
+    
+    mapped_filters = {}
+    for key, value in filters.items():
+        if key in field_settings:
+            real_field_name = field_settings[key].get("index_field_name")
+            mapped_filters[real_field_name] = value
+    return mapped_filters
 
 
 def search_documents(
-    data_source_name, query_text=None, filters=None, page=1, page_size=10, source_fields=None
+    data_source_name,
+    query_text=None,
+    filters=None,
+    page=1,
+    page_size=10,
+    source_fields=None,
 ):
     """
-    Function to search documents in the database.
-    Args:
-        data_source_name: The name of the data source to search in.
-        query_text: The text to search for.
-        filters: The filters to apply to the search.
-        page: The page number to return.
-        page_size: The number of results per page.
-        source_fields: The fields to return in the results.
-    Returns:
-        A dictionary containing the search results.
-    """
+    Search documents in Elasticsearch.
     
+    Args:
+        data_source_name: Name of the data source.
+        query_text: Text to search for.
+        filters: Dict of filters to apply.
+        page: Page number (1-based).
+        page_size: Number of results per page.
+        source_fields: Fields to include in results.
+    
+    Returns:
+        Dict with 'search_results' and 'total_results'.
+    """
     es = get_es_client()
     data_source = data_sources_with_settings.get_data_source(data_source_name)
     field_settings = data_sources_with_settings.get_field_settings(data_source_name)
     mapped_filters = get_mapped_filters(filters, field_settings)
+
+    fields = source_fields if source_fields is not None else data_sources_with_settings.get_display_fields(data_source_name)
 
     body = query_builder.build_document_search_body(
         query_text=query_text,
         filters=mapped_filters,
         page=page,
         page_size=page_size,
-        source_fields=source_fields,
+        source_fields=fields,
+        data_source_name=data_source_name,
     )
-    print(body)
+    
     res = es.search(index=data_source.get("index_name"), body=body)
-    parsed_results = response_parser.parse_document_search_response(res)
-    return parsed_results
+    return response_parser.parse_document_search_response(res)
 
 
 def search_as_you_type(data_source_name, query_text, field_name):
+    """
+    Perform search-as-you-type query for autocomplete.
+    
+    Args:
+        data_source_name: Name of the data source.
+        query_text: Text to search for.
+        field_name: Field to search in.
+    
+    Returns:
+        List of matching items.
+    """
     es = get_es_client()
     data_source = data_sources_with_settings.get_data_source(data_source_name)
     fl_name = data_sources_with_settings.get_index_field_name_from_data_source(data_source_name, field_name)
     size = data_sources_with_settings.get_size_by_field_name(data_source_name, field_name)
+    
     body = query_builder.build_search_as_you_type_body(
         field_name=fl_name,
         query=query_text,
         agg_size=size,
     )
+    
     res = es.search(index=data_source.get("index_name"), body=body)
-    parsed_results = response_parser.parse_search_item_response(res)
-    return parsed_results
+    return response_parser.parse_search_item_response(res)
 
 
 def get_search_item_results(q, data_source_name, field_name):
     """
-    Orchestrates the search-as-you-type functionality.
+    Get search-as-you-type results for a field.
+    
+    Args:
+        q: Query text.
+        data_source_name: Name of the data source.
+        field_name: Field to search in.
+    
+    Returns:
+        Tuple of (results_dict, error_message).
     """
     es = get_es_client()
     if not es:
@@ -110,7 +140,14 @@ def get_search_item_results(q, data_source_name, field_name):
 
 def get_filters_data(data_source_name, exclude_fields=None):
     """
-    Orchestrates the retrieval of filter options.
+    Get available filter options from Elasticsearch.
+    
+    Args:
+        data_source_name: Name of the data source.
+        exclude_fields: List of fields to exclude.
+    
+    Returns:
+        Tuple of (filters_dict, error_message).
     """
     es = get_es_client()
     if not es:
