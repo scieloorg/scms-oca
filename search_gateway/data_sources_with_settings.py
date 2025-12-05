@@ -261,29 +261,35 @@ DATA_SOURCES = {
 
 
 def get_data_source(data_source_name):
+    """Get the full data source configuration."""
     return DATA_SOURCES.get(data_source_name.lower(), {})
 
 
 def get_index_name_from_data_source(data_source):
+    """Get the Elasticsearch index name for a data source."""
     return DATA_SOURCES.get(data_source, {}).get("index_name")
 
 
 def get_index_field_name_from_data_source(data_source, field_name):
+    """Get the Elasticsearch field name for a form field."""
     field_settings = get_field_settings(data_source)
     if field_name in field_settings:
         return field_settings[field_name].get("index_field_name")
-
     return field_name
 
 
 def get_field_settings(data_source):
+    """Get the field settings for a data source."""
     return DATA_SOURCES.get(data_source, {}).get("field_settings", {})
 
 
+def get_display_fields(data_source):
+    """Get the display fields for a data source."""
+    return DATA_SOURCES.get(data_source, {}).get("display_fields", [])
+
+
 def get_query_operator_fields(data_source):
-    """
-    Get the fields that support query operators for a given data source.
-    """
+    """Get the fields that support query operators for a given data source."""
     supported_query_fields = {}
     ds_field_settings = get_field_settings(data_source)
 
@@ -298,6 +304,7 @@ def get_query_operator_fields(data_source):
 
 
 def field_supports_search_as_you_type(data_source, field_name):
+    """Check if a field supports search-as-you-type functionality."""
     field_settings = get_field_settings(data_source)
     if field_name in field_settings:
         return (
@@ -305,11 +312,11 @@ def field_supports_search_as_you_type(data_source, field_name):
             .get("settings", {})
             .get("support_search_as_you_type", False)
         )
-
     return False
 
 
 def get_size_by_field_name(data_source, field_name):
+    """Get the aggregation size for a field."""
     field_settings = get_field_settings(data_source)
     if field_name in field_settings:
         return field_settings[field_name].get("filter", {}).get("size", 20)
@@ -317,12 +324,15 @@ def get_size_by_field_name(data_source, field_name):
 
 
 def get_label_by_field_name(data_source, field_name):
+    """Get the display label for a field."""
     field_settings = get_field_settings(data_source)
     if field_name in field_settings:
         return field_settings[field_name].get("settings", {}).get("label")
     return field_name
 
+
 def field_allows_multiple_selection(data_source, field_name):
+    """Check if a field allows multiple selection."""
     field_settings = get_field_settings(data_source)
     if field_name in field_settings:
         return (
