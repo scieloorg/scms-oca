@@ -7,8 +7,6 @@ import os
 from collections import OrderedDict
 
 import pysolr
-from article.choices import LICENSE
-from core.utils import utils
 from django.conf import settings
 from django.http import Http404, HttpResponse, HttpResponseNotAllowed, JsonResponse
 from django.shortcuts import redirect, render
@@ -17,9 +15,13 @@ from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_GET
+
+from article.choices import LICENSE
+from core.utils import utils
 from indicator import indicator, indicatorOA
 from indicator.models import Indicator, IndicatorData, IndicatorFile
 from search_gateway.controller import get_filters_data
+from search_gateway.parser import extract_selected_filters
 
 from . import choices, tools
 from .models import SearchPage
@@ -595,14 +597,7 @@ def search_view_list(request):
             "cited_by_count",
         ],
     )
-    selected_filters = {}
-    for filter_key in filters.keys():
-        values = request.GET.getlist(filter_key)
-        if values:
-            cleaned_values = [v for v in values if v]
-            if cleaned_values:
-                selected_filters[filter_key] = cleaned_values
-
+    selected_filters = extract_selected_filters(request, filters)
     results_data = SearchPage.get_results_data(
         request,
         "world",

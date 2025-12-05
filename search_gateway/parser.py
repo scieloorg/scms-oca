@@ -39,3 +39,19 @@ def _transform_document_search_results(search_results):
             }
         )
     return transformed_hits
+
+
+def extract_selected_filters(request, available_filters):
+    """
+    Extracts filter values from the request GET parameters based on available filter keys.
+    """
+    selected_filters = {}
+    if not available_filters:
+        return selected_filters
+    for filter_key in available_filters.keys():
+        values = request.GET.getlist(filter_key)
+        if values:
+            cleaned_values = [v for v in values if v]
+            if cleaned_values:
+                selected_filters[filter_key] = cleaned_values
+    return selected_filters
