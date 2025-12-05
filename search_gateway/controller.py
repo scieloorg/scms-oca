@@ -3,8 +3,8 @@ from . import data_sources
 from . import parser as response_parser
 from . import query as query_builder
 from .client import get_es_client
-from .services import FILTERS_CACHE
 
+FILTERS_CACHE = {}
 
 def get_mapped_filters(filters, field_settings):
     """
