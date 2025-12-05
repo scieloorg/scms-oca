@@ -1,21 +1,40 @@
-from search_gateway.data_sources import get_index_field_name_from_data_source
-
 
 def query_filters(filters):
-    if filters:
-        filters_clauses = []
-        for f_field, f_value in filters.items():
-            if isinstance(f_value, list):
-                f_field = get_index_field_name_from_data_source("world", f_field)
-                filters_clauses.append({"terms": {f_field: f_value}})
-            else:
-                filters_clauses.append({"term": {f_field: f_value}})
-        return filters_clauses
+    """
+    Build filter clauses for Elasticsearch query.
+    
+    Note: Filters should already have Elasticsearch field names as keys
+    (i.e., already mapped from form field names).
+    
+    Args:
+        filters: Dict of filters with Elasticsearch field names as keys.
+    
+    Returns:
+        List of filter clauses for the bool query.
+    """
+    if not filters:
+        return []
+    
+    filters_clauses = []
+    for f_field, f_value in filters.items():
+        if isinstance(f_value, list):
+            filters_clauses.append({"terms": {f_field: f_value}})
+        else:
+            filters_clauses.append({"term": {f_field: f_value}})
+    return filters_clauses
 
 
 def build_search_as_you_type_body(field_name, query, agg_size=20):
     """
     Builds the body for a search-as-you-type query.
+    
+    Args:
+        field_name: The Elasticsearch field name to search in.
+        query: The search query text.
+        agg_size: Maximum number of aggregation results.
+    
+    Returns:
+        Elasticsearch query body dict.
     """
     return {
         "size": 0,
@@ -41,6 +60,14 @@ def build_search_as_you_type_body(field_name, query, agg_size=20):
 def build_term_search_body(field_name, query, aggregation_size=20):
     """
     Builds the body for a term-based search query.
+    
+    Args:
+        field_name: The Elasticsearch field name to search in.
+        query: The search query text.
+        aggregation_size: Maximum number of aggregation results.
+    
+    Returns:
+        Elasticsearch query body dict.
     """
     fn_cleaned = field_name.replace(".keyword", "")
 
@@ -61,27 +88,48 @@ def build_term_search_body(field_name, query, aggregation_size=20):
 def build_filters_aggs(field_settings, exclude_fields=None):
     """
     Builds the aggregations for retrieving filter options.
+    
+    Args:
+        field_settings: Dict of field settings from data source configuration.
+        exclude_fields: List of field names to exclude from aggregations.
+    
+    Returns:
+        Dict of aggregation definitions.
     """
+    exclude_fields = exclude_fields or []
     aggs = {}
+    
     for form_field_name, field_info in field_settings.items():
         if form_field_name in exclude_fields:
             continue
         
+        # Skip fields without filter configuration
+        if "filter" not in field_info:
+            continue
+        
         fl_name = field_info.get("index_field_name")
         fl_size = field_info.get("filter", {}).get("size", 1)
-        fl_order = field_info.get("order", {}).get("order")
-        fl_type = field_info.get("field_type")
-
+        fl_order = field_info.get("filter", {}).get("order")
 
         terms = {"field": fl_name, "size": fl_size}
         if fl_order:
             terms["order"] = fl_order
 
         aggs[form_field_name] = {"terms": terms}
+    
     return aggs
 
 
 def build_search_text_body(query_text):
+    """
+    Builds a simple text search query body.
+    
+    Args:
+        query_text: The search query text.
+    
+    Returns:
+        Elasticsearch query body dict.
+    """
     return {
         "query": {
             "simple_query_string": {
@@ -91,11 +139,32 @@ def build_search_text_body(query_text):
         }
     }
 
+
 def build_document_search_body(
-    query_text, filters, page=1, page_size=10, sort_field=None, sort_order="asc", source_fields=None
+    query_text=None,
+    filters=None,
+    page=1,
+    page_size=10,
+    sort_field=None,
+    sort_order="asc",
+    source_fields=None,
+    data_source_name=None,
 ):
     """
     Builds the body for a document search query with text and filters.
+    
+    Args:
+        query_text: Text to search for.
+        filters: Dict of filters (should already be mapped to ES field names).
+        page: Page number (1-based).
+        page_size: Number of results per page.
+        sort_field: Field to sort by.
+        sort_order: Sort order ('asc' or 'desc').
+        source_fields: List of fields to include in results.
+        data_source_name: Name of the data source (for future use).
+    
+    Returns:
+        Elasticsearch query body dict.
     """
     bool_query = {"must": []}
 
@@ -105,7 +174,7 @@ def build_document_search_body(
                 "simple_query_string": {
                     "query": query_text,
                     "default_operator": "AND",
-                    "fields": ["title"] # TODO: Definir os fields para a busca
+                    "fields": ["title"],  # TODO: Definir os fields para a busca
                 }
             }
         )
