@@ -1,5 +1,5 @@
 from search_gateway.client import get_es_client
-from search_gateway import data_sources
+from search_gateway import data_sources_with_settings
 
 from . import query as indicator_query
 from . import parser as indicator_parser
@@ -14,16 +14,15 @@ def get_journal_metrics_data(form_filters):
     if not es:
         return None, "Service unavailable"
 
-    data_source_name = "journal_metrics"
-    data_source = data_sources.DATA_SOURCES[data_source_name]
+    data_source = "journal_metrics"
+    data_source_settings = data_sources_with_settings.get_field_settings(data_source)
 
     year = form_filters.pop("year", None)
     ranking_metric = form_filters.pop("ranking_metric", "cwts_snip")
     limit = form_filters.pop("limit", 500)
     cleaned_filters = utils.clean_form_filters(form_filters)
 
-    field_settings = data_source.get("field_settings")
-    query = indicator_query.build_query(cleaned_filters, field_settings, data_source_name)
+    query = indicator_query.build_query(cleaned_filters, data_source_settings, data_source)
     jm_query = indicator_query.build_journal_metrics_query(year, query)
 
     body = indicator_query.build_journal_metrics_body(
@@ -34,7 +33,7 @@ def get_journal_metrics_data(form_filters):
     )
 
     try:
-        res = es.search(index=data_source.get("index_name"), body=body)
+        res = es.search(index=data_source_settings.get("index_name"), body=body)
         ranking_data = indicator_parser.parse_journal_metrics_response(
             res, selected_year=year, ranking_metric=ranking_metric
         )
@@ -51,7 +50,7 @@ def get_indicator_data(data_source_name, filters):
     if not es:
         return None, "Service unavailable"
 
-    data_source = data_sources.DATA_SOURCES.get(data_source_name)
+    data_source = data_sources_with_settings.get_data_source(data_source_name)
     if not data_source:
         return None, "Invalid data_source"
 

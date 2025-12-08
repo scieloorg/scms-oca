@@ -66,8 +66,8 @@
     <label class="form-label" for="is_scielo">Is SciELO</label>
     <select id="is_scielo" class="form-control" name="is_scielo" aria-label="Is SciELO">
         <option value="">Select an option</option>
-        <option value="true" {% if applied_filters.is_scielo == "true" %}selected{% endif %}>Yes</option>
-        <option value="false" {% if applied_filters.is_scielo == "false" %}selected{% endif %}>No</option>
+        <option value="Yes" {% if applied_filters.is_scielo == "Yes" %}selected{% endif %}>Yes</option>
+        <option value="No" {% if applied_filters.is_scielo == "No" %}selected{% endif %}>No</option>
     </select>
 </div>
 
@@ -157,6 +157,7 @@
         <option value="200" {% if applied_filters.limit == "200" %}selected{% endif %}>200</option>
         <option value="500" {% if applied_filters.limit == "500" or not applied_filters.limit %}selected{% endif %}>500</option>
         <option value="1000" {% if applied_filters.limit == "1000" %}selected{% endif %}>1000</option>
+        <option value="1000" {% if applied_filters.limit == "5000" %}selected{% endif %}>1000</option>
     </select>
 </div>
 
@@ -246,7 +247,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                     dataType: 'json',
                     delay: 300,
                     data: params => ({ q: params.term }),
-                    processResults: data => data,
+                    processResults: data => {
+                        return {
+                            results: data.results.map(item => ({
+                                id: item.key,
+                                text: item.key
+                            }))
+                        };
+                    }
                 },
                 minimumInputLength: 2,
                 placeholder: 'Start typing to search...',

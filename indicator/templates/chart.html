@@ -10,17 +10,19 @@
         </div>
     </div>
 
-    <!-- Citations Graph -->
-    <div class="card mb-2 p-3 d-none shadow-sm" id="citations-chart-div" style="height:75vh;">
-        <div class="mx-auto" style="width:100%; height:100%;">
-            <div id="citations-chart" style="width:100%; height:100%;"></div>
+    {% if data_source != "social" %}
+        <!-- Citations Graph -->
+        <div class="card mb-2 p-3 d-none shadow-sm" id="citations-chart-div" style="height:75vh;">
+            <div class="mx-auto" style="width:100%; height:100%;">
+                <div id="citations-chart" style="width:100%; height:100%;"></div>
+            </div>
         </div>
-    </div>
 
-    <!-- Citations per Document Graph -->
-    <div class="card mb-2 p-3 d-none shadow-sm" id="citations-per-doc-chart-div" style="height:75vh;">
-        <div class="mx-auto" style="width:100%; height:100%;">
-            <div id="citations-per-doc-chart" style="width:100%; height:100%;"></div>
+        <!-- Citations per Document Graph -->
+        <div class="card mb-2 p-3 d-none shadow-sm" id="citations-per-doc-chart-div" style="height:75vh;">
+            <div class="mx-auto" style="width:100%; height:100%;">
+                <div id="citations-per-doc-chart" style="width:100%; height:100%;"></div>
+            </div>
         </div>
-    </div>
+    {% endif %}
 </div>

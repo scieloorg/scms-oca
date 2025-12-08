@@ -9,7 +9,7 @@ from wagtail.contrib.modeladmin.views import CreateView, EditView
 
 from core import tasks
 from core_settings.models import Moderation
-from search_gateway import data_sources
+from search_gateway import data_sources_with_settings
 from search_gateway.controller import get_filters_data
 
 from .search import controller, utils
@@ -35,10 +35,9 @@ def data_view(request):
 
 
 def indicator_view(request, data_source_name):
-    if data_source_name not in data_sources.DATA_SOURCES or data_source_name == "journal_metrics":
+    data_source = data_sources_with_settings.get_data_source(data_source_name)
+    if not data_source:
         return JsonResponse({"error": "Invalid data_source"}, status=404)
-
-    data_source = data_sources.DATA_SOURCES[data_source_name]
 
     cleaned_filters = utils.clean_form_filters(request.GET.dict())
     context = {
@@ -52,7 +51,7 @@ def indicator_view(request, data_source_name):
 
 def journal_metrics_view(request):
     data_source_name = "journal_metrics"
-    data_source = data_sources.DATA_SOURCES[data_source_name]
+    data_source = data_sources_with_settings.get_data_source(data_source_name)
 
     cleaned_get_filters = utils.clean_form_filters(request.GET.dict())
     context = {

@@ -1,4 +1,4 @@
-from search_gateway import data_sources
+from search_gateway import data_sources_with_settings
 
 from . import utils
 
@@ -24,6 +24,7 @@ def build_journal_metrics_query(selected_year, query):
 def build_journal_metrics_body(selected_year=None, ranking_metric=None, size=500, query=None):
     if not selected_year:
         selected_year = "2024"
+
     if not ranking_metric:
         ranking_metric = "cwts_snip"
 
@@ -46,52 +47,60 @@ def build_journal_metrics_body(selected_year=None, ranking_metric=None, size=500
 
 def build_query(filters, field_settings, data_source):
     translated_filters = utils.translate_fields(filters, field_settings)
+
     must = []
 
     if data_source == "brazil":
-        name = field_settings.get("country", {}).get("index_field_name")
-        must.append({"term": {name: "BR"}})
+        fl_name = field_settings.get("country", {}).get("index_field_name")
+        add_must_term(fl_name, "BR", must)
+
     if data_source == "social":
-        name = field_settings.get("action", {}).get("index_field_name")
-        must.append({"exists": {"field": name}})
+        fl_name = field_settings.get("action", {}).get("index_field_name")
+        add_must_exists(fl_name,  must)
 
-    query_operator_fields = data_sources.get_query_operator_fields(data_source)
+    query_operator_fields = data_sources_with_settings.get_query_operator_fields(data_source)
+    index_field_name_to_filter_name_map = data_sources_with_settings.get_index_field_name_to_filter_name_map(data_source)
 
-    reverse_field_map = {
-        setting.get("index_field_name"): key
-        for key, setting in field_settings.items()
-        if setting.get("index_field_name")
-    }
+    for index_field_name, value in translated_filters.items():
+        filter_name = index_field_name_to_filter_name_map.get(index_field_name)
+        if not filter_name:
+            continue
 
-    for field, value in translated_filters.items():
         if isinstance(value, list):
-            original_field_name = reverse_field_map.get(field)
-
-            if original_field_name:
-                operator_key = f"{original_field_name}_operator"
-            else:
-                operator_key = f"{field.split('.')[0]}_operator"
-
-            use_and_operator = (
-                filters.get(operator_key) == "and"
-                and field in query_operator_fields.values()
-            )
-
-            normalized_values = sorted(list(set(str(item).strip() for item in value if item)))
-            if not normalized_values:
-                continue
-
-            if use_and_operator:
-                for single_value in normalized_values:
-                    must.append({"term": {field: single_value}})
-            else:
-                must.append({"terms": {field: normalized_values}})
+            add_must_list(filters, filter_name, index_field_name, query_operator_fields, value, must)
         else:
-            if value in (None, ""):
-                continue
-            must.append({"term": {field: value}})
+            add_must_term(index_field_name, value, must)
 
     return {"bool": {"must": must}} if must else {"match_all": {}}
+
+
+def add_must_list(filters, filter_name, qualified_index_field_name, query_operator_fields, values, must):
+    normalized_values = utils.standardize_values(values)
+    if not normalized_values:
+        return
+
+    operator_value = filters.get(f"{filter_name}_operator")
+    if operator_value == "and" and filter_name in query_operator_fields:
+        for value in values:
+            add_must_term(qualified_index_field_name, value, must)
+    else:
+        add_must_terms(qualified_index_field_name, values, must)
+
+
+def add_must_exists(name, must):
+    if name in (None, ""):
+        return
+    must.append({"exists": {"field": name}})
+
+
+def add_must_term(name, value, must):
+    if value in (None, ""):
+        return
+    must.append({"term": {name: value}})
+
+
+def add_must_terms(name, values, must):
+    must.append({"terms": {name: values}})
 
 
 def build_indicator_aggs(field_settings, breakdown_variable, data_source_name):
@@ -100,21 +109,32 @@ def build_indicator_aggs(field_settings, breakdown_variable, data_source_name):
 
     aggs = {
         "per_year": {
-            "terms": {"field": year_var, "order": {"_key": "asc"}, "size": 1000},
-            "aggs": {
-                "total_citations": {"sum": {"field": cited_by_count_field}}
-            }
+            "terms": {
+                "field": year_var,
+                "order": {"_key": "asc"},
+                "size": 1000
+            },
+            "aggs": {},
         }
     }
 
+    if cited_by_count_field:
+        aggs["per_year"]["aggs"] = {
+            "total_citations": {"sum": {"field": cited_by_count_field}}
+        }
+
     if breakdown_variable:
-        breakdown_field = field_settings.get(breakdown_variable, {}).get("index_field_name")
-        if breakdown_field:
+        breakdown_field_name = field_settings.get(breakdown_variable, {}).get("index_field_name")
+        if breakdown_field_name:
             aggs["per_year"]["aggs"]["breakdown"] = {
-                "terms": {"field": breakdown_field, "order": {"_key": "asc"}, "size": 2500},
-                "aggs": {
-                    "total_citations": {"sum": {"field": cited_by_count_field}}
-                }
+                "terms": {
+                    "field": breakdown_field_name,
+                    "order": {"_key": "asc"},
+                    "size": 2500
+                },
             }
+
+            if cited_by_count_field:
+                aggs["per_year"]["aggs"]["breakdown"]["aggs"] = {"total_citations": {"sum": {"field": cited_by_count_field}}}
 
     return aggs

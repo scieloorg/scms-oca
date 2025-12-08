@@ -5,7 +5,6 @@
   <select id="breakdown_variable" name="breakdown_variable" class="form-control">
     <option value="">Select a variable</option>
     <option value="collection">Collection</option>
-    <option value="document_type">Document Type</option>
     <option value="document_language">Document Language</option>
     <option value="access_type">Access Type</option>
   </select>
@@ -212,7 +211,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                         dataType: 'json',
                         delay: 300,
                         data: params => ({ q: params.term }),
-                        processResults: data => data,
+                        processResults: data => {
+                            return {
+                                results: data.results.map(item => ({
+                                    id: item.key,
+                                    text: item.key
+                                }))
+                            };
+                        }
                     },
                     minimumInputLength: 2,
                     placeholder: 'Start typing to search...',

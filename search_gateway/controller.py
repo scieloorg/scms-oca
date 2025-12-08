@@ -1,5 +1,4 @@
 from . import data_sources_with_settings
-from . import data_sources
 from . import parser as response_parser
 from . import query as query_builder
 from .client import get_es_client
@@ -92,14 +91,14 @@ def search_as_you_type(data_source_name, query_text, field_name):
         query=query_text,
         agg_size=size,
     )
-    
+
     res = es.search(index=data_source.get("index_name"), body=body)
     return response_parser.parse_search_item_response(res)
 
 
-def get_search_item_results(q, data_source_name, field_name):
+def search_item(q, data_source_name, field_name):
     """
-    Get search-as-you-type results for a field.
+    Search
     
     Args:
         q: Query text.
@@ -113,12 +112,12 @@ def get_search_item_results(q, data_source_name, field_name):
     if not es:
         return None, "Service unavailable"
 
-    data_source = data_sources.DATA_SOURCES.get(data_source_name)
+    data_source = data_sources_with_settings.get_data_source(data_source_name)
     if not data_source:
         return None, "Invalid data_source"
 
     field_settings = data_source.get("field_settings", {})
-    fl_name = data_sources.get_index_field_name_from_data_source(
+    fl_name = data_sources_with_settings.get_index_field_name_from_data_source(
         data_source_name, field_name
     )
     supports_search_as_you_type = field_settings.get(field_name, {}).get(
@@ -126,7 +125,7 @@ def get_search_item_results(q, data_source_name, field_name):
     ).get("search_as_you_type", False)
 
     if supports_search_as_you_type:
-        body = query_builder.build_search_as_you_type_body(fl_name, q)
+        body = query_builder.build_search_as_you_type_body(fl_name, q, add_keyword_term=True)
     else:
         body = query_builder.build_term_search_body(fl_name, q)
 
@@ -153,14 +152,14 @@ def get_filters_data(data_source_name, exclude_fields=None):
     if not es:
         return None, "Service unavailable"
 
-    index_name = data_sources.get_index_name_from_data_source(data_source_name)
+    index_name = data_sources_with_settings.get_index_name_from_data_source(data_source_name)
     if not index_name:
         return None, "Invalid index name"
         
     if index_name in FILTERS_CACHE:
         return FILTERS_CACHE[index_name], None
 
-    field_settings = data_sources.get_field_settings(data_source_name)
+    field_settings = data_sources_with_settings.get_field_settings(data_source_name)
     if not field_settings:
         return None, "Field settings not found"
 
