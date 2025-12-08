@@ -112,6 +112,38 @@ DATA_SOURCES = {
                     "support_query_operator": False,
                 },
             },
+            "document_publication_year_start": {
+                "index_field_name": "publication_year",
+                "filter": {
+                    "transform": {
+                        "type": "year_range",
+                        "sources": [
+                            "document_publication_year_start",
+                            "document_publication_year_end",
+                        ]
+                    },
+                    "size": 500,
+                    "order": {
+                        "_key": "asc"
+                    },
+                }
+            },
+            "document_publication_year_end": {
+                "index_field_name": "publication_year",
+                "filter": {
+                    "transform": {
+                        "type": "year_range",
+                        "sources": [
+                            "document_publication_year_start",
+                            "document_publication_year_end",
+                        ]
+                    },
+                    "size": 500,
+                    "order": {
+                        "_key": "asc"
+                    },
+                }
+            },
             "document_publication_year_range": {
                 "transform": "year_range",
                 "source_fields": [
