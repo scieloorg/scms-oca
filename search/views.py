@@ -8,16 +8,20 @@ from collections import OrderedDict
 
 import pysolr
 from django.conf import settings
-from django.http import Http404, HttpResponse, JsonResponse, HttpResponseNotAllowed
+from django.http import Http404, HttpResponse, HttpResponseNotAllowed, JsonResponse
 from django.shortcuts import redirect, render
 from django.template import loader
+from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils.translation import gettext as _
+from django.views.decorators.http import require_GET
 
 from article.choices import LICENSE
 from core.utils import utils
 from indicator import indicator, indicatorOA
 from indicator.models import Indicator, IndicatorData, IndicatorFile
+from search_gateway.controller import get_filters_data
+from search_gateway.parser import extract_selected_filters
 
 from . import choices, tools
 from .models import SearchPage
@@ -582,4 +586,29 @@ def get_search_results_json(request):
     except Exception as e:
         logging.exception("Error in get_search_results_json")
         return JsonResponse({"error": str(e)}, status=500)
-    
+
+
+@require_GET
+def search_view_list(request):
+    filters, erros = get_filters_data(
+        "world",
+        exclude_fields=[
+            "source_index_scielo",
+            "cited_by_count",
+        ],
+    )
+    selected_filters = extract_selected_filters(request, filters)
+    results_data = SearchPage.get_results_data(
+        request,
+        "world",
+        request.GET.get("search", ""),
+        selected_filters,
+    )
+    results_html = render_to_string("search/include/results_list.html", {"results_data": results_data}, request=request)
+
+    return JsonResponse(
+        {
+            "search_results_html": results_html,
+            "search_results": results_data,
+        }
+    )
