@@ -85,6 +85,9 @@ DATA_SOURCES = {
             "open_access": {
                 "index_field_name": "open_access.is_oa",
                 "filter": {
+                    "transform": {
+                      "type": "boolean"
+                    },
                     "size": 3,
                     "order": {"_key": "asc"},
                 },
