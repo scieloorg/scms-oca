@@ -211,7 +211,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                         dataType: 'json',
                         delay: 300,
                         data: params => ({ q: params.term }),
-                        processResults: data => data,
+                        processResults: data => {
+                            return {
+                                results: data.results.map(item => ({
+                                    id: item.key,
+                                    text: item.key
+                                }))
+                            };
+                        }
                     },
                     minimumInputLength: 2,
                     placeholder: 'Start typing to search...',
