@@ -1,5 +1,5 @@
 from search_gateway.client import get_es_client
-from search_gateway import data_sources
+from search_gateway import data_sources_with_settings
 
 from . import query as indicator_query
 from . import parser as indicator_parser
@@ -15,7 +15,7 @@ def get_journal_metrics_data(form_filters):
         return None, "Service unavailable"
 
     data_source = "journal_metrics"
-    data_source_settings = data_sources.get_field_settings(data_source)
+    data_source_settings = data_sources_with_settings.get_field_settings(data_source)
 
     year = form_filters.pop("year", None)
     ranking_metric = form_filters.pop("ranking_metric", "cwts_snip")
@@ -50,7 +50,7 @@ def get_indicator_data(data_source_name, filters):
     if not es:
         return None, "Service unavailable"
 
-    data_source = data_sources.DATA_SOURCES.get(data_source_name)
+    data_source = data_sources_with_settings.get_data_source(data_source_name)
     if not data_source:
         return None, "Invalid data_source"
 
