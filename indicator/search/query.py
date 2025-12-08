@@ -1,4 +1,4 @@
-from search_gateway import data_sources
+from search_gateway import data_sources_with_settings
 
 from . import utils
 

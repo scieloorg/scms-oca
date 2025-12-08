@@ -1,6 +1,3 @@
-from search_gateway.data_sources import  get_aggregation_qualified_field_name
-
-
 def clean_form_filters(filters_dict):
     """
     Removes empty filters and the CSRF token from a dictionary of form filters.
@@ -99,12 +96,7 @@ def translate_fields(filters, field_settings):
     # Third, handle field type
     for fl_name, data in translated.items():
         index_field_name = field_settings.get(fl_name, {}).get("index_field_name")
-        fl_aggr_type = field_settings.get(fl_name, {}).get("filter", {}).get("aggregation_type", "keyword")
-        aggegation_qualified_field_name = get_aggregation_qualified_field_name(
-            index_field_name,
-            fl_aggr_type,
-        )
-        searchable[aggegation_qualified_field_name] = data.get("value")
+        searchable[index_field_name] = data.get("value")
 
     return searchable
 
