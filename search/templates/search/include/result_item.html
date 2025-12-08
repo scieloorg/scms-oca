@@ -8,18 +8,13 @@
 <div class="card mb-3 result-item">
     <div class="card-body">
         <h5 class="card-title">
-        {% for location in doc.source.locations %}
-            {% if forloop.first %}
-                <a href="{{ location.landing_page_url }}" target="_blank" class="text-decoration-none">
-                    {{ doc.source.title }}
-                </a>
-            {% else %}
-                <span class="text-muted">|</span>
-                <a href="{{ location.landing_page_url }}" target="_blank" class="text-decoration-none">
-                    {{ doc.source.title }}
-                </a>
-            {% endif %}
-        {% endfor %}
+        {% if doc.source.locations %}
+            <a href="{{ doc.source.locations.0.landing_page_url }}" target="_blank" class="text-decoration-none">
+                {{ doc.source.title }}
+            </a>
+        {% else %}
+            <a href="{{pageurl}}" target="_blank" class="text-decoration-none">{{ doc.source.title }}</a>
+        {% endif %}
         </h5>
         {% if doc.source.authorships %}
             <p class="card-text">
