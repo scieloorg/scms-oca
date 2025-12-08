@@ -23,7 +23,7 @@ def query_filters(filters):
     return filters_clauses
 
 
-def build_search_as_you_type_body(field_name, query, agg_size=20):
+def build_search_as_you_type_body(field_name, query, agg_size=20, add_keyword_term=False):
     """
     Builds the body for a search-as-you-type query.
 
@@ -35,6 +35,11 @@ def build_search_as_you_type_body(field_name, query, agg_size=20):
     Returns:
         Elasticsearch query body dict.
     """
+    agg_field_name = str(field_name)
+
+    if add_keyword_term and not agg_field_name.endswith(".keyword"):
+        agg_field_name = f"{agg_field_name}.keyword"
+
     return {
         "size": 0,
         "query": {
@@ -50,7 +55,7 @@ def build_search_as_you_type_body(field_name, query, agg_size=20):
         },
         "aggs": {
             "unique_items": {
-                "terms": {"field": f"{field_name}", "size": agg_size}
+                "terms": {"field": agg_field_name, "size": agg_size}
             }
         },
     }

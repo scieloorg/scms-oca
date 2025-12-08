@@ -125,7 +125,7 @@ def search_item(q, data_source_name, field_name):
     ).get("search_as_you_type", False)
 
     if supports_search_as_you_type:
-        body = query_builder.build_search_as_you_type_body(fl_name, q)
+        body = query_builder.build_search_as_you_type_body(fl_name, q, add_keyword_term=True)
     else:
         body = query_builder.build_term_search_body(fl_name, q)
 
