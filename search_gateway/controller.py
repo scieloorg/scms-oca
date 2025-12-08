@@ -96,9 +96,9 @@ def search_as_you_type(data_source_name, query_text, field_name):
     return response_parser.parse_search_item_response(res)
 
 
-def get_search_item_results(q, data_source_name, field_name):
+def search_item(q, data_source_name, field_name):
     """
-    Get search-as-you-type results for a field.
+    Search
     
     Args:
         q: Query text.
