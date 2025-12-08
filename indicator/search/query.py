@@ -51,25 +51,25 @@ def build_query(filters, field_settings, data_source):
     must = []
 
     if data_source == "brazil":
-        add_must_term_to_brazil_data_source(field_settings, must)
+        fl_name = field_settings.get("country", {}).get("index_field_name")
+        add_must_term(fl_name, "BR", must)
 
     if data_source == "social":
-        add_must_term_to_social_data_source(field_settings, must)
+        fl_name = field_settings.get("action", {}).get("index_field_name")
+        add_must_exists(fl_name,  must)
 
-    query_operator_fields = data_sources.get_query_operator_fields(data_source)
-    index_field_name_to_filter_name_map = data_sources.get_index_field_name_to_filter_name_map(data_source)
+    query_operator_fields = data_sources_with_settings.get_query_operator_fields(data_source)
+    index_field_name_to_filter_name_map = data_sources_with_settings.get_index_field_name_to_filter_name_map(data_source)
 
-    for qualified_index_field_name, value in translated_filters.items():
-        index_field_name = data_sources.get_index_field_name_from_qualified_name(qualified_index_field_name)
-
+    for index_field_name, value in translated_filters.items():
         filter_name = index_field_name_to_filter_name_map.get(index_field_name)
         if not filter_name:
             continue
 
         if isinstance(value, list):
-            add_must_list(filters, filter_name, qualified_index_field_name, query_operator_fields, value, must)
+            add_must_list(filters, filter_name, index_field_name, query_operator_fields, value, must)
         else:
-            add_must_term(qualified_index_field_name, value, must)
+            add_must_term(index_field_name, value, must)
 
     return {"bool": {"must": must}} if must else {"match_all": {}}
 
@@ -87,6 +87,12 @@ def add_must_list(filters, filter_name, qualified_index_field_name, query_operat
         add_must_terms(qualified_index_field_name, values, must)
 
 
+def add_must_exists(name, must):
+    if name in (None, ""):
+        return
+    must.append({"exists": {"field": name}})
+
+
 def add_must_term(name, value, must):
     if value in (None, ""):
         return
@@ -95,20 +101,6 @@ def add_must_term(name, value, must):
 
 def add_must_terms(name, values, must):
     must.append({"terms": {name: values}})
-
-
-def add_must_term_to_brazil_data_source(field_settings, must):
-    fl_name = field_settings.get("country", {}).get("index_field_name")
-    fl_aggr_type = field_settings.get("country", {}).get("filter", {}).get("aggregation_type", "keyword")
-    fl_qualified_name = data_sources.get_aggregation_qualified_field_name(fl_name, fl_aggr_type)
-    must.append({"term": {fl_qualified_name: "BR"}})
-
-
-def add_must_term_to_social_data_source(field_settings, must):
-    fl_name = field_settings.get("action", {}).get("index_field_name")
-    fl_aggr_type = field_settings.get("action", {}).get("filter", {}).get("aggregation_type", "keyword")
-    fl_qualified_name = data_sources.get_aggregation_qualified_field_name(fl_name, fl_aggr_type)
-    must.append({"exists": {"field": fl_qualified_name}})
 
 
 def build_indicator_aggs(field_settings, breakdown_variable, data_source_name):
@@ -133,17 +125,10 @@ def build_indicator_aggs(field_settings, breakdown_variable, data_source_name):
 
     if breakdown_variable:
         breakdown_field_name = field_settings.get(breakdown_variable, {}).get("index_field_name")
-        breakdown_aggregation_type = field_settings.get(breakdown_variable, {}).get("filter", {}).get("aggregation_type")
-
-        breakdown_variable_qualified_name = data_sources.get_aggregation_qualified_field_name(
-            breakdown_field_name,
-            breakdown_aggregation_type,
-        )
-
         if breakdown_field_name:
             aggs["per_year"]["aggs"]["breakdown"] = {
                 "terms": {
-                    "field": breakdown_variable_qualified_name,
+                    "field": breakdown_field_name,
                     "order": {"_key": "asc"},
                     "size": 2500
                 },
