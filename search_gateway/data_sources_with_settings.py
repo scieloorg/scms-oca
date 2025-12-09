@@ -67,6 +67,7 @@ DATA_SOURCES = {
                     "label": _("Document Language"),
                     "support_search_as_you_type": False,
                     "support_query_operator": False,
+                    "display_transform": "language",
                 },
             },
             "document_type": {
@@ -201,7 +202,7 @@ DATA_SOURCES = {
             "institution": {
                 "index_field_name": "authorships.institutions.display_name.keyword",
                 "filter": {
-                    "size": 1,
+                    "size": 5,
                     "order": {"_key": "asc"},
                 },
                 "settings": {
@@ -220,8 +221,9 @@ DATA_SOURCES = {
                 "settings": {
                     "class_filter": "select2",
                     "label": _("Country"),
-                    "support_search_as_you_type": True,
-                    "support_query_operator": True,
+                    "support_search_as_you_type": False,
+                    "support_query_operator": False,
+                    "display_transform": "country",
                 },
             },
             "region_world": {
@@ -280,7 +282,7 @@ DATA_SOURCES = {
             "issn": {
                 "index_field_name": "primary_location.source.issn.keyword",
                 "filter": {
-                    "size": 1,
+                    "size": 5,
                     "order": {"_key": "asc"},
                 },
                 "settings": {
@@ -1027,9 +1029,9 @@ DATA_SOURCES = {
 }
 
 
-def get_data_source(data_source_name):
+def get_data_source(data_source):
     """Get the full data source configuration."""
-    return DATA_SOURCES.get(data_source_name.lower(), {})
+    return DATA_SOURCES.get(data_source.lower(), {})
 
 
 def get_index_name_from_data_source(data_source):
@@ -1097,6 +1099,20 @@ def get_label_by_field_name(data_source, field_name):
         return field_settings[field_name].get("settings", {}).get("label")
     return field_name
 
+def get_display_transform_by_field_name(data_source, field_name):
+    """Get the display transform for a field."""
+    field_settings = get_field_settings(data_source)
+    if field_name in field_settings:
+        return field_settings[field_name].get("settings", {}).get("display_transform")
+    return None
+
+
+def get_settings_by_field_name(data_source, field_name):
+    """Get the display transform for a field."""
+    field_settings = get_field_settings(data_source)
+    if field_name in field_settings:
+        return field_settings[field_name].get("settings", {})
+    return None
 
 def field_allows_multiple_selection(data_source, field_name):
     """Check if a field allows multiple selection."""
