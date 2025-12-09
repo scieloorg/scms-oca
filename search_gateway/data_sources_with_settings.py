@@ -98,6 +98,7 @@ DATA_SOURCES = {
                     "support_search_as_you_type": False,
                     "support_query_operator": False,
                     "multiple_selection": False,
+                    "display_transform": "boolean",
                 },
             },
             "publication_year": {
@@ -1083,6 +1084,10 @@ def field_supports_search_as_you_type(data_source, field_name):
         )
     return False
 
+def get_data_by_field_name(data_source, field_name):
+    field_settings = get_field_settings(data_source)
+    if field_name in field_settings:
+        return field_settings[field_name]
 
 def get_size_by_field_name(data_source, field_name):
     """Get the aggregation size for a field."""
