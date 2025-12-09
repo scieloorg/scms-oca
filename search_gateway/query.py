@@ -107,10 +107,6 @@ def build_filters_aggs(field_settings, exclude_fields=None):
         if form_field_name in exclude_fields:
             continue
 
-        # Skip fields without filter configuration
-        if "filter" not in field_info:
-            continue
-
         fl_name = field_info.get("index_field_name")
         fl_size = field_info.get("filter", {}).get("size", 1)
         fl_order = field_info.get("filter", {}).get("order")
