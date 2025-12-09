@@ -93,7 +93,7 @@ def search_as_you_type(data_source_name, query_text, field_name):
     )
 
     res = es.search(index=data_source.get("index_name"), body=body)
-    return response_parser.parse_search_item_response(res)
+    return response_parser.parse_search_item_response(res, data_source_name, field_name)
 
 
 def search_item(q, data_source_name, field_name):
@@ -131,7 +131,7 @@ def search_item(q, data_source_name, field_name):
 
     try:
         res = es.search(index=data_source.get("index_name"), body=body)
-        parsed_results = response_parser.parse_search_item_response(res)
+        parsed_results = response_parser.parse_search_item_response(res, data_source_name, field_name)
         return {"results": parsed_results}, None
     except Exception:
         return None, "Error executing or parsing search"
@@ -168,7 +168,7 @@ def get_filters_data(data_source_name, exclude_fields=None):
 
     try:
         res = es.search(index=index_name, body=body)
-        filters = response_parser.parse_filters_response(res)
+        filters = response_parser.parse_filters_response(res, data_source_name)
         FILTERS_CACHE[index_name] = filters
         return filters, None
     except Exception:

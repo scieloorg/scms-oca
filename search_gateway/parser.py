@@ -1,19 +1,26 @@
 from django.utils.translation import gettext as _
 
-def parse_search_item_response(response):
-    """
-    Parses the response for a search-as-you-type query.
-    """
+from . import transforms
+
+
+def parse_search_item_response(response, data_source_name=None, field_name=None):
     buckets = response.get("aggregations", {}).get("unique_items", {}).get("buckets", [])
-    return [{"key": b["key"], "doc_count": b["doc_count"]} for b in buckets]
+    return [{
+        "key": b["key"],
+        "label": transforms.apply_transform(data_source_name, field_name, b["key"]),
+        "doc_count": b["doc_count"]
+    } for b in buckets]
 
 
-def parse_filters_response(response):
+def parse_filters_response(response, data_source_name=None):
     """
     Parses the response for filter aggregations.
     """
     return {
-        k: [b["key"] for b in v["buckets"]]
+        k: [{
+            "key": b["key"],
+            "label": transforms.apply_transform(data_source_name, k, b["key"])
+        } for b in v["buckets"]]
         for k, v in response.get("aggregations", {}).items()
     }
 
