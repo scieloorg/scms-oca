@@ -1,13 +1,13 @@
 {% load custom_filters %}
-{% load filters_label %}
 
 <h4 class="my-2">Filters</h4>
 
 <div id="filters-container">
     {% for key, options in filters.items %}
+        {% with metadata=filter_metadata|get_item:key %}
         <div class="form-group mb-3">
-        <label class="form-label" for="{{ key }}">{{ key|get_translation_data_source:data_source_name }}</label>
-            {% if key == 'document_publication_year_range' %}
+            <label class="form-label" for="{{ key }}">{{ metadata.label|default:key }}</label>
+            {% if metadata.class_filter == 'range' %}
                 {# Campo RANGE especial #}
                 {% include "search/include/filters/range.html" with key=key %}
             {% else %}
@@ -15,6 +15,7 @@
                 {% include "search/include/filters/select2.html" %}
             {% endif %}
         </div>
+        {% endwith %}
     {% endfor %}
 </div>
 

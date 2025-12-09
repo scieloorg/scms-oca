@@ -9,9 +9,8 @@
         class="form-control filter-select" 
         data-filter-key="{{ key }}"
         aria-label="{{ key|title }}">
-        {% if not autocomplete_fields|get_item:key %}
             {% for option in options %}
-                <option value="{{ option }}">{{ option }}</option>
+                <option value="{{ option.key }}">{{ option.label }}</option>
             {% endfor %}
-        {% endif %}
+
     </select>

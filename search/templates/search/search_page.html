@@ -1,6 +1,5 @@
 {% extends "search/search.html" %}
 {% load custom_filters %}
-{% load filters_label %}
 
 
 {% block search_sidebar %}
@@ -162,9 +161,10 @@
         try {
             // Inicializar Select2 para todos os filtros
             {% for key, options in filters.items %}
+            {% with metadata=filter_metadata|get_item:key %}
             const selectElement_{{ key }} = document.getElementById('{{ key }}');
             if (selectElement_{{ key }}) {
-                {% if autocomplete_fields|get_item:key %}
+                {% if metadata.support_search_as_you_type %}
                 // Select2 com AJAX
                 $(selectElement_{{ key }}).select2({
                     ajax: {
@@ -182,7 +182,7 @@
                             return {
                                 results: data.map(item => ({
                                     id: item.key,
-                                    text: item.key,
+                                    text: item.label || item.key,
                                 }))
                             };
                         }
@@ -212,6 +212,7 @@
                     applyFiltersAjax();
                 });
             }
+            {% endwith %}
             {% endfor %}
         } catch (error) {
             console.error('Error initializing Select2', error);
