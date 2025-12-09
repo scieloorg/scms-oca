@@ -8,7 +8,7 @@
 
 {% block search_content %}
     <div class="card mb-3 p-3 bg-white shadow-sm">
-        <form method="get" action="." id="search-form">
+        <form method="get" action="{{self}}" id="search-form">
             <div class="row g-2 align-items-end">
                 <div class="col-md-10">
                     <label for="search-input" class="form-label">
@@ -156,6 +156,17 @@
         function clearFilters() {
             $('select[multiple]').val(null).trigger('change');
             applyFiltersAjax();
+        }
+        
+        // Interceptar submit do formulário para usar AJAX com filtros
+        const searchForm = document.getElementById('search-form');
+        if (searchForm) {
+            searchForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const searchInput = document.getElementById('search-input');
+                currentSearchQuery = searchInput ? searchInput.value : '';
+                applyFiltersAjax();
+            });
         }
         
         try {
