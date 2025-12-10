@@ -29,7 +29,7 @@ class SearchPage(Page):
         service = SearchGatewayService(data_source_name=data_source_name)
         self.set_filters(context, service)
         self.set_filters_metadata(context, filters=context.get("filters", {}), service=service)
-        selected_filters = extract_selected_filters(request, context.get("filters", {}))
+        selected_filters = extract_selected_filters(request, context.get("filters", {}), data_source_name)
         results_data = self.get_results_data(
             request, 
             data_source_name, 
@@ -43,15 +43,16 @@ class SearchPage(Page):
         return context
 
     def get_filters(self, service, exclude_fields: Optional[List] = None):
+        return service.get_filters(exclude_fields=exclude_fields)
+
+    def set_filters(self, context, service, exclude_fields: Optional[List] = None):
         exclude_fields = exclude_fields or [
                 "source_index_scielo",
                 "cited_by_count",
                 "document_publication_year_start",
-                "document_publication_year_end"
+                "document_publication_year_end",
+                "document_publication_year_range"
             ]
-        return service.get_filters(exclude_fields=exclude_fields)
-
-    def set_filters(self, context, service, exclude_fields: Optional[List] = None):
         body = self.get_filters(service=service, exclude_fields=exclude_fields)
         context['filters'] = service.build_filters(body=body)
 
