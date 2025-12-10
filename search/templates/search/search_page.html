@@ -1,6 +1,5 @@
 {% extends "search/search.html" %}
 {% load custom_filters %}
-{% load filters_label %}
 
 
 {% block search_sidebar %}
@@ -9,7 +8,7 @@
 
 {% block search_content %}
     <div class="card mb-3 p-3 bg-white shadow-sm">
-        <form method="get" action="." id="search-form">
+        <form method="get" action="{{self}}" id="search-form">
             <div class="row g-2 align-items-end">
                 <div class="col-md-10">
                     <label for="search-input" class="form-label">
@@ -33,13 +32,11 @@
             </div>
         </form>
         
-        {% if search_query %}
-        <div class="mt-3 pt-2 border-top">
+        <div id="search-query-container" class="mt-3 pt-2 border-top" {% if not search_query %}style="display: none;"{% endif %}>
             <small class="text-muted">
-                <span class="badge bg-info">Busca: "{{ search_query }}"</span>
+                <span id="search-query-badge" class="badge bg-info">Busca: "{{ search_query }}"</span>
             </small>
         </div>
-        {% endif %}
     </div>
     {% include "search/include/results.html" %}
 {% endblock %}
@@ -63,6 +60,20 @@
             {% endwith %}
         {% endfor %}
 
+        // Função para atualizar o badge de busca
+        function updateSearchQueryBadge() {
+            const badgeContainer = document.getElementById('search-query-container');
+            const badge = document.getElementById('search-query-badge');
+            
+            if (badgeContainer && badge) {
+                if (currentSearchQuery && currentSearchQuery.trim() !== '') {
+                    badge.textContent = 'Busca: "' + currentSearchQuery + '"';
+                    badgeContainer.style.display = '';
+                } else {
+                    badgeContainer.style.display = 'none';
+                }
+            }
+        }
                 
         // Função para aplicar filtros via AJAX
         function applyFiltersAjax() {
@@ -88,15 +99,27 @@
             
             // Adicionar filtros selecionados
             {% for key, options in filters.items %}
+            {% with metadata=filter_metadata|get_item:key %}
             const select_{{ key }} = document.getElementById('{{ key }}');
             if (select_{{ key }}) {
                 const selectedValues = $(select_{{ key }}).val();
+                {% if metadata.multiple_selection == False %}
+                // Single selection
+                if (selectedValues && selectedValues !== '') {
+                    params.append('{{ key }}', selectedValues);
+                }
+                {% else %}
+                // Multiple selection
                 if (selectedValues && selectedValues.length > 0) {
                     selectedValues.forEach(value => {
-                        params.append('{{ key }}', value);
+                        if (value && value !== '') {
+                            params.append('{{ key }}', value);
+                        }
                     });
                 }
+                {% endif %}
             }
+            {% endwith %}
             {% endfor %}
             
             // Fazer fetch para API JSON
@@ -153,18 +176,26 @@
                 });
         }
         
-        // Função para limpar filtros
-        function clearFilters() {
-            $('select[multiple]').val(null).trigger('change');
-            applyFiltersAjax();
+        
+        // Interceptar submit do formulário para usar AJAX com filtros
+        const searchForm = document.getElementById('search-form');
+        if (searchForm) {
+            searchForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const searchInput = document.getElementById('search-input');
+                currentSearchQuery = searchInput ? searchInput.value : '';
+                updateSearchQueryBadge();
+                applyFiltersAjax();
+            });
         }
         
         try {
             // Inicializar Select2 para todos os filtros
             {% for key, options in filters.items %}
+            {% with metadata=filter_metadata|get_item:key %}
             const selectElement_{{ key }} = document.getElementById('{{ key }}');
             if (selectElement_{{ key }}) {
-                {% if autocomplete_fields|get_item:key %}
+                {% if metadata.support_search_as_you_type %}
                 // Select2 com AJAX
                 $(selectElement_{{ key }}).select2({
                     ajax: {
@@ -182,7 +213,7 @@
                             return {
                                 results: data.map(item => ({
                                     id: item.key,
-                                    text: item.key,
+                                    text: item.label || item.key,
                                 }))
                             };
                         }
@@ -190,14 +221,16 @@
                     minimumInputLength: 2,
                     placeholder: 'Start typing to search...',
                     theme: 'bootstrap-5',
-                    allowClear: false
+                    allowClear: {% if metadata.multiple_selection == False %}true{% else %}false{% endif %},
+                    multiple: {% if metadata.multiple_selection == False %}false{% else %}true{% endif %}
                 });
                 {% else %}
                     // Select2 básico
                     $(selectElement_{{ key }}).select2({
                         placeholder: 'Start typing to search...',
                         theme: 'bootstrap-5',
-                        allowClear: false
+                        allowClear: {% if metadata.multiple_selection == False %}true{% else %}false{% endif %},
+                        multiple: {% if metadata.multiple_selection == False %}false{% else %}true{% endif %}
                     });
                 {% endif %}
                 
@@ -212,6 +245,7 @@
                     applyFiltersAjax();
                 });
             }
+            {% endwith %}
             {% endfor %}
         } catch (error) {
             console.error('Error initializing Select2', error);
@@ -226,14 +260,25 @@
         // Pré-selecionar filtros da URL
         const urlParams = new URLSearchParams(window.location.search);
         {% for key, options in filters.items %}
+        {% with metadata=filter_metadata|get_item:key %}
         const urlValues_{{ key }} = urlParams.getAll('{{ key }}');
         if (urlValues_{{ key }}.length > 0) {
             const select_{{ key }} = document.getElementById('{{ key }}');
             if (select_{{ key }}) {
+                {% if metadata.multiple_selection == False %}
+                // Single selection - use first value only
+                $(select_{{ key }}).val(urlValues_{{ key }}[0]).trigger('change.select2');
+                {% else %}
+                // Multiple selection
                 $(select_{{ key }}).val(urlValues_{{ key }}).trigger('change.select2');
+                {% endif %}
             }
         }
+        {% endwith %}
         {% endfor %}
+        
+        // Atualizar badge inicialmente
+        updateSearchQueryBadge();
     });
     </script>
 {% endblock %}

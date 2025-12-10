@@ -67,6 +67,7 @@ DATA_SOURCES = {
                     "label": _("Document Language"),
                     "support_search_as_you_type": False,
                     "support_query_operator": False,
+                    "display_transform": "language",
                 },
             },
             "document_type": {
@@ -97,6 +98,7 @@ DATA_SOURCES = {
                     "support_search_as_you_type": False,
                     "support_query_operator": False,
                     "multiple_selection": False,
+                    "display_transform": "boolean",
                 },
             },
             "publication_year": {
@@ -201,7 +203,7 @@ DATA_SOURCES = {
             "institution": {
                 "index_field_name": "authorships.institutions.display_name.keyword",
                 "filter": {
-                    "size": 1,
+                    "size": 5,
                     "order": {"_key": "asc"},
                 },
                 "settings": {
@@ -220,8 +222,9 @@ DATA_SOURCES = {
                 "settings": {
                     "class_filter": "select2",
                     "label": _("Country"),
-                    "support_search_as_you_type": True,
-                    "support_query_operator": True,
+                    "support_search_as_you_type": False,
+                    "support_query_operator": False,
+                    "display_transform": "country",
                 },
             },
             "region_world": {
@@ -280,7 +283,7 @@ DATA_SOURCES = {
             "issn": {
                 "index_field_name": "primary_location.source.issn.keyword",
                 "filter": {
-                    "size": 1,
+                    "size": 5,
                     "order": {"_key": "asc"},
                 },
                 "settings": {
@@ -1081,6 +1084,10 @@ def field_supports_search_as_you_type(data_source, field_name):
         )
     return False
 
+def get_data_by_field_name(data_source, field_name):
+    field_settings = get_field_settings(data_source)
+    if field_name in field_settings:
+        return field_settings[field_name]
 
 def get_size_by_field_name(data_source, field_name):
     """Get the aggregation size for a field."""
@@ -1097,6 +1104,20 @@ def get_label_by_field_name(data_source, field_name):
         return field_settings[field_name].get("settings", {}).get("label")
     return field_name
 
+def get_display_transform_by_field_name(data_source, field_name):
+    """Get the display transform for a field."""
+    field_settings = get_field_settings(data_source)
+    if field_name in field_settings:
+        return field_settings[field_name].get("settings", {}).get("display_transform")
+    return None
+
+
+def get_settings_by_field_name(data_source, field_name):
+    """Get the display transform for a field."""
+    field_settings = get_field_settings(data_source)
+    if field_name in field_settings:
+        return field_settings[field_name].get("settings", {})
+    return None
 
 def field_allows_multiple_selection(data_source, field_name):
     """Check if a field allows multiple selection."""

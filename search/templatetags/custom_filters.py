@@ -10,16 +10,3 @@ def get_item(dictionary, key):
     if dictionary is None:
         return []
     return dictionary.get(key, [])
-
-
-@register.filter
-def get_translation(key):
-    return settings.SEARCH_FILTER_LABELS.get(key, key)
-
-
-@register.filter
-def translate_language(language_code):
-    try:
-        return _(Lang(language_code).name)
-    except:
-        return language_code

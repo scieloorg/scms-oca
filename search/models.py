@@ -1,6 +1,5 @@
 import logging
-
-from wagtail.models import Page
+from typing import List, Optional
 
 from search_gateway import controller
 from search_gateway.data_sources_with_settings import (
@@ -9,6 +8,8 @@ from search_gateway.data_sources_with_settings import (
     get_index_name_from_data_source,
 )
 from search_gateway.parser import extract_selected_filters
+from search_gateway.service import SearchGatewayService
+from wagtail.models import Page
 
 logger = logging.getLogger(__name__)
 
@@ -25,11 +26,10 @@ class SearchPage(Page):
         search_query = request.GET.get("search", "")
         data_source_name = "world"
         context["current_data_source"] = get_index_name_from_data_source(data_source_name)
-        self.set_filters(context, data_source_name)
-        self.set_filters_search_as_you_type(context, data_source_name)
-
-        selected_filters = extract_selected_filters(request, context.get("filters", {}))
-        self.set_filters_metadata(context, data_source_name)
+        service = SearchGatewayService(data_source_name=data_source_name)
+        self.set_filters(context, service)
+        self.set_filters_metadata(context, filters=context.get("filters", {}), service=service)
+        selected_filters = extract_selected_filters(request, context.get("filters", {}), data_source_name)
         results_data = self.get_results_data(
             request, 
             data_source_name, 
@@ -42,44 +42,24 @@ class SearchPage(Page):
         context["selected_filters"] = selected_filters
         return context
 
-    def set_filters(self, context, data_source_name):
-        """
-        Fetches available filter options (aggregations) from Elasticsearch.
-        """
-        filters, errors = controller.get_filters_data(
-            data_source_name,
-            exclude_fields=[
+    def get_filters(self, service, exclude_fields: Optional[List] = None):
+        return service.get_filters(exclude_fields=exclude_fields)
+
+    def set_filters(self, context, service, exclude_fields: Optional[List] = None):
+        exclude_fields = exclude_fields or [
                 "source_index_scielo",
                 "cited_by_count",
                 "document_publication_year_start",
-                "document_publication_year_end"
-            ],
-        )
-        if errors:
-            logger.error("Error fetching filters: %s", errors)
-        context["filters"] = filters or {}
+                "document_publication_year_end",
+                "document_publication_year_range"
+            ]
+        body = self.get_filters(service=service, exclude_fields=exclude_fields)
+        context['filters'] = service.build_filters(body=body)
 
-    def set_filters_metadata(self, context, data_source_name):
-        field_settings = get_field_settings(data_source_name)
-        filter_metadata = {}
-
-        for field_name in context.get("filters", {}).keys():
-            if field_name in field_settings:
-                settings_config = field_settings[field_name].get("settings", {})
-                class_filter = settings_config.get("class_filter", "select2")
-                filter_metadata[field_name] = {
-                    "class_filter": class_filter
-                }
-        context["filter_metadata"] = filter_metadata
-
-
-    def set_filters_search_as_you_type(self, context, data_source_name):
-        autocomplete_fields = {}
-        if "filters" in context:
-            for field_name in context["filters"].keys():
-                if field_supports_search_as_you_type(data_source_name, field_name):
-                    autocomplete_fields[field_name] = True
-        context["autocomplete_fields"] = autocomplete_fields
+    
+    def set_filters_metadata(self,context, filters, service):
+        metadata = service.get_filter_metadata(filters)
+        context['filter_metadata'] = metadata
 
     @staticmethod
     def get_results_data(request, data_source_name, search_query, selected_filters):
