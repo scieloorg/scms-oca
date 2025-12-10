@@ -37,29 +37,11 @@
             </small>
         </p>
         {% endif %}
+        {% if doc.source.publication_year or doc.source.biblio.volume or doc.source.biblio.issue %}
         <p class="card-text">
             <small class="text-muted">
-                {% if doc.source.publication_year %}
-                    <strong>Publicação:</strong> {{ doc.source.publication_year }}
-                {% endif %}
-                {% if doc.source.type %}
-                    <strong>Tipo de documento:</strong> {{ doc.source.type }}
-                {% endif %}
+                {% if doc.source.publication_year %}{{ doc.source.publication_year }}{% endif %}{% if doc.source.publication_year and doc.source.biblio.volume %}, {% endif %}{% if doc.source.biblio.volume %}Volume {{ doc.source.biblio.volume }}{% endif %}{% if doc.source.biblio.issue %} N° {{ doc.source.biblio.issue }}{% endif %}
             </small>
-        </p>
-        {% if doc.source.biblio.volume or doc.source.biblio.issue or doc.source.biblio.first_page %}
-        <p class="card-text">
-            <small class="text-muted">
-                {% if doc.source.biblio.volume %}v.{{ doc.source.biblio.volume }},{% endif %}{% if doc.source.biblio.issue %}n.{{ doc.source.biblio.issue }}, {% endif %}{% if doc.source.biblio.first_page %}p.{{ doc.source.biblio.first_page }}{% endif %}
-            </small>
-        </p>
-        {% endif %}
-        {% if doc.source.primary_location.source.display_name %}
-        <p class="card-text">
-            <strong>Fonte:</strong> {{ doc.source.primary_location.source.display_name }}
-            {% if doc.source.journal_metadata.country %}
-                <span class="badge bg-light text-dark">{{ doc.source.journal_metadata.country }}</span>
-            {% endif %}
         </p>
         {% endif %}
         {% if doc.source.primary_location.doi %}
