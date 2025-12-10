@@ -71,8 +71,7 @@ class SearchPage(Page):
             page_size=get_save_number(request.GET.get("limit"), 50),
             source_fields=[
                 "_id",
-                "primary_location.source",
-                "primary_location.doi",
+                "primary_location",
                 "publication_year",
                 "biblio.volume",
                 "biblio.issue",
