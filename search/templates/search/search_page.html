@@ -32,13 +32,11 @@
             </div>
         </form>
         
-        {% if search_query %}
-        <div class="mt-3 pt-2 border-top">
+        <div id="search-query-container" class="mt-3 pt-2 border-top" {% if not search_query %}style="display: none;"{% endif %}>
             <small class="text-muted">
-                <span class="badge bg-info">Busca: "{{ search_query }}"</span>
+                <span id="search-query-badge" class="badge bg-info">Busca: "{{ search_query }}"</span>
             </small>
         </div>
-        {% endif %}
     </div>
     {% include "search/include/results.html" %}
 {% endblock %}
@@ -62,6 +60,20 @@
             {% endwith %}
         {% endfor %}
 
+        // Função para atualizar o badge de busca
+        function updateSearchQueryBadge() {
+            const badgeContainer = document.getElementById('search-query-container');
+            const badge = document.getElementById('search-query-badge');
+            
+            if (badgeContainer && badge) {
+                if (currentSearchQuery && currentSearchQuery.trim() !== '') {
+                    badge.textContent = 'Busca: "' + currentSearchQuery + '"';
+                    badgeContainer.style.display = '';
+                } else {
+                    badgeContainer.style.display = 'none';
+                }
+            }
+        }
                 
         // Função para aplicar filtros via AJAX
         function applyFiltersAjax() {
@@ -172,6 +184,7 @@
                 e.preventDefault();
                 const searchInput = document.getElementById('search-input');
                 currentSearchQuery = searchInput ? searchInput.value : '';
+                updateSearchQueryBadge();
                 applyFiltersAjax();
             });
         }
@@ -263,6 +276,9 @@
         }
         {% endwith %}
         {% endfor %}
+        
+        // Atualizar badge inicialmente
+        updateSearchQueryBadge();
     });
     </script>
 {% endblock %}
