@@ -3,12 +3,15 @@
 
 {# Campos SELECT normais #}
     <select 
-        multiple
+        {% if metadata.multiple_selection != False %}multiple{% endif %}
         id="{{ key }}" 
         name="{{ key }}" 
         class="form-control filter-select" 
         data-filter-key="{{ key }}"
         aria-label="{{ key|title }}">
+            {% if metadata.multiple_selection == False %}
+                <option value="">{{ metadata.label|default:key }}</option>
+            {% endif %}
             {% for option in options %}
                 <option value="{{ option.key }}">{{ option.label }}</option>
             {% endfor %}

@@ -87,15 +87,27 @@
             
             // Adicionar filtros selecionados
             {% for key, options in filters.items %}
+            {% with metadata=filter_metadata|get_item:key %}
             const select_{{ key }} = document.getElementById('{{ key }}');
             if (select_{{ key }}) {
                 const selectedValues = $(select_{{ key }}).val();
+                {% if metadata.multiple_selection == False %}
+                // Single selection
+                if (selectedValues && selectedValues !== '') {
+                    params.append('{{ key }}', selectedValues);
+                }
+                {% else %}
+                // Multiple selection
                 if (selectedValues && selectedValues.length > 0) {
                     selectedValues.forEach(value => {
-                        params.append('{{ key }}', value);
+                        if (value && value !== '') {
+                            params.append('{{ key }}', value);
+                        }
                     });
                 }
+                {% endif %}
             }
+            {% endwith %}
             {% endfor %}
             
             // Fazer fetch para API JSON
@@ -152,11 +164,6 @@
                 });
         }
         
-        // Função para limpar filtros
-        function clearFilters() {
-            $('select[multiple]').val(null).trigger('change');
-            applyFiltersAjax();
-        }
         
         // Interceptar submit do formulário para usar AJAX com filtros
         const searchForm = document.getElementById('search-form');
@@ -201,14 +208,16 @@
                     minimumInputLength: 2,
                     placeholder: 'Start typing to search...',
                     theme: 'bootstrap-5',
-                    allowClear: false
+                    allowClear: {% if metadata.multiple_selection == False %}true{% else %}false{% endif %},
+                    multiple: {% if metadata.multiple_selection == False %}false{% else %}true{% endif %}
                 });
                 {% else %}
                     // Select2 básico
                     $(selectElement_{{ key }}).select2({
                         placeholder: 'Start typing to search...',
                         theme: 'bootstrap-5',
-                        allowClear: false
+                        allowClear: {% if metadata.multiple_selection == False %}true{% else %}false{% endif %},
+                        multiple: {% if metadata.multiple_selection == False %}false{% else %}true{% endif %}
                     });
                 {% endif %}
                 
@@ -238,13 +247,21 @@
         // Pré-selecionar filtros da URL
         const urlParams = new URLSearchParams(window.location.search);
         {% for key, options in filters.items %}
+        {% with metadata=filter_metadata|get_item:key %}
         const urlValues_{{ key }} = urlParams.getAll('{{ key }}');
         if (urlValues_{{ key }}.length > 0) {
             const select_{{ key }} = document.getElementById('{{ key }}');
             if (select_{{ key }}) {
+                {% if metadata.multiple_selection == False %}
+                // Single selection - use first value only
+                $(select_{{ key }}).val(urlValues_{{ key }}[0]).trigger('change.select2');
+                {% else %}
+                // Multiple selection
                 $(select_{{ key }}).val(urlValues_{{ key }}).trigger('change.select2');
+                {% endif %}
             }
         }
+        {% endwith %}
         {% endfor %}
     });
     </script>
