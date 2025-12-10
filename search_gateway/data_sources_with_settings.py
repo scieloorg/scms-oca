@@ -1030,9 +1030,9 @@ DATA_SOURCES = {
 }
 
 
-def get_data_source(data_source):
+def get_data_source(data_source_name):
     """Get the full data source configuration."""
-    return DATA_SOURCES.get(data_source.lower(), {})
+    return DATA_SOURCES.get(data_source_name.lower(), {})
 
 
 def get_index_name_from_data_source(data_source):
