@@ -1,7 +1,7 @@
 from django.utils.translation import gettext as _
 
 from . import data_sources_with_settings, transforms
-from indicator.search.utils import transform_boolean_yes_no
+
 
 def _transform_boolean_value(value):
     """
