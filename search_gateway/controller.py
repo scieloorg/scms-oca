@@ -54,14 +54,12 @@ def search_documents(
     field_settings = data_sources_with_settings.get_field_settings(data_source_name)
     mapped_filters = get_mapped_filters(filters, field_settings)
 
-    fields = source_fields if source_fields is not None else data_sources_with_settings.get_display_fields(data_source_name)
-
     body = query_builder.build_document_search_body(
         query_text=query_text,
         filters=mapped_filters,
         page=page,
         page_size=page_size,
-        source_fields=fields,
+        source_fields=source_fields,
         data_source_name=data_source_name,
     )
     
