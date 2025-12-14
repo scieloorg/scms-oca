@@ -1254,11 +1254,6 @@ def get_field_settings(data_source):
     return DATA_SOURCES.get(data_source, {}).get("field_settings", {})
 
 
-def get_display_fields(data_source):
-    """Get the display fields for a data source."""
-    return DATA_SOURCES.get(data_source, {}).get("display_fields", [])
-
-
 def get_query_operator_fields(data_source):
     """Get the fields that support query operators for a given data source."""
     supported_query_fields = {}

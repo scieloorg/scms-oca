@@ -15,7 +15,6 @@ class SearchGatewayService:
         self._data_source = data_sources_with_settings.get_data_source(data_source_name=data_source_name)
         self._field_settings = data_sources_with_settings.get_field_settings(data_source=data_source_name)
         self._index_name = data_sources_with_settings.get_index_name_from_data_source(data_source=data_source_name)
-        self._display_fields = data_sources_with_settings.get_display_fields(data_source=data_source_name)
         self._exclude_filter_fields = data_sources_with_settings.get_filters_to_exclude_by_data_source(data_source=data_source_name) or exclude_filter_fields
         self._source_fields = data_sources_with_settings.get_source_fields_by_data_source(data_source=data_source_name)
 
@@ -27,10 +26,6 @@ class SearchGatewayService:
     def index_name(self):
         """Get the Elasticsearch index name"""
         return self._index_name
-
-    @property
-    def display_fields(self):
-        return self._display_fields
 
     @property
     def filters_to_exlcude(self):
