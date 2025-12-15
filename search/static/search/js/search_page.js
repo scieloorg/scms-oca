@@ -141,7 +141,7 @@ class SearchPageManager {
         const config = {
             placeholder: 'Start typing to search...',
             theme: 'bootstrap-5',
-            allowClear: false,
+            allowClear: metadata.multiple_selection == false,
             multiple: metadata.multiple_selection !== false
         };
         
