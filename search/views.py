@@ -7,8 +7,6 @@ import os
 from collections import OrderedDict
 
 import pysolr
-from article.choices import LICENSE
-from core.utils import utils
 from django.conf import settings
 from django.http import Http404, HttpResponse, HttpResponseNotAllowed, JsonResponse
 from django.shortcuts import redirect, render
@@ -17,10 +15,15 @@ from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_GET
+
+from article.choices import LICENSE
+from core.utils import utils
 from indicator import indicator, indicatorOA
 from indicator.models import Indicator, IndicatorData, IndicatorFile
-from search_gateway.controller import get_filters_data
+from search_gateway.controller import search_documents
+from search_gateway.data_sources_with_settings import get_result_template_by_data_source
 from search_gateway.parser import extract_selected_filters
+from search_gateway.service import SearchGatewayService
 
 from . import choices, tools
 from .models import SearchPage
@@ -589,21 +592,27 @@ def get_search_results_json(request):
 
 @require_GET
 def search_view_list(request):
-    filters, erros = get_filters_data(
-        "world",
-        exclude_fields=[
-            "source_index_scielo",
-            "cited_by_count",
-        ],
+    data_source_name = request.GET.get("data_source", "world")
+    page = request.GET.get("page", 1)
+    page_size = request.GET.get("limit", 50)
+    text_search = request.GET.get("search", "")
+    
+    service = SearchGatewayService(data_source_name=data_source_name)
+    body_filters = service.get_filters()
+    filters = service.build_filters(body=body_filters)
+    selected_filters = extract_selected_filters(request, filters, data_source_name)
+    results_data = search_documents(
+        data_source_name=data_source_name,
+        query_text=text_search,
+        filters=selected_filters,
+        page=page,
+        page_size=page_size
     )
-    selected_filters = extract_selected_filters(request, filters, "world")
-    results_data = SearchPage.get_results_data(
-        request,
-        "world",
-        request.GET.get("search", ""),
-        selected_filters,
-    )
-    results_html = render_to_string("search/include/results_list.html", {"results_data": results_data}, request=request)
+    result_template = get_result_template_by_data_source(data_source_name)
+    results_html = render_to_string("search/include/results_list.html", {
+        "results_data": results_data,
+        "result_template": result_template
+    }, request=request)
 
     return JsonResponse(
         {
@@ -611,3 +620,26 @@ def search_view_list(request):
             "search_results": results_data,
         }
     )
+
+@require_GET
+def get_filters_for_data_source(request):
+    """
+    API endpoint to get filters and metadata for a specific data source.
+    Used when switching data sources in the search page.
+    """
+    
+    data_source_name = request.GET.get("data_source", "world")
+    
+    try:
+        service = SearchGatewayService(data_source_name=data_source_name)
+        body_filters = service.get_filters()
+        filters = service.build_filters(body=body_filters)
+        filter_metadata = service.get_filter_metadata(filters)
+
+        return JsonResponse({
+            "filters": filters,
+            "filter_metadata": filter_metadata,
+        })
+    except Exception as e:
+        logging.exception(f"Error getting filters for data source {data_source_name}")
+        return JsonResponse({"error": str(e)}, status=500)

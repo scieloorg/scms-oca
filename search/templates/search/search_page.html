@@ -1,6 +1,44 @@
 {% extends "search/search.html" %}
 {% load custom_filters %}
+{% load static %}
 
+{% block header_content %}
+    <div class="row mx-1">
+        <div class="card mb-2 p-3 bg-light shadow-sm">
+        <div class="page-title-content">
+            <h1 class="mb-1">Search</h1>
+            <span class="text-muted">Data of the OCABr Observatory</span>
+        </div>
+        </div>
+    </div>
+
+    <div class="row mx-1">
+    <div class="card mb-2 p-3 bg-light shadow-sm">
+        <div class="dropdown">
+            <button class="dropdown-toggle" type="button" id="data-source-dropdown" data-bs-toggle="dropdown" aria-expanded="false" style="background: none; border: none; padding: 0; font: inherit; cursor: pointer; color: inherit;">
+                <span id="selected-data-source">
+                    {% for ds in available_data_sources %}
+                        {% if ds.key == data_source_name %}{{ ds.display_name }}{% endif %}
+                    {% endfor %}
+                </span>
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="data-source-dropdown">
+                {% for ds in available_data_sources %}
+                    <li>
+                        <a class="dropdown-item {% if ds.key == data_source_name %}active{% endif %}" 
+                           href="#" 
+                           data-source-key="{{ ds.key }}"
+                           data-source-name="{{ ds.display_name }}">
+                            {{ ds.display_name }}
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+        <input type="hidden" id="data-source-select" value="{{ data_source_name }}">
+    </div>
+    </div>
+{% endblock%}
 
 {% block search_sidebar %}
     {% include "search/include/filters.html" %}
@@ -43,242 +81,39 @@
 
 {% block javascript %}
 {{ block.super }}
+{{ filters|json_script:"filters-data" }}
+{{ filter_metadata|json_script:"filter-metadata-data" }}
+<script src="{% static 'search/js/search_page.js' %}"></script>
 <script>
+    window.searchPageConfig = {
+        initialSearchQuery: '{{ search_query|escapejs }}',
+        dataSourceName: '{{ data_source_name }}',
+        filters: JSON.parse(document.getElementById('filters-data').textContent),
+        filterMetadata: JSON.parse(document.getElementById('filter-metadata-data').textContent),
+    };
+    
+    // Handle dropdown UI updates and trigger change event
     document.addEventListener('DOMContentLoaded', function() {
-        let currentSearchQuery = '{{ search_query|escapejs }}';
-
-        // Mapa de fields range (detectados do template)
-        const rangeFields = {};
-        {% for key, options in filters.items %}
-            {% with metadata=filter_metadata|get_item:key %}
-                {% if metadata.class_filter == 'range' %}
-                    rangeFields['{{ key }}'] = {
-                        start: '{{ key }}_start',
-                        end: '{{ key }}_end'
-                    };
-                {% endif %}
-            {% endwith %}
-        {% endfor %}
-
-        // Função para atualizar o badge de busca
-        function updateSearchQueryBadge() {
-            const badgeContainer = document.getElementById('search-query-container');
-            const badge = document.getElementById('search-query-badge');
-            
-            if (badgeContainer && badge) {
-                if (currentSearchQuery && currentSearchQuery.trim() !== '') {
-                    badge.textContent = 'Busca: "' + currentSearchQuery + '"';
-                    badgeContainer.style.display = '';
-                } else {
-                    badgeContainer.style.display = 'none';
-                }
-            }
-        }
-                
-        // Função para aplicar filtros via AJAX
-        function applyFiltersAjax() {
-            const resultsContainer = document.getElementById('results-list');
-            const resultsCount = document.getElementById('results-count');
-            const filterStatus = document.getElementById('filter-status');
-            
-            // Mostrar loading
-            if (filterStatus) {
-                filterStatus.innerHTML = '<i class="icon-spinner icon-spin"></i> Carregando...';
-            }
-            if (resultsContainer) {
-                resultsContainer.innerHTML = '<div class="text-center p-5"><i class="icon-spinner icon-spin icon-2x"></i></div>';
-            }
-            
-            // Montar parâmetros da query
-            const params = new URLSearchParams();
-            
-            // Adicionar busca atual
-            if (currentSearchQuery) {
-                params.append('search', currentSearchQuery);
-            }
-            
-            // Adicionar filtros selecionados
-            {% for key, options in filters.items %}
-            {% with metadata=filter_metadata|get_item:key %}
-            const select_{{ key }} = document.getElementById('{{ key }}');
-            if (select_{{ key }}) {
-                const selectedValues = $(select_{{ key }}).val();
-                {% if metadata.multiple_selection == False %}
-                // Single selection
-                if (selectedValues && selectedValues !== '') {
-                    params.append('{{ key }}', selectedValues);
-                }
-                {% else %}
-                // Multiple selection
-                if (selectedValues && selectedValues.length > 0) {
-                    selectedValues.forEach(value => {
-                        if (value && value !== '') {
-                            params.append('{{ key }}', value);
-                        }
-                    });
-                }
-                {% endif %}
-            }
-            {% endwith %}
-            {% endfor %}
-            
-            // Fazer fetch para API JSON
-            fetch('/search/api/search-results-list/?' + params.toString())
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    // Atualizar contador
-                    if (resultsCount) {
-                        resultsCount.innerHTML = data.total_results 
-                            ? `<p class="text-muted"><strong>${data.total_results}</strong> resultado(s) encontrado(s)</p>`
-                            : '';
-                    }
-                    
-                    // Renderizar resultados
-                    if (resultsContainer) {
-                        if (data.search_results_html) {
-                            resultsContainer.innerHTML = data.search_results_html;
-                        } else {
-                            resultsContainer.innerHTML = `
-                                <div class="alert alert-info" role="alert">
-                                    <i class="icon-info-sign"></i> 
-                                    Nenhum resultado encontrado. Tente ajustar sua busca ou filtros.
-                                </div>
-                            `;
-                        }
-                    }
-                    
-                    // Atualizar status
-                    if (filterStatus) {
-                        filterStatus.innerHTML = '<i class="icon-ok text-success"></i> Filtros aplicados';
-                        setTimeout(() => {
-                            filterStatus.innerHTML = '';
-                        }, 2000);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error applying filters:', error);
-                    if (resultsContainer) {
-                        resultsContainer.innerHTML = `
-                            <div class="alert alert-danger" role="alert">
-                                <i class="icon-exclamation-sign"></i> 
-                                Erro ao carregar resultados. Tente novamente.
-                            </div>
-                        `;
-                    }
-                    if (filterStatus) {
-                        filterStatus.innerHTML = '<i class="icon-exclamation-sign text-danger"></i> Erro';
-                    }
-                });
-        }
-        
-        
-        // Interceptar submit do formulário para usar AJAX com filtros
-        const searchForm = document.getElementById('search-form');
-        if (searchForm) {
-            searchForm.addEventListener('submit', function(e) {
+        const dropdownItems = document.querySelectorAll('.dropdown-menu .dropdown-item');
+        dropdownItems.forEach(item => {
+            item.addEventListener('click', function(e) {
                 e.preventDefault();
-                const searchInput = document.getElementById('search-input');
-                currentSearchQuery = searchInput ? searchInput.value : '';
-                updateSearchQueryBadge();
-                applyFiltersAjax();
+                const sourceKey = this.getAttribute('data-source-key');
+                const sourceName = this.getAttribute('data-source-name');
+                
+                // Update the displayed text
+                document.getElementById('selected-data-source').textContent = sourceName;
+                
+                // Update the hidden input and trigger change (handled by SearchPageManager)
+                const selectElement = document.getElementById('data-source-select');
+                selectElement.value = sourceKey;
+                selectElement.dispatchEvent(new Event('change'));
+                
+                // Update active state
+                dropdownItems.forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
             });
-        }
-        
-        try {
-            // Inicializar Select2 para todos os filtros
-            {% for key, options in filters.items %}
-            {% with metadata=filter_metadata|get_item:key %}
-            const selectElement_{{ key }} = document.getElementById('{{ key }}');
-            if (selectElement_{{ key }}) {
-                {% if metadata.support_search_as_you_type %}
-                // Select2 com AJAX
-                $(selectElement_{{ key }}).select2({
-                    ajax: {
-                        url: '/search-gateway/search-as-you-type/',
-                        dataType: 'json',
-                        delay: 300,
-                        data: function(params) {
-                            return {
-                                q: params.term,
-                                field_name: '{{ key }}',
-                                data_source: '{{ data_source_name }}'
-                            };
-                        },
-                        processResults: function(data) {
-                            return {
-                                results: data.map(item => ({
-                                    id: item.key,
-                                    text: item.label || item.key,
-                                }))
-                            };
-                        }
-                    },
-                    minimumInputLength: 2,
-                    placeholder: 'Start typing to search...',
-                    theme: 'bootstrap-5',
-                    allowClear: {% if metadata.multiple_selection == False %}true{% else %}false{% endif %},
-                    multiple: {% if metadata.multiple_selection == False %}false{% else %}true{% endif %}
-                });
-                {% else %}
-                    // Select2 básico
-                    $(selectElement_{{ key }}).select2({
-                        placeholder: 'Start typing to search...',
-                        theme: 'bootstrap-5',
-                        allowClear: {% if metadata.multiple_selection == False %}true{% else %}false{% endif %},
-                        multiple: {% if metadata.multiple_selection == False %}false{% else %}true{% endif %}
-                    });
-                {% endif %}
-                
-                // Auto-foco
-                $(selectElement_{{ key }}).on('select2:open', function(e) {
-                    const searchField = document.querySelector(`[aria-controls="select2-${e.target.id}-results"]`);
-                    if (searchField) searchField.focus();
-                });
-                
-                // AJAX ao mudar filtro
-                $(selectElement_{{ key }}).on('change', function() {
-                    applyFiltersAjax();
-                });
-            }
-            {% endwith %}
-            {% endfor %}
-        } catch (error) {
-            console.error('Error initializing Select2', error);
-        }
-        
-        // Botão limpar
-        const clearFiltersBtn = document.getElementById('clear-filters-btn');
-        if (clearFiltersBtn) {
-            clearFiltersBtn.addEventListener('click', clearFilters);
-        }
-        
-        // Pré-selecionar filtros da URL
-        const urlParams = new URLSearchParams(window.location.search);
-        {% for key, options in filters.items %}
-        {% with metadata=filter_metadata|get_item:key %}
-        const urlValues_{{ key }} = urlParams.getAll('{{ key }}');
-        if (urlValues_{{ key }}.length > 0) {
-            const select_{{ key }} = document.getElementById('{{ key }}');
-            if (select_{{ key }}) {
-                {% if metadata.multiple_selection == False %}
-                // Single selection - use first value only
-                $(select_{{ key }}).val(urlValues_{{ key }}[0]).trigger('change.select2');
-                {% else %}
-                // Multiple selection
-                $(select_{{ key }}).val(urlValues_{{ key }}).trigger('change.select2');
-                {% endif %}
-            }
-        }
-        {% endwith %}
-        {% endfor %}
-        
-        // Atualizar badge inicialmente
-        updateSearchQueryBadge();
+        });
     });
-    </script>
+</script>
 {% endblock %}

@@ -488,3 +488,6 @@ ES_INDEX_SCI_PROD_SCIELO = env.str("ES_INDEX_SCI_PROD_SCIELO", "scielo_works")
 ES_INDEX_SOC_PROD = env.str("ES_INDEX_SOC_PROD", "opoca")
 ES_INDEX_JOURNAL_METRICS = env.str("ES_INDEX_JOURNAL_METRICS", "journal_annual_metrics")
 ES_INDEX_SOURCES = env.str("ES_INDEX_SOURCES", "journals")
+
+# New version of index opoca
+ES_INDEX_SOCIAL_PRODUCTION = env.str("ES_INDEX_SOCIAL_PRODUCTION", "social_production")

@@ -6,6 +6,32 @@ DATA_SOURCES = {
     "world": {
         "index_name": settings.ES_INDEX_SCI_PROD_WORLD,
         "display_name": _("Scientific Production - World"),
+        "result_template": "search/include/result_items/world.html",
+        "source_fields" : [
+            "_id",
+            "primary_location",
+            "publication_year",
+            "biblio.volume",
+            "biblio.issue",
+            "biblio.first_page",
+            "journal_metadata.issns",
+            "journal_metadata.country",
+            "title",
+            "authorships",
+            "language",
+            "type",
+            "open_access.is_oa",
+            "open_access.oa_status",
+            "indexed_in",
+            "locations.landing_page_url",            
+        ],
+        "filters_to_exclude": [
+            "source_index_scielo",
+            "cited_by_count",
+            "document_publication_year_start",
+            "document_publication_year_end",
+            "document_publication_year_range"            
+        ],
         "field_settings": {
             # General fields
             "source_index_open_alex": {
@@ -731,6 +757,183 @@ DATA_SOURCES = {
             },
         }
     },
+    "social_production": {
+        "index_name": settings.ES_INDEX_SOCIAL_PRODUCTION,
+        "display_name": _("Social Production"),
+        "result_template": "search/include/result_items/social_production.html",
+        "source_fields": ["*"],
+        "filters_to_exclude": [
+            "document_publication_year_end"
+        ],
+        "field_settings": {
+            "document_publication_year_start": {
+                "index_field_name": "year",
+                "filter": {
+                    "transform": {
+                        "type": "year_range",
+                        "sources": [
+                            "document_publication_year_start",
+                            "document_publication_year_end",
+                        ]
+                    },
+                    "size": 1000,
+                    "order": {
+                        "_key": "asc"
+                    },
+                },
+                "settings": {
+                    "class_filter": "select2",
+                    "label": _("Publication year start"),
+                    "support_search_as_you_type": False,
+                    "support_query_operator": False,                    
+                }                
+            },
+            "document_publication_year_end": {
+                "index_field_name": "year",
+                "filter": {
+                    "transform": {
+                        "type": "year_range",
+                        "sources": [
+                            "document_publication_year_start",
+                            "document_publication_year_end",
+                        ]
+                    },
+                    "size": 1000,
+                    "order": {
+                        "_key": "asc"
+                    },
+                },
+                "settings": {
+                    "class_filter": "select2",
+                    "label": _("Publication year end"),
+                    "support_search_as_you_type": False,
+                    "support_query_operator": False,                    
+                }
+            },
+            "city_brazil": {
+                "index_field_name": "cities.keyword",
+                "filter": {
+                    "size": 1000,
+                    "order": {
+                        "_key": "asc"
+                    },
+                },
+                "settings": {
+                    "class_filter": "select2",
+                    "label": _("City"),
+                    "support_search_as_you_type": True,
+                    "support_query_operator": False,
+                },
+            },
+            "state_brazil": {
+                "index_field_name": "states.keyword",
+                "filter": {
+                    "size": 27,
+                    "order": {
+                        "_key": "asc"
+                    },
+                },
+                "settings": {
+                    "class_filter": "select2",
+                    "label": _("State"),
+                    "support_search_as_you_type": False,
+                    "support_query_operator": False,
+                },
+            },
+            "action": {
+                "index_field_name": "action.keyword",
+                "filter": {
+                    "size": 1000,
+                    "order": {
+                        "_key": "asc"
+                    },
+                },
+                "settings": {
+                    "class_filter": "select2",
+                    "label": _("Action"),
+                    "support_search_as_you_type": False,
+                    "support_query_operator": False,
+                },                
+            },
+            "classification": {
+                "index_field_name": "classification.keyword",
+                "filter": {
+                    "size": 1000,
+                    "order": {
+                        "_key": "asc"
+                    },
+                },
+                "settings": {
+                    "class_filter": "select2",
+                    "label": _("Classification"),
+                    "support_search_as_you_type": False,
+                    "support_query_operator": False,
+                },                
+            },
+            "directory_type": {
+                "index_field_name": "directory_type.keyword",
+                "filter": {
+                    "size": 1000,
+                    "order": {
+                        "_key": "asc"
+                    },
+                },
+                "settings": {
+                    "class_filter": "select2",
+                    "label": _("Directory Type"),
+                    "support_search_as_you_type": False,
+                    "support_query_operator": False,
+                },                
+            },
+            "institution": {
+                "index_field_name": "institutions.keyword",
+                "filter": {
+                    "size": 100,
+                    "order": {
+                        "_key": "asc"
+                    },
+                },
+                "settings": {
+                    "class_filter": "select2",
+                    "label": _("Institution"),
+                    "support_search_as_you_type": True,
+                    "support_query_operator": False,
+                },                
+            },
+            "practice": {
+                "index_field_name": "practice.keyword",
+                "filter": {
+                    "size": 1000,
+                    "order": {
+                        "_key": "asc"
+                    },
+                },
+                "settings": {
+                    "class_filter": "select2",
+                    "label": _("Pratice"),
+                    "support_search_as_you_type": False,
+                    "support_query_operator": False,
+                },   
+                
+            },
+            "thematic_level_0": {
+                "index_field_name": "thematic_level_0.keyword",
+                "filter": {
+                    "size": 20,
+                    "order": {
+                        "_key": "asc"
+                    },
+                },
+                "settings": {
+                    "class_filter": "select2",
+                    "label": _("Thematic Level"),
+                    "support_search_as_you_type": True,
+                    "support_query_operator": False,
+                },   
+                
+            },        
+        }
+    },    
     "journal_metrics": {
         "index_name": settings.ES_INDEX_JOURNAL_METRICS,
         "display_name": _("Journal Metrics"),
@@ -1053,11 +1256,6 @@ def get_field_settings(data_source):
     return DATA_SOURCES.get(data_source, {}).get("field_settings", {})
 
 
-def get_display_fields(data_source):
-    """Get the display fields for a data source."""
-    return DATA_SOURCES.get(data_source, {}).get("display_fields", [])
-
-
 def get_query_operator_fields(data_source):
     """Get the fields that support query operators for a given data source."""
     supported_query_fields = {}
@@ -1141,3 +1339,13 @@ def get_index_field_name_to_filter_name_map(data_source):
         for key, setting in field_settings.items()
         if setting.get("index_field_name")
     }
+
+def get_filters_to_exclude_by_data_source(data_source):
+    return DATA_SOURCES.get(data_source, {}).get("filters_to_exclude")
+
+def get_source_fields_by_data_source(data_source):
+    return DATA_SOURCES.get(data_source, {}).get("source_fields")
+
+def get_result_template_by_data_source(data_source):
+    """Get the result template path for a data source."""
+    return DATA_SOURCES.get(data_source, {}).get("result_template", "")

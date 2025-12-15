@@ -15,8 +15,8 @@ class SearchGatewayService:
         self._data_source = data_sources_with_settings.get_data_source(data_source_name=data_source_name)
         self._field_settings = data_sources_with_settings.get_field_settings(data_source=data_source_name)
         self._index_name = data_sources_with_settings.get_index_name_from_data_source(data_source=data_source_name)
-        self._display_fields = data_sources_with_settings.get_display_fields(data_source=data_source_name)
-        self._exclude_filter_fields = exclude_filter_fields if exclude_filter_fields else []
+        self._exclude_filter_fields = data_sources_with_settings.get_filters_to_exclude_by_data_source(data_source=data_source_name) or exclude_filter_fields
+        self._source_fields = data_sources_with_settings.get_source_fields_by_data_source(data_source=data_source_name)
 
     @property
     def data_source(self):
@@ -28,10 +28,15 @@ class SearchGatewayService:
         return self._index_name
 
     @property
-    def display_fields(self):
-        return self._display_fields
+    def filters_to_exlcude(self):
+        return self._exclude_filter_fields or []
+
+    @property
+    def source_fields(self):
+        return self._source_fields or []
 
     def get_filters(self, exclude_fields=None):
+        exclude_fields = self._exclude_filter_fields or exclude_fields
         aggs = query_builder.build_filters_aggs(self._field_settings, exclude_fields)
         body = {"size": 0, "aggs": aggs}
         return body
