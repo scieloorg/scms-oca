@@ -1,14 +1,16 @@
 import logging
 from typing import List, Optional
 
+from wagtail.models import Page
+
 from search_gateway import controller
 from search_gateway.data_sources_with_settings import (
     DATA_SOURCES,
     get_index_name_from_data_source,
+    get_result_template_by_data_source,
 )
 from search_gateway.parser import extract_selected_filters
 from search_gateway.service import SearchGatewayService
-from wagtail.models import Page
 
 logger = logging.getLogger(__name__)
 
@@ -52,6 +54,7 @@ class SearchPage(Page):
         context["results_data"] = results_data
         context["search_query"] = search_query
         context["selected_filters"] = selected_filters
+        context["result_template"] = get_result_template_by_data_source(data_source_name)
         context["available_data_sources"] = get_available_data_sources(data_sources=["social_production", "world"])
         return context
 

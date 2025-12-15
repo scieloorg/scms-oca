@@ -1,0 +1,60 @@
+{% load humanize %}
+{% load static %}
+{% load i18n %}
+{% load wagtailsettings_tags %}
+{% load wagtailcore_tags %}
+
+
+<div class="card mb-3 result-item">
+    <div class="card-body">
+        <h5 class="card-title">
+        {% if doc.source.locations %}
+            <a href="{{ doc.source.locations.0.landing_page_url }}" target="_blank" class="text-decoration-none">
+                {{ doc.source.title }}
+            </a>
+        {% else %}
+            <a href="{{pageurl}}" target="_blank" class="text-decoration-none">{{ doc.source.title }}</a>
+        {% endif %}
+        </h5>
+        {% if doc.source.authorships %}
+            <p class="card-text">
+                {% for auth in doc.source.authorships %}
+                    {{ auth.author.display_name }}{% if auth.author.orcid %} <a href="{{ auth.author.orcid }}" target="_blank"><img src="{% static 'images/authorIcon-orcid.png' %}" alt="ORCID"></a>{% endif %}{% if not forloop.last %}; {% endif %}
+                {% endfor %}
+            </p>
+        {% endif %}
+        
+        {% if doc.source.primary_location.source.display_name %}
+        <p class="card-text">
+            <small class="text-muted">
+                {{ doc.source.primary_location.source.display_name }} {% if doc.source.primary_location.source.id %} <a href="{{doc.primary_location.source.id}}" target="_blank">{{doc.primary_location.source.id}}</a>{% endif %}
+            </small>
+        </p>
+        {% endif %}
+        {% if doc.source.publication_year or doc.source.biblio.volume or doc.source.biblio.issue %}
+        <p class="card-text">
+            <small class="text-muted">
+                {% if doc.source.publication_year %}{{ doc.source.publication_year }}{% endif %}{% if doc.source.publication_year and doc.source.biblio.volume %}, {% endif %}{% if doc.source.biblio.volume %}Volume {{ doc.source.biblio.volume }}{% endif %}{% if doc.source.biblio.issue %} N° {{ doc.source.biblio.issue }}{% endif %}
+            </small>
+        </p>
+        {% endif %}
+        {% if doc.source.primary_location.doi %}
+        <p class="card-text mb-0">
+            <small class="text-muted">
+                <a href="https://doi.org/{{ doc.source.primary_location.doi }}" target="_blank">
+                    {{ doc.source.primary_location.doi }}
+                </a>
+            </small>
+        </p>
+        {% endif %}
+        {% if doc.id %}
+        <p class="card-text mb-0">
+            <small class="text-muted">
+                <a href="{{ doc.id }}" target="_blank">
+                    {{ doc.id }}
+                </a>
+            </small>
+        </p>
+        {% endif %}
+    </div>
+</div>

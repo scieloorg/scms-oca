@@ -10,6 +10,6 @@
 
 <div id="results-list" class="results-list">
     {% for doc in results_data.search_results %}
-        {% include "search/include/result_item.html" %}
+        {% include result_template with doc=doc %}
     {% endfor %}
 </div>

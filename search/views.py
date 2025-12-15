@@ -7,8 +7,6 @@ import os
 from collections import OrderedDict
 
 import pysolr
-from article.choices import LICENSE
-from core.utils import utils
 from django.conf import settings
 from django.http import Http404, HttpResponse, HttpResponseNotAllowed, JsonResponse
 from django.shortcuts import redirect, render
@@ -17,9 +15,13 @@ from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_GET
+
+from article.choices import LICENSE
+from core.utils import utils
 from indicator import indicator, indicatorOA
 from indicator.models import Indicator, IndicatorData, IndicatorFile
 from search_gateway.controller import search_documents
+from search_gateway.data_sources_with_settings import get_result_template_by_data_source
 from search_gateway.parser import extract_selected_filters
 from search_gateway.service import SearchGatewayService
 
@@ -606,7 +608,11 @@ def search_view_list(request):
         page=page,
         page_size=page_size
     )
-    results_html = render_to_string("search/include/results_list.html", {"results_data": results_data}, request=request)
+    result_template = get_result_template_by_data_source(data_source_name)
+    results_html = render_to_string("search/include/results_list.html", {
+        "results_data": results_data,
+        "result_template": result_template
+    }, request=request)
 
     return JsonResponse(
         {

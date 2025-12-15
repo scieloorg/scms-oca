@@ -6,6 +6,7 @@ DATA_SOURCES = {
     "world": {
         "index_name": settings.ES_INDEX_SCI_PROD_WORLD,
         "display_name": _("Scientific Production - World"),
+        "result_template": "search/include/result_items/world.html",
         "source_fields" : [
             "_id",
             "primary_location",
@@ -759,6 +760,7 @@ DATA_SOURCES = {
     "social_production": {
         "index_name": settings.ES_INDEX_SOCIAL_PRODUCTION,
         "display_name": _("Social Production"),
+        "result_template": "search/include/result_items/social_production.html",
         "source_fields": ["*"],
         "filters_to_exclude": [
             "document_publication_year_end"
@@ -819,7 +821,7 @@ DATA_SOURCES = {
                 "settings": {
                     "class_filter": "select2",
                     "label": _("City"),
-                    "support_search_as_you_type": False,
+                    "support_search_as_you_type": True,
                     "support_query_operator": False,
                 },
             },
@@ -1343,3 +1345,7 @@ def get_filters_to_exclude_by_data_source(data_source):
 
 def get_source_fields_by_data_source(data_source):
     return DATA_SOURCES.get(data_source, {}).get("source_fields")
+
+def get_result_template_by_data_source(data_source):
+    """Get the result template path for a data source."""
+    return DATA_SOURCES.get(data_source, {}).get("result_template", "")
