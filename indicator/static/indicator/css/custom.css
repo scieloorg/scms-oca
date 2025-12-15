@@ -34,3 +34,18 @@ div.dt-container select.dt-input {
   margin-right: 1rem;
   padding: 4px;
 }
+
+/* Cor de fundo azul claro */
+.bg-oca-light {
+  background-color: #f1f2f4;
+}
+
+/* Margin top maior para início de seções */
+.mt-oca-section-start {
+  margin-top: 4.25rem;
+}
+
+/* Margin left menor para lado esquerdo com filtros */
+.ml-oca-filter {
+  margin-left: 0.10rem;
+}

@@ -12,13 +12,16 @@
     <div class="container">
       <div class="header-row top-search-parent">
 
-        <div id="logo" class="me-lg-5">
-          {% image settings.core_settings.CustomSettings.site_logo max-100x100 as logo %}
-          <a href="/" class="standard-logo" data-dark-logo="{{ logo.url }}"><img src="https://ocabr.org/media/images/logo-ocabr-v4-light100x100.max-100x100.png"
-              alt="{{ settings.core_settings.CustomSettings.name }}"></a>
+        <div class="d-flex flex-column">
+          <div id="logo" class="me-lg-5">
+            {% image settings.core_settings.CustomSettings.site_logo max-80x80 as logo %}
+            <a href="/" class="standard-logo" data-dark-logo="{{ logo.url }}"><img src="{% static 'img/logo-ocabr.png'%}" width="80px"
+                alt="Logotipo do OCABr"></a>
+          </div>
+          {% include 'menus/menu.html' %}
         </div>
-        
-        <nav class="navbar navbar-expand-lg navbar-light primary-menu flex-grow-1 justify-content-end">
+
+        <nav class="navbar navbar-expand-lg navbar-light primary-menu flex-grow-1 justify-content-end ms-auto d-lg-none">
           <div id="primary-menu-trigger">
             <svg class="svg-trigger" viewBox="0 0 100 100">
               <path
@@ -29,18 +32,23 @@
               </path>
             </svg>
           </div>
+
+          <ul class="menu-container mobile-primary-menu">
+            {% include 'menus/menu_items.html' %}
+
+            {% for handle in config.WAGTAILMENUS_FLAT_MENUS_HANDLE_CHOICES %}
+              <li class="menu-item">
+                {% flat_menu handle.0 max_levels=2 show_menu_heading=True fall_back_to_default_site_menus=False %}
+              </li>
+            {% endfor %}
+          </ul>
         </nav>
 
-        {% include 'menus/flat_menu_indicator.html' %}
-
-        {% include 'menus/flat_menu_observation.html' %}
-
-        {% for handle in config.WAGTAILMENUS_FLAT_MENUS_HANDLE_CHOICES %}
-
-          {% flat_menu handle.0 max_levels=2 show_menu_heading=True fall_back_to_default_site_menus=True %}
-
-        {% endfor %}
- 
+        <div class="d-none d-lg-flex align-items-center ms-auto">
+          {% for handle in config.WAGTAILMENUS_FLAT_MENUS_HANDLE_CHOICES %}
+              {% flat_menu handle.0 max_levels=2 show_menu_heading=True fall_back_to_default_site_menus=False %}
+          {% endfor %}
+        </div>
       </div>
     </div>
   </div>

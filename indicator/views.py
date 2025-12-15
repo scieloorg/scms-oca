@@ -25,8 +25,11 @@ def data_view(request):
     body_text = request.body.decode()
     payload = json.loads(body_text) if body_text else {}
     filters = payload.get("filters", {})
+    study_unit = payload.get("study_unit") or request.GET.get("study_unit") or "document"
+    if study_unit not in ("document", "journal"):
+        study_unit = "document"
 
-    data, error = controller.get_indicator_data(data_source_name, dict(filters))
+    data, error = controller.get_indicator_data(data_source_name, dict(filters), study_unit=study_unit)
     if error:
         status_code = 503 if error == "Service unavailable" else 400 if error == "Invalid data_source" else 500
         return JsonResponse({"error": error}, status=status_code)
@@ -40,10 +43,14 @@ def indicator_view(request, data_source_name):
         return JsonResponse({"error": "Invalid data_source"}, status=404)
 
     cleaned_filters = utils.clean_form_filters(request.GET.dict())
+    study_unit = request.GET.get("study_unit", "document")
+    if study_unit not in ("document", "journal"):
+        study_unit = "document"
     context = {
         "data_source": data_source_name,
         "data_source_display_name": data_source.get("display_name"),
         "applied_filters": cleaned_filters,
+        "study_unit": study_unit,
     }
     context["applied_filters_json"] = json.dumps(context["applied_filters"])
     return render(request, "indicator.html", context)
@@ -75,6 +82,45 @@ def journal_metrics_view(request):
 
     context["applied_filters_json"] = json.dumps(context["applied_filters"])
     return render(request, "indicator.html", context)
+
+
+@require_GET
+def journal_metrics_timeseries_view(request):
+    issn = request.GET.get("issn")
+    journal = request.GET.get("journal")
+
+    data, error = controller.get_journal_metrics_timeseries(issn=issn, journal=journal)
+    if error:
+        status_code = 503 if error == "Service unavailable" else 404 if error == "Not found" else 400
+        return JsonResponse({"error": error}, status=status_code)
+
+    return JsonResponse(data)
+
+
+@require_GET
+def periodical_timeseries_view(request):
+    """Time series for a single periodical using the *documents* indices.
+
+    Example:
+      /indicators/periodical/timeseries/?data_source=world&field_name=issn&value=1234-5678
+    """
+
+    data_source_name = request.GET.get("data_source")
+    field_name = request.GET.get("field_name")
+    value = request.GET.get("value")
+
+    if not data_source_name:
+        return JsonResponse({"error": "Missing data_source parameter"}, status=400)
+    if not field_name or not value:
+        return JsonResponse({"error": "Missing field_name or value parameter"}, status=400)
+
+    filters = {field_name: value}
+    data, error = controller.get_indicator_data(data_source_name, filters)
+    if error:
+        status_code = 503 if error == "Service unavailable" else 400 if error == "Invalid data_source" else 500
+        return JsonResponse({"error": error}, status=status_code)
+
+    return JsonResponse(data)
 
 
 class IndicatorDirectoryEditView(EditView):

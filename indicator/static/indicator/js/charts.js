@@ -60,9 +60,12 @@ function destroyChartInstance(container) {
 // Clears the charts container and destroys chart instances
 function clearGraphsContainer() {
     const chartDivs = [
+        'periodicals-chart-div',
         'docs-chart-div',
         'citations-chart-div',
-        'citations-per-doc-chart-div'
+        'citations-per-doc-chart-div',
+        'cited-docs-chart-div',
+        'pct-cited-docs-chart-div'
     ];
 
     chartDivs.forEach(divId => {
@@ -134,7 +137,19 @@ Indicators.renderChart = function({ chartId, chartDivId, data, seriesType, title
                 });
         }
     } else {
-        if (seriesType === 'Documents') {
+        if (seriesType === 'Periodicals') {
+            series = [{ name: 'Unique Periodicals (sources)', type: chartType, data: data.nperiodicals_per_year || [] }];
+        } else if (seriesType === 'Documents per Periodical') {
+            series = [{ name: 'Documents / Periodical', type: chartType, data: data.docs_per_periodical_per_year || [] }];
+        } else if (seriesType === 'Citations per Periodical') {
+            series = [{ name: 'Citations / Periodical', type: chartType, data: data.citations_per_periodical_per_year || [] }];
+        } else if (seriesType === 'Cited Documents per Periodical') {
+            series = [{ name: 'Cited Documents / Periodical', type: chartType, data: data.cited_docs_per_periodical_per_year || [] }];
+        } else if (seriesType === 'Percent Periodicals With Cited Docs') {
+            series = [{ name: '% Periodicals With ≥1 Cited Document', type: chartType, data: data.percent_periodicals_with_cited_docs_per_year || [] }];
+        } else if (seriesType === 'Cited Documents') {
+            series = [{ name: 'Cited Documents', type: chartType, data: data.docs_with_citations_per_year || [] }];
+        } else if (seriesType === 'Documents') {
             series = [{ name: 'Documents', type: chartType, data: data.ndocs_per_year }];
         } else if (seriesType === 'Citations') {
             series = [{ name: 'Citations', type: chartType, data: data.total_citations_per_year }];
@@ -143,6 +158,8 @@ Indicators.renderChart = function({ chartId, chartDivId, data, seriesType, title
                 return ndocs > 0 ? (data.total_citations_per_year[i] / ndocs).toFixed(4) : 0;
             });
             series = [{ name: 'Citations per Document', type: chartType, data: cpdData }];
+        } else if (seriesType === 'Percent Docs With Citations') {
+            series = [{ name: '% Docs With ≥1 Citation', type: chartType, data: data.percent_docs_with_citations_per_year || [] }];
         }
     }
 
@@ -162,7 +179,7 @@ Indicators.renderChart = function({ chartId, chartDivId, data, seriesType, title
 
 // Handle window resize to adjust charts
 window.addEventListener('resize', () => {
-    ['docs-chart', 'citations-chart', 'citations-per-doc-chart'].forEach(id => {
+    ['periodicals-chart', 'docs-chart', 'citations-chart', 'citations-per-doc-chart', 'cited-docs-chart', 'pct-cited-docs-chart'].forEach(id => {
         const el = document.getElementById(id);
         if (el && el._chartInstance) {
             el._chartInstance.resize();
