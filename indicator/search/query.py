@@ -103,9 +103,26 @@ def add_must_terms(name, values, must):
     must.append({"terms": {name: values}})
 
 
-def build_indicator_aggs(field_settings, breakdown_variable, data_source_name):
+def _get_periodical_identifier_field(field_settings):
+    """Return a keyword field suitable for cardinality of periodicals."""
+    for candidate in ("issn", "journal", "source_name"):
+        fl = field_settings.get(candidate, {}).get("index_field_name")
+        if fl:
+            if not str(fl).endswith(".keyword"):
+                return f"{fl}.keyword"
+            return fl
+    return None
+
+
+def build_indicator_aggs(field_settings, breakdown_variable, data_source_name, study_unit="document"):
+    if study_unit == "document_and_citation":
+        study_unit = "document"
     year_var = "publication_year" if data_source_name != "social" else "year"
     cited_by_count_field = field_settings.get("cited_by_count", {}).get("index_field_name")
+
+    periodical_field = None
+    if study_unit == "journal":
+        periodical_field = _get_periodical_identifier_field(field_settings)
 
     aggs = {
         "per_year": {
@@ -122,6 +139,21 @@ def build_indicator_aggs(field_settings, breakdown_variable, data_source_name):
         aggs["per_year"]["aggs"] = {
             "total_citations": {"sum": {"field": cited_by_count_field}}
         }
+
+        docs_with_citations_agg = {
+            "filter": {"range": {cited_by_count_field: {"gt": 0}}}
+        }
+        if study_unit == "journal" and periodical_field:
+            docs_with_citations_agg["aggs"] = {
+                "unique_periodicals": {"cardinality": {"field": periodical_field}}
+            }
+        aggs["per_year"]["aggs"]["docs_with_citations"] = docs_with_citations_agg
+
+    if study_unit == "journal":
+        if periodical_field:
+            aggs["per_year"]["aggs"]["unique_periodicals"] = {
+                "cardinality": {"field": periodical_field}
+            }
 
     if breakdown_variable:
         breakdown_field_name = field_settings.get(breakdown_variable, {}).get("index_field_name")
