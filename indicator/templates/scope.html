@@ -1,0 +1,100 @@
+{% load static %}
+
+<div>
+    <h4 class="my-2">Scope</h4>
+
+    <form id="data-source-form" class="mb-2">
+      <label class="form-label" for="data_source">Data Source</label>
+      <div class="input-group">
+          <select class="form-select" id="selectDataSource" name="data_source" style="height: 2.25rem;">
+              <option selected value="world">World</option>
+              <option value="brazil">Brazil</option>
+              <option value="scielo">SciELO Network</option>
+          </select>
+      </div>
+    </form>
+
+    <form id="study-unit-form" class="mb-2">
+      <label class="form-label" for="study_unit">Aggregation Mode</label>
+      <div class="input-group">
+        <select class="form-select" id="selectStudyUnit" name="study_unit" style="height: 2.25rem;">
+            <option selected value="document">Document</option>
+            <option value="journal">Journal</option>
+        </select>
+      </div>
+    </form>
+</div>
+
+{% block inline_javascript %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // Data source form handling
+    const dataSourceForm = document.getElementById('data-source-form');
+    const selectDataSource = document.getElementById('selectDataSource');
+
+    const currentDataSource = '{{ data_source }}';
+    let currentStudyUnit = '{{ study_unit|default:"document" }}';
+    if (currentStudyUnit === 'document_and_citation') {
+      currentStudyUnit = 'document';
+    }
+
+    // Set initial value only if option exists
+    if (selectDataSource && currentDataSource) {
+      const hasOption = Array.from(selectDataSource.options).some(o => o.value === currentDataSource);
+      if (hasOption) {
+        selectDataSource.value = currentDataSource;
+      }
+    }
+
+    dataSourceForm.addEventListener('submit', function (event) {
+      event.preventDefault();
+      const selectedDataSource = selectDataSource.value;
+      if (selectedDataSource) {
+        const params = new URLSearchParams(window.location.search);
+        params.set('study_unit', currentStudyUnit || 'document');
+        window.location.href = `/indicators/${selectedDataSource}/?${params.toString()}`;
+      }
+    });
+
+    if (selectDataSource) {
+      selectDataSource.addEventListener('change', () => {
+        dataSourceForm.requestSubmit();
+      });
+    }
+
+    // Study unit form handling
+    const studyUnitForm = document.getElementById('study-unit-form');
+    const selectStudyUnit = document.getElementById('selectStudyUnit');
+
+    if (selectStudyUnit && currentStudyUnit) {
+      const hasOption = Array.from(selectStudyUnit.options).some(o => o.value === currentStudyUnit);
+      if (hasOption) {
+        selectStudyUnit.value = currentStudyUnit;
+      }
+    }
+
+    studyUnitForm.addEventListener('submit', function (event) {
+      event.preventDefault();
+      const selectedStudyUnit = selectStudyUnit.value;
+      if (selectedStudyUnit) {
+        const dataSourceForRedirect = (currentDataSource && ['world', 'brazil', 'scielo'].includes(currentDataSource))
+          ? currentDataSource
+          : (selectDataSource ? selectDataSource.value : 'world');
+
+        const params = new URLSearchParams(window.location.search);
+        params.set('study_unit', selectedStudyUnit);
+        if (selectedStudyUnit === 'journal') {
+          params.delete('breakdown_variable');
+        }
+        window.location.href = `/indicators/${dataSourceForRedirect}/?${params.toString()}`;
+      }
+    });
+
+    if (selectStudyUnit) {
+      selectStudyUnit.addEventListener('change', () => {
+        studyUnitForm.requestSubmit();
+      });
+    }
+  });
+</script>
+{% endblock %}

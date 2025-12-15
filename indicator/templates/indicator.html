@@ -13,26 +13,18 @@
 
 
 {% block content %}
-<section id="content" class="mt-3">
+<section id="content" class="mt-oca-section-start">
   <div class="container">
-    <div class="row mx-1">
-        <div class="card mb-2 p-3 bg-light shadow-sm">
-          <div class="page-title-content">
-            <h1 class="mb-1">Indicators</h1>
-            <span class="text-muted">Data panel of the OCABr Observatory</span>
-          </div>
-        </div>
-    </div>
-    <div class="row mx-1">
-      <div class="card mb-2 p-3 bg-light shadow-sm">
-        <h4 class="my-0">{{ data_source_display_name }}</h4>
-      </div>
-    </div>
-
-    <div class="row mx-1" id="mainContent">
-      <!-- Menu -->
-      <div class="col-lg-3 card mb-2 pt-2 bg-light shadow-sm align-self-start">
+    <div class="row ml-oca-filter" id="mainContent">
+      <!-- Add filters menu -->
+      <div class="col-lg-3 card mb-2 pt-2 bg-oca-light shadow-sm align-self-start">
         <div id="menu-container">
+          {% if data_source != "social" %}
+            <!-- Add scope selectors -->
+            {% include "scope.html" %}
+          {% endif %}
+
+          <!-- Add filters menu based on data source -->
           {% if data_source == "journal_metrics" %}
             {% include "menu_ranking.html" %}
           {% else %}

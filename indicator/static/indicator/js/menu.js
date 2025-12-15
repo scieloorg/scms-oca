@@ -1,4 +1,4 @@
-function initIndicatorForm(dataSource) {
+function initIndicatorForm(dataSource, studyUnit) {
   const menuForm = document.getElementById('menu-form');
   if (!menuForm) return;
 
@@ -22,7 +22,8 @@ function initIndicatorForm(dataSource) {
     // Prepare payload for the POST request
     const payload = {
       breakdown_variable: breakdownVariable,
-      filters: filters
+      filters: filters,
+      study_unit: studyUnit
     };
 
     // Send POST request to fetch data
@@ -43,7 +44,7 @@ function initIndicatorForm(dataSource) {
       updateAppliedFiltersDisplay();
 
       // Render charts or tables based on data source
-      renderChartsContainer(data, dataSource, formData.get('csrfmiddlewaretoken'));
+      renderChartsContainer(data, dataSource, studyUnit, formData.get('csrfmiddlewaretoken'));
     })
     .catch(error => console.error('Error:', error))
     .finally(() => {
@@ -91,34 +92,95 @@ function initIndicatorForm(dataSource) {
   }
 }
 
-function renderChartsContainer(data, dataSource, csrfMiddlewareToken) {
+function renderChartsContainer(data, dataSource, studyUnit, csrfMiddlewareToken) {
   const breakdownVariable = data.breakdown_variable;
-  const breakdownLabel = breakdownVariable ? ` by ${breakdownVariable.replace(/_/g, ' ')}` : ' per Year';
+  const breakdownLabel = ` per Year${breakdownVariable ? ` by ${breakdownVariable.replace(/_/g, ' ')}` : ''}`;
+  const unitSuffix = '';
 
-  // Render documents chart
-  window.Indicators.renderChart({
-    chartId: 'docs-chart',
-    chartDivId: 'docs-chart-div',
-    data: data,
-    seriesType: 'Documents',
-    title: `Documents${breakdownLabel}`,
-  });
+  if (studyUnit === 'journal') {
+    window.Indicators.renderChart({
+      chartId: 'periodicals-chart',
+      chartDivId: 'periodicals-chart-div',
+      data: data,
+      seriesType: 'Periodicals',
+      title: `Unique Periodicals (sources)${breakdownLabel}`,
+    });
 
-  // Render citations chart
-  window.Indicators.renderChart({
-    chartId: 'citations-chart',
-    chartDivId: 'citations-chart-div',
-    data: data,
-    seriesType: 'Citations',
-    title: `Citations${breakdownLabel}`,
-  });
+    window.Indicators.renderChart({
+      chartId: 'docs-chart',
+      chartDivId: 'docs-chart-div',
+      data: data,
+      seriesType: 'Documents per Periodical',
+      title: `Avg Documents per Periodical${breakdownLabel}${unitSuffix}`,
+    });
 
-  // Render citations per document chart
-  window.Indicators.renderChart({
-    chartId: 'citations-per-doc-chart',
-    chartDivId: 'citations-per-doc-chart-div',
-    data: data,
-    seriesType: 'Citations per Document',
-    title: `Citations per Document${breakdownLabel}`,
-  });
+    window.Indicators.renderChart({
+      chartId: 'citations-chart',
+      chartDivId: 'citations-chart-div',
+      data: data,
+      seriesType: 'Citations per Periodical',
+      title: `Avg Citations per Periodical${breakdownLabel}${unitSuffix}`,
+    });
+
+    window.Indicators.renderChart({
+      chartId: 'citations-per-doc-chart',
+      chartDivId: 'citations-per-doc-chart-div',
+      data: data,
+      seriesType: 'Cited Documents per Periodical',
+      title: `Avg Cited Documents per Periodical${breakdownLabel}${unitSuffix}`,
+    });
+
+    window.Indicators.renderChart({
+      chartId: 'pct-cited-docs-chart',
+      chartDivId: 'pct-cited-docs-chart-div',
+      data: data,
+      seriesType: 'Percent Periodicals With Cited Docs',
+      title: `% Periodicals With ≥1 Cited Document${breakdownLabel}${unitSuffix}`,
+    });
+  } else {
+    // Render documents chart
+    window.Indicators.renderChart({
+      chartId: 'docs-chart',
+      chartDivId: 'docs-chart-div',
+      data: data,
+      seriesType: 'Documents',
+      title: `Total Documents${breakdownLabel}${unitSuffix}`,
+    });
+
+    // Render citations chart
+    window.Indicators.renderChart({
+      chartId: 'citations-chart',
+      chartDivId: 'citations-chart-div',
+      data: data,
+      seriesType: 'Citations',
+      title: `Total Citations${breakdownLabel}${unitSuffix}`,
+    });
+
+    // Render citations per document chart
+    window.Indicators.renderChart({
+      chartId: 'citations-per-doc-chart',
+      chartDivId: 'citations-per-doc-chart-div',
+      data: data,
+      seriesType: 'Citations per Document',
+      title: `Citations per Document${breakdownLabel}${unitSuffix}`,
+    });
+
+    // Render cited documents chart
+    window.Indicators.renderChart({
+      chartId: 'cited-docs-chart',
+      chartDivId: 'cited-docs-chart-div',
+      data: data,
+      seriesType: 'Cited Documents',
+      title: `Cited Documents (≥1 citation)${breakdownLabel}${unitSuffix}`,
+    });
+
+    // Render % docs with citations chart
+    window.Indicators.renderChart({
+      chartId: 'pct-cited-docs-chart',
+      chartDivId: 'pct-cited-docs-chart-div',
+      data: data,
+      seriesType: 'Percent Docs With Citations',
+      title: `% Documents With ≥1 Citation${breakdownLabel}${unitSuffix}`,
+    });
+  }
 }

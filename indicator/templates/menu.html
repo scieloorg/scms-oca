@@ -29,6 +29,7 @@
   // Initialize the menu with the appropriate data source
   document.addEventListener('DOMContentLoaded', () => {
     const dataSource = "{{ data_source|escapejs }}";
-    initIndicatorForm(dataSource);
+    const studyUnit = "{{ study_unit|default:'document'|escapejs }}";
+    initIndicatorForm(dataSource, studyUnit);
   });
 </script>
