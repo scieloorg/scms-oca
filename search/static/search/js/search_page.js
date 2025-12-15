@@ -11,10 +11,107 @@ class SearchPageManager {
     }
     
     init() {
+        this.setupDataSourceSelector();
         this.setupSearchForm();
         this.setupFilters();
         this.updateSearchQueryBadge();
         this.preselectFiltersFromURL();
+    }
+    
+    setupDataSourceSelector() {
+        const dataSourceSelect = document.getElementById('data-source-select');
+        if (dataSourceSelect) {
+            dataSourceSelect.addEventListener('change', (e) => {
+                this.handleDataSourceChange(e.target.value);
+            });
+        }
+    }
+    
+    async handleDataSourceChange(newDataSource) {
+        this.dataSourceName = newDataSource;
+        
+        // Clear current filters
+        this.clearAllFilters();
+        
+        // Fetch new filters for the selected data source
+        await this.loadFiltersForDataSource(newDataSource);
+        
+        // Apply filters and get new results
+        this.applyFiltersAjax();
+    }
+    
+    clearAllFilters() {
+        // Destroy all Select2 instances
+        Object.keys(this.filters).forEach(key => {
+            const selectElement = document.getElementById(key);
+            if (selectElement && $(selectElement).data('select2')) {
+                $(selectElement).select2('destroy');
+            }
+        });
+        
+        // Clear filters container
+        const filtersContainer = document.getElementById('filters-container');
+        if (filtersContainer) {
+            filtersContainer.innerHTML = '<div class="text-center p-3"><i class="icon-spinner icon-spin"></i> Carregando filtros...</div>';
+        }
+    }
+    
+    async loadFiltersForDataSource(dataSource) {
+        try {
+            const response = await fetch(`/search/api/filters/?data_source=${dataSource}`);
+            if (!response.ok) throw new Error('Failed to load filters');
+            
+            const data = await response.json();
+            this.filters = data.filters || {};
+            this.filterMetadata = data.filter_metadata || {};
+            
+            // Re-render filters HTML
+            this.renderFilters();
+            
+            // Re-initialize Select2 for new filters
+            this.setupFilters();
+        } catch (error) {
+            console.error('Error loading filters:', error);
+            const filtersContainer = document.getElementById('filters-container');
+            if (filtersContainer) {
+                filtersContainer.innerHTML = `
+                    <div class="alert alert-danger" role="alert">
+                        <i class="icon-exclamation-sign"></i> 
+                        Erro ao carregar filtros.
+                    </div>
+                `;
+            }
+        }
+    }
+    
+    renderFilters() {
+        const filtersContainer = document.getElementById('filters-container');
+        if (!filtersContainer) return;
+        
+        let html = '';
+        Object.keys(this.filters).forEach(key => {
+            const options = this.filters[key];
+            const metadata = this.filterMetadata[key] || {};
+            const label = metadata.label || key;
+            
+            if (metadata.class_filter === 'range') {
+                // Range filters would need special handling
+                return;
+            }
+            
+            const multiple = metadata.multiple_selection !== false ? 'multiple' : '';
+            html += `
+                <div class="form-group mb-3">
+                    <label class="form-label" for="${key}">${label}</label>
+                    <select ${multiple} id="${key}" name="${key}" class="form-control filter-select" data-filter-key="${key}" aria-label="${label}">
+                        ${metadata.multiple_selection === false ? `<option value="">${label}</option>` : ''}
+                        ${options.map(opt => `<option value="${opt.key}">${opt.label}</option>`).join('')}
+                    </select>
+                </div>
+            `;
+        });
+        
+        filtersContainer.innerHTML = html;
     }
     
     setupSearchForm() {

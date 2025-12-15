@@ -2,6 +2,30 @@
 {% load custom_filters %}
 {% load static %}
 
+{% block header_content %}
+    <div class="row mx-1">
+        <div class="card mb-2 p-3 bg-light shadow-sm">
+        <div class="page-title-content">
+            <h1 class="mb-1">Search</h1>
+            <span class="text-muted">Data of the OCABr Observatory</span>
+        </div>
+        </div>
+    </div>
+
+    <div class="row mx-1">
+    <div class="card mb-2 p-3 bg-light shadow-sm">
+        <h4 style="margin-bottom: 2%;">Data Source</h4>
+        <select id="data-source-select" class="form-select" aria-label="Data Source">
+            {% for ds in available_data_sources %}
+                <option value="{{ ds.key }}" {% if ds.key == data_source_name %}selected{% endif %}>
+                    {{ ds.display_name }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+    </div>
+{% endblock%}
+
 {% block search_sidebar %}
     {% include "search/include/filters.html" %}
 {% endblock %}
