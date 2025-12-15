@@ -14,14 +14,28 @@
 
     <div class="row mx-1">
     <div class="card mb-2 p-3 bg-light shadow-sm">
-        <h4 style="margin-bottom: 2%;">Data Source</h4>
-        <select id="data-source-select" class="form-select" aria-label="Data Source">
-            {% for ds in available_data_sources %}
-                <option value="{{ ds.key }}" {% if ds.key == data_source_name %}selected{% endif %}>
-                    {{ ds.display_name }}
-                </option>
-            {% endfor %}
-        </select>
+        <div class="dropdown">
+            <button class="dropdown-toggle" type="button" id="data-source-dropdown" data-bs-toggle="dropdown" aria-expanded="false" style="background: none; border: none; padding: 0; font: inherit; cursor: pointer; color: inherit;">
+                <span id="selected-data-source">
+                    {% for ds in available_data_sources %}
+                        {% if ds.key == data_source_name %}{{ ds.display_name }}{% endif %}
+                    {% endfor %}
+                </span>
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="data-source-dropdown">
+                {% for ds in available_data_sources %}
+                    <li>
+                        <a class="dropdown-item {% if ds.key == data_source_name %}active{% endif %}" 
+                           href="#" 
+                           data-source-key="{{ ds.key }}"
+                           data-source-name="{{ ds.display_name }}">
+                            {{ ds.display_name }}
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+        <input type="hidden" id="data-source-select" value="{{ data_source_name }}">
     </div>
     </div>
 {% endblock%}
@@ -77,5 +91,29 @@
         filters: JSON.parse(document.getElementById('filters-data').textContent),
         filterMetadata: JSON.parse(document.getElementById('filter-metadata-data').textContent),
     };
+    
+    // Handle dropdown UI updates and trigger change event
+    document.addEventListener('DOMContentLoaded', function() {
+        const dropdownItems = document.querySelectorAll('.dropdown-menu .dropdown-item');
+        dropdownItems.forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                const sourceKey = this.getAttribute('data-source-key');
+                const sourceName = this.getAttribute('data-source-name');
+                
+                // Update the displayed text
+                document.getElementById('selected-data-source').textContent = sourceName;
+                
+                // Update the hidden input and trigger change (handled by SearchPageManager)
+                const selectElement = document.getElementById('data-source-select');
+                selectElement.value = sourceKey;
+                selectElement.dispatchEvent(new Event('change'));
+                
+                // Update active state
+                dropdownItems.forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+    });
 </script>
 {% endblock %}
