@@ -72,6 +72,15 @@ var hasIntlDisplay = typeof Intl !== 'undefined' && typeof Intl.DisplayNames ===
 var countryDisplay = hasIntlDisplay ? new Intl.DisplayNames(['en'], { type: 'region' }) : null;
 var languageDisplay = hasIntlDisplay ? new Intl.DisplayNames(['en'], { type: 'language' }) : null;
 
+function safeDisplayName(display, code) {
+    if (!display || !code) return null;
+    try {
+        return display.of(code);
+    } catch (e) {
+        return null;
+    }
+}
+
 /**
  * Standardize country code to full country name
  */
@@ -84,7 +93,8 @@ function standardizeCountryCode(countryCode) {
     }
 
     var normalized = String(countryCode).toUpperCase();
-    var label = countryDisplay ? countryDisplay.of(normalized) : null;
+    // Intl.DisplayNames.of throws for invalid region codes.
+    var label = safeDisplayName(countryDisplay, normalized);
 
     return label || normalized;
 }
@@ -108,12 +118,23 @@ function standardizeLanguageCode(langCode) {
         suffix = ` (${suffixMatch[2]})`;
     }
 
+    // Some backends send already-localized names (e.g. "Portuguese") or other
+    // values that are not valid language tags; in that case, keep as-is.
+    languageOnly = String(languageOnly).trim();
+    // Keep only the first token to avoid values like "en;fr" or "pt, en".
+    languageOnly = languageOnly.split(/[\s,;]+/)[0];
     var bcp47 = languageOnly.replace(/_/g, '-');
+    var looksLikeLangTag = /^[A-Za-z]{2,3}([\-][A-Za-z]{2,4})*$/.test(bcp47);
+    if (!looksLikeLangTag) {
+        return languageOnly + suffix;
+    }
+
     var parts = bcp47.split('-');
     var languagePart = parts[0].toLowerCase();
     var regionPart = parts.length > 1 ? parts[1].toUpperCase() : null;
 
-    var label = languageDisplay ? languageDisplay.of(languagePart) : null;
+    // Intl.DisplayNames.of throws for invalid language codes.
+    var label = safeDisplayName(languageDisplay, languagePart);
     if (!label) label = languagePart.toUpperCase();
     else label = label.charAt(0).toUpperCase() + label.slice(1);
 
