@@ -34,7 +34,7 @@
 
     const currentDataSource = '{{ data_source }}';
     let currentStudyUnit = '{{ study_unit|default:"document" }}';
-    if (currentStudyUnit === 'document_and_citation') {
+    if (!['document', 'journal'].includes(currentStudyUnit)) {
       currentStudyUnit = 'document';
     }
 

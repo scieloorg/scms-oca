@@ -115,7 +115,7 @@ def _get_periodical_identifier_field(field_settings):
 
 
 def build_indicator_aggs(field_settings, breakdown_variable, data_source_name, study_unit="document"):
-    if study_unit == "document_and_citation":
+    if study_unit not in ("document", "journal"):
         study_unit = "document"
     year_var = "publication_year" if data_source_name != "social" else "year"
     cited_by_count_field = field_settings.get("cited_by_count", {}).get("index_field_name")

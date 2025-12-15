@@ -85,7 +85,7 @@ def parse_journal_metrics_timeseries(source):
 
 
 def parse_indicator_response(res, breakdown_variable, study_unit="document"):
-    if study_unit == "document_and_citation":
+    if study_unit not in ("document", "journal"):
         study_unit = "document"
     aggs = res.get("aggregations", {})
     per_year_buckets = aggs.get("per_year", {}).get("buckets", [])

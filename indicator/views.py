@@ -26,7 +26,7 @@ def data_view(request):
     payload = json.loads(body_text) if body_text else {}
     filters = payload.get("filters", {})
     study_unit = payload.get("study_unit") or request.GET.get("study_unit") or "document"
-    if study_unit == "document_and_citation":
+    if study_unit not in ("document", "journal"):
         study_unit = "document"
 
     data, error = controller.get_indicator_data(data_source_name, dict(filters), study_unit=study_unit)
@@ -44,7 +44,7 @@ def indicator_view(request, data_source_name):
 
     cleaned_filters = utils.clean_form_filters(request.GET.dict())
     study_unit = request.GET.get("study_unit", "document")
-    if study_unit == "document_and_citation":
+    if study_unit not in ("document", "journal"):
         study_unit = "document"
     context = {
         "data_source": data_source_name,

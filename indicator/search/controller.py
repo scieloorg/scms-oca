@@ -6,20 +6,34 @@ from . import parser as indicator_parser
 from . import utils
 
 
+def _get_es_or_error():
+    es = get_es_client()
+    if not es:
+        return None, "Service unavailable"
+    return es, None
+
+
+def _get_index_name_or_error(data_source_name):
+    data_source_config = data_sources_with_settings.get_data_source(data_source_name)
+    index_name = data_source_config.get("index_name") if data_source_config else None
+    if not index_name:
+        return None, "Invalid data_source"
+    return index_name, None
+
+
 def get_journal_metrics_data(form_filters):
     """
     Orchestrates the retrieval of journal metrics data.
     """
-    es = get_es_client()
-    if not es:
-        return None, "Service unavailable"
+    es, error = _get_es_or_error()
+    if error:
+        return None, error
 
     data_source = "journal_metrics"
-    data_source_config = data_sources_with_settings.get_data_source(data_source)
     data_source_settings = data_sources_with_settings.get_field_settings(data_source)
-    index_name = data_source_config.get("index_name") if data_source_config else None
-    if not index_name:
-        return None, "Invalid data_source"
+    index_name, error = _get_index_name_or_error(data_source)
+    if error:
+        return None, error
 
     year = form_filters.pop("year", None)
     ranking_metric = form_filters.pop("ranking_metric", "cwts_snip")
@@ -51,15 +65,14 @@ def get_journal_metrics_timeseries(issn=None, journal=None):
     if not issn and not journal:
         return None, "Missing journal identifier"
 
-    es = get_es_client()
-    if not es:
-        return None, "Service unavailable"
+    es, error = _get_es_or_error()
+    if error:
+        return None, error
 
     data_source = "journal_metrics"
-    data_source_config = data_sources_with_settings.get_data_source(data_source)
-    index_name = data_source_config.get("index_name") if data_source_config else None
-    if not index_name:
-        return None, "Invalid data_source"
+    index_name, error = _get_index_name_or_error(data_source)
+    if error:
+        return None, error
 
     must = []
     if issn:
@@ -87,11 +100,10 @@ def get_journal_metrics_timeseries(issn=None, journal=None):
 
 
 def get_indicator_data(data_source_name, filters, study_unit="document"):
-    if study_unit == "document_and_citation":
+    """Orchestrates the retrieval of indicator data from Elasticsearch."""
+
+    if study_unit not in ("document", "journal"):
         study_unit = "document"
-    """
-    Orchestrates the retrieval of indicator data from Elasticsearch.
-    """
     es = get_es_client()
     if not es:
         return None, "Service unavailable"
