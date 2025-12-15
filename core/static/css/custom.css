@@ -40,8 +40,24 @@
   margin-left: auto;
 }
 
-#header .header-row .primary-menu .navbar-collapse {
+#header .header-row .primary-menu .navbar-collapse,
+#header .header-row .primary-menu .mobile-primary-menu {
   justify-content: flex-end;
+}
+
+/* Muda linha horizontal do header para azul escuro */
+#header-wrap {
+  border-bottom: 0.1rem solid #1c438c !important;
+}
+
+/* Muda cor do footer para azul claro */
+#footer {
+  background-color: #f1f2f4 !important;
+}
+
+/* Muda cor da area de copyrights para azul claro */
+#copyrights {
+  background-color: #f1f2f4 !important;
 }
 
 @media (max-width: 991.98px) {
@@ -50,11 +66,8 @@
     align-items: center;
   }
 
-  body:not(.primary-menu-open) .flat-primary-menu {
-    display: none;
-  }
-
-  #header .header-row .primary-menu .navbar-collapse {
+  #header .header-row .primary-menu .navbar-collapse,
+  #header .header-row .primary-menu .mobile-primary-menu {
     position: absolute;
     top: 100%;
     right: 0;
@@ -66,15 +79,280 @@
     border: 1px solid rgba(0, 0, 0, 0.1);
     border-radius: 0.25rem;
     box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.15);
-    z-index: 1040;
-  }
-
-  #header .header-row .primary-menu .navbar-collapse.collapse:not(.show) {
-    display: none !important;
+    z-index: 1050;
   }
 
   #header .header-row .primary-menu .navbar-nav {
     flex-direction: column;
     width: 100%;
   }
+
+  /* Mobile dropdown: usa o mesmo trigger do tema, mas com layout vertical */
+  #header .header-row .primary-menu > .mobile-primary-menu {
+    margin-top: 0;
+  }
+
+  #header .header-row #primary-menu-trigger {
+    position: relative;
+    z-index: 1051;
+  }
+
+  .primary-menu .mobile-primary-menu {
+    overflow-y: auto;
+    max-height: calc(100vh - 7rem);
+  }
+
+  .primary-menu .mobile-primary-menu .menu-link {
+    margin-right: 0 !important;
+    white-space: normal;
+  }
+
+  /* Visual mobile: “lista” (não botões desktop) */
+  .primary-menu .mobile-primary-menu .menu-item {
+    border-top: 0;
+    padding: 0;
+  }
+
+  .primary-menu .mobile-primary-menu > .menu-item + .menu-item {
+    margin-top: 0.5rem;
+  }
+
+  .primary-menu .mobile-primary-menu .menu-link {
+    background: #fff !important;
+    color: #1c438c !important;
+    font-size: 1rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0 !important;
+    text-transform: none !important;
+    box-shadow: none !important;
+    border: 1px solid #ced9ed !important;
+    border-radius: 0.35rem !important;
+    padding: 0.65rem 0.75rem !important;
+  }
+
+  .primary-menu .mobile-primary-menu .menu-item.active > .menu-link,
+  .primary-menu .mobile-primary-menu .menu-item:hover > .menu-link {
+    background: #ebeff7 !important;
+    border-color: #1c438c !important;
+  }
+
+  .primary-menu .mobile-primary-menu .sub-menu-container .menu-link {
+    font-size: 0.95rem !important;
+    font-weight: 500 !important;
+    border-color: #ebeff7 !important;
+  }
+
+  .primary-menu .mobile-primary-menu .sub-menu-container {
+    margin-top: 0.5rem !important;
+  }
+
+  .primary-menu .mobile-primary-menu .sub-menu-container .menu-item + .menu-item {
+    margin-top: 0.4rem;
+  }
+
+  .primary-menu .mobile-primary-menu .sub-menu-container {
+    padding-left: 0 !important;
+    margin-top: 0 !important;
+  }
+
+  .primary-menu .mobile-primary-menu .sub-menu-horizontal {
+    display: block !important;
+    padding-top: 0.5rem !important;
+  }
+
+  .primary-menu .mobile-primary-menu .sub-menu-horizontal .menu-item {
+    margin: 0;
+  }
+
+
+  .flat-menu.with_heading > ul {
+    display: block;
+    position: static;
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .flat-menu.with_heading > ul > li {
+    margin-left: 0;
+    margin-top: 0.25rem;
+  }
+
+  .flat-menu.with_heading > ul {
+    display: block;
+    position: static;
+    width: 100%;
+  }
+
+  .flat-menu.with_heading > ul > li {
+    margin-left: 0;
+    margin-top: 0.25rem;
+  }
+
+  /* Flat menus dentro do hambúrguer: herdar o “look mobile” */
+  .primary-menu .mobile-primary-menu .flat-menu.with_heading {
+    margin-top: 1rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid #ebeff7;
+  }
+
+  .primary-menu .mobile-primary-menu .flat-menu.with_heading > h4 {
+    margin: 0 0 0.5rem 0 !important;
+    font-size: 0.9rem !important;
+    font-weight: 700 !important;
+    color: #1c438c !important;
+  }
+
+  .primary-menu .mobile-primary-menu .flat-menu.with_heading > ul > li > a {
+    display: block;
+    background: #fff !important;
+    color: #1c438c !important;
+    border: 1px solid #ced9ed !important;
+    border-radius: 0.35rem !important;
+    padding: 0.6rem 0.75rem !important;
+    font-size: 0.95rem !important;
+    font-weight: 600 !important;
+    text-transform: none !important;
+  }
+
+  .primary-menu .mobile-primary-menu .flat-menu.with_heading > ul > li:hover > a {
+    background: #ebeff7 !important;
+    border-color: #1c438c !important;
+  }
+}
+
+/* Alinha menu à esquerda */
+.primary-menu > .menu-container {
+  justify-content: flex-start;
+  margin-top: 2rem;
+}
+
+.primary-menu .menu-link {
+  color: #1c438c;
+  font-size: 1rem;
+  transition: background-color 0.2s, border-color 0.2s;
+  padding-top: 0.65rem !important;
+  padding-bottom: 0.65rem !important;
+  margin-right: 1.5rem !important;
+  text-transform: capitalize;
+}
+
+/* botao raiz - estado normal */
+.primary-menu > .menu-container > .menu-item > .menu-link {
+  background-color: #ebeff7;
+  box-shadow: 0 4px 0 0 transparent;
+  transition: background-color 0.2s, box-shadow 0.2s;
+}
+
+/* botao raiz - estado selecionado */
+.primary-menu > .menu-container > .menu-item:hover > .menu-link,
+.primary-menu > .menu-container > .menu-item.active > .menu-link {
+  background-color: #ced9ed;
+  box-shadow: 0 4px 0 0 #1c438c;
+}
+
+.primary-menu .menu-item .sub-menu-container {
+    background: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+    width: auto !important;
+}
+
+.sub-menu-horizontal {
+  display: flex !important;
+  flex-direction: row !important;
+  list-style: none !important;
+  padding-left: 0 !important;
+  padding-top: 1rem !important;
+}
+
+nav.primary-menu .sub-menu-horizontal .menu-item > .menu-link,
+nav.primary-menu .sub-menu-horizontal .menu-item > a.menu-link {
+  padding: 0.6rem 0.6rem !important;
+  font-size: 1rem !important;
+  border-radius: 0.3rem !important;
+  text-transform: lowercase;
+  background-color: #ebeff7 !important; /* estado normal */
+  color: #1c438c !important;
+}
+
+nav.primary-menu .sub-menu-horizontal .menu-item:hover > .menu-link,
+nav.primary-menu .sub-menu-horizontal .menu-item:hover > a.menu-link,
+nav.primary-menu .sub-menu-horizontal .menu-item.active > .menu-link,
+nav.primary-menu .sub-menu-horizontal .menu-item.active > a.menu-link {
+  background-color: #ced9ed !important; /* estado selecionado */
+}
+
+nav.primary-menu .sub-menu-horizontal .menu-item.active > .menu-link,
+nav.primary-menu .sub-menu-horizontal .menu-item.active > a.menu-link {
+    color: #000;
+}
+
+.primary-menu .sub-menu-container .sub-menu-container {
+    top: 100%;
+    left: 0;
+    background-color: #f9f9f9;
+}
+
+.primary-menu .sub-menu-container .menu-item {
+    position: relative;
+}
+
+.flat-menu.with_heading {
+  position: relative;
+}
+
+.flat-menu.with_heading > h4 {
+  margin: 0 0 0.5rem 0 !important;
+  padding: 0 !important;
+  color: #1c438c !important;
+  font-size: 0.9rem !important;
+}
+
+.flat-menu.with_heading > ul {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: 100%;
+  flex-direction: row;
+  list-style: none !important;
+  padding-left: 0 !important;
+  margin: 0 !important;
+  width: max-content;
+}
+
+.flat-menu.with_heading:hover > ul {
+  display: flex;
+}
+
+@media (min-width: 992px) {
+  .flat-menu.with_heading > ul {
+    gap: 0.5rem;
+  }
+
+  .flat-menu.with_heading > ul > li {
+    margin-left: 0;
+  }
+
+  /* Espaço entre os próprios menus (ex.: About vs Contact) */
+  #header .header-row .flat-menu.with_heading + .flat-menu.with_heading {
+    margin-left: 1rem;
+  }
+}
+
+.flat-menu.with_heading > ul > li {
+  margin-left: 0.5rem;
+}
+
+.flat-menu.with_heading > ul > li > a {
+  padding: 0.6rem 0.6rem !important;
+  font-size: 1rem !important;
+  border-radius: 0.3rem !important;
+  text-transform: lowercase;
+  background-color: #ebeff7 !important; /* estado normal */
+  color: #1c438c !important;
+  font-weight: 600 !important;
+}
+
+.flat-menu.with_heading > ul > li:hover > a {
+  background-color: #ced9ed !important; /* estado selecionado */
 }
