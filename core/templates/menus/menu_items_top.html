@@ -1,0 +1,20 @@
+{% load i18n %}
+{% load string_filters %}
+{% load menu_context %}
+
+{% get_menu_context request as menu_ctx %}
+
+<!-- Sobre -->
+<li class="menu-item {% if menu_ctx.is_about_section %}active{% endif %}">
+    <a class="menu-link" href="/{{ request.LANGUAGE_CODE }}/sobre/"><div>{% trans "Sobre" %}</div></a>
+</li>
+
+<!-- Produção Científica -->
+<li class="menu-item {% if menu_ctx.is_about_producao_cientifica or menu_ctx.is_scientific_context %}active{% endif %}">
+    <a class="menu-link" href="/{{ request.LANGUAGE_CODE }}/sobre-producao-cientifica/"><div>{% trans "Produção Científica" %}</div></a>
+</li>
+
+<!-- Produção Social -->
+<li class="menu-item {% if menu_ctx.is_about_producao_social or menu_ctx.is_social_context %}active{% endif %}">
+    <a class="menu-link" href="/{{ request.LANGUAGE_CODE }}/sobre-producao-social/"><div>{% trans "Produção Social" %}</div></a>
+</li>
