@@ -42,6 +42,7 @@ DATA_SOURCES = {
                     "label": _("Source Index (OpenAlex)"),
                     "support_search_as_you_type": False,
                     "support_query_operator": False,
+                    "category": "source",
                 },
             },
             "source_index_scielo": {
@@ -66,6 +67,7 @@ DATA_SOURCES = {
                     "label": _("Source Type"),
                     "support_search_as_you_type": False,
                     "support_query_operator": False,
+                    "category": "source",
                 },
             },
             # Document fields
@@ -80,6 +82,7 @@ DATA_SOURCES = {
                     "label": _("Access Type"),
                     "support_search_as_you_type": False,
                     "support_query_operator": False,
+                    "category": "document",
                 },
             },
             "document_language": {
@@ -94,6 +97,7 @@ DATA_SOURCES = {
                     "support_search_as_you_type": False,
                     "support_query_operator": False,
                     "display_transform": "language",
+                    "category": "document",
                 },
             },
             "document_type": {
@@ -107,6 +111,7 @@ DATA_SOURCES = {
                     "label": _("Document Type"),
                     "support_search_as_you_type": False,
                     "support_query_operator": False,
+                    "category": "document",
                 },
             },
             "open_access": {
@@ -125,6 +130,7 @@ DATA_SOURCES = {
                     "support_query_operator": False,
                     "multiple_selection": False,
                     "display_transform": "boolean",
+                    "category": "document",
                 },
             },
             "publication_year": {
@@ -138,6 +144,7 @@ DATA_SOURCES = {
                     "label": _("Publication Year"),
                     "support_search_as_you_type": False,
                     "support_query_operator": False,
+                    "category": "document",
                 },
             },
             "document_publication_year_start": {
@@ -197,6 +204,7 @@ DATA_SOURCES = {
                     "label": _("Subject Area Level 0"),
                     "support_search_as_you_type": False,
                     "support_query_operator": False,
+                    "category": "document",
                 },
             },
             "subject_area_level_1": {
@@ -210,6 +218,7 @@ DATA_SOURCES = {
                     "label": _("Subject Area Level 1"),
                     "support_search_as_you_type": False,
                     "support_query_operator": False,
+                    "category": "document",
                 },
             },
             "subject_area_level_2": {
@@ -223,6 +232,7 @@ DATA_SOURCES = {
                     "label": _("Subject Area Level 2"),
                     "support_search_as_you_type": False,
                     "support_query_operator": False,
+                    "category": "document",
                 },
             },
             # Author affiliation fields
@@ -237,6 +247,7 @@ DATA_SOURCES = {
                     "label": _("Institution"),
                     "support_search_as_you_type": True,
                     "support_query_operator": True,
+                    "category": "author_affiliation",
                 },
             },
             "country": {
@@ -251,6 +262,7 @@ DATA_SOURCES = {
                     "support_search_as_you_type": False,
                     "support_query_operator": False,
                     "display_transform": "country",
+                    "category": "author_affiliation",
                 },
             },
             "region_world": {
@@ -264,6 +276,7 @@ DATA_SOURCES = {
                     "label": _("Region (World)"),
                     "support_search_as_you_type": False,
                     "support_query_operator": False,
+                    "category": "author_affiliation",
                 },
             },
             # Metrics fields
@@ -291,6 +304,7 @@ DATA_SOURCES = {
                     "label": _("Source Country"),
                     "support_search_as_you_type": True,
                     "support_query_operator": False,
+                    "category": "source",
                 },
             },
             "source_name": {
@@ -304,6 +318,7 @@ DATA_SOURCES = {
                     "label": _("Source Name"),
                     "support_search_as_you_type": False,
                     "support_query_operator": False,
+                    "category": "source",
                 },
             },
             "issn": {
@@ -317,6 +332,7 @@ DATA_SOURCES = {
                     "label": _("ISSN"),
                     "support_search_as_you_type": True,
                     "support_query_operator": False,
+                    "category": "source",
                 },
             },
         },
@@ -390,6 +406,7 @@ DATA_SOURCES = {
                     "label": _("Publication Year"),
                     "support_search_as_you_type": False,
                     "support_query_operator": False,
+                    "category": "document",
                 },
             },
             "document_publication_year_start": {
@@ -1349,3 +1366,7 @@ def get_source_fields_by_data_source(data_source):
 def get_result_template_by_data_source(data_source):
     """Get the result template path for a data source."""
     return DATA_SOURCES.get(data_source, {}).get("result_template", "")
+
+
+def get_display_name_by_data_source(data_source):
+    return DATA_SOURCES.get(data_source, {}).get("display_name", "")

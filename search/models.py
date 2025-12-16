@@ -10,6 +10,7 @@ from search_gateway.data_sources_with_settings import (
     get_index_name_from_data_source,
     get_result_template_by_data_source,
 )
+from search_gateway.filters import FILTER_CATEGORIES
 from search_gateway.parser import extract_selected_filters
 from search_gateway.service import SearchGatewayService
 
@@ -57,6 +58,11 @@ class SearchPage(RoutablePageMixin, Page):
         context["search_query"] = search_query
         context["result_template"] = get_result_template_by_data_source(data_source_name)
         context["available_data_sources"] = get_available_data_sources(data_sources=["social_production", "world"])
+        context["filter_categories"] = FILTER_CATEGORIES
+        context["grouped_filters"] = self.group_filters_by_category(
+            context.get("filters", {}), 
+            context.get("filter_metadata", {})
+        )
         return context
 
     @route(r'^$')
@@ -86,6 +92,20 @@ class SearchPage(RoutablePageMixin, Page):
     def set_filters_metadata(self,context, filters, service):
         metadata = service.get_filter_metadata(filters)
         context['filter_metadata'] = metadata
+    
+    def group_filters_by_category(self, filters, filter_metadata):
+        """Group filters by their category property"""
+        categorized = {}
+        
+        for key, options in filters.items():
+            metadata = filter_metadata.get(key, {})
+            category = metadata.get('category', 'other')
+            
+            if category not in categorized:
+                categorized[category] = []
+            categorized[category].append((key, options))
+        
+        return categorized
 
     @staticmethod
     def get_results_data(request, data_source_name, search_query, selected_filters, source_fields):
