@@ -1,0 +1,57 @@
+{% load i18n %}
+{% load string_filters %}
+{% load wagtailcore_tags %}
+{% load menu_context %}
+
+{% get_menu_context request as menu_ctx %}
+
+{% comment %}
+Menu inferior (contextual):
+- Se estiver em Produção Social (indicators/social, evolucao-producaosocial- ou searchv2 com menu_scope), usa links sociais.
+- Caso contrário, assume Produção Científica.
+{% endcomment %}
+
+<!-- Indicadores -->
+<li class="menu-item {% if menu_ctx.is_about_indicadores or menu_ctx.path|startswith:'/indicators/world/' or menu_ctx.path|startswith:'/indicators/social/' %}active{% endif %}">
+    {% if menu_ctx.is_about_section %}
+        <a class="menu-link" href="/{{ request.LANGUAGE_CODE }}/sobre-indicadores/"><div>{% trans "Indicadores" %}</div></a>
+    {% elif menu_ctx.is_social_context %}
+        <a class="menu-link" href="{% url 'indicator' 'social' %}"><div>{% trans "Indicadores" %}</div></a>
+    {% else %}
+        <a class="menu-link" href="{% url 'indicator' 'world' %}"><div>{% trans "Indicadores" %}</div></a>
+    {% endif %}
+</li>
+
+<!-- Observação -->
+{% if menu_ctx.is_about_section %}
+    <li class="menu-item {% if menu_ctx.is_about_observacao %}active{% endif %}">
+        <a class="menu-link" href="/{{ request.LANGUAGE_CODE }}/sobre-observacao/"><div>{% trans "Observação" %}</div></a>
+    </li>
+{% elif menu_ctx.is_social_context %}
+    <li class="menu-item {% if request.GET.menu_scope|startswith:'evolucao-producaosocial-' %}active{% endif %}">
+        <a class="menu-link" href="/{{ request.LANGUAGE_CODE }}/chart/?menu_scope=evolucao-producaosocial-pais-documentos"><div>{% trans "Observação" %}</div></a>
+    </li>
+{% else %}
+    <li class="menu-item {% if request.GET.menu_scope|startswith:'evolucao-producao-' %}active{% endif %}">
+        <a class="menu-link" href="/{{ request.LANGUAGE_CODE }}/chart/?menu_scope=evolucao-producao-mundo-pais-documentos"><div>{% trans "Observação" %}</div></a>
+    </li>
+{% endif %}
+
+<!-- Busca -->
+<li class="menu-item {% if menu_ctx.is_about_busca or menu_ctx.path|startswith:'/searchv2' %}active{% endif %}">
+    {% if menu_ctx.is_about_section %}
+        <a class="menu-link" href="/{{ request.LANGUAGE_CODE }}/sobre-busca-bibliografica/"><div>{% trans "Busca" %}</div></a>
+    {% elif menu_ctx.is_social_context %}
+        {% if search_page %}
+            <a class="menu-link" href="{% pageurl search_page %}social/"><div>{% trans "Busca" %}</div></a>
+        {% else %}
+            <a class="menu-link" href="/searchv2/"><div>{% trans "Busca" %}</div></a>
+        {% endif %}
+    {% else %}
+        {% if search_page %}
+            <a class="menu-link" href="{% pageurl search_page %}"><div>{% trans "Busca" %}</div></a>
+        {% else %}
+            <a class="menu-link" href="/searchv2"><div>{% trans "Busca" %}</div></a>
+        {% endif %}
+    {% endif %}
+</li>
