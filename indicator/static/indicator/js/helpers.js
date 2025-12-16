@@ -24,10 +24,13 @@ async function populateSelectFilters(data, exclude=[]) {
         // Prepare and sort options
         const options = (value || [])
             .map(item => {
-                const optionValue = item?.value ?? item ?? '';
-                if (!optionValue) return null;
+                // Backend commonly returns buckets as { key, label }.
+                // Older/other endpoints may return { value, label } or plain strings.
+                const rawValue = item?.value ?? item?.key ?? item?.id ?? item ?? '';
+                if (rawValue === null || rawValue === undefined || rawValue === '') return null;
 
-                const optionLabel = item?.label ?? optionValue;
+                const optionValue = String(rawValue);
+                const optionLabel = item?.label ?? item?.text ?? optionValue;
                 const optionLabelStz = standardizeFieldValue(key, optionLabel);
 
                 return { optionValue, optionLabelStz };
