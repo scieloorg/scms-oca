@@ -3,40 +3,15 @@
 {% load static %}
 
 {% block header_content %}
-    <div class="row mx-1">
-        <div class="card mb-2 p-3 bg-light shadow-sm">
-        <div class="page-title-content">
-            <h1 class="mb-1">Search</h1>
-            <span class="text-muted">Data of the OCABr Observatory</span>
+    <div class="row">
+        <div class="col-12" style="padding-right: 0% !important;">
+            <div class="card mb-2 p-3 bg-oca-light shadow-sm">
+                <div class="page-title-content">
+                    <h1 class="mb-1 fw-bold text-oca-blue-title">{{ display_name }}</h1>
+                    <span class="text-muted">Data of the OCABr Observatory</span>
+                </div>
+            </div>
         </div>
-        </div>
-    </div>
-
-    <div class="row mx-1">
-    <div class="card mb-2 p-3 bg-light shadow-sm">
-        <div class="dropdown">
-            <button class="dropdown-toggle" type="button" id="data-source-dropdown" data-bs-toggle="dropdown" aria-expanded="false" style="background: none; border: none; padding: 0; font: inherit; cursor: pointer; color: inherit;">
-                <span id="selected-data-source">
-                    {% for ds in available_data_sources %}
-                        {% if ds.key == data_source_name %}{{ ds.display_name }}{% endif %}
-                    {% endfor %}
-                </span>
-            </button>
-            <ul class="dropdown-menu" aria-labelledby="data-source-dropdown">
-                {% for ds in available_data_sources %}
-                    <li>
-                        <a class="dropdown-item {% if ds.key == data_source_name %}active{% endif %}" 
-                           href="#" 
-                           data-source-key="{{ ds.key }}"
-                           data-source-name="{{ ds.display_name }}">
-                            {{ ds.display_name }}
-                        </a>
-                    </li>
-                {% endfor %}
-            </ul>
-        </div>
-        <input type="hidden" id="data-source-select" value="{{ data_source_name }}">
-    </div>
     </div>
 {% endblock%}
 
@@ -70,10 +45,26 @@
             </div>
         </form>
         
-        <div id="search-query-container" class="mt-3 pt-2 border-top" {% if not search_query %}style="display: none;"{% endif %}>
-            <small class="text-muted">
-                <span id="search-query-badge" class="badge bg-info">Busca: "{{ search_query }}"</span>
-            </small>
+        <div id="active-filters-container" class="mt-3 pt-2 border-top" style="display: none;">
+            <!-- Search Query Section -->
+            <div id="search-query-section" class="mb-2" style="display: none;">
+                <div class="d-flex flex-wrap gap-2 align-items-center">
+                    <small class="text-muted me-2"><strong>Busca:</strong></small>
+                    <span id="search-query-badge" class="badge bg-info" style="font-size: 0.9rem;">
+                        <!-- Search badge will be populated by JavaScript -->
+                    </span>
+                </div>
+            </div>
+            
+            <!-- Filters Section -->
+            <div id="filters-section" style="display: none;">
+                <div class="d-flex flex-wrap gap-2 align-items-center">
+                    <small class="text-muted me-2"><strong>Filtros ativos:</strong></small>
+                    <div id="selected-filters-badges" class="d-flex flex-wrap gap-2">
+                        <!-- Filter badges will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
     {% include "search/include/results.html" %}
@@ -92,28 +83,5 @@
         filterMetadata: JSON.parse(document.getElementById('filter-metadata-data').textContent),
     };
     
-    // Handle dropdown UI updates and trigger change event
-    document.addEventListener('DOMContentLoaded', function() {
-        const dropdownItems = document.querySelectorAll('.dropdown-menu .dropdown-item');
-        dropdownItems.forEach(item => {
-            item.addEventListener('click', function(e) {
-                e.preventDefault();
-                const sourceKey = this.getAttribute('data-source-key');
-                const sourceName = this.getAttribute('data-source-name');
-                
-                // Update the displayed text
-                document.getElementById('selected-data-source').textContent = sourceName;
-                
-                // Update the hidden input and trigger change (handled by SearchPageManager)
-                const selectElement = document.getElementById('data-source-select');
-                selectElement.value = sourceKey;
-                selectElement.dispatchEvent(new Event('change'));
-                
-                // Update active state
-                dropdownItems.forEach(i => i.classList.remove('active'));
-                this.classList.add('active');
-            });
-        });
-    });
 </script>
 {% endblock %}

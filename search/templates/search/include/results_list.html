@@ -9,6 +9,10 @@
 </div>
 
 <div id="results-list" class="results-list">
+    {% comment %}
+    Este template é usado apenas para a renderização inicial da página (server-side).
+    Após a primeira carga, as buscas e filtros AJAX usam renderização client-side via JavaScript.
+    {% endcomment %}
     {% for doc in results_data.search_results %}
         {% include result_template with doc=doc %}
     {% endfor %}

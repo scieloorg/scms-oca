@@ -17,7 +17,7 @@ def get_mapped_filters(filters, field_settings):
         Dict with Elasticsearch field names as keys.
     """
     if not filters:
-        return None
+        return {}
     
     mapped_filters = {}
     for key, value in filters.items():
@@ -51,9 +51,10 @@ def search_documents(
     """
     es = get_es_client()
     data_source = data_sources_with_settings.get_data_source(data_source_name)
-    field_settings = data_sources_with_settings.get_field_settings(data_source_name)
+    field_settings = data_source.get("field_settings", {})
+    index_name = data_source.get("index_name")
     mapped_filters = get_mapped_filters(filters, field_settings)
-
+    
     body = query_builder.build_document_search_body(
         query_text=query_text,
         filters=mapped_filters,
@@ -63,7 +64,7 @@ def search_documents(
         data_source_name=data_source_name,
     )
     
-    res = es.search(index=data_source.get("index_name"), body=body)
+    res = es.search(index=index_name, body=body)
     return response_parser.parse_document_search_response(res)
 
 
