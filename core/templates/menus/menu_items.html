@@ -1,5 +1,7 @@
-{% load i18n %}
+{% load i18n wagtailcore_tags %}
 {% load string_filters %}
+
+{% get_search_page as search_page %}
 
 <!-- Sobre -->
 <li class="menu-item {% if '/sobre/' in request.path %}active{% endif %}">
@@ -59,7 +61,7 @@
             </ul>
         </li>
         <li class="menu-item {% if request.path == '/searchv2' and not request.GET.menu_scope %}active{% endif %}">
-            <a class="menu-link" href="/searchv2"><div>{% trans "Busca" %}</div></a>
+            <a class="menu-link" href="{% pageurl search_page %}"><div>{% trans "Busca" %}</div></a>
         </li>
     </ul>
 </li>
@@ -77,7 +79,7 @@
             <a class="menu-link" href="/chart?menu_scope=evolucao-producaosocial-pais-documentos"><div>{% trans "Observação" %}</div></a>
         </li>
         <li class="menu-item {% if request.path == '/searchv2/' and request.GET.menu_scope %}active{% endif %}">
-            <a class="menu-link" href="/searchv2/"><div>{% trans "Busca" %}</div></a>
+            <a class="menu-link" href="{% pageurl search_page %}social/"><div>{% trans "Busca" %}</div></a>
         </li>
     </ul>
 </li>
