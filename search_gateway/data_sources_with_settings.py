@@ -249,7 +249,7 @@ DATA_SOURCES = {
                     "class_filter": "select2",
                     "label": _("Country"),
                     "support_search_as_you_type": False,
-                    "support_query_operator": False,
+                    "support_query_operator": True,
                     "display_transform": "country",
                 },
             },
