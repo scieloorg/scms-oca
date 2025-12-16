@@ -1,73 +1,83 @@
+{% load i18n %}
 {% load string_filters %}
+
+<!-- Sobre -->
+<li class="menu-item {% if '/sobre/' in request.path %}active{% endif %}">
+    <a class="menu-link" href="/{{ request.LANGUAGE_CODE }}/sobre/"><div>{% trans "Sobre" %}</div></a>
+</li>
+
+<!-- Produção Científica -->
 <li class="menu-item {% if request.path|startswith:'/indicators/world/' or request.GET.menu_scope|startswith:'evolucao-producao-' %}active{% endif %}">
     <span class="menu-link">
-        <div>Scientific Production</div>
+        <div>{% trans "Produção Científica" %}</div>
     </span>
     <ul class="sub-menu-container sub-menu-horizontal">
         <li class="menu-item {% if request.path|startswith:'/indicators/world/' %}active{% endif %}">
-            <a class="menu-link" href="{% url 'indicator' 'world' %}"><div>Indicators</div></a>
+            <a class="menu-link" href="{% url 'indicator' 'world' %}"><div>{% trans "Indicadores" %}</div></a>
         </li>
         <li class="menu-item {% if request.GET.menu_scope|startswith:'evolucao-producao-' %}active{% endif %}">
             <span class="menu-link">
-                <div>Observation</div>
+                <div>{% trans "Observação" %}</div>
             </span>
             <ul class="sub-menu-container sub-menu-horizontal" style="margin-top: 2.5rem;">
                 <li class="menu-item {% if request.GET.menu_scope|startswith:'evolucao-producao-mundo' %}active{% endif %}">
                     <span class="menu-link">
-                        <div>World</div>
+                        <div>{% trans "Mundo" %}</div>
                     </span>
                     <ul class="sub-menu-container sub-menu-horizontal" style="margin-top: 2.5rem;">
                         <li class="menu-item {% if request.GET.menu_scope == 'evolucao-producao-mundo-pais-documentos' %}active{% endif %}">
-                            <a class="menu-link" href="/chart?menu_scope=evolucao-producao-mundo-pais-documentos"><div>Documents</div></a>
+                            <a class="menu-link" href="/chart?menu_scope=evolucao-producao-mundo-pais-documentos"><div>{% trans "Documentos" %}</div></a>
                         </li>
                         <li class="menu-item {% if request.GET.menu_scope == 'evolucao-producao-mundo-pais-citacoes' %}active{% endif %}">
-                            <a class="menu-link" href="/chart?menu_scope=evolucao-producao-mundo-pais-citacoes"><div>Citation</div></a>
+                            <a class="menu-link" href="/chart?menu_scope=evolucao-producao-mundo-pais-citacoes"><div>{% trans "Citações" %}</div></a>
                         </li>
                     </ul>
                 </li>
                 <li class="menu-item {% if request.GET.menu_scope|startswith:'evolucao-producao-brasil' %}active{% endif %}">
                     <span class="menu-link">
-                        <div>Brazil</div>
+                        <div>{% trans "Brasil" %}</div>
                     </span>
                     <ul class="sub-menu-container sub-menu-horizontal" style="margin-top: 2.5rem;">
                         <li class="menu-item {% if request.GET.menu_scope == 'evolucao-producao-brasil-pais-documentos' %}active{% endif %}">
-                            <a class="menu-link" href="/chart?menu_scope=evolucao-producao-brasil-pais-documentos"><div>Documents</div></a>
+                            <a class="menu-link" href="/chart?menu_scope=evolucao-producao-brasil-pais-documentos"><div>{% trans "Documentos" %}</div></a>
                         </li>
                         <li class="menu-item {% if request.GET.menu_scope == 'evolucao-producao-brasil-pais-citacoes' %}active{% endif %}">
-                            <a class="menu-link" href="/chart?menu_scope=evolucao-producao-brasil-pais-citacoes"><div>Citation</div></a>
+                            <a class="menu-link" href="/chart?menu_scope=evolucao-producao-brasil-pais-citacoes"><div>{% trans "Citações" %}</div></a>
                         </li>
                     </ul>
                 </li>
                 <li class="menu-item {% if request.GET.menu_scope|startswith:'evolucao-producao-redescielo' %}active{% endif %}">
                     <span class="menu-link" style="white-space: nowrap;">
-                        <div>SciELO Network</div>
+                        <div>{% trans "Rede SciELO" %}</div>
                     </span>
                     <ul class="sub-menu-container sub-menu-horizontal" style="margin-top: 2.5rem;">
                         <li class="menu-item {% if request.GET.menu_scope == 'evolucao-producao-redescielo-pais-documentos' %}active{% endif %}">
-                            <a class="menu-link" href="/chart?menu_scope=evolucao-producao-redescielo-pais-documentos"><div>Documents</div></a>
+                            <a class="menu-link" href="/chart?menu_scope=evolucao-producao-redescielo-pais-documentos"><div>{% trans "Documentos" %}</div></a>
                         </li>
                     </ul>
                 </li>
             </ul>
         </li>
         <li class="menu-item {% if request.path == '/searchv2' and not request.GET.menu_scope %}active{% endif %}">
-            <a class="menu-link" href="/searchv2"><div>Search</div></a>
+            <a class="menu-link" href="/searchv2"><div>{% trans "Busca" %}</div></a>
         </li>
     </ul>
 </li>
+
+<!-- Produção Social -->
 <li class="menu-item {% if request.path|startswith:'/indicators/social/' or request.GET.menu_scope|startswith:'evolucao-producaosocial-' %}active{% endif %}">
     <span class="menu-link">
-        <div>Social production</div>
+        <div>{% trans "Produção Social" %}</div>
     </span>
     <ul class="sub-menu-container sub-menu-horizontal">
         <li class="menu-item {% if request.path|startswith:'/indicators/social/' %}active{% endif %}">
-            <a class="menu-link" href="{% url 'indicator' 'social' %}"><div>Indicators</div></a>
+            <a class="menu-link" href="{% url 'indicator' 'social' %}"><div>{% trans "Indicadores" %}</div></a>
         </li>
         <li class="menu-item {% if request.GET.menu_scope|startswith:'evolucao-producaosocial-' %}active{% endif %}">
-            <a class="menu-link" href="/chart?menu_scope=evolucao-producaosocial-pais-documentos"><div>Observation</div></a>
+            <a class="menu-link" href="/chart?menu_scope=evolucao-producaosocial-pais-documentos"><div>{% trans "Observação" %}</div></a>
         </li>
         <li class="menu-item {% if request.path == '/searchv2/' and request.GET.menu_scope %}active{% endif %}">
-            <a class="menu-link" href="/searchv2/"><div>Search</div></a>
+            <a class="menu-link" href="/searchv2/"><div>{% trans "Busca" %}</div></a>
         </li>
     </ul>
 </li>

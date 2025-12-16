@@ -118,28 +118,27 @@
   }
 
   .primary-menu .mobile-primary-menu .menu-link {
-    background: #fff !important;
+    background: transparent !important;
     color: #1c438c !important;
     font-size: 1rem !important;
-    font-weight: 600 !important;
+    font-weight: 700 !important;
     letter-spacing: 0 !important;
-    text-transform: none !important;
+    text-transform: lowercase !important;
     box-shadow: none !important;
-    border: 1px solid #ced9ed !important;
-    border-radius: 0.35rem !important;
-    padding: 0.65rem 0.75rem !important;
+    border: none !important;
+    border-radius: 0 !important;
+    padding: 0.35rem 0 !important;
   }
 
   .primary-menu .mobile-primary-menu .menu-item.active > .menu-link,
   .primary-menu .mobile-primary-menu .menu-item:hover > .menu-link {
-    background: #ebeff7 !important;
-    border-color: #1c438c !important;
+    background: transparent !important;
   }
 
   .primary-menu .mobile-primary-menu .sub-menu-container .menu-link {
     font-size: 0.95rem !important;
-    font-weight: 500 !important;
-    border-color: #ebeff7 !important;
+    font-weight: 700 !important;
+    border-color: transparent !important;
   }
 
   .primary-menu .mobile-primary-menu .sub-menu-container {
@@ -155,6 +154,11 @@
     margin-top: 0 !important;
   }
 
+  /* Indenta subníveis para parecer lista */
+  .primary-menu .mobile-primary-menu .sub-menu-container {
+    padding-left: 0.9rem !important;
+  }
+
   .primary-menu .mobile-primary-menu .sub-menu-horizontal {
     display: block !important;
     padding-top: 0.5rem !important;
@@ -165,34 +169,42 @@
   }
 
 
-  .flat-menu.with_heading > ul {
-    display: block;
+  .flat-menu.with_heading > ul,
+  .flat-menu.no_heading > ul {
+    display: flex;
     position: static;
     width: 100%;
     flex-direction: column;
+    list-style: none !important;
+    padding: 0 !important;
+    margin: 0.25rem 0 0 0 !important;
+    gap: 0.35rem;
   }
 
-  .flat-menu.with_heading > ul > li {
-    margin-left: 0;
-    margin-top: 0.25rem;
+  .flat-menu.with_heading > ul > li,
+  .flat-menu.no_heading > ul > li {
+    margin: 0 !important;
   }
 
-  .flat-menu.with_heading > ul {
+  .flat-menu.with_heading > ul > li > a,
+  .flat-menu.no_heading > ul > li > a {
     display: block;
-    position: static;
-    width: 100%;
-  }
-
-  .flat-menu.with_heading > ul > li {
-    margin-left: 0;
-    margin-top: 0.25rem;
+    padding: 0.35rem 0 !important;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    color: #1c438c !important;
+    font-size: 0.95rem !important;
+    font-weight: 700 !important;
+    text-transform: lowercase !important;
+    text-decoration: none !important;
   }
 
   /* Flat menus dentro do hambúrguer: herdar o “look mobile” */
   .primary-menu .mobile-primary-menu .flat-menu.with_heading {
-    margin-top: 1rem;
-    padding-top: 0.75rem;
-    border-top: 1px solid #ebeff7;
+    margin-top: 0.75rem;
+    padding-top: 0;
+    border-top: 0;
   }
 
   .primary-menu .mobile-primary-menu .flat-menu.with_heading > h4 {
@@ -204,19 +216,18 @@
 
   .primary-menu .mobile-primary-menu .flat-menu.with_heading > ul > li > a {
     display: block;
-    background: #fff !important;
+    background: transparent !important;
     color: #1c438c !important;
-    border: 1px solid #ced9ed !important;
-    border-radius: 0.35rem !important;
-    padding: 0.6rem 0.75rem !important;
+    border: none !important;
+    border-radius: 0 !important;
+    padding: 0.35rem 0 !important;
     font-size: 0.95rem !important;
-    font-weight: 600 !important;
-    text-transform: none !important;
+    font-weight: 700 !important;
+    text-transform: lowercase !important;
   }
 
   .primary-menu .mobile-primary-menu .flat-menu.with_heading > ul > li:hover > a {
-    background: #ebeff7 !important;
-    border-color: #1c438c !important;
+    background: transparent !important;
   }
 }
 
@@ -355,4 +366,77 @@ nav.primary-menu .sub-menu-horizontal .menu-item.active > a.menu-link {
 
 .flat-menu.with_heading > ul > li:hover > a {
   background-color: #ced9ed !important; /* estado selecionado */
+}
+
+/* Flat menu sem heading: lista simples horizontal (desktop) */
+@media (min-width: 992px) {
+  #header .header-row .flat-menu.no_heading > ul {
+    display: flex;
+    flex-direction: row;
+    list-style: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    gap: 1.25rem;
+    align-items: center;
+  }
+
+  #header .header-row .flat-menu.no_heading > ul > li {
+    margin: 0 !important;
+  }
+
+  #header .header-row .flat-menu.no_heading > ul > li > a {
+    display: inline-block;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    color: #1c438c !important;
+    font-size: 1rem !important;
+    font-weight: 700 !important;
+    text-transform: lowercase !important;
+    text-decoration: none !important;
+    white-space: nowrap;
+  }
+
+  #header .header-row .flat-menu.no_heading > ul > li > a:hover,
+  #header .header-row .flat-menu.no_heading > ul > li > a:focus {
+    text-decoration: none !important;
+  }
+}
+
+#page-title {
+  background-color: #fff;
+  border-bottom: 0;
+}
+
+/* Imagem alinhada à esquerda: Texto flui na direita */
+.rich-text img.left, 
+img.richtext-image-left {
+    float: left;
+    margin-right: 1rem;
+    margin-bottom: 0.5rem;
+    max-width: 40%; /* Ajuste o tamanho conforme preferir */
+    height: auto;
+}
+
+/* Imagem alinhada à direita: Texto flui na esquerda */
+.rich-text img.right, 
+img.richtext-image-right {
+    float: right;
+    margin-left: 1rem;
+    margin-bottom: 0.5rem;
+    max-width: 40%;
+    height: auto;
+}
+
+/* Limpa o fluxo depois do texto (opcional, mas bom ter) */
+.rich-text::after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+.text-oca-blue-title {
+    color: #1c438c;
 }
