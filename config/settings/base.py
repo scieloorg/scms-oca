@@ -406,11 +406,14 @@ RECAPTCHA_PRIVATE_KEY = env.str("RECAPTCHA_PRIVATE_KEY", default="")
 WAGTAILMENUS_FLAT_MENUS_HANDLE_CHOICES = [
     ("busca", _("Busca")),
     ("graficos", _("Gráficos")),
-    ("oca", "OCA"),
+    ("oca", "OCABr"),
     ("contato", "Contato"),
     ("comite", _("Comitê")),
     ("faq", "FAQ"),
     ("noticias", _("Notícias")),
+    ("secundario", _("Menu Secundário")),
+    ("sobre_producao_cientifica", _("Sobre")),
+    ("sobre_oca", _("Sobre o OCABr")),
 ]
 
 PAGINATION_PER_PAGE = 10
