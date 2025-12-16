@@ -51,6 +51,19 @@
             </small>
         </p>
         {% endif %}
+
+        {% if doc.source.organization %}
+        <p class="card-text mb-1">
+            <small class="text-muted">
+                <strong>{% trans "organization" %}:</strong> 
+                {% if doc.source.organization|length > 0 %}
+                    {% for inst in doc.source.organization %}
+                        {{ inst }}{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                {% endif %}
+            </small>
+        </p>
+        {% endif %}
         
         {% if doc.source.cities or doc.source.states %}
         <p class="card-text mb-1">

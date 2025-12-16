@@ -400,6 +400,7 @@ class SearchPageManager {
         const directoryType = source.directory_type || '';
         const year = source.year || '';
         const institutions = source.institutions || [];
+        const organization = source.organization || '';
         const cities = source.cities || [];
         const states = source.states || [];
         const practice = source.practice || '';
@@ -435,10 +436,10 @@ class SearchPageManager {
                         </p>
                     ` : ''}
                     
-                    ${institutions.length > 0 ? `
+                    ${institutions.length > 0 || organization ? `
                         <p class="card-text mb-1">
                             <small class="text-muted">
-                                <strong>Instituições:</strong> ${institutions.map(inst => this.escapeHtml(inst)).join(', ')}
+                                <strong>Instituições:</strong> ${institutions.length > 0 ? institutions.map(inst => this.escapeHtml(inst)).join(', ') : this.escapeHtml(organization)}
                             </small>
                         </p>
                     ` : ''}
