@@ -1,6 +1,7 @@
 import logging
 from typing import List, Optional
 
+from wagtail.contrib.routable_page.models import RoutablePageMixin, route
 from wagtail.models import Page
 
 from search_gateway import controller
@@ -33,11 +34,11 @@ def get_available_data_sources(data_sources=None):
             for key, config in DATA_SOURCES.items() if key in keys
         ]
 
-class SearchPage(Page):
+class SearchPage(RoutablePageMixin, Page):
     def get_context(self, request, *args, **kwargs):
         context = super().get_context(request, *args, **kwargs)
         search_query = request.GET.get("search", "")
-        data_source_name = request.GET.get("data_source", "world")
+        data_source_name = kwargs.get("data_source_name") or request.GET.get("data_source", "world")
         context["current_data_source"] = get_index_name_from_data_source(data_source_name)
         service = SearchGatewayService(data_source_name=data_source_name)
         self.set_filters(context, service)
@@ -51,18 +52,33 @@ class SearchPage(Page):
             source_fields=service.source_fields
         )
         context["data_source_name"] = data_source_name
+        context["display_name"] = service.display_name
         context["results_data"] = results_data
         context["search_query"] = search_query
-        context["selected_filters"] = selected_filters
         context["result_template"] = get_result_template_by_data_source(data_source_name)
         context["available_data_sources"] = get_available_data_sources(data_sources=["social_production", "world"])
         return context
+
+    @route(r'^$')
+    def index_route(self, request):
+        """Default route - uses data_source from GET param or defaults to 'world'"""
+        return self.render(request)
+
+    @route(r'^world/$')
+    def world_route(self, request):
+        """World data source route"""
+        return self.render(request, data_source_name="world")
+
+    @route(r'^social/$')
+    def social_route(self, request):
+        """Social production data source route"""
+        return self.render(request, data_source_name="social_production")
 
     def get_filters(self, service, exclude_fields: Optional[List] = None):
         return service.get_filters(exclude_fields=exclude_fields)
 
     def set_filters(self, context, service, exclude_fields: Optional[List] = None):
-        exclude_fields = service.filters_to_exlcude
+        exclude_fields = service.filters_to_exclude
         body = self.get_filters(service=service, exclude_fields=exclude_fields)
         context['filters'] = service.build_filters(body=body)
 

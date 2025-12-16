@@ -17,6 +17,7 @@ class SearchGatewayService:
         self._index_name = data_sources_with_settings.get_index_name_from_data_source(data_source=data_source_name)
         self._exclude_filter_fields = data_sources_with_settings.get_filters_to_exclude_by_data_source(data_source=data_source_name) or exclude_filter_fields
         self._source_fields = data_sources_with_settings.get_source_fields_by_data_source(data_source=data_source_name)
+        self._display_name = data_sources_with_settings.get_display_name_by_data_source(data_source=data_source_name)
 
     @property
     def data_source(self):
@@ -28,12 +29,16 @@ class SearchGatewayService:
         return self._index_name
 
     @property
-    def filters_to_exlcude(self):
+    def filters_to_exclude(self):
         return self._exclude_filter_fields or []
 
     @property
     def source_fields(self):
         return self._source_fields or []
+
+    @property
+    def display_name(self):
+        return self._display_name
 
     def get_filters(self, exclude_fields=None):
         exclude_fields = self._exclude_filter_fields or exclude_fields
@@ -59,7 +64,9 @@ class SearchGatewayService:
 
     def build_filters(self, body=None):
         body = body or self.get_filters()
-        res = self.client.search(index=self.index_name, body=body)
+        res = self.client.search(index=self.index_name, body=body, request_cache=True)
         return response_parser.parse_filters_response(res, self.data_source)
 
-
+    @property
+    def get_total_itens(self):
+        return self.client.count(index=self.index_name)
