@@ -29,6 +29,58 @@
   gap: 1rem;
 }
 
+/* Desktop: cola o menu superior na borda inferior do header */
+@media (min-width: 992px) {
+  #header .header-row.top-search-parent {
+    align-items: stretch;
+  }
+
+  #header .header-row.top-search-parent .header-left-menus {
+    align-self: stretch;
+  }
+
+  #header .header-row.top-search-parent .header-left-menus .primary-menu-top {
+    margin-top: auto;
+  }
+
+  #header .header-row.top-search-parent .header-left-menus .primary-menu-top .menu-container {
+    margin-bottom: 0;
+  }
+}
+
+/* Desktop: menu inferior abaixo do header */
+.secondary-menu-bar {
+  padding-top: 1.25rem;
+}
+
+/* Visual do menu inferior: botões menores, arredondados, sem bordas */
+.menu-container.menu-container-secondary > .menu-item,
+.menu-container.menu-container-secondary > .menu-item > .menu-link {
+  border: none !important;
+  border-bottom: none !important;
+}
+
+.menu-container.menu-container-secondary > .menu-item > .menu-link {
+  /* mesmo visual do menu superior (estado normal) */
+  background-color: #ebeff7;
+  color: #1c438c;
+  box-shadow: 0 4px 0 0 transparent;
+  transition: background-color 0.2s, box-shadow 0.2s;
+
+  border-radius: 0.3rem;
+  font-size: 0.95rem;
+  padding: 0.6rem 0.6rem;
+  margin-right: 1.5rem !important;
+  text-transform: lowercase;
+}
+
+.menu-container.menu-container-secondary > .menu-item:hover > .menu-link,
+.menu-container.menu-container-secondary > .menu-item.active > .menu-link {
+  /* mesmo visual do menu superior (estado selecionado) */
+  background-color: #ced9ed;
+  box-shadow: 0 4px 0 0 #1c438c;
+}
+
 #header .header-row .primary-menu.navbar {
   position: relative;
   flex: 0 1 auto;
@@ -118,67 +170,75 @@ body.header-hidden .header-wrap-clone {
   }
 
   .primary-menu .mobile-primary-menu {
+    display: none;
     overflow-y: auto;
     max-height: calc(100vh - 7rem);
   }
 
-  .primary-menu .mobile-primary-menu .menu-link {
-    margin-right: 0 !important;
-    white-space: normal;
+  /* Mobile dropdown: agora com “botões” como no desktop */
+  .primary-menu .mobile-primary-menu .mobile-menu-section + .mobile-menu-section {
+    margin-top: 0.75rem;
   }
 
-  /* Visual mobile: “lista” (não botões desktop) */
+  .primary-menu .mobile-primary-menu .menu-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+
   .primary-menu .mobile-primary-menu .menu-item {
     border-top: 0;
     padding: 0;
   }
 
-  .primary-menu .mobile-primary-menu > .menu-item + .menu-item {
+  .primary-menu .mobile-primary-menu .menu-container > .menu-item + .menu-item {
     margin-top: 0.5rem;
   }
 
-  .primary-menu .mobile-primary-menu .menu-link {
-    background: transparent !important;
+  .primary-menu .mobile-primary-menu .menu-container > .menu-item > .menu-link,
+  .primary-menu .mobile-primary-menu .menu-container > .menu-item > a.menu-link {
+    display: block;
+    width: 100%;
+    margin-right: 0 !important;
+    white-space: normal;
+    padding: 0.65rem 0.9rem !important;
+    background-color: #ebeff7 !important;
     color: #1c438c !important;
     font-size: 1rem !important;
     font-weight: 700 !important;
     letter-spacing: 0 !important;
-    text-transform: lowercase !important;
-    box-shadow: none !important;
+    box-shadow: 0 4px 0 0 transparent !important;
     border: none !important;
-    border-radius: 0 !important;
-    padding: 0.35rem 0 !important;
+    border-radius: 0.3rem !important;
+    text-decoration: none !important;
+    transition: background-color 0.2s, box-shadow 0.2s;
   }
 
-  .primary-menu .mobile-primary-menu .menu-item.active > .menu-link,
-  .primary-menu .mobile-primary-menu .menu-item:hover > .menu-link {
-    background: transparent !important;
+  .primary-menu .mobile-primary-menu .menu-container > .menu-item:hover > .menu-link,
+  .primary-menu .mobile-primary-menu .menu-container > .menu-item.active > .menu-link {
+    background-color: #ced9ed !important;
+    box-shadow: 0 4px 0 0 #1c438c !important;
   }
 
-  .primary-menu .mobile-primary-menu .sub-menu-container .menu-link {
+  .primary-menu .mobile-primary-menu .mobile-menu-list-top > .menu-item > .menu-link {
+    text-transform: capitalize !important;
+  }
+
+  .primary-menu .mobile-primary-menu .mobile-menu-list-bottom > .menu-item > .menu-link {
+    text-transform: lowercase !important;
     font-size: 0.95rem !important;
-    font-weight: 700 !important;
-    border-color: transparent !important;
   }
 
   .primary-menu .mobile-primary-menu .sub-menu-container {
     margin-top: 0.5rem !important;
+    padding-left: 0.9rem !important;
   }
 
   .primary-menu .mobile-primary-menu .sub-menu-container .menu-item + .menu-item {
     margin-top: 0.4rem;
   }
 
-  .primary-menu .mobile-primary-menu .sub-menu-container {
-    padding-left: 0 !important;
-    margin-top: 0 !important;
-  }
-
-  /* Indenta subníveis para parecer lista */
-  .primary-menu .mobile-primary-menu .sub-menu-container {
-    padding-left: 0.9rem !important;
-  }
-
+  /* No mobile, a observação (sub-menu-horizontal) vira lista vertical */
   .primary-menu .mobile-primary-menu .sub-menu-horizontal {
     display: block !important;
     padding-top: 0.5rem !important;
@@ -188,43 +248,9 @@ body.header-hidden .header-wrap-clone {
     margin: 0;
   }
 
-
-  .flat-menu.with_heading > ul,
-  .flat-menu.no_heading > ul {
-    display: flex;
-    position: static;
-    width: 100%;
-    flex-direction: column;
-    list-style: none !important;
-    padding: 0 !important;
-    margin: 0.25rem 0 0 0 !important;
-    gap: 0.35rem;
-  }
-
-  .flat-menu.with_heading > ul > li,
-  .flat-menu.no_heading > ul > li {
-    margin: 0 !important;
-  }
-
-  .flat-menu.with_heading > ul > li > a,
-  .flat-menu.no_heading > ul > li > a {
-    display: block;
-    padding: 0.35rem 0 !important;
-    background: transparent !important;
-    border: none !important;
-    border-radius: 0 !important;
-    color: #1c438c !important;
-    font-size: 0.95rem !important;
-    font-weight: 700 !important;
-    text-transform: lowercase !important;
-    text-decoration: none !important;
-  }
-
-  /* Flat menus dentro do hambúrguer: herdar o “look mobile” */
-  .primary-menu .mobile-primary-menu .flat-menu.with_heading {
-    margin-top: 0.75rem;
-    padding-top: 0;
-    border-top: 0;
+  /* Flat menus (lado direito) dentro do hambúrguer */
+  .primary-menu .mobile-primary-menu .mobile-flat-menu {
+    padding: 0;
   }
 
   .primary-menu .mobile-primary-menu .flat-menu.with_heading > h4 {
@@ -234,20 +260,44 @@ body.header-hidden .header-wrap-clone {
     color: #1c438c !important;
   }
 
-  .primary-menu .mobile-primary-menu .flat-menu.with_heading > ul > li > a {
+  .primary-menu .mobile-primary-menu .flat-menu.with_heading > ul,
+  .primary-menu .mobile-primary-menu .flat-menu.no_heading > ul {
+    display: flex;
+    position: static;
+    width: 100%;
+    flex-direction: column;
+    list-style: none !important;
+    padding: 0 !important;
+    margin: 0.25rem 0 0 0 !important;
+    gap: 0.5rem;
+  }
+
+  .primary-menu .mobile-primary-menu .flat-menu.with_heading > ul > li,
+  .primary-menu .mobile-primary-menu .flat-menu.no_heading > ul > li {
+    margin: 0 !important;
+  }
+
+  .primary-menu .mobile-primary-menu .flat-menu.with_heading > ul > li > a,
+  .primary-menu .mobile-primary-menu .flat-menu.no_heading > ul > li > a {
     display: block;
-    background: transparent !important;
+    width: 100%;
+    padding: 0.65rem 0.9rem !important;
+    background-color: #ebeff7 !important;
     color: #1c438c !important;
-    border: none !important;
-    border-radius: 0 !important;
-    padding: 0.35rem 0 !important;
     font-size: 0.95rem !important;
     font-weight: 700 !important;
     text-transform: lowercase !important;
+    text-decoration: none !important;
+    border: none !important;
+    border-radius: 0.3rem !important;
+    box-shadow: 0 4px 0 0 transparent !important;
+    transition: background-color 0.2s, box-shadow 0.2s;
   }
 
-  .primary-menu .mobile-primary-menu .flat-menu.with_heading > ul > li:hover > a {
-    background: transparent !important;
+  .primary-menu .mobile-primary-menu .flat-menu.with_heading > ul > li:hover > a,
+  .primary-menu .mobile-primary-menu .flat-menu.no_heading > ul > li:hover > a {
+    background-color: #ced9ed !important;
+    box-shadow: 0 4px 0 0 #1c438c !important;
   }
 }
 
