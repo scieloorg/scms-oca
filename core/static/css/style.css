@@ -3384,14 +3384,17 @@ html[xmlns] .slider-wrap {
 
 .header-size-sm #header-wrap #logo img {
 	height: 60px;
+	width: auto;
 }
 
 .header-size-md #header-wrap #logo img {
 	height: 80px;
+	width: auto;
 }
 
 .header-size-lg #header-wrap #logo img {
 	height: 120px;
+	width: auto;
 }
 
 #logo a.standard-logo {
@@ -3412,6 +3415,7 @@ html[xmlns] .slider-wrap {
 
 	.sticky-header-shrink #header-wrap #logo img {
 		height: 60px;
+		width: auto;
 	}
 
 }

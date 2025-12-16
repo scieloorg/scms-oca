@@ -50,6 +50,26 @@
   border-bottom: 0.1rem solid #1c438c !important;
 }
 
+/* Oculta o header ao rolar para baixo (controlado via JS em custom.js)
+   - remove o espaço reservado do .header-wrap-clone para o conteúdo ocupar mais área
+*/
+@media (min-width: 992px) {
+  /* Mantém as transições existentes do tema e adiciona a do hide/show */
+  #header-wrap {
+    transition: height .2s ease 0s, background-color .3s ease 0s, transform .25s ease;
+    will-change: transform;
+  }
+}
+
+body.header-hidden #header-wrap {
+  transform: translate3d(0, -100%, 0);
+  pointer-events: none;
+}
+
+body.header-hidden .header-wrap-clone {
+  height: 0 !important;
+}
+
 /* Muda cor do footer para azul claro */
 #footer {
   background-color: #f1f2f4 !important;
