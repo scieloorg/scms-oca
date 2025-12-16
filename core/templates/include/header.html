@@ -12,7 +12,7 @@
     <div class="container">
       <div class="header-row top-search-parent">
 
-        <div class="d-flex flex-column">
+        <div class="d-flex flex-column header-left-menus">
           <div id="logo" class="me-lg-5">
             {% image settings.core_settings.CustomSettings.site_logo max-80x80 as logo %}
             <a href="/" class="standard-logo" data-dark-logo="{{ logo.url }}"><img src="{% static 'img/logo-ocabr.png'%}" width="80px"
@@ -33,15 +33,29 @@
             </svg>
           </div>
 
-          <ul class="menu-container mobile-primary-menu">
-            {% include 'menus/menu_items.html' %}
+          <div class="mobile-primary-menu">
+            <div class="mobile-menu-section mobile-menu-top">
+              <ul class="menu-container mobile-menu-list mobile-menu-list-top">
+                {% include 'menus/menu_items_top.html' %}
+              </ul>
+            </div>
 
-            {% for handle in config.WAGTAILMENUS_FLAT_MENUS_HANDLE_CHOICES %}
-              <li class="menu-item">
-                {% flat_menu handle.0 max_levels=2 show_menu_heading=True fall_back_to_default_site_menus=False %}
-              </li>
-            {% endfor %}
-          </ul>
+            <div class="mobile-menu-section mobile-menu-bottom">
+              <ul class="menu-container mobile-menu-list mobile-menu-list-bottom menu-container-secondary">
+                {% include 'menus/menu_items_bottom.html' %}
+              </ul>
+            </div>
+
+            <div class="mobile-menu-section mobile-menu-right">
+              <ul class="menu-container mobile-menu-list mobile-menu-list-right">
+                {% for handle in config.WAGTAILMENUS_FLAT_MENUS_HANDLE_CHOICES %}
+                  <li class="menu-item mobile-flat-menu">
+                    {% flat_menu handle.0 max_levels=2 show_menu_heading=True fall_back_to_default_site_menus=False %}
+                  </li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
         </nav>
 
         <div class="d-none d-lg-flex align-items-center ms-auto">
@@ -55,6 +69,14 @@
   <div class="header-wrap-clone"></div>
 </header>
 <!-- header -->
+
+<!-- secondary menu (desktop) -->
+<div class="secondary-menu-bar d-none d-lg-block">
+  <div class="container">
+    {% include 'menus/menu_bottom.html' %}
+  </div>
+</div>
+<!-- secondary menu (desktop) -->
 
 <!-- breadcrumb -->
 {% include 'include/breadcrumb.html' %}
