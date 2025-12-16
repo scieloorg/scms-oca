@@ -436,3 +436,7 @@ img.richtext-image-right {
     display: table;
     clear: both;
 }
+
+.text-oca-blue-title {
+    color: #1c438c;
+}
