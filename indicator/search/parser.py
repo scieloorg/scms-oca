@@ -168,37 +168,54 @@ def parse_indicator_response(res, breakdown_variable, study_unit="document"):
         
         series_ndocs = []
         series_citations = []
+        series_cited_docs = []
+        series_pct_cited_docs = []
 
         for breakdown in breakdown_keys:
             data_ndocs = []
             data_citations = []
+            data_cited_docs = []
+            data_pct_cited_docs = []
             for year_bucket in per_year_buckets:
                 found = False
                 for b in year_bucket.get("breakdown", {}).get("buckets", []):
                     if str(b["key"]) == breakdown:
                         data_ndocs.append(b["doc_count"])
                         data_citations.append(int(b.get("total_citations", {}).get("value", 0)))
+                        cited_docs_count = int((b.get("docs_with_citations", {}) or {}).get("doc_count", 0))
+                        data_cited_docs.append(cited_docs_count)
+                        data_pct_cited_docs.append(
+                            round((cited_docs_count / b["doc_count"]) * 100, 2) if b["doc_count"] else 0
+                        )
                         found = True
                         break
                 if not found:
                     data_ndocs.append(0)
                     data_citations.append(0)
+                    data_cited_docs.append(0)
+                    data_pct_cited_docs.append(0)
             
             series_ndocs.append({"name": breakdown, "data": data_ndocs, "type": "documents"})
             series_citations.append({"name": breakdown, "data": data_citations, "type": "citations"})
+            series_cited_docs.append({"name": breakdown, "data": data_cited_docs, "type": "cited_documents"})
+            series_pct_cited_docs.append({"name": breakdown, "data": data_pct_cited_docs, "type": "pct_cited_documents"})
 
-        # Combine series for documents and citations
-        series = series_ndocs + series_citations
+        # Combine series for all breakdown metrics
+        series = series_ndocs + series_citations + series_cited_docs + series_pct_cited_docs
         
         # Standardize breakdown keys and series names
         standardized_breakdown_keys = utils.standardize_breakdown_keys(breakdown_keys, series)
         
-        # Append "(Documents)" or "(Citations)" after standardization
+        # Append metric suffixes after standardization
         for s in series:
             if s.get("type") == "documents":
                 s["name"] = f"{s['name']} (Documents)"
             elif s.get("type") == "citations":
                 s["name"] = f"{s['name']} (Citations)"
+            elif s.get("type") == "cited_documents":
+                s["name"] = f"{s['name']} (Cited Documents)"
+            elif s.get("type") == "pct_cited_documents":
+                s["name"] = f"{s['name']} (Percent Docs With Citations)"
             s.pop("type", None) # Remove the temporary type field
 
         data["breakdown_keys"] = standardized_breakdown_keys

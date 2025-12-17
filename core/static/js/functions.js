@@ -565,12 +565,10 @@ var SEMICOLON = SEMICOLON || {};
 			menuItemTrigger	= menuItemSubs.children( subMenuTriggerT );
 
 			if( $body.hasClass('device-xl') || $body.hasClass('device-lg') ) {
-				setTimeout( function(){
-					if( $headerWrapClone.length > 0 ) {
-						$headerWrapClone.css({ 'height': $headerWrap.outerHeight() });
-					}
-					SEMICOLON.header.includeOffset();
-				}, 1000);
+				if( $headerWrapClone.length > 0 ) {
+					$headerWrapClone.css({ 'height': $headerWrap.outerHeight() });
+				}
+				SEMICOLON.header.includeOffset();
 				primaryMenu.find( submenus ).css({ 'display': '' });
 			} else {
 				$headerInc.css({ 'margin-top': '' });
@@ -2251,3 +2249,27 @@ var SEMICOLON = SEMICOLON || {};
 	});
 
 })(jQuery);
+
+// Hide Header on scroll down
+(function() {
+    var lastScrollTop = 0;
+    var header = document.getElementById('header');
+    if (!header) return;
+    var headerHeight = header.offsetHeight;
+    var scrollThreshold = 150; // pixels
+
+    window.addEventListener('scroll', function() {
+        var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+        if (scrollTop > lastScrollTop && scrollTop > scrollThreshold) {
+            // Scroll Down
+            header.classList.add('header-hidden');
+        } else {
+            // Scroll Up
+            if (scrollTop + window.innerHeight < document.documentElement.scrollHeight) {
+                header.classList.remove('header-hidden');
+            }
+        }
+        lastScrollTop = scrollTop <= 0 ? 0 : scrollTop; // For Mobile or negative scrolling
+    }, false);
+})();
