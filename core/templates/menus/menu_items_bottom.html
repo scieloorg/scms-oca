@@ -6,7 +6,7 @@
 {% get_menu_context request as menu_ctx %}
 
 <!-- Indicadores -->
-<li class="menu-item {% if menu_ctx.is_about_indicadores or menu_ctx.path|startswith:'/indicators/world/' or menu_ctx.path|startswith:'/indicators/social/' %}active{% endif %}">
+<li class="menu-item {% if menu_ctx.is_about_indicadores or menu_ctx.path|startswith:'/indicators/world/' or menu_ctx.path|startswith:'/indicators/brazil/' or menu_ctx.path|startswith:'/indicators/scielo/' or menu_ctx.path|startswith:'/indicators/social/' %}active{% endif %}">
     {% if menu_ctx.is_about_section %}
         <a class="menu-link" href="/{{ request.LANGUAGE_CODE }}/sobre-indicadores/"><div>{% trans "Indicadores" %}</div></a>
     {% elif menu_ctx.is_social_context %}

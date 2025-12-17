@@ -40,6 +40,8 @@ def get_menu_context(request):
     is_scientific_context = (
         is_about_producao_cientifica
         or path.startswith("/indicators/world/")
+        or path.startswith("/indicators/brazil/")
+        or path.startswith("/indicators/scielo/")
         or str(menu_scope).startswith("evolucao-producao-")
         or (path.startswith("/searchv2") and not bool(menu_scope))
     )
