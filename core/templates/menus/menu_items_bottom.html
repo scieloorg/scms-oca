@@ -5,12 +5,6 @@
 
 {% get_menu_context request as menu_ctx %}
 
-{% comment %}
-Menu inferior (contextual):
-- Se estiver em Produção Social (indicators/social, evolucao-producaosocial- ou searchv2 com menu_scope), usa links sociais.
-- Caso contrário, assume Produção Científica.
-{% endcomment %}
-
 <!-- Indicadores -->
 <li class="menu-item {% if menu_ctx.is_about_indicadores or menu_ctx.path|startswith:'/indicators/world/' or menu_ctx.path|startswith:'/indicators/social/' %}active{% endif %}">
     {% if menu_ctx.is_about_section %}
@@ -42,16 +36,8 @@ Menu inferior (contextual):
     {% if menu_ctx.is_about_section %}
         <a class="menu-link" href="/{{ request.LANGUAGE_CODE }}/sobre-busca-bibliografica/"><div>{% trans "Busca" %}</div></a>
     {% elif menu_ctx.is_social_context %}
-        {% if search_page %}
-            <a class="menu-link" href="{% pageurl search_page %}social/"><div>{% trans "Busca" %}</div></a>
-        {% else %}
-            <a class="menu-link" href="/searchv2/"><div>{% trans "Busca" %}</div></a>
-        {% endif %}
+        <a class="menu-link" href="/searchv2/social"><div>{% trans "Busca" %}</div></a>
     {% else %}
-        {% if search_page %}
-            <a class="menu-link" href="{% pageurl search_page %}"><div>{% trans "Busca" %}</div></a>
-        {% else %}
-            <a class="menu-link" href="/searchv2"><div>{% trans "Busca" %}</div></a>
-        {% endif %}
+        <a class="menu-link" href="/searchv2/world"><div>{% trans "Busca" %}</div></a>
     {% endif %}
 </li>
