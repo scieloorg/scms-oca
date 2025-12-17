@@ -167,6 +167,11 @@ def build_indicator_aggs(field_settings, breakdown_variable, data_source_name, s
             }
 
             if cited_by_count_field:
-                aggs["per_year"]["aggs"]["breakdown"]["aggs"] = {"total_citations": {"sum": {"field": cited_by_count_field}}}
+                aggs["per_year"]["aggs"]["breakdown"]["aggs"] = {
+                    "total_citations": {"sum": {"field": cited_by_count_field}},
+                    "docs_with_citations": {
+                        "filter": {"range": {cited_by_count_field: {"gt": 0}}}
+                    },
+                }
 
     return aggs
