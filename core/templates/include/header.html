@@ -9,7 +9,8 @@
 <!-- header -->
 <header id="header" class="">
   <div id="header-wrap" class="">
-    <div class="container">
+    <div class="top-menu-wrapper">
+      <div class="container">
       <div class="header-row top-search-parent">
 
         <div class="d-flex flex-column header-left-menus">
@@ -65,18 +66,16 @@
         </div>
       </div>
     </div>
+    </div>
+    <div class="secondary-menu-bar d-none d-lg-block">
+      <div class="container">
+        {% include 'menus/menu_bottom.html' %}
+      </div>
+    </div>
   </div>
   <div class="header-wrap-clone"></div>
 </header>
 <!-- header -->
-
-<!-- secondary menu (desktop) -->
-<div class="secondary-menu-bar d-none d-lg-block">
-  <div class="container">
-    {% include 'menus/menu_bottom.html' %}
-  </div>
-</div>
-<!-- secondary menu (desktop) -->
 
 <!-- breadcrumb -->
 {% include 'include/breadcrumb.html' %}

@@ -48,14 +48,14 @@
   }
 }
 
-/* Desktop: menu inferior abaixo do header */
+/* Desktop: menu inferior dentro do header */
 .secondary-menu-bar {
   padding-top: 1.25rem;
+  padding-bottom: 1.25rem;
 }
 
 /* Visual do menu inferior: botões menores, arredondados, sem bordas */
-.menu-container.menu-container-secondary > .menu-item,
-.menu-container.menu-container-secondary > .menu-item > .menu-link {
+.menu-container.menu-container-secondary > .menu-item {
   border: none !important;
   border-bottom: none !important;
 }
@@ -64,8 +64,8 @@
   /* mesmo visual do menu superior (estado normal) */
   background-color: #ebeff7;
   color: #1c438c;
-  box-shadow: 0 4px 0 0 transparent;
-  transition: background-color 0.2s, box-shadow 0.2s;
+  border: 1px solid transparent;
+  transition: background-color 0.2s, border-color 0.2s;
 
   border-radius: 0.3rem;
   font-size: 0.95rem;
@@ -78,7 +78,7 @@
 .menu-container.menu-container-secondary > .menu-item.active > .menu-link {
   /* mesmo visual do menu superior (estado selecionado) */
   background-color: #ced9ed;
-  box-shadow: 0 4px 0 0 #1c438c;
+  border-color: #1c438c;
 }
 
 #header .header-row .primary-menu.navbar {
@@ -98,28 +98,27 @@
 }
 
 /* Muda linha horizontal do header para azul escuro */
-#header-wrap {
+#header-wrap .top-menu-wrapper {
   border-bottom: 0.1rem solid #1c438c !important;
 }
 
-/* Oculta o header ao rolar para baixo (controlado via JS em custom.js)
-   - remove o espaço reservado do .header-wrap-clone para o conteúdo ocupar mais área
-*/
-@media (min-width: 992px) {
-  /* Mantém as transições existentes do tema e adiciona a do hide/show */
-  #header-wrap {
-    transition: height .2s ease 0s, background-color .3s ease 0s, transform .25s ease;
-    will-change: transform;
+/* Remove a borda cinza do header no estado normal (sem scroll) */
+#header {
+  border-bottom: none !important;
+}
+
+#header-wrap {
+  border-bottom: none !important;
+}
+
+#header.sticky-header.full-header #header-wrap {
+  border-bottom: none !important;
+}
+
+@media (max-width: 991.98px) {
+  #header.sticky-header #header-wrap {
+    border-bottom: none !important;
   }
-}
-
-body.header-hidden #header-wrap {
-  transform: translate3d(0, -100%, 0);
-  pointer-events: none;
-}
-
-body.header-hidden .header-wrap-clone {
-  height: 0 !important;
 }
 
 /* Muda cor do footer para azul claro */
@@ -175,9 +174,12 @@ body.header-hidden .header-wrap-clone {
     max-height: calc(100vh - 7rem);
   }
 
-  /* Mobile dropdown: agora com “botões” como no desktop */
   .primary-menu .mobile-primary-menu .mobile-menu-section + .mobile-menu-section {
     margin-top: 0.75rem;
+  }
+
+  .primary-menu .mobile-primary-menu .mobile-menu-top + .mobile-menu-bottom {
+    margin-top: 2rem;
   }
 
   .primary-menu .mobile-primary-menu .menu-container {
@@ -298,6 +300,19 @@ body.header-hidden .header-wrap-clone {
   .primary-menu .mobile-primary-menu .flat-menu.no_heading > ul > li:hover > a {
     background-color: #ced9ed !important;
     box-shadow: 0 4px 0 0 #1c438c !important;
+  }
+
+  .primary-menu .mobile-primary-menu .menu-container-secondary > .menu-item > .menu-link {
+    box-shadow: none !important;
+    border: 1px solid transparent !important;
+    transition: background-color 0.2s, border-color 0.2s;
+  }
+
+  .primary-menu .mobile-primary-menu .menu-container-secondary > .menu-item:hover > .menu-link,
+  .primary-menu .mobile-primary-menu .menu-container-secondary > .menu-item.active > .menu-link {
+    background-color: #ced9ed !important;
+    box-shadow: none !important;
+    border-color: #1c438c !important;
   }
 }
 

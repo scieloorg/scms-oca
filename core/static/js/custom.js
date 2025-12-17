@@ -9,7 +9,6 @@ $('.lang-select').change(function(){
 // Oculta o header quando o usuário rola para baixo e mostra ao rolar para cima.
 // A classe no <body> controla o CSS (ver custom.css).
 (function () {
-    // Auto-hide desativado: estava causando tremor/jitter no header.
-    // Mantém o header sempre visível.
+    // Auto-hide desativado.
     document.body.classList.remove('header-hidden');
 })();
