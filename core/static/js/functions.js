@@ -565,12 +565,10 @@ var SEMICOLON = SEMICOLON || {};
 			menuItemTrigger	= menuItemSubs.children( subMenuTriggerT );
 
 			if( $body.hasClass('device-xl') || $body.hasClass('device-lg') ) {
-				setTimeout( function(){
-					if( $headerWrapClone.length > 0 ) {
-						$headerWrapClone.css({ 'height': $headerWrap.outerHeight() });
-					}
-					SEMICOLON.header.includeOffset();
-				}, 1000);
+				if( $headerWrapClone.length > 0 ) {
+					$headerWrapClone.css({ 'height': $headerWrap.outerHeight() });
+				}
+				SEMICOLON.header.includeOffset();
 				primaryMenu.find( submenus ).css({ 'display': '' });
 			} else {
 				$headerInc.css({ 'margin-top': '' });
