@@ -16891,3 +16891,15 @@ label.checkbox { padding-left: 20px; }
 	-webkit-animation-name: fadeOutUpSmall;
 	animation-name: fadeOutUpSmall;
 }
+
+/* Custom styles for hiding header on scroll */
+#header {
+    position: sticky;
+    top: 0;
+    z-index: 999;
+    transition: transform 0.3s ease-in-out;
+}
+
+#header.header-hidden {
+    transform: translateY(-100%);
+}
