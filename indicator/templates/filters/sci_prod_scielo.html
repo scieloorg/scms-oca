@@ -60,7 +60,12 @@
 
 <div class="form-group mb-3">
     <label class="form-label" for="journal">Journal</label>
-    <select id="journal" name="journal" class="form-control" aria-label="Journal"></select>
+    <div class="input-group">
+        <div class="flex-grow-1 position-relative input-group-left">
+            <select id="journal" name="journal" class="form-control" aria-label="Journal"></select>
+        </div>
+        <button class="btn btn-outline input-group-right toggle-not" type="button" id="journal_bool_not" title="Click to activate not operator">NOT</button>
+    </div>
 </div>
 
 <div class="h6 pb-2 mt-4 border-bottom text-primary">
