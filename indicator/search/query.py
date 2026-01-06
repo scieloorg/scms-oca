@@ -84,7 +84,7 @@ def add_must_list(filters, filter_name, qualified_index_field_name, query_operat
         for value in values:
             add_term(qualified_index_field_name, value, must)
     else:
-        add_must_terms(qualified_index_field_name, values, must)
+        add_terms(qualified_index_field_name, values, must)
 
 
 def add_must_exists(name, must):
@@ -99,7 +99,7 @@ def add_term(name, value, must):
     must.append({"term": {name: value}})
 
 
-def add_must_terms(name, values, must):
+def add_terms(name, values, must):
     must.append({"terms": {name: values}})
 
 
