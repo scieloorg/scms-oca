@@ -87,7 +87,7 @@ def add_list(filters, filter_name, qualified_index_field_name, query_operator_fi
         add_terms(qualified_index_field_name, values, must)
 
 
-def add_must_exists(name, must):
+def add_exists(name, must):
     if name in (None, ""):
         return
     must.append({"exists": {"field": name}})
