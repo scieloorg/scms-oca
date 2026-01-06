@@ -56,7 +56,7 @@ def build_query(filters, field_settings, data_source):
 
     if data_source == "social":
         fl_name = field_settings.get("action", {}).get("index_field_name")
-        add_must_exists(fl_name,  must)
+        add_exists(fl_name, must)
 
     query_operator_fields = data_sources_with_settings.get_query_operator_fields(data_source)
     index_field_name_to_filter_name_map = data_sources_with_settings.get_index_field_name_to_filter_name_map(data_source)
@@ -67,14 +67,14 @@ def build_query(filters, field_settings, data_source):
             continue
 
         if isinstance(value, list):
-            add_must_list(filters, filter_name, index_field_name, query_operator_fields, value, must)
+            add_list(filters, filter_name, index_field_name, query_operator_fields, value, must)
         else:
             add_must_term(index_field_name, value, must)
 
     return {"bool": {"must": must}} if must else {"match_all": {}}
 
 
-def add_must_list(filters, filter_name, qualified_index_field_name, query_operator_fields, values, must):
+def add_list(filters, filter_name, qualified_index_field_name, query_operator_fields, values, must):
     normalized_values = utils.standardize_values(values)
     if not normalized_values:
         return
