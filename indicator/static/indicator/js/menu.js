@@ -78,6 +78,11 @@ function initIndicatorForm(dataSource, studyUnit) {
         }
     }
 
+    // Reset 'NOT' toggles
+    document.querySelectorAll('.toggle-not').forEach(button => {
+        button.closest('.input-group').classList.remove('not-active');
+    });
+
     // Clear charts area
     clearAppliedFiltersContainer();
 
