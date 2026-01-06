@@ -109,9 +109,14 @@
 
 <div class="form-group mb-3">
     <label class="form-label" for="document_language">Document Language</label>
-    <select class="form-control" id="document_language" name="document_language" aria-label="Document Language">
-      <option></option>
-    </select>
+    <div class="input-group">
+        <div class="flex-grow-1 position-relative input-group-left">
+            <select class="form-control" id="document_language" name="document_language" aria-label="Document Language">
+                <option></option>
+            </select>
+        </div>
+        <button class="btn btn-outline input-group-right toggle-not" type="button" id="document_language_bool_not" title="Click to activate not operator">NOT</button>
+    </div>
 </div>
 
 <div class="form-group mb-3">
