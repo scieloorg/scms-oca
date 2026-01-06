@@ -49,6 +49,7 @@ def build_query(filters, field_settings, data_source):
     translated_filters = utils.translate_fields(filters, field_settings)
 
     must = []
+    must_not = []
 
     if data_source == "brazil":
         fl_name = field_settings.get("country", {}).get("index_field_name")
