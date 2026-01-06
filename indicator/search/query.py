@@ -67,6 +67,8 @@ def build_query(filters, field_settings, data_source):
         if not filter_name:
             continue
 
+        is_not = filters.get(f"{filter_name}_bool_not") == "true"
+
         if isinstance(value, list):
             add_list(filters, filter_name, index_field_name, query_operator_fields, value, must)
         else:
