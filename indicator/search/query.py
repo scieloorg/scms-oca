@@ -72,9 +72,10 @@ def build_query(filters, field_settings, data_source):
         if isinstance(value, list):
             add_list(filters, filter_name, index_field_name, query_operator_fields, value, must)
         else:
-            add_must_term(index_field_name, value, must)
-
-    return {"bool": {"must": must}} if must else {"match_all": {}}
+            if is_not:
+                add_term(index_field_name, value, must_not)
+            else:
+                add_term(index_field_name, value, must)
 
 
 def add_list(filters, filter_name, qualified_index_field_name, query_operator_fields, values, must):
