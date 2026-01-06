@@ -67,6 +67,17 @@ function collectFiltersFromForm(formData) {
     }
   }
 
+  // Handle 'NOT' toggles
+  document.querySelectorAll('.toggle-not').forEach(button => {
+    const group = button.closest('.input-group');
+    if (group.classList.contains('not-active')) {
+      const select = group.querySelector('select');
+      if (select && select.name) {
+        filters[`${select.name}_bool_not`] = 'true';
+      }
+    }
+  });
+
   return filters;
 }
 
@@ -267,14 +278,25 @@ function updateAppliedFiltersDisplay() {
         if (existing) {
             existing.values.push(value);
         } else {
-            filtersToDisplay.push({ label: labelText, values: [value] });
+            filtersToDisplay.push({ key: key, label: labelText, values: [value] });
         }
     }
 
     // Standardize and format filter strings
     filtersToDisplay.forEach(filter => {
-        const values = filter.values.map(val => standardizeFieldValue(filter.label, val)).join(', ');
-        allFilterStrings.push(`${filter.label}: ${values}`);
+        const element = form.querySelector(`[name="${filter.key}"]`);
+        const group = element.closest('.input-group');
+        const isNot = group && group.querySelector('.toggle-not') && group.classList.contains('not-active');
+
+        const values = filter.values.map(val => {
+            const standardizedVal = standardizeFieldValue(filter.label, val);
+            if (isNot) {
+                return `<span class="badge badge-oca-light bg-danger text-white">NOT</span> ${standardizedVal}`;
+            }
+            return standardizedVal;
+        }).join(', ');
+
+        allFilterStrings.push(`<span class="fw-bold">${filter.label}:</span> ${values}`);
     });
 
     // Handle publication year range separately
@@ -282,7 +304,7 @@ function updateAppliedFiltersDisplay() {
     const endVal = formData.get('document_publication_year_end');
     const rangeLabel = formatYearRange(startVal, endVal);
     if (rangeLabel) {
-        allFilterStrings.push(`Publication Year: ${rangeLabel}`);
+        allFilterStrings.push(`<span class="fw-bold">Publication Year:</span> ${rangeLabel}`);
     }
     // Handle country and language query operators
     const countryOp = formData.get('country_operator');
@@ -291,18 +313,18 @@ function updateAppliedFiltersDisplay() {
 
     const countryFilter = filtersToDisplay.find(f => f.label === 'Country');
     if (countryOp && countryFilter && countryFilter.values.length > 1) {
-        queryOperators.push(`<span>Country: <span class="badge">${countryOp.toUpperCase()}</span></span>`);
+        queryOperators.push(`<span><span class="fw-bold">Country:</span> <span class="badge badge-oca-light bg-secondary">${countryOp.toUpperCase()}</span></span>`);
     }
 
     const languageFilter = filtersToDisplay.find(f => f.label === 'Document Language');
     if (languageOp && languageFilter && languageFilter.values.length > 1) {
-        queryOperators.push(`<span>Document Language: <span class="badge">${languageOp.toUpperCase()}</span></span>`);
+        queryOperators.push(`<span><span class="fw-bold">Document Language:</span> <span class="badge badge-oca-light bg-secondary">${languageOp.toUpperCase()}</span></span>`);
     }
 
     // Build the final HTML string
-    let finalHtml = `<strong class="text-primary">Applied Filters</strong><span>${allFilterStrings.join('<span class="badge mx-2">AND</span>')}</span>`;
+    let finalHtml = `<strong class="text-primary">Applied Filters</strong><div>${allFilterStrings.join('<span class="badge badge-oca-light bg-secondary mx-2">AND</span>')}</div>`;
     if (queryOperators.length > 0) {
-        finalHtml += `<strong class="mt-1 text-primary">Search Options</strong>${queryOperators.join(' ')}`;
+        finalHtml += `<strong class="mt-1 text-primary">Search Options</strong><div>${queryOperators.join(' ')}</div>`;
     }
 
     // Join and display all filter strings
