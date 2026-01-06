@@ -83,3 +83,7 @@ div.dt-container select.dt-input {
 .input-group .btn {
     height: 2.4rem !important;
 }
+
+.badge-oca-light {
+    border-color: #f1f2f4;
+}
