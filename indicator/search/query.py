@@ -77,6 +77,14 @@ def build_query(filters, field_settings, data_source):
             else:
                 add_term(index_field_name, value, must)
 
+    query_bool = {}
+    if must:
+        query_bool["must"] = must
+    if must_not:
+        query_bool["must_not"] = must_not
+
+    return {"bool": query_bool} if query_bool else {"match_all": {}}
+
 
 def add_list(filters, filter_name, qualified_index_field_name, query_operator_fields, values, must):
     normalized_values = utils.standardize_values(values)
