@@ -52,7 +52,7 @@ def build_query(filters, field_settings, data_source):
 
     if data_source == "brazil":
         fl_name = field_settings.get("country", {}).get("index_field_name")
-        add_must_term(fl_name, "BR", must)
+        add_term(fl_name, "BR", must)
 
     if data_source == "social":
         fl_name = field_settings.get("action", {}).get("index_field_name")
@@ -82,7 +82,7 @@ def add_must_list(filters, filter_name, qualified_index_field_name, query_operat
     operator_value = filters.get(f"{filter_name}_operator")
     if operator_value == "and" and filter_name in query_operator_fields:
         for value in values:
-            add_must_term(qualified_index_field_name, value, must)
+            add_term(qualified_index_field_name, value, must)
     else:
         add_must_terms(qualified_index_field_name, values, must)
 
@@ -93,7 +93,7 @@ def add_must_exists(name, must):
     must.append({"exists": {"field": name}})
 
 
-def add_must_term(name, value, must):
+def add_term(name, value, must):
     if value in (None, ""):
         return
     must.append({"term": {name: value}})
