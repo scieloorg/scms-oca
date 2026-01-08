@@ -46,12 +46,22 @@
 
 <div class="form-group mb-3">
     <label class="form-label" for="source_name">Source Name</label>
-    <select id="source_name" class="form-control" name="source_name" aria-label="Source Name"></select>
+    <div class="input-group">
+        <div class="flex-grow-1 position-relative input-group-left">
+            <select id="source_name" class="form-control" name="source_name" aria-label="Source Name"></select>
+        </div>
+        <button aria-pressed="false" class="btn btn-outline input-group-right toggle-not" type="button" id="source_name_bool_not" title="Click to activate not operator">NOT</button>
+    </div>
 </div>
 
 <div class="form-group mb-3">
     <label class="form-label" for="source_country">Source Country</label>
-    <select id="source_country" class="form-control" name="source_country" aria-label="Source Name"></select>
+    <div class="input-group">
+        <div class="flex-grow-1 position-relative input-group-left">
+            <select id="source_country" class="form-control" name="source_country" aria-label="Source Country"></select>
+        </div>
+        <button aria-pressed="false" class="btn btn-outline input-group-right toggle-not" type="button" id="source_country_bool_not" title="Click to activate not operator">NOT</button>
+    </div>
 </div>
 
 <div class="form-group mb-3">
@@ -95,9 +105,14 @@
 
 <div class="form-group mb-3">
     <label class="form-label" for="document_language">Document Language</label>
-    <select id="document_language" class="form-control" name="document_language" aria-label="Document Language">
-      <option></option>
-    </select>
+    <div class="input-group">
+        <div class="flex-grow-1 position-relative input-group-left">
+            <select id="document_language" class="form-control" name="document_language" aria-label="Document Language">
+                <option></option>
+            </select>
+        </div>
+        <button aria-pressed="false" class="btn btn-outline input-group-right toggle-not" type="button" id="document_language_bool_not" title="Click to activate not operator">NOT</button>
+    </div>
 </div>
 
 <div class="form-group mb-3">

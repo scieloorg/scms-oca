@@ -49,3 +49,41 @@ div.dt-container select.dt-input {
 .ml-oca-filter {
   margin-left: 0.10rem;
 }
+
+/* Estilos para lidar com selects compostos por campo principal e not */
+.input-group-right {
+    width: auto !important;
+    flex: 0 0 auto !important;
+    padding: 0.25rem 0.5rem !important;
+    height: 2.4rem !important;
+    font-size: 0.7rem !important;
+    margin: 0 !important;
+}
+
+.input-group-left .select2-selection--single {
+    border-end-end-radius: 0 !important;
+    border-start-end-radius: 0 !important;
+    border-right: 0 !important;
+}
+
+.input-group.not-active {
+    border-color: #dc3545;
+}
+
+.input-group.not-active .btn {
+    background-color: #dc3545;
+    color: white;
+    border-color: #dc3545;
+}
+
+.input-group.not-active .input-group-left .select2-selection--single {
+    border-color: #dc3545 !important;
+}
+
+.input-group .btn {
+    height: 2.4rem !important;
+}
+
+.badge-oca-light {
+    border-color: #f1f2f4;
+}

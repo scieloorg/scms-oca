@@ -16,41 +16,56 @@
 
 <div class="form-group mb-3">
     <label class="form-label" for="collection">Collection</label>
-    <select id="collection" name="collection" class="form-control" aria-label="Collection">
-        <option value="" selected>Select a Collection</option>
-        <option value="arg">Argentina</option>
-        <option value="bol">Bolivia</option>
-        <option value="scl">Brazil</option>
-        <option value="chl">Chile</option>
-        <option value="col">Colombia</option>
-        <option value="cri">Costa Rica</option>
-        <option value="cub">Cuba</option>
-        <option value="dom">Dominican Republic</option>
-        <option value="ecu">Ecuador</option>
-        <option value="mex">Mexico</option>
-        <option value="per">Peru</option>
-        <option value="prt">Portugal</option>
-        <option value="pry">Paraguay</option>
-        <option value="esp">Spain</option>
-        <option value="sza">South Africa</option>
-        <option value="ury">Uruguay</option>
-        <option value="ven">Venezuela</option>
-        <option value="wid">West Indies</option>
-        <option value="cic">Science and Culture</option>
-        <option value="psi">PEPSIC</option>
-        <option value="spa">Public Health</option>
-        <option value="rve">REVENF</option>
-    </select>
+    <div class="input-group">
+        <div class="flex-grow-1 position-relative input-group-left">
+            <select id="collection" name="collection" class="form-control" aria-label="Collection">
+                <option value="" selected>Select a Collection</option>
+                <option value="arg">Argentina</option>
+                <option value="bol">Bolivia</option>
+                <option value="scl">Brazil</option>
+                <option value="chl">Chile</option>
+                <option value="col">Colombia</option>
+                <option value="cri">Costa Rica</option>
+                <option value="cub">Cuba</option>
+                <option value="dom">Dominican Republic</option>
+                <option value="ecu">Ecuador</option>
+                <option value="mex">Mexico</option>
+                <option value="per">Peru</option>
+                <option value="prt">Portugal</option>
+                <option value="pry">Paraguay</option>
+                <option value="esp">Spain</option>
+                <option value="sza">South Africa</option>
+                <option value="ury">Uruguay</option>
+                <option value="ven">Venezuela</option>
+                <option value="wid">West Indies</option>
+                <option value="cic">Science and Culture</option>
+                <option value="psi">PEPSIC</option>
+                <option value="spa">Public Health</option>
+                <option value="rve">REVENF</option>
+            </select>
+        </div>
+        <button aria-pressed="false" class="btn btn-outline input-group-right toggle-not" type="button" id="collection_bool_not" title="Click to activate not operator">NOT</button>
+    </div>
 </div>
 
 <div class="form-group mb-3">
     <label class="form-label" for="publisher">Publisher</label>
-    <select id="publisher" name="publisher" class="form-control" aria-label="Publisher"></select>
+    <div class="input-group">
+        <div class="flex-grow-1 position-relative input-group-left">
+            <select id="publisher" name="publisher" class="form-control" aria-label="Publisher"></select>
+        </div>
+        <button aria-pressed="false" class="btn btn-outline input-group-right toggle-not" type="button" id="publisher_bool_not" title="Click to activate not operator">NOT</button>
+    </div>
 </div>
 
 <div class="form-group mb-3">
     <label class="form-label" for="journal">Journal</label>
-    <select id="journal" name="journal" class="form-control" aria-label="Journal"></select>
+    <div class="input-group">
+        <div class="flex-grow-1 position-relative input-group-left">
+            <select id="journal" name="journal" class="form-control" aria-label="Journal"></select>
+        </div>
+        <button aria-pressed="false" class="btn btn-outline input-group-right toggle-not" type="button" id="journal_bool_not" title="Click to activate not operator">NOT</button>
+    </div>
 </div>
 
 <div class="h6 pb-2 mt-4 border-bottom text-primary">

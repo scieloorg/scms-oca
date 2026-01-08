@@ -49,14 +49,15 @@ def build_query(filters, field_settings, data_source):
     translated_filters = utils.translate_fields(filters, field_settings)
 
     must = []
+    must_not = []
 
     if data_source == "brazil":
         fl_name = field_settings.get("country", {}).get("index_field_name")
-        add_must_term(fl_name, "BR", must)
+        add_term(fl_name, "BR", must)
 
     if data_source == "social":
         fl_name = field_settings.get("action", {}).get("index_field_name")
-        add_must_exists(fl_name,  must)
+        add_exists(fl_name, must)
 
     query_operator_fields = data_sources_with_settings.get_query_operator_fields(data_source)
     index_field_name_to_filter_name_map = data_sources_with_settings.get_index_field_name_to_filter_name_map(data_source)
@@ -66,15 +67,26 @@ def build_query(filters, field_settings, data_source):
         if not filter_name:
             continue
 
+        is_not = filters.get(f"{filter_name}_bool_not") == "true"
+
         if isinstance(value, list):
-            add_must_list(filters, filter_name, index_field_name, query_operator_fields, value, must)
+            add_list(filters, filter_name, index_field_name, query_operator_fields, value, must)
         else:
-            add_must_term(index_field_name, value, must)
+            if is_not:
+                add_term(index_field_name, value, must_not)
+            else:
+                add_term(index_field_name, value, must)
 
-    return {"bool": {"must": must}} if must else {"match_all": {}}
+    query_bool = {}
+    if must:
+        query_bool["must"] = must
+    if must_not:
+        query_bool["must_not"] = must_not
+
+    return {"bool": query_bool} if query_bool else {"match_all": {}}
 
 
-def add_must_list(filters, filter_name, qualified_index_field_name, query_operator_fields, values, must):
+def add_list(filters, filter_name, qualified_index_field_name, query_operator_fields, values, must):
     normalized_values = utils.standardize_values(values)
     if not normalized_values:
         return
@@ -82,24 +94,24 @@ def add_must_list(filters, filter_name, qualified_index_field_name, query_operat
     operator_value = filters.get(f"{filter_name}_operator")
     if operator_value == "and" and filter_name in query_operator_fields:
         for value in values:
-            add_must_term(qualified_index_field_name, value, must)
+            add_term(qualified_index_field_name, value, must)
     else:
-        add_must_terms(qualified_index_field_name, values, must)
+        add_terms(qualified_index_field_name, values, must)
 
 
-def add_must_exists(name, must):
+def add_exists(name, must):
     if name in (None, ""):
         return
     must.append({"exists": {"field": name}})
 
 
-def add_must_term(name, value, must):
+def add_term(name, value, must):
     if value in (None, ""):
         return
     must.append({"term": {name: value}})
 
 
-def add_must_terms(name, values, must):
+def add_terms(name, values, must):
     must.append({"terms": {name: values}})
 
 
