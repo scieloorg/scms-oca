@@ -117,7 +117,7 @@ def add_terms(name, values, must):
 
 def _get_periodical_identifier_field(field_settings):
     """Return a keyword field suitable for cardinality of periodicals."""
-    for candidate in ("issn", "journal", "source_name"):
+    for candidate in ("journal", "source_name", "issn"):
         fl = field_settings.get(candidate, {}).get("index_field_name")
         if fl:
             if not str(fl).endswith(".keyword"):
