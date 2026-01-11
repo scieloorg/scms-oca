@@ -92,3 +92,11 @@ div.dt-container select.dt-input {
 .is-height-2-4 {
     height: 2.4rem !important;
 }
+
+/* Força 100% de comprimento no select à esquerda, em componente composto de select de campos e select de operadores booleanos */
+.select-left .select2-selection--multiple {
+    flex: 1 1 0;
+    min-width: 0;
+    border-bottom-right-radius: 0;
+    border-top-right-radius: 0;
+}
