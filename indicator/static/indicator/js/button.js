@@ -28,3 +28,22 @@ function setupDatePicker(fieldId, format="yyyy", view_mode="years", min_view_mod
         console.log('Error initializing datepicker for field', fieldId, '. Error: ', error)
     }
 }
+
+/* Função para facilitar construção de objeto Select2 do tipo single */
+function setupSelect2Single(fieldId, placeholder="", allow_search=false, allow_clear=true, width="") {
+    try {
+        const selectElement = document.getElementById(fieldId);
+        if (selectElement) {
+            let opts = {theme: 'bootstrap-5', width: 'auto'}
+            if (allow_clear) {opts.allowClear = allow_clear;}
+            if (!allow_search) {opts.minimumResultsForSearch = Infinity;}
+            if (placeholder !== "") {opts.placeholder = placeholder;}
+            if (width !== "") {opts.width = width;}
+            $(selectElement).select2(opts).on('select2:open', function (e) {
+                document.querySelector(`[aria-controls="select2-${e.target.id}-results"]`).focus();
+            });
+        }
+    } catch (error) {
+        console.error('Error initializing Select2 for field', fieldId, '. Error: ', error)
+    }
+}

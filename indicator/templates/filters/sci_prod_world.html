@@ -216,55 +216,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         setupDatePicker(fieldId);
     });
 
-    try {
-        // Initialize Select2 for multi-select fields
-        const multiSelectFields = [
-            'source_index_open_alex',
-            'source_index_scielo',
-            'source_type',
-            'document_type',
-            'access_type',
-            'subject_area_level_0',
-            'subject_area_level_1',
-            'subject_area_level_2',
-            'region_world',
-            'country'
-        ];
-        multiSelectFields.forEach(fieldId => {
-            const selectElement = document.getElementById(fieldId);
-            if (selectElement) {
-                $(selectElement).select2(
-                  {
-                    placeholder: 'Start typing to search...',
-                    theme: 'bootstrap-5',
-                  }
-                ).on('select2:open', function(e) {
-                  document.querySelector(`[aria-controls="select2-${e.target.id}-results"]`).focus();
-                });
-            }
-        });
+    // Initialize singleselect fields
+    const singleSelectFieldsOpts = [
+        ["country_operator", "", false, false],
+        ['breakdown_variable', 'Select a breakdown variable', false, true],
+        ['document_language', 'Select a language', true, true],
+        ['open_access', 'Select an open access status', false, true],
+    ]
+    singleSelectFieldsOpts.forEach(([fieldId, fieldPlaceholder, allowSearch, allowClear]) => {
+        setupSelect2Single(fieldId, fieldPlaceholder, allowSearch, allowClear);
+    });
 
-        // Initialize Select2 for single-select fields
-        const singleSelectFields = [
-          'document_language',
-          'open_access',
-          'breakdown_variable',
-          'country_operator',
-        ];
-        singleSelectFields.forEach(fieldId => {
-            const selectElement = document.getElementById(fieldId);
-            if (selectElement) {
-                $(selectElement).select2(
-                  {
-                    placeholder: 'Start typing to search...',
-                    allowClear: true,
-                    theme: 'bootstrap-5',
-                  }
-                ).on('select2:open', function(e) {
-                    document.querySelector(`[aria-controls="select2-${e.target.id}-results"]`).focus();
-                });
-            }
-        });
 
         // Initialize Select2 for special select fields
         const specialSelectFields = [

@@ -179,71 +179,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         setupDatePicker(fieldId);
     });
 
-    try {
-        // Initialize Select2 for singleSelect fields
-        const singleSelectFields = [
-            "access_type",
-            "country",
-            "document_language",
-            "document_type",
-            'breakdown_variable',
-            'country_operator',
-            'document_language_operator',
-            'collection',
-        ];
-        singleSelectFields.forEach(fieldId => {
-            const selectElement = document.getElementById(fieldId);
-            if (selectElement) {
-                $(selectElement).select2(
-                  {
-                    placeholder: 'Start typing to search...',
-                    allowClear: true,
-                    theme: 'bootstrap-5',
-                  }
-                ).on('select2:open', function(e) {
-                    document.querySelector(`[aria-controls="select2-${e.target.id}-results"]`).focus();
-                });
-            }
-        });
+    // Initialize singleselect fields
+    const singleSelectFieldsOpts = [
+        ["access_type", "Select an access type", false, true],
+        ["breakdown_variable", "Select a breakdown variable", false, true],
+        ["collection", "Select a collection", false, true],
+        ["country_operator", "", false, false],
+        ["document_language_operator", "", false, false],
+        ["document_type", "Select a document type", false, true],
+    ]
+    singleSelectFieldsOpts.forEach(([fieldId, fieldPlaceholder, allowSearch, allowClear]) => {
+        setupSelect2Single(fieldId, fieldPlaceholder, allowSearch, allowClear);
+    });
 
-        // Initialize Select2 for special select fields
-        const searchFields = [
-            "journal",
-            "institution",
-            "publisher"
-        ];
-        searchFields.forEach(fieldId => {
-            const selectElement = document.getElementById(fieldId);
-            if (selectElement) {
-                $(selectElement).select2(
-                  {
-                    ajax: {
-                        url: `/search-gateway/search-item/?field_name=${fieldId}&data_source=scielo`,
-                        dataType: 'json',
-                        delay: 300,
-                        data: params => ({ q: params.term }),
-                        processResults: data => {
-                            return {
-                                results: data.results.map(item => ({
-                                    id: item.key,
-                                    text: item.key
-                                }))
-                            };
-                        }
-                    },
-                    minimumInputLength: 2,
-                    placeholder: 'Start typing to search...',
-                    theme: 'bootstrap-5',
-                    allowClear: true
-                  }
-                ).on('select2:open', function(e) {
-                    document.querySelector(`[aria-controls="select2-${e.target.id}-results"]`).focus();
-                });
-            }
-        });
-
-    } catch (error) {
-        console.error('Error initializing Select2', error);
-    }
 });
 </script>
