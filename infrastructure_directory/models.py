@@ -293,7 +293,7 @@ class InfrastructureDirectory(CommonControlField):
     get_institutions.short_description = "Institution Name"
 
     def get_institutions_country(self):
-        return "| ".join([a.location.country.name_pt for a in self.institutions.all() if a.location])
+        return "| ".join([str(a.location.country) for a in self.institutions.all() if a.location])
     get_institutions_country.short_description = "Institution Country"
     
     def get_institutions_state(self):
