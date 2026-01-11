@@ -200,5 +200,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     multiSelectFieldsOpts.forEach(([fieldId, fieldPlaceholder, allowClear]) => {
         setupSelect2Multiple(fieldId, fieldPlaceholder, allowClear);
     });
+
+    // Initialize SearchAsYouType fields
+    const saytFieldsOpts = [
+        ["institution", "scielo", "Search for an institution", true],
+        ["journal", "scielo", "Search for a journal", true],
+        ["publisher", "scielo", "Search for a publisher", true],
+    ];
+    saytFieldsOpts.forEach(([fieldId, fieldDataSource, fieldPlaceholder, allowClear]) => {
+        setupSelect2SearchAsYouType(fieldId, fieldDataSource, fieldPlaceholder, allowClear);
+    });
 });
 </script>
