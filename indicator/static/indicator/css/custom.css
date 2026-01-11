@@ -87,3 +87,8 @@ div.dt-container select.dt-input {
 .badge-oca-light {
     border-color: #f1f2f4;
 }
+
+/* Força componente a ter altura 2.4rem */
+.is-height-2-4 {
+    height: 2.4rem !important;
+}
