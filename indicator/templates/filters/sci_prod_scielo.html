@@ -103,15 +103,17 @@
 
 <div class="form-group mb-3">
     <label class="form-label" for="document_language">Document Language</label>
-    <select multiple id="document_language" name="document_language" class="form-control" aria-label="Language"></select>
-</div>
-
-<div class="form-group mb-3">
-    <label class="form-label" for="document_language_operator">Language Query Operator</label>
-    <select id="document_language_operator" name="document_language_operator" class="form-control" aria-label="Language Query Operator">
-        <option value="and">AND</option>
-        <option value="or">OR</option>
-    </select>
+    <div class="d-flex align-items-start justify-content-between">
+        <div class="select-left flex-grow-1">
+            <select multiple id="document_language" name="document_language" class="form-control" aria-label="Language"></select>
+        </div>
+        <div class="select-right">
+            <select id="document_language_operator" name="document_language_operator" class="form-control" aria-label="Language Query Operator">
+                <option value="and" selected>AND</option>
+                <option value="or">OR</option>
+            </select>
+        </div>
+    </div>
 </div>
 
 <div class="form-group mb-3">
