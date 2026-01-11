@@ -184,8 +184,8 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', async () => {
+    // Populate filters
     try {
-        // Populate filters
         const data = await fetchFilters('world');
         populateSelectFilters(
             // Filters data retrieved from the index API
@@ -193,14 +193,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Fields that we don't want to populate because they are handled differently
             [
               'breakdown_variable',
-              'open_access',
-              'document_publication_year_start',
-              'document_publication_year_end',
               'country_operator',
-              'source_name',
-              'source_country',
-              'issn',
+              'document_publication_year_end',
+              'document_publication_year_start',
               'institution',
+              'issn',
+              'open_access',
+              'source_country',
+              'source_name',
             ]
         );
     } catch (error) {

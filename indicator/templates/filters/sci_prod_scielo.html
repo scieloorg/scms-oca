@@ -147,8 +147,8 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', async () => {
+    // Populate filters
     try {
-        // Populate filters
         const data = await fetchFilters('scielo');
         populateSelectFilters(
             // Filters data retrieved from the index API
