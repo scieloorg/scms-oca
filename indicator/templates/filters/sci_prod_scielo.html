@@ -187,7 +187,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         ["country_operator", "", false, false],
         ["document_language_operator", "", false, false],
         ["document_type", "Select a document type", false, true],
-    ]
+    ];
     singleSelectFieldsOpts.forEach(([fieldId, fieldPlaceholder, allowSearch, allowClear]) => {
         setupSelect2Single(fieldId, fieldPlaceholder, allowSearch, allowClear);
     });

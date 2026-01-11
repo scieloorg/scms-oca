@@ -222,7 +222,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         ['breakdown_variable', 'Select a breakdown variable', false, true],
         ['document_language', 'Select a language', true, true],
         ['open_access', 'Select an open access status', false, true],
-    ]
+    ];
     singleSelectFieldsOpts.forEach(([fieldId, fieldPlaceholder, allowSearch, allowClear]) => {
         setupSelect2Single(fieldId, fieldPlaceholder, allowSearch, allowClear);
     });
