@@ -166,16 +166,17 @@
 
 <div class="form-group mb-3">
     <label class="form-label" for="country">Country</label>
-    <select multiple id="country" class="form-control" name="country" aria-label="Country">
-    </select>
-</div>
-
-<div class="form-group mb-3">
-    <label class="form-label" for="country_operator">Country Query Operator</label>
-    <select id="country_operator" name="country_operator" class="form-control" aria-label="Country Query Operator">
-        <option value="and">AND</option>
-        <option value="or" selected>OR</option>
-    </select>
+    <div class="d-flex align-items-start justify-content-between">
+        <div class="select-left flex-grow-1">
+            <select multiple id="country" name="country" class="form-control" aria-label="Country"></select>
+        </div>
+        <div class="select-right">
+            <select id="country_operator" name="country_operator" class="form-control" aria-label="Country Query Operator">
+                <option value="and" selected>AND</option>
+                <option value="or">OR</option>
+            </select>
+        </div>
+    </div>
 </div>
 
 <script>
