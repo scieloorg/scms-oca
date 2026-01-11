@@ -46,6 +46,7 @@ class InfrastructureDirectory(CommonControlField):
                 _("Can edit institutional_contribution"),
             ),
             ("can_edit_notes", _("Can edit notes")),
+            ("can_edit_date", _("Can edit date")),
         )
 
     title = models.CharField(
@@ -144,11 +145,16 @@ class InfrastructureDirectory(CommonControlField):
         help_text=help_fields.DIRECTORY_NOTES_HELP,
     )
 
+    date = models.DateField(
+        _("Date"), max_length=255, null=True, blank=True, help_text="Data"
+    )
+
     panels = [
         HelpPanel(
             "Portais, plataformas, servidores, repositórios e serviços brasileiros que operam em acesso aberto objetos de comunicação de comunicação de pesquisas, recursos de apoio e resultantes de pesquisas e em acesso aberto."
         ),
         FieldPanel("title", permission="infrastructure_directory.can_edit_title"),
+        FieldPanel("date", permission="infrastructure_directory.can_edit_date"),
         FieldPanel("link", permission="infrastructure_directory.can_edit_link"),
         FieldPanel("source", permission="infrastructure_directory.can_edit_source"),
         FieldPanel("description", permission="infrastructure_directory.can_edit_description"),
@@ -283,6 +289,10 @@ class InfrastructureDirectory(CommonControlField):
     def get_link(self):
         return self.link
     get_link.short_description = "Link"
+
+    def get_date(self):
+        return self.date
+    get_date.short_description = "Date"
 
     def get_description(self):
         return self.description
