@@ -204,23 +204,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.error('Error loading filters', error);
     }
 
-        // Initialize Bootstrap Datepicker for year fields
+    // Initialize Bootstrap Datepicker for year fields
     const yearFields = [
         'document_publication_year_start',
         'document_publication_year_end',
     ];
     yearFields.forEach(fieldId => {
-        const yearInput = document.getElementById(fieldId);
-        if (yearInput) {
-            $(yearInput).datepicker({
-                format: "yyyy",
-                viewMode: "years",
-                minViewMode: "years",
-                autoclose: true,
-                startDate: '1900',
-                endDate: '2100'
-            });
-        }
+        setupDatePicker(fieldId);
     });
 
     try {
