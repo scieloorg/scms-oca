@@ -192,5 +192,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         setupSelect2Single(fieldId, fieldPlaceholder, allowSearch, allowClear);
     });
 
+    // Initialize multiselect fields with boolean operators
+    const multiSelectFieldsOpts = [
+        ["country", "Search for a country", false],
+        ["document_language", "Search for a language", false],
+    ];
+    multiSelectFieldsOpts.forEach(([fieldId, fieldPlaceholder, allowClear]) => {
+        setupSelect2Multiple(fieldId, fieldPlaceholder, allowClear);
+    });
 });
 </script>

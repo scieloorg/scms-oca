@@ -47,3 +47,21 @@ function setupSelect2Single(fieldId, placeholder="", allow_search=false, allow_c
         console.error('Error initializing Select2 for field', fieldId, '. Error: ', error)
     }
 }
+
+/* Função para facilitar construção de objeto Select2 do tipo múltiplo */
+function setupSelect2Multiple(fieldId, placeholder="", allow_clear=true, width="") {
+    try {
+        const selectElement = document.getElementById(fieldId);
+        if (selectElement) {
+            let opts = {theme: 'bootstrap-5'}
+            if (allow_clear) {opts.allowClear = allow_clear;}
+            if (placeholder !== "") {opts.placeholder = placeholder;}
+            if (width !== "") {opts.width = width;}
+            $(selectElement).select2(opts).on('select2:open', function (e) {
+                document.querySelector(`[aria-controls="select2-${e.target.id}-results"]`).focus();
+            });
+        }
+    } catch (error) {
+        console.error('Error initializing Select2 for field', fieldId, '. Error: ', error)
+    }
+}

@@ -227,51 +227,22 @@ document.addEventListener('DOMContentLoaded', async () => {
         setupSelect2Single(fieldId, fieldPlaceholder, allowSearch, allowClear);
     });
 
+    // Initialize multiselect fields
+    const multiSelectFieldsOpts = [
+        ['access_type', 'Select an access type', false],
+        ["country", "Search for a country", false]
+        ['document_type', 'Select a document type', false],
+        ['region_world', 'Select a region', false],
+        ['source_index_open_alex', 'Select a source index', false],
+        ['source_index_scielo', 'Select a source index', false],
+        ['source_type', 'Select a source type', false],
+        ['subject_area_level_0', 'Select an area', false],
+        ['subject_area_level_1', 'Select an area', false],
+        ['subject_area_level_2', 'Search for an area', false],
+    ];
+    multiSelectFieldsOpts.forEach(([fieldId, fieldPlaceholder, allowClear]) => {
+        setupSelect2Multiple(fieldId, fieldPlaceholder, allowClear);
+    });
 
-        // Initialize Select2 for special select fields
-        const specialSelectFields = [
-          'source_country',
-          'source_name',
-          'issn',
-          'institution',
-        ];
-        specialSelectFields.forEach(fieldId => {
-            const selectElement = document.getElementById(fieldId);
-            if (selectElement) {
-                let dsname;
-                if (fieldId === 'institution') {
-                  dsname = 'world';
-                } else {
-                  dsname = 'sources';
-                }
-                $(selectElement).select2(
-                  {
-                    ajax: {
-                        url: `/search-gateway/search-item/?field_name=${fieldId}&data_source=${dsname}`,
-                        dataType: 'json',
-                        delay: 300,
-                        data: params => ({ q: params.term }),
-                        processResults: data => {
-                            return {
-                                results: data.results.map(item => ({
-                                    id: item.key,
-                                    text: item.key
-                                }))
-                            };
-                        }
-                    },
-                    minimumInputLength: 2,
-                    placeholder: 'Start typing to search...',
-                    theme: 'bootstrap-5',
-                    allowClear: true
-                  }
-                ).on('select2:open', function(e) {
-                    document.querySelector(`[aria-controls="select2-${e.target.id}-results"]`).focus();
-                });
-            }
-        });
-    } catch (error) {
-        console.error('Error initializing Select2', error);
-    }
 });
 </script>
