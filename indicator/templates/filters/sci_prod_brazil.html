@@ -4,7 +4,7 @@
 <div class="form-group mb-3">
     <label for="breakdown_variable" class="form-label">Breakdown Variable</label>
     <select id="breakdown_variable" class="form-control" name="breakdown_variable">
-        <option value="">Select a variable</option>
+        <option></option>
         <option value="source_index_open_alex">Source Index (OpenAlex)</option>
         <option value="source_index_scielo">Source Index (SciELO)</option>
         <option value="source_type">Source Type</option>
@@ -80,7 +80,7 @@
       id="document_publication_year_start"
       name="document_publication_year_start"
       type="text"
-      class="form-control"
+      class="form-control is-height-2-4"
       aria-label="Publication Year Start"
       placeholder="Start"
       value="2015"
@@ -89,7 +89,7 @@
       id="document_publication_year_end"
       name="document_publication_year_end"
       type="text"
-      class="form-control"
+      class="form-control is-height-2-4"
       aria-label="Publication Year End"
       placeholder="End"
       value="2024"
@@ -166,16 +166,17 @@
 
 <div class="form-group mb-3">
     <label class="form-label" for="country">Country</label>
-    <select multiple id="country" class="form-control" name="country" aria-label="Country">
-    </select>
-</div>
-
-<div class="form-group mb-3">
-    <label class="form-label" for="country_operator">Country Query Operator</label>
-    <select id="country_operator" name="country_operator" class="form-control" aria-label="Country Query Operator">
-        <option value="and">AND</option>
-        <option value="or" selected>OR</option>
-    </select>
+    <div class="d-flex align-items-start justify-content-between">
+        <div class="select-left flex-grow-1">
+            <select multiple id="country" name="country" class="form-control" aria-label="Country"></select>
+        </div>
+        <div class="select-right">
+            <select id="country_operator" name="country_operator" class="form-control" aria-label="Country Query Operator">
+                <option value="and" selected>AND</option>
+                <option value="or">OR</option>
+            </select>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -189,134 +190,66 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Fields that we don't want to populate because they are handled differently
             [
               'breakdown_variable',
-              'open_access',
-              'document_publication_year_start',
-              'document_publication_year_end',
               'country_operator',
-              'source_name',
-              'source_country',
-              'issn',
+              'document_publication_year_end',
+              'document_publication_year_start',
               'institution',
+              'issn',
+              'open_access',
+              'source_country',
+              'source_name',
             ]
         );
     } catch (error) {
         console.error('Error loading filters', error);
     }
 
-        // Initialize Bootstrap Datepicker for year fields
+    // Initialize Bootstrap Datepicker for year fields
     const yearFields = [
         'document_publication_year_start',
         'document_publication_year_end',
     ];
     yearFields.forEach(fieldId => {
-        const yearInput = document.getElementById(fieldId);
-        if (yearInput) {
-            $(yearInput).datepicker({
-                format: "yyyy",
-                viewMode: "years",
-                minViewMode: "years",
-                autoclose: true,
-                startDate: '1900',
-                endDate: '2100'
-            });
-        }
+        setupDatePicker(fieldId);
     });
 
-    try {
-        // Initialize Select2 for multi select fields
-        const multiSelectFields = [
-            'source_index_open_alex',
-            'source_index_scielo',
-            'source_type',
-            'document_type',
-            'access_type',
-            'subject_area_level_0',
-            'subject_area_level_1',
-            'subject_area_level_2',
-            'region_world',
-            'country'
-        ];
-        multiSelectFields.forEach(fieldId => {
-            const selectElement = document.getElementById(fieldId);
-            if (selectElement) {
-                $(selectElement).select2(
-                  {
-                    placeholder: 'Start typing to search...',
-                    theme: 'bootstrap-5',
-                  }
-                ).on('select2:open', function(e) {
-                    document.querySelector(`[aria-controls="select2-${e.target.id}-results"]`).focus();
-                });
-            }
-        });
+    // Initialize singleselect fields
+    const singleSelectFieldsOpts = [
+        ["country_operator", "", false, false],
+        ['breakdown_variable', 'Select a breakdown variable', false, true],
+        ['document_language', 'Search for a language', true, true],
+        ['open_access', 'Select an open access status', false, true],
+    ];
+    singleSelectFieldsOpts.forEach(([fieldId, fieldPlaceholder, allowSearch, allowClear]) => {
+        setupSelect2Single(fieldId, fieldPlaceholder, allowSearch, allowClear);
+    });
 
-        // Initialize Select2 for single select fields
-        const singleSelectFields = [
-            'document_language',
-            'open_access',
-            'breakdown_variable',
-            'country_operator',
-        ];
-        singleSelectFields.forEach(fieldId => {
-            const selectElement = document.getElementById(fieldId);
-            if (selectElement) {
-                $(selectElement).select2(
-                  {
-                    placeholder: 'Start typing to search...',
-                    allowClear: true,
-                    theme: 'bootstrap-5',
-                  }
-                ).on('select2:open', function(e) {
-                    document.querySelector(`[aria-controls="select2-${e.target.id}-results"]`).focus();
-                });
-            }
-        });
+    // Initialize multiselect fields
+    const multiselectFieldsOpts = [
+        ['access_type', 'Select an access type', false],
+        ["country", "Search for a country", false],
+        ['document_type', 'Select a document type', false],
+        ['region_world', 'Select a region', false],
+        ['source_index_open_alex', 'Select a source index', false],
+        ['source_index_scielo', 'Select a source index', false],
+        ['source_type', 'Select a source type', false],
+        ['subject_area_level_0', 'Select an area', false],
+        ['subject_area_level_1', 'Select an area', false],
+        ['subject_area_level_2', 'Search for an area', false],
+    ];
+    multiselectFieldsOpts.forEach(([fieldId, fieldPlaceholder, allowClear]) => {
+        setupSelect2Multiple(fieldId, fieldPlaceholder, allowClear);
+    });
 
-        // Initialize Select2 for special select fields
-        const specialSelectFields = [
-          'source_country',
-          'source_name',
-          'issn',
-          'institution',
-        ];
-        specialSelectFields.forEach(fieldId => {
-            const selectElement = document.getElementById(fieldId);
-            if (selectElement) {
-                let dsname;
-                if (fieldId === 'institution') {
-                  dsname = 'brazil';
-                } else {
-                  dsname = 'sources';
-                }
-                $(selectElement).select2(
-                  {
-                    ajax: {
-                        url: `/search-gateway/search-item/?field_name=${fieldId}&data_source=${dsname}`,
-                        dataType: 'json',
-                        delay: 300,
-                        data: params => ({ q: params.term }),
-                        processResults: data => {
-                            return {
-                                results: data.results.map(item => ({
-                                    id: item.key,
-                                    text: item.key
-                                }))
-                            };
-                        }
-                    },
-                    minimumInputLength: 2,
-                    placeholder: 'Start typing to search...',
-                    theme: 'bootstrap-5',
-                    allowClear: true
-                  }
-                ).on('select2:open', function(e) {
-                    document.querySelector(`[aria-controls="select2-${e.target.id}-results"]`).focus();
-                });
-            }
-        });
-    } catch (error) {
-        console.error('Error initializing Select2', error);
-    }
+    // Initialize SearchAsYouType fields
+    const saytFieldsOpts = [
+      ['institution', 'sources', 'Search for an institution', true],
+      ['issn', 'world', 'Search for an ISSN', true],
+      ['source_country', 'world', 'Search for a country', true],
+      ['source_name', 'world', 'Search for a source', true],
+    ];
+    saytFieldsOpts.forEach(([fieldId, fieldDataSource, fieldPlaceholder, allowClear]) => {
+        setupSelect2SearchAsYouType(fieldId, fieldDataSource, fieldPlaceholder, allowClear);
+    });
 });
-
 </script>

@@ -87,3 +87,74 @@ div.dt-container select.dt-input {
 .badge-oca-light {
     border-color: #f1f2f4;
 }
+
+/* Força componente a ter altura 2.4rem */
+.is-height-2-4 {
+    height: 2.4rem !important;
+}
+
+/* Força 100% de comprimento no select à esquerda, em componente composto de select de campos e select de operadores booleanos */
+.select-left .select2-selection--multiple {
+    flex: 1 1 0;
+    min-width: 0;
+    border-bottom-right-radius: 0;
+    border-top-right-radius: 0;
+}
+
+/* Define tamanho do componente direito do select */
+.select-right {
+    width: 60px !important;
+    min-width: 60px !important;
+}
+
+/* Estiliza componente direito do select */
+.select-right .select2-selection--single {
+    height: 2.35rem !important;
+    display: flex !important;
+    align-items: center !important;
+    padding: 0 0 0 0 !important;
+    margin: 0 !important;
+    border-bottom-left-radius: 0;
+    border-top-left-radius: 0;
+    border-left: 0;
+}
+
+/* Define estilo do texto do componente direito do select */
+.select-right .select2-selection__rendered {
+    padding-left: 8px !important;
+    padding-right: 0 !important;
+    margin-right: 0 !important;
+    font-size: 0.7rem !important;
+    font-weight: 800 !important;
+    color: #495057 !important;
+    text-transform: uppercase;
+    line-height: 1 !important;
+}
+
+/* Define estilo do container da seta do componente direito do select */
+.select-right .select2-selection__arrow {
+    position: static !important;
+    height: auto !important;
+    width: auto !important;
+    background: transparent !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Define estilo da seta do componente direito do select */
+.select-right .select2-selection__arrow b {
+    margin-top: 0 !important;
+    border-color: #6c757d transparent transparent transparent !important;
+    border-width: 5px 4px 0 4px !important;
+}
+
+/* Define estilo do dropdown do componente direito do select */
+[id*="_operator-results"] .select2-results__option {
+    font-size: 0.7rem !important;
+    padding-left: 8px;
+    margin-left: 0;
+    text-align: left !important;
+    font-weight: 700 !important;
+    min-height: 0 !important;
+}
