@@ -76,7 +76,7 @@ drf-yasg==1.21.5  # https://pypi.org/project/drf-yasg2/
 
 # Pandas
 # ------------------------------------------------------------------------------
-numpy==1.21.0  # https://numpy.org/
+numpy==1.22.2  # https://numpy.org/
 pandas==2.0.1  # https://pandas.pydata.org/
 
 # Langcode
