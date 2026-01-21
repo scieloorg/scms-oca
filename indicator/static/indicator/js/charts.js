@@ -138,15 +138,15 @@ Indicators.renderChart = function({ chartId, chartDivId, data, seriesType, title
         }
     } else {
         if (seriesType === 'Periodicals') {
-            series = [{ name: 'Unique Periodicals (sources)', type: chartType, data: data.nperiodicals_per_year || [] }];
-        } else if (seriesType === 'Documents per Periodical') {
-            series = [{ name: 'Documents / Periodical', type: chartType, data: data.docs_per_periodical_per_year || [] }];
-        } else if (seriesType === 'Citations per Periodical') {
-            series = [{ name: 'Citations / Periodical', type: chartType, data: data.citations_per_periodical_per_year || [] }];
-        } else if (seriesType === 'Cited Documents per Periodical') {
-            series = [{ name: 'Cited Documents / Periodical', type: chartType, data: data.cited_docs_per_periodical_per_year || [] }];
-        } else if (seriesType === 'Percent Periodicals With Cited Docs') {
-            series = [{ name: '% Periodicals With ≥1 Cited Document', type: chartType, data: data.percent_periodicals_with_cited_docs_per_year || [] }];
+            series = [{ name: 'Unique Journals (sources)', type: chartType, data: data.nperiodicals_per_year || [] }];
+        } else if (seriesType === 'Documents per Journal') {
+            series = [{ name: 'Documents / Journal', type: chartType, data: data.docs_per_periodical_per_year || [] }];
+        } else if (seriesType === 'Citations per Journal') {
+            series = [{ name: 'Citations / Journal', type: chartType, data: data.citations_per_periodical_per_year || [] }];
+        } else if (seriesType === 'Cited Documents per Journal') {
+            series = [{ name: 'Cited Documents / Journal', type: chartType, data: data.cited_docs_per_periodical_per_year || [] }];
+        } else if (seriesType === 'Percent Journals With Cited Docs') {
+            series = [{ name: '% Journals With ≥1 Cited Document', type: chartType, data: data.percent_periodicals_with_cited_docs_per_year || [] }];
         } else if (seriesType === 'Cited Documents') {
             series = [{ name: 'Cited Documents', type: chartType, data: data.docs_with_citations_per_year || [] }];
         } else if (seriesType === 'Documents') {
