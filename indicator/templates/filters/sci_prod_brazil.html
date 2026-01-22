@@ -1,88 +1,90 @@
+{% load i18n static %}
+
 {% if study_unit != 'journal' %}
-<h4 class="my-2">Graph Options</h4>
+<h4 class="my-2">{% trans "Graph Options" %}</h4>
 
 <div class="form-group mb-3">
-    <label for="breakdown_variable" class="form-label">Breakdown Variable</label>
+    <label for="breakdown_variable" class="form-label">{% trans "Breakdown Variable" %}</label>
     <select id="breakdown_variable" class="form-control" name="breakdown_variable">
         <option></option>
-        <option value="source_index_open_alex">Source Index (OpenAlex)</option>
-        <option value="source_index_scielo">Source Index (SciELO)</option>
-        <option value="source_type">Source Type</option>
-        <option value="document_type">Document Type</option>
-        <option value="document_language">Document Language</option>
-        <option value="open_access">Open Access</option>
-        <option value="access_type">Access Type</option>
-        <option value="subject_area_level_0">Subject Area Level 0</option>
-        <option value="subject_area_level_1">Subject Area Level 1</option>
-        <option value="subject_area_level_2">Subject Area Level 2</option>
-        <option value="region_world">Author Affiliation - Region (World)</option>
+        <option value="source_index_open_alex">{% trans "Source Index (OpenAlex)" %}</option>
+        <option value="source_index_scielo">{% trans "Source Index (SciELO)" %}</option>
+        <option value="source_type">{% trans "Source Type" %}</option>
+        <option value="document_type">{% trans "Document Type" %}</option>
+        <option value="document_language">{% trans "Document Language" %}</option>
+        <option value="open_access">{% trans "Open Access" %}</option>
+        <option value="access_type">{% trans "Access Type" %}</option>
+        <option value="subject_area_level_0">{% trans "Subject Area Level 0" %}</option>
+        <option value="subject_area_level_1">{% trans "Subject Area Level 1" %}</option>
+        <option value="subject_area_level_2">{% trans "Subject Area Level 2" %}</option>
+        <option value="region_world">{% trans "Author Affiliation - Region (World)" %}</option>
     </select>
 </div>
 {% endif %}
 
-<h4 class="my-2 pt-1">Filters</h4>
+<h4 class="my-2 pt-1">{% trans "Filters" %}</h4>
 
 <div class="h6 pb-2 mt-4 border-bottom text-primary">
-  <strong>Source</strong>
+  <strong>{% trans "Source" %}</strong>
 </div>
 
 <div class="form-group mb-3">
-    <label class="form-label" for="source_index_open_alex">Source Index (OpenAlex)</label>
-    <select multiple id="source_index_open_alex" class="form-control" name="source_index_open_alex" aria-label="Source Index (OpenAlex)">
+    <label class="form-label" for="source_index_open_alex">{% trans "Source Index (OpenAlex)" %}</label>
+    <select multiple id="source_index_open_alex" class="form-control" name="source_index_open_alex" aria-label="{% trans 'Source Index (OpenAlex)' %}">
     </select>
 </div>
 
 <div class="form-group mb-3">
-    <label class="form-label" for="source_index_scielo">Source Index (SciELO)</label>
-    <select multiple id="source_index_scielo" class="form-control" name="source_index_scielo" aria-label="Source Index (SciELO)">
+    <label class="form-label" for="source_index_scielo">{% trans "Source Index (SciELO)" %}</label>
+    <select multiple id="source_index_scielo" class="form-control" name="source_index_scielo" aria-label="{% trans 'Source Index (SciELO)' %}">
     </select>
 </div>
 
 <div class="form-group mb-3">
-    <label class="form-label" for="source_type">Source Type</label>
-    <select multiple id="source_type" class="form-control" name="source_type" aria-label="Source Type">
+    <label class="form-label" for="source_type">{% trans "Source Type" %}</label>
+    <select multiple id="source_type" class="form-control" name="source_type" aria-label="{% trans 'Source Type' %}">
     </select>
 </div>
 
 <div class="form-group mb-3">
-    <label class="form-label" for="source_name">Source Name</label>
+    <label class="form-label" for="source_name">{% trans "Source Name" %}</label>
     <div class="input-group">
         <div class="flex-grow-1 position-relative input-group-left">
-            <select id="source_name" class="form-control" name="source_name" aria-label="Source Name"></select>
+            <select id="source_name" class="form-control" name="source_name" aria-label="{% trans 'Source Name' %}"></select>
         </div>
-        <button aria-pressed="false" class="btn btn-outline input-group-right toggle-not" type="button" id="source_name_bool_not" title="Click to activate not operator">NOT</button>
+        <button aria-pressed="false" class="btn btn-outline input-group-right toggle-not" type="button" id="source_name_bool_not" title="{% trans 'Click to activate not operator' %}">NOT</button>
     </div>
 </div>
 
 <div class="form-group mb-3">
-    <label class="form-label" for="source_country">Source Country</label>
+    <label class="form-label" for="source_country">{% trans "Source Country" %}</label>
     <div class="input-group">
         <div class="flex-grow-1 position-relative input-group-left">
-            <select id="source_country" class="form-control" name="source_country" aria-label="Source Country"></select>
+            <select id="source_country" class="form-control" name="source_country" aria-label="{% trans 'Source Country' %}"></select>
         </div>
-        <button aria-pressed="false" class="btn btn-outline input-group-right toggle-not" type="button" id="source_country_bool_not" title="Click to activate not operator">NOT</button>
+        <button aria-pressed="false" class="btn btn-outline input-group-right toggle-not" type="button" id="source_country_bool_not" title="{% trans 'Click to activate not operator' %}">NOT</button>
     </div>
 </div>
 
 <div class="form-group mb-3">
-    <label class="form-label" for="issn">ISSN</label>
-    <select id="issn" class="form-control" name="issn" aria-label="ISSN"></select>
+    <label class="form-label" for="issn">{% trans "ISSN" %}</label>
+    <select id="issn" class="form-control" name="issn" aria-label="{% trans 'ISSN' %}"></select>
 </div>
 
 <div class="h6 pb-2 mt-4 border-bottom text-primary">
-  <strong>Document</strong>
+  <strong>{% trans "Document" %}</strong>
 </div>
 
 <div class="form-group mb-3">
-  <label class="form-label" for="document_publication_year_start">Publication Year</label>
+  <label class="form-label" for="document_publication_year_start">{% trans "Publication Year" %}</label>
   <div class="input-group">
     <input
       id="document_publication_year_start"
       name="document_publication_year_start"
       type="text"
       class="form-control is-height-2-4"
-      aria-label="Publication Year Start"
-      placeholder="Start"
+      aria-label="{% trans 'Publication Year Start' %}"
+      placeholder="{% trans 'Start' %}"
       value="2015"
     />
     <input
@@ -90,8 +92,8 @@
       name="document_publication_year_end"
       type="text"
       class="form-control is-height-2-4"
-      aria-label="Publication Year End"
-      placeholder="End"
+      aria-label="{% trans 'Publication Year End' %}"
+      placeholder="{% trans 'End' %}"
       value="2024"
     />
   </div>
@@ -99,25 +101,25 @@
 
 
 <div class="form-group mb-3">
-    <label class="form-label" for="document_type">Document Type</label>
-    <select multiple id="document_type" class="form-control" name="document_type" aria-label="Type"></select>
+    <label class="form-label" for="document_type">{% trans "Document Type" %}</label>
+    <select multiple id="document_type" class="form-control" name="document_type" aria-label="{% trans 'Document Type' %}"></select>
 </div>
 
 <div class="form-group mb-3">
-    <label class="form-label" for="document_language">Document Language</label>
+    <label class="form-label" for="document_language">{% trans "Document Language" %}</label>
     <div class="input-group">
         <div class="flex-grow-1 position-relative input-group-left">
-            <select id="document_language" class="form-control" name="document_language" aria-label="Document Language">
+            <select id="document_language" class="form-control" name="document_language" aria-label="{% trans 'Document Language' %}">
                 <option></option>
             </select>
         </div>
-        <button aria-pressed="false" class="btn btn-outline input-group-right toggle-not" type="button" id="document_language_bool_not" title="Click to activate not operator">NOT</button>
+        <button aria-pressed="false" class="btn btn-outline input-group-right toggle-not" type="button" id="document_language_bool_not" title="{% trans 'Click to activate not operator' %}">NOT</button>
     </div>
 </div>
 
 <div class="form-group mb-3">
-    <label class="form-label" for="open_access">Open Access</label>
-    <select id="open_access" class="form-control" name="open_access" aria-label="Open Access">
+    <label class="form-label" for="open_access">{% trans "Open Access" %}</label>
+    <select id="open_access" class="form-control" name="open_access" aria-label="{% trans 'Open Access' %}">
         <option></option>
         <option value="Yes">Yes</option>
         <option value="No">No</option>
@@ -125,53 +127,53 @@
 </div>
 
 <div class="form-group mb-3">
-    <label class="form-label" for="access_type">Access Type</label>
-    <select multiple id="access_type" class="form-control" name="access_type" aria-label="Access Type">
+    <label class="form-label" for="access_type">{% trans "Access Type" %}</label>
+    <select multiple id="access_type" class="form-control" name="access_type" aria-label="{% trans 'Access Type' %}">
     </select>
 </div>
 
 <div class="form-group mb-3">
-    <label class="form-label" for="subject_area_level_0">Subject Area Level 0</label>
-    <select multiple id="subject_area_level_0" class="form-control" name="subject_area_level_0" aria-label="Subject Area Level 0">
+    <label class="form-label" for="subject_area_level_0">{% trans "Subject Area Level 0" %}</label>
+    <select multiple id="subject_area_level_0" class="form-control" name="subject_area_level_0" aria-label="{% trans 'Subject Area Level 0' %}">
     </select>
 </div>
 
 <div class="form-group mb-3">
-    <label class="form-label" for="subject_area_level_1">Subject Area Level 1</label>
-    <select multiple id="subject_area_level_1" class="form-control" name="subject_area_level_1" aria-label="Subject Area Level 1">
+    <label class="form-label" for="subject_area_level_1">{% trans "Subject Area Level 1" %}</label>
+    <select multiple id="subject_area_level_1" class="form-control" name="subject_area_level_1" aria-label="{% trans 'Subject Area Level 1' %}">
     </select>
 </div>
 
 <div class="form-group mb-3">
-    <label class="form-label" for="subject_area_level_2">Subject Area Level 2</label>
-    <select multiple id="subject_area_level_2" class="form-control" name="subject_area_level_2" aria-label="Subject Area Level 2">
+    <label class="form-label" for="subject_area_level_2">{% trans "Subject Area Level 2" %}</label>
+    <select multiple id="subject_area_level_2" class="form-control" name="subject_area_level_2" aria-label="{% trans 'Subject Area Level 2' %}">
     </select>
 </div>
 
 <div class="h6 pb-2 mt-4 border-bottom text-primary">
-  <strong>Author Affiliation</strong>
+  <strong>{% trans "Author Affiliation" %}</strong>
 </div>
 
 <div class="form-group mb-3">
-    <label class="form-label" for="institution">Institution</label>
-    <select multiple id="institution" class="form-control" name="institution" aria-label="Institution">
+    <label class="form-label" for="institution">{% trans "Institution" %}</label>
+    <select multiple id="institution" class="form-control" name="institution" aria-label="{% trans 'Institution' %}">
     </select>
 </div>
 
 <div class="form-group mb-3">
-    <label class="form-label" for="region_world">Region (World)</label>
-    <select multiple id="region_world" class="form-control" name="region_world" aria-label="Region (World)">
+    <label class="form-label" for="region_world">{% trans "Region (World)" %}</label>
+    <select multiple id="region_world" class="form-control" name="region_world" aria-label="{% trans 'Region (World)' %}">
     </select>
 </div>
 
 <div class="form-group mb-3">
-    <label class="form-label" for="country">Country</label>
+    <label class="form-label" for="country">{% trans "Country" %}</label>
     <div class="d-flex align-items-start justify-content-between">
         <div class="select-left flex-grow-1">
-            <select multiple id="country" name="country" class="form-control" aria-label="Country"></select>
+            <select multiple id="country" name="country" class="form-control" aria-label="{% trans 'Country' %}"></select>
         </div>
         <div class="select-right">
-            <select id="country_operator" name="country_operator" class="form-control" aria-label="Country Query Operator">
+            <select id="country_operator" name="country_operator" class="form-control" aria-label="{% trans 'Country Query Operator' %}">
                 <option value="and" selected>AND</option>
                 <option value="or">OR</option>
             </select>
