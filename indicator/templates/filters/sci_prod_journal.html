@@ -1,18 +1,20 @@
-<h4 class="my-2 pt-1">Filters</h4>
+{% load i18n static %}
+
+<h4 class="my-2 pt-1">{% trans "Filters" %}</h4>
 
 <div class="form-group mb-3">
-    <label class="form-label" for="journal">Journal</label>
-    <select id="journal" class="form-control" name="journal" aria-label="Journal"></select>
+    <label class="form-label" for="journal">{% trans "Journal" %}</label>
+    <select id="journal" class="form-control" name="journal" aria-label="{% trans 'Journal' %}"></select>
 </div>
 
 <div class="form-group mb-3">
-    <label class="form-label" for="issn">ISSN</label>
-    <select id="issn" class="form-control" name="issn" aria-label="ISSN"></select>
+    <label class="form-label" for="issn">{% trans "ISSN" %}</label>
+    <select id="issn" class="form-control" name="issn" aria-label="{% trans 'ISSN' %}"></select>
 </div>
 
 <div class="form-group mb-3">
-    <label class="form-label" for="source_index">Source Index</label>
-    <select id="source_index" class="form-control" name="source_index" aria-label="Source Index">
+    <label class="form-label" for="source_index">{% trans "Source Index" %}</label>
+    <select id="source_index" class="form-control" name="source_index" aria-label="{% trans 'Source Index' %}">
         <option></option>
         {% for option in filters_data.source_index %}
             <option value="{{ option }}" {% if applied_filters.source_index == option %}selected{% endif %}>{{ option }}</option>
@@ -21,13 +23,13 @@
 </div>
 
 <div class="form-group mb-3">
-    <label class="form-label" for="publisher_name">Publisher</label>
-    <select id="publisher_name" class="form-control" name="publisher_name" aria-label="Publisher"></select>
+    <label class="form-label" for="publisher_name">{% trans "Publisher" %}</label>
+    <select id="publisher_name" class="form-control" name="publisher_name" aria-label="{% trans 'Publisher' %}"></select>
 </div>
 
 <div class="form-group mb-3">
-    <label class="form-label" for="openalex_region">Region</label>
-    <select id="openalex_region" class="form-control" name="openalex_region" aria-label="Region">
+    <label class="form-label" for="openalex_region">{% trans "Region" %}</label>
+    <select id="openalex_region" class="form-control" name="openalex_region" aria-label="{% trans 'Region' %}">
         <option></option>
         {% for option in filters_data.openalex_region %}
             <option value="{{ option }}" {% if applied_filters.openalex_region == option %}selected{% endif %}>{{ option }}</option>
@@ -36,8 +38,8 @@
 </div>
 
 <div class="form-group mb-3">
-    <label class="form-label" for="country">Country</label>
-    <select id="country" class="form-control" name="country" aria-label="Country">
+    <label class="form-label" for="country">{% trans "Country" %}</label>
+    <select id="country" class="form-control" name="country" aria-label="{% trans 'Country' %}">
         <option></option>
         {% for option in filters_data.country %}
             <option value="{{ option }}" {% if applied_filters.country == option %}selected{% endif %}>{{ option }}</option>
@@ -46,34 +48,34 @@
 </div>
 
 <div class="form-group mb-3">
-    <label class="form-label" for="year_founded">Year Founded</label>
+    <label class="form-label" for="year_founded">{% trans "Year Founded" %}</label>
     <input
         id="year_founded"
         class="form-control"
         name="year_founded"
-        aria-label="Year Founded"
+        aria-label="{% trans 'Year Founded' %}"
         type="text"
         value="{{ applied_filters.year_founded|default:'' }}"
-        placeholder="Select a Year"
+        placeholder="{% trans 'Select a Year' %}"
     />
 </div>
 
 <div class="h6 pb-2 mt-4 border-bottom text-primary">
-  <strong>SciELO</strong>
+  <strong>{% trans "SciELO" %}</strong>
 </div>
 
 <div class="form-group mb-3">
-    <label class="form-label" for="is_scielo">Is SciELO</label>
-    <select id="is_scielo" class="form-control" name="is_scielo" aria-label="Is SciELO">
-        <option value="">Select an option</option>
+    <label class="form-label" for="is_scielo">{% trans "Is SciELO" %}</label>
+    <select id="is_scielo" class="form-control" name="is_scielo" aria-label="{% trans 'Is SciELO' %}">
+        <option value="">{% trans "Select an option" %}</option>
         <option value="Yes" {% if applied_filters.is_scielo == "Yes" %}selected{% endif %}>Yes</option>
         <option value="No" {% if applied_filters.is_scielo == "No" %}selected{% endif %}>No</option>
     </select>
 </div>
 
 <div class="form-group mb-3">
-    <label class="form-label" for="scielo_collection_name">Collection</label>
-    <select id="scielo_collection_name" class="form-control" name="scielo_collection_name" aria-label="Collection (SciELO)">
+    <label class="form-label" for="scielo_collection_name">{% trans "Collection" %}</label>
+    <select id="scielo_collection_name" class="form-control" name="scielo_collection_name" aria-label="{% trans 'Collection (SciELO)' %}">
         <option></option>
         {% for option in filters_data.scielo_collection_name %}
             <option value="{{ option }}" {% if applied_filters.scielo_collection_name == option %}selected{% endif %}>{{ option }}</option>
@@ -82,8 +84,8 @@
 </div>
 
 <div class="form-group mb-3">
-    <label class="form-label" for="scielo_thematic_area">Thematic Area</label>
-    <select id="scielo_thematic_area" class="form-control" name="scielo_thematic_area" aria-label="Thematic Area">
+    <label class="form-label" for="scielo_thematic_area">{% trans "Thematic Area" %}</label>
+    <select id="scielo_thematic_area" class="form-control" name="scielo_thematic_area" aria-label="{% trans 'Thematic Area' %}">
         <option></option>
         {% for option in filters_data.scielo_thematic_area %}
             <option value="{{ option }}" {% if applied_filters.scielo_thematic_area == option %}selected{% endif %}>{{ option }}</option>
@@ -92,26 +94,26 @@
 </div>
 
 <div class="h6 pb-2 mt-4 border-bottom text-primary">
-  <strong>Metrics</strong>
+  <strong>{% trans "Metrics" %}</strong>
 </div>
 
 <div class="form-group mb-3">
-    <label class="form-label" for="year">Year</label>
+    <label class="form-label" for="year">{% trans "Year" %}</label>
     <input
         id="year"
         class="form-control"
         name="year"
-        aria-label="Metric Year"
+        aria-label="{% trans 'Metric Year' %}"
         type="text"
         value="{{ applied_filters.year|default:'2024' }}"
-        placeholder="Metric Year"
+        placeholder="{% trans 'Metric Year' %}"
     />
 </div>
 
 <div class="form-group mb-3">
-    <label class="form-label" for="scimago_best_quartile">Scimago Best Quartile</label>
-    <select id="scimago_best_quartile" class="form-control" name="scimago_best_quartile" aria-label="Scimago Best Quartile">
-        <option value="">Select an option</option>
+    <label class="form-label" for="scimago_best_quartile">{% trans "Scimago Best Quartile" %}</label>
+    <select id="scimago_best_quartile" class="form-control" name="scimago_best_quartile" aria-label="{% trans 'Scimago Best Quartile' %}">
+        <option value="">{% trans "Select an option" %}</option>
         <option value="Q1" {% if applied_filters.scimago_best_quartile == "Q1" %}selected{% endif %}>Q1</option>
         <option value="Q2" {% if applied_filters.scimago_best_quartile == "Q2" %}selected{% endif %}>Q2</option>
         <option value="Q3" {% if applied_filters.scimago_best_quartile == "Q3" %}selected{% endif %}>Q3</option>
@@ -120,36 +122,36 @@
 </div>
 
 <div class="form-group mb-3">
-    <label class="form-label" for="openalex_docs_2024_5">OpenAlex Total Docs 2024 > 5</label>
-    <select id="openalex_docs_2024_5" class="form-control" name="openalex_docs_2024_5" aria-label="OpenAlex Total Docs 2024 > 5">
-        <option value="">Select an option</option>
+    <label class="form-label" for="openalex_docs_2024_5">{% trans "OpenAlex Total Docs 2024 > 5" %}</label>
+    <select id="openalex_docs_2024_5" class="form-control" name="openalex_docs_2024_5" aria-label="{% trans 'OpenAlex Total Docs 2024 > 5' %}">
+        <option value="">{% trans "Select an option" %}</option>
         <option value="true" {% if applied_filters.openalex_docs_2024_5 == "true" %}selected{% endif %}>Yes</option>
         <option value="false" {% if applied_filters.openalex_docs_2024_5 == "false" %}selected{% endif %}>No</option>
     </select>
 </div>
 
 <div class="form-group mb-3">
-    <label class="form-label" for="ranking_metric">Ranking metric</label>
-    <select id="ranking_metric" class="form-control" name="ranking_metric" aria-label="Ranking metric">
+    <label class="form-label" for="ranking_metric">{% trans "Ranking metric" %}</label>
+    <select id="ranking_metric" class="form-control" name="ranking_metric" aria-label="{% trans 'Ranking metric' %}">
         <option {% if applied_filters.ranking_metric == "cwts_snip" or not applied_filters.ranking_metric %}selected{% endif %} value="cwts_snip">CWTS SNIP</option>
         <option {% if applied_filters.ranking_metric == "scielo_num_docs" %}selected{% endif %} value="scielo_num_docs">SciELO Total Docs</option>
         <optgroup label="Scimago">
-            <option {% if applied_filters.ranking_metric == "scimago_cites_by_doc_2_years" %}selected{% endif %} value="scimago_cites_by_doc_2_years">Citations / Doc. (2 years)</option>
-            <option {% if applied_filters.ranking_metric == "scimago_estimated_apc" %}selected{% endif %} value="scimago_estimated_apc">Estimated APC (USD)</option>
-            <option {% if applied_filters.ranking_metric == "scimago_estimated_value" %}selected{% endif %} value="scimago_estimated_value">Estimated Value (USD)</option>
-            <option {% if applied_filters.ranking_metric == "scimago_female_authors_percent" %}selected{% endif %} value="scimago_female_authors_percent">% Female</option>
-            <option {% if applied_filters.ranking_metric == "scimago_overton" %}selected{% endif %} value="scimago_overton">Overton</option>
-            <option {% if applied_filters.ranking_metric == "scimago_sdg" %}selected{% endif %} value="scimago_sdg">SDG</option>
-            <option {% if applied_filters.ranking_metric == "scimago_sjr" %}selected{% endif %} value="scimago_sjr">SJR</option>
-            <option {% if applied_filters.ranking_metric == "scimago_total_cites_3_years" %}selected{% endif %} value="scimago_total_cites_3_years">Total Citations (3 years)</option>
-            <option {% if applied_filters.ranking_metric == "scimago_total_docs" %}selected{% endif %} value="scimago_total_docs">Total Docs</option>
+            <option {% if applied_filters.ranking_metric == "scimago_cites_by_doc_2_years" %}selected{% endif %} value="scimago_cites_by_doc_2_years">{% trans "Citations / Doc. (2 years)" %}</option>
+            <option {% if applied_filters.ranking_metric == "scimago_estimated_apc" %}selected{% endif %} value="scimago_estimated_apc">{% trans "Estimated APC (USD)" %}</option>
+            <option {% if applied_filters.ranking_metric == "scimago_estimated_value" %}selected{% endif %} value="scimago_estimated_value">{% trans "Estimated Value (USD)" %}</option>
+            <option {% if applied_filters.ranking_metric == "scimago_female_authors_percent" %}selected{% endif %} value="scimago_female_authors_percent">{% trans "% Female" %}</option>
+            <option {% if applied_filters.ranking_metric == "scimago_overton" %}selected{% endif %} value="scimago_overton">{% trans "Overton" %}</option>
+            <option {% if applied_filters.ranking_metric == "scimago_sdg" %}selected{% endif %} value="scimago_sdg">{% trans "SDG" %}</option>
+            <option {% if applied_filters.ranking_metric == "scimago_sjr" %}selected{% endif %} value="scimago_sjr">{% trans "SJR" %}</option>
+            <option {% if applied_filters.ranking_metric == "scimago_total_cites_3_years" %}selected{% endif %} value="scimago_total_cites_3_years">{% trans "Total Citations (3 years)" %}</option>
+            <option {% if applied_filters.ranking_metric == "scimago_total_docs" %}selected{% endif %} value="scimago_total_docs">{% trans "Total Docs" %}</option>
         </optgroup>
     </select>
 </div>
 
 <div class="form-group mb-3">
-    <label class="form-label" for="limit">Number of results</label>
-    <select id="limit" class="form-control" name="limit" aria-label="Number of results">
+    <label class="form-label" for="limit">{% trans "Number of results" %}</label>
+    <select id="limit" class="form-control" name="limit" aria-label="{% trans 'Number of results' %}">
         <option value="10" {% if applied_filters.limit == "10" %}selected{% endif %}>10</option>
         <option value="25" {% if applied_filters.limit == "25" %}selected{% endif %}>25</option>
         <option value="50" {% if applied_filters.limit == "50" %}selected{% endif %}>50</option>
