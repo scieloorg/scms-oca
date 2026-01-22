@@ -24,7 +24,7 @@ django-redis==5.2.0  # https://github.com/jazzband/django-redis
 
 # Wagtail
 # ------------------------------------------------------------------------------
-wagtail==4.2.2  # https://github.com/wagtail/wagtail
+wagtail==6.0.5  # https://github.com/wagtail/wagtail
 
 
 # Wagtail Recaptcha
