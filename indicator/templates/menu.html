@@ -1,3 +1,5 @@
+{% load i18n static %}
+
 <div>
   <form id="menu-form">
     {% csrf_token %} 
@@ -18,8 +20,8 @@
 
     <div class="menu-floating-actions mt-6">
       <div class="menu-floating-actions__inner">
-        <button id="menu-reset" type="button" class="btn btn-secondary me-2">Reset</button>
-        <button id="menu-submit" type="submit" class="btn btn-primary">Generate</button>
+        <button id="menu-reset" type="button" class="btn btn-secondary me-2">{% trans "Reset" %}</button>
+        <button id="menu-submit" type="submit" class="btn btn-primary">{% trans "Generate" %}</button>
       </div>
     </div>
   </form>
