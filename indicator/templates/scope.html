@@ -1,25 +1,25 @@
-{% load static %}
+{% load i18n static %}
 
 <div>
-    <h4 class="my-2">Scope</h4>
+  <h4 class="my-2">{% trans "Scope" %}</h4>
 
     <form id="data-source-form" class="mb-2">
-      <label class="form-label" for="data_source">Data Source</label>
+      <label class="form-label" for="data_source">{% trans "Data Source" %}</label>
       <div class="input-group">
           <select class="form-select" id="selectDataSource" name="data_source" style="height: 2.25rem;">
-              <option selected value="world">World</option>
-              <option value="brazil">Brazil</option>
-              <option value="scielo">SciELO Network</option>
+              <option selected value="world">{% trans "World" %}</option>
+              <option value="brazil">{% trans "Brazil" %}</option>
+              <option value="scielo">{% trans "SciELO Network" %}</option>
           </select>
       </div>
     </form>
 
     <form id="study-unit-form" class="mb-2">
-      <label class="form-label" for="study_unit">Aggregation Mode</label>
+      <label class="form-label" for="study_unit">{% trans "Aggregation Mode" %}</label>
       <div class="input-group">
         <select class="form-select" id="selectStudyUnit" name="study_unit" style="height: 2.25rem;">
-            <option selected value="document">Document</option>
-            <option value="journal">Journal</option>
+            <option selected value="document">{% trans "Document" %}</option>
+            <option value="journal">{% trans "Journal" %}</option>
         </select>
       </div>
     </form>
