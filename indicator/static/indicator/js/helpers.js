@@ -6,7 +6,7 @@ async function fetchFilters(dataSource) {
     const url = `/search-gateway/filters/?data_source=${encodeURIComponent(dataSource)}`;
     const response = await fetch(url);
 
-    if (!response.ok) throw new Error('GET filters has failed');
+    if (!response.ok) throw new Error(gettext('GET filters has failed'));
 
     return await response.json();
 }
@@ -164,40 +164,41 @@ function standardizeLanguageCode(langCode) {
  * Standardize collection code to collection name.
  */
 function standardizeCollectionToName(collectionCode) {
+    const { base, suffix } = splitDocCitSuffix(collectionCode);
     const collectionMap = {
-        'arg': 'Argentina',
-        'bol': 'Bolivia',
-        'chl': 'Chile',
-        'cic': 'Science and Culture',
-        'col': 'Colombia',
-        'cri': 'Costa Rica',
-        'cub': 'Cuba',
-        'dom': 'Dominican Republic',
-        'ecu': 'Ecuador',
-        'esp': 'Spain',
-        'mex': 'Mexico',
-        'per': 'Peru',
-        'prt': 'Portugal',
-        'pry': 'Paraguay',
-        'psi': 'PEPSIC',
-        'rve': 'REVENF',
-        'scl': 'Brazil',
-        'spa': 'Public Health',
-        'sza': 'South Africa',
-        'ury': 'Uruguay',
-        'ven': 'Venezuela',
-        'wid': 'West Indies',
+        'arg': gettext('Argentina'),
+        'bol': gettext('Bolivia'),
+        'chl': gettext('Chile'),
+        'cic': gettext('Science and Culture'),
+        'col': gettext('Colombia'),
+        'cri': gettext('Costa Rica'),
+        'cub': gettext('Cuba'),
+        'dom': gettext('Dominican Republic'),
+        'ecu': gettext('Ecuador'),
+        'esp': gettext('Spain'),
+        'mex': gettext('Mexico'),
+        'per': gettext('Peru'),
+        'prt': gettext('Portugal'),
+        'pry': gettext('Paraguay'),
+        'psi': gettext('PEPSIC'),
+        'rve': gettext('REVENF'),
+        'scl': gettext('Brazil'),
+        'spa': gettext('Public Health'),
+        'sza': gettext('South Africa'),
+        'ury': gettext('Uruguay'),
+        'ven': gettext('Venezuela'),
+        'wid': gettext('West Indies'),
     };
 
-    return collectionMap[collectionCode] || collectionCode;
+    return (collectionMap[base] || base) + suffix;
 }
 
 /**
  * Standardize Open Access values (0 to No, 1 to Yes).
  */
 function standardizeOpenAccessValue(value) {
-    if (value === '0') return 'No';
-    if (value === '1') return 'Yes';
+    if (value === '0') return gettext('No');
+    if (value === '1') return gettext('Yes');
     return value;
 }
 
@@ -304,27 +305,27 @@ function updateAppliedFiltersDisplay() {
     const endVal = formData.get('document_publication_year_end');
     const rangeLabel = formatYearRange(startVal, endVal);
     if (rangeLabel) {
-        allFilterStrings.push(`<span class="fw-bold">Publication Year:</span> ${rangeLabel}`);
+        allFilterStrings.push(`<span class="fw-bold">${gettext('Publication Year')}:</span> ${rangeLabel}`);
     }
     // Handle country and language query operators
     const countryOp = formData.get('country_operator');
     const languageOp = formData.get('document_language_operator');
     const queryOperators = [];
 
-    const countryFilter = filtersToDisplay.find(f => f.label === 'Country');
+    const countryFilter = filtersToDisplay.find(f => f.key === 'country');
     if (countryOp && countryFilter && countryFilter.values.length > 1) {
-        queryOperators.push(`<span><span class="fw-bold">Country:</span> <span class="badge badge-oca-light bg-secondary">${countryOp.toUpperCase()}</span></span>`);
+        queryOperators.push(`<span><span class="fw-bold">${gettext('Country')}:</span> <span class="badge badge-oca-light bg-secondary">${countryOp.toUpperCase()}</span></span>`);
     }
 
-    const languageFilter = filtersToDisplay.find(f => f.label === 'Document Language');
+    const languageFilter = filtersToDisplay.find(f => f.key === 'document_language');
     if (languageOp && languageFilter && languageFilter.values.length > 1) {
-        queryOperators.push(`<span><span class="fw-bold">Document Language:</span> <span class="badge badge-oca-light bg-secondary">${languageOp.toUpperCase()}</span></span>`);
+        queryOperators.push(`<span><span class="fw-bold">${gettext('Document Language')}:</span> <span class="badge badge-oca-light bg-secondary">${languageOp.toUpperCase()}</span></span>`);
     }
 
     // Build the final HTML string
-    let finalHtml = `<strong class="text-primary">Applied Filters</strong><div>${allFilterStrings.join('<span class="badge badge-oca-light bg-secondary mx-2">AND</span>')}</div>`;
+    let finalHtml = `<strong class="text-primary">${gettext('Applied Filters')}</strong><div>${allFilterStrings.join('<span class="badge badge-oca-light bg-secondary mx-2">AND</span>')}</div>`;
     if (queryOperators.length > 0) {
-        finalHtml += `<strong class="mt-1 text-primary">Search Options</strong><div>${queryOperators.join(' ')}</div>`;
+        finalHtml += `<strong class="mt-1 text-primary">${gettext('Search Options')}</strong><div>${queryOperators.join(' ')}</div>`;
     }
 
     // Join and display all filter strings
@@ -370,7 +371,7 @@ function formatYearRange(startYear, endYear) {
 
     if (years.length === 1) return String(years[0]);
 
-    return `${years[0]} to ${years[years.length - 1]}`;
+    return `${years[0]} ${gettext('to')} ${years[years.length - 1]}`;
 }
 
 /**
