@@ -138,28 +138,28 @@ Indicators.renderChart = function({ chartId, chartDivId, data, seriesType, title
         }
     } else {
         if (seriesType === 'Periodicals') {
-            series = [{ name: 'Unique Periodicals (sources)', type: chartType, data: data.nperiodicals_per_year || [] }];
+            series = [{ name: gettext('Unique Periodicals (sources)'), type: chartType, data: data.nperiodicals_per_year || [] }];
         } else if (seriesType === 'Documents per Periodical') {
-            series = [{ name: 'Documents / Periodical', type: chartType, data: data.docs_per_periodical_per_year || [] }];
+            series = [{ name: gettext('Documents / Periodical'), type: chartType, data: data.docs_per_periodical_per_year || [] }];
         } else if (seriesType === 'Citations per Periodical') {
-            series = [{ name: 'Citations / Periodical', type: chartType, data: data.citations_per_periodical_per_year || [] }];
+            series = [{ name: gettext('Citations / Periodical'), type: chartType, data: data.citations_per_periodical_per_year || [] }];
         } else if (seriesType === 'Cited Documents per Periodical') {
-            series = [{ name: 'Cited Documents / Periodical', type: chartType, data: data.cited_docs_per_periodical_per_year || [] }];
+            series = [{ name: gettext('Cited Documents / Periodical'), type: chartType, data: data.cited_docs_per_periodical_per_year || [] }];
         } else if (seriesType === 'Percent Periodicals With Cited Docs') {
-            series = [{ name: '% Periodicals With ≥1 Cited Document', type: chartType, data: data.percent_periodicals_with_cited_docs_per_year || [] }];
+            series = [{ name: gettext('% Periodicals With ≥1 Cited Document'), type: chartType, data: data.percent_periodicals_with_cited_docs_per_year || [] }];
         } else if (seriesType === 'Cited Documents') {
-            series = [{ name: 'Cited Documents', type: chartType, data: data.docs_with_citations_per_year || [] }];
+            series = [{ name: gettext('Cited Documents'), type: chartType, data: data.docs_with_citations_per_year || [] }];
         } else if (seriesType === 'Documents') {
-            series = [{ name: 'Documents', type: chartType, data: data.ndocs_per_year }];
+            series = [{ name: gettext('Documents'), type: chartType, data: data.ndocs_per_year }];
         } else if (seriesType === 'Citations') {
-            series = [{ name: 'Citations', type: chartType, data: data.total_citations_per_year }];
+            series = [{ name: gettext('Citations'), type: chartType, data: data.total_citations_per_year }];
         } else if (seriesType === 'Citations per Document') {
             const cpdData = data.ndocs_per_year.map((ndocs, i) => {
                 return ndocs > 0 ? (data.total_citations_per_year[i] / ndocs).toFixed(4) : 0;
             });
-            series = [{ name: 'Citations per Document', type: chartType, data: cpdData }];
+            series = [{ name: gettext('Citations per Document'), type: chartType, data: cpdData }];
         } else if (seriesType === 'Percent Docs With Citations') {
-            series = [{ name: '% Docs With ≥1 Citation', type: chartType, data: data.percent_docs_with_citations_per_year || [] }];
+            series = [{ name: gettext('% Docs With ≥1 Citation'), type: chartType, data: data.percent_docs_with_citations_per_year || [] }];
         }
     }
 
