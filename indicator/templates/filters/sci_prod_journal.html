@@ -182,7 +182,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (selectElement) {
                 $(selectElement).select2(
                 {
-                    placeholder: 'Select an option',
+                    placeholder: gettext('Select an option'),
                     allowClear: true,
                     minimumResultsForSearch: Infinity,
                     theme: 'bootstrap-5',
@@ -224,7 +224,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (selectElement) {
             $(selectElement).select2(
                 {
-                placeholder: 'Start typing to search...',
+                placeholder: gettext('Start typing to search...'),
                 allowClear: true,
                 theme: 'bootstrap-5',
                 }
@@ -259,7 +259,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     }
                 },
                 minimumInputLength: 2,
-                placeholder: 'Start typing to search...',
+                placeholder: gettext('Start typing to search...'),
                 theme: 'bootstrap-5',
                 allowClear: true,
             }).on('select2:open', function(e) {

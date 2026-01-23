@@ -183,12 +183,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Initialize singleselect fields
     const singleSelectFieldsOpts = [
-        ["access_type", "Select an access type", false, true],
-        ["breakdown_variable", "Select a breakdown variable", false, true],
-        ["collection", "Select a collection", false, true],
+        ["access_type", gettext('Select an access type'), false, true],
+        ["breakdown_variable", gettext('Select a breakdown variable'), false, true],
+        ["collection", gettext('Select a collection'), false, true],
         ["country_operator", "", false, false],
         ["document_language_operator", "", false, false],
-        ["document_type", "Select a document type", false, true],
+        ["document_type", gettext('Select a document type'), false, true],
     ];
     singleSelectFieldsOpts.forEach(([fieldId, fieldPlaceholder, allowSearch, allowClear]) => {
         setupSelect2Single(fieldId, fieldPlaceholder, allowSearch, allowClear);
@@ -196,8 +196,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Initialize multiselect fields with boolean operators
     const multiSelectFieldsOpts = [
-        ["country", "Search for a country", false],
-        ["document_language", "Search for a language", false],
+        ["country", gettext('Search for a country'), false],
+        ["document_language", gettext('Search for a language'), false],
     ];
     multiSelectFieldsOpts.forEach(([fieldId, fieldPlaceholder, allowClear]) => {
         setupSelect2Multiple(fieldId, fieldPlaceholder, allowClear);
@@ -205,9 +205,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Initialize SearchAsYouType fields
     const saytFieldsOpts = [
-        ["institution", "scielo", "Search for an institution", true],
-        ["journal", "scielo", "Search for a journal", true],
-        ["publisher", "scielo", "Search for a publisher", true],
+        ["institution", "scielo", gettext('Search for an institution'), true],
+        ["journal", "scielo", gettext('Search for a journal'), true],
+        ["publisher", "scielo", gettext('Search for a publisher'), true],
     ];
     saytFieldsOpts.forEach(([fieldId, fieldDataSource, fieldPlaceholder, allowClear]) => {
         setupSelect2SearchAsYouType(fieldId, fieldDataSource, fieldPlaceholder, allowClear);

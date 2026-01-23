@@ -221,9 +221,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Initialize singleselect fields
     const singleSelectFieldsOpts = [
         ["country_operator", "", false, false],
-        ['breakdown_variable', 'Select a breakdown variable', false, true],
-        ['document_language', 'Select a language', true, true],
-        ['open_access', 'Select an open access status', false, true],
+        ['breakdown_variable', gettext('Select a breakdown variable'), false, true],
+        ['document_language', gettext('Select a language'), true, true],
+        ['open_access', gettext('Select an open access status'), false, true],
     ];
     singleSelectFieldsOpts.forEach(([fieldId, fieldPlaceholder, allowSearch, allowClear]) => {
         setupSelect2Single(fieldId, fieldPlaceholder, allowSearch, allowClear);
@@ -231,16 +231,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Initialize multiselect fields
     const multiSelectFieldsOpts = [
-        ['access_type', 'Select an access type', false],
-        ["country", "Search for a country", false],
-        ['document_type', 'Select a document type', false],
-        ['region_world', 'Select a region', false],
-        ['source_index_open_alex', 'Select a source index', false],
-        ['source_index_scielo', 'Select a source index', false],
-        ['source_type', 'Select a source type', false],
-        ['subject_area_level_0', 'Select an area', false],
-        ['subject_area_level_1', 'Select an area', false],
-        ['subject_area_level_2', 'Search for an area', false],
+        ['access_type', gettext('Select an access type'), false],
+        ["country", gettext('Search for a country'), false],
+        ['document_type', gettext('Select a document type'), false],
+        ['region_world', gettext('Select a region'), false],
+        ['source_index_open_alex', gettext('Select a source index'), false],
+        ['source_index_scielo', gettext('Select a source index'), false],
+        ['source_type', gettext('Select a source type'), false],
+        ['subject_area_level_0', gettext('Select an area'), false],
+        ['subject_area_level_1', gettext('Select an area'), false],
+        ['subject_area_level_2', gettext('Search for an area'), false],
     ];
     multiSelectFieldsOpts.forEach(([fieldId, fieldPlaceholder, allowClear]) => {
         setupSelect2Multiple(fieldId, fieldPlaceholder, allowClear);
@@ -248,10 +248,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Initialize SearchAsYouType fields
     const saytFieldsOpts = [
-      ['institution', 'sources', 'Search for an institution', true],
-      ['issn', 'world', 'Search for an ISSN', true],
-      ['source_country', 'world', 'Search for a country', true],
-      ['source_name', 'world', 'Search for a source', true],
+            ['institution', 'sources', gettext('Search for an institution'), true],
+            ['issn', 'world', gettext('Search for an ISSN'), true],
+            ['source_country', 'world', gettext('Search for a country'), true],
+            ['source_name', 'world', gettext('Search for a source'), true],
     ];
     saytFieldsOpts.forEach(([fieldId, fieldDataSource, fieldPlaceholder, allowClear]) => {
         setupSelect2SearchAsYouType(fieldId, fieldDataSource, fieldPlaceholder, allowClear);
