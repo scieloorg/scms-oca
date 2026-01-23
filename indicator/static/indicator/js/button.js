@@ -10,6 +10,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
+// Django JS i18n fallback (jsi18n usually loads this)
+if (typeof window !== 'undefined') {
+    if (typeof window.gettext !== 'function') {
+        window.gettext = function (msgid) { return msgid; };
+    }
+}
+
 /* Função para facilitar a construção de objeto Datepicker */
 function setupDatePicker(fieldId, format="yyyy", view_mode="years", min_view_mode="years", autoclose=true, start_date="1900", end_date="2100") {
     try {
