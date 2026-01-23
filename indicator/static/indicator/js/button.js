@@ -74,10 +74,13 @@ function setupSelect2Multiple(fieldId, placeholder="", allow_clear=true, width="
 }
 
 /* Função para facilitar construção de objeto Select2 com busca em índice */
-function setupSelect2SearchAsYouType(fieldId, data_source, placeholder="Start typing to search...", allow_clear=true) {
+function setupSelect2SearchAsYouType(fieldId, data_source, placeholder=null, allow_clear=true) {
     try {
         const selectElement = document.getElementById(fieldId);
         if (selectElement) {
+            const resolvedPlaceholder = (placeholder === null || placeholder === undefined || placeholder === "")
+                ? gettext('Start typing to search...')
+                : placeholder;
             $(selectElement).select2(
                 {
                     ajax: {
@@ -95,7 +98,7 @@ function setupSelect2SearchAsYouType(fieldId, data_source, placeholder="Start ty
                         }
                     },
                     minimumInputLength: 2,
-                    placeholder: placeholder,
+                    placeholder: resolvedPlaceholder,
                     theme: 'bootstrap-5',
                     allowClear: allow_clear,
                 }
