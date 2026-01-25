@@ -1,6 +1,7 @@
 {% extends "search/search.html" %}
 {% load custom_filters %}
 {% load static %}
+{% load i18n %}
 
 {% block header_content %}
     <div class="row">
@@ -8,7 +9,7 @@
             <div class="card mb-2 p-3 bg-oca-light shadow-sm">
                 <div class="page-title-content">
                     <h1 class="mb-1 fw-bold text-oca-blue-title">{{ display_name }}</h1>
-                    <span class="text-muted">Data of the OCABr Observatory</span>
+                    <span class="text-muted">{% trans "Data of the OCABr Observatory" %}</span>
                 </div>
             </div>
         </div>
@@ -25,21 +26,21 @@
             <div class="row g-2 align-items-end">
                 <div class="col-md-10">
                     <label for="search-input" class="form-label">
-                        <i class="icon-search"></i> Buscar
+                        <i class="icon-search"></i> {% trans "Buscar" %}
                     </label>
                     <input 
                         type="search" 
                         name="search" 
                         id="search-input" 
                         class="form-control" 
-                        placeholder="Digite sua pesquisa..." 
+                        placeholder="{% trans 'Digite sua pesquisa...' %}" 
                         value="{{ search_query }}"
                         autocomplete="off"
                     >
                 </div>
                 <div class="col-md-2">
                     <button type="submit" class="btn btn-primary w-100" style="padding-bottom: 0% !important; margin-bottom: 0% !important; text-align: center;">
-                        Buscar
+                        {% trans "Buscar" %}
                     </button>
                 </div>
             </div>
@@ -49,7 +50,7 @@
             <!-- Search Query Section -->
             <div id="search-query-section" class="mb-2" style="display: none;">
                 <div class="d-flex flex-wrap gap-2 align-items-center">
-                    <small class="text-muted me-2"><strong>Busca:</strong></small>
+                    <small class="text-muted me-2"><strong>{% trans "Busca:" %}</strong></small>
                     <span id="search-query-badge" class="badge bg-info" style="font-size: 0.9rem;">
                         <!-- Search badge will be populated by JavaScript -->
                     </span>
@@ -59,7 +60,7 @@
             <!-- Filters Section -->
             <div id="filters-section" style="display: none;">
                 <div class="d-flex flex-wrap gap-2 align-items-center">
-                    <small class="text-muted me-2"><strong>Filtros ativos:</strong></small>
+                    <small class="text-muted me-2"><strong>{% trans "Filtros ativos:" %}</strong></small>
                     <div id="selected-filters-badges" class="d-flex flex-wrap gap-2">
                         <!-- Filter badges will be populated by JavaScript -->
                     </div>
@@ -81,6 +82,21 @@
         dataSourceName: '{{ data_source_name }}',
         filters: JSON.parse(document.getElementById('filters-data').textContent),
         filterMetadata: JSON.parse(document.getElementById('filter-metadata-data').textContent),
+        i18n: {
+            loading: '{% trans "Carregando..." %}',
+            resultsCountSingular: '{% trans "resultado encontrado" %}',
+            resultsCountPlural: '{% trans "resultados encontrados" %}',
+            noResults: '{% trans "Nenhum resultado encontrado. Tente ajustar sua busca ou filtros." %}',
+            filtersApplied: '{% trans "Filtros aplicados" %}',
+            labelType: '{% trans "Tipo" %}',
+            labelYear: '{% trans "Ano" %}',
+            labelInstitutions: '{% trans "Instituições" %}',
+            labelLocation: '{% trans "Localização" %}',
+            labelPractice: '{% trans "Prática" %}',
+            labelAction: '{% trans "Ação" %}',
+            labelClassification: '{% trans "Classificação" %}',
+            labelThematicAreas: '{% trans "Áreas Temáticas" %}',
+        },
     };
     
 </script>

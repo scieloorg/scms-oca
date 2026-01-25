@@ -39,7 +39,7 @@
         {% if doc.source.publication_year or doc.source.biblio.volume or doc.source.biblio.issue %}
         <p class="card-text">
             <small class="text-muted">
-                {% if doc.source.publication_year %}{{ doc.source.publication_year }}{% endif %}{% if doc.source.publication_year and doc.source.biblio.volume %}, {% endif %}{% if doc.source.biblio.volume %}Volume {{ doc.source.biblio.volume }}{% endif %}{% if doc.source.biblio.issue %} N° {{ doc.source.biblio.issue }}{% endif %}
+                {% if doc.source.publication_year %}{{ doc.source.publication_year }}{% endif %}{% if doc.source.publication_year and doc.source.biblio.volume %}, {% endif %}{% if doc.source.biblio.volume %}{% trans "Volume" %} {{ doc.source.biblio.volume }}{% endif %}{% if doc.source.biblio.issue %} {% trans "N°" %} {{ doc.source.biblio.issue }}{% endif %}
             </small>
         </p>
         {% endif %}

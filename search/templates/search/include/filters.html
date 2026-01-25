@@ -1,6 +1,7 @@
 {% load custom_filters %}
+{% load i18n %}
 
-<h4 class="my-2">Filters</h4>
+<h4 class="my-2">{% trans "Filters" %}</h4>
 
 <div id="filters-container">
     {% for category_key, category_info in filter_categories.items %}
