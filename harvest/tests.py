@@ -87,7 +87,9 @@ class HarvestTestOAIPMH(TestCase):
     def test_get_info_article_parses_fields(self):
         rec = DummyRec("oai:scielo:123", self.sample_xml, datestamp=timezone.now())
         data = get_info_article(
-            rec, ExceptionContext(harvest_object=rec, fk_field=None, log_model=None), nodes=NODES
+            rec,
+            ExceptionContext(harvest_object=rec, fk_field=None, log_model=None),
+            nodes=NODES,
         )
         self.assertEqual(data["title"][0]["text"], "Titulo de teste")
         self.assertEqual(data["language"], "pt")
@@ -245,4 +247,3 @@ class HarvestTestOAIPMH(TestCase):
         dataset_obj = HarvestedSciELOData.objects.get(identifier="ds-1")
         self.assertEqual(dataverse_obj.raw_data["identifier"], "dv-1")
         self.assertEqual(dataset_obj.raw_data["identifier"], "ds-1")
-

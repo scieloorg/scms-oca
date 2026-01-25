@@ -13,6 +13,7 @@ class HarvestedPreprintModelAdmin(ModelAdmin):
     search_fields = ("identifier", "source_url")
     list_filter = ("harvest_status", "index_status")
 
+
 modeladmin_register(HarvestedPreprintModelAdmin)
 
 
@@ -23,7 +24,9 @@ class HarvestedSciELODataModelAdmin(ModelAdmin):
     search_fields = ("identifier", "source_url")
     list_filter = ("harvest_status", "index_status", "type_data")
 
+
 modeladmin_register(HarvestedSciELODataModelAdmin)
+
 
 class HarvestedBooksModelAdmin(ModelAdmin):
     model = HarvestedBooks
@@ -31,5 +34,6 @@ class HarvestedBooksModelAdmin(ModelAdmin):
     list_display = ("identifier", "harvest_status", "datestamp", "created")
     search_fields = ("identifier", "source_url")
     list_filter = ("harvest_status", "index_status", "type_data")
+
 
 modeladmin_register(HarvestedBooksModelAdmin)

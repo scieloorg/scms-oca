@@ -14,6 +14,7 @@ NODES = [
     "type",
 ]
 
+
 def harvest_preprint(recs, user):
     harvest_records(
         recs=recs,
@@ -24,5 +25,3 @@ def harvest_preprint(recs, user):
         fk_field="preprint",
         label="preprint",
     )
-
-

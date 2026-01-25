@@ -8,27 +8,28 @@ class ExceptionContext:
         self.fk_field = fk_field
         self.exceptions = []
 
-    
     def add_exception(
         self,
         exception,
         field_name,
         context_data=None,
     ):
-        self.exceptions.append({
-            "field_name": field_name,
-            "exception_type": type(exception).__name__,
-            "exception_message": str(exception),
-            "exception_traceback": traceback.format_exc(),
-            "context_data": context_data or {},
-        })
+        self.exceptions.append(
+            {
+                "field_name": field_name,
+                "exception_type": type(exception).__name__,
+                "exception_message": str(exception),
+                "exception_traceback": traceback.format_exc(),
+                "context_data": context_data or {},
+            }
+        )
 
     def has_exceptions(self) -> bool:
         return len(self.exceptions) > 0
 
     def get_exceptions_by_field(self, field_name):
         return [e for e in self.exceptions if e.get("field_name") == field_name]
-    
+
     def verify_obj_as_failed(self):
         if self.exceptions:
             self.harvest_object.harvest_status = "failed"
@@ -56,5 +57,3 @@ class ExceptionContext:
                 "context_data": exc.get("context_data", {}),
             }
             self.log_model.objects.create(**payload)
-
-

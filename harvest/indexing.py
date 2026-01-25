@@ -17,7 +17,9 @@ def _get_index_name(model_name=None):
     return {
         "HarvestedPreprint": getattr(settings, "OPENSEARCH_INDEX_RAW_PREPRINT", None),
         "HarvestedBooks": getattr(settings, "OPENSEARCH_INDEX_RAW_BOOK", None),
-        "HarvestedSciELOData": getattr(settings, "OPENSEARCH_INDEX_RAW_SCIELO_DATA", None)
+        "HarvestedSciELOData": getattr(
+            settings, "OPENSEARCH_INDEX_RAW_SCIELO_DATA", None
+        ),
     }.get(model_name)
 
 
@@ -59,9 +61,11 @@ def index_harvested_instance(instance, index_name=None, refresh=False):
     if client is None:
         logger.warning("OpenSearch client não configurado.")
         return
-    
+
     try:
-        logging.info(f"Indexando instancia {instance.__class__.__name__}: {instance.identifier} no indice {index_name}")
+        logging.info(
+            f"Indexando instancia {instance.__class__.__name__}: {instance.identifier} no indice {index_name}"
+        )
         client.index(
             index=index_name,
             id=instance.identifier,
@@ -78,10 +82,7 @@ def index_harvested_instance(instance, index_name=None, refresh=False):
             exc,
         )
         instance.mark_as_index_failed()
-        exc_context.add_exception(
-            exception=exc,
-            field_name="raw_data"
-        )
+        exc_context.add_exception(exception=exc, field_name="raw_data")
         exc_context.save_to_db()
 
     if refresh:
@@ -98,9 +99,7 @@ def delete_harvested_document(model_name, identifier, refresh=False):
         logger.warning("OpenSearch client não configurado.")
         return
     try:
-        logging.info(
-            "Removendo documento %s do indice %s", identifier, index_name
-        )
+        logging.info("Removendo documento %s do indice %s", identifier, index_name)
         client.delete(index=index_name, id=identifier, refresh=refresh)
     except Exception as exc:
         logger.warning(
@@ -109,9 +108,3 @@ def delete_harvested_document(model_name, identifier, refresh=False):
             identifier,
             exc,
         )
-
-
-
-
-
-

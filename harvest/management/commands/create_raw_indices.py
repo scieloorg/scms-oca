@@ -9,7 +9,6 @@ from search_gateway.client import get_opensearch_client
 class Command(BaseCommand):
     help = "Cria os índices raw no OpenSearch para preprint, books e scielo data."
 
-
     def add_arguments(self, parser):
         parser.add_argument(
             "--force",
@@ -76,9 +75,7 @@ class Command(BaseCommand):
 
             if exists:
                 self.stdout.write(
-                    self.style.NOTICE(
-                        f"{model_name}: índice já existe: {index_name}."
-                    )
+                    self.style.NOTICE(f"{model_name}: índice já existe: {index_name}.")
                 )
                 continue
 
@@ -90,9 +87,7 @@ class Command(BaseCommand):
                         "number_of_replicas": 0,
                     },
                     "mappings": {
-                        "properties": {
-                            "raw_data": {"type": "object", "enabled": False}
-                        }
+                        "properties": {"raw_data": {"type": "object", "enabled": False}}
                     },
                 },
             )
@@ -102,8 +97,3 @@ class Command(BaseCommand):
 
         if index_choice:
             self._index_items(index_choice=index_choice)
-
-
-
-
-

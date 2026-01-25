@@ -12,6 +12,7 @@ namespaces = {
     "dc": "http://purl.org/dc/elements/1.1/",
 }
 
+
 def get_info_article(rec, exc_context, nodes):
     NODES = nodes
     article_dict = {}
@@ -25,15 +26,11 @@ def get_info_article(rec, exc_context, nodes):
             if lang:
                 node_dict["lang"] = lang
             article_dict[node].append(node_dict)
-    
-    article_dict["language"] = get_language_node(
-        root=root, exc_context=exc_context
-    )
+
+    article_dict["language"] = get_language_node(root=root, exc_context=exc_context)
     article_dict["date"] = get_date(root=root, exc_context=exc_context)
     article_dict["authors"] = get_name_author(root=root, exc_context=exc_context)
-    article_dict["source"] = get_identifier_source(
-        root=root, exc_context=exc_context
-    )
+    article_dict["source"] = get_identifier_source(root=root, exc_context=exc_context)
     return article_dict
 
 
@@ -43,7 +40,7 @@ def get_language_node(root, exc_context: ExceptionContext):
     except IndexError as e:
         logging.warning(
             f"Exception in {inspect.stack()[0].function}: {e}",
-            extra={'field': "language"}
+            extra={"field": "language"},
         )
         exc_context.add_exception(
             exception=e,
@@ -63,6 +60,7 @@ def get_identifier_source(root, exc_context: ExceptionContext):
 
     return urls
 
+
 def get_date(root, exc_context: ExceptionContext):
     try:
         date_string = root.xpath(".//dc:date", namespaces=namespaces)[0].text
@@ -75,7 +73,7 @@ def get_date(root, exc_context: ExceptionContext):
     except ValueError as e:
         logging.warning(
             f"Exception in {inspect.stack()[0].function}: {e}",
-            extra={'raw': date_string}
+            extra={"raw": date_string},
         )
         exc_context.add_exception(
             exception=ValueError("Invalid date"),
@@ -89,6 +87,8 @@ def get_date(root, exc_context: ExceptionContext):
             exception=IndexError("Error retrieving preprint data."),
             field_name="date",
         )
+
+
 def get_name_author(root, exc_context: ExceptionContext):
     author_data = []
     for author in root.xpath(".//dc:creator", namespaces=namespaces):
@@ -99,11 +99,9 @@ def get_name_author(root, exc_context: ExceptionContext):
         except Exception as e:
             logging.warning(
                 f"Exception in {inspect.stack()[0].function}: {e}",
-                extra={'field': "creator"}
+                extra={"field": "creator"},
             )
             exc_context.add_exception(
-                exception=e,
-                field_name="creator",
-                context={"name_creator": name_author}
-            )            
+                exception=e, field_name="creator", context={"name_creator": name_author}
+            )
     return author_data

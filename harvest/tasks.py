@@ -17,12 +17,14 @@ from .service import service_oai_pmh_scythe, service_oai_pmh_sickle
 
 User = get_user_model()
 
+
 def get_latest_preprint():
     # Recupera o ultimo registro de Preprint a partir do header.datestamp armazenado no campo datestamp
     try:
         return HarvestedPreprint.objects.latest("datestamp")
     except HarvestedPreprint.DoesNotExist:
         return None
+
 
 def transform_verify_in_python(verify_value):
     """
@@ -34,7 +36,7 @@ def transform_verify_in_python(verify_value):
     if isinstance(verify_value, str):
         return verify_value.strip().lower() in ("true", "1")
     return False
-    
+
 
 @celery_app.task(name="Harvest data preprint")
 def harvest_preprint_in_endpoint_oai_pmh(username, user_id=None, url=None, verify=True):
@@ -63,8 +65,8 @@ def harvest_scielo_data_in_endpoint_dataverse(
         base_url=base_url,
         per_page=per_page,
         start=start,
-
     )
+
 
 @celery_app.task(name="Harvest Books")
 def harvest_books_in_couchdb(

@@ -13,19 +13,20 @@ from core.models import CommonControlField
 
 class HarvestStatus(models.TextChoices):
     """Status de coleta de dados"""
-    PENDING = 'pending', _('Pendente')
-    IN_PROGRESS = 'in_progress', _('Em Progresso')
-    SUCCESS = 'success', _('Sucesso')
-    FAILED = 'failed', _('Falhou')
 
+    PENDING = "pending", _("Pendente")
+    IN_PROGRESS = "in_progress", _("Em Progresso")
+    SUCCESS = "success", _("Sucesso")
+    FAILED = "failed", _("Falhou")
 
 
 class IndexStatus(models.TextChoices):
     """Status de indexação"""
-    PENDING = 'pending', _('Pendente')
-    IN_PROGRESS = 'in_progress', _('Em Progresso')
-    SUCCESS = 'success', _('Sucesso')
-    FAILED = 'failed', _('Falhou')
+
+    PENDING = "pending", _("Pendente")
+    IN_PROGRESS = "in_progress", _("Em Progresso")
+    SUCCESS = "success", _("Sucesso")
+    FAILED = "failed", _("Falhou")
 
 
 class BaseHarvestedData(CommonControlField):
@@ -33,61 +34,55 @@ class BaseHarvestedData(CommonControlField):
     Modelo base abstrato para armazenar dados coletados de diferentes endpoints.
     Contém campos comuns a todos os tipos de dados.
     """
+
     identifier = models.CharField(
-        _('ID Externo'),
+        _("ID Externo"),
         max_length=255,
         unique=True,
         db_index=True,
-        help_text=_('Identificador único do registro no sistema externo')
-    )    
+        help_text=_("Identificador único do registro no sistema externo"),
+    )
     source_url = models.URLField(
-        _('URL da Fonte'),
+        _("URL da Fonte"),
         blank=True,
         null=True,
-    )    
+    )
     raw_data = models.JSONField(
-        _('Dados Brutos'),
+        _("Dados Brutos"),
         default=dict,
         blank=True,
-        help_text=_('Dados completos retornados pelo endpoint')
+        help_text=_("Dados completos retornados pelo endpoint"),
     )
     harvest_status = models.CharField(
-        _('Status da Coleta'),
+        _("Status da Coleta"),
         max_length=20,
         choices=HarvestStatus.choices,
         default=HarvestStatus.PENDING,
-        db_index=True
+        db_index=True,
     )
     index_status = models.CharField(
-        _('Status da Indexação'),
+        _("Status da Indexação"),
         max_length=20,
         choices=IndexStatus.choices,
         default=IndexStatus.PENDING,
-        db_index=True
+        db_index=True,
     )
     datestamp = models.DateTimeField(
-        verbose_name=_("Data do registro"), 
-        auto_now_add=True
+        verbose_name=_("Data do registro"), auto_now_add=True
     )
     last_harvest_attempt = models.DateTimeField(
-        _('Última Tentativa de Coleta'),
-        blank=True,
-        null=True
+        _("Última Tentativa de Coleta"), blank=True, null=True
     )
-    indexed_at = models.DateTimeField(
-        _('Indexado em'),
-        blank=True,
-        null=True
-    )
+    indexed_at = models.DateTimeField(_("Indexado em"), blank=True, null=True)
     index_name = models.CharField(
-        _('Nome do Índice'),
+        _("Nome do Índice"),
         max_length=100,
         blank=True,
         null=True,
-        help_text=_('Nome do índice no OpenSearch onde foi indexado')
+        help_text=_("Nome do índice no OpenSearch onde foi indexado"),
     )
-    
-    panels  = [
+
+    panels = [
         FieldPanel("identifier"),
         FieldPanel("source_url"),
         FieldPanel("raw_data"),
@@ -96,16 +91,16 @@ class BaseHarvestedData(CommonControlField):
         FieldPanel("last_harvest_attempt"),
         FieldPanel("indexed_at"),
         FieldPanel("index_name"),
-        InlinePanel("harvest_error_log")
+        InlinePanel("harvest_error_log"),
     ]
 
     class Meta:
         abstract = True
-        ordering = ['-created_at']
+        ordering = ["-created_at"]
         indexes = [
-            models.Index(fields=['identifier']),
+            models.Index(fields=["identifier"]),
         ]
-    
+
     def __str__(self):
         return f"{self.identifier}"
 
@@ -118,28 +113,34 @@ class BaseHarvestedData(CommonControlField):
         self.harvest_status = HarvestStatus.SUCCESS
         self.last_harvest_attempt = timezone.now()
         self.updated = timezone.now()
-        self.save(update_fields=['harvest_status', 'last_harvest_attempt', 'updated'])
-    
+        self.save(update_fields=["harvest_status", "last_harvest_attempt", "updated"])
+
     def mark_as_failed(self, error_message=None):
         self.harvest_status = HarvestStatus.FAILED
         self.last_harvest_attempt = timezone.now()
         self.updated = timezone.now()
-        self.save(update_fields=[
-            'harvest_status', 'last_harvest_attempt', 'updated'
-        ])
-    
+        self.save(update_fields=["harvest_status", "last_harvest_attempt", "updated"])
+
     def mark_as_indexed(self, index_name):
         self.index_status = IndexStatus.SUCCESS
         self.indexed_at = timezone.now()
         self.index_name = index_name
         self.updated = timezone.now()
-        self.save(update_fields=['harvest_status', 'index_status', 'indexed_at', 'index_name', 'updated'])
-    
+        self.save(
+            update_fields=[
+                "harvest_status",
+                "index_status",
+                "indexed_at",
+                "index_name",
+                "updated",
+            ]
+        )
+
     def mark_as_index_failed(self, error_message=None):
         self.index_status = IndexStatus.FAILED
         self.updated = timezone.now()
-        self.save(update_fields=['harvest_status', 'index_status', 'updated'])
-    
+        self.save(update_fields=["harvest_status", "index_status", "updated"])
+
     def set_attrs_from_article_info(self, article_info, datestamp):
         datestamp = datestamp if datestamp else None
         self.source_url = (
@@ -149,7 +150,7 @@ class BaseHarvestedData(CommonControlField):
         self.datestamp = datestamp
         self.last_harvest_attempt = datestamp
         self.save()
-    
+
     def get_document_for_indexing(self):
         return self.raw_data
 
@@ -158,9 +159,10 @@ class HarvestedPreprint(BaseHarvestedData, ClusterableModel):
     """
     Modelo para dados de preprint.
     """
+
     class Meta:
-        verbose_name = _('Dados de preprint puro')
-        verbose_name_plural = _('Dados de preprint')
+        verbose_name = _("Dados de preprint puro")
+        verbose_name_plural = _("Dados de preprint")
 
 
 class HarvestedBooks(BaseHarvestedData, ClusterableModel):
@@ -169,7 +171,7 @@ class HarvestedBooks(BaseHarvestedData, ClusterableModel):
         max_length=20,
         blank=True,
         null=True,
-        help_text=_('Part ou Monograph')
+        help_text=_("Part ou Monograph"),
     )
     parent = models.ForeignKey(
         "self",
@@ -195,74 +197,77 @@ class HarvestedBooks(BaseHarvestedData, ClusterableModel):
     ]
 
     class Meta:
-        verbose_name = _('Dados de Scielo Books')
-        verbose_name_plural = _('Dados de Scielo Books')
-
+        verbose_name = _("Dados de Scielo Books")
+        verbose_name_plural = _("Dados de Scielo Books")
 
 
 class HarvestedSciELOData(BaseHarvestedData, ClusterableModel):
     type_data = models.CharField(
-        _('Tipo de dado'),
+        _("Tipo de dado"),
         max_length=20,
         blank=True,
         null=True,
-        help_text=_('dataset ou dataverse')
+        help_text=_("dataset ou dataverse"),
     )
-    
-    class Meta:
-        verbose_name = _('Dados de Scielo Data')
-        verbose_name_plural = _('Dados de Scielo')
 
+    class Meta:
+        verbose_name = _("Dados de Scielo Data")
+        verbose_name_plural = _("Dados de Scielo")
 
 
 class BaseHarvestErrorLog(models.Model):
     field_name = models.CharField(
-        _('Campo com Erro'),
+        _("Campo com Erro"),
         max_length=100,
         blank=True,
         null=True,
         db_index=True,
-        help_text=_('Nome do campo que causou o erro, se aplicável')
+        help_text=_("Nome do campo que causou o erro, se aplicável"),
     )
     exception_type = models.TextField(_("Exception Type"), null=True, blank=True)
     exception_message = models.TextField(
-        _('Mensagem de Erro'),
-        help_text=_('Descrição detalhada do erro')
+        _("Mensagem de Erro"), help_text=_("Descrição detalhada do erro")
     )
-    
+
     exception_traceback = models.TextField(
-        _('Traceback do Erro'),
+        _("Traceback do Erro"),
         blank=True,
         null=True,
-        help_text=_('Stack trace completo do erro (para debugging)')
+        help_text=_("Stack trace completo do erro (para debugging)"),
     )
     is_resolved = models.BooleanField(
-        _('Erro Resolvido'),
+        _("Erro Resolvido"),
         default=False,
         db_index=True,
-        help_text=_('Indica se o erro foi resolvido')
+        help_text=_("Indica se o erro foi resolvido"),
     )
     context_data = models.JSONField(
-        _('Dados de Contexto'),
+        _("Dados de Contexto"),
         default=dict,
         blank=True,
-        help_text=_('Informações adicionais sobre o contexto do erro')
-    )    
+        help_text=_("Informações adicionais sobre o contexto do erro"),
+    )
     resolved_at = models.DateTimeField(
-        _('Resolvido em'),
+        _("Resolvido em"),
         blank=True,
         null=True,
-        help_text=_('Quando o erro foi resolvido')
-    )    
+        help_text=_("Quando o erro foi resolvido"),
+    )
 
 
 class HarvestErrorLogPreprint(BaseHarvestErrorLog):
-    preprint = ParentalKey(HarvestedPreprint, related_name="harvest_error_log", on_delete=models.CASCADE)
+    preprint = ParentalKey(
+        HarvestedPreprint, related_name="harvest_error_log", on_delete=models.CASCADE
+    )
 
 
 class HarvestErrorLogBooks(BaseHarvestErrorLog):
-    book = ParentalKey(HarvestedBooks, related_name="harvest_error_log", on_delete=models.CASCADE)
+    book = ParentalKey(
+        HarvestedBooks, related_name="harvest_error_log", on_delete=models.CASCADE
+    )
 
 
 class HarvestErrorLogSciELOData(BaseHarvestErrorLog):
-    scielo_data = ParentalKey(HarvestedSciELOData, related_name="harvest_error_log", on_delete=models.CASCADE)
+    scielo_data = ParentalKey(
+        HarvestedSciELOData, related_name="harvest_error_log", on_delete=models.CASCADE
+    )

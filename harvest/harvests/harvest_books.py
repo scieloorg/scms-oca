@@ -163,7 +163,7 @@ def _resolve_monograph_parent(
     parent = HarvestedBooks.objects.filter(identifier=monograph_identifier).first()
     if parent:
         return parent
-    
+
     monograph_payload, monograph_url = fetch_doc(
         base_url=base_url,
         db_name=db_name,

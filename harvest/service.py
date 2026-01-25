@@ -34,9 +34,16 @@ class CustomScythe(Scythe):
         timeout: int | float = 60,
     ):
         super().__init__(
-            endpoint, http_method, iterator, max_retries,
-            retry_status_codes, default_retry_after,
-            class_mapping, encoding, auth, timeout
+            endpoint,
+            http_method,
+            iterator,
+            max_retries,
+            retry_status_codes,
+            default_retry_after,
+            class_mapping,
+            encoding,
+            auth,
+            timeout,
         )
         self.verify = verify
 
@@ -52,37 +59,37 @@ class CustomScythe(Scythe):
             A reusable HTTP client instance for making HTTP requests.
         """
         if self._client is None or self._client.is_closed:
-            headers = {
-                "Accept": "text/xml; charset=utf-8",
-                "user-agent": USER_AGENT
-            }
+            headers = {"Accept": "text/xml; charset=utf-8", "user-agent": USER_AGENT}
             self._client = httpx.Client(
                 headers=headers,
                 timeout=self.timeout,
                 auth=self.auth,
                 default_encoding=self.encoding,
-                verify=self.verify, # overwrite
+                verify=self.verify,  # overwrite
                 event_hooks={"response": [log_response]},
             )
         return self._client
 
 
-
 def service_oai_pmh_scythe(
-    url, metadata_prefix="oai_dc", from_date=None, until_date=None, verify=True, ignore_deleted=True
+    url,
+    metadata_prefix="oai_dc",
+    from_date=None,
+    until_date=None,
+    verify=True,
+    ignore_deleted=True,
 ):
     scythe = CustomScythe(url, verify=verify)
-    
-    params = {
-        "metadata_prefix": metadata_prefix}
-    
+
+    params = {"metadata_prefix": metadata_prefix}
+
     if from_date:
         params["from_"] = from_date
 
     if until_date:
-        params["until"] = until_date 
+        params["until"] = until_date
     if ignore_deleted:
-        params["ignore_deleted"] = ignore_deleted 
+        params["ignore_deleted"] = ignore_deleted
 
     recs = scythe.list_records(**params)
     return recs
@@ -100,6 +107,6 @@ def service_oai_pmh_sickle(
 
     if until_date:
         params["until"] = until_date
-    
+
     recs = sickle.ListRecords(**params)
     return recs

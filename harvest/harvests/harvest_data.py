@@ -25,6 +25,7 @@ def _extract_items(payload):
             return payload.get("items")
     return []
 
+
 def _extract_total_count(payload):
     if isinstance(payload, dict):
         data = payload.get("data")
@@ -101,19 +102,15 @@ def harvest_data(
     search_url = f"{base_url}{SEARCH_PATH}"
     dataset_url = f"{base_url}{DATASET_PATH}"
     total_in_db = HarvestedSciELOData.objects.count()
-    start = (total_in_db// 100) * 100 if start is None else start # Remove dois ultimos numeros
-    headers = {
-        "Accept": "text/xml; charset=utf-8",
-        "user-agent": USER_AGENT
-    }
+    start = (
+        (total_in_db // 100) * 100 if start is None else start
+    )  # Remove dois ultimos numeros
+    headers = {"Accept": "text/xml; charset=utf-8", "user-agent": USER_AGENT}
     page_count = 0
     total_count = None
     while True:
         items, total_count = fetch_search_page(
-            search_url=search_url,
-            start=start,
-            per_page=per_page,
-            headers=headers
+            search_url=search_url, start=start, per_page=per_page, headers=headers
         )
 
         if not items:
@@ -124,9 +121,7 @@ def harvest_data(
             if item_type == "dataverse":
                 identifier = item.get("identifier")
                 if not identifier:
-                    logging.warning(
-                        "Item dataverse sem identifier (start=%s)", start
-                    )
+                    logging.warning("Item dataverse sem identifier (start=%s)", start)
                     continue
                 _persist_harvested(
                     user=user,
@@ -138,11 +133,9 @@ def harvest_data(
             elif item_type == "dataset":
                 global_id = item.get("global_id")
                 if not global_id:
-                    logging.warning(
-                        "Item dataset sem global_id (start=%s)", start
-                    )
+                    logging.warning("Item dataset sem global_id (start=%s)", start)
                     continue
-        
+
                 data = fetch_dataset_data(
                     dataset_url=dataset_url,
                     global_id=global_id,
