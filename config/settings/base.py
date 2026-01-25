@@ -133,6 +133,7 @@ LOCAL_APPS = [
     "journal",
     "chart",
     "search_gateway",
+    "harvest",
 ]
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
@@ -494,3 +495,11 @@ ES_INDEX_SOURCES = env.str("ES_INDEX_SOURCES", "journals")
 
 # New version of index opoca
 ES_INDEX_SOCIAL_PRODUCTION = env.str("ES_INDEX_SOCIAL_PRODUCTION", "social_production")
+
+OPENSEARCH_URL = env("OPENSEARCH_URL", default="http://opensearch:9200") 
+OPENSEARCH_INDEX_RAW_PREPRINT = env.str("OPENSEARCH_INDEX_RAW_PREPRINT", "raw_scielo_preprint")
+OPENSEARCH_INDEX_RAW_BOOK = env.str("OPENSEARCH_INDEX_RAW_BOOK", "raw_scielo_book")
+OPENSEARCH_INDEX_RAW_SCIELO_DATA = env.str("OPENSEARCH_INDEX_RAW_SCIELO_DATA", "raw_scielo_data")
+
+# HARVEST Books, Preprint, SciELO Data
+SCIELO_BOOKS_BASE_URL = env("SCIELO_BOOKS_BASE_URL", default=None)
