@@ -1441,7 +1441,7 @@ msgstr "New content for moderation - %s"
 #: education_directory/views.py:163 event_directory/views.py:161
 #: infrastructure_directory/views.py:162 policy_directory/views.py:165
 msgid "Valication error"
-msgstr ""
+msgstr "Validation error"
 
 #: education_directory/views.py:170 event_directory/views.py:168
 #: infrastructure_directory/views.py:169 policy_directory/views
@@ -1449,7 +1449,7 @@ msgstr ""
 #: infrastructure_directory/views.py:169 policy_directory/views.py:172
 #, python-format
 msgid "Valication error: %s"
-msgstr ""
+msgstr "Validation error: %s"
 
 #: education_directory/views.py:172 event_directory/views.py:170
 #: infrastructure_directory/views.py:171 policy_directory/views.py:174
