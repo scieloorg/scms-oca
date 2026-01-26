@@ -1,0 +1,225 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-01-26 17:35+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+#: indicator/static/indicator/js/button.js:82
+msgid "Start typing to search..."
+msgstr ""
+
+#: indicator/static/indicator/js/charts.js:141
+#: indicator/static/indicator/js/menu.js:122
+msgid "Unique Periodicals (sources)"
+msgstr ""
+
+#: indicator/static/indicator/js/charts.js:143
+msgid "Documents / Periodical"
+msgstr ""
+
+#: indicator/static/indicator/js/charts.js:145
+msgid "Citations / Periodical"
+msgstr ""
+
+#: indicator/static/indicator/js/charts.js:147
+msgid "Cited Documents / Periodical"
+msgstr ""
+
+#: indicator/static/indicator/js/charts.js:149
+#: indicator/static/indicator/js/menu.js:154
+msgid "% Periodicals With ≥1 Cited Document"
+msgstr ""
+
+#: indicator/static/indicator/js/charts.js:151
+msgid "Cited Documents"
+msgstr ""
+
+#: indicator/static/indicator/js/charts.js:153
+msgid "Documents"
+msgstr ""
+
+#: indicator/static/indicator/js/charts.js:155
+msgid "Citations"
+msgstr ""
+
+#: indicator/static/indicator/js/charts.js:160
+#: indicator/static/indicator/js/menu.js:181
+msgid "Citations per Document"
+msgstr ""
+
+#: indicator/static/indicator/js/charts.js:162
+msgid "% Docs With ≥1 Citation"
+msgstr ""
+
+#: indicator/static/indicator/js/helpers.js:9
+msgid "GET filters has failed"
+msgstr ""
+
+#: indicator/static/indicator/js/helpers.js:169
+msgid "Argentina"
+msgstr ""
+
+#: indicator/static/indicator/js/helpers.js:170
+msgid "Bolivia"
+msgstr ""
+
+#: indicator/static/indicator/js/helpers.js:171
+msgid "Chile"
+msgstr ""
+
+#: indicator/static/indicator/js/helpers.js:172
+msgid "Science and Culture"
+msgstr ""
+
+#: indicator/static/indicator/js/helpers.js:173
+msgid "Colombia"
+msgstr ""
+
+#: indicator/static/indicator/js/helpers.js:174
+msgid "Costa Rica"
+msgstr ""
+
+#: indicator/static/indicator/js/helpers.js:175
+msgid "Cuba"
+msgstr ""
+
+#: indicator/static/indicator/js/helpers.js:176
+msgid "Dominican Republic"
+msgstr ""
+
+#: indicator/static/indicator/js/helpers.js:177
+msgid "Ecuador"
+msgstr ""
+
+#: indicator/static/indicator/js/helpers.js:178
+msgid "Spain"
+msgstr ""
+
+#: indicator/static/indicator/js/helpers.js:179
+msgid "Mexico"
+msgstr ""
+
+#: indicator/static/indicator/js/helpers.js:180
+msgid "Peru"
+msgstr ""
+
+#: indicator/static/indicator/js/helpers.js:181
+msgid "Portugal"
+msgstr ""
+
+#: indicator/static/indicator/js/helpers.js:182
+msgid "Paraguay"
+msgstr ""
+
+#: indicator/static/indicator/js/helpers.js:183
+msgid "PEPSIC"
+msgstr ""
+
+#: indicator/static/indicator/js/helpers.js:184
+msgid "REVENF"
+msgstr ""
+
+#: indicator/static/indicator/js/helpers.js:185
+msgid "Brazil"
+msgstr ""
+
+#: indicator/static/indicator/js/helpers.js:186
+msgid "Public Health"
+msgstr ""
+
+#: indicator/static/indicator/js/helpers.js:187
+msgid "South Africa"
+msgstr ""
+
+#: indicator/static/indicator/js/helpers.js:188
+msgid "Uruguay"
+msgstr ""
+
+#: indicator/static/indicator/js/helpers.js:189
+msgid "Venezuela"
+msgstr ""
+
+#: indicator/static/indicator/js/helpers.js:190
+msgid "West Indies"
+msgstr ""
+
+#: indicator/static/indicator/js/helpers.js:200
+msgid "No"
+msgstr ""
+
+#: indicator/static/indicator/js/helpers.js:201
+msgid "Yes"
+msgstr ""
+
+#: indicator/static/indicator/js/helpers.js:308
+msgid "Publication Year"
+msgstr ""
+
+#: indicator/static/indicator/js/helpers.js:317
+msgid "Country"
+msgstr ""
+
+#: indicator/static/indicator/js/helpers.js:322
+msgid "Document Language"
+msgstr ""
+
+#: indicator/static/indicator/js/helpers.js:326
+msgid "Applied Filters"
+msgstr ""
+
+#: indicator/static/indicator/js/helpers.js:328
+msgid "Search Options"
+msgstr ""
+
+#: indicator/static/indicator/js/helpers.js:374
+msgid "to"
+msgstr ""
+
+#: indicator/static/indicator/js/menu.js:113
+msgid "per Year"
+msgstr ""
+
+#: indicator/static/indicator/js/menu.js:113
+msgid "by"
+msgstr ""
+
+#: indicator/static/indicator/js/menu.js:130
+msgid "Avg Documents per Periodical"
+msgstr ""
+
+#: indicator/static/indicator/js/menu.js:138
+msgid "Avg Citations per Periodical"
+msgstr ""
+
+#: indicator/static/indicator/js/menu.js:146
+msgid "Avg Cited Documents per Periodical"
+msgstr ""
+
+#: indicator/static/indicator/js/menu.js:163
+msgid "Total Documents"
+msgstr ""
+
+#: indicator/static/indicator/js/menu.js:172
+msgid "Total Citations"
+msgstr ""
+
+#: indicator/static/indicator/js/menu.js:190
+msgid "Cited Documents (≥1 citation)"
+msgstr ""
+
+#: indicator/static/indicator/js/menu.js:199
+msgid "% Documents With ≥1 Citation"
+msgstr ""
