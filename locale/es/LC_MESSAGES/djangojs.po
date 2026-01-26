@@ -9,217 +9,218 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-01-26 17:35+0000\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"PO-Revision-Date: 2026-01-26 15:40+0000\n"
+"Last-Translator: Gemini\n"
+"Language-Team: Spanish\n"
+"Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
 #: indicator/static/indicator/js/button.js:82
 msgid "Start typing to search..."
-msgstr ""
+msgstr "Comience a escribir para buscar..."
 
 #: indicator/static/indicator/js/charts.js:141
 #: indicator/static/indicator/js/menu.js:122
 msgid "Unique Periodicals (sources)"
-msgstr ""
+msgstr "Revistas únicas (fuentes)"
 
 #: indicator/static/indicator/js/charts.js:143
 msgid "Documents / Periodical"
-msgstr ""
+msgstr "Documentos / Revista"
 
 #: indicator/static/indicator/js/charts.js:145
 msgid "Citations / Periodical"
-msgstr ""
+msgstr "Citas / Revista"
 
 #: indicator/static/indicator/js/charts.js:147
 msgid "Cited Documents / Periodical"
-msgstr ""
+msgstr "Documentos citados / Revista"
 
 #: indicator/static/indicator/js/charts.js:149
 #: indicator/static/indicator/js/menu.js:154
 msgid "% Periodicals With ≥1 Cited Document"
-msgstr ""
+msgstr "% de Revistas con ≥1 documento citado"
 
 #: indicator/static/indicator/js/charts.js:151
 msgid "Cited Documents"
-msgstr ""
+msgstr "Documentos citados"
 
 #: indicator/static/indicator/js/charts.js:153
 msgid "Documents"
-msgstr ""
+msgstr "Documentos"
 
 #: indicator/static/indicator/js/charts.js:155
 msgid "Citations"
-msgstr ""
+msgstr "Citas"
 
 #: indicator/static/indicator/js/charts.js:160
 #: indicator/static/indicator/js/menu.js:181
 msgid "Citations per Document"
-msgstr ""
+msgstr "Citas por documento"
 
 #: indicator/static/indicator/js/charts.js:162
 msgid "% Docs With ≥1 Citation"
-msgstr ""
+msgstr "% de documentos con ≥1 cita"
 
 #: indicator/static/indicator/js/helpers.js:9
 msgid "GET filters has failed"
-msgstr ""
+msgstr "La obtención de filtros ha fallado"
 
 #: indicator/static/indicator/js/helpers.js:169
 msgid "Argentina"
-msgstr ""
+msgstr "Argentina"
 
 #: indicator/static/indicator/js/helpers.js:170
 msgid "Bolivia"
-msgstr ""
+msgstr "Bolivia"
 
 #: indicator/static/indicator/js/helpers.js:171
 msgid "Chile"
-msgstr ""
+msgstr "Chile"
 
 #: indicator/static/indicator/js/helpers.js:172
 msgid "Science and Culture"
-msgstr ""
+msgstr "Ciencia y Cultura"
 
 #: indicator/static/indicator/js/helpers.js:173
 msgid "Colombia"
-msgstr ""
+msgstr "Colombia"
 
 #: indicator/static/indicator/js/helpers.js:174
 msgid "Costa Rica"
-msgstr ""
+msgstr "Costa Rica"
 
 #: indicator/static/indicator/js/helpers.js:175
 msgid "Cuba"
-msgstr ""
+msgstr "Cuba"
 
 #: indicator/static/indicator/js/helpers.js:176
 msgid "Dominican Republic"
-msgstr ""
+msgstr "República Dominicana"
 
 #: indicator/static/indicator/js/helpers.js:177
 msgid "Ecuador"
-msgstr ""
+msgstr "Ecuador"
 
 #: indicator/static/indicator/js/helpers.js:178
 msgid "Spain"
-msgstr ""
+msgstr "España"
 
 #: indicator/static/indicator/js/helpers.js:179
 msgid "Mexico"
-msgstr ""
+msgstr "México"
 
 #: indicator/static/indicator/js/helpers.js:180
 msgid "Peru"
-msgstr ""
+msgstr "Perú"
 
 #: indicator/static/indicator/js/helpers.js:181
 msgid "Portugal"
-msgstr ""
+msgstr "Portugal"
 
 #: indicator/static/indicator/js/helpers.js:182
 msgid "Paraguay"
-msgstr ""
+msgstr "Paraguay"
 
 #: indicator/static/indicator/js/helpers.js:183
 msgid "PEPSIC"
-msgstr ""
+msgstr "PEPSIC"
 
 #: indicator/static/indicator/js/helpers.js:184
 msgid "REVENF"
-msgstr ""
+msgstr "REVENF"
 
 #: indicator/static/indicator/js/helpers.js:185
 msgid "Brazil"
-msgstr ""
+msgstr "Brasil"
 
 #: indicator/static/indicator/js/helpers.js:186
 msgid "Public Health"
-msgstr ""
+msgstr "Salud Pública"
 
 #: indicator/static/indicator/js/helpers.js:187
 msgid "South Africa"
-msgstr ""
+msgstr "Sudáfrica"
 
 #: indicator/static/indicator/js/helpers.js:188
 msgid "Uruguay"
-msgstr ""
+msgstr "Uruguay"
 
 #: indicator/static/indicator/js/helpers.js:189
 msgid "Venezuela"
-msgstr ""
+msgstr "Venezuela"
 
 #: indicator/static/indicator/js/helpers.js:190
 msgid "West Indies"
-msgstr ""
+msgstr "Indias Occidentales"
 
 #: indicator/static/indicator/js/helpers.js:200
 msgid "No"
-msgstr ""
+msgstr "No"
 
 #: indicator/static/indicator/js/helpers.js:201
 msgid "Yes"
-msgstr ""
+msgstr "Sí"
 
 #: indicator/static/indicator/js/helpers.js:308
 msgid "Publication Year"
-msgstr ""
+msgstr "Año de publicación"
 
 #: indicator/static/indicator/js/helpers.js:317
 msgid "Country"
-msgstr ""
+msgstr "País"
 
 #: indicator/static/indicator/js/helpers.js:322
 msgid "Document Language"
-msgstr ""
+msgstr "Idioma del documento"
 
 #: indicator/static/indicator/js/helpers.js:326
 msgid "Applied Filters"
-msgstr ""
+msgstr "Filtros aplicados"
 
 #: indicator/static/indicator/js/helpers.js:328
 msgid "Search Options"
-msgstr ""
+msgstr "Opciones de búsqueda"
 
 #: indicator/static/indicator/js/helpers.js:374
 msgid "to"
-msgstr ""
+msgstr "a"
 
 #: indicator/static/indicator/js/menu.js:113
 msgid "per Year"
-msgstr ""
+msgstr "por año"
 
 #: indicator/static/indicator/js/menu.js:113
 msgid "by"
-msgstr ""
+msgstr "por"
 
 #: indicator/static/indicator/js/menu.js:130
 msgid "Avg Documents per Periodical"
-msgstr ""
+msgstr "Promedio de documentos por revista"
 
 #: indicator/static/indicator/js/menu.js:138
 msgid "Avg Citations per Periodical"
-msgstr ""
+msgstr "Promedio de citas por revista"
 
 #: indicator/static/indicator/js/menu.js:146
 msgid "Avg Cited Documents per Periodical"
-msgstr ""
+msgstr "Promedio de documentos citados por revista"
 
 #: indicator/static/indicator/js/menu.js:163
 msgid "Total Documents"
-msgstr ""
+msgstr "Total de documentos"
 
 #: indicator/static/indicator/js/menu.js:172
 msgid "Total Citations"
-msgstr ""
+msgstr "Total de citas"
 
 #: indicator/static/indicator/js/menu.js:190
 msgid "Cited Documents (≥1 citation)"
-msgstr ""
+msgstr "Documentos citados (≥1 cita)"
 
 #: indicator/static/indicator/js/menu.js:199
 msgid "% Documents With ≥1 Citation"
-msgstr ""
+msgstr "% de documentos con ≥1 cita"
