@@ -6,6 +6,21 @@ class SearchPageManager {
         this.filters = config.filters || {};
         this.filterMetadata = config.filterMetadata || {};
         this.rangeFields = config.rangeFields || {};
+        this.i18n = config.i18n || {
+            loading: 'Carregando...',
+            resultsCountSingular: 'resultado encontrado',
+            resultsCountPlural: 'resultados encontrados',
+            noResults: 'Nenhum resultado encontrado. Tente ajustar sua busca ou filtros.',
+            filtersApplied: 'Filtros aplicados',
+            labelType: 'Tipo',
+            labelYear: 'Ano',
+            labelInstitutions: 'Instituições',
+            labelLocation: 'Localização',
+            labelPractice: 'Prática',
+            labelAction: 'Ação',
+            labelClassification: 'Classificação',
+            labelThematicAreas: 'Áreas Temáticas',
+        };
         
         this.init();
     }
@@ -237,7 +252,7 @@ class SearchPageManager {
     
     showLoading(filterStatus, resultsContainer) {
         if (filterStatus) {
-            filterStatus.innerHTML = '<i class="icon-spinner icon-spin"></i> Carregando...';
+            filterStatus.innerHTML = `<i class="icon-spinner icon-spin"></i> ${this.i18n.loading}`;
         }
         if (resultsContainer) {
             resultsContainer.innerHTML = '<div class="text-center p-5"><i class="icon-spinner icon-spin icon-2x"></i></div>';
@@ -246,9 +261,14 @@ class SearchPageManager {
     
     handleSearchResults(data, resultsCount, resultsContainer, filterStatus) {        
         if (resultsCount) {
-            resultsCount.innerHTML = data.total_results 
-                ? `<p class="text-muted"><strong>${data.total_results}</strong> resultado(s) encontrado(s)</p>`
-                : '';
+            if (data.total_results) {
+                const resultsLabel = data.total_results > 1
+                    ? this.i18n.resultsCountPlural
+                    : this.i18n.resultsCountSingular;
+                resultsCount.innerHTML = `<p class="text-muted"><strong>${data.total_results}</strong> ${resultsLabel}</p>`;
+            } else {
+                resultsCount.innerHTML = '';
+            }
         }
         
         if (resultsContainer) {
@@ -261,14 +281,14 @@ class SearchPageManager {
                 resultsContainer.innerHTML = `
                     <div class="alert alert-info" role="alert">
                         <i class="icon-info-sign"></i> 
-                        Nenhum resultado encontrado. Tente ajustar sua busca ou filtros.
+                        ${this.i18n.noResults}
                     </div>
                 `;
             }
         }
         
         if (filterStatus) {
-            filterStatus.innerHTML = '<i class="icon-ok text-success"></i> Filtros aplicados';
+            filterStatus.innerHTML = `<i class="icon-ok text-success"></i> ${this.i18n.filtersApplied}`;
             setTimeout(() => {
                 filterStatus.innerHTML = '';
             }, 2000);
@@ -423,7 +443,7 @@ class SearchPageManager {
                     ${directoryType ? `
                         <p class="card-text mb-1">
                             <small class="text-muted">
-                                <strong>Tipo:</strong> ${this.escapeHtml(directoryType)}
+                                <strong>${this.i18n.labelType}:</strong> ${this.escapeHtml(directoryType)}
                             </small>
                         </p>
                     ` : ''}
@@ -431,7 +451,7 @@ class SearchPageManager {
                     ${year ? `
                         <p class="card-text mb-1">
                             <small class="text-muted">
-                                <strong>Ano:</strong> ${this.escapeHtml(year)}
+                                <strong>${this.i18n.labelYear}:</strong> ${this.escapeHtml(year)}
                             </small>
                         </p>
                     ` : ''}
@@ -439,7 +459,7 @@ class SearchPageManager {
                     ${institutions.length > 0 || organization ? `
                         <p class="card-text mb-1">
                             <small class="text-muted">
-                                <strong>Instituições:</strong> ${institutions.length > 0 ? institutions.map(inst => this.escapeHtml(inst)).join(', ') : this.escapeHtml(organization)}
+                                <strong>${this.i18n.labelInstitutions}:</strong> ${institutions.length > 0 ? institutions.map(inst => this.escapeHtml(inst)).join(', ') : this.escapeHtml(organization)}
                             </small>
                         </p>
                     ` : ''}
@@ -447,7 +467,7 @@ class SearchPageManager {
                     ${(cities.length > 0 || states.length > 0) ? `
                         <p class="card-text mb-1">
                             <small class="text-muted">
-                                <strong>Localização:</strong> 
+                                <strong>${this.i18n.labelLocation}:</strong> 
                                 ${cities.map(city => this.escapeHtml(city)).join(', ')}
                                 ${cities.length > 0 && states.length > 0 ? ' - ' : ''}
                                 ${states.map(state => this.escapeHtml(state)).join(', ')}
@@ -458,7 +478,7 @@ class SearchPageManager {
                     ${practice ? `
                         <p class="card-text mb-1">
                             <small class="text-muted">
-                                <strong>Prática:</strong> ${this.escapeHtml(practice)}
+                                <strong>${this.i18n.labelPractice}:</strong> ${this.escapeHtml(practice)}
                             </small>
                         </p>
                     ` : ''}
@@ -466,7 +486,7 @@ class SearchPageManager {
                     ${action ? `
                         <p class="card-text mb-1">
                             <small class="text-muted">
-                                <strong>Ação:</strong> ${this.escapeHtml(action)}
+                                <strong>${this.i18n.labelAction}:</strong> ${this.escapeHtml(action)}
                             </small>
                         </p>
                     ` : ''}
@@ -474,7 +494,7 @@ class SearchPageManager {
                     ${classification ? `
                         <p class="card-text mb-1">
                             <small class="text-muted">
-                                <strong>Classificação:</strong> ${this.escapeHtml(classification)}
+                                <strong>${this.i18n.labelClassification}:</strong> ${this.escapeHtml(classification)}
                             </small>
                         </p>
                     ` : ''}
@@ -482,7 +502,7 @@ class SearchPageManager {
                     ${thematicLevel0.length > 0 ? `
                         <p class="card-text mb-0">
                             <small class="text-muted">
-                                <strong>Áreas Temáticas:</strong> ${thematicLevel0.map(theme => this.escapeHtml(theme)).join(', ')}
+                                <strong>${this.i18n.labelThematicAreas}:</strong> ${thematicLevel0.map(theme => this.escapeHtml(theme)).join(', ')}
                             </small>
                         </p>
                     ` : ''}
