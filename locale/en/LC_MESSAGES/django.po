@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-11 15:40+0000\n"
+"POT-Creation-Date: 2026-01-26 12:37+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -80,6 +80,11 @@ msgid "Proceedings Article"
 msgstr ""
 
 #: article/choices.py:18 indicator/choices.py:59
+#: indicator/templates/filters/sci_prod_journal.html:6
+#: indicator/templates/filters/sci_prod_journal.html:7
+#: indicator/templates/filters/sci_prod_scielo.html:64
+#: indicator/templates/filters/sci_prod_scielo.html:67
+#: indicator/templates/ranking.html:28 indicator/templates/scope.html:22
 #: scholarly_articles/choices.py:18
 msgid "Journal"
 msgstr ""
@@ -224,7 +229,9 @@ msgstr ""
 
 #: article/models.py:69 education_directory/models.py:95
 #: event_directory/models.py:95 indicator/models.py:144
-#: infrastructure_directory/models.py:78 policy_directory/models.py:79
+#: indicator/templates/filters/sci_prod_journal.html:87
+#: indicator/templates/filters/sci_prod_journal.html:88
+#: infrastructure_directory/models.py:79 policy_directory/models.py:79
 #: usefulmodels/models.py:299 usefulmodels/wagtail_hooks.py:125
 msgid "Thematic Area"
 msgstr ""
@@ -236,7 +243,9 @@ msgstr ""
 #: article/models.py:76 article/models.py:994 article/models.py:1177
 #: education_directory/models.py:149 event_directory/models.py:148
 #: indicator/models.py:170 indicator/models.py:811
-#: infrastructure_directory/models.py:125 institution/models.py:256
+#: indicator/templates/filters/sci_prod_brazil.html:28
+#: indicator/templates/filters/sci_prod_world.html:32
+#: infrastructure_directory/models.py:126 institution/models.py:256
 #: journal/models.py:24 policy_directory/models.py:126
 #: search_gateway/filters.py:5
 msgid "Source"
@@ -263,7 +272,11 @@ msgstr ""
 msgid "Journal Name"
 msgstr ""
 
-#: article/models.py:103 scholarly_articles/models.py:238
+#: article/models.py:103 indicator/templates/filters/sci_prod_journal.html:26
+#: indicator/templates/filters/sci_prod_journal.html:27
+#: indicator/templates/filters/sci_prod_scielo.html:54
+#: indicator/templates/filters/sci_prod_scielo.html:57
+#: scholarly_articles/models.py:238
 msgid "Publisher"
 msgstr ""
 
@@ -329,8 +342,15 @@ msgstr ""
 msgid "Source Institution"
 msgstr ""
 
-#: article/models.py:729 location/models.py:23 location/models.py:46
-#: location/models.py:56 scholarly_articles/models.py:391
+#: article/models.py:729 indicator/templates/filters/sci_prod_brazil.html:170
+#: indicator/templates/filters/sci_prod_brazil.html:173
+#: indicator/templates/filters/sci_prod_journal.html:41
+#: indicator/templates/filters/sci_prod_journal.html:42
+#: indicator/templates/filters/sci_prod_scielo.html:136
+#: indicator/templates/filters/sci_prod_scielo.html:139
+#: indicator/templates/filters/sci_prod_world.html:173
+#: indicator/templates/filters/sci_prod_world.html:176 location/models.py:23
+#: location/models.py:46 location/models.py:56 scholarly_articles/models.py:391
 #: search/templates/include/result_doc.html:32
 #: search/templates/include/result_doc_directory.html:52
 #: search/templates/include/result_doc_indicator.html:27
@@ -374,8 +394,10 @@ msgstr ""
 msgid "The license table have duplicity...."
 msgstr ""
 
-#: article/models.py:979 article/models.py:1139 scholarly_articles/models.py:18
-#: scholarly_articles/models.py:455 scholarly_articles/models.py:520
+#: article/models.py:979 article/models.py:1139
+#: indicator/templates/filters/sci_prod_journal.html:101
+#: scholarly_articles/models.py:18 scholarly_articles/models.py:455
+#: scholarly_articles/models.py:520
 #: search/templates/search/include/result_items/social_production.html:37
 msgid "Year"
 msgstr ""
@@ -387,7 +409,7 @@ msgstr ""
 
 #: article/models.py:981 article/models.py:1134 core_settings/models.py:114
 #: education_directory/models.py:59 event_directory/models.py:59
-#: indicator/models.py:108 infrastructure_directory/models.py:52
+#: indicator/models.py:108 infrastructure_directory/models.py:53
 #: journal/models.py:14 policy_directory/models.py:53
 #: scholarly_articles/models.py:15
 msgid "Title"
@@ -417,10 +439,12 @@ msgstr ""
 
 #: article/models.py:1136 provided_data/core.py:334
 #: scholarly_articles/models.py:16
+#: search/templates/search/include/result_items/world.html:42
 msgid "Volume"
 msgstr ""
 
-#: article/models.py:1137 provided_data/core.py:62
+#: article/models.py:1137 indicator/templates/filters/sci_prod_scielo.html:103
+#: indicator/templates/filters/sci_prod_world.html:108 provided_data/core.py:62
 #: search/templates/search/include/result_items/social_production.html:29
 msgid "Type"
 msgstr ""
@@ -503,15 +527,15 @@ msgstr ""
 #: core/templates/menus/menu_items_bottom.html:39
 #: core/templates/menus/menu_items_bottom.html:41
 msgid "Busca"
-msgstr ""
+msgstr "Search"
 
 #: config/settings/base.py:408
 msgid "Gráficos"
-msgstr ""
+msgstr "Charts"
 
 #: config/settings/base.py:411
 msgid "Comitê"
-msgstr ""
+msgstr "Committee"
 
 #: config/settings/base.py:413
 msgid "Notícias"
@@ -519,38 +543,38 @@ msgstr "News"
 
 #: config/settings/base.py:414
 msgid "Menu Secundário"
-msgstr ""
+msgstr "Secondary Menu"
 
 #: config/settings/base.py:415 core/templates/menus/menu_items_top.html:9
 msgid "Sobre"
-msgstr ""
+msgstr "About"
 
 #: config/settings/base.py:416
 #, fuzzy
 #| msgid "Sobre o Projeto"
 msgid "Sobre o OCABr"
-msgstr "About the project"
+msgstr "About OCABr"
 
 #: core/help_fields.py:9
 msgid ""
 "Título do item, veja exemplo em: <a href=\"https://github.com/scieloorg/scms-"
 "oca/wiki/Campos#title\" target=\"_blank\">https://github.com/scieloorg/scms-"
 "oca/wiki/Campos#title</a>"
-msgstr ""
+msgstr "Item title, see example at: <a href=\"https://github.com/scieloorg/scms-oca/wiki/Campos#title\" target=\"_blank\">https://github.com/scieloorg/scms-oca/wiki/Campos#title</a>"
 
 #: core/help_fields.py:11
 msgid ""
 "Link URL do item específico, veja exemplo em: <a href=\"https://github.com/"
 "scieloorg/scms-oca/wiki/Campos#link\" target=\"_blank\">https://github.com/"
 "scieloorg/scms-oca/wiki/Campos#link</a>"
-msgstr ""
+msgstr "Link URL of the specific item, see example at: <a href=\"https://github.com/scieloorg/scms-oca/wiki/Campos#link\" target=\"_blank\">https://github.com/scieloorg/scms-oca/wiki/Campos#link</a>"
 
 #: core/help_fields.py:13
 msgid ""
 "Descrição/representação do item, veja exemplo em: <a href=\"https://github."
 "com/scieloorg/scms-oca/wiki/Campos#descri%C3%A7%C3%A3o\" target=\"_blank"
 "\">https://github.com/scieloorg/scms-oca/wiki/Campos#descri%C3%A7%C3%A3o</a>"
-msgstr ""
+msgstr "Description/representation of the item, see example at: <a href=\"https://github.com/scieloorg/scms-oca/wiki/Campos#descri%C3%A7%C3%A3o\" target=\"_blank\">https://github.com/scieloorg/scms-oca/wiki/Campos#descri%C3%A7%C3%A3o</a>"
 
 #: core/help_fields.py:15
 msgid ""
@@ -558,7 +582,7 @@ msgid ""
 "instituição. Veja exemplo em: <a href=\"https://github.com/scieloorg/scms-"
 "oca/wiki/Campos#origem\" target=\"_blank\">https://github.com/scieloorg/scms-"
 "oca/wiki/Campos#origem</a>"
-msgstr ""
+msgstr "Institution to which the item is subordinated (when applicable). It is different from the institution. See example at: <a href=\"https://github.com/scieloorg/scms-oca/wiki/Campos#origem\" target=\"_blank\">https://github.com/scieloorg/scms-oca/wiki/Campos#origem</a>"
 
 #: core/help_fields.py:17
 msgid ""
@@ -566,7 +590,7 @@ msgid ""
 "href=\"https://github.com/scieloorg/scms-oca/wiki/Campos#institui"
 "%C3%A7%C3%A3o\" target=\"_blank\">https://github.com/scieloorg/scms-oca/wiki/"
 "Campos#institui%C3%A7%C3%A3o</a>"
-msgstr ""
+msgstr "Institution/company to which the registered item belongs. See example at: <a href=\"https://github.com/scieloorg/scms-oca/wiki/Campos#institui%C3%A7%C3%A3o\" target=\"_blank\">https://github.com/scieloorg/scms-oca/wiki/Campos#institui%C3%A7%C3%A3o</a>"
 
 #: core/help_fields.py:19
 msgid ""
@@ -574,14 +598,14 @@ msgid ""
 "href=\"https://github.com/scieloorg/scms-oca/wiki/Campos#%C3%A1rea-tem"
 "%C3%A1tica\" target=\"_blank\">https://github.com/scieloorg/scms-oca/wiki/"
 "Campos#%C3%A1rea-tem%C3%A1tica</a>"
-msgstr ""
+msgstr "Major knowledge area to which the item belongs. See example at: <a href=\"https://github.com/scieloorg/scms-oca/wiki/Campos#%C3%A1rea-tem%C3%A1tica\" target=\"_blank\">https://github.com/scieloorg/scms-oca/wiki/Campos#%C3%A1rea-tem%C3%A1tica</a>"
 
 #: core/help_fields.py:21
 msgid ""
 "Palavras-chaves do item. Veja exemplo em: <a href=\"https://github.com/"
 "scieloorg/scms-oca/wiki/Campos#palavras-chaves\" target=\"_blank\">https://"
 "github.com/scieloorg/scms-oca/wiki/Campos#palavras-chaves</a>"
-msgstr ""
+msgstr "Item keywords. See example at: <a href=\"https://github.com/scieloorg/scms-oca/wiki/Campos#palavras-chaves\" target=\"_blank\">https://github.com/scieloorg/scms-oca/wiki/Campos#palavras-chaves</a>"
 
 #: core/help_fields.py:23
 msgid ""
@@ -589,7 +613,7 @@ msgid ""
 "href=\"https://github.com/scieloorg/scms-oca/wiki/Campos#pr%C3%A1tica\" "
 "target=\"_blank\">https://github.com/scieloorg/scms-oca/wiki/Campos#pr"
 "%C3%A1tica</a>"
-msgstr ""
+msgstr "Open science practice related to the registered item. See example at: <a href=\"https://github.com/scieloorg/scms-oca/wiki/Campos#pr%C3%A1tica\" target=\"_blank\">https://github.com/scieloorg/scms-oca/wiki/Campos#pr%C3%A1tica</a>"
 
 #: core/help_fields.py:27
 msgid ""
@@ -597,21 +621,21 @@ msgid ""
 "\"https://github.com/scieloorg/scms-oca/wiki/Campos#classifica%C3%A7%C3%A3o"
 "\" target=\"_blank\">https://github.com/scieloorg/scms-oca/wiki/"
 "Campos#classifica%C3%A7%C3%A3o</a>"
-msgstr ""
+msgstr "Classification related to the registered item. See example at: <a href=\"https://github.com/scieloorg/scms-oca/wiki/Campos#classifica%C3%A7%C3%A3o\" target=\"_blank\">https://github.com/scieloorg/scms-oca/wiki/Campos#classifica%C3%A7%C3%A3o</a>"
 
 #: core/help_fields.py:29
 msgid ""
 "Status do registro no OCABR. Veja exemplo em: <a href=\"https://github.com/"
 "scieloorg/scms-oca/wiki/Campos#status\" target=\"_blank\">https://github.com/"
 "scieloorg/scms-oca/wiki/Campos#status</a>"
-msgstr ""
+msgstr "Record status in OCABR. See example at: <a href=\"https://github.com/scieloorg/scms-oca/wiki/Campos#status\" target=\"_blank\">https://github.com/scieloorg/scms-oca/wiki/Campos#status</a>"
 
 #: core/help_fields.py:31
 msgid ""
 "Anotações sobre o registro. Veja exemplo em: <a href=\"https://github.com/"
 "scieloorg/scms-oca/wiki/Campos#notes\" target=\"_blank\">https://github.com/"
 "scieloorg/scms-oca/wiki/Campos#notes</a>"
-msgstr ""
+msgstr "Notes about the record. See example at: <a href=\"https://github.com/scieloorg/scms-oca/wiki/Campos#notes\" target=\"_blank\">https://github.com/scieloorg/scms-oca/wiki/Campos#notes</a>"
 
 #: core/help_fields.py:33
 msgid ""
@@ -619,7 +643,7 @@ msgid ""
 "github.com/scieloorg/scms-oca/wiki/Campos#institui%C3%A7%C3%A3o-contribuidora"
 "\" target=\"_blank\">https://github.com/scieloorg/scms-oca/wiki/"
 "Campos#institui%C3%A7%C3%A3o-contribuidora</a>"
-msgstr ""
+msgstr "Name of the contributing institution. See example at: <a href=\"https://github.com/scieloorg/scms-oca/wiki/Campos#institui%C3%A7%C3%A3o-contribuidora\" target=\"_blank\">https://github.com/scieloorg/scms-oca/wiki/Campos#institui%C3%A7%C3%A3o-contribuidora</a>"
 
 #: core/models.py:23 indicator/models.py:819
 msgid "Creation date"
@@ -637,7 +661,11 @@ msgstr ""
 msgid "Updater"
 msgstr ""
 
-#: core/models.py:53 search_gateway/data_sources_with_settings.py:318
+#: core/models.py:53 indicator/templates/filters/sci_prod_brazil.html:50
+#: indicator/templates/filters/sci_prod_brazil.html:53
+#: indicator/templates/filters/sci_prod_world.html:54
+#: indicator/templates/filters/sci_prod_world.html:57
+#: search_gateway/data_sources_with_settings.py:318
 msgid "Source Name"
 msgstr ""
 
@@ -649,7 +677,8 @@ msgstr ""
 msgid "Language code 2"
 msgstr ""
 
-#: core/models.py:85 institution/models.py:403 provided_data/core.py:328
+#: core/models.py:85 indicator/templates/filters/sci_prod_scielo.html:110
+#: institution/models.py:403 provided_data/core.py:328
 msgid "Language"
 msgstr ""
 
@@ -909,68 +938,6 @@ msgid ""
 "mail address</a>."
 msgstr ""
 
-#: core/templates/graph/graph.html:30
-#: search/templates/indicator/indicator_detail.html:38
-#: search/templates/search.html:36
-msgid "Digite sua pesquisa..."
-msgstr ""
-
-#: core/templates/graph/graph.html:35
-#: search/templates/indicator/indicator_detail.html:43
-#: search/templates/search.html:41
-msgid "Buscar"
-msgstr ""
-
-#: core/templates/graph/graph.html:37
-#: search/templates/indicator/indicator_detail.html:45
-#: search/templates/search.html:43
-msgid "Help"
-msgstr ""
-
-#: core/templates/graph/graph.html:57 search/templates/search.html:63
-msgid "registros encontrados para o termo"
-msgstr ""
-
-#: core/templates/graph/graph.html:61 search/templates/search.html:67
-msgid "Tempo da pesquisa"
-msgstr ""
-
-#: core/templates/graph/graph.html:61 search/templates/search.html:67
-msgid "milisegundos"
-msgstr ""
-
-#: core/templates/graph/graph.html:64 search/templates/search.html:70
-msgid "0 registros encontrados para o termo"
-msgstr ""
-
-#: core/templates/graph/graph.html:92 search/templates/search.html:98
-msgid "Ordenar por"
-msgstr ""
-
-#: core/templates/graph/graph.html:94 search/templates/search.html:100
-msgid "Por âmbito geográfico"
-msgstr ""
-
-#: core/templates/graph/graph.html:95 search/templates/search.html:101
-msgid "Por âmbito temático"
-msgstr ""
-
-#: core/templates/graph/graph.html:96 search/templates/search.html:102
-msgid "Ordem descrecente de criação"
-msgstr ""
-
-#: core/templates/graph/graph.html:97 search/templates/search.html:103
-msgid "Relevância"
-msgstr ""
-
-#: core/templates/graph/graph.html:102 search/templates/search.html:108
-msgid "Visualizar"
-msgstr ""
-
-#: core/templates/graph/graph.html:110 search/templates/search.html:116
-msgid "Itens por página"
-msgstr ""
-
 #: core/templates/home/welcome_page.html:53
 #: core/templates/home/welcome_page.html:56
 msgid "View the release notes"
@@ -1016,29 +983,29 @@ msgstr ""
 #: core/templates/menus/menu_items_bottom.html:15 search/choices.py:22
 #: search/templates/include/result_doc_indicator.html:14
 msgid "Indicadores"
-msgstr ""
+msgstr "Indicators"
 
 #: core/templates/menus/menu_items_bottom.html:22
 #: core/templates/menus/menu_items_bottom.html:26
 #: core/templates/menus/menu_items_bottom.html:30
 msgid "Observação"
-msgstr ""
+msgstr "Observation"
 
 #: core/templates/menus/menu_items_top.html:14
 msgid "Produção Científica"
-msgstr ""
+msgstr "Scientific Production"
 
 #: core/templates/menus/menu_items_top.html:19
 msgid "Produção Social"
-msgstr ""
+msgstr "Social Production"
 
 #: core/templates/wagtailadmin/home.html:7
 msgid "Welcome to the administrative area of "
-msgstr "Bem vindo a área administritiva do "
+msgstr "Welcome to the administrative area of "
 
 #: core/templates/wagtailadmin/login.html:9
 msgid "Administrative area of "
-msgstr "Área administrativa do "
+msgstr "Administrative area of "
 
 #: core/users/admin.py:17
 msgid "Personal info"
@@ -1074,27 +1041,27 @@ msgstr ""
 
 #: core_settings/choices.py:5
 msgid "Indicatores"
-msgstr ""
+msgstr "Indicators"
 
 #: core_settings/choices.py:6
 msgid "Diretório de Educação"
-msgstr ""
+msgstr "Education Directory"
 
 #: core_settings/choices.py:7
 msgid "Diretório de Divulgação"
-msgstr ""
+msgstr "Dissemination Directory"
 
 #: core_settings/choices.py:8
 msgid "Diretório de Infraestrutura"
-msgstr ""
+msgstr "Infrastructure Directory"
 
 #: core_settings/choices.py:9
 msgid "Diretório de Política"
-msgstr ""
+msgstr "Policy Directory"
 
 #: core_settings/models.py:27 core_settings/models.py:28
 msgid "Configuração do site"
-msgstr ""
+msgstr "Site settings"
 
 #: core_settings/models.py:81 core_settings/models.py:88
 #: core_settings/models.py:158
@@ -1119,7 +1086,7 @@ msgstr ""
 
 #: core_settings/models.py:137
 msgid "Grupo Moderator"
-msgstr ""
+msgstr "Moderator Group"
 
 #: core_settings/models.py:147
 msgid "Send e-mail to moderator(s)"
@@ -1148,27 +1115,27 @@ msgstr ""
 #: education_directory/choices.py:5 search/choices.py:31
 #: usefulmodels/choices.py:105
 msgid "curso livre"
-msgstr ""
+msgstr "free course"
 
 #: education_directory/choices.py:6 search/choices.py:32
 #: usefulmodels/choices.py:106
 msgid "disciplina de graduação"
-msgstr ""
+msgstr "undergraduate course"
 
 #: education_directory/choices.py:7 search/choices.py:33
 #: usefulmodels/choices.py:107
 msgid "disciplina de lato sensu"
-msgstr ""
+msgstr "lato sensu course"
 
 #: education_directory/choices.py:8 search/choices.py:34
 #: usefulmodels/choices.py:108
 msgid "disciplina de stricto sensu"
-msgstr ""
+msgstr "stricto sensu course"
 
 #: education_directory/choices.py:9 event_directory/choices.py:18
 #: institution/choices.py:21 search/choices.py:40 usefulmodels/choices.py:114
 msgid "outros"
-msgstr ""
+msgstr "others"
 
 #: education_directory/choices.py:15 event_directory/choices.py:24
 #: indicator/choices.py:19 infrastructure_directory/choices.py:20
@@ -1291,13 +1258,13 @@ msgid "Can edit notes"
 msgstr ""
 
 #: education_directory/models.py:66 event_directory/models.py:66
-#: indicator/models.py:153 infrastructure_directory/models.py:60
+#: indicator/models.py:153 infrastructure_directory/models.py:61
 #: policy_directory/models.py:60
 msgid "Link"
 msgstr ""
 
 #: education_directory/models.py:69 event_directory/models.py:69
-#: indicator/models.py:110 infrastructure_directory/models.py:63
+#: indicator/models.py:110 infrastructure_directory/models.py:64
 #: policy_directory/models.py:63
 msgid "Description"
 msgstr ""
@@ -1329,7 +1296,16 @@ msgid "Location"
 msgstr ""
 
 #: education_directory/models.py:89 indicator/models.py:147
-#: infrastructure_directory/models.py:72 institution/wagtail_hooks.py:22
+#: indicator/templates/filters/sci_prod_brazil.html:158
+#: indicator/templates/filters/sci_prod_brazil.html:159
+#: indicator/templates/filters/sci_prod_scielo.html:131
+#: indicator/templates/filters/sci_prod_scielo.html:132
+#: indicator/templates/filters/sci_prod_world.html:161
+#: indicator/templates/filters/sci_prod_world.html:162
+#: indicator/templates/filters/soc_prod.html:13
+#: indicator/templates/filters/soc_prod.html:70
+#: indicator/templates/filters/soc_prod.html:71
+#: infrastructure_directory/models.py:73 institution/wagtail_hooks.py:22
 #: policy_directory/models.py:73
 #: search_gateway/data_sources_with_settings.py:247
 #: search_gateway/data_sources_with_settings.py:915
@@ -1337,7 +1313,10 @@ msgid "Institution"
 msgstr ""
 
 #: education_directory/models.py:102 event_directory/models.py:102
-#: infrastructure_directory/models.py:85 policy_directory/models.py:86
+#: indicator/templates/filters/soc_prod.html:12
+#: indicator/templates/filters/soc_prod.html:64
+#: indicator/templates/filters/soc_prod.html:65
+#: infrastructure_directory/models.py:86 policy_directory/models.py:86
 #: search/templates/include/result_doc_directory.html:69
 #: search/templates/include/result_doc_indicator.html:48
 #: search/templates/search/include/result_items/social_production.html:90
@@ -1347,7 +1326,10 @@ msgid "Practice"
 msgstr ""
 
 #: education_directory/models.py:111 event_directory/models.py:111
-#: infrastructure_directory/models.py:94 policy_directory/models.py:95
+#: indicator/templates/filters/soc_prod.html:10
+#: indicator/templates/filters/soc_prod.html:52
+#: indicator/templates/filters/soc_prod.html:53
+#: infrastructure_directory/models.py:95 policy_directory/models.py:95
 #: search/templates/include/result_doc_directory.html:70
 #: search/templates/include/result_doc_indicator.html:47
 #: search/templates/search/include/result_items/social_production.html:98
@@ -1357,7 +1339,10 @@ msgid "Action"
 msgstr ""
 
 #: education_directory/models.py:119 event_directory/models.py:119
-#: infrastructure_directory/models.py:103 policy_directory/models.py:104
+#: indicator/templates/filters/soc_prod.html:11
+#: indicator/templates/filters/soc_prod.html:58
+#: indicator/templates/filters/soc_prod.html:59
+#: infrastructure_directory/models.py:104 policy_directory/models.py:104
 #: search/templates/include/result_doc_indicator.html:39
 #: search/templates/search/include/result_items/social_production.html:106
 #: search_gateway/data_sources_with_settings.py:885 usefulmodels/models.py:472
@@ -1365,7 +1350,7 @@ msgid "Classification"
 msgstr ""
 
 #: education_directory/models.py:128 event_directory/models.py:127
-#: indicator/models.py:161 infrastructure_directory/models.py:112
+#: indicator/models.py:161 infrastructure_directory/models.py:113
 #: policy_directory/models.py:113 provided_data/core.py:314
 msgid "Keywords"
 msgstr ""
@@ -1375,19 +1360,19 @@ msgid "Attendance"
 msgstr ""
 
 #: education_directory/models.py:140 event_directory/models.py:139
-#: indicator/models.py:164 infrastructure_directory/models.py:116
+#: indicator/models.py:164 infrastructure_directory/models.py:117
 #: policy_directory/models.py:117
 msgid "Record status"
 msgstr ""
 
 #: education_directory/models.py:157 event_directory/models.py:156
-#: indicator/models.py:192 infrastructure_directory/models.py:133
+#: indicator/models.py:192 infrastructure_directory/models.py:134
 #: policy_directory/models.py:134
 msgid "Institutional Contribution"
 msgstr ""
 
 #: education_directory/models.py:164 event_directory/models.py:163
-#: indicator/models.py:198 infrastructure_directory/models.py:140
+#: indicator/models.py:198 infrastructure_directory/models.py:141
 #: policy_directory/models.py:141
 msgid "Notes"
 msgstr ""
@@ -1397,17 +1382,17 @@ msgid "Education Data Upload"
 msgstr ""
 
 #: education_directory/models.py:408 event_directory/models.py:395
-#: infrastructure_directory/models.py:349 policy_directory/models.py:356
+#: infrastructure_directory/models.py:359 policy_directory/models.py:356
 msgid "Attachement"
 msgstr ""
 
 #: education_directory/models.py:414 event_directory/models.py:401
-#: infrastructure_directory/models.py:355 policy_directory/models.py:362
+#: infrastructure_directory/models.py:365 policy_directory/models.py:362
 msgid "Is valid?"
 msgstr ""
 
 #: education_directory/models.py:416 event_directory/models.py:403
-#: infrastructure_directory/models.py:357 policy_directory/models.py:364
+#: infrastructure_directory/models.py:367 policy_directory/models.py:364
 msgid "Number of lines"
 msgstr ""
 
@@ -1421,7 +1406,7 @@ msgstr ""
 #: policy_directory/search_indexes.py:185
 #, python-format
 msgid "Conteúdo publicado sem moderação / contribuição de %s"
-msgstr ""
+msgstr "Content published without moderation / contribution from %s"
 
 #: education_directory/templates/modeladmin/education_directory/educationdirectory/create.html:8
 #: event_directory/templates/modeladmin/event_directory/eventdirectory/create.html:8
@@ -1451,18 +1436,20 @@ msgstr ""
 #: policy_directory/views.py:95
 #, python-format
 msgid "Novo conteúdo para moderação - %s"
-msgstr ""
+msgstr "New content for moderation - %s"
 
 #: education_directory/views.py:163 event_directory/views.py:161
 #: infrastructure_directory/views.py:162 policy_directory/views.py:165
 msgid "Valication error"
-msgstr ""
+msgstr "Validation error"
 
+#: education_directory/views.py:170 event_directory/views.py:168
+#: infrastructure_directory/views.py:169 policy_directory/views
 #: education_directory/views.py:170 event_directory/views.py:168
 #: infrastructure_directory/views.py:169 policy_directory/views.py:172
 #, python-format
 msgid "Valication error: %s"
-msgstr ""
+msgstr "Validation error: %s"
 
 #: education_directory/views.py:172 event_directory/views.py:170
 #: infrastructure_directory/views.py:171 policy_directory/views.py:174
@@ -1489,27 +1476,27 @@ msgstr ""
 #: event_directory/choices.py:13 search/choices.py:35
 #: usefulmodels/choices.py:109
 msgid "encontro"
-msgstr ""
+msgstr "meeting"
 
 #: event_directory/choices.py:14 search/choices.py:36
 #: usefulmodels/choices.py:110
 msgid "conferência"
-msgstr ""
+msgstr "conference"
 
 #: event_directory/choices.py:15 search/choices.py:37
 #: usefulmodels/choices.py:111
 msgid "congresso"
-msgstr ""
+msgstr "congress"
 
 #: event_directory/choices.py:16 search/choices.py:38
 #: usefulmodels/choices.py:112
 msgid "workshop"
-msgstr ""
+msgstr "workshop"
 
 #: event_directory/choices.py:17 search/choices.py:39
 #: usefulmodels/choices.py:113
 msgid "seminário"
-msgstr ""
+msgstr "seminar"
 
 #: event_directory/models.py:31 event_directory/models.py:32
 #: event_directory/wagtail_hooks.py:20 event_directory/wagtail_hooks.py:82
@@ -1518,11 +1505,11 @@ msgstr ""
 
 #: event_directory/models.py:89
 msgid "Instituição"
-msgstr ""
+msgstr "Institution"
 
 #: event_directory/models.py:91
 msgid "Instituições responsáveis pela organização do evento."
-msgstr ""
+msgstr "Institutions responsible for organizing the event."
 
 #: event_directory/models.py:391 event_directory/wagtail_hooks.py:64
 msgid "Dissemination Data Upload"
@@ -1575,83 +1562,83 @@ msgstr ""
 
 #: indicator/choices.py:85 search/choices.py:55
 msgid "Geral"
-msgstr ""
+msgstr "General"
 
 #: indicator/choices.py:86 search/choices.py:56
 msgid "Instituticional"
-msgstr ""
+msgstr "Institutional"
 
 #: indicator/choices.py:87 search/choices.py:57
 msgid "Geográfico"
-msgstr ""
+msgstr "Geographic"
 
 #: indicator/choices.py:88 search/choices.py:58
 msgid "Cronológico"
-msgstr ""
+msgstr "Chronological"
 
 #: indicator/choices.py:89 search/choices.py:59
 msgid "Temático"
-msgstr ""
+msgstr "Thematic"
 
 #: indicator/choices.py:99 search/choices.py:51
 msgid "Frequência"
-msgstr ""
+msgstr "Frequency"
 
 #: indicator/choices.py:100 search/choices.py:52
 msgid "Evolução"
-msgstr ""
+msgstr "Evolution"
 
 #: indicator/choices.py:101 search/choices.py:53
 msgid "Média"
-msgstr ""
+msgstr "Average"
 
 #: indicator/choices.py:102 search/choices.py:54
 msgid "Frequência relativa"
-msgstr ""
+msgstr "Relative frequency"
 
 #: indicator/directory.py:53
 msgid "prática"
-msgstr ""
+msgstr "practice"
 
 #: indicator/directory.py:54
 msgid "qualificação"
-msgstr ""
+msgstr "qualification"
 
 #: indicator/directory.py:55 indicator/sciprod.py:49
 msgid "instituição"
-msgstr ""
+msgstr "institution"
 
 #: indicator/directory.py:56 indicator/directory.py:57 indicator/sciprod.py:50
 #: indicator/sciprod.py:51
 msgid "área temática"
-msgstr ""
+msgstr "thematic area"
 
 #: indicator/directory.py:58 indicator/sciprod.py:52
 msgid "UF"
-msgstr ""
+msgstr "State"
 
 #: indicator/directory.py:59 indicator/sciprod.py:53 search/choices.py:18
 msgid "região"
-msgstr ""
+msgstr "region"
 
 #: indicator/directory.py:438 indicator/sciprod.py:371
 msgid "Brasil"
-msgstr ""
+msgstr "Brazil"
 
 #: indicator/directory.py:444
 msgid "ações de {}"
-msgstr ""
+msgstr "actions of {}"
 
 #: indicator/directory.py:485
 #, python-brace-format
 msgid ""
 "Gerado automaticamente usando dados coletados e registrados manualmente por "
 "{contribution}"
-msgstr ""
+msgstr "Automatically generated using data collected and manually recorded by {contribution}"
 
 #: indicator/directory.py:612
 msgid "Geração de indicadores de ações"
-msgstr ""
+msgstr "Generation of action indicators"
 
 #: indicator/models.py:41
 msgid "File name"
@@ -1663,7 +1650,7 @@ msgstr ""
 
 #: indicator/models.py:43
 msgid "Descrição"
-msgstr ""
+msgstr "Description"
 
 #: indicator/models.py:44
 msgid "JSONL Zip File"
@@ -1693,7 +1680,7 @@ msgstr ""
 msgid "Indicator File"
 msgstr ""
 
-#: indicator/models.py:173
+#: indicator/models.py:173 indicator/templates/scope.html:4
 msgid "Scope"
 msgstr ""
 
@@ -1711,11 +1698,11 @@ msgstr ""
 
 #: indicator/models.py:183 search/choices.py:25
 msgid "Categoria"
-msgstr ""
+msgstr "Category"
 
 #: indicator/models.py:184
 msgid "Contexto"
-msgstr ""
+msgstr "Context"
 
 #: indicator/models.py:187
 msgid "Link to graphic"
@@ -1791,19 +1778,19 @@ msgstr ""
 
 #: indicator/models.py:441
 msgid "Número"
-msgstr ""
+msgstr "Number"
 
 #: indicator/models.py:442
 msgid "Evolução do número"
-msgstr ""
+msgstr "Number evolution"
 
 #: indicator/models.py:444
 msgid "de"
-msgstr ""
+msgstr "of"
 
 #: indicator/models.py:562
 msgid "por"
-msgstr ""
+msgstr "by"
 
 #: indicator/models.py:807
 msgid "Data Type"
@@ -1812,7 +1799,7 @@ msgstr ""
 #: indicator/scheduler.py:52
 #, python-format
 msgid "Agendado %s %s às %s:%s prioridade: %s"
-msgstr ""
+msgstr "Scheduled %s %s at %s:%s priority: %s"
 
 #: indicator/scheduler.py:80
 msgid "Unable to get_or_create_crontab_schedule {} {} {} {} {}"
@@ -1820,28 +1807,28 @@ msgstr ""
 
 #: indicator/sciprod.py:47
 msgid "licença de uso"
-msgstr ""
+msgstr "use license"
 
 #: indicator/sciprod.py:48
 msgid "status de acesso aberto"
-msgstr ""
+msgstr "open access status"
 
 #: indicator/sciprod.py:54
 msgid "APC"
-msgstr ""
+msgstr "APC"
 
 #: indicator/sciprod.py:380
 msgid "artigos científicos"
-msgstr ""
+msgstr "scientific articles"
 
 #: indicator/sciprod.py:412
 #, python-brace-format
 msgid "Gerado automaticamente usando dados provenientes de {sources}"
-msgstr ""
+msgstr "Automatically generated using data from {sources}"
 
 #: indicator/sciprod.py:589
 msgid "Geração de indicadores de artigos científicos"
-msgstr ""
+msgstr "Generation of scientific article indicators"
 
 #: indicator/tasks.py:41
 msgid "Generate scientific indicator"
@@ -1860,7 +1847,547 @@ msgid "Generate data from OA(OpenAlex) Count Countries"
 msgstr ""
 
 #: indicator/templates/admin/graph.html:59 search/choices.py:66
+#: search/templates/search/search_page.html:92
 msgid "Ano"
+msgstr "Year"
+
+#: indicator/templates/filters/sci_prod_brazil.html:4
+#: indicator/templates/filters/sci_prod_scielo.html:4
+#: indicator/templates/filters/sci_prod_world.html:4
+#: indicator/templates/filters/soc_prod.html:3
+msgid "Graph Options"
+msgstr ""
+
+#: indicator/templates/filters/sci_prod_brazil.html:7
+#: indicator/templates/filters/sci_prod_scielo.html:7
+#: indicator/templates/filters/sci_prod_world.html:9
+#: indicator/templates/filters/soc_prod.html:6
+msgid "Breakdown Variable"
+msgstr ""
+
+#: indicator/templates/filters/sci_prod_brazil.html:10
+#: indicator/templates/filters/sci_prod_brazil.html:32
+#: indicator/templates/filters/sci_prod_brazil.html:33
+#: indicator/templates/filters/sci_prod_world.html:12
+#: indicator/templates/filters/sci_prod_world.html:36
+#: indicator/templates/filters/sci_prod_world.html:37
+#: search_gateway/data_sources_with_settings.py:42
+msgid "Source Index (OpenAlex)"
+msgstr ""
+
+#: indicator/templates/filters/sci_prod_brazil.html:11
+#: indicator/templates/filters/sci_prod_brazil.html:38
+#: indicator/templates/filters/sci_prod_brazil.html:39
+#: indicator/templates/filters/sci_prod_world.html:13
+#: indicator/templates/filters/sci_prod_world.html:42
+#: indicator/templates/filters/sci_prod_world.html:43
+#: search_gateway/data_sources_with_settings.py:53
+msgid "Source Index (SciELO)"
+msgstr ""
+
+#: indicator/templates/filters/sci_prod_brazil.html:12
+#: indicator/templates/filters/sci_prod_brazil.html:44
+#: indicator/templates/filters/sci_prod_brazil.html:45
+#: indicator/templates/filters/sci_prod_world.html:14
+#: indicator/templates/filters/sci_prod_world.html:48
+#: indicator/templates/filters/sci_prod_world.html:49
+#: search_gateway/data_sources_with_settings.py:67
+msgid "Source Type"
+msgstr ""
+
+#: indicator/templates/filters/sci_prod_brazil.html:13
+#: indicator/templates/filters/sci_prod_brazil.html:104
+#: indicator/templates/filters/sci_prod_brazil.html:105
+#: indicator/templates/filters/sci_prod_scielo.html:102
+#: indicator/templates/filters/sci_prod_world.html:15
+#: indicator/templates/filters/sci_prod_world.html:107
+#: search_gateway/data_sources_with_settings.py:111
+msgid "Document Type"
+msgstr ""
+
+#: indicator/templates/filters/sci_prod_brazil.html:14
+#: indicator/templates/filters/sci_prod_brazil.html:109
+#: indicator/templates/filters/sci_prod_brazil.html:112
+#: indicator/templates/filters/sci_prod_scielo.html:11
+#: indicator/templates/filters/sci_prod_scielo.html:107
+#: indicator/templates/filters/sci_prod_world.html:16
+#: indicator/templates/filters/sci_prod_world.html:112
+#: indicator/templates/filters/sci_prod_world.html:115
+#: search_gateway/data_sources_with_settings.py:96
+msgid "Document Language"
+msgstr ""
+
+#: indicator/templates/filters/sci_prod_brazil.html:15
+#: indicator/templates/filters/sci_prod_brazil.html:121
+#: indicator/templates/filters/sci_prod_brazil.html:122
+#: indicator/templates/filters/sci_prod_world.html:17
+#: indicator/templates/filters/sci_prod_world.html:124
+#: indicator/templates/filters/sci_prod_world.html:125
+#: search_gateway/data_sources_with_settings.py:128
+msgid "Open Access"
+msgstr ""
+
+#: indicator/templates/filters/sci_prod_brazil.html:16
+#: indicator/templates/filters/sci_prod_brazil.html:130
+#: indicator/templates/filters/sci_prod_brazil.html:131
+#: indicator/templates/filters/sci_prod_scielo.html:12
+#: indicator/templates/filters/sci_prod_scielo.html:122
+#: indicator/templates/filters/sci_prod_scielo.html:123
+#: indicator/templates/filters/sci_prod_world.html:18
+#: indicator/templates/filters/sci_prod_world.html:133
+#: indicator/templates/filters/sci_prod_world.html:134
+#: search_gateway/data_sources_with_settings.py:82
+msgid "Access Type"
+msgstr ""
+
+#: indicator/templates/filters/sci_prod_brazil.html:17
+#: indicator/templates/filters/sci_prod_brazil.html:136
+#: indicator/templates/filters/sci_prod_brazil.html:137
+#: indicator/templates/filters/sci_prod_world.html:19
+#: indicator/templates/filters/sci_prod_world.html:139
+#: indicator/templates/filters/sci_prod_world.html:140
+#: search_gateway/data_sources_with_settings.py:204
+msgid "Subject Area Level 0"
+msgstr ""
+
+#: indicator/templates/filters/sci_prod_brazil.html:18
+#: indicator/templates/filters/sci_prod_brazil.html:142
+#: indicator/templates/filters/sci_prod_brazil.html:143
+#: indicator/templates/filters/sci_prod_world.html:20
+#: indicator/templates/filters/sci_prod_world.html:145
+#: indicator/templates/filters/sci_prod_world.html:146
+#: search_gateway/data_sources_with_settings.py:218
+msgid "Subject Area Level 1"
+msgstr ""
+
+#: indicator/templates/filters/sci_prod_brazil.html:19
+#: indicator/templates/filters/sci_prod_brazil.html:148
+#: indicator/templates/filters/sci_prod_brazil.html:149
+#: indicator/templates/filters/sci_prod_world.html:21
+#: indicator/templates/filters/sci_prod_world.html:151
+#: indicator/templates/filters/sci_prod_world.html:152
+#: search_gateway/data_sources_with_settings.py:232
+msgid "Subject Area Level 2"
+msgstr ""
+
+#: indicator/templates/filters/sci_prod_brazil.html:20
+#: indicator/templates/filters/sci_prod_world.html:22
+msgid "Author Affiliation - Region (World)"
+msgstr ""
+
+#: indicator/templates/filters/sci_prod_brazil.html:25
+#: indicator/templates/filters/sci_prod_journal.html:3
+#: indicator/templates/filters/sci_prod_scielo.html:17
+#: indicator/templates/filters/sci_prod_world.html:29
+#: indicator/templates/filters/soc_prod.html:19
+#: search/templates/search/include/filters.html:4
+msgid "Filters"
+msgstr ""
+
+#: indicator/templates/filters/sci_prod_brazil.html:55
+#: indicator/templates/filters/sci_prod_brazil.html:65
+#: indicator/templates/filters/sci_prod_brazil.html:116
+#: indicator/templates/filters/sci_prod_scielo.html:49
+#: indicator/templates/filters/sci_prod_scielo.html:59
+#: indicator/templates/filters/sci_prod_scielo.html:69
+#: indicator/templates/filters/sci_prod_world.html:59
+#: indicator/templates/filters/sci_prod_world.html:69
+#: indicator/templates/filters/sci_prod_world.html:119
+msgid "Click to activate not operator"
+msgstr ""
+
+#: indicator/templates/filters/sci_prod_brazil.html:60
+#: indicator/templates/filters/sci_prod_brazil.html:63
+#: indicator/templates/filters/sci_prod_world.html:64
+#: indicator/templates/filters/sci_prod_world.html:67
+#: search_gateway/data_sources_with_settings.py:304
+msgid "Source Country"
+msgstr ""
+
+#: indicator/templates/filters/sci_prod_brazil.html:70
+#: indicator/templates/filters/sci_prod_brazil.html:71
+#: indicator/templates/filters/sci_prod_journal.html:11
+#: indicator/templates/filters/sci_prod_journal.html:12
+#: indicator/templates/filters/sci_prod_world.html:74
+#: indicator/templates/filters/sci_prod_world.html:75
+#: indicator/templates/ranking.html:29 journal/models.py:11
+#: search_gateway/data_sources_with_settings.py:332
+msgid "ISSN"
+msgstr ""
+
+#: indicator/templates/filters/sci_prod_brazil.html:75
+#: indicator/templates/filters/sci_prod_scielo.html:74
+#: indicator/templates/filters/sci_prod_world.html:79
+#: indicator/templates/scope.html:21 search_gateway/filters.py:10
+msgid "Document"
+msgstr ""
+
+#: indicator/templates/filters/sci_prod_brazil.html:79
+#: indicator/templates/filters/sci_prod_scielo.html:78
+#: indicator/templates/filters/sci_prod_world.html:83
+#: indicator/templates/filters/soc_prod.html:22
+#: search_gateway/data_sources_with_settings.py:144
+#: search_gateway/data_sources_with_settings.py:406
+msgid "Publication Year"
+msgstr ""
+
+#: indicator/templates/filters/sci_prod_brazil.html:86
+#: indicator/templates/filters/sci_prod_scielo.html:85
+#: indicator/templates/filters/sci_prod_world.html:90
+#: indicator/templates/filters/soc_prod.html:29
+msgid "Publication Year Start"
+msgstr ""
+
+#: indicator/templates/filters/sci_prod_brazil.html:87
+#: indicator/templates/filters/sci_prod_scielo.html:86
+#: indicator/templates/filters/sci_prod_world.html:91
+#: indicator/templates/filters/soc_prod.html:30
+#: search/templates/search/include/filters/range.html:11
+msgid "Start"
+msgstr ""
+
+#: indicator/templates/filters/sci_prod_brazil.html:95
+#: indicator/templates/filters/sci_prod_scielo.html:94
+#: indicator/templates/filters/sci_prod_world.html:99
+#: indicator/templates/filters/soc_prod.html:38
+msgid "Publication Year End"
+msgstr ""
+
+#: indicator/templates/filters/sci_prod_brazil.html:96
+#: indicator/templates/filters/sci_prod_scielo.html:95
+#: indicator/templates/filters/sci_prod_world.html:100
+#: indicator/templates/filters/soc_prod.html:39
+#: search/templates/search/include/filters/range.html:23
+msgid "End"
+msgstr ""
+
+#: indicator/templates/filters/sci_prod_brazil.html:154
+#: indicator/templates/filters/sci_prod_scielo.html:127
+#: indicator/templates/filters/sci_prod_world.html:157
+#: search_gateway/filters.py:15
+msgid "Author Affiliation"
+msgstr ""
+
+#: indicator/templates/filters/sci_prod_brazil.html:164
+#: indicator/templates/filters/sci_prod_brazil.html:165
+#: indicator/templates/filters/sci_prod_world.html:167
+#: indicator/templates/filters/sci_prod_world.html:168
+#: search_gateway/data_sources_with_settings.py:276
+msgid "Region (World)"
+msgstr ""
+
+#: indicator/templates/filters/sci_prod_brazil.html:176
+#: indicator/templates/filters/sci_prod_scielo.html:142
+#: indicator/templates/filters/sci_prod_world.html:179
+msgid "Country Query Operator"
+msgstr ""
+
+#: indicator/templates/filters/sci_prod_journal.html:16
+#: indicator/templates/filters/sci_prod_journal.html:17
+msgid "Source Index"
+msgstr ""
+
+#: indicator/templates/filters/sci_prod_journal.html:31
+#: indicator/templates/filters/sci_prod_journal.html:32
+#: search/templates/include/result_doc.html:33
+#: search/templates/include/result_doc_directory.html:55
+#: search/templates/include/result_doc_indicator.html:30
+#: usefulmodels/models.py:95
+msgid "Region"
+msgstr ""
+
+#: indicator/templates/filters/sci_prod_journal.html:51
+#: indicator/templates/filters/sci_prod_journal.html:56
+msgid "Year Founded"
+msgstr ""
+
+#: indicator/templates/filters/sci_prod_journal.html:59
+msgid "Select a Year"
+msgstr ""
+
+#: indicator/templates/filters/sci_prod_journal.html:64
+msgid "SciELO"
+msgstr ""
+
+#: indicator/templates/filters/sci_prod_journal.html:68
+#: indicator/templates/filters/sci_prod_journal.html:69
+msgid "Is SciELO"
+msgstr ""
+
+#: indicator/templates/filters/sci_prod_journal.html:70
+#: indicator/templates/filters/sci_prod_journal.html:116
+#: indicator/templates/filters/sci_prod_journal.html:127
+msgid "Select an option"
+msgstr ""
+
+#: indicator/templates/filters/sci_prod_journal.html:77
+#: indicator/templates/filters/sci_prod_scielo.html:10
+#: indicator/templates/filters/sci_prod_scielo.html:20
+#: indicator/templates/filters/sci_prod_scielo.html:23
+msgid "Collection"
+msgstr ""
+
+#: indicator/templates/filters/sci_prod_journal.html:78
+msgid "Collection (SciELO)"
+msgstr ""
+
+#: indicator/templates/filters/sci_prod_journal.html:97
+msgid "Metrics"
+msgstr ""
+
+#: indicator/templates/filters/sci_prod_journal.html:106
+#: indicator/templates/filters/sci_prod_journal.html:109
+msgid "Metric Year"
+msgstr ""
+
+#: indicator/templates/filters/sci_prod_journal.html:114
+#: indicator/templates/filters/sci_prod_journal.html:115
+msgid "Scimago Best Quartile"
+msgstr ""
+
+#: indicator/templates/filters/sci_prod_journal.html:125
+#: indicator/templates/filters/sci_prod_journal.html:126
+msgid "OpenAlex Total Docs 2024 > 5"
+msgstr ""
+
+#: indicator/templates/filters/sci_prod_journal.html:134
+#: indicator/templates/filters/sci_prod_journal.html:135
+msgid "Ranking metric"
+msgstr ""
+
+#: indicator/templates/filters/sci_prod_journal.html:139
+msgid "Citations / Doc. (2 years)"
+msgstr ""
+
+#: indicator/templates/filters/sci_prod_journal.html:140
+msgid "Estimated APC (USD)"
+msgstr ""
+
+#: indicator/templates/filters/sci_prod_journal.html:141
+msgid "Estimated Value (USD)"
+msgstr ""
+
+#: indicator/templates/filters/sci_prod_journal.html:142
+#, python-format
+msgid "%% Female"
+msgstr ""
+
+#: indicator/templates/filters/sci_prod_journal.html:143
+msgid "Overton"
+msgstr ""
+
+#: indicator/templates/filters/sci_prod_journal.html:144
+msgid "SDG"
+msgstr ""
+
+#: indicator/templates/filters/sci_prod_journal.html:145
+msgid "SJR"
+msgstr ""
+
+#: indicator/templates/filters/sci_prod_journal.html:146
+msgid "Total Citations (3 years)"
+msgstr ""
+
+#: indicator/templates/filters/sci_prod_journal.html:147
+msgid "Total Docs"
+msgstr ""
+
+#: indicator/templates/filters/sci_prod_journal.html:153
+#: indicator/templates/filters/sci_prod_journal.html:154
+msgid "Number of results"
+msgstr ""
+
+#: indicator/templates/filters/sci_prod_scielo.html:25
+msgid "Argentina"
+msgstr ""
+
+#: indicator/templates/filters/sci_prod_scielo.html:26
+msgid "Bolivia"
+msgstr ""
+
+#: indicator/templates/filters/sci_prod_scielo.html:27
+#: indicator/templates/scope.html:11
+msgid "Brazil"
+msgstr ""
+
+#: indicator/templates/filters/sci_prod_scielo.html:28
+msgid "Chile"
+msgstr ""
+
+#: indicator/templates/filters/sci_prod_scielo.html:29
+msgid "Colombia"
+msgstr ""
+
+#: indicator/templates/filters/sci_prod_scielo.html:30
+msgid "Costa Rica"
+msgstr ""
+
+#: indicator/templates/filters/sci_prod_scielo.html:31
+msgid "Cuba"
+msgstr ""
+
+#: indicator/templates/filters/sci_prod_scielo.html:32
+msgid "Dominican Republic"
+msgstr ""
+
+#: indicator/templates/filters/sci_prod_scielo.html:33
+msgid "Ecuador"
+msgstr ""
+
+#: indicator/templates/filters/sci_prod_scielo.html:34
+msgid "Mexico"
+msgstr ""
+
+#: indicator/templates/filters/sci_prod_scielo.html:35
+msgid "Peru"
+msgstr ""
+
+#: indicator/templates/filters/sci_prod_scielo.html:36
+msgid "Portugal"
+msgstr ""
+
+#: indicator/templates/filters/sci_prod_scielo.html:37
+msgid "Paraguay"
+msgstr ""
+
+#: indicator/templates/filters/sci_prod_scielo.html:38
+msgid "Spain"
+msgstr ""
+
+#: indicator/templates/filters/sci_prod_scielo.html:39
+msgid "South Africa"
+msgstr ""
+
+#: indicator/templates/filters/sci_prod_scielo.html:40
+msgid "Uruguay"
+msgstr ""
+
+#: indicator/templates/filters/sci_prod_scielo.html:41
+msgid "Venezuela"
+msgstr ""
+
+#: indicator/templates/filters/sci_prod_scielo.html:42
+msgid "West Indies"
+msgstr ""
+
+#: indicator/templates/filters/sci_prod_scielo.html:43
+msgid "Science and Culture"
+msgstr ""
+
+#: indicator/templates/filters/sci_prod_scielo.html:44
+msgid "PEPSIC"
+msgstr ""
+
+#: indicator/templates/filters/sci_prod_scielo.html:45
+msgid "Public Health"
+msgstr ""
+
+#: indicator/templates/filters/sci_prod_scielo.html:46
+msgid "REVENF"
+msgstr ""
+
+#: indicator/templates/filters/sci_prod_scielo.html:113
+msgid "Language Query Operator"
+msgstr ""
+
+#: indicator/templates/filters/soc_prod.html:8
+msgid "Select a variable"
+msgstr ""
+
+#: indicator/templates/filters/soc_prod.html:9
+#: indicator/templates/filters/soc_prod.html:46
+#: indicator/templates/filters/soc_prod.html:47
+#: search_gateway/data_sources_with_settings.py:900
+msgid "Directory Type"
+msgstr ""
+
+#: indicator/templates/filters/soc_prod.html:14
+#: indicator/templates/filters/soc_prod.html:75
+#: indicator/templates/filters/soc_prod.html:76
+msgid "State (Brazil)"
+msgstr ""
+
+#: indicator/templates/filters/soc_prod.html:15
+#: indicator/templates/filters/soc_prod.html:80
+#: indicator/templates/filters/soc_prod.html:81
+msgid "City (Brazil)"
+msgstr ""
+
+#: indicator/templates/menu.html:23 indicator/templates/menu_ranking.html:12
+msgid "Reset"
+msgstr ""
+
+#: indicator/templates/menu.html:24 indicator/templates/menu_ranking.html:13
+msgid "Generate"
+msgstr ""
+
+#: indicator/templates/ranking.html:9
+msgid "Applied Filters"
+msgstr ""
+
+#: indicator/templates/ranking.html:27
+msgid "Rank"
+msgstr ""
+
+#: indicator/templates/ranking.html:30
+msgid "CWTS SNIP"
+msgstr ""
+
+#: indicator/templates/ranking.html:31
+msgid "Scimago SJR"
+msgstr ""
+
+#: indicator/templates/ranking.html:32
+msgid "Scimago Citations / Doc. (2 Years)"
+msgstr ""
+
+#: indicator/templates/ranking.html:33
+msgid "Scimago Total Citations (3 Years)"
+msgstr ""
+
+#: indicator/templates/ranking.html:34
+msgid "SciELO Total Docs"
+msgstr ""
+
+#: indicator/templates/ranking.html:35
+msgid "Scimago Total Docs"
+msgstr ""
+
+#: indicator/templates/ranking.html:36
+#, python-format
+msgid "Scimago %% Female"
+msgstr ""
+
+#: indicator/templates/ranking.html:37
+msgid "Scimago Estimated APC (USD)"
+msgstr ""
+
+#: indicator/templates/ranking.html:38
+msgid "Scimago Estimated Value (USD)"
+msgstr ""
+
+#: indicator/templates/ranking.html:39
+msgid "Scimago Overton"
+msgstr ""
+
+#: indicator/templates/ranking.html:40
+msgid "Scimago SDG"
+msgstr ""
+
+#: indicator/templates/scope.html:7
+msgid "Data Source"
+msgstr ""
+
+#: indicator/templates/scope.html:10
+msgid "World"
+msgstr ""
+
+#: indicator/templates/scope.html:12
+msgid "SciELO Network"
+msgstr ""
+
+#: indicator/templates/scope.html:18
+msgid "Aggregation Mode"
 msgstr ""
 
 #: indicator/views.py:79
@@ -1879,44 +2406,44 @@ msgstr ""
 #: infrastructure_directory/choices.py:5 search/choices.py:41
 #: usefulmodels/choices.py:115
 msgid "Portal"
-msgstr ""
+msgstr "Portal"
 
 #: infrastructure_directory/choices.py:6 search/choices.py:42
 #: usefulmodels/choices.py:116
 msgid "Plataforma"
-msgstr ""
+msgstr "Platform"
 
 #: infrastructure_directory/choices.py:7 search/choices.py:43
 #: usefulmodels/choices.py:117
 msgid "Servidor"
-msgstr ""
+msgstr "Server"
 
 #: infrastructure_directory/choices.py:8 search/choices.py:44
 #: usefulmodels/choices.py:118
 msgid "Repositório"
-msgstr ""
+msgstr "Repository"
 
 #: infrastructure_directory/choices.py:9
 msgid "Repositório de dados"
-msgstr ""
+msgstr "Data repository"
 
 #: infrastructure_directory/choices.py:10
 msgid "Repositório de dados de pesquisa"
-msgstr ""
+msgstr "Research data repository"
 
 #: infrastructure_directory/choices.py:11
 msgid "Portal de periódicos"
-msgstr ""
+msgstr "Journals portal"
 
 #: infrastructure_directory/choices.py:13 search/choices.py:45
 #: usefulmodels/choices.py:119
 msgid "Serviço"
-msgstr ""
+msgstr "Service"
 
 #: infrastructure_directory/choices.py:14 search/choices.py:50
 #: usefulmodels/choices.py:124
 msgid "Outras"
-msgstr ""
+msgstr "Others"
 
 #: infrastructure_directory/models.py:30 infrastructure_directory/models.py:31
 #: infrastructure_directory/wagtail_hooks.py:20
@@ -1924,35 +2451,43 @@ msgstr ""
 msgid "Infrastructure Data"
 msgstr ""
 
-#: infrastructure_directory/models.py:344
-#: infrastructure_directory/models.py:345
+#: infrastructure_directory/models.py:49
+msgid "Can edit date"
+msgstr ""
+
+#: infrastructure_directory/models.py:149 policy_directory/models.py:69
+msgid "Date"
+msgstr ""
+
+#: infrastructure_directory/models.py:354
+#: infrastructure_directory/models.py:355
 #: infrastructure_directory/wagtail_hooks.py:66
 msgid "Infrastructure Data Upload"
 msgstr ""
 
 #: institution/choices.py:6
 msgid "agência de apoio à pesquisa"
-msgstr ""
+msgstr "research support agency"
 
 #: institution/choices.py:9
 msgid "universidade e instâncias ligadas à universidades"
-msgstr ""
+msgstr "university and university-related instances"
 
 #: institution/choices.py:13
 msgid "empresa ou instituto ligadas ao governo"
-msgstr ""
+msgstr "government-linked company or institute"
 
 #: institution/choices.py:15
 msgid "organização privada"
-msgstr ""
+msgstr "private organization"
 
 #: institution/choices.py:16
 msgid "organização sem fins de lucros"
-msgstr ""
+msgstr "non-profit organization"
 
 #: institution/choices.py:19
 msgid "sociedade científica, associação pós-graduação, associação profissional"
-msgstr ""
+msgstr "scientific society, graduate association, professional association"
 
 #: institution/choices.py:23 usefulmodels/choices.py:12
 #: usefulmodels/choices.py:27 usefulmodels/choices.py:85
@@ -2032,10 +2567,6 @@ msgstr ""
 msgid "Instutition"
 msgstr ""
 
-#: journal/models.py:11 search_gateway/data_sources_with_settings.py:332
-msgid "ISSN"
-msgstr ""
-
 #: journal/models.py:12
 msgid "ISSN_L"
 msgstr ""
@@ -2077,30 +2608,26 @@ msgstr ""
 #: policy_directory/choices.py:5 search/choices.py:46
 #: usefulmodels/choices.py:120
 msgid "promoção"
-msgstr ""
+msgstr "promotion"
 
 #: policy_directory/choices.py:6 search/choices.py:47
 #: usefulmodels/choices.py:121
 msgid "posicionamento"
-msgstr ""
+msgstr "positioning"
 
 #: policy_directory/choices.py:7 search/choices.py:48
 #: usefulmodels/choices.py:122
 msgid "mandato"
-msgstr ""
+msgstr "mandate"
 
 #: policy_directory/choices.py:8 search/choices.py:49
 #: usefulmodels/choices.py:123
 msgid "geral"
-msgstr ""
+msgstr "general"
 
 #: policy_directory/models.py:30 policy_directory/models.py:31
 #: policy_directory/wagtail_hooks.py:20 policy_directory/wagtail_hooks.py:82
 msgid "Policy Data"
-msgstr ""
-
-#: policy_directory/models.py:69
-msgid "Date"
 msgstr ""
 
 #: policy_directory/models.py:352 policy_directory/wagtail_hooks.py:64
@@ -2335,278 +2862,265 @@ msgstr ""
 
 #: search/choices.py:4
 msgid "Todos"
-msgstr ""
+msgstr "All"
 
 #: search/choices.py:5
 msgid "OCABr"
-msgstr ""
+msgstr "OCABr"
 
 #: search/choices.py:6
 msgid "Produção científica"
-msgstr ""
+msgstr "Scientific production"
 
 #: search/choices.py:7
 msgid "OpenAlex"
-msgstr ""
+msgstr "OpenAlex"
 
 #: search/choices.py:8
 msgid "OCABr + OpenAlex"
-msgstr ""
+msgstr "OCABr + OpenAlex"
 
 #: search/choices.py:9 usefulmodels/choices.py:61
 msgid "Educação"
-msgstr ""
+msgstr "Education"
 
 #: search/choices.py:10
 msgid "Disseminação"
-msgstr ""
+msgstr "Dissemination"
 
 #: search/choices.py:11
 msgid "Infraestrutura"
-msgstr ""
+msgstr "Infrastructure"
 
 #: search/choices.py:12
-#, fuzzy
-#| msgid "Métricas"
 msgid "Política"
-msgstr "Metrics"
+msgstr "Policy"
 
 #: search/choices.py:13
 msgid "tipo de registro"
-msgstr ""
+msgstr "record type"
 
 #: search/choices.py:14
 msgid "dados"
-msgstr ""
+msgstr "data"
 
 #: search/choices.py:15
 msgid "país"
-msgstr ""
+msgstr "country"
 
 #: search/choices.py:16
 msgid "estado"
-msgstr ""
+msgstr "state"
 
 #: search/choices.py:17
 msgid "cidade"
-msgstr ""
+msgstr "city"
 
 #: search/choices.py:19
 msgid "Pós-Graduação"
-msgstr ""
+msgstr "Graduate Studies"
 
 #: search/choices.py:20
-#, fuzzy
-#| msgid "Métricas"
 msgid "áreas temáticas"
-msgstr "Metrics"
+msgstr "thematic areas"
 
 #: search/choices.py:21
 msgid "Dados"
-msgstr ""
+msgstr "Data"
 
 #: search/choices.py:23
-#, fuzzy
-#| msgid "Métricas"
 msgid "Práticas"
-msgstr "Metrics"
+msgstr "Practices"
 
 #: search/choices.py:24
 msgid "Ações"
-msgstr ""
+msgstr "Actions"
 
 #: search/choices.py:26
 msgid "Escopo geográfico"
-msgstr ""
+msgstr "Geographic scope"
 
 #: search/choices.py:27
 msgid "Escopo temático"
-msgstr ""
+msgstr "Thematic scope"
 
 #: search/choices.py:28 search/templates/include/result_doc_directory.html:72
 #: search/templates/include/result_doc_indicator.html:49
 msgid "Contribuição"
-msgstr ""
+msgstr "Contribution"
 
 #: search/choices.py:29
 msgid "Corrente"
-msgstr ""
+msgstr "Current"
 
 #: search/choices.py:30
 msgid "Desatualizado"
-msgstr ""
+msgstr "Outdated"
 
 #: search/choices.py:60
 msgid "Fechado"
-msgstr ""
+msgstr "Closed"
 
 #: search/choices.py:61
 msgid "Ouro"
-msgstr ""
+msgstr "Gold"
 
 #: search/choices.py:63
 msgid "Hibrído"
-msgstr ""
+msgstr "Hybrid"
 
 #: search/choices.py:64
 msgid "Verde"
-msgstr ""
+msgstr "Green"
 
 #: search/choices.py:65
 msgid "Diamante"
-msgstr ""
+msgstr "Diamond"
 
 #: search/choices.py:67
 msgid "Sim"
-msgstr ""
+msgstr "Yes"
 
 #: search/choices.py:68
 msgid "Não"
-msgstr ""
+msgstr "No"
 
 #: search/choices.py:69
 msgid "Artigo"
-msgstr ""
+msgstr "Article"
 
 #: search/choices.py:70
 msgid "Livro"
-msgstr ""
+msgstr "Book"
 
 #: search/choices.py:71
 msgid "Capítulo de livro"
-msgstr ""
+msgstr "Book chapter"
 
 #: search/choices.py:72
 msgid "Capítulo"
-msgstr ""
+msgstr "Chapter"
 
 #: search/choices.py:73
 msgid "Editorial"
-msgstr ""
+msgstr "Editorial"
 
 #: search/choices.py:74
 msgid "Dissertação"
-msgstr ""
+msgstr "Dissertation"
 
 #: search/choices.py:75
 msgid "Paratexto"
-msgstr ""
+msgstr "Paratext"
 
 #: search/choices.py:76
 msgid "Conjunto de dados"
-msgstr ""
+msgstr "Dataset"
 
 #: search/choices.py:77
 msgid "Errata"
-msgstr ""
+msgstr "Erratum"
 
 #: search/choices.py:78
 msgid "Outro"
-msgstr ""
+msgstr "Other"
 
 #: search/choices.py:79
 msgid "Outros"
-msgstr ""
+msgstr "Others"
 
 #: search/choices.py:80
 msgid "Relatório"
-msgstr ""
+msgstr "Report"
 
 #: search/choices.py:81
 msgid "Verbete"
-msgstr ""
+msgstr "Entry"
 
 #: search/choices.py:82
 msgid "Referência"
-msgstr ""
+msgstr "Reference"
 
 #: search/choices.py:83
 msgid "Entrada de referência"
-msgstr ""
+msgstr "Reference entry"
 
 #: search/choices.py:84
 msgid "Periódico"
-msgstr ""
+msgstr "Journal"
 
 #: search/choices.py:85
 msgid "Artigo de periódico"
-msgstr ""
+msgstr "Journal article"
 
 #: search/choices.py:86
 msgid "Pares"
-msgstr ""
+msgstr "Peers"
 
 #: search/choices.py:87
 msgid "Revisão por pares"
-msgstr ""
+msgstr "Peer review"
 
 #: search/choices.py:88
 msgid "Revisão"
-msgstr ""
+msgstr "Review"
 
 #: search/choices.py:89
 msgid "Carta"
-msgstr ""
+msgstr "Letter"
 
 #: search/choices.py:90
 msgid "Anais"
-msgstr ""
+msgstr "Proceedings"
 
 #: search/choices.py:91
 msgid "Conteúdo"
-msgstr ""
+msgstr "Content"
 
 #: search/choices.py:92
 msgid "Publicado"
-msgstr ""
+msgstr "Published"
 
 #: search/choices.py:93
 msgid "Conteúdo publicado"
-msgstr ""
+msgstr "Published content"
 
 #: search/choices.py:94
 msgid "Artigo de anais"
-msgstr ""
+msgstr "Proceedings article"
 
 #: search/choices.py:95
 msgid "Norma"
-msgstr ""
+msgstr "Standard"
 
 #: search/choices.py:96
 msgid "Parte de livro"
-msgstr ""
+msgstr "Book part"
 
 #: search/choices.py:97
 msgid "Parte"
-msgstr ""
+msgstr "Part"
 
 #: search/choices.py:98
 msgid "Série de anais"
-msgstr ""
+msgstr "Proceedings series"
 
 #: search/choices.py:99
 msgid "Série"
-msgstr ""
+msgstr "Series"
 
 #: search/templates/cluster.html:9
 msgid "Filtros"
-msgstr ""
-
-#: search/templates/include/result_doc.html:33
-#: search/templates/include/result_doc_directory.html:55
-#: search/templates/include/result_doc_indicator.html:30
-#: usefulmodels/models.py:95
-msgid "Region"
-msgstr ""
+msgstr "Filters"
 
 #: search/templates/include/result_doc_directory.html:15
 msgid "Diretórios"
-msgstr ""
+msgstr "Directories"
 
 #: search/templates/include/result_doc_directory.html:20
 #: search/templates/include/result_doc_indicator.html:19
 msgid "Atenção"
-msgstr ""
+msgstr "Attention"
 
 #: search/templates/include/result_doc_directory.html:71
 #: search/templates/search/include/result_items/social_production.html:114
@@ -2616,144 +3130,227 @@ msgstr ""
 
 #: search/templates/include/result_doc_indicator.html:56
 msgid "Data de criação"
-msgstr ""
+msgstr "Creation date"
 
 #: search/templates/include/search_pagination.html:8
 msgid "Página"
-msgstr ""
+msgstr "Page"
 
 #: search/templates/indicator/abas.html:7
 msgid "Dados computados"
-msgstr ""
+msgstr "Computed data"
 
 #: search/templates/indicator/abas.html:12
 msgid "Gráfico texturizado e modo escuro"
-msgstr ""
+msgstr "Textured chart and dark mode"
 
 #: search/templates/indicator/abas.html:17
 msgid "Gráfico modo escuro"
-msgstr ""
+msgstr "Dark mode chart"
 
 #: search/templates/indicator/abas.html:22
 msgid "Gráfico"
+msgstr "Chart"
+
+#: search/templates/indicator/indicator_detail.html:38
+#: search/templates/search.html:36 search/templates/search/search_page.html:36
+msgid "Digite sua pesquisa..."
+msgstr "Enter your search..."
+
+#: search/templates/indicator/indicator_detail.html:43
+#: search/templates/search.html:41 search/templates/search/search_page.html:29
+#: search/templates/search/search_page.html:43
+msgid "Buscar"
+msgstr "Search"
+
+#: search/templates/indicator/indicator_detail.html:45
+#: search/templates/search.html:43
+msgid "Help"
 msgstr ""
+
+#: search/templates/search.html:63
+msgid "registros encontrados para o termo"
+msgstr "records found for the term"
+
+#: search/templates/search.html:67
+msgid "Tempo da pesquisa"
+msgstr "Search time"
+
+#: search/templates/search.html:67
+msgid "milisegundos"
+msgstr "milliseconds"
+
+#: search/templates/search.html:70
+msgid "0 registros encontrados para o termo"
+msgstr "0 records found for the term"
+
+#: search/templates/search.html:98
+msgid "Ordenar por"
+msgstr "Sort by"
+
+#: search/templates/search.html:100
+msgid "Por âmbito geográfico"
+msgstr "By geographic scope"
+
+#: search/templates/search.html:101
+msgid "Por âmbito temático"
+msgstr "By thematic scope"
+
+#: search/templates/search.html:102
+msgid "Ordem descrecente de criação"
+msgstr "Descending order of creation"
+
+#: search/templates/search.html:103
+msgid "Relevância"
+msgstr "Relevance"
+
+#: search/templates/search.html:108
+msgid "Visualizar"
+msgstr "View"
+
+#: search/templates/search.html:116
+msgid "Itens por página"
+msgstr "Items per page"
 
 #: search/templates/search.html:286
 msgid ""
 "O valor do campo página não pode ser maior que a quantidade atual de páginas."
-msgstr ""
+msgstr "The page field value cannot be greater than the current number of pages."
 
 #: search/templates/search.html:294
 msgid "O valor do campo página deve ser maior que 0."
-msgstr ""
+msgstr "The page field value must be greater than 0."
 
 #: search/templates/search/include/result_items/social_production.html:58
 msgid "organization"
 msgstr ""
 
+#: search/templates/search/include/result_items/world.html:42
+msgid "N°"
+msgstr ""
+
+#: search/templates/search/include/results_list.html:7
+msgid "resultado(s) encontrado(s)"
+msgstr "result(s) found"
+
+#: search/templates/search/include/results_list.html:9
+msgid "resultados"
+msgstr "results"
+
+#: search/templates/search/include/results_list.html:11
+msgid "resultado"
+msgstr "result"
+
+#: search/templates/search/search_page.html:12
+msgid "Data of the OCABr Observatory"
+msgstr ""
+
+#: search/templates/search/search_page.html:53
+msgid "Busca:"
+msgstr "Search:"
+
+#: search/templates/search/search_page.html:63
+msgid "Filtros ativos:"
+msgstr "Active filters:"
+
+#: search/templates/search/search_page.html:86
+msgid "Carregando..."
+msgstr "Loading..."
+
+#: search/templates/search/search_page.html:87
+msgid "resultado encontrado"
+msgstr "result found"
+
+#: search/templates/search/search_page.html:88
+msgid "resultados encontrados"
+msgstr "results found"
+
+#: search/templates/search/search_page.html:89
+msgid "Nenhum resultado encontrado. Tente ajustar sua busca ou filtros."
+msgstr "No results found. Try adjusting your search or filters."
+
+#: search/templates/search/search_page.html:90
+msgid "Filtros aplicados"
+msgstr "Applied filters"
+
+#: search/templates/search/search_page.html:91
+msgid "Tipo"
+msgstr "Type"
+
+#: search/templates/search/search_page.html:93
+msgid "Instituições"
+msgstr "Institutions"
+
+#: search/templates/search/search_page.html:94
+msgid "Localização"
+msgstr "Location"
+
+#: search/templates/search/search_page.html:95
+msgid "Prática"
+msgstr "Practice"
+
+#: search/templates/search/search_page.html:96
+msgid "Ação"
+msgstr "Action"
+
+#: search/templates/search/search_page.html:97
+msgid "Classificação"
+msgstr "Classification"
+
+#: search/templates/search/search_page.html:98
+msgid "Áreas Temáticas"
+msgstr "Thematic Areas"
+
 #: search/tools.py:63
 msgid "Evolução anual da"
-msgstr ""
+msgstr "Annual evolution of"
 
 #: search/tools.py:64
 msgid "distribuição da produção científica"
-msgstr ""
+msgstr "scientific production distribution"
 
 #: search/tools.py:65
 msgid "por "
-msgstr ""
+msgstr "by "
 
 #: search/tools.py:79
 msgid " no "
-msgstr ""
+msgstr " in "
 
 #: search/tools.py:84
 msgid "Distribuição"
-msgstr ""
+msgstr "Distribution"
 
 #: search/tools.py:85
 msgid "da produção científica"
-msgstr ""
+msgstr "of scientific production"
 
 #: search/views.py:348
 msgid "Evolução da"
-msgstr ""
+msgstr "Evolution of"
 
 #: search/views.py:349
 msgid "ação"
-msgstr ""
+msgstr "action"
 
 #: search/views.py:350
 msgid "de "
-msgstr ""
+msgstr "of "
 
 #: search/views.py:351
 msgid " em prol de Ciência Aberta"
-msgstr ""
+msgstr " in favor of Open Science"
 
 #: search_gateway/data_sources_with_settings.py:8
 msgid "Scientific Production - World"
-msgstr ""
-
-#: search_gateway/data_sources_with_settings.py:42
-msgid "Source Index (OpenAlex)"
-msgstr ""
-
-#: search_gateway/data_sources_with_settings.py:53
-msgid "Source Index (SciELO)"
-msgstr ""
-
-#: search_gateway/data_sources_with_settings.py:67
-msgid "Source Type"
-msgstr ""
-
-#: search_gateway/data_sources_with_settings.py:82
-msgid "Access Type"
-msgstr ""
-
-#: search_gateway/data_sources_with_settings.py:96
-msgid "Document Language"
-msgstr ""
-
-#: search_gateway/data_sources_with_settings.py:111
-msgid "Document Type"
-msgstr ""
-
-#: search_gateway/data_sources_with_settings.py:128
-msgid "Open Access"
-msgstr ""
-
-#: search_gateway/data_sources_with_settings.py:144
-#: search_gateway/data_sources_with_settings.py:406
-msgid "Publication Year"
 msgstr ""
 
 #: search_gateway/data_sources_with_settings.py:191
 msgid "Publication Year Range"
 msgstr ""
 
-#: search_gateway/data_sources_with_settings.py:204
-msgid "Subject Area Level 0"
-msgstr ""
-
-#: search_gateway/data_sources_with_settings.py:218
-msgid "Subject Area Level 1"
-msgstr ""
-
-#: search_gateway/data_sources_with_settings.py:232
-msgid "Subject Area Level 2"
-msgstr ""
-
-#: search_gateway/data_sources_with_settings.py:276
-msgid "Region (World)"
-msgstr ""
-
 #: search_gateway/data_sources_with_settings.py:291
 msgid "Cited by Count"
-msgstr ""
-
-#: search_gateway/data_sources_with_settings.py:304
-msgid "Source Country"
 msgstr ""
 
 #: search_gateway/data_sources_with_settings.py:342
@@ -2777,10 +3374,7 @@ msgstr ""
 msgid "Publication year end"
 msgstr ""
 
-#: search_gateway/data_sources_with_settings.py:900
-msgid "Directory Type"
-msgstr ""
-
+#: search_gateway/data
 #: search_gateway/data_sources_with_settings.py:930
 msgid "Pratice"
 msgstr ""
@@ -2791,14 +3385,6 @@ msgstr ""
 
 #: search_gateway/data_sources_with_settings.py:956
 msgid "Journal Metrics"
-msgstr ""
-
-#: search_gateway/filters.py:10
-msgid "Document"
-msgstr ""
-
-#: search_gateway/filters.py:15
-msgid "Author Affiliation"
 msgstr ""
 
 #: search_gateway/filters.py:20
@@ -2815,219 +3401,219 @@ msgstr ""
 
 #: usefulmodels/choices.py:5
 msgid "Ciências da Vida"
-msgstr ""
+msgstr "Life Sciences"
 
 #: usefulmodels/choices.py:8
 msgid "Ciências Físicas, Tecnológicas e Multidisciplinares"
-msgstr ""
+msgstr "Physical, Technological and Multidisciplinary Sciences"
 
 #: usefulmodels/choices.py:10
 msgid "Humanidades"
-msgstr ""
+msgstr "Humanities"
 
 #: usefulmodels/choices.py:18
 msgid "Ciências Agrárias"
-msgstr ""
+msgstr "Agricultural Sciences"
 
 #: usefulmodels/choices.py:19
 msgid "Ciências Biológicas"
-msgstr ""
+msgstr "Biological Sciences"
 
 #: usefulmodels/choices.py:20
 msgid "Ciências da Saúde"
-msgstr ""
+msgstr "Health Sciences"
 
 #: usefulmodels/choices.py:21
 msgid "Ciências Exatas e da Terra"
-msgstr ""
+msgstr "Exact and Earth Sciences"
 
 #: usefulmodels/choices.py:22
 msgid "Ciências Humanas"
-msgstr ""
+msgstr "Human Sciences"
 
 #: usefulmodels/choices.py:23
 msgid "Ciências Sociais Aplicadas"
-msgstr ""
+msgstr "Applied Social Sciences"
 
 #: usefulmodels/choices.py:24 usefulmodels/choices.py:77
 msgid "Engenharias"
-msgstr ""
+msgstr "Engineering"
 
 #: usefulmodels/choices.py:25
 msgid "Lingüística, Letras e Artes"
-msgstr ""
+msgstr "Linguistics, Literature and Arts"
 
 #: usefulmodels/choices.py:33
 msgid "Ciência de Alimentos"
-msgstr ""
+msgstr "Food Science"
 
 #: usefulmodels/choices.py:34
 msgid "Ciências Agrárias I"
-msgstr ""
+msgstr "Agricultural Sciences I"
 
 #: usefulmodels/choices.py:35
 msgid "Medicina Veterinária"
-msgstr ""
+msgstr "Veterinary Medicine"
 
 #: usefulmodels/choices.py:36
 msgid "Zootecnia/Recursos Pesqueiros"
-msgstr ""
+msgstr "Animal Science/Fishery Resources"
 
 #: usefulmodels/choices.py:37
 msgid "Biodiversidade"
-msgstr ""
+msgstr "Biodiversity"
 
 #: usefulmodels/choices.py:38
 msgid "Ciências Biológicas I"
-msgstr ""
+msgstr "Biological Sciences I"
 
 #: usefulmodels/choices.py:39
 msgid "Ciências Biológicas II"
-msgstr ""
+msgstr "Biological Sciences II"
 
 #: usefulmodels/choices.py:40
 msgid "Ciências Biológicas III"
-msgstr ""
+msgstr "Biological Sciences III"
 
 #: usefulmodels/choices.py:41
 msgid "Educação Física"
-msgstr ""
+msgstr "Physical Education"
 
 #: usefulmodels/choices.py:42
 msgid "Enfermagem"
-msgstr ""
+msgstr "Nursing"
 
 #: usefulmodels/choices.py:43
 msgid "Farmácia"
-msgstr ""
+msgstr "Pharmacy"
 
 #: usefulmodels/choices.py:44
 msgid "Medicina I"
-msgstr ""
+msgstr "Medicine I"
 
 #: usefulmodels/choices.py:45
 msgid "Medicina II"
-msgstr ""
+msgstr "Medicine II"
 
 #: usefulmodels/choices.py:46
 msgid "Medicina III"
-msgstr ""
+msgstr "Medicine III"
 
 #: usefulmodels/choices.py:47
 msgid "Nutrição"
-msgstr ""
+msgstr "Nutrition"
 
 #: usefulmodels/choices.py:48
 msgid "Odontologia"
-msgstr ""
+msgstr "Dentistry"
 
 #: usefulmodels/choices.py:49
 msgid "Saúde Coletiva"
-msgstr ""
+msgstr "Public Health"
 
 #: usefulmodels/choices.py:50
 msgid "Astronomia/Física"
-msgstr ""
+msgstr "Astronomy/Physics"
 
 #: usefulmodels/choices.py:51
 msgid "Ciências da Computação"
-msgstr ""
+msgstr "Computer Science"
 
 #: usefulmodels/choices.py:52
 msgid "Geociências"
-msgstr ""
+msgstr "Geosciences"
 
 #: usefulmodels/choices.py:53
 msgid "Matemática/Probabilidade Estatística"
-msgstr ""
+msgstr "Mathematics/Statistical Probability"
 
 #: usefulmodels/choices.py:54
 msgid "Química"
-msgstr ""
+msgstr "Chemistry"
 
 #: usefulmodels/choices.py:55
 msgid "Antropologia/Arqueologia"
-msgstr ""
+msgstr "Anthropology/Archaeology"
 
 #: usefulmodels/choices.py:58
 msgid "Ciência Política e Relações Internacionais"
-msgstr ""
+msgstr "Political Science and International Relations"
 
 #: usefulmodels/choices.py:60
 msgid "Ciências da Religião e Teologia"
-msgstr ""
+msgstr "Religious Sciences and Theology"
 
 #: usefulmodels/choices.py:62
 msgid "Filosofia"
-msgstr ""
+msgstr "Philosophy"
 
 #: usefulmodels/choices.py:63
 msgid "Geografia"
-msgstr ""
+msgstr "Geography"
 
 #: usefulmodels/choices.py:64
 msgid "História"
-msgstr ""
+msgstr "History"
 
 #: usefulmodels/choices.py:65
 msgid "Psicologia"
-msgstr ""
+msgstr "Psychology"
 
 #: usefulmodels/choices.py:66
 msgid "Sociologia"
-msgstr ""
+msgstr "Sociology"
 
 #: usefulmodels/choices.py:67
 msgid "Turismo"
-msgstr ""
+msgstr "Tourism"
 
 #: usefulmodels/choices.py:68
 msgid "Arquitetura, Urbanismo e Design"
-msgstr ""
+msgstr "Architecture, Urbanism and Design"
 
 #: usefulmodels/choices.py:69
 msgid "Comunicação e Informação"
-msgstr ""
+msgstr "Communication and Information"
 
 #: usefulmodels/choices.py:70
 msgid "Direito"
-msgstr ""
+msgstr "Law"
 
 #: usefulmodels/choices.py:71
 msgid "Economia"
-msgstr ""
+msgstr "Economics"
 
 #: usefulmodels/choices.py:74
 msgid "Planejamento Urbano e Regional/Demografia"
-msgstr ""
+msgstr "Urban and Regional Planning/Demography"
 
 #: usefulmodels/choices.py:76
 msgid "Serviço Social"
-msgstr ""
+msgstr "Social Work"
 
 #: usefulmodels/choices.py:78
 msgid "Engenharias I"
-msgstr ""
+msgstr "Engineering I"
 
 #: usefulmodels/choices.py:79
 msgid "Engenharias II"
-msgstr ""
+msgstr "Engineering II"
 
 #: usefulmodels/choices.py:80
 msgid "Engenharias III"
-msgstr ""
+msgstr "Engineering III"
 
 #: usefulmodels/choices.py:81
 msgid "Engenharias IV"
-msgstr ""
+msgstr "Engineering IV"
 
 #: usefulmodels/choices.py:82
 msgid "Artes"
-msgstr ""
+msgstr "Arts"
 
 #: usefulmodels/choices.py:83
 msgid "Linguística e Literatura"
-msgstr ""
+msgstr "Linguistics and Literature"
 
 #: usefulmodels/models.py:27
 msgid "Name of the city"
@@ -3100,6 +3686,3 @@ msgstr ""
 #: usefulmodels/wagtail_hooks.py:219
 msgid "Useful Models"
 msgstr ""
-
-#~ msgid "Buscar por conteúdo do site..."
-#~ msgstr "Search by content"
