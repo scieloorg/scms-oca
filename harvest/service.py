@@ -2,6 +2,7 @@ import ssl
 from collections.abc import Iterable
 
 import httpx
+from django.conf import settings
 from httpx._types import AuthTypes
 from oaipmh_scythe import Scythe
 from oaipmh_scythe.__about__ import __version__
@@ -9,11 +10,6 @@ from oaipmh_scythe.iterator import BaseOAIIterator, OAIItemIterator
 from oaipmh_scythe.models import OAIItem
 from oaipmh_scythe.utils import log_response
 from sickle import Sickle
-
-USER_AGENT = (
-    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
-    "(KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36"
-)
 
 OAI_NAMESPACE: str = "{http://www.openarchives.org/OAI/2.0/}"
 
@@ -59,7 +55,7 @@ class CustomScythe(Scythe):
             A reusable HTTP client instance for making HTTP requests.
         """
         if self._client is None or self._client.is_closed:
-            headers = {"Accept": "text/xml; charset=utf-8", "user-agent": USER_AGENT}
+            headers = {"Accept": "text/xml; charset=utf-8", "user-agent": settings.USER_AGENT}
             self._client = httpx.Client(
                 headers=headers,
                 timeout=self.timeout,
@@ -78,8 +74,12 @@ def service_oai_pmh_scythe(
     until_date=None,
     verify=True,
     ignore_deleted=True,
+    resumption_token=None,
 ):
     scythe = CustomScythe(url, verify=verify)
+
+    if resumption_token:
+        return scythe.list_records(resumption_token=resumption_token)
 
     params = {"metadata_prefix": metadata_prefix}
 
@@ -93,6 +93,11 @@ def service_oai_pmh_scythe(
 
     recs = scythe.list_records(**params)
     return recs
+
+
+def service_oai_pmh_get_record(url, identifier, metadata_prefix="oai_dc", verify=True):
+    scythe = CustomScythe(url, verify=verify)
+    return scythe.get_record(identifier=identifier, metadata_prefix=metadata_prefix)
 
 
 def service_oai_pmh_sickle(
