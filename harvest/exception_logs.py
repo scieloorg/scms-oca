@@ -43,8 +43,10 @@ class ExceptionContext:
 
     def verify_obj_as_failed_index(self):
         if self.exceptions:
-            self.harvest_object.harvest_status = "index_failed"
-            self.harvest_object.save(update_fields=["harvest_status"])
+            if hasattr(self.harvest_object, "mark_as_index_failed"):
+                self.harvest_object.mark_as_index_failed()
+            else:
+                self.harvest_object.save()
 
     def save_to_db(self):
         for exc in self.exceptions:
