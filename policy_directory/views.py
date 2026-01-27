@@ -82,7 +82,7 @@ class PolicyDirectoryCreateView(CreateView):
                     # get user
                     user_email = self.get_moderation().moderator.email or None
                     group_mails = []
-                    
+
                     if self.get_moderation().group_moderator:
                         # get group
                         group_mails = [
@@ -162,14 +162,14 @@ def validate(request):
                 upload_path, cols, True, True, True, False
             )
             if errorlist:
-                raise Exception(_("Valication error"))
+                raise Exception(_("Validation error"))
             else:
                 file_upload.is_valid = True
                 fp = open(upload_path)
                 file_upload.line_count = len(fp.readlines())
                 file_upload.save()
         except Exception as ex:
-            messages.error(request, _("Valication error: %s") % errorlist)
+            messages.error(request, _("Validation error: %s") % errorlist)
         else:
             messages.success(request, _("File successfully validated!"))
 
@@ -196,7 +196,9 @@ def import_file(request):
 
     try:
         with open(file_path, "r") as csvfile:
-            data = csv.DictReader(csvfile, delimiter=settings.DIRECTORY_IMPORT_DELIMITER)
+            data = csv.DictReader(
+                csvfile, delimiter=settings.DIRECTORY_IMPORT_DELIMITER
+            )
 
             for line, row in enumerate(data):
                 po = PolicyDirectory()
@@ -271,9 +273,16 @@ def import_file(request):
 
                 po.save()
     except Exception as ex:
-        messages.error(request, _("Import error: %s, Line: %s") % (ex, str(line + 2)))
+        messages.error(
+            request,
+            _("Import error: %(error)s, Line: %(line)s")
+            % {
+                "error": ex,
+                "line": line + 2,
+            },
+        )
     else:
-       messages.success(request, _("File imported successfully!"))
+        messages.success(request, _("File imported successfully!"))
 
     return redirect(request.META.get("HTTP_REFERER"))
 

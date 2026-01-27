@@ -53,6 +53,7 @@ class EducationDirectory(CommonControlField):
                 _("Can edit institutional_contribution"),
             ),
             ("can_edit_notes", _("Can edit notes")),
+            ("can_edit_availability", _("Can edit availability")),
         )
 
     title = models.CharField(
@@ -168,6 +169,15 @@ class EducationDirectory(CommonControlField):
         help_text=help_fields.DIRECTORY_NOTES_HELP,
     )
 
+    availability = models.CharField(
+        _("Availability"),
+        choices=choices.availability,
+        max_length=255,
+        null=True,
+        blank=True,
+        help_text=help_fields.DIRECTORY_AVAILABILITY_HELP,
+    )
+
     panels = [
         HelpPanel(
             "Cursos livres, disciplinas de graduação e pós-graduação ministrados por instituições brasileiras – presenciais ou EAD- para promover a adoção dos princípios e práticas de ciência aberta por todos os envolvidos no processo de pesquisa."
@@ -186,6 +196,7 @@ class EducationDirectory(CommonControlField):
         AutocompletePanel("thematic_areas", permission="education_directory.can_edit_thematic_areas"),
         FieldPanel("keywords", permission="education_directory.can_edit_keywords"),
         FieldPanel("classification", permission="education_directory.can_edit_classification"),
+        FieldPanel("availability", permission="education_directory.can_edit_availability"),
         FieldPanel("practice", permission="education_directory.can_edit_practice"),
         FieldPanel("attendance", permission="education_directory.can_edit_attendance"),
         FieldPanel("record_status", permission="education_directory.can_edit_record_status"),
