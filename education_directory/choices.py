@@ -23,3 +23,9 @@ attendance_type = (
     ("virtual", "Remoto"),  # People attend the event entirely online
     ("hybrid", "Híbrido"),  # Some people attend in person, others online
 )
+
+availability = (
+    ("", ""),
+    ("gratuito", _("Gratuito")),
+    ("pago", _("Pago")),
+)   
