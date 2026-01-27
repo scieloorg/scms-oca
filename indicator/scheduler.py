@@ -49,8 +49,15 @@ def get_or_create_periodic_task(
     )
     periodic_task.save()
     logging.info(
-        _("Agendado %s %s às %s:%s prioridade: %s")
-        % (name, day_of_week, hour, str(minute).zfill(2), priority)
+        _(
+            "Agendado %(name)s %(day)s às %(hour)s:%(minute)s prioridade: %(priority)s"
+        ) % {
+            "name": name,
+            "day": day_of_week,
+            "hour": hour,
+            "minute": str(minute).zfill(2),
+            "priority": priority,
+        }
     )
 
 
