@@ -10,11 +10,6 @@ from harvest.exception_logs import ExceptionContext
 from harvest.indexing import delete_harvested_document
 from harvest.models import HarvestedBooks, HarvestErrorLogBooks
 
-USER_AGENT = (
-    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
-    "(KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36"
-)
-
 
 def _build_url(base_url, params=None):
     if not params:
