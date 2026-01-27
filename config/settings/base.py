@@ -2,9 +2,9 @@
 Base settings to build other settings files upon.
 """
 from pathlib import Path
-from django.utils.translation import gettext_lazy as _
 
 import environ
+from django.utils.translation import gettext_lazy as _
 
 ROOT_DIR = Path(__file__).resolve(strict=True).parent.parent.parent
 APPS_DIR = ROOT_DIR / "core"
@@ -503,3 +503,8 @@ OPENSEARCH_INDEX_RAW_SCIELO_DATA = env.str("OPENSEARCH_INDEX_RAW_SCIELO_DATA", "
 
 # HARVEST Books, Preprint, SciELO Data
 SCIELO_BOOKS_BASE_URL = env("SCIELO_BOOKS_BASE_URL", default=None)
+SITE_SCIELO_DATA = env("SITE_SCIELO_DATA", default="https://data.scielo.org")
+USER_AGENT = env(
+    "USER_AGENT",
+    default="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+)
