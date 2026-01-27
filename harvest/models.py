@@ -165,6 +165,24 @@ class HarvestedPreprint(BaseHarvestedData, ClusterableModel):
         verbose_name_plural = _("Dados de preprint")
 
 
+    @classmethod
+    def get_latest_preprint(cls):
+        # Recupera o ultimo registro de Preprint a partir do header.datestamp armazenado no campo datestamp
+        try:
+            return HarvestedPreprint.objects.latest("datestamp")
+        except HarvestedPreprint.DoesNotExist:
+            return None
+
+    @classmethod
+    def get_latest_preprint_token(cls):
+        latest = (
+            HarvestedPreprint.objects.exclude(last_resumption_token__isnull=True)
+            .exclude(last_resumption_token="")
+            .order_by("-updated")
+            .first()
+        )
+        return latest.last_resumption_token if latest else None
+
 class HarvestedBooks(BaseHarvestedData, ClusterableModel):
     type_data = models.CharField(
         _("Tipo de data"),
