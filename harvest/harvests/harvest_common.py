@@ -4,7 +4,15 @@ from harvest.exception_logs import ExceptionContext
 from harvest.parse_info_oai_pmh import get_info_article
 
 
-def harvest_records(recs, user, nodes, model, log_model, fk_field, label):
+def harvest_records(
+    recs,
+    user,
+    nodes,
+    model,
+    log_model,
+    fk_field,
+    label,
+):
     for rec in recs:
         if not rec.header.identifier:
             continue
