@@ -1527,9 +1527,10 @@ msgstr ""
 msgid "Notes"
 msgstr ""
 
+#: education_directory/models.py:404 education_directory/wagtail_hooks.py:64
 #: education_directory/models.py:173
 msgid "Availability"
-msgstr ""
+msgstr "Disponibilidade"
 
 #: education_directory/models.py:415 education_directory/wagtail_hooks.py:64
 msgid "Education Data Upload"
