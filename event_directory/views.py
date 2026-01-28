@@ -158,14 +158,14 @@ def validate(request):
                 upload_path, cols, True, True, True, False
             )
             if errorlist:
-                raise Exception(_("Valication error"))
+                raise Exception(_("Validation error"))
             else:
                 file_upload.is_valid = True
                 fp = open(upload_path)
                 file_upload.line_count = len(fp.readlines())
                 file_upload.save()
         except Exception as ex:
-            messages.error(request, _("Valication error: %s") % errorlist)
+            messages.error(request, _("Validation error: %s") % errorlist)
         else:
             messages.success(request, _("File successfully validated!"))
 

@@ -3,12 +3,11 @@
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
-#: core/help_fields.py:25
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-26 12:37+0000\n"
+"POT-Creation-Date: 2026-01-27 09:54+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -226,7 +225,7 @@ msgstr "IDs dos pais"
 msgid "Parent relation"
 msgstr "Relação com o pai"
 
-#: article/models.py:69 education_directory/models.py:95
+#: article/models.py:69 education_directory/models.py:96
 #: event_directory/models.py:95 indicator/models.py:144
 #: indicator/templates/filters/sci_prod_journal.html:87
 #: indicator/templates/filters/sci_prod_journal.html:88
@@ -240,7 +239,7 @@ msgid "Thematic area relation"
 msgstr "Relação com área temática"
 
 #: article/models.py:76 article/models.py:994 article/models.py:1177
-#: education_directory/models.py:149 event_directory/models.py:148
+#: education_directory/models.py:150 event_directory/models.py:148
 #: indicator/models.py:170 indicator/models.py:811
 #: indicator/templates/filters/sci_prod_brazil.html:28
 #: indicator/templates/filters/sci_prod_world.html:32
@@ -409,7 +408,7 @@ msgid "DOI"
 msgstr "DOI"
 
 #: article/models.py:981 article/models.py:1134 core_settings/models.py:114
-#: education_directory/models.py:59 event_directory/models.py:59
+#: education_directory/models.py:60 event_directory/models.py:59
 #: indicator/models.py:108 infrastructure_directory/models.py:53
 #: journal/models.py:14 policy_directory/models.py:53
 #: scholarly_articles/models.py:15
@@ -576,13 +575,15 @@ msgstr ""
 
 #: core/help_fields.py:13
 msgid ""
-"Descrição/representação do item, veja exemplo em: <a href=\"https://github."
-"com/scieloorg/scms-oca/wiki/Campos#descri%C3%A7%C3%A3o\" target=\"_blank"
-"\">https://github.com/scieloorg/scms-oca/wiki/Campos#descri%C3%A7%C3%A3o</a>"
+"Descrição/representação do item, veja exemplo em: <a href=\"https://"
+"github.com/scieloorg/scms-oca/wiki/Campos#descri%C3%A7%C3%A3o\" "
+"target=\"_blank\">https://github.com/scieloorg/scms-oca/wiki/"
+"Campos#descri%C3%A7%C3%A3o</a>"
 msgstr ""
-"Descrição/representação do item, veja exemplo em: <a href=\"https://github."
-"com/scieloorg/scms-oca/wiki/Campos#descri%C3%A7%C3%A3o\" target=\"_blank"
-"\">https://github.com/scieloorg/scms-oca/wiki/Campos#descri%C3%A7%C3%A3o</a>"
+"Descrição/representação do item, veja exemplo em: <a href=\"https://"
+"github.com/scieloorg/scms-oca/wiki/Campos#descri%C3%A7%C3%A3o\" "
+"target=\"_blank\">https://github.com/scieloorg/scms-oca/wiki/"
+"Campos#descri%C3%A7%C3%A3o</a>"
 
 #: core/help_fields.py:15
 msgid ""
@@ -599,25 +600,25 @@ msgstr ""
 #: core/help_fields.py:17
 msgid ""
 "Instituição/empresa ao qual o item registrado pertence. Veja exemplo em: <a "
-"href=\"https://github.com/scieloorg/scms-oca/wiki/Campos#institui"
-"%C3%A7%C3%A3o\" target=\"_blank\">https://github.com/scieloorg/scms-oca/wiki/"
-"Campos#institui%C3%A7%C3%A3o</a>"
+"href=\"https://github.com/scieloorg/scms-oca/wiki/"
+"Campos#institui%C3%A7%C3%A3o\" target=\"_blank\">https://github.com/"
+"scieloorg/scms-oca/wiki/Campos#institui%C3%A7%C3%A3o</a>"
 msgstr ""
 "Instituição/empresa ao qual o item registrado pertence. Veja exemplo em: <a "
-"href=\"https://github.com/scieloorg/scms-oca/wiki/Campos#institui"
-"%C3%A7%C3%A3o\" target=\"_blank\">https://github.com/scieloorg/scms-oca/wiki/"
-"Campos#institui%C3%A7%C3%A3o</a>"
+"href=\"https://github.com/scieloorg/scms-oca/wiki/"
+"Campos#institui%C3%A7%C3%A3o\" target=\"_blank\">https://github.com/"
+"scieloorg/scms-oca/wiki/Campos#institui%C3%A7%C3%A3o</a>"
 
 #: core/help_fields.py:19
 msgid ""
 "Grandes área do conhecimento ao qual pertence o item. Veja exemplo em: <a "
-"href=\"https://github.com/scieloorg/scms-oca/wiki/Campos#%C3%A1rea-tem"
-"%C3%A1tica\" target=\"_blank\">https://github.com/scieloorg/scms-oca/wiki/"
+"href=\"https://github.com/scieloorg/scms-oca/wiki/Campos#%C3%A1rea-"
+"tem%C3%A1tica\" target=\"_blank\">https://github.com/scieloorg/scms-oca/wiki/"
 "Campos#%C3%A1rea-tem%C3%A1tica</a>"
 msgstr ""
 "Grandes área do conhecimento ao qual pertence o item. Veja exemplo em: <a "
-"href=\"https://github.com/scieloorg/scms-oca/wiki/Campos#%C3%A1rea-tem"
-"%C3%A1tica\" target=\"_blank\">https://github.com/scieloorg/scms-oca/wiki/"
+"href=\"https://github.com/scieloorg/scms-oca/wiki/Campos#%C3%A1rea-"
+"tem%C3%A1tica\" target=\"_blank\">https://github.com/scieloorg/scms-oca/wiki/"
 "Campos#%C3%A1rea-tem%C3%A1tica</a>"
 
 #: core/help_fields.py:21
@@ -634,25 +635,40 @@ msgstr ""
 msgid ""
 "Prática da ciência aberta referente ao item registrado. Veja exemplo em: <a "
 "href=\"https://github.com/scieloorg/scms-oca/wiki/Campos#pr%C3%A1tica\" "
-"target=\"_blank\">https://github.com/scieloorg/scms-oca/wiki/Campos#pr"
-"%C3%A1tica</a>"
+"target=\"_blank\">https://github.com/scieloorg/scms-oca/wiki/"
+"Campos#pr%C3%A1tica</a>"
 msgstr ""
 "Prática da ciência aberta referente ao item registrado. Veja exemplo em: <a "
 "href=\"https://github.com/scieloorg/scms-oca/wiki/Campos#pr%C3%A1tica\" "
-"target=\"_blank\">https://github.com/scieloorg/scms-oca/wiki/Campos#pr"
-"%C3%A1tica</a>"
+"target=\"_blank\">https://github.com/scieloorg/scms-oca/wiki/"
+"Campos#pr%C3%A1tica</a>"
+
+#: core/help_fields.py:25
+#, fuzzy
+#| msgid ""
+#| "Título do item, veja exemplo em: <a href=\"https://github.com/scieloorg/"
+#| "scms-oca/wiki/Campos#title\" target=\"_blank\">https://github.com/"
+#| "scieloorg/scms-oca/wiki/Campos#title</a>"
+msgid ""
+"Determine qual a ação dessa prática: <a href=\"https://github.com/scieloorg/"
+"scms-oca/wiki/Campos#pr%C3%A1tica\" target=\"_blank\">https://github.com/"
+"scieloorg/scms-oca/wiki/Campos#acao</a>"
+msgstr ""
+"Título do item, veja exemplo em: <a href=\"https://github.com/scieloorg/scms-"
+"oca/wiki/Campos#title\" target=\"_blank\">https://github.com/scieloorg/scms-"
+"oca/wiki/Campos#title</a>"
 
 #: core/help_fields.py:27
 msgid ""
-"Classificação referente ao item registrado. Veja exemplo em: <a href="
-"\"https://github.com/scieloorg/scms-oca/wiki/Campos#classifica%C3%A7%C3%A3o"
-"\" target=\"_blank\">https://github.com/scieloorg/scms-oca/wiki/"
-"Campos#classifica%C3%A7%C3%A3o</a>"
+"Classificação referente ao item registrado. Veja exemplo em: <a "
+"href=\"https://github.com/scieloorg/scms-oca/wiki/"
+"Campos#classifica%C3%A7%C3%A3o\" target=\"_blank\">https://github.com/"
+"scieloorg/scms-oca/wiki/Campos#classifica%C3%A7%C3%A3o</a>"
 msgstr ""
-"Classificação referente ao item registrado. Veja exemplo em: <a href="
-"\"https://github.com/scieloorg/scms-oca/wiki/Campos#classifica%C3%A7%C3%A3o"
-"\" target=\"_blank\">https://github.com/scieloorg/scms-oca/wiki/"
-"Campos#classifica%C3%A7%C3%A3o</a>"
+"Classificação referente ao item registrado. Veja exemplo em: <a "
+"href=\"https://github.com/scieloorg/scms-oca/wiki/"
+"Campos#classifica%C3%A7%C3%A3o\" target=\"_blank\">https://github.com/"
+"scieloorg/scms-oca/wiki/Campos#classifica%C3%A7%C3%A3o</a>"
 
 #: core/help_fields.py:29
 msgid ""
@@ -677,13 +693,30 @@ msgstr ""
 #: core/help_fields.py:33
 msgid ""
 "Nome da instituição que contribuiu. Veja exemplo em: <a href=\"https://"
-"github.com/scieloorg/scms-oca/wiki/Campos#institui%C3%A7%C3%A3o-contribuidora"
-"\" target=\"_blank\">https://github.com/scieloorg/scms-oca/wiki/"
+"github.com/scieloorg/scms-oca/wiki/Campos#institui%C3%A7%C3%A3o-"
+"contribuidora\" target=\"_blank\">https://github.com/scieloorg/scms-oca/wiki/"
 "Campos#institui%C3%A7%C3%A3o-contribuidora</a>"
 msgstr ""
 "Nome da instituição que contribuiu. Veja exemplo em: <a href=\"https://"
-"github.com/scieloorg/scms-oca/wiki/Campos#institui%C3%A7%C3%A3o-contribuidora"
-"\" target=\"_blank\">https://github.com/scieloorg/scms-oca/wiki/"
+"github.com/scieloorg/scms-oca/wiki/Campos#institui%C3%A7%C3%A3o-"
+"contribuidora\" target=\"_blank\">https://github.com/scieloorg/scms-oca/wiki/"
+"Campos#institui%C3%A7%C3%A3o-contribuidora</a>"
+
+#: core/help_fields.py:35
+#, fuzzy
+#| msgid ""
+#| "Nome da instituição que contribuiu. Veja exemplo em: <a href=\"https://"
+#| "github.com/scieloorg/scms-oca/wiki/Campos#institui%C3%A7%C3%A3o-"
+#| "contribuidora\" target=\"_blank\">https://github.com/scieloorg/scms-oca/"
+#| "wiki/Campos#institui%C3%A7%C3%A3o-contribuidora</a>"
+msgid ""
+"Indique a disponibilidade: <a href=\"https://github.com/scieloorg/scms-oca/"
+"wiki/Campos#institui%C3%A7%C3%A3o-contribuidora\" target=\"_blank\">https://"
+"github.com/scieloorg/scms-oca/wiki/Campos#disponibilidade</a>"
+msgstr ""
+"Nome da instituição que contribuiu. Veja exemplo em: <a href=\"https://"
+"github.com/scieloorg/scms-oca/wiki/Campos#institui%C3%A7%C3%A3o-"
+"contribuidora\" target=\"_blank\">https://github.com/scieloorg/scms-oca/wiki/"
 "Campos#institui%C3%A7%C3%A3o-contribuidora</a>"
 
 #: core/models.py:23 indicator/models.py:819
@@ -818,11 +851,11 @@ msgstr "Confirmar"
 #: core/templates/account/email_confirm.html:27
 #, python-format
 msgid ""
-"This e-mail confirmation link expired or is invalid. Please <a href="
-"\"%(email_url)s\">issue a new e-mail confirmation request</a>."
+"This e-mail confirmation link expired or is invalid. Please <a "
+"href=\"%(email_url)s\">issue a new e-mail confirmation request</a>."
 msgstr ""
-"Este link de confirmação de e-mail expirou ou é inválido. Por favor, <a href="
-"\"%(email_url)s\">solicite uma nova confirmação de e-mail</a>."
+"Este link de confirmação de e-mail expirou ou é inválido. Por favor, <a "
+"href=\"%(email_url)s\">solicite uma nova confirmação de e-mail</a>."
 
 #: core/templates/account/login.html:7 core/templates/account/login.html:11
 #: core/templates/account/login.html:56
@@ -839,8 +872,8 @@ msgid ""
 "Or, <a href=\"%(signup_url)s\">sign up</a> for a %(site_name)s account and "
 "sign in below:"
 msgstr ""
-"Ou, <a href=\"%(signup_url)s\">cadastre-se</a> para uma conta %(site_name)s e "
-"entre abaixo:"
+"Ou, <a href=\"%(signup_url)s\">cadastre-se</a> para uma conta %(site_name)s "
+"e entre abaixo:"
 
 #: core/templates/account/login.html:32
 msgid "or"
@@ -849,11 +882,11 @@ msgstr "ou"
 #: core/templates/account/login.html:41
 #, python-format
 msgid ""
-"If you have not created an account yet, then please <a href=\"%(signup_url)s"
-"\">sign up</a> first."
+"If you have not created an account yet, then please <a "
+"href=\"%(signup_url)s\">sign up</a> first."
 msgstr ""
-"Se você ainda não criou uma conta, por favor <a href=\"%(signup_url)s"
-"\">cadastre-se</a> primeiro."
+"Se você ainda não criou uma conta, por favor <a "
+"href=\"%(signup_url)s\">cadastre-se</a> primeiro."
 
 #: core/templates/account/login.html:55
 msgid "Forgot Password?"
@@ -890,8 +923,8 @@ msgid ""
 "Forgotten your password? Enter your e-mail address below, and we'll send you "
 "an e-mail allowing you to reset it."
 msgstr ""
-"Esqueceu sua senha? Digite seu endereço de e-mail abaixo e enviaremos um "
-"e-mail permitindo que você a redefina."
+"Esqueceu sua senha? Digite seu endereço de e-mail abaixo e enviaremos um e-"
+"mail permitindo que você a redefina."
 
 #: core/templates/account/password_reset.html:21
 msgid "Reset My Password"
@@ -899,7 +932,8 @@ msgstr "Redefinir Minha Senha"
 
 #: core/templates/account/password_reset.html:24
 msgid "Please contact us if you have any trouble resetting your password."
-msgstr "Entre em contato conosco se tiver algum problema para redefinir sua senha."
+msgstr ""
+"Entre em contato conosco se tiver algum problema para redefinir sua senha."
 
 #: core/templates/account/password_reset_done.html:15
 msgid ""
@@ -1009,6 +1043,69 @@ msgstr ""
 "<strong>Nota:</strong> você ainda pode <a href=\"%(email_url)s\">alterar seu "
 "endereço de e-mail</a>."
 
+#: core/templates/graph/graph.html:30
+#: search/templates/indicator/indicator_detail.html:38
+#: search/templates/search.html:36 search/templates/search/search_page.html:36
+msgid "Digite sua pesquisa..."
+msgstr "Digite sua pesquisa..."
+
+#: core/templates/graph/graph.html:35
+#: search/templates/indicator/indicator_detail.html:43
+#: search/templates/search.html:41 search/templates/search/search_page.html:29
+#: search/templates/search/search_page.html:43
+msgid "Buscar"
+msgstr "Buscar"
+
+#: core/templates/graph/graph.html:37
+#: search/templates/indicator/indicator_detail.html:45
+#: search/templates/search.html:43
+msgid "Help"
+msgstr "Ajuda"
+
+#: core/templates/graph/graph.html:57 search/templates/search.html:63
+msgid "registros encontrados para o termo"
+msgstr "registros encontrados para o termo"
+
+#: core/templates/graph/graph.html:61 search/templates/search.html:67
+msgid "Tempo da pesquisa"
+msgstr "Tempo da pesquisa"
+
+#: core/templates/graph/graph.html:61 search/templates/search.html:67
+msgid "milisegundos"
+msgstr "milissegundos"
+
+#: core/templates/graph/graph.html:64 search/templates/search.html:70
+msgid "0 registros encontrados para o termo"
+msgstr "0 registros encontrados para o termo"
+
+#: core/templates/graph/graph.html:92 search/templates/search.html:98
+msgid "Ordenar por"
+msgstr "Ordenar por"
+
+#: core/templates/graph/graph.html:94 search/templates/search.html:100
+msgid "Por âmbito geográfico"
+msgstr "Por âmbito geográfico"
+
+#: core/templates/graph/graph.html:95 search/templates/search.html:101
+msgid "Por âmbito temático"
+msgstr "Por âmbito temático"
+
+#: core/templates/graph/graph.html:96 search/templates/search.html:102
+msgid "Ordem descrecente de criação"
+msgstr "Ordem decrescente de criação"
+
+#: core/templates/graph/graph.html:97 search/templates/search.html:103
+msgid "Relevância"
+msgstr "Relevância"
+
+#: core/templates/graph/graph.html:102 search/templates/search.html:108
+msgid "Visualizar"
+msgstr "Visualizar"
+
+#: core/templates/graph/graph.html:110 search/templates/search.html:116
+msgid "Itens por página"
+msgstr "Itens por página"
+
 #: core/templates/home/welcome_page.html:53
 #: core/templates/home/welcome_page.html:56
 msgid "View the release notes"
@@ -1020,13 +1117,13 @@ msgstr "Bem-vindo ao seu Gerenciador de Conteúdo SciELO"
 
 #: core/templates/home/welcome_page.html:69
 msgid ""
-"Please feel free to <a href=\"https://github.com/wagtail/wagtail/wiki/Slack"
-"\">join our community on Slack</a>, or get started with one of the links "
-"below."
+"Please feel free to <a href=\"https://github.com/wagtail/wagtail/wiki/"
+"Slack\">join our community on Slack</a>, or get started with one of the "
+"links below."
 msgstr ""
-"Sinta-se à vontade para <a href=\"https://github.com/wagtail/wagtail/wiki/Slack"
-"\">juntar-se à nossa comunidade no Slack</a>, ou comece com um dos links "
-"abaixo."
+"Sinta-se à vontade para <a href=\"https://github.com/wagtail/wagtail/wiki/"
+"Slack\">juntar-se à nossa comunidade no Slack</a>, ou comece com um dos "
+"links abaixo."
 
 #: core/templates/home/welcome_page.html:77
 msgid "Wagtail Documentation"
@@ -1229,6 +1326,14 @@ msgstr "PUBLICADO"
 msgid "NOT PUBLISHED"
 msgstr "NÃO PUBLICADO"
 
+#: education_directory/choices.py:29
+msgid "Gratuito"
+msgstr ""
+
+#: education_directory/choices.py:30
+msgid "Pago"
+msgstr ""
+
 #: education_directory/models.py:31 education_directory/models.py:32
 #: education_directory/wagtail_hooks.py:20
 #: education_directory/wagtail_hooks.py:82
@@ -1331,45 +1436,51 @@ msgstr "Pode editar contribuição institucional"
 msgid "Can edit notes"
 msgstr "Pode editar notas"
 
-#: education_directory/models.py:66 event_directory/models.py:66
+#: education_directory/models.py:56
+#, fuzzy
+#| msgid "Can edit validity"
+msgid "Can edit availability"
+msgstr "Pode editar validade"
+
+#: education_directory/models.py:67 event_directory/models.py:66
 #: indicator/models.py:153 infrastructure_directory/models.py:61
 #: policy_directory/models.py:60
 msgid "Link"
 msgstr "Link"
 
-#: education_directory/models.py:69 event_directory/models.py:69
+#: education_directory/models.py:70 event_directory/models.py:69
 #: indicator/models.py:110 infrastructure_directory/models.py:64
 #: policy_directory/models.py:63
 msgid "Description"
 msgstr "Descrição"
 
-#: education_directory/models.py:76 event_directory/models.py:76
+#: education_directory/models.py:77 event_directory/models.py:76
 #: indicator/models.py:150
 msgid "Start Date"
 msgstr "Data de Início"
 
-#: education_directory/models.py:78 event_directory/models.py:78
+#: education_directory/models.py:79 event_directory/models.py:78
 #: indicator/models.py:151
 msgid "End Date"
 msgstr "Data de Fim"
 
-#: education_directory/models.py:80 education_directory/views.py:299
+#: education_directory/models.py:81 education_directory/views.py:311
 #: event_directory/models.py:80
 msgid "Start Time"
 msgstr "Hora Inicial"
 
-#: education_directory/models.py:82 education_directory/views.py:301
+#: education_directory/models.py:83 education_directory/views.py:313
 #: event_directory/models.py:82
 msgid "End Time"
 msgstr "Hora Final"
 
-#: education_directory/models.py:85 event_directory/models.py:85
+#: education_directory/models.py:86 event_directory/models.py:85
 #: indicator/models.py:149 location/models.py:35 location/wagtail_hooks.py:20
 #: search/templates/search/include/result_items/social_production.html:71
 msgid "Location"
 msgstr "Localização"
 
-#: education_directory/models.py:89 indicator/models.py:147
+#: education_directory/models.py:90 indicator/models.py:147
 #: indicator/templates/filters/sci_prod_brazil.html:158
 #: indicator/templates/filters/sci_prod_brazil.html:159
 #: indicator/templates/filters/sci_prod_scielo.html:131
@@ -1386,7 +1497,7 @@ msgstr "Localização"
 msgid "Institution"
 msgstr "Instituição"
 
-#: education_directory/models.py:102 event_directory/models.py:102
+#: education_directory/models.py:103 event_directory/models.py:102
 #: indicator/templates/filters/soc_prod.html:12
 #: indicator/templates/filters/soc_prod.html:64
 #: indicator/templates/filters/soc_prod.html:65
@@ -1399,7 +1510,7 @@ msgstr "Instituição"
 msgid "Practice"
 msgstr "Prática"
 
-#: education_directory/models.py:111 event_directory/models.py:111
+#: education_directory/models.py:112 event_directory/models.py:111
 #: indicator/templates/filters/soc_prod.html:10
 #: indicator/templates/filters/soc_prod.html:52
 #: indicator/templates/filters/soc_prod.html:53
@@ -1412,7 +1523,7 @@ msgstr "Prática"
 msgid "Action"
 msgstr "Ação"
 
-#: education_directory/models.py:119 event_directory/models.py:119
+#: education_directory/models.py:120 event_directory/models.py:119
 #: indicator/templates/filters/soc_prod.html:11
 #: indicator/templates/filters/soc_prod.html:58
 #: indicator/templates/filters/soc_prod.html:59
@@ -1423,29 +1534,29 @@ msgstr "Ação"
 msgid "Classification"
 msgstr "Classificação"
 
-#: education_directory/models.py:128 event_directory/models.py:127
+#: education_directory/models.py:129 event_directory/models.py:127
 #: indicator/models.py:161 infrastructure_directory/models.py:113
 #: policy_directory/models.py:113 provided_data/core.py:314
 msgid "Keywords"
 msgstr "Palavras-chave"
 
-#: education_directory/models.py:132 event_directory/models.py:131
+#: education_directory/models.py:133 event_directory/models.py:131
 msgid "Attendance"
 msgstr "Presença"
 
-#: education_directory/models.py:140 event_directory/models.py:139
+#: education_directory/models.py:141 event_directory/models.py:139
 #: indicator/models.py:164 infrastructure_directory/models.py:117
 #: policy_directory/models.py:117
 msgid "Record status"
 msgstr "Status do registro"
 
-#: education_directory/models.py:157 event_directory/models.py:156
+#: education_directory/models.py:158 event_directory/models.py:156
 #: indicator/models.py:192 infrastructure_directory/models.py:134
 #: policy_directory/models.py:134
 msgid "Institutional Contribution"
 msgstr "Contribuição Institucional"
 
-#: education_directory/models.py:164 event_directory/models.py:163
+#: education_directory/models.py:165 event_directory/models.py:163
 #: indicator/models.py:198 infrastructure_directory/models.py:141
 #: policy_directory/models.py:141
 msgid "Notes"
@@ -1460,17 +1571,17 @@ msgstr "Disponibilidade"
 msgid "Education Data Upload"
 msgstr "Upload de Dados de Educação"
 
-#: education_directory/models.py:408 event_directory/models.py:395
+#: education_directory/models.py:419 event_directory/models.py:395
 #: infrastructure_directory/models.py:359 policy_directory/models.py:356
 msgid "Attachement"
 msgstr "Anexo"
 
-#: education_directory/models.py:414 event_directory/models.py:401
+#: education_directory/models.py:425 event_directory/models.py:401
 #: infrastructure_directory/models.py:365 policy_directory/models.py:362
 msgid "Is valid?"
 msgstr "É válido?"
 
-#: education_directory/models.py:416 event_directory/models.py:403
+#: education_directory/models.py:427 event_directory/models.py:403
 #: infrastructure_directory/models.py:367 policy_directory/models.py:364
 msgid "Number of lines"
 msgstr "Número de linhas"
@@ -1517,15 +1628,16 @@ msgstr "Download de Exemplo CSV"
 msgid "Novo conteúdo para moderação - %s"
 msgstr "Novo conteúdo para moderação - %s"
 
-#: education_directory/views.py:163 event_directory/views.py:161
-#: infrastructure_directory/views.py:162 policy_directory/views.py:165
-msgid "Valication error"
+#: education_directory/views.py:163
+#, fuzzy
+#| msgid "Validation error"
+msgid "Vlidation error"
 msgstr "Erro de validação"
 
-#: education_directory/views.py:170 event_directory/views.py:168
-#: infrastructure_directory/views.py:169 policy_directory/views.py:172
-#, python-format
-msgid "Valication error: %s"
+#: education_directory/views.py:170
+#, fuzzy, python-format
+#| msgid "Validation error: %s"
+msgid "Vlidation error: %s"
 msgstr "Erro de validação: %s"
 
 #: education_directory/views.py:172 event_directory/views.py:170
@@ -1533,20 +1645,21 @@ msgstr "Erro de validação: %s"
 msgid "File successfully validated!"
 msgstr "Arquivo validado com sucesso!"
 
-#: education_directory/views.py:260 event_directory/views.py:258
-#: infrastructure_directory/views.py:252 policy_directory/views.py:257
+#: education_directory/views.py:265 event_directory/views.py:258
+#: infrastructure_directory/views.py:257 policy_directory/views.py:259
 #, python-format
 msgid "Unknown Practice, line: %s"
 msgstr "Prática desconhecida, linha: %s"
 
-#: education_directory/views.py:277 infrastructure_directory/views.py:271
-#: policy_directory/views.py:274
-#, python-format
-msgid "Import error: %s, Line: %s"
+#: education_directory/views.py:284 infrastructure_directory/views.py:278
+#: policy_directory/views.py:278
+#, fuzzy, python-format
+#| msgid "Import error: %s, Line: %s"
+msgid "Import error: %(error)s, Line: %(line)s"
 msgstr "Erro na importação: %s, Linha: %s"
 
-#: education_directory/views.py:279 infrastructure_directory/views.py:273
-#: policy_directory/views.py:276
+#: education_directory/views.py:291 infrastructure_directory/views.py:285
+#: policy_directory/views.py:285
 msgid "File imported successfully!"
 msgstr "Arquivo importado com sucesso!"
 
@@ -1591,6 +1704,17 @@ msgstr "Instituições responsáveis pela organização do evento."
 #: event_directory/models.py:391 event_directory/wagtail_hooks.py:64
 msgid "Dissemination Data Upload"
 msgstr "Upload de Dados de Disseminação"
+
+#: event_directory/views.py:161 infrastructure_directory/views.py:162
+#: policy_directory/views.py:165
+msgid "Validation error"
+msgstr "Erro de validação"
+
+#: event_directory/views.py:168 infrastructure_directory/views.py:169
+#: policy_directory/views.py:172
+#, python-format
+msgid "Validation error: %s"
+msgstr "Erro de validação: %s"
 
 #: indicator/choices.py:18
 msgid "WORK IN PROGRESS"
@@ -1705,15 +1829,6 @@ msgstr "Brasil"
 #: indicator/directory.py:444
 msgid "ações de {}"
 msgstr "ações de {}"
-
-#: indicator/directory.py:485
-#, python-brace-format
-msgid ""
-"Gerado automaticamente usando dados coletados e registrados manualmente por "
-"{contribution}"
-msgstr ""
-"Gerado automaticamente usando dados coletados e registrados manualmente por "
-"{contribution}"
 
 #: indicator/directory.py:612
 msgid "Geração de indicadores de ações"
@@ -1875,12 +1990,14 @@ msgstr "por"
 msgid "Data Type"
 msgstr "Tipo de Dados"
 
-#: indicator/scheduler.py:52
-#, python-format
-msgid "Agendado %s %s às %s:%s prioridade: %s"
+#: indicator/scheduler.py:53
+#, fuzzy, python-format
+#| msgid "Agendado %s %s às %s:%s prioridade: %s"
+msgid ""
+"Agendado %(name)s %(day)s às %(hour)s:%(minute)s prioridade: %(priority)s"
 msgstr "Agendado %s %s às %s:%s prioridade: %s"
 
-#: indicator/scheduler.py:80
+#: indicator/scheduler.py:87
 msgid "Unable to get_or_create_crontab_schedule {} {} {} {} {}"
 msgstr "Não foi possível obter ou criar crontab_schedule {} {} {} {} {}"
 
@@ -1899,11 +2016,6 @@ msgstr "APC"
 #: indicator/sciprod.py:380
 msgid "artigos científicos"
 msgstr "artigos científicos"
-
-#: indicator/sciprod.py:412
-#, python-brace-format
-msgid "Gerado automaticamente usando dados provenientes de {sources}"
-msgstr "Gerado automaticamente usando dados provenientes de {sources}"
 
 #: indicator/sciprod.py:589
 msgid "Geração de indicadores de artigos científicos"
@@ -2566,7 +2678,8 @@ msgstr "organização sem fins de lucros"
 
 #: institution/choices.py:19
 msgid "sociedade científica, associação pós-graduação, associação profissional"
-msgstr "sociedade científica, associação pós-graduação, associação profissional"
+msgstr ""
+"sociedade científica, associação pós-graduação, associação profissional"
 
 #: institution/choices.py:23 usefulmodels/choices.py:12
 #: usefulmodels/choices.py:27 usefulmodels/choices.py:85
@@ -2662,9 +2775,6 @@ msgstr "A tabela de periódicos de origem possui duplicidade...."
 msgid "Source Journals"
 msgstr "Periódicos de Origem"
 
-#: location/models.py:16 location/models.py:50 location/models.py:60
-#: search/templates/include/result_doc.html:35
-#: search/templates/include/result_doc_directory.html
 #: location/models.py:16 location/models.py:50 location/models.py:60
 #: search/templates/include/result_doc.html:35
 #: search/templates/include/result_doc_directory.html:61
@@ -3050,8 +3160,8 @@ msgid "Ouro"
 msgstr "Ouro"
 
 #: search/choices.py:63
-msgid "Híbrido"
-msgstr "Híbrido"
+msgid "Hibrído"
+msgstr ""
 
 #: search/choices.py:64
 msgid "Verde"
@@ -3235,66 +3345,6 @@ msgstr "Gráfico modo escuro"
 #: search/templates/indicator/abas.html:22
 msgid "Gráfico"
 msgstr "Gráfico"
-
-#: search/templates/indicator/indicator_detail.html:38
-#: search/templates/search.html:36 search/templates/search/search_page.html:36
-msgid "Digite sua pesquisa..."
-msgstr "Digite sua pesquisa..."
-
-#: search/templates/indicator/indicator_detail.html:43
-#: search/templates/search.html:41 search/templates/search/search_page.html:29
-#: search/templates/search/search_page.html:43
-msgid "Buscar"
-msgstr "Buscar"
-
-#: search/templates/indicator/indicator_detail.html:45
-#: search/templates/search.html:43
-msgid "Help"
-msgstr "Ajuda"
-
-#: search/templates/search.html:63
-msgid "registros encontrados para o termo"
-msgstr "registros encontrados para o termo"
-
-#: search/templates/search.html:67
-msgid "Tempo da pesquisa"
-msgstr "Tempo da pesquisa"
-
-#: search/templates/search.html:67
-msgid "milisegundos"
-msgstr "milissegundos"
-
-#: search/templates/search.html:70
-msgid "0 registros encontrados para o termo"
-msgstr "0 registros encontrados para o termo"
-
-#: search/templates/search.html:98
-msgid "Ordenar por"
-msgstr "Ordenar por"
-
-#: search/templates/search.html:100
-msgid "Por âmbito geográfico"
-msgstr "Por âmbito geográfico"
-
-#: search/templates/search.html:101
-msgid "Por âmbito temático"
-msgstr "Por âmbito temático"
-
-#: search/templates/search.html:102
-msgid "Ordem descrecente de criação"
-msgstr "Ordem decrescente de criação"
-
-#: search/templates/search.html:103
-msgid "Relevância"
-msgstr "Relevância"
-
-#: search/templates/search.html:108
-msgid "Visualizar"
-msgstr "Visualizar"
-
-#: search/templates/search.html:116
-msgid "Itens por página"
-msgstr "Itens por página"
 
 #: search/templates/search.html:286
 msgid ""
@@ -3770,3 +3820,22 @@ msgstr "Ações"
 #: usefulmodels/wagtail_hooks.py:219
 msgid "Useful Models"
 msgstr "Modelos Úteis"
+
+#, python-format
+#~ msgid "Import error: %s, Line: %s"
+#~ msgstr "Erro na importação: %s, Linha: %s"
+
+#, python-brace-format
+#~ msgid ""
+#~ "Gerado automaticamente usando dados coletados e registrados manualmente "
+#~ "por {contribution}"
+#~ msgstr ""
+#~ "Gerado automaticamente usando dados coletados e registrados manualmente "
+#~ "por {contribution}"
+
+#, python-brace-format
+#~ msgid "Gerado automaticamente usando dados provenientes de {sources}"
+#~ msgstr "Gerado automaticamente usando dados provenientes de {sources}"
+
+#~ msgid "Híbrido"
+#~ msgstr "Híbrido"
