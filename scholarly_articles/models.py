@@ -27,7 +27,7 @@ class ScholarlyArticles(models.Model):
         _("Use License"), max_length=50, choices=choices.LICENSE, null=True, blank=True
     )
     license = models.ForeignKey(
-        _("License"),
+        "License",
         verbose_name=_("License"),
         on_delete=models.SET_NULL,
         max_length=255,
