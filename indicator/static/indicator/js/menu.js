@@ -98,9 +98,19 @@ function initIndicatorForm(dataSource, studyUnit) {
   }
 }
 
+// Django JS i18n fallback (jsi18n usually loads this)
+if (typeof window !== 'undefined' && typeof window.gettext !== 'function') {
+  window.gettext = function (msgid) { return msgid; };
+}
+
 function renderChartsContainer(data, dataSource, studyUnit, csrfMiddlewareToken) {
   const breakdownVariable = data.breakdown_variable;
-  const breakdownLabel = ` per Year${breakdownVariable ? ` by ${breakdownVariable.replace(/_/g, ' ')}` : ''}`;
+
+  const breakdownSelect = document.querySelector('#menu-form select[name="breakdown_variable"]');
+  const breakdownText = breakdownSelect && breakdownSelect.value
+    ? (breakdownSelect.options[breakdownSelect.selectedIndex]?.textContent || '').trim()
+    : '';
+  const breakdownLabel = ` ${gettext('per Year')}${breakdownText ? ` ${gettext('by')} ${breakdownText}` : ''}`;
   const unitSuffix = '';
 
   if (studyUnit === 'journal') {
@@ -109,7 +119,7 @@ function renderChartsContainer(data, dataSource, studyUnit, csrfMiddlewareToken)
       chartDivId: 'periodicals-chart-div',
       data: data,
       seriesType: 'Periodicals',
-      title: `Unique Periodicals (sources)${breakdownLabel}`,
+      title: `${gettext('Unique Periodicals (sources)')}${breakdownLabel}`,
     });
 
     window.Indicators.renderChart({
@@ -117,7 +127,7 @@ function renderChartsContainer(data, dataSource, studyUnit, csrfMiddlewareToken)
       chartDivId: 'docs-chart-div',
       data: data,
       seriesType: 'Documents per Periodical',
-      title: `Avg Documents per Periodical${breakdownLabel}${unitSuffix}`,
+      title: `${gettext('Avg Documents per Periodical')}${breakdownLabel}${unitSuffix}`,
     });
 
     window.Indicators.renderChart({
@@ -125,7 +135,7 @@ function renderChartsContainer(data, dataSource, studyUnit, csrfMiddlewareToken)
       chartDivId: 'citations-chart-div',
       data: data,
       seriesType: 'Citations per Periodical',
-      title: `Avg Citations per Periodical${breakdownLabel}${unitSuffix}`,
+      title: `${gettext('Avg Citations per Periodical')}${breakdownLabel}${unitSuffix}`,
     });
 
     window.Indicators.renderChart({
@@ -133,7 +143,7 @@ function renderChartsContainer(data, dataSource, studyUnit, csrfMiddlewareToken)
       chartDivId: 'citations-per-doc-chart-div',
       data: data,
       seriesType: 'Cited Documents per Periodical',
-      title: `Avg Cited Documents per Periodical${breakdownLabel}${unitSuffix}`,
+      title: `${gettext('Avg Cited Documents per Periodical')}${breakdownLabel}${unitSuffix}`,
     });
 
     window.Indicators.renderChart({
@@ -141,7 +151,7 @@ function renderChartsContainer(data, dataSource, studyUnit, csrfMiddlewareToken)
       chartDivId: 'pct-cited-docs-chart-div',
       data: data,
       seriesType: 'Percent Periodicals With Cited Docs',
-      title: `% Periodicals With ≥1 Cited Document${breakdownLabel}${unitSuffix}`,
+      title: `${gettext('% Periodicals With ≥1 Cited Document')}${breakdownLabel}${unitSuffix}`,
     });
   } else {
     // Render documents chart
@@ -150,7 +160,7 @@ function renderChartsContainer(data, dataSource, studyUnit, csrfMiddlewareToken)
       chartDivId: 'docs-chart-div',
       data: data,
       seriesType: 'Documents',
-      title: `Total Documents${breakdownLabel}${unitSuffix}`,
+      title: `${gettext('Total Documents')}${breakdownLabel}${unitSuffix}`,
     });
 
     // Render citations chart
@@ -159,7 +169,7 @@ function renderChartsContainer(data, dataSource, studyUnit, csrfMiddlewareToken)
       chartDivId: 'citations-chart-div',
       data: data,
       seriesType: 'Citations',
-      title: `Total Citations${breakdownLabel}${unitSuffix}`,
+      title: `${gettext('Total Citations')}${breakdownLabel}${unitSuffix}`,
     });
 
     // Render citations per document chart
@@ -168,7 +178,7 @@ function renderChartsContainer(data, dataSource, studyUnit, csrfMiddlewareToken)
       chartDivId: 'citations-per-doc-chart-div',
       data: data,
       seriesType: 'Citations per Document',
-      title: `Citations per Document${breakdownLabel}${unitSuffix}`,
+      title: `${gettext('Citations per Document')}${breakdownLabel}${unitSuffix}`,
     });
 
     // Render cited documents chart
@@ -177,7 +187,7 @@ function renderChartsContainer(data, dataSource, studyUnit, csrfMiddlewareToken)
       chartDivId: 'cited-docs-chart-div',
       data: data,
       seriesType: 'Cited Documents',
-      title: `Cited Documents (≥1 citation)${breakdownLabel}${unitSuffix}`,
+      title: `${gettext('Cited Documents (≥1 citation)')}${breakdownLabel}${unitSuffix}`,
     });
 
     // Render % docs with citations chart
@@ -186,7 +196,7 @@ function renderChartsContainer(data, dataSource, studyUnit, csrfMiddlewareToken)
       chartDivId: 'pct-cited-docs-chart-div',
       data: data,
       seriesType: 'Percent Docs With Citations',
-      title: `% Documents With ≥1 Citation${breakdownLabel}${unitSuffix}`,
+      title: `${gettext('% Documents With ≥1 Citation')}${breakdownLabel}${unitSuffix}`,
     });
   }
 }

@@ -1,6 +1,6 @@
 from django.utils.translation import gettext as _
 
-from wagtail.contrib.modeladmin.options import ModelAdmin
+from wagtail_modeladmin.options import ModelAdmin
 
 from .models import SourceJournal
 

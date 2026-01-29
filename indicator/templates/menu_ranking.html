@@ -1,3 +1,5 @@
+{% load i18n static %}
+
 <div>
   <form method="POST" action="{% url 'indicator_journal_metrics' %}" id="menu-form-journal-metrics">
     {% csrf_token %}
@@ -7,8 +9,8 @@
 
     <div class="menu-floating-actions mt-6">
       <div class="menu-floating-actions__inner">
-        <button id="menu-reset-journal-metrics" type="reset" class="btn btn-secondary me-2">Reset</button>
-        <button id="menu-submit-journal-metrics" type="submit" class="btn btn-primary">Generate</button>
+        <button id="menu-reset-journal-metrics" type="reset" class="btn btn-secondary me-2">{% trans "Reset" %}</button>
+        <button id="menu-submit-journal-metrics" type="submit" class="btn btn-primary">{% trans "Generate" %}</button>
       </div>
     </div>
   </form>

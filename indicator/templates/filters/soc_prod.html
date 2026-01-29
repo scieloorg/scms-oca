@@ -1,31 +1,33 @@
-<h4 class="my-2">Graph Options</h4>
+{% load i18n static %}
+
+<h4 class="my-2">{% trans "Graph Options" %}</h4>
 
 <div class="form-group mb-3">
-  <label for="breakdown_variable" class="form-label">Breakdown Variable</label>
+  <label for="breakdown_variable" class="form-label">{% trans "Breakdown Variable" %}</label>
   <select id="breakdown_variable" class="form-control" name="breakdown_variable">
-    <option value="">Select a variable</option>
-    <option value="directory_type">Directory Type</option>
-    <option value="action">Action</option>
-    <option value="classification">Classification</option>
-    <option value="practice">Practice</option>
-    <option value="institution">Institution</option>
-    <option value="state_brazil">State (Brazil)</option>
-    <option value="city_brazil">City (Brazil)</option>
+    <option value="">{% trans "Select a variable" %}</option>
+    <option value="directory_type">{% trans "Directory Type" %}</option>
+    <option value="action">{% trans "Action" %}</option>
+    <option value="classification">{% trans "Classification" %}</option>
+    <option value="practice">{% trans "Practice" %}</option>
+    <option value="institution">{% trans "Institution" %}</option>
+    <option value="state_brazil">{% trans "State (Brazil)" %}</option>
+    <option value="city_brazil">{% trans "City (Brazil)" %}</option>
   </select>
 </div>
 
-<h4 class="my-2 pt-1">Filters</h4>
+<h4 class="my-2 pt-1">{% trans "Filters" %}</h4>
 
 <div class="form-group mb-3">
-  <label class="form-label" for="document_publication_year_start">Publication Year</label>
+  <label class="form-label" for="document_publication_year_start">{% trans "Publication Year" %}</label>
   <div class="input-group">
     <input
       id="document_publication_year_start"
       name="document_publication_year_start"
       type="text"
       class="form-control"
-      aria-label="Publication Year Start"
-      placeholder="Start"
+      aria-label="{% trans 'Publication Year Start' %}"
+      placeholder="{% trans 'Start' %}"
       value="2015"
     />
     <input
@@ -33,49 +35,50 @@
       name="document_publication_year_end"
       type="text"
       class="form-control"
-      aria-label="Publication Year End"
-      placeholder="End"
+      aria-label="{% trans 'Publication Year End' %}"
+      placeholder="{% trans 'End' %}"
       value="2024"
     />
   </div>
 </div>
 
 <div class="form-group mb-3">
-    <label class="form-label" for="directory_type">Directory Type</label>
-    <select multiple id="directory_type" class="form-control" name="directory_type" aria-label="Directory Type">
+    <label class="form-label" for="directory_type">{% trans "Directory Type" %}</label>
+    <select multiple id="directory_type" class="form-control" name="directory_type" aria-label="{% trans 'Directory Type' %}">
     </select>
 </div>
 
 <div class="form-group mb-3">
-    <label class="form-label" for="action">Action</label>
-    <select multiple id="action" class="form-control" name="action" aria-label="Action">
+    <label class="form-label" for="action">{% trans "Action" %}</label>
+    <select multiple id="action" class="form-control" name="action" aria-label="{% trans 'Action' %}">
     </select>
 </div>
 
 <div class="form-group mb-3">
-    <label class="form-label" for="classification">Classification</label>
-    <select multiple id="classification" class="form-control" name="classification" aria-label="Classification">
+    <label class="form-label" for="classification">{% trans "Classification" %}</label>
+    <select multiple id="classification" class="form-control" name="classification" aria-label="{% trans 'Classification' %}">
     </select>
 </div>
 
 <div class="form-group mb-3">
-    <label class="form-label" for="practice">Practice</label>
-    <select multiple id="practice" class="form-control" name="practice" aria-label="Practice"></select>
+    <label class="form-label" for="practice">{% trans "Practice" %}</label>
+    <select multiple id="practice" class="form-control" name="practice" aria-label="{% trans 'Practice' %}">
+    </select>
 </div>
 
 <div class="form-group mb-3">
-    <label class="form-label" for="institution">Institution</label>
-    <select multiple id="institution" class="form-control" name="institution" aria-label="Institution"></select>
+    <label class="form-label" for="institution">{% trans "Institution" %}</label>
+    <select multiple id="institution" class="form-control" name="institution" aria-label="{% trans 'Institution' %}"></select>
 </div>
 
 <div class="form-group mb-3">
-    <label class="form-label" for="state_brazil">State (Brazil)</label>
-    <select multiple id="state_brazil" class="form-control" name="state_brazil" aria-label="State (Brazil)"></select>
+    <label class="form-label" for="state_brazil">{% trans "State (Brazil)" %}</label>
+    <select multiple id="state_brazil" class="form-control" name="state_brazil" aria-label="{% trans 'State (Brazil)' %}"></select>
 </div>
 
 <div class="form-group mb-3">
-    <label class="form-label" for="city_brazil">City (Brazil)</label>
-    <select multiple id="city_brazil" class="form-control" name="city_brazil" aria-label="City (Brazil)">
+    <label class="form-label" for="city_brazil">{% trans "City (Brazil)" %}</label>
+    <select multiple id="city_brazil" class="form-control" name="city_brazil" aria-label="{% trans 'City (Brazil)' %}">
     </select>
 </div>
 
@@ -125,7 +128,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (selectElement) {
             $(selectElement).select2(
               {
-                placeholder: 'Start typing to search...',
+                placeholder: gettext('Start typing to search...'),
                 allowClear: true,
                 theme: 'bootstrap-5',
               }
@@ -150,7 +153,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             const selectElement = document.getElementById(fieldId);
             if (selectElement) {
                 $(selectElement).select2(
-                  {placeholder: 'Start typing to search...'}
+                    {
+                        placeholder: gettext('Start typing to search...'), 
+                    }
                 );
             }
         });

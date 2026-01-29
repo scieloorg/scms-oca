@@ -7,7 +7,7 @@ from django.template.loader import render_to_string
 from django.conf import settings
 from django.utils.translation import gettext as _
 from wagtail.admin import messages
-from wagtail.contrib.modeladmin.views import CreateView, EditView
+from wagtail_modeladmin.views import CreateView, EditView
 
 from core import tasks
 from core.libs import chkcsv
@@ -114,7 +114,7 @@ class InfrastructureDirectoryEditView(EditView):
 
     def form_valid(self, form):
         self.object = form.save_all(self.request.user)
-        
+
         # check if have moderation
         if self.must_moderate:
             if self.get_moderation():
@@ -159,14 +159,14 @@ def validate(request):
                 upload_path, cols, True, True, True, False
             )
             if errorlist:
-                raise Exception(_("Valication error"))
+                raise Exception(_("Validation error"))
             else:
                 file_upload.is_valid = True
                 fp = open(upload_path)
                 file_upload.line_count = len(fp.readlines())
                 file_upload.save()
         except Exception as ex:
-            messages.error(request, _("Valication error: %s") % errorlist)
+            messages.error(request, _("Validation error: %s") % errorlist)
         else:
             messages.success(request, _("File successfully validated!"))
 
@@ -193,12 +193,17 @@ def import_file(request):
 
     try:
         with open(file_path, "r") as csvfile:
-            data = csv.DictReader(csvfile, delimiter=settings.DIRECTORY_IMPORT_DELIMITER)
+            data = csv.DictReader(
+                csvfile, delimiter=settings.DIRECTORY_IMPORT_DELIMITER
+            )
 
             for line, row in enumerate(data):
 
                 record_id = row.get("Id", "").strip()
-                if record_id and InfrastructureDirectory.objects.filter(id=record_id).exists():
+                if (
+                    record_id
+                    and InfrastructureDirectory.objects.filter(id=record_id).exists()
+                ):
                     isd = InfrastructureDirectory.objects.get(id=record_id)
                 else:
                     isd = InfrastructureDirectory()
@@ -268,7 +273,14 @@ def import_file(request):
                 InfraStructureIndex().update_object(instance=isd)
 
     except Exception as ex:
-        messages.error(request, _("Import error: %s, Line: %s") % (ex, str(line + 2)))
+        messages.error(
+            request,
+            _("Import error: %(error)s, Line: %(line)s")
+            % {
+                "error": ex,
+                "line": line + 2,
+            },
+        )
     else:
         messages.success(request, _("File imported successfully!"))
 

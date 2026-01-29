@@ -1,9 +1,15 @@
 {% load humanize %}
+{% load i18n %}
 
 <div id="results-count" class="mb-3">
     {% if results_data.total_results %}
     <p class="text-muted">
-        <strong>{{ results_data.total_results|default:"0" }}</strong> resultado(s) encontrado(s)
+        <strong>{{ results_data.total_results|default:"0" }}</strong> {% trans "resultado(s) encontrado(s)" %}
+        {% if results_data.total_results|default:"0" > 1 %}
+            {% trans "resultados" %}
+        {% else %}
+            {% trans "resultado" %}
+        {% endif %}
     </p>
     {% endif %}
 </div>

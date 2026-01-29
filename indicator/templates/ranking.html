@@ -1,3 +1,4 @@
+{% load i18n static %}
 {% load l10n %}
 {% load indicator_filters %}
 
@@ -5,7 +6,7 @@
     <!-- Applied Filters -->
     {% if applied_filters and applied_filters.items %}
     <div class="card mb-2 p-3 bg-oca-light shadow-sm" id="applied-filters-journal-metrics">
-        <strong class="text-primary">Applied Filters</strong>
+        <strong class="text-primary">{% trans "Applied Filters" %}</strong>
         <span>
             {% for key, value in applied_filters.items %}
                 {{ key|stz_filter }}: {{ value|stz_filter }}
@@ -23,20 +24,20 @@
         <table id="ranking-table" class="table table-striped display nowrap">
             <thead>
                 <tr>
-                    <th scope="col">Rank</th>
-                    <th scope="col">Journal</th>
-                    <th scope="col">ISSN</th>
-                    <th scope="col">CWTS SNIP</th>
-                    <th scope="col">Scimago SJR</th>
-                    <th scope="col">Scimago Citations / Doc. (2 Years)</th>
-                    <th scope="col">Scimago Total Citations (3 Years)</th>
-                    <th scope="col">SciELO Total Docs</th>
-                    <th scope="col">Scimago Total Docs</th>
-                    <th scope="col">Scimago % Female</th>
-                    <th scope="col">Scimago Estimated APC (USD)</th>
-                    <th scope="col">Scimago Estimated Value (USD)</th>
-                    <th scope="col">Scimago Overton</th>
-                    <th scope="col">Scimago SDG</th>
+                    <th scope="col">{% trans "Rank" %}</th>
+                    <th scope="col">{% trans "Journal" %}</th>
+                    <th scope="col">{% trans "ISSN" %}</th>
+                    <th scope="col">{% trans "CWTS SNIP" %}</th>
+                    <th scope="col">{% trans "Scimago SJR" %}</th>
+                    <th scope="col">{% trans "Scimago Citations / Doc. (2 Years)" %}</th>
+                    <th scope="col">{% trans "Scimago Total Citations (3 Years)" %}</th>
+                    <th scope="col">{% trans "SciELO Total Docs" %}</th>
+                    <th scope="col">{% trans "Scimago Total Docs" %}</th>
+                    <th scope="col">{% trans "Scimago % Female" %}</th>
+                    <th scope="col">{% trans "Scimago Estimated APC (USD)" %}</th>
+                    <th scope="col">{% trans "Scimago Estimated Value (USD)" %}</th>
+                    <th scope="col">{% trans "Scimago Overton" %}</th>
+                    <th scope="col">{% trans "Scimago SDG" %}</th>
                 </tr>
             </thead>
             {% localize off %}
