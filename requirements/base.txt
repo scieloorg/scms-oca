@@ -100,3 +100,5 @@ iso639-lang==2.6.3  # https://pypi.org/project/iso639-lang/
 # PyCountry
 # ------------------------------------------------------------------------------
 pycountry==24.6.1  # https://pypi.org/project/pycountry/
+sqlparse>=0.5.4 # not directly required, pinned by Snyk to avoid a vulnerability
+zipp>=3.19.1 # not directly required, pinned by Snyk to avoid a vulnerability
