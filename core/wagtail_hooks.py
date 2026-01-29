@@ -4,7 +4,10 @@ from django.templatetags.static import static
 from django.utils.html import format_html
 from django.utils.translation import gettext as _
 from wagtail import hooks
-from wagtail.contrib.modeladmin.options import ModelAdmin, modeladmin_register
+from wagtail_modeladmin.options import (
+    ModelAdmin,
+    modeladmin_register,
+)
 
 from core.models import Source
 
