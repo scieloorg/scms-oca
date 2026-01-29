@@ -2,9 +2,9 @@
 Base settings to build other settings files upon.
 """
 from pathlib import Path
-from django.utils.translation import gettext_lazy as _
 
 import environ
+from django.utils.translation import gettext_lazy as _
 
 ROOT_DIR = Path(__file__).resolve(strict=True).parent.parent.parent
 APPS_DIR = ROOT_DIR / "core"
@@ -131,6 +131,7 @@ LOCAL_APPS = [
     "journal",
     "chart",
     "search_gateway",
+    "harvest",
 ]
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
@@ -493,3 +494,17 @@ ES_INDEX_SOURCES = env.str("ES_INDEX_SOURCES", "journals")
 
 # New version of index opoca
 ES_INDEX_SOCIAL_PRODUCTION = env.str("ES_INDEX_SOCIAL_PRODUCTION", "social_production")
+
+OPENSEARCH_URL = env("OPENSEARCH_URL", default="http://opensearch:9200") 
+OPENSEARCH_INDEX_RAW_PREPRINT = env.str("OPENSEARCH_INDEX_RAW_PREPRINT", "raw_scielo_preprint")
+OPENSEARCH_INDEX_RAW_BOOK = env.str("OPENSEARCH_INDEX_RAW_BOOK", "raw_scielo_book")
+OPENSEARCH_INDEX_RAW_SCIELO_DATA = env.str("OPENSEARCH_INDEX_RAW_SCIELO_DATA", "raw_scielo_data")
+
+# HARVEST Books, Preprint, SciELO Data
+SCIELO_BOOKS_BASE_URL = env("SCIELO_BOOKS_BASE_URL", default=None)
+SITE_SCIELO_DATA = env("SITE_SCIELO_DATA", default="https://data.scielo.org")
+USER_AGENT = env(
+    "USER_AGENT",
+    default="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+)
+ENDPOINT_OAI_PMH_PREPRINT = env("ENDPOINT_OAI_PMH_PREPRINT", default="https://preprints.scielo.org/index.php/scielo/oai")

@@ -1,24 +1,17 @@
 from django.db import models
+from django.db.models import Count
 from django.utils.translation import gettext as _
-from modelcluster.models import ClusterableModel
-from wagtail.admin.panels import FieldPanel
-from wagtailautocomplete.edit_handlers import AutocompletePanel
-from wagtail.models import Orderable
 from modelcluster.fields import ParentalKey
-from core.models import CommonControlField
-from location.models import Location
+from modelcluster.models import ClusterableModel
+from wagtail.admin.panels import FieldPanel, InlinePanel, ObjectList, TabbedInterface
+from wagtail.models import Orderable
+from wagtailautocomplete.edit_handlers import AutocompletePanel
 
-from wagtail.admin.panels import (
-    FieldPanel,
-    InlinePanel,
-    ObjectList,
-    TabbedInterface,
-)
+from core.models import CommonControlField, Language, Source
+from location.models import Location
 
 from . import choices
 from .forms import InstitutionForm
-
-from core.models import Source, Language
 
 
 class Institution(CommonControlField, ClusterableModel):

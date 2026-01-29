@@ -1,6 +1,5 @@
 # coding: utf-8
 from haystack import indexes
-from django.conf import settings
 from django.utils.translation import gettext as _
 
 from article import models

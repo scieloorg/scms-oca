@@ -100,3 +100,11 @@ iso639-lang==2.6.3  # https://pypi.org/project/iso639-lang/
 # PyCountry
 # ------------------------------------------------------------------------------
 pycountry==24.6.1  # https://pypi.org/project/pycountry/
+
+# OAI-PMH harvesting
+Sickle==0.7.0  # https://pypi.org/project/sickle/
+
+# OAI-PMH Scythe
+# ------------------------------------------------------------------------------
+oaipmh-scythe==0.13.0  # https://pypi.org/project/oaipmh-scythe/
+
