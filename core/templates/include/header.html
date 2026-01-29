@@ -58,11 +58,13 @@
             </div>
           </div>
         </nav>
-
+        
         <div class="d-none d-lg-flex align-items-center ms-auto">
           {% for handle in config.WAGTAILMENUS_FLAT_MENUS_HANDLE_CHOICES %}
               {% flat_menu handle.0 max_levels=2 show_menu_heading=True fall_back_to_default_site_menus=False %}
           {% endfor %}
+          <span class="mx-2">{% include 'include/language.html' %}</span>
+          
         </div>
       </div>
     </div>

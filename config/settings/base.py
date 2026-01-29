@@ -384,9 +384,9 @@ URL_API_OPENALEX_INSTITUTIONS = env.str("URL_API_OPENALEX_INSTITUTIONS", default
 URL_API_OPENALEX_JOURNALS = env.str("URL_API_OPENALEX_JOURNALS", default="https://api.openalex.org/sources")
 
 LANGUAGES = [
-    ("pt-BR", "Portuguese"),
-    # ('en', "English"),
-    # ('es', "Spanish"),
+    ("pt-BR", _('Português')),
+    ('en', _('English')),
+    ('es', _('Español')),
 ]
 
 WAGTAIL_I18N_ENABLED = True
