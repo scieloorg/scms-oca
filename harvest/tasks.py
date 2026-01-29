@@ -1,7 +1,7 @@
 import logging
 
 from django.contrib.auth import get_user_model
-
+from django.conf import settings
 from config import celery_app
 from harvest.exception_logs import ExceptionContext
 from harvest.harvests.harvest_books import (
@@ -26,10 +26,13 @@ from .service import service_oai_pmh_get_record, service_oai_pmh_scythe
 User = get_user_model()
 
 
+ENDPOINT_PREPRINT = getattr(settings, "ENDPOINT_OAI_PMH_PREPRINT", None)
+
+
 @celery_app.task(name="Harvest data preprint")
 def harvest_preprint_in_endpoint_oai_pmh(username, user_id=None, url=None, verify=True):
     user = User.objects.get(username=username)
-    url = url or "https://preprints.scielo.org/index.php/scielo/oai"
+    url = ENDPOINT_PREPRINT
     latest_preprint = HarvestedPreprint.get_latest_preprint()
     from_date = latest_preprint.datestamp.date().__str__() if latest_preprint else None
     logging.info(f"Coleta a partir da data {from_date}")
@@ -109,7 +112,7 @@ def harvest_single_book_in_couchdb(
 @celery_app.task(name="Retry failed preprints")
 def retry_failed_preprints_oai_pmh(username, user_id=None, url=None, verify=True):
     user = User.objects.get(username=username)
-    url = url or "https://preprints.scielo.org/index.php/scielo/oai"
+    url = ENDPOINT_PREPRINT
     failed_identifiers = set(
         HarvestedPreprint.objects.filter(harvest_status=HarvestStatus.FAILED)
         .values_list("identifier", flat=True)
