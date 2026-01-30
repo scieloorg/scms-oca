@@ -1,11 +1,11 @@
 from django.http import HttpResponseRedirect
 from django.utils.translation import gettext as _
-from wagtail_modeladmin.options import (
+from wagtail.contrib.modeladmin.options import (
     ModelAdmin,
     ModelAdminGroup,
     modeladmin_register,
 )
-from wagtail_modeladmin.views import CreateView
+from wagtail.contrib.modeladmin.views import CreateView
 
 from .models import Institution, SourceInstitution
 
