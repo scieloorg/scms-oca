@@ -1,44 +1,45 @@
-from wagtail.snippets.models import register_snippet
-from wagtail.snippets.views.snippets import SnippetViewSet, SnippetViewSetGroup
+from wagtail.contrib.modeladmin.options import (
+    ModelAdmin, ModelAdminGroup, modeladmin_register
+)
 
 from .models import HarvestedBooks, HarvestedPreprint, HarvestedSciELOData
 
 
-class HarvestedPreprintViewSet(SnippetViewSet):
+class HarvestedPreprintAdmin(ModelAdmin):
     model = HarvestedPreprint
     menu_label = "Preprint"
-    icon = "doc-full"
+    menu_icon = "doc-full"
     list_display = ("identifier", "harvest_status", "datestamp", "created")
     search_fields = ("identifier", "source_url")
     list_filter = ("harvest_status", "index_status")
 
 
-class HarvestedSciELODataViewSet(SnippetViewSet):
+class HarvestedSciELODataAdmin(ModelAdmin):
     model = HarvestedSciELOData
     menu_label = "SciELO Data"
-    icon = "doc-full"
+    menu_icon = "doc-full"
     list_display = ("identifier", "harvest_status", "datestamp", "created")
     search_fields = ("identifier", "source_url")
     list_filter = ("harvest_status", "index_status", "type_data")
 
 
-class HarvestedBooksViewSet(SnippetViewSet):
+class HarvestedBooksAdmin(ModelAdmin):
     model = HarvestedBooks
     menu_label = "Books"
-    icon = "doc-full"
+    menu_icon = "doc-full"
     list_display = ("identifier", "harvest_status", "datestamp", "created")
     search_fields = ("identifier", "source_url")
     list_filter = ("harvest_status", "index_status", "type_data")
 
 
-class HarvestViewSetGroup(SnippetViewSetGroup):
+class HarvestModelAdminGroup(ModelAdminGroup):
     menu_label = "Harvest"
     menu_icon = "download"
     items = (
-        HarvestedPreprintViewSet,
-        HarvestedSciELODataViewSet,
-        HarvestedBooksViewSet,
+        HarvestedPreprintAdmin,
+        HarvestedSciELODataAdmin,
+        HarvestedBooksAdmin,
     )
 
 
-register_snippet(HarvestViewSetGroup)
+modeladmin_register(HarvestModelAdminGroup)

@@ -1,4 +1,4 @@
-from wagtail_modeladmin.helpers import PermissionHelper
+from wagtail.contrib.modeladmin.helpers import PermissionHelper
 
 MUST_BE_MODERATE = "must_be_moderate"
 

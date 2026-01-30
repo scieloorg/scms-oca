@@ -2,14 +2,14 @@
 
 -r base.txt
 
-gevent==25.9.1  # http://www.gevent.org/
-gunicorn==24.1.1  # https://github.com/benoitc/gunicorn
-psycopg2==2.9.11  # https://github.com/psycopg/psycopg2
-sentry-sdk[django]==2.51.0 # https://github.com/getsentry/sentry-python
+gevent==24.2.1  # http://www.gevent.org/
+gunicorn==21.2.0  # https://github.com/benoitc/gunicorn
+psycopg2==2.9.9  # https://github.com/psycopg/psycopg2
+sentry-sdk[django]==2.5.1 # https://github.com/getsentry/sentry-python
 
 # Django
 # ------------------------------------------------------------------------------
-django-extensions==4.1  # https://github.com/django-extensions/django-extensions
+django-extensions==3.2.1  # https://github.com/django-extensions/django-extensions
 django-debug-toolbar  # https://github.com/jazzband/django-debug-toolbar
 django-anymail  # https://github.com/anymail/django-anymail
 

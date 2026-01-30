@@ -1,9 +1,9 @@
 from django.utils.translation import gettext as _
 
-from wagtail_modeladmin.options import (
+from wagtail.contrib.modeladmin.options import (
     ModelAdmin,
-    ModelAdminGroup,
     modeladmin_register,
+    ModelAdminGroup,
 )
 
 from .models import (
