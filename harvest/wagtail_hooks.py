@@ -27,7 +27,7 @@ class HarvestedBooksAdmin(ModelAdmin):
     model = HarvestedBooks
     menu_label = "Books"
     menu_icon = "doc-full"
-    list_display = ("identifier", "harvest_status", "datestamp", "created")
+    list_display = ("identifier","type_data", "harvest_status", "datestamp", "created")
     search_fields = ("identifier", "source_url")
     list_filter = ("harvest_status", "index_status", "type_data")
 
