@@ -32,9 +32,11 @@ ENDPOINT_PREPRINT = getattr(settings, "ENDPOINT_OAI_PMH_PREPRINT", None)
 
 @celery_app.task(name="Harvest data preprint")
 def harvest_preprint_in_endpoint_oai_pmh(username, user_id=None, reprocess=None, url=None, verify=True):
+    latest_preprint = None
     user = User.objects.get(username=username)
     url = ENDPOINT_PREPRINT
-    latest_preprint = reprocess or HarvestedPreprint.get_latest_preprint()
+    if not reprocess:
+        latest_preprint = HarvestedPreprint.get_latest_preprint()
     from_date = latest_preprint.datestamp.date().__str__() if latest_preprint else None
     logging.info(f"Coleta a partir da data {from_date}")
     recs = service_oai_pmh_scythe(url=url, from_date=from_date, verify=verify)
