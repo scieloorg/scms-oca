@@ -1,0 +1,226 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-01-26 17:35+0000\n"
+"PO-Revision-Date: 2026-02-06 12:57+0000\n"
+"Last-Translator: GitHub Copilot\n"
+"Language-Team: Portuguese\n"
+"Language: pt\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: indicator/static/indicator/js/button.js:82
+msgid "Start typing to search..."
+msgstr "Comece a digitar para pesquisar..."
+
+#: indicator/static/indicator/js/charts.js:141
+#: indicator/static/indicator/js/menu.js:122
+msgid "Unique Periodicals (sources)"
+msgstr "Periódicos Únicos (fontes)"
+
+#: indicator/static/indicator/js/charts.js:143
+msgid "Documents / Periodical"
+msgstr "Documentos / Periódico"
+
+#: indicator/static/indicator/js/charts.js:145
+msgid "Citations / Periodical"
+msgstr "Citações / Periódico"
+
+#: indicator/static/indicator/js/charts.js:147
+msgid "Cited Documents / Periodical"
+msgstr "Documentos Citados / Periódico"
+
+#: indicator/static/indicator/js/charts.js:149
+#: indicator/static/indicator/js/menu.js:154
+msgid "% Periodicals With ≥1 Cited Document"
+msgstr "% de Periódicos com ≥1 Documento Citado"
+
+#: indicator/static/indicator/js/charts.js:151
+msgid "Cited Documents"
+msgstr "Documentos Citados"
+
+#: indicator/static/indicator/js/charts.js:153
+msgid "Documents"
+msgstr "Documentos"
+
+#: indicator/static/indicator/js/charts.js:155
+msgid "Citations"
+msgstr "Citações"
+
+#: indicator/static/indicator/js/charts.js:160
+#: indicator/static/indicator/js/menu.js:181
+msgid "Citations per Document"
+msgstr "Citações por Documento"
+
+#: indicator/static/indicator/js/charts.js:162
+msgid "% Docs With ≥1 Citation"
+msgstr "% de Docs com ≥1 Citação"
+
+#: indicator/static/indicator/js/helpers.js:9
+msgid "GET filters has failed"
+msgstr "A obtenção (GET) dos filtros falhou"
+
+#: indicator/static/indicator/js/helpers.js:169
+msgid "Argentina"
+msgstr "Argentina"
+
+#: indicator/static/indicator/js/helpers.js:170
+msgid "Bolivia"
+msgstr "Bolívia"
+
+#: indicator/static/indicator/js/helpers.js:171
+msgid "Chile"
+msgstr "Chile"
+
+#: indicator/static/indicator/js/helpers.js:172
+msgid "Science and Culture"
+msgstr "Ciência e Cultura"
+
+#: indicator/static/indicator/js/helpers.js:173
+msgid "Colombia"
+msgstr "Colômbia"
+
+#: indicator/static/indicator/js/helpers.js:174
+msgid "Costa Rica"
+msgstr "Costa Rica"
+
+#: indicator/static/indicator/js/helpers.js:175
+msgid "Cuba"
+msgstr "Cuba"
+
+#: indicator/static/indicator/js/helpers.js:176
+msgid "Dominican Republic"
+msgstr "República Dominicana"
+
+#: indicator/static/indicator/js/helpers.js:177
+msgid "Ecuador"
+msgstr "Equador"
+
+#: indicator/static/indicator/js/helpers.js:178
+msgid "Spain"
+msgstr "Espanha"
+
+#: indicator/static/indicator/js/helpers.js:179
+msgid "Mexico"
+msgstr "México"
+
+#: indicator/static/indicator/js/helpers.js:180
+msgid "Peru"
+msgstr "Peru"
+
+#: indicator/static/indicator/js/helpers.js:181
+msgid "Portugal"
+msgstr "Portugal"
+
+#: indicator/static/indicator/js/helpers.js:182
+msgid "Paraguay"
+msgstr "Paraguai"
+
+#: indicator/static/indicator/js/helpers.js:183
+msgid "PEPSIC"
+msgstr "PEPSIC"
+
+#: indicator/static/indicator/js/helpers.js:184
+msgid "REVENF"
+msgstr "REVENF"
+
+#: indicator/static/indicator/js/helpers.js:185
+msgid "Brazil"
+msgstr "Brasil"
+
+#: indicator/static/indicator/js/helpers.js:186
+msgid "Public Health"
+msgstr "Saúde Pública"
+
+#: indicator/static/indicator/js/helpers.js:187
+msgid "South Africa"
+msgstr "África do Sul"
+
+#: indicator/static/indicator/js/helpers.js:188
+msgid "Uruguay"
+msgstr "Uruguai"
+
+#: indicator/static/indicator/js/helpers.js:189
+msgid "Venezuela"
+msgstr "Venezuela"
+
+#: indicator/static/indicator/js/helpers.js:190
+msgid "West Indies"
+msgstr "Índias Ocidentais"
+
+#: indicator/static/indicator/js/helpers.js:200
+msgid "No"
+msgstr "Não"
+
+#: indicator/static/indicator/js/helpers.js:201
+msgid "Yes"
+msgstr "Sim"
+
+#: indicator/static/indicator/js/helpers.js:308
+msgid "Publication Year"
+msgstr "Ano de Publicação"
+
+#: indicator/static/indicator/js/helpers.js:317
+msgid "Country"
+msgstr "País"
+
+#: indicator/static/indicator/js/helpers.js:322
+msgid "Document Language"
+msgstr "Idioma do Documento"
+
+#: indicator/static/indicator/js/helpers.js:326
+msgid "Applied Filters"
+msgstr "Filtros Aplicados"
+
+#: indicator/static/indicator/js/helpers.js:328
+msgid "Search Options"
+msgstr "Opções de Busca"
+
+#: indicator/static/indicator/js/helpers.js:374
+msgid "to"
+msgstr "até"
+
+#: indicator/static/indicator/js/menu.js:113
+msgid "per Year"
+msgstr "por Ano"
+
+#: indicator/static/indicator/js/menu.js:113
+msgid "by"
+msgstr "por"
+
+#: indicator/static/indicator/js/menu.js:130
+msgid "Avg Documents per Periodical"
+msgstr "Média de Documentos por Periódico"
+
+#: indicator/static/indicator/js/menu.js:138
+msgid "Avg Citations per Periodical"
+msgstr "Média de Citações por Periódico"
+
+#: indicator/static/indicator/js/menu.js:146
+msgid "Avg Cited Documents per Periodical"
+msgstr "Média de Documentos Citados por Periódico"
+
+#: indicator/static/indicator/js/menu.js:163
+msgid "Total Documents"
+msgstr "Total de Documentos"
+
+#: indicator/static/indicator/js/menu.js:172
+msgid "Total Citations"
+msgstr "Total de Citações"
+
+#: indicator/static/indicator/js/menu.js:190
+msgid "Cited Documents (≥1 citation)"
+msgstr "Documentos Citados (≥1 citação)"
+
+#: indicator/static/indicator/js/menu.js:199
+msgid "% Documents With ≥1 Citation"
+msgstr "% de Documentos com ≥1 Citação"
