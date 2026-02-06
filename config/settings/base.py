@@ -386,7 +386,8 @@ URL_API_OPENALEX_INSTITUTIONS = env.str("URL_API_OPENALEX_INSTITUTIONS", default
 URL_API_OPENALEX_JOURNALS = env.str("URL_API_OPENALEX_JOURNALS", default="https://api.openalex.org/sources")
 
 LANGUAGES = [
-    ("pt-BR", _('Português')),
+    ("pt-BR", _('Português (Brasil)')),
+    ('pt', _('Português')),
     ('en', _('English')),
     ('es', _('Español')),
 ]
