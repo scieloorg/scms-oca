@@ -382,8 +382,8 @@ msgid ""
 "Number of days between the publication date of the work and the start date "
 "of this license"
 msgstr ""
-"Número de dias entre a data de publicación del trabalho e a data de início "
-"desta licença"
+"Número de días entre la fecha de publicación del trabajo y la fecha de "
+"inicio de esta licencia"
 
 #: article/models.py:884 scholarly_articles/models.py:631
 msgid "Stard Date"
@@ -443,7 +443,7 @@ msgstr "Arquivo JSON"
 
 #: article/models.py:1117
 msgid "The source article table have duplicity...."
-msgstr "A tabela de artigos de origem possui duplicidade...."
+msgstr "La tabla de artículos de origen tiene duplicados...."
 
 #: article/models.py:1136 provided_data/core.py:334
 #: scholarly_articles/models.py:16
@@ -499,7 +499,7 @@ msgstr "A tabela de artigos possui duplicidade...."
 
 #: article/scripts/concat_sucupira.py:25 article/scripts/load_sucupira.py:21
 msgid "It looks like the given path is not a file!"
-msgstr "Parece que o caminho fornecido não é um arquivo!"
+msgstr "¡Parece que la ruta proporcionada no es un archivo!"
 
 #: article/scripts/load_openalex.py:18
 msgid "Param user_id and date is required."
@@ -581,8 +581,9 @@ msgid ""
 "target=\"_blank\">https://github.com/scieloorg/scms-oca/wiki/Campos#link</a>"
 msgstr ""
 "Link URL del item específico, vea ejemplo em: <a "
-"href=\"https://github.com/scieloorg/scms-oca/wiki/Campos#link\" "
-"target=\"_blank\">https://github.com/scieloorg/scms-oca/wiki/Campos#link</a>"
+"href=\"https://github.com/scieloorg/scms-oca/wiki/Campos#enlace\" "
+"target=\"_blank\">https://github.com/scieloorg/scms-"
+"oca/wiki/Campos#enlace</a>"
 
 #: core/help_fields.py:13
 msgid ""
@@ -798,7 +799,9 @@ msgstr "Endereços de E-mail"
 
 #: core/templates/account/email.html:13
 msgid "The following e-mail addresses are associated with your account:"
-msgstr "Os seguintes endereços de e-mail estão associados à sua conta:"
+msgstr ""
+"Las siguientes direcciones de correo electrónico están asociadas a su "
+"cuenta:"
 
 #: core/templates/account/email.html:27
 msgid "Verified"
@@ -834,9 +837,9 @@ msgid ""
 "an e-mail address so you can receive notifications, reset your password, "
 "etc."
 msgstr ""
-"Você atualmente não possui nenhum endereço de e-mail configurado. Você deve "
-"adicionar um endereço de e-mail para poder receber notificações, redefinir "
-"sua senha, etc."
+"Actualmente no tiene ninguna dirección de e-mail configurada. Debe agregar "
+"una dirección de correo electrónico para poder receber notificações, "
+"restablecer su contraseña, etc."
 
 #: core/templates/account/email.html:51
 msgid "Add E-mail Address"
@@ -848,7 +851,8 @@ msgstr "Adicionar E-mail"
 
 #: core/templates/account/email.html:66
 msgid "Do you really want to remove the selected e-mail address?"
-msgstr "Você realmente deseja remover o endereço de e-mail selecionado?"
+msgstr ""
+"¿Realmente desea eliminar la dirección de correo electrónico seleccionada?"
 
 #: core/templates/account/email_confirm.html:6
 #: core/templates/account/email_confirm.html:10
@@ -862,7 +866,7 @@ msgid ""
 "address for user %(user_display)s."
 msgstr ""
 "Por favor, confirme que <a href=\"mailto:%(email)s\">%(email)s</a> é um "
-"endereço de e-mail para o usuário %(user_display)s."
+"dirección de correo electrónico para o usuário %(user_display)s."
 
 #: core/templates/account/email_confirm.html:20
 msgid "Confirm"
@@ -874,7 +878,7 @@ msgid ""
 "This e-mail confirmation link expired or is invalid. Please <a "
 "href=\"%(email_url)s\">issue a new e-mail confirmation request</a>."
 msgstr ""
-"Este link de confirmación de e-mail expirou ou é inválido. Por favor, <a "
+"Este enlace de confirmación de e-mail expirou ou é inválido. Por favor, <a "
 "href=\"%(email_url)s\">solicite uma nova confirmación de e-mail</a>."
 
 #: core/templates/account/login.html:7 core/templates/account/login.html:11
@@ -884,7 +888,8 @@ msgstr "Entrar"
 
 #: core/templates/account/login.html:17
 msgid "Please sign in with one of your existing third party accounts:"
-msgstr "Por favor, entre con uma de suas contas de terceiros existentes:"
+msgstr ""
+"Por favor, inicie sesión con una de sus cuentas de terceros existentes:"
 
 #: core/templates/account/login.html:19
 #, python-format
@@ -892,8 +897,8 @@ msgid ""
 "Or, <a href=\"%(signup_url)s\">sign up</a> for a %(site_name)s account and "
 "sign in below:"
 msgstr ""
-"Ou, <a href=\"%(signup_url)s\">cadastre-se</a> para uma conta %(site_name)s "
-"e entre abaixo:"
+"O, <a href=\"%(signup_url)s\">regístrese</a> para una cuenta %(site_name)s e"
+" inicie sesión a continuación:"
 
 #: core/templates/account/login.html:32
 msgid "or"
@@ -905,12 +910,12 @@ msgid ""
 "If you have not created an account yet, then please <a "
 "href=\"%(signup_url)s\">sign up</a> first."
 msgstr ""
-"Se você ainda não criou uma conta, por favor <a "
-"href=\"%(signup_url)s\">cadastre-se</a> primeiro."
+"Si aún no ha creado una cuenta, por favor <a "
+"href=\"%(signup_url)s\">regístrese</a> primero."
 
 #: core/templates/account/login.html:55
 msgid "Forgot Password?"
-msgstr "Esqueceu a Senha?"
+msgstr "¿Olvidó la contraseña?"
 
 #: core/templates/account/logout.html:5 core/templates/account/logout.html:8
 #: core/templates/account/logout.html:17
@@ -919,7 +924,7 @@ msgstr "Sair"
 
 #: core/templates/account/logout.html:10
 msgid "Are you sure you want to sign out?"
-msgstr "Tem certeza de que deseja sair?"
+msgstr "¿Está seguro de que desea salir?"
 
 #: core/templates/account/password_change.html:6
 #: core/templates/account/password_change.html:9
@@ -943,8 +948,8 @@ msgid ""
 "Forgotten your password? Enter your e-mail address below, and we'll send you"
 " an e-mail allowing you to reset it."
 msgstr ""
-"Esqueceu sua senha? Digite seu endereço de e-mail abaixo e enviaremos um "
-"e-mail permitindo que você a redefina."
+"Olvidó su senha? Ingrese su dirección de correo electrónico a continuación e"
+" enviaremos um e-mail permitiendo que usted a redefina."
 
 #: core/templates/account/password_reset.html:21
 msgid "Reset My Password"
@@ -952,16 +957,15 @@ msgstr "Redefinir Minha Senha"
 
 #: core/templates/account/password_reset.html:24
 msgid "Please contact us if you have any trouble resetting your password."
-msgstr ""
-"Entre em contato conosco se tiver algum problema para redefinir sua senha."
+msgstr "Contáctenos si tiene algún problema para restablecer su contraseña."
 
 #: core/templates/account/password_reset_done.html:15
 msgid ""
 "We have sent you an e-mail. Please contact us if you do not receive it "
 "within a few minutes."
 msgstr ""
-"Enviamos um e-mail para você. Entre em contato conosco se não recebê-lo "
-"dentro de alguns minutos."
+"Le hemos enviado un correo electrónico. Contáctenos si no lo recibe en unos "
+"minutos."
 
 #: core/templates/account/password_reset_from_key.html:8
 msgid "Bad Token"
@@ -974,13 +978,13 @@ msgid ""
 "used.  Please request a <a href=\"%(passwd_reset_url)s\">new password "
 "reset</a>."
 msgstr ""
-"O link de redefinición de senha era inválido, possivelmente porque já foi "
-"usado. Por favor, solicite uma <a href=\"%(passwd_reset_url)s\">nova "
-"redefinición de senha</a>."
+"El enlace de restablecimiento de contraseña no era válido, posiblemente "
+"porque ya se ha utilizado. Por favor, solicite un <a "
+"href=\"%(passwd_reset_url)s\">nuevo restablecimiento de contraseña</a>."
 
 #: core/templates/account/password_reset_from_key.html:18
 msgid "change password"
-msgstr "alterar senha"
+msgstr "cambiar contraseña"
 
 #: core/templates/account/password_reset_from_key.html:21
 #: core/templates/account/password_reset_from_key_done.html:8
@@ -1005,7 +1009,9 @@ msgstr "Cadastrar"
 #, python-format
 msgid ""
 "Already have an account? Then please <a href=\"%(login_url)s\">sign in</a>."
-msgstr "Já tem uma conta? Então, por favor, <a href=\"%(login_url)s\">entre</a>."
+msgstr ""
+"¿Ya tiene una cuenta? Entonces, por favor, <a href=\"%(login_url)s\">inicie "
+"sesión</a>."
 
 #: core/templates/account/signup_closed.html:5
 #: core/templates/account/signup_closed.html:8
@@ -1029,9 +1035,9 @@ msgid ""
 "finalize the signup process. Please contact us if you do not receive it "
 "within a few minutes."
 msgstr ""
-"Enviamos um e-mail para você para verificación. Siga o link fornecido para "
-"finalizar o processo de cadastro. Entre em contato conosco se não recebê-lo "
-"dentro de alguns minutos."
+"Le hemos enviado un correo electrónico para verificación. Siga el enlace "
+"proporcionado para finalizar el proceso de registro. Contáctenos si no lo "
+"recibe en unos minutos."
 
 #: core/templates/account/verified_email_required.html:12
 msgid ""
@@ -1039,9 +1045,9 @@ msgid ""
 "you are who you claim to be. For this purpose, we require that you\n"
 "verify ownership of your e-mail address. "
 msgstr ""
-"Esta parte del site requer que verifiquemos que\n"
-"você é quem afirma ser. Para isso, exigimos que você\n"
-"verifique a propriedade del seu endereço de e-mail. "
+"Esta parte del sitio requiere que verifiquemos que\n"
+"usted es quien afirma ser. Para ello, exigimos que usted\n"
+"verifique a propriedade del su dirección de correo electrónico. "
 
 #: core/templates/account/verified_email_required.html:16
 msgid ""
@@ -1049,9 +1055,9 @@ msgid ""
 "verification. Please click on the link inside this e-mail. Please\n"
 "contact us if you do not receive it within a few minutes."
 msgstr ""
-"Enviamos um e-mail para você para\n"
-"verificación. Por favor, clique no link dentro deste e-mail. Por favor,\n"
-"entre em contato conosco se não recebê-lo dentro de alguns minutos."
+"Le hemos enviado un correo electrónico para\n"
+"verificación. Por favor, haga clic en el enlace enste e-mail. Por favor,\n"
+"inicie sesión em contato si no lo recibe en unos minutos."
 
 #: core/templates/account/verified_email_required.html:20
 #, python-format
@@ -1059,14 +1065,14 @@ msgid ""
 "<strong>Note:</strong> you can still <a href=\"%(email_url)s\">change your "
 "e-mail address</a>."
 msgstr ""
-"<strong>Nota:</strong> você ainda pode <a href=\"%(email_url)s\">alterar seu"
-" endereço de e-mail</a>."
+"<strong>Nota:</strong> usted aún puede <a href=\"%(email_url)s\">cambiar su "
+"dirección de correo electrónico</a>."
 
 #: core/templates/graph/graph.html:30
 #: search/templates/indicator/indicator_detail.html:38
 #: search/templates/search.html:36 search/templates/search/search_page.html:36
 msgid "Digite sua pesquisa..."
-msgstr "Digite sua pesquisa..."
+msgstr "Ingrese su búsqueda..."
 
 #: core/templates/graph/graph.html:35
 #: search/templates/indicator/indicator_detail.html:43
@@ -1083,7 +1089,7 @@ msgstr "Ayuda"
 
 #: core/templates/graph/graph.html:57 search/templates/search.html:63
 msgid "registros encontrados para o termo"
-msgstr "registros encontrados para o termo"
+msgstr "registros encontrados para el término"
 
 #: core/templates/graph/graph.html:61 search/templates/search.html:67
 msgid "Tempo da pesquisa"
@@ -1095,7 +1101,7 @@ msgstr "milissegundos"
 
 #: core/templates/graph/graph.html:64 search/templates/search.html:70
 msgid "0 registros encontrados para o termo"
-msgstr "0 registros encontrados para o termo"
+msgstr "0 registros encontrados para el término"
 
 #: core/templates/graph/graph.html:92 search/templates/search.html:98
 msgid "Ordenar por"
@@ -1132,7 +1138,7 @@ msgstr "Ver as notas de versão"
 
 #: core/templates/home/welcome_page.html:68
 msgid "Welcome to your SciELO Content Manager"
-msgstr "Bem-vindo ao seu Gerenciador de Contenido SciELO"
+msgstr "Bienvenido a su Administrador de Contenido SciELO"
 
 #: core/templates/home/welcome_page.html:69
 msgid ""
@@ -1142,7 +1148,7 @@ msgid ""
 msgstr ""
 "Sinta-se à vontade para <a "
 "href=\"https://github.com/wagtail/wagtail/wiki/Slack\">juntar-se à nossa "
-"comunidade no Slack</a>, ou comece con um de los links abaixo."
+"comunidade no Slack</a>, ou comece con um de los links a continuación."
 
 #: core/templates/home/welcome_page.html:77
 msgid "Wagtail Documentation"
@@ -1158,7 +1164,7 @@ msgstr "Tutorial"
 
 #: core/templates/home/welcome_page.html:86
 msgid "Build your first Wagtail site"
-msgstr "Construa seu primeiro site Wagtail"
+msgstr "Construya su primer sitio Wagtail"
 
 #: core/templates/home/welcome_page.html:93
 msgid "Admin Interface"
@@ -1166,7 +1172,7 @@ msgstr "Interface de Administración"
 
 #: core/templates/home/welcome_page.html:94
 msgid "Create your superuser first!"
-msgstr "Crie seu superusuário primeiro!"
+msgstr "¡Cree su superusuario primero!"
 
 #: core/templates/menus/menu_items_bottom.html:11
 #: core/templates/menus/menu_items_bottom.html:13
@@ -1251,7 +1257,7 @@ msgstr "Diretório de Política"
 
 #: core_settings/models.py:27 core_settings/models.py:28
 msgid "Configuração do site"
-msgstr "Configuración del site"
+msgstr "Configuración del sitio"
 
 #: core_settings/models.py:81 core_settings/models.py:88
 #: core_settings/models.py:158
@@ -1260,7 +1266,7 @@ msgstr "Moderación"
 
 #: core_settings/models.py:86
 msgid "Site settings"
-msgstr "Configurações del site"
+msgstr "Configuraciones del sitio"
 
 #: core_settings/models.py:87
 msgid "Admin settings"
@@ -1374,7 +1380,7 @@ msgstr "Pode editar título"
 #: indicator/models.py:327 infrastructure_directory/models.py:35
 #: policy_directory/models.py:35
 msgid "Can edit link"
-msgstr "Pode editar link"
+msgstr "Puede editar enlace"
 
 #: education_directory/models.py:37 event_directory/models.py:37
 #: infrastructure_directory/models.py:36 policy_directory/models.py:36
@@ -1977,11 +1983,11 @@ msgstr "Pode editar resumido"
 
 #: indicator/models.py:343
 msgid "Can edit link to data"
-msgstr "Pode editar link para datos"
+msgstr "Pode editar enlace para datos"
 
 #: indicator/models.py:344
 msgid "Can edit link do graphic"
-msgstr "Pode editar link del gráfico"
+msgstr "Pode editar enlace del gráfico"
 
 #: indicator/models.py:441
 msgid "Número"
@@ -2759,7 +2765,7 @@ msgstr "Identificación"
 
 #: institution/models.py:374
 msgid "The source institution table have duplicity...."
-msgstr "A tabela de instituições de origem possui duplicidade...."
+msgstr "La tabla de instituciones de origen tiene duplicados...."
 
 #: institution/models.py:491
 msgid "The institution translate table have duplicity...."
@@ -3014,7 +3020,7 @@ msgid ""
 "between id|line."
 msgstr ""
 "Referencia aos datos, pode ser id, linha. Use line:10 ou id:452 para "
-"diferenciar entre id|linha."
+"diferenciar inicie sesión id|linha."
 
 #: scholarly_articles/models.py:583
 msgid "Data"
@@ -3365,12 +3371,12 @@ msgid ""
 "O valor do campo página não pode ser maior que a quantidade atual de "
 "páginas."
 msgstr ""
-"O valor del campo página não pode ser maior que a quantidade atual de "
+"El valor del campo página no puede ser mayor que la cantidad actual de "
 "páginas."
 
 #: search/templates/search.html:294
 msgid "O valor do campo página deve ser maior que 0."
-msgstr "O valor del campo página deve ser maior que 0."
+msgstr "El valor del campo página debe ser mayor que 0."
 
 #: search/templates/search/include/result_items/social_production.html:58
 msgid "organization"
@@ -3418,7 +3424,7 @@ msgstr "resultados encontrados"
 
 #: search/templates/search/search_page.html:89
 msgid "Nenhum resultado encontrado. Tente ajustar sua busca ou filtros."
-msgstr "Nenhum resultado encontrado. Tente ajustar sua busca ou filtros."
+msgstr "Nenhum resultado encontrado. Tente ajustar su busca ou filtros."
 
 #: search/templates/search/search_page.html:90
 msgid "Filtros aplicados"
