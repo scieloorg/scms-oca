@@ -8,8 +8,9 @@ from modelcluster.models import ClusterableModel
 from wagtail.admin.panels import FieldPanel, InlinePanel
 from wagtail.models import ParentalKey
 
-from core.models import CommonControlField
 from core.forms import CoreAdminModelForm
+from core.models import CommonControlField
+
 
 class HarvestStatus(models.TextChoices):
     """Status de coleta de dados"""
@@ -27,6 +28,15 @@ class IndexStatus(models.TextChoices):
     IN_PROGRESS = "in_progress", _("Em Progresso")
     SUCCESS = "success", _("Sucesso")
     FAILED = "failed", _("Falhou")
+
+
+class HarvestModelChoice(models.TextChoices):
+    """Tipos de modelo de coleta para associar scripts de transformação"""
+
+    PREPRINT = "HarvestedPreprint", "Preprint"
+    BOOKS = "HarvestedBooks", "Books"
+    SCIELO_DATA_DATASET = "HarvestedSciELOData_dataset", "SciELO Data - Dataset"
+    SCIELO_DATA_DATAVERSE = "HarvestedSciELOData_dataverse", "SciELO Data - Dataverse"
 
 
 class BaseHarvestedData(CommonControlField):
@@ -233,6 +243,9 @@ class HarvestedSciELOData(BaseHarvestedData, ClusterableModel):
         verbose_name = _("Dados de Scielo Data")
         verbose_name_plural = _("Dados de Scielo")
 
+    @property
+    def get_url_dataverse(self):
+        return self.raw_data.get("theme", {}).get("linkUrl")
 
 class BaseHarvestErrorLog(models.Model):
     field_name = models.CharField(
@@ -259,6 +272,11 @@ class BaseHarvestErrorLog(models.Model):
         default=False,
         db_index=True,
         help_text=_("Indica se o erro foi resolvido"),
+    )
+    occurrence_date = models.DateTimeField(
+        _("Data de ocorrência"),
+        blank=True,
+        null=True,
     )
     context_data = models.JSONField(
         _("Dados de Contexto"),
@@ -340,9 +358,18 @@ class TransformationScript(CommonControlField):
         db_index=True,
         help_text=_("Se desativado, a transformação não será executada"),
     )
-    
+    harvest_model = models.CharField(
+        _("Modelo de Coleta"),
+        max_length=50,
+        choices=HarvestModelChoice.choices,
+        blank=True,
+        null=True,
+        db_index=True,
+        help_text=_("Modelo de coleta associado a este script para transformação automática"),
+    )
 
     panels = [
+        FieldPanel("harvest_model"),
         FieldPanel("name"),
         FieldPanel("description"),
         FieldPanel("source_index"),
