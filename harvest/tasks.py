@@ -48,10 +48,16 @@ def harvest_scielo_data_in_endpoint_dataverse(
     username,
     user_id=None,
     per_page=100,
-    start=None,
+    start=0,
 ):
     user = User.objects.get(username=username)
-    harvest_data(user=user, per_page=per_page, start=start)
+    
+    harvest_data(user=user, type="dataverse")
+    if start is None:
+        total_in_db = HarvestedSciELOData.objects.count()
+        start = (total_in_db // per_page) * per_page    
+    
+    harvest_data(user=user, per_page=per_page, start=start, type="dataset")
 
 
 @celery_app.task(name="Harvest Books")
