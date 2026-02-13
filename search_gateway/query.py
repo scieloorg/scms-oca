@@ -23,7 +23,7 @@ def query_filters(filters):
     return filters_clauses
 
 
-def build_search_as_you_type_body(field_name, query, agg_size=20, add_keyword_term=False):
+def build_search_as_you_type_body(field_name, field_autocomplete, query, agg_size=20, add_keyword_term=False):
     """
     Builds the body for a search-as-you-type query.
 
@@ -35,30 +35,27 @@ def build_search_as_you_type_body(field_name, query, agg_size=20, add_keyword_te
     Returns:
         Elasticsearch query body dict.
     """
-    agg_field_name = str(field_name)
 
-    if add_keyword_term and not agg_field_name.endswith(".keyword"):
-        agg_field_name = f"{agg_field_name}.keyword"
-
-    return {
+    body = {
         "size": 0,
         "query": {
             "multi_match": {
                 "query": query,
                 "type": "bool_prefix",
                 "fields": [
-                    f"{field_name}",
-                    f"{field_name}._2gram",
-                    f"{field_name}._3gram",
+                    f"{field_autocomplete}",
+                    f"{field_autocomplete}._2gram",
+                    f"{field_autocomplete}._3gram",
                 ],
             }
         },
         "aggs": {
             "unique_items": {
-                "terms": {"field": agg_field_name, "size": agg_size}
+                "terms": {"field": field_name, "size": agg_size}
             }
         },
     }
+    return body
 
 
 def build_term_search_body(field_name, query, aggregation_size=20):
@@ -174,7 +171,7 @@ def build_document_search_body(
                 "simple_query_string": {
                     "query": query_text,
                     "default_operator": "AND",
-                    "fields": ["title"],  # TODO: Definir os fields para a busca
+                    "fields": ["title_search", "ids_search"],  # TODO: Definir os fields para a busca
                 }
             }
         )
