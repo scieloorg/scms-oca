@@ -1328,11 +1328,11 @@ msgstr "NÃO PUBLICADO"
 
 #: education_directory/choices.py:29
 msgid "Gratuito"
-msgstr ""
+msgstr "Gratuito"
 
 #: education_directory/choices.py:30
 msgid "Pago"
-msgstr ""
+msgstr "Pago"
 
 #: education_directory/models.py:31 education_directory/models.py:32
 #: education_directory/wagtail_hooks.py:20
@@ -3161,7 +3161,7 @@ msgstr "Ouro"
 
 #: search/choices.py:63
 msgid "Hibrído"
-msgstr ""
+msgstr "Híbrido"
 
 #: search/choices.py:64
 msgid "Verde"
