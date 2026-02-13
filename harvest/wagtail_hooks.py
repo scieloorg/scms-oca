@@ -12,7 +12,7 @@ from wagtail.contrib.modeladmin.options import (
 )
 from wagtail.contrib.modeladmin.views import CreateView
 
-from .bronze_transform import transform_single_document
+from .bronze_transform import transform_document
 from .models import (
     HarvestedBooks,
     HarvestedPreprint,
@@ -113,7 +113,7 @@ def run_transform_view(request):
         return redirect(request.META.get("HTTP_REFERER", "/admin/"))
 
     try:
-        success = transform_single_document(script)
+        success = transform_document(script)
         message = success.get("message")
         if success.get("status") == "success":
             messages.success(
