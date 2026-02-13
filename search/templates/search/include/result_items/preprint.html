@@ -1,0 +1,133 @@
+{% load humanize %}
+{% load static %}
+{% load i18n %}
+{% load wagtailsettings_tags %}
+{% load wagtailcore_tags %}
+
+
+<div class="card mb-3 result-item">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start gap-2">
+            <h5 class="card-title mb-0" style="flex: 1 1 auto; min-width: 0;">
+            {% if doc.source.ids.doi %}
+                <a href="https://doi.org/{{ doc.source.ids.doi }}" target="_blank" class="text-decoration-none">
+                    {{ doc.source.title }}
+                </a>
+            {% elif doc.source.content_url %}
+                <a href="{{ doc.source.content_url }}" target="_blank" class="text-decoration-none">
+                    {{ doc.source.title }}
+                </a>
+            {% else %}
+                <a href="{{pageurl}}" target="_blank" class="text-decoration-none">{{ doc.source.title }}</a>
+            {% endif %}
+            </h5>
+            {% if doc.source.type %}
+                <span class="badge bg-secondary ms-2 text-muted" style="flex-shrink: 0; white-space: nowrap;">{{ doc.source.type }}</span>
+            {% endif %}
+        </div>
+        
+        {% if doc.source.authorships %}
+            <p class="card-text">
+                {% for author in doc.source.authorships %}
+                    {{ author.name }}{% if author.orcid %} <a href="{{ author.orcid }}" target="_blank"><img src="{% static 'images/authorIcon-orcid.png' %}" alt="ORCID"></a>{% endif %}{% if not forloop.last %}; {% endif %}
+                {% endfor %}
+            </p>
+        {% endif %}
+
+        {% if doc.source.description %}
+        <p class="card-text">
+            {{ doc.source.description|safe|truncatewords:100 }}
+        </p>
+        {% endif %}
+
+        {% if doc.source.publisher %}
+        <p class="card-text mb-1">
+            <small class="text-muted">
+                <strong>{% trans "Publisher" %}:</strong>
+                {{ doc.source.publisher }}
+            </small>
+        </p>
+        {% endif %}
+
+        {% if doc.source.publication_year %}
+        <p class="card-text mb-1">
+            <small class="text-muted">
+                <strong>{% trans "Year" %}:</strong> {{ doc.source.publication_year }}
+            </small>
+        </p>
+        {% endif %}
+
+        {% if doc.source.publication_date %}
+        <p class="card-text mb-1">
+            <small class="text-muted">
+                <strong>{% trans "Publication Date" %}:</strong> {{ doc.source.publication_date|date:"d/m/Y" }}
+            </small>
+        </p>
+        {% endif %}
+
+        {% if doc.source.language %}
+        <p class="card-text mb-1">
+            <small class="text-muted">
+                <strong>{% trans "Language" %}:</strong>
+                {% if doc.source.language|length > 4 %}
+                    {% for language in doc.source.language %}
+                        {{ language }}{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                {% else %}
+                    {{ doc.source.language }}
+                {% endif %}
+            </small>
+        </p>
+        {% endif %}
+
+        {% if doc.source.subjects_search %}
+        <p class="card-text mb-1">
+            <small class="text-muted">
+                <strong>{% trans "Subjects" %}:</strong>
+                {% for subject in doc.source.subjects_search %}
+                    {{ subject }}{% if not forloop.last %}, {% endif %}
+                {% endfor %}
+            </small>
+        </p>
+        {% elif doc.source.subjects %}
+        <p class="card-text mb-1">
+            <small class="text-muted">
+                <strong>{% trans "Subjects" %}:</strong>
+                {% for subject in doc.source.subjects %}
+                    {{ subject }}{% if not forloop.last %}, {% endif %}
+                {% endfor %}
+            </small>
+        </p>
+        {% endif %}
+
+        {% if doc.source.ids.doi %}
+        <p class="card-text mb-1">
+            <small class="text-muted">
+                <strong>{% trans "DOI" %}:</strong>
+                <a href="https://doi.org/{{ doc.source.ids.doi }}" target="_blank">
+                    {{ doc.source.ids.doi }}
+                </a>
+            </small>
+        </p>
+        {% endif %}
+
+        {% if doc.source.ids.scl_preprint_id %}
+        <p class="card-text mb-1">
+            <small class="text-muted">
+                <strong>{% trans "SciELO Preprint ID" %}:</strong> {{ doc.source.ids.scl_preprint_id }}
+            </small>
+        </p>
+        {% endif %}
+
+        {% if doc.source.rights %}
+        <p class="card-text mb-0">
+            <small class="text-muted">
+                <strong>{% trans "Rights" %}:</strong>
+                {% for right in doc.source.rights %}
+                    {{ right }}{% if not forloop.last %}; {% endif %}
+                {% endfor %}
+            </small>
+        </p>
+        {% endif %}
+    </div>
+</div>
