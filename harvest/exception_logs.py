@@ -1,5 +1,5 @@
 import traceback
-
+from datetime import datetime
 
 class ExceptionContext:
     def __init__(self, harvest_object, log_model, fk_field):
@@ -14,6 +14,7 @@ class ExceptionContext:
         field_name,
         context_data=None,
     ):
+        occurrence_date = datetime.now()
         self.exceptions.append(
             {
                 "field_name": field_name,
@@ -21,6 +22,7 @@ class ExceptionContext:
                 "exception_message": str(exception),
                 "exception_traceback": traceback.format_exc(),
                 "context_data": context_data or {},
+                "ocorrence_date": occurrence_date
             }
         )
 
@@ -57,5 +59,6 @@ class ExceptionContext:
                 "exception_message": exc.get("exception_message"),
                 "exception_traceback": exc.get("exception_traceback"),
                 "context_data": exc.get("context_data", {}),
+                "ocorrence_date": exc.get("ocorrence_date")
             }
             self.log_model.objects.create(**payload)
