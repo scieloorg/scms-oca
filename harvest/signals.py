@@ -46,7 +46,10 @@ def _should_index_raw_data(instance, created, update_fields):
 def _index_if_raw_data_saved(instance, created, update_fields):
     if not _should_index_raw_data(instance, created, update_fields):
         return
-    index_name = _get_index_name(model_name=instance.__class__.__name__)
+    index_name = _get_index_name(
+        model_name=instance.__class__.__name__,
+        instance=instance,
+    )
     index_harvested_instance(instance=instance, index_name=index_name)
 
     model_name = instance.__class__.__name__
