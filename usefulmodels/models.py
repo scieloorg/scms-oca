@@ -522,7 +522,7 @@ class ActionAndPractice(models.Model):
     def code(self):
         items = (
             self.action and self.action.code,
-            classification and slugify(classification) or "",
-            practice and practice.code or "",
+            self.classification and slugify(self.classification) or "",
+            self.practice and self.practice.code or "",
         )
         return slugify("_".join(items)).upper()
