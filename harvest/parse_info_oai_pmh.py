@@ -95,6 +95,8 @@ def get_name_author(root, exc_context: ExceptionContext):
         try:
             name_author = author.text.strip()
             author_dict = parse_author_name(name_author)
+            if lang := author.get("{http://www.w3.org/XML/1998/namespace}lang"):
+                author_dict["lang"] = lang
             author_data.append(author_dict)
         except Exception as e:
             logging.warning(
