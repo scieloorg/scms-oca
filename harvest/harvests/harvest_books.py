@@ -77,7 +77,7 @@ def _extract_changes(payload):
 
 def _extract_last_seq(payload):
     if isinstance(payload, dict):
-        return payload.get("last_seq")
+        return payload.get("seq")
     return None
 
 
