@@ -196,8 +196,7 @@ class SearchPageManager {
     }
     
     applyFiltersAjax() {
-        const resultsContainer = document.getElementById('results-list');
-        const resultsCount = document.getElementById('results-count');
+        const resultsContainer = document.getElementById('results-container');
         const filterStatus = document.getElementById('filter-status');
         
         this.showLoading(filterStatus, resultsContainer);
@@ -209,7 +208,7 @@ class SearchPageManager {
                 if (!response.ok) throw new Error('Network response was not ok');
                 return response.json();
             })
-            .then(data => this.handleSearchResults(data, resultsCount, resultsContainer, filterStatus))
+            .then(data => this.handleSearchResults(data, resultsContainer, filterStatus))
             .catch(error => this.handleSearchError(error, resultsContainer, filterStatus));
     }
     
@@ -259,24 +258,10 @@ class SearchPageManager {
         }
     }
     
-    handleSearchResults(data, resultsCount, resultsContainer, filterStatus) {        
-        if (resultsCount) {
-            if (data.total_results) {
-                const resultsLabel = data.total_results > 1
-                    ? this.i18n.resultsCountPlural
-                    : this.i18n.resultsCountSingular;
-                resultsCount.innerHTML = `<p class="text-muted"><strong>${data.total_results}</strong> ${resultsLabel}</p>`;
-            } else {
-                resultsCount.innerHTML = '';
-            }
-        }
-        
+    handleSearchResults(data, resultsContainer, filterStatus) {
         if (resultsContainer) {
-            if (data.search_results && data.search_results.length > 0) {
-                // Renderizar resultados no frontend
-                // Use data_source from response or fallback to instance property
-                const dataSource = data.data_source || this.dataSourceName;
-                resultsContainer.innerHTML = this.renderResults(data.search_results, dataSource);
+            if (data.results_html) {
+                resultsContainer.innerHTML = data.results_html;
             } else {
                 resultsContainer.innerHTML = `
                     <div class="alert alert-info" role="alert">
@@ -294,247 +279,7 @@ class SearchPageManager {
             }, 2000);
         }
     }
-    
-    renderResults(results, dataSource) {
-        return results.map(doc => this.renderResultItem(doc, dataSource)).join('');
-    }
-    
-    renderResultItem(doc, dataSource) {
-        if (dataSource === 'world') {
-            return this.renderWorldTemplate(doc);
-        } else if (dataSource === 'social_production') {
-            return this.renderSocialProductionTemplate(doc);
-        } else {
-            return this.renderDefaultTemplate(doc);
-        }
-    }
-    
-    renderWorldTemplate(doc) {
-        const source = doc.source || {};
-        const title = source.title || 'Untitled';
-        const type = source.type || '';
-        const authorships = source.authorships || [];
-        const primaryLocation = source.primary_location || {};
-        const locationSource = primaryLocation.source || {};
-        const biblio = source.biblio || {};
-        const locations = source.locations || [];
-        const landingPageUrl = locations.length > 0 ? locations[0].landing_page_url : '';
-        
-        // Build authors list
-        let authorsHtml = '';
-        if (authorships.length > 0) {
-            const authorsText = authorships.map(auth => {
-                const author = auth.author || {};
-                const displayName = author.display_name || '';
-                const orcid = author.orcid || '';
-                let authorHtml = this.escapeHtml(displayName);
-                if (orcid) {
-                    authorHtml += ` <a href="${this.escapeHtml(orcid)}" target="_blank"><img src="/static/images/authorIcon-orcid.png" alt="ORCID" style="height: 16px;"></a>`;
-                }
-                return authorHtml;
-            }).join('; ');
-            authorsHtml = `<p class="card-text">${authorsText}</p>`;
-        }
-        
-        // Build publication info
-        let publicationInfo = '';
-        if (locationSource.display_name) {
-            publicationInfo += `
-                <p class="card-text">
-                    <small class="text-muted">
-                        
-                        ${locationSource.id ? ` <a href="${this.escapeHtml(locationSource.id)}" target="_blank">${this.escapeHtml(locationSource.display_name)}</a>` : ''}
-                    </small>
-                </p>
-            `;
-        }
-        
-        // Build year/volume/issue info
-        let yearVolumeIssue = [];
-        if (source.publication_year) yearVolumeIssue.push(this.escapeHtml(source.publication_year));
-        if (biblio.volume) yearVolumeIssue.push(`Volume ${this.escapeHtml(biblio.volume)}`);
-        if (biblio.issue) yearVolumeIssue.push(`N° ${this.escapeHtml(biblio.issue)}`);
-        
-        if (yearVolumeIssue.length > 0) {
-            publicationInfo += `
-                <p class="card-text">
-                    <small class="text-muted">${yearVolumeIssue.join(', ')}</small>
-                </p>
-            `;
-        }
-        
-        // Build DOI link
-        let doiHtml = '';
-        if (primaryLocation.doi) {
-            doiHtml = `
-                <p class="card-text mb-0">
-                    <small class="text-muted">
-                        <a href="https://doi.org/${this.escapeHtml(primaryLocation.doi)}" target="_blank">
-                            ${this.escapeHtml(primaryLocation.doi)}
-                        </a>
-                    </small>
-                </p>
-            `;
-        }
-        
-        // Build ID link
-        let idHtml = '';
-        if (doc.id) {
-            idHtml = `
-                <p class="card-text mb-0">
-                    <small class="text-muted">
-                        <a href="${this.escapeHtml(doc.id)}" target="_blank">
-                            ${this.escapeHtml(doc.id)}
-                        </a>
-                    </small>
-                </p>
-            `;
-        }
-        
-        return `
-            <div class="card mb-3 result-item">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start gap-2">
-                        <h5 class="card-title mb-0" style="flex: 1 1 auto; min-width: 0;">
-                            ${landingPageUrl ? 
-                                `<a href="${this.escapeHtml(landingPageUrl)}" target="_blank" class="text-decoration-none">${this.escapeHtml(title)}</a>` :
-                                `<span>${this.escapeHtml(title)}</span>`
-                            }
-                        </h5>
-                        ${type ? `<span class="badge bg-secondary ms-2 text-muted" style="flex-shrink: 0; white-space: nowrap;">${this.escapeHtml(type)}</span>` : ''}
-                    </div>
-                    ${authorsHtml}
-                    ${publicationInfo}
-                    ${doiHtml}
-                    ${idHtml}
-                </div>
-            </div>
-        `;
-    }
-    
-    renderSocialProductionTemplate(doc) {
-        const source = doc.source || {};
-        const title = source.title || 'Untitled';
-        const description = source.description || '';
-        const link = source.link || '';
-        const directoryType = source.directory_type || '';
-        const year = source.year || '';
-        const institutions = source.institutions || [];
-        const organization = source.organization || '';
-        const cities = source.cities || [];
-        const states = source.states || [];
-        const practice = source.practice || '';
-        const action = source.action || '';
-        const classification = source.classification || '';
-        const thematicLevel0 = source.thematic_level_0 || [];
-        
-        return `
-            <div class="card mb-3 result-item">
-                <div class="card-body">
-                    <h5 class="card-title">
-                        ${link ? 
-                            `<a href="${this.escapeHtml(link)}" target="_blank" class="text-decoration-none">${this.escapeHtml(title)}</a>` :
-                            this.escapeHtml(title)
-                        }
-                    </h5>
-                    
-                    ${description ? `<p class="card-text">${this.escapeHtml(this.truncateWords(description, 50))}</p>` : ''}
-                    
-                    ${directoryType ? `
-                        <p class="card-text mb-1">
-                            <small class="text-muted">
-                                <strong>${this.i18n.labelType}:</strong> ${this.escapeHtml(directoryType)}
-                            </small>
-                        </p>
-                    ` : ''}
-                    
-                    ${year ? `
-                        <p class="card-text mb-1">
-                            <small class="text-muted">
-                                <strong>${this.i18n.labelYear}:</strong> ${this.escapeHtml(year)}
-                            </small>
-                        </p>
-                    ` : ''}
-                    
-                    ${institutions.length > 0 || organization ? `
-                        <p class="card-text mb-1">
-                            <small class="text-muted">
-                                <strong>${this.i18n.labelInstitutions}:</strong> ${institutions.length > 0 ? institutions.map(inst => this.escapeHtml(inst)).join(', ') : this.escapeHtml(organization)}
-                            </small>
-                        </p>
-                    ` : ''}
-                    
-                    ${(cities.length > 0 || states.length > 0) ? `
-                        <p class="card-text mb-1">
-                            <small class="text-muted">
-                                <strong>${this.i18n.labelLocation}:</strong> 
-                                ${cities.map(city => this.escapeHtml(city)).join(', ')}
-                                ${cities.length > 0 && states.length > 0 ? ' - ' : ''}
-                                ${states.map(state => this.escapeHtml(state)).join(', ')}
-                            </small>
-                        </p>
-                    ` : ''}
-                    
-                    ${practice ? `
-                        <p class="card-text mb-1">
-                            <small class="text-muted">
-                                <strong>${this.i18n.labelPractice}:</strong> ${this.escapeHtml(practice)}
-                            </small>
-                        </p>
-                    ` : ''}
-                    
-                    ${action ? `
-                        <p class="card-text mb-1">
-                            <small class="text-muted">
-                                <strong>${this.i18n.labelAction}:</strong> ${this.escapeHtml(action)}
-                            </small>
-                        </p>
-                    ` : ''}
-                    
-                    ${classification ? `
-                        <p class="card-text mb-1">
-                            <small class="text-muted">
-                                <strong>${this.i18n.labelClassification}:</strong> ${this.escapeHtml(classification)}
-                            </small>
-                        </p>
-                    ` : ''}
-                    
-                    ${thematicLevel0.length > 0 ? `
-                        <p class="card-text mb-0">
-                            <small class="text-muted">
-                                <strong>${this.i18n.labelThematicAreas}:</strong> ${thematicLevel0.map(theme => this.escapeHtml(theme)).join(', ')}
-                            </small>
-                        </p>
-                    ` : ''}
-                </div>
-            </div>
-        `;
-    }
-    
-    renderDefaultTemplate(doc) {
-        const source = doc.source || {};
-        const title = source.title || source.name || 'Untitled';
-        const description = source.description || '';
-        
-        return `
-            <div class="card mb-3 result-item">
-                <div class="card-body">
-                    <h5 class="card-title">${this.escapeHtml(title)}</h5>
-                    ${description ? `<p class="card-text">${this.escapeHtml(this.truncateWords(description, 50))}</p>` : ''}
-                    ${doc.id ? `
-                        <p class="card-text mb-0">
-                            <small class="text-muted">
-                                <strong>ID:</strong> 
-                                <a href="${this.escapeHtml(doc.id)}" target="_blank">
-                                    ${this.escapeHtml(doc.id)}
-                                </a>
-                            </small>
-                        </p>
-                    ` : ''}
-                </div>
-            </div>
-        `;
-    }
+
 
     escapeHtml(text) {
         if (!text) return '';
@@ -543,13 +288,6 @@ class SearchPageManager {
         return div.innerHTML;
     }
     
-    truncateWords(text, wordCount) {
-        if (!text) return '';
-        const words = text.split(/\s+/);
-        if (words.length <= wordCount) return text;
-        return words.slice(0, wordCount).join(' ') + '...';
-    }
-
     handleSearchError(error, resultsContainer, filterStatus) {
         console.error('Error applying filters:', error);
         if (resultsContainer) {
