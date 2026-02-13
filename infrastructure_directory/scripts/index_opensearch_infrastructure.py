@@ -1,0 +1,1 @@
+from infrastructure_directory.scripts.index_opensearch import run
