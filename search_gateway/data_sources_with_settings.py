@@ -1246,8 +1246,249 @@ DATA_SOURCES = {
                 }
             }
         }
+    },
+    "bronze_all": {
+        "index_name": "bronze_*",
+        "display_name": _("Scientific Production"),
+        "field_settings": {
+            "document_type": {
+                "index_field_name": "type.keyword",
+                "filter":{
+                    "size": 100,
+                    "order": {
+                        "_key": "asc"
+                    }
+                },
+                "settings": {
+                    "class_filter": "select2",
+                    "label": _("Document Type"),
+                    "support_search_as_you_type": False,
+                    "support_query_operator": False,
+                    "category": "document",
+                },
+            },
+            "publication_year": {
+                "index_field_name": "publication_year",
+                "filter": {
+                    "size": 100,
+                    "order": {
+                        "_key": "asc"
+                    }
+                },
+                "settings": {
+                    "class_filter": "select2",
+                    "label": _("Publication Year"),
+                    "support_search_as_you_type": False,
+                    "support_query_operator": False,
+                    "category": "document",                    
+                }
+            },
+            "subjects": {
+                "index_field_name": "subjects_search.keyword",
+                "field_autocomplete": "subjects_search_autocomplete",
+                "filter":{
+                    "size": 100,
+                    "order": {
+                        "_key": "asc"
+                    }
+                },
+                "settings": {
+                    "class_filter": "select2",
+                    "label": _("Subject"),
+                    "support_search_as_you_type": True,
+                    "support_query_operator": False,
+                    "category": "document",                    
+                }
+            },
+            "publisher": {
+                "index_field_name": "publisher_search.keyword",
+                "field_autocomplete": "publisher_search_autocomplete",
+                "filter":{
+                    "size": 100,
+                    "order": {
+                        "_key": "asc"
+                    }
+                },
+                "settings": {
+                    "class_filter": "select2",
+                    "label": _("Publisher"),
+                    "support_search_as_you_type": True,
+                    "support_query_operator": False,
+                    "category": "document",                    
+                }
+            }
+        }
+    },
+    "bronze_social_production":{
+        "index_name": settings.OP_INDEX_SOC_PROD,
+        "display_name": _("Social Production"),
+        "field_settings":{
+            "publication_year": {
+                "index_field_name": "year",
+                "filter":{
+                    "size": 20,
+                    "order":{
+                        "_key": "asc"
+                    }
+                },
+                "settings": {
+                    "class_filter": "select2",
+                    "label": _("Publication year start"),
+                    "support_search_as_you_type": False,
+                    "support_query_operator": False,
+                    "category": "document",                           
+                }                
+            },
+            "action": {
+                "index_field_name": "action",
+                "filter":{
+                    "size": 20,
+                    "order":{
+                        "_key": "asc"
+                    }
+                },
+                "settings": {
+                    "class_filter": "select2",
+                    "label": _("Action"),
+                    "support_search_as_you_type": False,
+                    "support_query_operator": False,
+                    "category": "document",                           
+                }
+            },
+            "thematic_level_0": {
+                "index_field_name": "thematic_level_0",
+                "filter":{
+                    "size": 20,
+                    "order":{
+                        "_key": "asc"
+                    }
+                },
+                "settings": {
+                    "class_filter": "select2",
+                    "label": _("Thematic level 0"),
+                    "support_search_as_you_type": False,
+                    "support_query_operator": False,
+                    "category": "document",                           
+                }
+            },
+            "thematic_level_1": {
+                "index_field_name": "thematic_level_1",
+                "filter":{
+                    "size": 20,
+                    "order":{
+                        "_key": "asc"
+                    }
+                },
+                "settings": {
+                    "class_filter": "select2",
+                    "label": _("Thematic level 1"),
+                    "support_search_as_you_type": False,
+                    "support_query_operator": False,
+                    "category": "document",                           
+                }
+            },
+            "thematic_level_3": {
+                "index_field_name": "thematic_level_2",
+                "filter":{
+                    "size": 20,
+                    "order":{
+                        "_key": "asc"
+                    }
+                },
+                "settings": {
+                    "class_filter": "select2",
+                    "label": _("Thematic level 2"),
+                    "support_search_as_you_type": False,
+                    "support_query_operator": False,
+                    "category": "document",                           
+                }
+            },
+            "practice": {
+                "index_field_name": "practice",
+                "filter":{
+                    "size": 20,
+                    "order":{
+                        "_key": "asc"
+                    }
+                },
+                "settings": {
+                    "class_filter": "select2",
+                    "label": _("Practice"),
+                    "support_search_as_you_type": False,
+                    "support_query_operator": False,
+                    "category": "document",                           
+                }
+            },
+            "institutions": {
+                "index_field_name": "institutions_search.keyword",
+                "field_autocomplete": "institutions_search_autocomplete",
+                "filter":{
+                    "size": 20,
+                    "order":{
+                        "_key": "asc"
+                    }
+                },
+                "settings": {
+                    "class_filter": "select2",
+                    "label": _("Institutions"),
+                    "support_search_as_you_type": True,
+                    "support_query_operator": False,
+                    "category": "document",                           
+                }
+            },
+            "classification": {
+                "index_field_name": "classification",
+                "filter":{
+                    "size": 20,
+                    "order":{
+                        "_key": "asc"
+                    }
+                },
+                "settings": {
+                    "class_filter": "select2",
+                    "label": _("Classification"),
+                    "support_search_as_you_type": False,
+                    "support_query_operator": False,
+                    "category": "document",                           
+                }
+            },
+            "cities": {
+                "index_field_name": "cities",
+                "filter":{
+                    "size": 20,
+                    "order":{
+                        "_key": "asc"
+                    }
+                },
+                "settings": {
+                    "class_filter": "select2",
+                    "label": _("Cities"),
+                    "support_search_as_you_type": False,
+                    "support_query_operator": False,
+                    "category": "document",                           
+                }
+            },
+            "states": {
+                "index_field_name": "states",
+                "filter":{
+                    "size": 20,
+                    "order":{
+                        "_key": "asc"
+                    }
+                },
+                "settings": {
+                    "class_filter": "select2",
+                    "label": _("States"),
+                    "support_search_as_you_type": False,
+                    "support_query_operator": False,
+                    "category": "document",                           
+                }
+            }
+            
+        }
     }
 }
+
 
 
 def get_data_source(data_source_name):
@@ -1267,6 +1508,11 @@ def get_index_field_name_from_data_source(data_source, field_name):
         return field_settings[field_name].get("index_field_name")
     return field_name
 
+def get_field_autocomplete_from_data_source(data_source, field_name):
+    field_settings = get_field_settings(data_source)
+    if field_name in field_settings:
+        return field_settings[field_name].get("field_autocomplete")
+    return field_name
 
 def get_field_settings(data_source):
     """Get the field settings for a data source."""
