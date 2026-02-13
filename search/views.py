@@ -606,7 +606,8 @@ def search_view_list(request):
         query_text=text_search,
         filters=selected_filters,
         page=page,
-        page_size=page_size
+        page_size=page_size,
+        client=service.client
     )
 
 
