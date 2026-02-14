@@ -4,13 +4,13 @@ from django.urls import path, reverse
 from django.utils.translation import gettext as _
 from wagtail import hooks
 from wagtail.admin import messages
-from wagtail.contrib.modeladmin.helpers import ButtonHelper
-from wagtail.contrib.modeladmin.options import (
+from wagtail_modeladmin.helpers import ButtonHelper
+from wagtail_modeladmin.options import (
     ModelAdmin,
     ModelAdminGroup,
     modeladmin_register,
 )
-from wagtail.contrib.modeladmin.views import CreateView
+from wagtail_modeladmin.views import CreateView
 
 from .bronze_transform import transform_document
 from .models import (
