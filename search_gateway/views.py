@@ -2,7 +2,7 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_GET
 
 from . import controller
-
+from .client import get_opensearch_client
 
 @require_GET
 def filters_view(request):
@@ -32,9 +32,9 @@ def search_as_you_type_view(request):
     q = request.GET.get("q", "")
     data_source_name = request.GET.get("data_source", "world")
     field_name = request.GET.get("field_name", "journal")
-
+    client = get_opensearch_client()
     try:
-        results = controller.search_as_you_type(data_source_name, q, field_name)
+        results = controller.search_as_you_type(data_source_name, q, field_name, client=client)
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500) # TODO: Handle different error codes
     return JsonResponse(results, safe=False)

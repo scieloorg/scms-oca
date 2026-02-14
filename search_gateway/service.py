@@ -3,14 +3,14 @@ import logging
 from . import data_sources_with_settings
 from . import parser as response_parser
 from . import query as query_builder
-from .client import get_es_client
+from .client import get_es_client, get_opensearch_client
 
 logger = logging.getLogger(__name__)
 
 
 class SearchGatewayService:
     def __init__(self, data_source_name, exclude_filter_fields=None):
-        self.client = get_es_client()
+        self.client = get_opensearch_client()
         self.data_source_name = data_source_name
         self._data_source = data_sources_with_settings.get_data_source(data_source_name=data_source_name)
         self._field_settings = data_sources_with_settings.get_field_settings(data_source=data_source_name)

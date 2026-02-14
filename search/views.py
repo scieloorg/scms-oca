@@ -11,6 +11,7 @@ from django.conf import settings
 from django.http import Http404, HttpResponse, HttpResponseNotAllowed, JsonResponse
 from django.shortcuts import redirect, render
 from django.template import loader
+from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_GET
@@ -20,6 +21,7 @@ from core.utils import utils
 from indicator import indicator, indicatorOA
 from indicator.models import Indicator, IndicatorData, IndicatorFile
 from search_gateway.controller import search_documents
+from search_gateway.data_sources_with_settings import get_result_template_by_data_source
 from search_gateway.parser import extract_selected_filters
 from search_gateway.service import SearchGatewayService
 
@@ -592,7 +594,7 @@ def get_search_results_json(request):
 def search_view_list(request):
     data_source_name = request.GET.get("data_source", "world")
     page = request.GET.get("page", 1)
-    page_size = request.GET.get("limit", 50)
+    page_size = request.GET.get("limit", 25)
     text_search = request.GET.get("search", "")
     
     service = SearchGatewayService(data_source_name=data_source_name)
@@ -604,13 +606,21 @@ def search_view_list(request):
         query_text=text_search,
         filters=selected_filters,
         page=page,
-        page_size=page_size
+        page_size=page_size,
+        client=service.client
     )
 
+
+    results_html = render_to_string(
+        "search/include/results_list.html",
+        {
+            "results_data": results_data,
+        },
+        request=request,
+    )
     return JsonResponse({
-        "search_results": results_data.get("search_results", []),
         "total_results": results_data.get("total_results", 0),
-        "data_source": data_source_name,
+        "results_html": results_html,
         "selected_filters": selected_filters,
     })
 

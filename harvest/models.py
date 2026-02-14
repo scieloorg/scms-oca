@@ -8,6 +8,7 @@ from modelcluster.models import ClusterableModel
 from wagtail.admin.panels import FieldPanel, InlinePanel
 from wagtail.models import ParentalKey
 
+from core.forms import CoreAdminModelForm
 from core.models import CommonControlField
 
 
@@ -27,6 +28,15 @@ class IndexStatus(models.TextChoices):
     IN_PROGRESS = "in_progress", _("Em Progresso")
     SUCCESS = "success", _("Sucesso")
     FAILED = "failed", _("Falhou")
+
+
+class HarvestModelChoice(models.TextChoices):
+    """Tipos de modelo de coleta para associar scripts de transformação"""
+
+    PREPRINT = "HarvestedPreprint", "Preprint"
+    BOOKS = "HarvestedBooks", "Books"
+    SCIELO_DATA_DATASET = "HarvestedSciELOData_dataset", "SciELO Data - Dataset"
+    SCIELO_DATA_DATAVERSE = "HarvestedSciELOData_dataverse", "SciELO Data - Dataverse"
 
 
 class BaseHarvestedData(CommonControlField):
@@ -68,7 +78,9 @@ class BaseHarvestedData(CommonControlField):
         db_index=True,
     )
     datestamp = models.DateTimeField(
-        verbose_name=_("Data do registro"), auto_now_add=True
+        verbose_name=_("Data do registro"),
+        blank=True,
+        null=True,
     )
     last_harvest_attempt = models.DateTimeField(
         _("Última Tentativa de Coleta"), blank=True, null=True
@@ -96,7 +108,6 @@ class BaseHarvestedData(CommonControlField):
 
     class Meta:
         abstract = True
-        ordering = ["-created_at"]
         indexes = [
             models.Index(fields=["identifier"]),
         ]
@@ -232,6 +243,9 @@ class HarvestedSciELOData(BaseHarvestedData, ClusterableModel):
         verbose_name = _("Dados de Scielo Data")
         verbose_name_plural = _("Dados de Scielo")
 
+    @property
+    def get_url_dataverse(self):
+        return self.raw_data.get("theme", {}).get("linkUrl")
 
 class BaseHarvestErrorLog(models.Model):
     field_name = models.CharField(
@@ -258,6 +272,11 @@ class BaseHarvestErrorLog(models.Model):
         default=False,
         db_index=True,
         help_text=_("Indica se o erro foi resolvido"),
+    )
+    occurrence_date = models.DateTimeField(
+        _("Data de ocorrência"),
+        blank=True,
+        null=True,
     )
     context_data = models.JSONField(
         _("Dados de Contexto"),
@@ -289,3 +308,82 @@ class HarvestErrorLogSciELOData(BaseHarvestErrorLog):
     scielo_data = ParentalKey(
         HarvestedSciELOData, related_name="harvest_error_log", on_delete=models.CASCADE
     )
+
+class TransformationScript(CommonControlField):
+    """
+    Modelo para armazenar scripts Painless de transformação de dados.
+    Permite configurar via interface a transformação de dados raw para bronze.
+    """
+
+    name = models.CharField(
+        _("Nome"),
+        max_length=100,
+        help_text=_("Nome identificador do script de transformação"),
+    )
+    description = models.TextField(
+        _("Descrição"),
+        blank=True,
+        null=True,
+        help_text=_("Descrição do que este script faz"),
+    )
+    source_index = models.CharField(
+        _("Índice de Origem"),
+        max_length=100,
+        help_text=_("Nome do índice OpenSearch de origem (ex: raw_scielo_book)"),
+    )
+    dest_index = models.CharField(
+        _("Índice de Destino"),
+        max_length=100,
+        help_text=_("Nome do índice OpenSearch de destino (ex: bronze_scielo_books)"),
+    )
+    query_script = models.TextField(
+        _("Query JSON"),
+        help_text=_(
+            "Query JSON para selecionar documentos. "
+            "Use {{identifier}} como placeholder para o ID do documento."
+        ),
+        null=True,
+        blank=True
+    )
+    transform_script = models.TextField(
+        _("Script Painless"),
+        help_text=_(
+            "Script Painless para transformação dos dados. "
+            "Acesse os dados brutos via ctx._source.raw_data"
+        ),
+    )
+    is_active = models.BooleanField(
+        _("Ativo"),
+        default=True,
+        db_index=True,
+        help_text=_("Se desativado, a transformação não será executada"),
+    )
+    harvest_model = models.CharField(
+        _("Modelo de Coleta"),
+        max_length=50,
+        choices=HarvestModelChoice.choices,
+        blank=True,
+        null=True,
+        db_index=True,
+        help_text=_("Modelo de coleta associado a este script para transformação automática"),
+    )
+
+    panels = [
+        FieldPanel("harvest_model"),
+        FieldPanel("name"),
+        FieldPanel("description"),
+        FieldPanel("source_index"),
+        FieldPanel("dest_index"),
+        FieldPanel("is_active"),
+        FieldPanel("query_script"),
+        FieldPanel("transform_script"),
+    ]
+
+    class Meta:
+        verbose_name = _("Script de Transformação")
+        verbose_name_plural = _("Scripts de Transformação")
+
+    def __str__(self):
+        return f"{self.name} ({self.source_index})"
+    
+    base_form_class = CoreAdminModelForm

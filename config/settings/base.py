@@ -496,10 +496,19 @@ ES_INDEX_SOURCES = env.str("ES_INDEX_SOURCES", "journals")
 # New version of index opoca
 ES_INDEX_SOCIAL_PRODUCTION = env.str("ES_INDEX_SOCIAL_PRODUCTION", "social_production")
 
+
+# Settings Opensearch index
 OPENSEARCH_URL = env("OPENSEARCH_URL", default="http://opensearch:9200") 
 OPENSEARCH_INDEX_RAW_PREPRINT = env.str("OPENSEARCH_INDEX_RAW_PREPRINT", "raw_scielo_preprint")
 OPENSEARCH_INDEX_RAW_BOOK = env.str("OPENSEARCH_INDEX_RAW_BOOK", "raw_scielo_book")
-OPENSEARCH_INDEX_RAW_SCIELO_DATA = env.str("OPENSEARCH_INDEX_RAW_SCIELO_DATA", "raw_scielo_data")
+OPENSEARCH_INDEX_RAW_SCIELO_DATA_DATASET = env.str(
+    "OPENSEARCH_INDEX_RAW_SCIELO_DATA_DATASET",
+    "raw_scielo_data_dataset",
+)
+OPENSEARCH_INDEX_RAW_SCIELO_DATA_DATAVERSE = env.str(
+    "OPENSEARCH_INDEX_RAW_SCIELO_DATA_DATAVERSE",
+    "raw_scielo_data_comunities_dataverse",
+)
 
 # HARVEST Books, Preprint, SciELO Data
 SCIELO_BOOKS_BASE_URL = env("SCIELO_BOOKS_BASE_URL", default=None)
@@ -509,3 +518,6 @@ USER_AGENT = env(
     default="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
 )
 ENDPOINT_OAI_PMH_PREPRINT = env("ENDPOINT_OAI_PMH_PREPRINT", default="https://preprints.scielo.org/index.php/scielo/oai")
+
+# ALIAS OPENSEARCHINDEX
+OP_INDEX_SOC_PROD = env.str("ES_INDEX_SOC_PROD", "social_production")

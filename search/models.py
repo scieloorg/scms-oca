@@ -23,23 +23,12 @@ def get_save_number(item, default: int):
     except (TypeError, ValueError):
         return default
 
-def get_available_data_sources(data_sources=None):
-    """
-    Get list of available data sources with their display names.
-    If data_sources is provided (list or iterable), only return those matching ones.
-    """
-    if data_sources is not None:
-        keys = set(data_sources)
-        return [
-            {"key": key, "display_name": str(config.get("display_name", key))}
-            for key, config in DATA_SOURCES.items() if key in keys
-        ]
 
 class SearchPage(RoutablePageMixin, Page):
     def get_context(self, request, *args, **kwargs):
         context = super().get_context(request, *args, **kwargs)
         search_query = request.GET.get("search", "")
-        data_source_name = kwargs.get("data_source_name") or request.GET.get("data_source", "world")
+        data_source_name = kwargs.get("data_source_name") or request.GET.get("data_source", "bronze_all")
         context["current_data_source"] = get_index_name_from_data_source(data_source_name)
         service = SearchGatewayService(data_source_name=data_source_name)
         self.set_filters(context, service)
@@ -50,14 +39,13 @@ class SearchPage(RoutablePageMixin, Page):
             data_source_name=data_source_name, 
             search_query=search_query, 
             selected_filters=selected_filters,
-            source_fields=service.source_fields
+            source_fields=service.source_fields,
+            client=service.client,
         )
         context["data_source_name"] = data_source_name
         context["display_name"] = service.display_name
         context["results_data"] = results_data
         context["search_query"] = search_query
-        context["result_template"] = get_result_template_by_data_source(data_source_name)
-        context["available_data_sources"] = get_available_data_sources(data_sources=["social_production", "world"])
         context["filter_categories"] = FILTER_CATEGORIES
         context["grouped_filters"] = self.group_filters_by_category(
             context.get("filters", {}), 
@@ -73,12 +61,12 @@ class SearchPage(RoutablePageMixin, Page):
     @route(r'^world/$')
     def world_route(self, request):
         """World data source route"""
-        return self.render(request, data_source_name="world")
+        return self.render(request, data_source_name="bronze_all")
 
     @route(r'^social/$')
     def social_route(self, request):
         """Social production data source route"""
-        return self.render(request, data_source_name="social_production")
+        return self.render(request, data_source_name="bronze_social_production")
 
     def get_filters(self, service, exclude_fields: Optional[List] = None):
         return service.get_filters(exclude_fields=exclude_fields)
@@ -108,12 +96,13 @@ class SearchPage(RoutablePageMixin, Page):
         return categorized
 
     @staticmethod
-    def get_results_data(request, data_source_name, search_query, selected_filters, source_fields):
+    def get_results_data(request, data_source_name, search_query, selected_filters, source_fields, client):
         return controller.search_documents(
             data_source_name=data_source_name,
             query_text=search_query,
             filters=selected_filters,
             page=get_save_number(request.GET.get("page"), 1),
             page_size=get_save_number(request.GET.get("limit"), 50),
-            source_fields=source_fields
+            source_fields=source_fields,
+            client=client
         )

@@ -37,11 +37,10 @@ def _build_url(base_url, params):
     return f"{base_url}?{urlencode(params, doseq=True)}"
 
 
-def fetch_search_page(search_url, start, per_page, headers):
+def fetch_search_page(search_url, start, per_page, headers, type):
     params = [
         ("q", "*"),
-        ("type", "dataset"),
-        ("type", "dataverse"),
+        ("type", type),
         ("per_page", per_page),
         ("start", start),
     ]
@@ -97,12 +96,8 @@ def _persist_harvested(user, source_url, identifier, raw_data, type_data):
     exc_context.mark_status_harvest()
 
 
-def harvest_data(user, per_page=100, start=None):
+def harvest_data(user, type, per_page=100, start=0):
     search_url = API_SCIELO_DATA
-
-    if start is None:
-        total_in_db = HarvestedSciELOData.objects.count()
-        start = (total_in_db // per_page) * per_page
 
     logging.info(f"Iniciando coleta SciELO Data a partir do offset {start}")
 
@@ -110,6 +105,7 @@ def harvest_data(user, per_page=100, start=None):
         try:
             items, total_count = fetch_search_page(
                 search_url=search_url,
+                type=type,
                 start=start,
                 per_page=per_page,
                 headers=DEFAULT_HEADERS,
@@ -126,7 +122,6 @@ def harvest_data(user, per_page=100, start=None):
             try:
                 _persist_item(
                     item=item,
-                    start=start,
                     user=user,
                 )
             except Exception as exc:
@@ -137,7 +132,7 @@ def harvest_data(user, per_page=100, start=None):
             break
 
 
-def _persist_item(item, user, start=None):
+def _persist_item(item, user):
     data, source_url, type_data, identifier = _fetch_data_by_type(item)
 
     _persist_harvested(
@@ -150,31 +145,43 @@ def _persist_item(item, user, start=None):
 
 def _fetch_data_by_type(item):
     """
-    Retorna:
-        data, source_url, type_data
+    Returns:
+        tuple: (data, source_url, type_data, identifier)
+    Raises:
+        ValueError: If required fields or known types are missing.
     """
     type_data = item.get("type")
 
     if type_data == "dataverse":
         identifier = item.get("identifier")
         if not identifier:
-            raise ValueError("Dataverse sem identifier")
-
+            raise ValueError("Dataverse sem 'identifier'.")
         data = fetch_dataverse_data(identifier=identifier, headers=DEFAULT_HEADERS)
-        return data, f"{DATAVERSE_URL}{identifier}", type_data, identifier
+        source_url = f"{DATAVERSE_URL}{identifier}"
+        return data, source_url, type_data, identifier
 
-    if type_data == "dataset":
+    elif type_data == "dataset":
         global_id = item.get("global_id")
         if not global_id:
-            raise ValueError("Dataset sem global_id")
+            raise ValueError("Dataset sem 'global_id'.")
+
         source_url = _build_url(DATASET_URL, {"persistentId": global_id})
+        publisher = item.get("publisher")
+        dataverse_identifier = item.get("identifier_of_dataverse")
+        dataverse_obj = HarvestedSciELOData.objects.filter(identifier=dataverse_identifier).first()
         data = fetch_dataset_data(
             global_id=global_id,
             headers=DEFAULT_HEADERS,
         )
+        data["publisher"] = {
+            "name": publisher,
+            "identifier": dataverse_identifier,
+            "url": dataverse_obj.get_url_dataverse
+        }
         return data, source_url, type_data, global_id
 
-    raise ValueError(f"Tipo desconhecido: {type_data}")
+    else:
+        raise ValueError(f"Tipo desconhecido ou não suportado: {type_data}")
 
 
 def harvest_single_scielo_data(harvested_obj):

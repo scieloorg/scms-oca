@@ -1,16 +1,16 @@
 from . import data_sources_with_settings
 from . import parser as response_parser
 from . import query as query_builder
-from .client import get_es_client
+from .client import get_es_client, get_opensearch_client
 
 FILTERS_CACHE = {}
 
 def get_mapped_filters(filters, field_settings):
     """
-    Map form filter names to Elasticsearch field names.
+    Map form filter names to Elasticsearch field namclient.
     
     Args:
-        filters: Dict of filters with form field names.
+        filters: Dict of filters with form field namclient.
         field_settings: Field settings from data source configuration.
     
     Returns:
@@ -34,6 +34,7 @@ def search_documents(
     page=1,
     page_size=10,
     source_fields=None,
+    client=None
 ):
     """
     Search documents in Elasticsearch.
@@ -49,7 +50,7 @@ def search_documents(
     Returns:
         Dict with 'search_results' and 'total_results'.
     """
-    es = get_es_client()
+    es = client or get_es_client()
     data_source = data_sources_with_settings.get_data_source(data_source_name)
     field_settings = data_source.get("field_settings", {})
     index_name = data_source.get("index_name")
@@ -68,7 +69,7 @@ def search_documents(
     return response_parser.parse_document_search_response(res)
 
 
-def search_as_you_type(data_source_name, query_text, field_name):
+def search_as_you_type(data_source_name, query_text, field_name, client=None):
     """
     Perform search-as-you-type query for autocomplete.
     
@@ -80,22 +81,23 @@ def search_as_you_type(data_source_name, query_text, field_name):
     Returns:
         List of matching items.
     """
-    es = get_es_client()
+    es = client or get_es_client()
     data_source = data_sources_with_settings.get_data_source(data_source_name)
     fl_name = data_sources_with_settings.get_index_field_name_from_data_source(data_source_name, field_name)
     size = data_sources_with_settings.get_size_by_field_name(data_source_name, field_name)
-    
+    field_autocomplete = data_sources_with_settings.get_field_autocomplete_from_data_source(data_source_name, field_name)
     body = query_builder.build_search_as_you_type_body(
         field_name=fl_name,
         query=query_text,
         agg_size=size,
+        field_autocomplete=field_autocomplete
     )
 
     res = es.search(index=data_source.get("index_name"), body=body)
     return response_parser.parse_search_item_response(res, data_source_name, field_name)
 
 
-def search_item(q, data_source_name, field_name):
+def search_item(q, data_source_name, field_name, client=None):
     """
     Search
     
@@ -107,7 +109,7 @@ def search_item(q, data_source_name, field_name):
     Returns:
         Tuple of (results_dict, error_message).
     """
-    es = get_es_client()
+    es = client or get_es_client()
     if not es:
         return None, "Service unavailable"
 
@@ -136,7 +138,7 @@ def search_item(q, data_source_name, field_name):
         return None, "Error executing or parsing search"
 
 
-def get_filters_data(data_source_name, exclude_fields=None):
+def get_filters_data(data_source_name, client=None, exclude_fields=None):
     """
     Get available filter options from Elasticsearch.
     
@@ -147,7 +149,7 @@ def get_filters_data(data_source_name, exclude_fields=None):
     Returns:
         Tuple of (filters_dict, error_message).
     """
-    es = get_es_client()
+    es = client or get_es_client()
     if not es:
         return None, "Service unavailable"
 

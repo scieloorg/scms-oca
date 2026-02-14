@@ -128,14 +128,11 @@ class ThematicAreaAdmin(ModelAdmin):
     exclude_from_explorer = (
         False  # or True to exclude pages of this type from Wagtail's explorer view
     )
-    # list_display = (
-    #     "level0",
-    #     "level1",
-    #     "level2",
-    #     "creator",
-    #     "updated",
-    #     "created",
-    # )
+    list_display = (
+        "level0",
+        "level1",
+        "level2",
+    )
     search_fields = (
         "level0",
         "level1",

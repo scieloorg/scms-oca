@@ -15,11 +15,23 @@
 </div>
 
 <div id="results-list" class="results-list">
-    {% comment %}
-    Este template é usado apenas para a renderização inicial da página (server-side).
-    Após a primeira carga, as buscas e filtros AJAX usam renderização client-side via JavaScript.
-    {% endcomment %}
     {% for doc in results_data.search_results %}
-        {% include result_template with doc=doc %}
+        {% with item_type=doc.source.type|default_if_none:"" %}
+            {% if item_type == "dataset" %}
+                {% include "search/include/result_items/dataset.html" with doc=doc %}
+            {% elif item_type == "book" %}
+                {% include "search/include/result_items/book.html" with doc=doc %}
+            {% elif item_type == "book-chapter" %}
+                {% include "search/include/result_items/book-chapter.html" with doc=doc %}
+            {% elif item_type == "JOURNALS" or item_type == "ORGANIZATIONS_INSTITUTIONS" %}
+                {% include "search/include/result_items/journals.html" with doc=doc %}
+            {% elif item_type == "preprint" %}
+                {% include "search/include/result_items/preprint.html" with doc=doc %}
+            {% elif item_type == "directory" %}
+                {% include "search/include/result_items/social_production.html" with doc=doc %}
+            {% else %}
+                {% include "search/include/result_items/default.html" with doc=doc %}
+            {% endif %}
+        {% endwith %}
     {% endfor %}
 </div>
