@@ -1316,6 +1316,39 @@ DATA_SOURCES = {
                     "support_query_operator": False,
                     "category": "document",                    
                 }
+            },
+            "institutions": {
+                "index_field_name": "institutions_search.keyword",
+                "field_autocomplete": "institutions_search_autocomplete",
+                "filter":{
+                    "size": 100,
+                    "order": {
+                        "_key": "asc"
+                    }
+                },
+                "settings": {
+                    "class_filter": "select2",
+                    "label": _("Institutions"),
+                    "support_search_as_you_type": True,
+                    "support_query_operator": False,
+                    "category": "document",                    
+                }
+            },
+            "document_language": {
+                "index_field_name": "language.keyword",
+                "filter":{
+                    "size": 100,
+                    "order": {
+                        "_key": "asc"
+                    }
+                },
+                "settings": {
+                    "class_filter": "select2",
+                    "label": _("Document Language"),
+                    "support_search_as_you_type": False,
+                    "support_query_operator": False,
+                    "category": "document",                    
+                }
             }
         }
     },
@@ -1368,7 +1401,7 @@ DATA_SOURCES = {
                     "label": _("Thematic level 0"),
                     "support_search_as_you_type": False,
                     "support_query_operator": False,
-                    "category": "document",                           
+                    "category": "document",
                 }
             },
             "thematic_level_1": {
