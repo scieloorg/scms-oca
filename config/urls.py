@@ -21,6 +21,10 @@ urlpatterns = [
     # Django Admin, use {% url "admin:index" %}
     path(settings.DJANGO_ADMIN_URL, admin.site.urls),
     # Wagtail Admin
+    # NOTE: Wagtail admin is not language-prefixed, so keep wagtail-autocomplete
+    # endpoints alongside it (not inside i18n_patterns), otherwise POST requests
+    # get redirected to /<lang>/... and downgraded to GET.
+    path("admin/autocomplete/", include(autocomplete_admin_urls)),
     path(settings.WAGTAIL_ADMIN_URL, include(wagtailadmin_urls)),
     path('indicators/', include(indicator_urls)),
     path('search-gateway/', include(search_gateway_urls)),
@@ -47,8 +51,6 @@ urlpatterns += i18n_patterns(
     # Index search
     re_path(r"^search/", include("search.urls")),
     re_path(r"^chart/", include("chart.urls")),
-    # Auto complete endpoint
-    path("admin/autocomplete/", include(autocomplete_admin_urls)),
     # API V2 endpoint wagtail models
     path("api/v2/", api_router.urls),
     path("users/", include("core.users.urls", namespace="users")),
