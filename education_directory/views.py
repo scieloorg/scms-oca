@@ -8,7 +8,7 @@ from django.utils.translation import gettext as _
 from django.template.loader import render_to_string
 from django.conf import settings
 from wagtail.admin import messages
-from wagtail.contrib.modeladmin.views import CreateView, EditView
+from wagtail_modeladmin.views import CreateView, EditView
 
 from core import tasks
 from core.libs import chkcsv
