@@ -242,16 +242,10 @@ def harvest_books(
         limit=limit,
         headers=headers,
     ):
-        doc_id = change.get("id")
-        if not doc_id:
-            continue
-        if change.get("deleted"):
-            _delete_book_record(identifier=doc_id)
-            continue
         harvest_single_book(
             base_url=_base_url(),
             db_name=db_name,
-            doc_id=doc_id,
+            payload=change,
             headers=headers,
             user=user,
             last_seq=change.get("seq"),
@@ -261,33 +255,32 @@ def harvest_books(
 def harvest_single_book(
     base_url,
     db_name,
-    doc_id,
+    payload,
     headers,
     user,
-    payload=None,
-    source_url=None,
     last_seq=None,
 ):
+
+    doc_id = payload.get("id")
+    if not doc_id:
+        return
+    if payload.get("deleted"):
+        _delete_book_record(identifier=doc_id)
+        return
     base_url = _base_url() if not base_url else base_url
     if not base_url:
         logging.error("Sem base url definida para coleta de books")
         raise ValueError()
 
-    doc_url = source_url
-    if payload is None:
-        payload, doc_url = fetch_doc(
-            base_url=base_url,
-            db_name=db_name,
-            doc_id=doc_id,
-            headers=headers,
-            user=user,
-        )
-    if not payload:
-        return
+    payload, doc_url = fetch_doc(
+        base_url=base_url,
+        db_name=db_name,
+        doc_id=doc_id,
+        headers=headers,
+        user=user,
+    )
 
     identifier = payload.get("_id")
-    if not identifier:
-        return
     payload = _sanitize_raw_data(payload)
 
     type_data = payload.get("TYPE")

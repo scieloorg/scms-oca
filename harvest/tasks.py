@@ -81,12 +81,9 @@ def harvest_books_in_couchdb(
         limit=limit,
         headers=headers,
     ):
-        doc_id = change.get("id")
-        if not doc_id:
-            continue
         harvest_single_book_in_couchdb.delay(
             username=username,
-            doc_id=doc_id,
+            payload=change,
             db_name=db_name,
             headers=headers,
         )
@@ -95,7 +92,7 @@ def harvest_books_in_couchdb(
 @celery_app.task(name="Harvest Single Book")
 def harvest_single_book_in_couchdb(
     username,
-    doc_id,
+    payload,
     user_id=None,
     db_name="scielobooks_1a",
     headers=None,
@@ -103,7 +100,7 @@ def harvest_single_book_in_couchdb(
     user = User.objects.get(username=username)
     harvest_single_book(
         base_url=None,
-        doc_id=doc_id,
+        payload=payload,
         db_name=db_name,
         user=user,
         headers=headers,
