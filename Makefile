@@ -86,6 +86,9 @@ django_migrate: ## Run migrate from django container using $(compose)
 django_makemessages: ## Run ./manage.py makemessages $(compose)
 	@docker compose -f $(compose) run --rm django python manage.py makemessages --all
 
+django_makemessages_js: ## Run ./manage.py makemessages for JS
+	@docker compose -f $(compose) run --rm django python manage.py makemessages --all --domain=djangojs
+
 django_compilemessages: ## Run ./manage.py compilemessages $(compose)
 	@docker compose -f $(compose) run --rm django python manage.py compilemessages
 

@@ -434,8 +434,8 @@ HAYSTACK_CONNECTIONS = {
     },
     "es": {
         "ENGINE": "haystack.backends.elasticsearch7_backend.Elasticsearch7SearchEngine",
-        "URL": env("ES_URL", default="http://elastic:xxxxx@host.docker.internal:9200/"),
-        "INDEX_NAME": env("INDEX_NAME", default="openalex_works"),
+        "URL": env("ES_URL", default="https://admin:pass@localhost:9200/"),
+        "INDEX_NAME": env("INDEX_NAME", default="raw_openalex_works"),
         "SOLR_TIMEOUT": 10,
         "KWARGS": {
             "verify_certs": env.bool("ES_VERIFY_CERTS", default=False),
@@ -498,7 +498,7 @@ ES_INDEX_SOCIAL_PRODUCTION = env.str("ES_INDEX_SOCIAL_PRODUCTION", "social_produ
 
 
 # Settings Opensearch index
-OPENSEARCH_URL = env("OPENSEARCH_URL", default="http://opensearch:9200") 
+OPENSEARCH_URL = env("OPENSEARCH_URL", default="http://opensearch:9200")
 OPENSEARCH_INDEX_RAW_PREPRINT = env.str("OPENSEARCH_INDEX_RAW_PREPRINT", "raw_scielo_preprint")
 OPENSEARCH_INDEX_RAW_BOOK = env.str("OPENSEARCH_INDEX_RAW_BOOK", "raw_scielo_book")
 OPENSEARCH_INDEX_RAW_SCIELO_DATA_DATASET = env.str(
@@ -509,6 +509,8 @@ OPENSEARCH_INDEX_RAW_SCIELO_DATA_DATAVERSE = env.str(
     "OPENSEARCH_INDEX_RAW_SCIELO_DATA_DATAVERSE",
     "raw_scielo_data_comunities_dataverse",
 )
+OPENSEARCH_INDEX_RAW_SCIELO_DATA = env.str("OPENSEARCH_INDEX_RAW_SCIELO_DATA", "raw_scielo_data")
+OPENSEARCH_INDEX_BRONZE = env.str("OPENSEARCH_INDEX_BRONZE", "bronze_*")
 
 # HARVEST Books, Preprint, SciELO Data
 SCIELO_BOOKS_BASE_URL = env("SCIELO_BOOKS_BASE_URL", default=None)
