@@ -508,7 +508,7 @@ DIRECTORY_IMPORT_DELIMITER = env.str("DIRECTORY_IMPORT_DELIMITER", default=",")
 ES_INDEX_SCI_PROD_WORLD = env.str("ES_INDEX_SCI_PROD_WORLD", "openalex_works")
 ES_INDEX_SCI_PROD_BRAZIL = env.str("ES_INDEX_SCI_PROD_BRAZIL", "openalex_works")
 ES_INDEX_SCI_PROD_SCIELO = env.str("ES_INDEX_SCI_PROD_SCIELO", "scielo_works")
-ES_INDEX_SOC_PROD = env.str("ES_INDEX_SOC_PROD", "opoca")
+ES_INDEX_SOC_PROD = env.str("ES_INDEX_SOC_PROD", "social_production")
 ES_INDEX_JOURNAL_METRICS = env.str("ES_INDEX_JOURNAL_METRICS", "journal_annual_metrics")
 ES_INDEX_SOURCES = env.str("ES_INDEX_SOURCES", "journals")
 
@@ -518,6 +518,8 @@ ES_INDEX_SOCIAL_PRODUCTION = env.str("ES_INDEX_SOCIAL_PRODUCTION", "social_produ
 
 # Settings Opensearch index
 OPENSEARCH_URL = env("OPENSEARCH_URL", default="http://opensearch:9200")
+OP_INDEX_SCI_PROD = env.str("OP_INDEX_SCI_PROD", "bronze_*")
+OP_INDEX_JOURNAL_METRICS = env.str("OP_INDEX_JOURNAL_METRICS", ES_INDEX_JOURNAL_METRICS)
 OPENSEARCH_INDEX_RAW_PREPRINT = env.str("OPENSEARCH_INDEX_RAW_PREPRINT", "raw_scielo_preprint")
 OPENSEARCH_INDEX_RAW_BOOK = env.str("OPENSEARCH_INDEX_RAW_BOOK", "raw_scielo_book")
 OPENSEARCH_INDEX_RAW_SCIELO_DATA_DATASET = env.str(
@@ -541,4 +543,4 @@ USER_AGENT = env(
 ENDPOINT_OAI_PMH_PREPRINT = env("ENDPOINT_OAI_PMH_PREPRINT", default="https://preprints.scielo.org/index.php/scielo/oai")
 
 # ALIAS OPENSEARCHINDEX
-OP_INDEX_SOC_PROD = env.str("ES_INDEX_SOC_PROD", "social_production")
+OP_INDEX_SOC_PROD = env.str("OP_INDEX_SOC_PROD", "bronze_social_production")

@@ -15,4 +15,18 @@ CELERY_FLOWER_PASSWORD=QgScyefPrYhHgO6onW61u0nazc5xdBuP4sM7jMRrBBFuA2RjsFhZLp7xb
 
 # OpenSearch
 # ------------------------------------------------------------------------------
-OPENSEARCH_URL=https://admin:bai%haeHeegh5uamaikei3iShaeb1i@node01-opensearch.scielo.org:9200/
+OPENSEARCH_URL=
+OP_INDEX_SCI_PROD=bronze_*
+ES_URL=
+ES_INDEX_JOURNAL_METRICS=metrics_by_field
+
+# UI banners
+# ------------------------------------------------------------------------------
+UI_WARNING_BANNER_ENABLED=True
+UI_WARNING_BANNER_VARIANT=warning
+UI_WARNING_BANNER_MESSAGE=
+
+# Django
+# ------------------------------------------------------------------------------
+DJANGO_SETTINGS_MODULE=config.settings.local
+DJANGO_SECRET_KEY=

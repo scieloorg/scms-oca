@@ -20,6 +20,11 @@ DJANGO_SECRET_KEY=FMiraeekXCSl3zHfg7D4oHx7ufT46HRnwnsawKgTCC53BYajVkVzb8HhOvBOHa
 DJANGO_ADMIN_URL=django-admin/
 DJANGO_ALLOWED_HOSTS=*
 
+# UI banners
+# ------------------------------------------------------------------------------
+UI_WARNING_BANNER_ENABLED=True
+UI_WARNING_BANNER_VARIANT=warning
+UI_WARNING_BANNER_MESSAGE=
 
 # Wagtail
 # ------------------------------------------------------------------------------
