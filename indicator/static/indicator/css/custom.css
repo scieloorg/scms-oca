@@ -50,6 +50,213 @@ div.dt-container select.dt-input {
   margin-left: 0.10rem;
 }
 
+.filter-group-card {
+    background: #ffffff;
+    border: 1px solid #d8dee5;
+    border-radius: 10px;
+    padding: 0.85rem 0.85rem 0.75rem;
+    margin-bottom: 0.9rem;
+}
+
+.filter-group-card--muted {
+    background: #eef2f6;
+    border-color: #ccd6e1;
+}
+
+.filter-group-card__title {
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: #2f4050;
+    margin-bottom: 0.75rem;
+}
+
+.filter-group-card__toggle {
+    width: 100%;
+    border: 0;
+    background: transparent;
+    padding: 0;
+    margin: 0 0 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    text-align: left;
+}
+
+.filter-group-card__toggle .filter-group-card__title {
+    margin-bottom: 0;
+}
+
+.filter-group-card__chevron {
+    width: 0.55rem;
+    height: 0.55rem;
+    border-right: 2px solid #4c5f73;
+    border-bottom: 2px solid #4c5f73;
+    transform: rotate(45deg);
+    transition: transform 0.16s ease-in-out;
+    margin-left: 0.45rem;
+    flex-shrink: 0;
+}
+
+.filter-group-card.is-collapsed .filter-group-card__chevron {
+    transform: rotate(-45deg);
+}
+
+.filter-group-card__body.is-collapsed {
+    display: none;
+}
+
+.indicator-chart-card {
+    border: 1px solid #d6dee6;
+}
+
+.indicator-chart-canvas {
+    width: 100%;
+    height: 42vh;
+    min-height: 320px;
+}
+
+@media (max-width: 991px) {
+    .indicator-chart-canvas {
+        height: 52vh;
+        min-height: 280px;
+    }
+}
+
+.indicator-applied-filters {
+    background: linear-gradient(180deg, #f9fbfd 0%, #f0f4f8 100%);
+    border: 1px solid #d7e0ea;
+}
+
+.indicator-relative-section__title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: #314659;
+}
+
+.indicator-relative-section__subtitle {
+    font-size: 0.8rem;
+    color: #576b7f;
+}
+
+.applied-filters-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.55rem;
+}
+
+.applied-filters-title {
+    font-size: 0.86rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: #33475b;
+}
+
+.applied-filters-count {
+    border: 1px solid #b8c8d8;
+    border-radius: 999px;
+    padding: 0.15rem 0.55rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #36516b;
+    background: #ecf3fa;
+}
+
+.applied-filters-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+}
+
+.applied-filter-chip {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.28rem;
+    padding: 0.28rem 0.5rem;
+    border: 1px solid #ccdae7;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #213242;
+    font-size: 0.8rem;
+    line-height: 1.25;
+}
+
+.applied-filter-chip__label {
+    font-weight: 700;
+    color: #2e4357;
+}
+
+.applied-filter-chip__value {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.16rem;
+}
+
+.applied-filter-chip__not {
+    border: 1px solid #c34f4f;
+    border-radius: 999px;
+    padding: 0.05rem 0.38rem;
+    font-size: 0.67rem;
+    font-weight: 700;
+    color: #8d2222;
+    background: #ffecec;
+}
+
+.applied-filters-operators {
+    margin-top: 0.72rem;
+    padding-top: 0.65rem;
+    border-top: 1px dashed #c5d3e1;
+}
+
+.applied-filters-operators__title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #4b6075;
+    margin-bottom: 0.42rem;
+    text-transform: uppercase;
+}
+
+.applied-filters-operators__list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+}
+
+.applied-filter-operator-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.36rem;
+    border: 1px solid #c7d4e1;
+    border-radius: 999px;
+    padding: 0.15rem 0.55rem;
+    background: #f7fafe;
+    font-size: 0.76rem;
+}
+
+.applied-filter-operator-chip__label {
+    color: #50657a;
+    font-weight: 600;
+}
+
+.applied-filter-operator-chip__value {
+    color: #1f3750;
+    font-weight: 700;
+}
+
+.journal-metrics-applied {
+    margin-top: 0.8rem;
+    padding-top: 0.72rem;
+    border-top: 1px dashed #c5d3e1;
+}
+
 /* Estilos para lidar com selects compostos por campo principal e not */
 .input-group-right {
     width: auto !important;
@@ -157,4 +364,180 @@ div.dt-container select.dt-input {
     text-align: left !important;
     font-weight: 700 !important;
     min-height: 0 !important;
+}
+
+.journal-kpi {
+    background: #f8f9fa;
+    border: 1px solid #d9dee3;
+    border-radius: 8px;
+    height: 100%;
+    padding: 0.6rem 0.75rem;
+}
+
+.journal-kpi__label {
+    color: #4f5c68;
+    font-size: 0.75rem;
+    line-height: 1.2;
+}
+
+.journal-kpi__value {
+    color: #1f2a36;
+    font-size: 1.1rem;
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+.journal-profile-chart {
+    width: 100%;
+    height: 330px;
+}
+
+@media (max-width: 991px) {
+    .journal-profile-chart {
+        height: 300px;
+    }
+}
+
+#ranking-table tbody tr {
+    cursor: pointer;
+}
+
+.journal-ranking-tip {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    border: 1px solid #d2deea;
+    border-radius: 8px;
+    background: #f6f9fc;
+    color: #2b465f;
+    font-size: 0.9rem;
+    line-height: 1.3;
+    padding: 0.45rem 0.6rem;
+}
+
+.journal-ranking-tip__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
+}
+
+.journal-ranking-tip__icon svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.journal-ranking-link {
+    color: #0a58ca;
+    font-weight: 600;
+    text-decoration: underline;
+    text-decoration-thickness: 1.5px;
+    text-underline-offset: 0.16rem;
+    border: 0;
+    background: transparent;
+    padding: 0;
+    cursor: pointer;
+}
+
+.journal-ranking-link:hover,
+.journal-ranking-link:focus-visible {
+    color: #0847a6;
+    text-decoration-thickness: 2px;
+    outline: none;
+}
+
+.journal-profile-section {
+    background: #f8fafc;
+    border: 1px solid #d9e1e8;
+    border-radius: 10px;
+    padding: 1rem 1rem 0.95rem;
+}
+
+.journal-profile-section + .journal-profile-section {
+    margin-top: 1.15rem;
+}
+
+.journal-profile-section__title {
+    color: #1f2a36;
+    font-size: 0.82rem;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 0.7rem;
+}
+
+.journal-source-badge {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    padding: 0.28rem 0.58rem;
+    border: 1px solid #c4ccd4;
+    border-radius: 999px;
+    background-color: #f7f9fb;
+    color: #2f3b4a;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.28rem;
+}
+
+.journal-source-badge--active {
+    background-color: #eaf4f0;
+    border-color: #4f8a76;
+    color: #214338;
+    box-shadow: inset 0 0 0 1px #4f8a76;
+}
+
+.journal-source-badge--inactive {
+    color: #556171;
+    background-color: #f8fafb;
+    border-color: #bcc5cf;
+    border-style: dashed;
+    opacity: 0.86;
+}
+
+.journal-source-badge--active::before {
+    content: "\25CF";
+    font-size: 0.52rem;
+}
+
+.journal-source-badge--inactive::before {
+    content: "\25CB";
+    font-size: 0.54rem;
+}
+
+#journal-profile-modal .modal-body {
+    padding-top: 1rem;
+    padding-bottom: 1.2rem;
+}
+
+#journal-profile-modal .select2-container {
+    width: 100% !important;
+}
+
+.ranking-metric-header {
+    white-space: nowrap !important;
+    min-width: 190px;
+    line-height: 1.2;
+}
+
+.journal-profile-modal-close {
+    opacity: 0.78;
+}
+
+.journal-profile-modal-close:hover,
+.journal-profile-modal-close:focus {
+    opacity: 1;
+}
+
+.journal-profile-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    min-height: 180px;
+    color: #35536e;
+    font-weight: 500;
 }
