@@ -4,6 +4,7 @@
 {% load menu_context %}
 
 {% get_menu_context request as menu_ctx %}
+{% get_search_page as search_page %}
 
 <!-- Indicadores -->
 <li class="menu-item {% if menu_ctx.is_about_indicadores or menu_ctx.path|startswith:'/indicators/world/' or menu_ctx.path|startswith:'/indicators/brazil/' or menu_ctx.path|startswith:'/indicators/scielo/' or menu_ctx.path|startswith:'/indicators/social/' %}active{% endif %}">
@@ -32,12 +33,12 @@
 {% endif %}
 
 <!-- Busca -->
-<li class="menu-item {% if menu_ctx.is_about_busca or menu_ctx.path|startswith:'/searchv2' %}active{% endif %}">
+<li class="menu-item {% if menu_ctx.is_about_busca or menu_ctx.path|startswith:'/search-page' %}active{% endif %}">
     {% if menu_ctx.is_about_section %}
         <a class="menu-link" href="/{{ request.LANGUAGE_CODE }}/sobre-busca-bibliografica/"><div>{% trans "Busca" %}</div></a>
     {% elif menu_ctx.is_social_context %}
-        <a class="menu-link" href="/searchv2/social"><div>{% trans "Busca" %}</div></a>
+        <a class="menu-link" href="{% pageurl search_page %}world/"><div>{% trans "Busca" %}</div></a>
     {% else %}
-        <a class="menu-link" href="/searchv2/world"><div>{% trans "Busca" %}</div></a>
+        <a class="menu-link" href="{% pageurl search_page %}social/"><div>{% trans "Busca" %}</div></a>
     {% endif %}
 </li>
