@@ -1,16 +1,43 @@
-from search_gateway.client import get_es_client
+from search_gateway.client import get_es_client, get_opensearch_client
 from search_gateway import data_sources_with_settings
 
 from . import query as indicator_query
 from . import parser as indicator_parser
 from . import utils
 
+INDICATOR_OPENSEARCH_DATA_SOURCES = {
+    "world",
+    "brazil",
+    "scielo",
+    "social",
+    "journal_metrics",
+}
 
-def _get_es_or_error():
-    es = get_es_client()
-    if not es:
+BASELINE_PRESERVED_FILTER_KEYS = {
+    "scope",
+    "publication_year",
+    "document_publication_year_start",
+    "document_publication_year_end",
+    "document_publication_year_range",
+}
+
+CONTROL_FILTER_KEYS = {
+    "breakdown_variable",
+    "study_unit",
+    "csrfmiddlewaretoken",
+}
+
+DEFAULT_JOURNAL_METRICS_CATEGORY_LEVEL = "field"
+VALID_JOURNAL_METRICS_CATEGORY_LEVELS = {"domain", "field", "subfield", "topic"}
+DEFAULT_JOURNAL_METRICS_PUBLICATION_YEAR = "2020"
+DEFAULT_JOURNAL_METRICS_RANKING_METRIC = "journal_impact_normalized_window_3y"
+
+
+def _get_opensearch_or_error():
+    os_client = get_opensearch_client()
+    if not os_client:
         return None, "Service unavailable"
-    return es, None
+    return os_client, None
 
 
 def _get_index_name_or_error(data_source_name):
