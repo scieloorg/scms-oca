@@ -286,6 +286,26 @@ EMAIL_TIMEOUT = 5
 # https://docs.djangoproject.com/en/4.2/ref/settings/#std-setting-EMAIL_SUBJECT_PREFIX
 EMAIL_SUBJECT_PREFIX = env("DJANGO_EMAIL_SUBJECT_PREFIX", default="[OCABR] ")
 
+# UI / BANNERS
+# ------------------------------------------------------------------------------
+# Enable/disable indicator warning banner via environment variables.
+# Example:
+#   UI_WARNING_BANNER_ENABLED=True
+#   UI_WARNING_BANNER_VARIANT=warning   # or danger/info/success/primary/secondary
+#   UI_WARNING_BANNER_MESSAGE=Optional custom message
+UI_WARNING_BANNER_ENABLED = env.bool("UI_WARNING_BANNER_ENABLED", default=False)
+UI_WARNING_BANNER_VARIANT = env.str("UI_WARNING_BANNER_VARIANT", default="warning").strip().lower()
+if UI_WARNING_BANNER_VARIANT not in {
+    "warning",
+    "danger",
+    "info",
+    "success",
+    "primary",
+    "secondary",
+}:
+    UI_WARNING_BANNER_VARIANT = "warning"
+UI_WARNING_BANNER_MESSAGE = env.str("UI_WARNING_BANNER_MESSAGE", default="").strip()
+
 # ADMIN
 # ------------------------------------------------------------------------------
 # Django Admin URL.
