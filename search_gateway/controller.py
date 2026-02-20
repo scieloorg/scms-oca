@@ -2,8 +2,53 @@ from . import data_sources_with_settings
 from . import parser as response_parser
 from . import query as query_builder
 from .client import get_es_client, get_opensearch_client
+import json
+import time
 
 FILTERS_CACHE = {}
+FILTERS_CACHE_TTL_SECONDS = 300
+OPENSEARCH_DATA_SOURCES = {
+    "world",
+    "brazil",
+    "scielo",
+    "social",
+    "journal_metrics",
+}
+
+DEFAULT_JOURNAL_METRICS_CATEGORY_LEVEL = "field"
+VALID_JOURNAL_METRICS_CATEGORY_LEVELS = {"domain", "field", "subfield", "topic"}
+
+
+def _normalize_journal_metrics_category_level(value):
+    normalized = str(value or "").strip().lower()
+    if not normalized:
+        return DEFAULT_JOURNAL_METRICS_CATEGORY_LEVEL
+    if normalized not in VALID_JOURNAL_METRICS_CATEGORY_LEVELS:
+        return DEFAULT_JOURNAL_METRICS_CATEGORY_LEVEL
+    return normalized
+
+
+def _get_search_client_for_data_source(data_source_name, client=None):
+    if client:
+        return client
+    if data_source_name in OPENSEARCH_DATA_SOURCES:
+        return get_opensearch_client()
+    return get_es_client()
+
+
+def _apply_search_filters_to_body(body, mapped_filters):
+    if not mapped_filters:
+        return body
+
+    original_query = body.get("query", {"match_all": {}})
+    body_with_filters = dict(body)
+    body_with_filters["query"] = {
+        "bool": {
+            "must": [original_query],
+            "filter": query_builder.query_filters(mapped_filters),
+        }
+    }
+    return body_with_filters
 
 def get_mapped_filters(filters, field_settings):
     """
