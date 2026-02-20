@@ -444,7 +444,7 @@ HAYSTACK_CONNECTIONS = {
     },
 }
 
-USE_SOLR = env.str("USE_SOLR", "True") == "True"
+USE_SOLR = env.str("USE_SOLR", "False") == "True"
 
 if USE_SOLR:
     HAYSTACK_SIGNAL_PROCESSOR = "haystack.signals.RealtimeSignalProcessor"
@@ -520,4 +520,4 @@ USER_AGENT = env(
 ENDPOINT_OAI_PMH_PREPRINT = env("ENDPOINT_OAI_PMH_PREPRINT", default="https://preprints.scielo.org/index.php/scielo/oai")
 
 # ALIAS OPENSEARCHINDEX
-OP_INDEX_SOC_PROD = env.str("ES_INDEX_SOC_PROD", "social_production")
+OP_INDEX_SOC_PROD = env.str("OP_INDEX_SOC_PROD", "bronze_social_production")
