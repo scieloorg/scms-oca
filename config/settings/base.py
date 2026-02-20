@@ -432,7 +432,7 @@ WAGTAILMENUS_FLAT_MENUS_HANDLE_CHOICES = [
     ("faq", "FAQ"),
     ("noticias", _("Notícias")),
     ("secundario", _("Menu Secundário")),
-    ("sobre_producao_cientifica", _("Sobre")),
+    ("about", _("About")),
     ("sobre_oca", _("Sobre o OCABr")),
 ]
 
