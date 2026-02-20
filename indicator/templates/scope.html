@@ -1,66 +1,145 @@
 {% load i18n static %}
 
 <div>
-  <h4 class="my-2">{% trans "Scope" %}</h4>
+  <h4 class="mt-0 mb-2">{% trans "Scope" %}</h4>
 
-    <form id="data-source-form" class="mb-2">
-      <label class="form-label" for="data_source">{% trans "Data Source" %}</label>
-      <div class="input-group">
-          <select class="form-select" id="selectDataSource" name="data_source" style="height: 2.25rem;">
-              <option selected value="world">{% trans "World" %}</option>
-              <option value="brazil">{% trans "Brazil" %}</option>
-              <option value="scielo">{% trans "SciELO Network" %}</option>
-          </select>
-      </div>
-    </form>
-
-    <form id="study-unit-form" class="mb-2">
-      <label class="form-label" for="study_unit">{% trans "Aggregation Mode" %}</label>
+  <div class="filter-group-card filter-group-card--muted filter-group-card--collapsible mb-2">
+    <div class="filter-group-card__title">{% trans "Aggregation Mode" %}</div>
+    <form id="study-unit-form" class="mb-0">
+      <label class="form-label" for="study_unit">{% trans "Study unit" %}</label>
       <div class="input-group">
         <select class="form-select" id="selectStudyUnit" name="study_unit" style="height: 2.25rem;">
             <option selected value="document">{% trans "Document" %}</option>
-            <option value="journal">{% trans "Journal" %}</option>
+            <option value="source">{% trans "Source" %}</option>
+            <option value="journal_metrics">{% trans "Journal Metrics" %}</option>
         </select>
       </div>
     </form>
+  </div>
+
+  <div class="filter-group-card filter-group-card--muted filter-group-card--collapsible mb-2">
+    <div class="filter-group-card__title">{% trans "Data Scope" %}</div>
+    <form id="scope-filter-form" class="mb-0">
+      <label class="form-label" for="selectIndexScope">{% trans "Scope" %}</label>
+      <div class="input-group">
+        <select class="form-select" id="selectIndexScope" name="scope" style="height: 2.25rem;">
+            <option value="">{% trans "All scopes" %}</option>
+        </select>
+      </div>
+    </form>
+  </div>
 </div>
 
 {% block inline_javascript %}
 <script>
   document.addEventListener('DOMContentLoaded', function () {
-    // Data source form handling
-    const dataSourceForm = document.getElementById('data-source-form');
-    const selectDataSource = document.getElementById('selectDataSource');
+    const scopeFilterForm = document.getElementById('scope-filter-form');
+    const selectIndexScope = document.getElementById('selectIndexScope');
 
-    const currentDataSource = '{{ data_source }}';
+    const currentDataSource = '{{ data_source|default:"world" }}';
+    const isJournalMetricsPage = currentDataSource === 'journal_metrics';
+    const scopeDataSource = isJournalMetricsPage ? 'world' : currentDataSource;
+    const indicatorHomeUrl = '{% url "indicator_home" %}';
+    const journalMetricsUrl = '{% url "indicator_journal_metrics" %}';
     let currentStudyUnit = '{{ study_unit|default:"document" }}';
-    if (!['document', 'journal'].includes(currentStudyUnit)) {
-      currentStudyUnit = 'document';
+    if (currentStudyUnit === 'journal') {
+      currentStudyUnit = 'source';
     }
+    if (!['document', 'source', 'journal_metrics'].includes(currentStudyUnit)) {
+      currentStudyUnit = isJournalMetricsPage ? 'journal_metrics' : 'document';
+    }
+    const currentQueryParams = new URLSearchParams(window.location.search);
+    const currentScopeFilter =
+      currentQueryParams.get('scope')
+      || currentQueryParams.get('source_index_open_alex')
+      || currentQueryParams.get('collection')
+      || '';
+    const returnStudyUnitParam = (currentQueryParams.get('return_study_unit') || '').trim().toLowerCase();
+    const returnStudyUnit = ['document', 'source'].includes(returnStudyUnitParam)
+      ? returnStudyUnitParam
+      : 'source';
+    const allScopesLabel = "{% filter escapejs %}{% trans 'All scopes' %}{% endfilter %}";
 
-    // Set initial value only if option exists
-    if (selectDataSource && currentDataSource) {
-      const hasOption = Array.from(selectDataSource.options).some(o => o.value === currentDataSource);
-      if (hasOption) {
-        selectDataSource.value = currentDataSource;
+    const buildIndicatorRedirectUrl = (studyUnit, scopeValue) => {
+      const params = isJournalMetricsPage
+        ? new URLSearchParams()
+        : new URLSearchParams(window.location.search);
+      params.set('study_unit', studyUnit || 'document');
+      params.delete('collection');
+      params.delete('source_index_open_alex');
+      params.delete('return_study_unit');
+      if (scopeValue) {
+        params.set('scope', scopeValue);
+      } else {
+        params.delete('scope');
       }
-    }
+      const query = params.toString();
+      return query ? `${indicatorHomeUrl}?${query}` : indicatorHomeUrl;
+    };
 
-    dataSourceForm.addEventListener('submit', function (event) {
-      event.preventDefault();
-      const selectedDataSource = selectDataSource.value;
-      if (selectedDataSource) {
-        const params = new URLSearchParams(window.location.search);
-        params.set('study_unit', currentStudyUnit || 'document');
-        window.location.href = `/indicators/${selectedDataSource}/?${params.toString()}`;
+    const buildJournalMetricsRedirectUrl = (scopeValue) => {
+      const params = new URLSearchParams();
+      if (scopeValue) {
+        params.set('scope', scopeValue);
       }
-    });
+      params.set('return_study_unit', ['document', 'source'].includes(currentStudyUnit) ? currentStudyUnit : 'source');
+      const query = params.toString();
+      return query ? `${journalMetricsUrl}?${query}` : journalMetricsUrl;
+    };
 
-    if (selectDataSource) {
-      selectDataSource.addEventListener('change', () => {
-        dataSourceForm.requestSubmit();
-      });
-    }
+    const populateScopeOptions = async () => {
+      if (!selectIndexScope) return;
+
+      selectIndexScope.innerHTML = '';
+      const allOption = document.createElement('option');
+      allOption.value = '';
+      allOption.textContent = allScopesLabel || 'All scopes';
+      selectIndexScope.appendChild(allOption);
+
+      try {
+        const response = await fetch(
+          `/search-gateway/filters/?data_source=${encodeURIComponent(scopeDataSource)}&fields=scope,collection&refresh=1`
+        );
+        if (!response.ok) return;
+
+        const data = await response.json();
+        const scopeOptions = Array.isArray(data?.scope)
+          ? data.scope
+          : Array.isArray(data?.source_index_open_alex)
+            ? data.source_index_open_alex
+          : Array.isArray(data?.collection)
+            ? data.collection
+            : [];
+
+        const seen = new Set();
+        scopeOptions.forEach(option => {
+          const optionValue = String(option?.key ?? '').trim();
+          if (!optionValue || seen.has(optionValue)) return;
+          seen.add(optionValue);
+
+          const optionLabel = String(option?.label ?? optionValue);
+          const selectOption = document.createElement('option');
+          selectOption.value = optionValue;
+          selectOption.textContent = optionLabel;
+          selectIndexScope.appendChild(selectOption);
+        });
+      } catch (error) {
+        console.error('Error loading scope options', error);
+      }
+
+      if (currentScopeFilter) {
+        const hasCurrentScope = Array.from(selectIndexScope.options).some(o => o.value === currentScopeFilter);
+        if (!hasCurrentScope) {
+          const dynamicOption = document.createElement('option');
+          dynamicOption.value = currentScopeFilter;
+          dynamicOption.textContent = currentScopeFilter;
+          selectIndexScope.appendChild(dynamicOption);
+        }
+        selectIndexScope.value = currentScopeFilter;
+      } else {
+        selectIndexScope.value = '';
+      }
+    };
 
     // Study unit form handling
     const studyUnitForm = document.getElementById('study-unit-form');
@@ -77,16 +156,14 @@
       event.preventDefault();
       const selectedStudyUnit = selectStudyUnit.value;
       if (selectedStudyUnit) {
-        const dataSourceForRedirect = (currentDataSource && ['world', 'brazil', 'scielo'].includes(currentDataSource))
-          ? currentDataSource
-          : (selectDataSource ? selectDataSource.value : 'world');
-
-        const params = new URLSearchParams(window.location.search);
-        params.set('study_unit', selectedStudyUnit);
-        if (selectedStudyUnit === 'journal') {
-          params.delete('breakdown_variable');
-        }
-        window.location.href = `/indicators/${dataSourceForRedirect}/?${params.toString()}`;
+        const selectedScope = selectIndexScope ? selectIndexScope.value : '';
+        const redirectUrl = new URL(
+          selectedStudyUnit === 'journal_metrics'
+            ? buildJournalMetricsRedirectUrl(selectedScope)
+            : buildIndicatorRedirectUrl(selectedStudyUnit, selectedScope),
+          window.location.origin,
+        );
+        window.location.href = redirectUrl.pathname + redirectUrl.search;
       }
     });
 
@@ -95,6 +172,26 @@
         studyUnitForm.requestSubmit();
       });
     }
+
+    if (scopeFilterForm) {
+      scopeFilterForm.addEventListener('submit', function (event) {
+        event.preventDefault();
+        const selectedScope = selectIndexScope ? selectIndexScope.value : '';
+        if (isJournalMetricsPage) {
+          window.location.href = buildIndicatorRedirectUrl(returnStudyUnit, selectedScope);
+          return;
+        }
+        window.location.href = buildIndicatorRedirectUrl(currentStudyUnit, selectedScope);
+      });
+    }
+
+    if (selectIndexScope) {
+      selectIndexScope.addEventListener('change', () => {
+        scopeFilterForm.requestSubmit();
+      });
+    }
+
+    populateScopeOptions();
   });
 </script>
 {% endblock %}
