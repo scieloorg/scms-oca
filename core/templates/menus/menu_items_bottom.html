@@ -37,8 +37,8 @@
     {% if menu_ctx.is_about_section %}
         <a class="menu-link" href="/{{ request.LANGUAGE_CODE }}/sobre-busca-bibliografica/"><div>{% trans "Busca" %}</div></a>
     {% elif menu_ctx.is_social_context %}
-        <a class="menu-link" href="{% pageurl search_page %}world/"><div>{% trans "Busca" %}</div></a>
-    {% else %}
         <a class="menu-link" href="{% pageurl search_page %}social/"><div>{% trans "Busca" %}</div></a>
+    {% else %}
+        <a class="menu-link" href="{% pageurl search_page %}world/"><div>{% trans "Busca" %}</div></a>
     {% endif %}
 </li>
