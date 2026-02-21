@@ -36,7 +36,8 @@ def parse_filters_response(response, data_source_name=None):
     return {
         k: [{
             "key": b["key"],
-            "label": transforms.apply_transform(data_source_name, k, b["key"])
+            "label": transforms.apply_transform(data_source_name, k, b["key"]),
+            "doc_count": b.get("doc_count"),
         } for b in v["buckets"]]
         for k, v in response.get("aggregations", {}).items()
     }

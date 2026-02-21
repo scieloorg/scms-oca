@@ -70,17 +70,58 @@ def build_term_search_body(field_name, query, aggregation_size=20):
     Returns:
         Elasticsearch query body dict.
     """
-    fn_cleaned = field_name.replace(".keyword", "")
+    if field_name.endswith(".keyword"):
+        query_field = field_name[:-8]
+        agg_field = field_name
+    else:
+        query_field = field_name
+        agg_field = field_name
 
     return {
         "size": 0,
-        "query": {"match_phrase_prefix": {fn_cleaned: query}},
+        "query": {"match_phrase_prefix": {query_field: query}},
         "aggs": {
             "unique_items": {
                 "terms": {
-                    "field": f"{fn_cleaned}.keyword",
+                    "field": agg_field,
                     "size": aggregation_size,
                 }
+            }
+        },
+    }
+
+
+def build_keyword_contains_search_body(field_name, query, aggregation_size=20):
+    """
+    Builds a contains search body for keyword fields using wildcard.
+    """
+    cleaned_query = (query or "").strip()
+    if not cleaned_query:
+        return {
+            "size": 0,
+            "query": {"match_all": {}},
+            "aggs": {
+                "unique_items": {
+                    "terms": {"field": field_name, "size": aggregation_size}
+                }
+            },
+        }
+
+    escaped_query = cleaned_query.replace("\\", "\\\\").replace("*", "\\*").replace("?", "\\?")
+
+    return {
+        "size": 0,
+        "query": {
+            "wildcard": {
+                field_name: {
+                    "value": f"*{escaped_query}*",
+                    "case_insensitive": True,
+                }
+            }
+        },
+        "aggs": {
+            "unique_items": {
+                "terms": {"field": field_name, "size": aggregation_size}
             }
         },
     }
@@ -103,8 +144,12 @@ def build_filters_aggs(field_settings, exclude_fields=None):
     for form_field_name, field_info in field_settings.items():
         if form_field_name in exclude_fields:
             continue
+        if field_info.get("filter", {}).get("use") is False:
+            continue
 
         fl_name = field_info.get("index_field_name")
+        if not fl_name:
+            continue
         fl_size = field_info.get("filter", {}).get("size", 1)
         fl_order = field_info.get("filter", {}).get("order")
 
