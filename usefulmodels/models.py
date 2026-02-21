@@ -268,7 +268,6 @@ class ThematicArea(CommonControlField):
 
     level0 = models.CharField(
         _("Level 0"),
-        choices=choices.thematic_level0,
         max_length=255,
         null=True,
         blank=True,
@@ -277,7 +276,6 @@ class ThematicArea(CommonControlField):
 
     level1 = models.CharField(
         _("Level 1"),
-        choices=choices.thematic_level1,
         max_length=255,
         null=True,
         blank=True,
@@ -286,7 +284,6 @@ class ThematicArea(CommonControlField):
 
     level2 = models.CharField(
         _("Level 2"),
-        choices=choices.thematic_level2,
         max_length=255,
         null=True,
         blank=True,

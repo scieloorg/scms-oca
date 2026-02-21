@@ -463,7 +463,7 @@ HAYSTACK_CONNECTIONS = {
     },
 }
 
-USE_SOLR = env.str("USE_SOLR", "True") == "True"
+USE_SOLR = env.str("USE_SOLR", "False") == "True"
 
 if USE_SOLR:
     HAYSTACK_SIGNAL_PROCESSOR = "haystack.signals.RealtimeSignalProcessor"
