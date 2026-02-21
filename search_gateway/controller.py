@@ -95,7 +95,7 @@ def search_documents(
     Returns:
         Dict with 'search_results' and 'total_results'.
     """
-    es = client or get_es_client()
+    es = _get_search_client_for_data_source(data_source_name, client=client)
     data_source = data_sources_with_settings.get_data_source(data_source_name)
     field_settings = data_source.get("field_settings", {})
     index_name = data_source.get("index_name")
@@ -126,7 +126,7 @@ def search_as_you_type(data_source_name, query_text, field_name, client=None):
     Returns:
         List of matching items.
     """
-    es = client or get_es_client()
+    es = _get_search_client_for_data_source(data_source_name, client=client)
     data_source = data_sources_with_settings.get_data_source(data_source_name)
     fl_name = data_sources_with_settings.get_index_field_name_from_data_source(data_source_name, field_name)
     size = data_sources_with_settings.get_size_by_field_name(data_source_name, field_name)
@@ -142,7 +142,7 @@ def search_as_you_type(data_source_name, query_text, field_name, client=None):
     return response_parser.parse_search_item_response(res, data_source_name, field_name)
 
 
-def search_item(q, data_source_name, field_name, client=None):
+def search_item(q, data_source_name, field_name, client=None, filters=None):
     """
     Search
     
@@ -154,7 +154,7 @@ def search_item(q, data_source_name, field_name, client=None):
     Returns:
         Tuple of (results_dict, error_message).
     """
-    es = client or get_es_client()
+    es = _get_search_client_for_data_source(data_source_name, client=client)
     if not es:
         return None, "Service unavailable"
 
@@ -194,16 +194,13 @@ def get_filters_data(data_source_name, client=None, exclude_fields=None):
     Returns:
         Tuple of (filters_dict, error_message).
     """
-    es = client or get_es_client()
+    es = _get_search_client_for_data_source(data_source_name, client=client)
     if not es:
         return None, "Service unavailable"
 
     index_name = data_sources_with_settings.get_index_name_from_data_source(data_source_name)
     if not index_name:
         return None, "Invalid index name"
-        
-    if index_name in FILTERS_CACHE:
-        return FILTERS_CACHE[index_name], None
 
     field_settings = data_sources_with_settings.get_field_settings(data_source_name)
     if not field_settings:
