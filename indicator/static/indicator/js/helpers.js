@@ -2,14 +2,96 @@
 /**
  * Fetch filters from the server for a given data source
  */
-async function fetchFilters(dataSource) {
-    const url = `/search-gateway/filters/?data_source=${encodeURIComponent(dataSource)}`;
+async function fetchFilters(dataSource, extraParams = {}) {
+    let url = `/search-gateway/filters/?data_source=${encodeURIComponent(dataSource)}`;
+    if (extraParams && typeof extraParams === 'object') {
+        const query = new URLSearchParams();
+
+        Object.entries(extraParams).forEach(([key, value]) => {
+            if (value === null || value === undefined || value === '') return;
+            if (Array.isArray(value)) {
+                value.forEach(item => {
+                    if (item === null || item === undefined || item === '') return;
+                    query.append(key, String(item));
+                });
+                return;
+            }
+            query.set(key, String(value));
+        });
+
+        const queryString = query.toString();
+        if (queryString) {
+            url += `&${queryString}`;
+        }
+    }
     const response = await fetch(url);
 
     if (!response.ok) throw new Error(gettext('GET filters has failed'));
 
     return await response.json();
 }
+
+/**
+ * Enable open/close behavior for filter group cards.
+ * Cards must use `.filter-group-card--collapsible` and include
+ * a direct child `.filter-group-card__title`.
+ */
+function initCollapsibleFilterGroups() {
+    const cards = document.querySelectorAll('.filter-group-card--collapsible');
+
+    cards.forEach((card, index) => {
+        if (card.dataset.collapsibleReady === 'true') return;
+
+        const titleElement = card.querySelector(':scope > .filter-group-card__title');
+        if (!titleElement) return;
+
+        const titleText = titleElement.textContent.trim();
+        const expandedByDefault = card.dataset.expanded !== 'false';
+        const bodyId = card.id ? `${card.id}-body` : `filter-group-body-${index + 1}`;
+
+        const toggleButton = document.createElement('button');
+        toggleButton.type = 'button';
+        toggleButton.className = 'filter-group-card__toggle';
+        toggleButton.setAttribute('aria-expanded', expandedByDefault ? 'true' : 'false');
+        toggleButton.setAttribute('aria-controls', bodyId);
+        toggleButton.innerHTML = `
+            <span class="filter-group-card__title">${titleText}</span>
+            <span class="filter-group-card__chevron" aria-hidden="true"></span>
+        `;
+
+        const body = document.createElement('div');
+        body.className = 'filter-group-card__body';
+        body.id = bodyId;
+
+        let current = titleElement.nextSibling;
+        while (current) {
+            const nextNode = current.nextSibling;
+            body.appendChild(current);
+            current = nextNode;
+        }
+
+        titleElement.replaceWith(toggleButton);
+        card.appendChild(body);
+
+        if (!expandedByDefault) {
+            card.classList.add('is-collapsed');
+            body.classList.add('is-collapsed');
+        }
+
+        toggleButton.addEventListener('click', () => {
+            const isExpanded = toggleButton.getAttribute('aria-expanded') === 'true';
+            toggleButton.setAttribute('aria-expanded', isExpanded ? 'false' : 'true');
+            card.classList.toggle('is-collapsed', isExpanded);
+            body.classList.toggle('is-collapsed', isExpanded);
+        });
+
+        card.dataset.collapsibleReady = 'true';
+    });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    initCollapsibleFilterGroups();
+});
 
 /**
  * Populate select filter elements with options from fetched data
@@ -32,17 +114,24 @@ async function populateSelectFilters(data, exclude=[]) {
                 const optionValue = String(rawValue);
                 const optionLabel = item?.label ?? item?.text ?? optionValue;
                 const optionLabelStz = standardizeFieldValue(key, optionLabel);
+                const optionDocCount = Number(item?.doc_count);
 
-                return { optionValue, optionLabelStz };
+                return {
+                    optionValue,
+                    optionLabelStz,
+                    optionDocCount: Number.isFinite(optionDocCount) ? optionDocCount : null,
+                };
             })
             .filter(Boolean)
             .sort((a, b) => a.optionLabelStz.localeCompare(b.optionLabelStz, undefined, { sensitivity: 'base' }));
 
         // Add sorted options to fragment
-        options.forEach(({ optionValue, optionLabelStz }) => {
+        options.forEach(({ optionValue, optionLabelStz, optionDocCount }) => {
             const option = document.createElement('option');
             option.value = optionValue;
-            option.textContent = optionLabelStz;
+            option.textContent = optionDocCount === null
+                ? optionLabelStz
+                : `${optionLabelStz} (${optionDocCount.toLocaleString()})`;
             fragment.appendChild(option);
         });
 
@@ -113,24 +202,51 @@ function standardizeCountryCode(countryCode) {
     return label || normalized;
 }
 
+const BREAKDOWN_METRIC_SUFFIXES = new Set([
+    'Documents',
+    'Citations',
+    'Citations per Document',
+    'Cited Documents',
+    'Percent Docs With Citations',
+    'Periodicals',
+    'Documents per Periodical',
+    'Citations per Periodical',
+    'Cited Documents per Periodical',
+    'Percent Periodicals With Cited Docs',
+]);
+
+function splitMetricSuffix(value) {
+    const normalized = String(value ?? '').trim();
+    if (!normalized) return { base: '', suffix: '' };
+
+    const match = normalized.match(/^(.*?)\s+\(([^()]+)\)$/);
+    if (!match) return { base: normalized, suffix: '' };
+
+    const metricLabel = String(match[2] || '').trim();
+    if (!BREAKDOWN_METRIC_SUFFIXES.has(metricLabel)) {
+        return { base: normalized, suffix: '' };
+    }
+
+    return {
+        base: String(match[1] || '').trim(),
+        suffix: ` (${metricLabel})`,
+    };
+}
+
+function splitDocCitSuffix(value) {
+    // Backward compatibility: old helper name used by collection standardization.
+    return splitMetricSuffix(value);
+}
+
 /**
  * Standardize language code to full language name (with region if applicable)
  */
 function standardizeLanguageCode(langCode) {
     if (!langCode) return '';
 
-    var normalized = String(langCode).trim();
-    if (!normalized) return '';
-
-    // Extract the language part and any suffix like " (Documents)" or " (Citations)"
-    const suffixMatch = normalized.match(/^(.*?)\s+\((Documents|Citations)\)$/i);
-    let languageOnly = normalized;
-    let suffix = '';
-
-    if (suffixMatch) {
-        languageOnly = suffixMatch[1];
-        suffix = ` (${suffixMatch[2]})`;
-    }
+    const { base, suffix } = splitMetricSuffix(langCode);
+    let languageOnly = base || String(langCode).trim();
+    if (!languageOnly) return '';
 
     // Some backends send already-localized names (e.g. "Portuguese") or other
     // values that are not valid language tags; in that case, keep as-is.
@@ -237,6 +353,15 @@ function clearAppliedFiltersContainer() {
     }
 }
 
+function escapeHtml(value) {
+    return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
 /**
  * Update applied filters display area
 */
@@ -246,7 +371,7 @@ function updateAppliedFiltersDisplay() {
     if (!container || !form) return;
 
     const formData = new FormData(form);
-    const allFilterStrings = [];
+    const filterChips = [];
 
     // Map field IDs to labels
     const labels = {};
@@ -272,7 +397,7 @@ function updateAppliedFiltersDisplay() {
         }
 
         const element = form.querySelector(`[name="${key}"]`);
-        const labelText = labels[element.id] || key;
+        const labelText = element ? (labels[element.id] || key) : key;
 
         // Group values of 'multiple' fields
         const existing = filtersToDisplay.find(f => f.label === labelText);
@@ -283,21 +408,28 @@ function updateAppliedFiltersDisplay() {
         }
     }
 
-    // Standardize and format filter strings
+    // Standardize and format chips
     filtersToDisplay.forEach(filter => {
         const element = form.querySelector(`[name="${filter.key}"]`);
-        const group = element.closest('.input-group');
+        const group = element ? element.closest('.input-group') : null;
         const isNot = group && group.querySelector('.toggle-not') && group.classList.contains('not-active');
 
-        const values = filter.values.map(val => {
-            const standardizedVal = standardizeFieldValue(filter.label, val);
-            if (isNot) {
-                return `<span class="badge badge-oca-light bg-danger text-white">NOT</span> ${standardizedVal}`;
-            }
-            return standardizedVal;
-        }).join(', ');
+        const valuesHtml = filter.values.map(val => {
+            const standardizedVal = standardizeFieldValue(filter.key, val);
+            const safeValue = escapeHtml(standardizedVal);
+            return `<span>${safeValue}</span>`;
+        }).join('<span>, </span>');
+        const notPrefixHtml = isNot
+            ? `<span class="applied-filter-chip__not">NOT</span>`
+            : '';
 
-        allFilterStrings.push(`<span class="fw-bold">${filter.label}:</span> ${values}`);
+        filterChips.push(
+            `<span class="applied-filter-chip">` +
+                `<span class="applied-filter-chip__label">${escapeHtml(filter.label)}</span>` +
+                `<span>:</span>` +
+                `<span class="applied-filter-chip__value">${notPrefixHtml}${valuesHtml}</span>` +
+            `</span>`
+        );
     });
 
     // Handle publication year range separately
@@ -305,8 +437,15 @@ function updateAppliedFiltersDisplay() {
     const endVal = formData.get('document_publication_year_end');
     const rangeLabel = formatYearRange(startVal, endVal);
     if (rangeLabel) {
-        allFilterStrings.push(`<span class="fw-bold">${gettext('Publication Year')}:</span> ${rangeLabel}`);
+        filterChips.push(
+            `<span class="applied-filter-chip">` +
+                `<span class="applied-filter-chip__label">${escapeHtml(gettext('Publication Year'))}</span>` +
+                `<span>:</span>` +
+                `<span class="applied-filter-chip__value">${escapeHtml(rangeLabel)}</span>` +
+            `</span>`
+        );
     }
+
     // Handle country and language query operators
     const countryOp = formData.get('country_operator');
     const languageOp = formData.get('document_language_operator');
@@ -314,28 +453,51 @@ function updateAppliedFiltersDisplay() {
 
     const countryFilter = filtersToDisplay.find(f => f.key === 'country');
     if (countryOp && countryFilter && countryFilter.values.length > 1) {
-        queryOperators.push(`<span><span class="fw-bold">${gettext('Country')}:</span> <span class="badge badge-oca-light bg-secondary">${countryOp.toUpperCase()}</span></span>`);
+        queryOperators.push({
+            label: gettext('Country'),
+            value: countryOp.toUpperCase(),
+        });
     }
 
     const languageFilter = filtersToDisplay.find(f => f.key === 'document_language');
     if (languageOp && languageFilter && languageFilter.values.length > 1) {
-        queryOperators.push(`<span><span class="fw-bold">${gettext('Document Language')}:</span> <span class="badge badge-oca-light bg-secondary">${languageOp.toUpperCase()}</span></span>`);
+        queryOperators.push({
+            label: gettext('Document Language'),
+            value: languageOp.toUpperCase(),
+        });
     }
 
-    // Build the final HTML string
-    let finalHtml = `<strong class="text-primary">${gettext('Applied Filters')}</strong><div>${allFilterStrings.join('<span class="badge badge-oca-light bg-secondary mx-2">AND</span>')}</div>`;
-    if (queryOperators.length > 0) {
-        finalHtml += `<strong class="mt-1 text-primary">${gettext('Search Options')}</strong><div>${queryOperators.join(' ')}</div>`;
-    }
-
-    // Join and display all filter strings
-    if (allFilterStrings.length) {
-        container.innerHTML = finalHtml;
-        container.classList.remove('d-none');
-    } else {
+    if (!filterChips.length) {
         container.classList.add('d-none');
         container.innerHTML = '';
+        return;
     }
+
+    let queryOperatorsHtml = '';
+    if (queryOperators.length > 0) {
+        queryOperatorsHtml =
+            `<div class="applied-filters-operators">` +
+                `<div class="applied-filters-operators__title">${escapeHtml(gettext('Search Options'))}</div>` +
+                `<div class="applied-filters-operators__list">` +
+                    queryOperators.map(op =>
+                        `<span class="applied-filter-operator-chip">` +
+                            `<span class="applied-filter-operator-chip__label">${escapeHtml(op.label)}</span>` +
+                            `<span class="applied-filter-operator-chip__value">${escapeHtml(op.value)}</span>` +
+                        `</span>`
+                    ).join('') +
+                `</div>` +
+            `</div>`;
+    }
+
+    container.innerHTML =
+        `<div class="applied-filters-head">` +
+            `<span class="applied-filters-title">${escapeHtml(gettext('Applied Filters'))}</span>` +
+            `<span class="applied-filters-count">${filterChips.length}</span>` +
+        `</div>` +
+        `<div class="applied-filters-grid">${filterChips.join('')}</div>` +
+        queryOperatorsHtml;
+
+    container.classList.remove('d-none');
 }
 
 /**
@@ -391,7 +553,9 @@ function toTitleCase(text) {
 function standardizeIndicatorSeriesNames(indicators) {
     if (indicators.breakdown_variable && indicators.series) {
         indicators.series.forEach(s => {
-            s.name = standardizeFieldValue(indicators.breakdown_variable, s.name);
+            const { base, suffix } = splitMetricSuffix(s.name);
+            const standardizedBase = standardizeFieldValue(indicators.breakdown_variable, base);
+            s.name = `${standardizedBase}${suffix}`;
         });
     }
 }

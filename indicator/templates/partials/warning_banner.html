@@ -1,0 +1,12 @@
+{% load i18n %}
+
+{% if config.UI_WARNING_BANNER_ENABLED %}
+<div class="alert alert-{{ config.UI_WARNING_BANNER_VARIANT }} shadow-sm mb-3" role="alert" aria-live="polite">
+    {% if config.UI_WARNING_BANNER_MESSAGE %}
+        {% trans config.UI_WARNING_BANNER_MESSAGE %}
+    {% else %}
+        {% trans "Note: study units Document and Source are still in data backfill. Some results may be partial for now. Data will be complete soon." %}
+    {% endif %}
+</div>
+{% endif %}
+

@@ -7,13 +7,13 @@
 {% get_search_page as search_page %}
 
 <!-- Indicadores -->
-<li class="menu-item {% if menu_ctx.is_about_indicadores or menu_ctx.path|startswith:'/indicators/world/' or menu_ctx.path|startswith:'/indicators/brazil/' or menu_ctx.path|startswith:'/indicators/scielo/' or menu_ctx.path|startswith:'/indicators/social/' %}active{% endif %}">
+<li class="menu-item {% if menu_ctx.is_about_indicadores or menu_ctx.path|startswith:'/indicators/' %}active{% endif %}">
     {% if menu_ctx.is_about_section %}
         <a class="menu-link" href="/{{ request.LANGUAGE_CODE }}/sobre-indicadores/"><div>{% trans "Indicadores" %}</div></a>
     {% elif menu_ctx.is_social_context %}
         <a class="menu-link" href="{% url 'indicator' 'social' %}"><div>{% trans "Indicadores" %}</div></a>
     {% else %}
-        <a class="menu-link" href="{% url 'indicator' 'world' %}"><div>{% trans "Indicadores" %}</div></a>
+        <a class="menu-link" href="{% url 'indicator_home' %}"><div>{% trans "Indicadores" %}</div></a>
     {% endif %}
 </li>
 

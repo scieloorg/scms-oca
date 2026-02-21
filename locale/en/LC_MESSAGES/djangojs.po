@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-26 17:35+0000\n"
+"POT-Creation-Date: 2026-02-20 21:17+0000\n"
 "PO-Revision-Date: 2026-01-26 15:45-0300\n"
 "Last-Translator: \n"
 "Language-Team: English\n"
@@ -18,209 +18,439 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: indicator/static/indicator/js/button.js:82
+#: indicator/static/indicator/js/button.js:85
 msgid "Start typing to search..."
 msgstr "Start typing to search..."
 
-#: indicator/static/indicator/js/charts.js:141
-#: indicator/static/indicator/js/menu.js:122
-msgid "Unique Periodicals (sources)"
+#: indicator/static/indicator/js/charts.js:214
+#: indicator/static/indicator/js/menu.js:228
+#, fuzzy
+#| msgid "Unique Periodicals (sources)"
+msgid "Unique Sources"
 msgstr "Unique Periodicals (sources)"
 
-#: indicator/static/indicator/js/charts.js:143
-msgid "Documents / Periodical"
-msgstr "Documents / Periodical"
+# charts.js / journal_metrics.js (manual additions)
+#: indicator/static/indicator/js/charts.js:216
+msgid "Documents per Source"
+msgstr "Documents per Source"
 
-#: indicator/static/indicator/js/charts.js:145
-msgid "Citations / Periodical"
-msgstr "Citations / Periodical"
+#: indicator/static/indicator/js/charts.js:218
+msgid "Citations per Source"
+msgstr "Citations per Source"
 
-#: indicator/static/indicator/js/charts.js:147
-msgid "Cited Documents / Periodical"
-msgstr "Cited Documents / Periodical"
+#: indicator/static/indicator/js/charts.js:220
+msgid "Cited Documents per Source"
+msgstr "Cited Documents per Source"
 
-#: indicator/static/indicator/js/charts.js:149
-#: indicator/static/indicator/js/menu.js:154
-msgid "% Periodicals With ≥1 Cited Document"
+#: indicator/static/indicator/js/charts.js:222
+#: indicator/static/indicator/js/menu.js:264
+#, fuzzy
+#| msgid "% Periodicals With ≥1 Cited Document"
+msgid "% Sources With ≥1 Cited Document"
 msgstr "% Periodicals With ≥1 Cited Document"
 
-#: indicator/static/indicator/js/charts.js:151
+#: indicator/static/indicator/js/charts.js:224
+#: indicator/static/indicator/js/menu.js:338
+#, fuzzy
+#| msgid "Documents per Source (share %)"
+msgid "Unique Sources Share (%)"
+msgstr "Documents per Source (share %)"
+
+#: indicator/static/indicator/js/charts.js:226
+msgid "Documents per Source (share %)"
+msgstr "Documents per Source (share %)"
+
+#: indicator/static/indicator/js/charts.js:228
+msgid "Citations per Source (share %)"
+msgstr "Citations per Source (share %)"
+
+#: indicator/static/indicator/js/charts.js:230
+msgid "Cited Documents per Source (share %)"
+msgstr "Cited Documents per Source (share %)"
+
+#: indicator/static/indicator/js/charts.js:232
+#: indicator/static/indicator/js/menu.js:382
+#, fuzzy
+#| msgid "% Periodicals With ≥1 Cited Document"
+msgid "% Sources With ≥1 Cited Document Share (%)"
+msgstr "% Periodicals With ≥1 Cited Document"
+
+#: indicator/static/indicator/js/charts.js:234
 msgid "Cited Documents"
 msgstr "Cited Documents"
 
-#: indicator/static/indicator/js/charts.js:153
+#: indicator/static/indicator/js/charts.js:236
 msgid "Documents"
 msgstr "Documents"
 
-#: indicator/static/indicator/js/charts.js:155
+#: indicator/static/indicator/js/charts.js:238
+#: indicator/static/indicator/js/journal_metrics.js:209
 msgid "Citations"
 msgstr "Citations"
 
-#: indicator/static/indicator/js/charts.js:160
-#: indicator/static/indicator/js/menu.js:181
+#: indicator/static/indicator/js/charts.js:240
+#: indicator/static/indicator/js/menu.js:395
+#, fuzzy
+#| msgid "Documents per Source (share %)"
+msgid "Documents Share (%)"
+msgstr "Documents per Source (share %)"
+
+#: indicator/static/indicator/js/charts.js:242
+#: indicator/static/indicator/js/menu.js:406
+#, fuzzy
+#| msgid "Citations per Source (share %)"
+msgid "Citations Share (%)"
+msgstr "Citations per Source (share %)"
+
+#: indicator/static/indicator/js/charts.js:247
+#: indicator/static/indicator/js/menu.js:294
 msgid "Citations per Document"
 msgstr "Citations per Document"
 
-#: indicator/static/indicator/js/charts.js:162
+#: indicator/static/indicator/js/charts.js:249
+#: indicator/static/indicator/js/menu.js:417
+#, fuzzy
+#| msgid "Citations per Document"
+msgid "Citations per Document Share (%)"
+msgstr "Citations per Document"
+
+#: indicator/static/indicator/js/charts.js:251
 msgid "% Docs With ≥1 Citation"
 msgstr "% Docs With ≥1 Citation"
 
-#: indicator/static/indicator/js/helpers.js:9
+#: indicator/static/indicator/js/charts.js:253
+#: indicator/static/indicator/js/menu.js:428
+#, fuzzy
+#| msgid "Cited Documents per Source (share %)"
+msgid "Cited Documents Share (%)"
+msgstr "Cited Documents per Source (share %)"
+
+#: indicator/static/indicator/js/charts.js:255
+#, fuzzy
+#| msgid "% Docs With ≥1 Citation"
+msgid "% Docs With ≥1 Citation Share (%)"
+msgstr "% Docs With ≥1 Citation"
+
+#: indicator/static/indicator/js/helpers.js:29
 msgid "GET filters has failed"
 msgstr "GET filters has failed"
 
-#: indicator/static/indicator/js/helpers.js:169
+#: indicator/static/indicator/js/helpers.js:285
 msgid "Argentina"
 msgstr "Argentina"
 
-#: indicator/static/indicator/js/helpers.js:170
+#: indicator/static/indicator/js/helpers.js:286
 msgid "Bolivia"
 msgstr "Bolivia"
 
-#: indicator/static/indicator/js/helpers.js:171
+#: indicator/static/indicator/js/helpers.js:287
 msgid "Chile"
 msgstr "Chile"
 
-#: indicator/static/indicator/js/helpers.js:172
+#: indicator/static/indicator/js/helpers.js:288
 msgid "Science and Culture"
 msgstr "Science and Culture"
 
-#: indicator/static/indicator/js/helpers.js:173
+#: indicator/static/indicator/js/helpers.js:289
 msgid "Colombia"
 msgstr "Colombia"
 
-#: indicator/static/indicator/js/helpers.js:174
+#: indicator/static/indicator/js/helpers.js:290
 msgid "Costa Rica"
 msgstr "Costa Rica"
 
-#: indicator/static/indicator/js/helpers.js:175
+#: indicator/static/indicator/js/helpers.js:291
 msgid "Cuba"
 msgstr "Cuba"
 
-#: indicator/static/indicator/js/helpers.js:176
+#: indicator/static/indicator/js/helpers.js:292
 msgid "Dominican Republic"
 msgstr "Dominican Republic"
 
-#: indicator/static/indicator/js/helpers.js:177
+#: indicator/static/indicator/js/helpers.js:293
 msgid "Ecuador"
 msgstr "Ecuador"
 
-#: indicator/static/indicator/js/helpers.js:178
+#: indicator/static/indicator/js/helpers.js:294
 msgid "Spain"
 msgstr "Spain"
 
-#: indicator/static/indicator/js/helpers.js:179
+#: indicator/static/indicator/js/helpers.js:295
 msgid "Mexico"
 msgstr "Mexico"
 
-#: indicator/static/indicator/js/helpers.js:180
+#: indicator/static/indicator/js/helpers.js:296
 msgid "Peru"
 msgstr "Peru"
 
-#: indicator/static/indicator/js/helpers.js:181
+#: indicator/static/indicator/js/helpers.js:297
 msgid "Portugal"
 msgstr "Portugal"
 
-#: indicator/static/indicator/js/helpers.js:182
+#: indicator/static/indicator/js/helpers.js:298
 msgid "Paraguay"
 msgstr "Paraguay"
 
-#: indicator/static/indicator/js/helpers.js:183
+#: indicator/static/indicator/js/helpers.js:299
 msgid "PEPSIC"
 msgstr "PEPSIC"
 
-#: indicator/static/indicator/js/helpers.js:184
+#: indicator/static/indicator/js/helpers.js:300
 msgid "REVENF"
 msgstr "REVENF"
 
-#: indicator/static/indicator/js/helpers.js:185
+#: indicator/static/indicator/js/helpers.js:301
 msgid "Brazil"
 msgstr "Brazil"
 
-#: indicator/static/indicator/js/helpers.js:186
+#: indicator/static/indicator/js/helpers.js:302
 msgid "Public Health"
 msgstr "Public Health"
 
-#: indicator/static/indicator/js/helpers.js:187
+#: indicator/static/indicator/js/helpers.js:303
 msgid "South Africa"
 msgstr "South Africa"
 
-#: indicator/static/indicator/js/helpers.js:188
+#: indicator/static/indicator/js/helpers.js:304
 msgid "Uruguay"
 msgstr "Uruguay"
 
-#: indicator/static/indicator/js/helpers.js:189
+#: indicator/static/indicator/js/helpers.js:305
 msgid "Venezuela"
 msgstr "Venezuela"
 
-#: indicator/static/indicator/js/helpers.js:190
+#: indicator/static/indicator/js/helpers.js:306
 msgid "West Indies"
 msgstr "West Indies"
 
-#: indicator/static/indicator/js/helpers.js:200
+#: indicator/static/indicator/js/helpers.js:316
 msgid "No"
 msgstr "No"
 
-#: indicator/static/indicator/js/helpers.js:201
+#: indicator/static/indicator/js/helpers.js:317
 msgid "Yes"
 msgstr "Yes"
 
-#: indicator/static/indicator/js/helpers.js:308
+#: indicator/static/indicator/js/helpers.js:442
 msgid "Publication Year"
 msgstr "Publication Year"
 
-#: indicator/static/indicator/js/helpers.js:317
+#: indicator/static/indicator/js/helpers.js:457
 msgid "Country"
 msgstr "Country"
 
-#: indicator/static/indicator/js/helpers.js:322
+#: indicator/static/indicator/js/helpers.js:465
 msgid "Document Language"
 msgstr "Document Language"
 
-#: indicator/static/indicator/js/helpers.js:326
-msgid "Applied Filters"
-msgstr "Applied Filters"
-
-#: indicator/static/indicator/js/helpers.js:328
+#: indicator/static/indicator/js/helpers.js:480
 msgid "Search Options"
 msgstr "Search Options"
 
-#: indicator/static/indicator/js/helpers.js:374
+#: indicator/static/indicator/js/helpers.js:494
+msgid "Applied Filters"
+msgstr "Applied Filters"
+
+#: indicator/static/indicator/js/helpers.js:536
 msgid "to"
 msgstr "to"
 
-#: indicator/static/indicator/js/menu.js:113
-msgid "per Year"
-msgstr "per Year"
+#: indicator/static/indicator/js/journal_metrics.js:89
+msgid "Select a journal"
+msgstr ""
 
-#: indicator/static/indicator/js/menu.js:113
-msgid "by"
-msgstr "by"
+#: indicator/static/indicator/js/journal_metrics.js:97
+msgid "Select a category"
+msgstr ""
 
-#: indicator/static/indicator/js/menu.js:130
-msgid "Avg Documents per Periodical"
-msgstr "Avg Documents per Periodical"
+#: indicator/static/indicator/js/journal_metrics.js:191
+msgid "Publications and Total Citations per Year"
+msgstr ""
 
-#: indicator/static/indicator/js/menu.js:138
-msgid "Avg Citations per Periodical"
-msgstr "Avg Citations per Periodical"
+#: indicator/static/indicator/js/journal_metrics.js:194
+#: indicator/static/indicator/js/journal_metrics.js:208
+#: indicator/static/indicator/js/journal_metrics.js:213
+#: indicator/static/indicator/js/journal_metrics.js:463
+#, fuzzy
+#| msgid "Publication Year"
+msgid "Publications"
+msgstr "Publication Year"
 
-#: indicator/static/indicator/js/menu.js:146
-msgid "Avg Cited Documents per Periodical"
-msgstr "Avg Cited Documents per Periodical"
-
-#: indicator/static/indicator/js/menu.js:163
-msgid "Total Documents"
-msgstr "Total Documents"
-
-#: indicator/static/indicator/js/menu.js:172
+#: indicator/static/indicator/js/journal_metrics.js:194
+#: indicator/static/indicator/js/journal_metrics.js:218
+#: indicator/static/indicator/js/journal_metrics.js:467
+#: indicator/static/indicator/js/menu.js:284
 msgid "Total Citations"
 msgstr "Total Citations"
 
-#: indicator/static/indicator/js/menu.js:190
+#: indicator/static/indicator/js/journal_metrics.js:230
+msgid "Impact and Mean Citations per Year"
+msgstr ""
+
+#: indicator/static/indicator/js/journal_metrics.js:234
+#: indicator/static/indicator/js/journal_metrics.js:255
+msgid "Normalized Impact"
+msgstr "Normalized Impact"
+
+#: indicator/static/indicator/js/journal_metrics.js:235
+#: indicator/static/indicator/js/journal_metrics.js:261
+msgid "Normalized Impact (2 years)"
+msgstr "Normalized Impact (2 years)"
+
+#: indicator/static/indicator/js/journal_metrics.js:236
+#: indicator/static/indicator/js/journal_metrics.js:267
+msgid "Normalized Impact (3 years)"
+msgstr "Normalized Impact (3 years)"
+
+#: indicator/static/indicator/js/journal_metrics.js:237
+#: indicator/static/indicator/js/journal_metrics.js:273
+msgid "Normalized Impact (5 years)"
+msgstr "Normalized Impact (5 years)"
+
+#: indicator/static/indicator/js/journal_metrics.js:238
+#: indicator/static/indicator/js/journal_metrics.js:279
+#: indicator/static/indicator/js/journal_metrics.js:471
+#, fuzzy
+#| msgid "Citations"
+msgid "Mean Citations"
+msgstr "Citations"
+
+#: indicator/static/indicator/js/journal_metrics.js:290
+#, fuzzy
+#| msgid "Publication Year"
+msgid "Top Publications Share (%) per Year"
+msgstr "Publication Year"
+
+#: indicator/static/indicator/js/journal_metrics.js:293
+#: indicator/static/indicator/js/journal_metrics.js:309
+msgid "Top 1%"
+msgstr ""
+
+#: indicator/static/indicator/js/journal_metrics.js:293
+#: indicator/static/indicator/js/journal_metrics.js:315
+msgid "Top 5%"
+msgstr ""
+
+#: indicator/static/indicator/js/journal_metrics.js:293
+#: indicator/static/indicator/js/journal_metrics.js:321
+msgid "Top 10%"
+msgstr ""
+
+#: indicator/static/indicator/js/journal_metrics.js:293
+#: indicator/static/indicator/js/journal_metrics.js:327
+msgid "Top 50%"
+msgstr ""
+
+#: indicator/static/indicator/js/journal_metrics.js:343
+#: indicator/static/indicator/js/journal_metrics.js:361
+msgid "by Category"
+msgstr ""
+
+#: indicator/static/indicator/js/journal_metrics.js:349
+msgid "No category data available"
+msgstr ""
+
+#: indicator/static/indicator/js/journal_metrics.js:413
+msgid "Journal profile"
+msgstr ""
+
+#: indicator/static/indicator/js/journal_metrics.js:434
+#, fuzzy
+#| msgid "Publication Year"
+msgid "Publication year"
+msgstr "Publication Year"
+
+#: indicator/static/indicator/js/menu.js:55
+#: indicator/static/indicator/js/menu.js:102
+#: indicator/static/indicator/js/menu.js:128
+msgid "Error loading indicator data."
+msgstr ""
+
+#: indicator/static/indicator/js/menu.js:109
+msgid "Unexpected response while loading indicator data."
+msgstr ""
+
+#: indicator/static/indicator/js/menu.js:219
+msgid "per Year"
+msgstr "per Year"
+
+#: indicator/static/indicator/js/menu.js:219
+msgid "by"
+msgstr "by"
+
+# charts.js / journal_metrics.js (manual additions)
+#: indicator/static/indicator/js/menu.js:237
+#, fuzzy
+#| msgid "Documents per Source"
+msgid "Avg Documents per Source"
+msgstr "Documents per Source"
+
+#: indicator/static/indicator/js/menu.js:246
+#, fuzzy
+#| msgid "Citations per Source"
+msgid "Avg Citations per Source"
+msgstr "Citations per Source"
+
+#: indicator/static/indicator/js/menu.js:255
+#, fuzzy
+#| msgid "Cited Documents per Source"
+msgid "Avg Cited Documents per Source"
+msgstr "Cited Documents per Source"
+
+#: indicator/static/indicator/js/menu.js:274
+msgid "Total Documents"
+msgstr "Total Documents"
+
+#: indicator/static/indicator/js/menu.js:304
 msgid "Cited Documents (≥1 citation)"
 msgstr "Cited Documents (≥1 citation)"
 
-#: indicator/static/indicator/js/menu.js:199
+#: indicator/static/indicator/js/menu.js:314
 msgid "% Documents With ≥1 Citation"
 msgstr "% Documents With ≥1 Citation"
+
+#: indicator/static/indicator/js/menu.js:331
+msgid "Per year, filtered vs total baseline"
+msgstr ""
+
+#: indicator/static/indicator/js/menu.js:349
+#, fuzzy
+#| msgid "Documents per Source (share %)"
+msgid "Documents per Source Share (%)"
+msgstr "Documents per Source (share %)"
+
+#: indicator/static/indicator/js/menu.js:360
+#, fuzzy
+#| msgid "Citations per Source (share %)"
+msgid "Citations per Source Share (%)"
+msgstr "Citations per Source (share %)"
+
+#: indicator/static/indicator/js/menu.js:371
+#, fuzzy
+#| msgid "Cited Documents per Source (share %)"
+msgid "Cited Documents per Source Share (%)"
+msgstr "Cited Documents per Source (share %)"
+
+#: indicator/static/indicator/js/menu.js:439
+#, fuzzy
+#| msgid "% Documents With ≥1 Citation"
+msgid "% Documents With ≥1 Citation Share (%)"
+msgstr "% Documents With ≥1 Citation"
+
+#~ msgid "Documents / Periodical"
+#~ msgstr "Documents / Periodical"
+
+#~ msgid "Citations / Periodical"
+#~ msgstr "Citations / Periodical"
+
+#~ msgid "Cited Documents / Periodical"
+#~ msgstr "Cited Documents / Periodical"
+
+#~ msgid "Avg Documents per Periodical"
+#~ msgstr "Avg Documents per Periodical"
+
+#~ msgid "Avg Citations per Periodical"
+#~ msgstr "Avg Citations per Periodical"
+
+#~ msgid "Avg Cited Documents per Periodical"
+#~ msgstr "Avg Cited Documents per Periodical"

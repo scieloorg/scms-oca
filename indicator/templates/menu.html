@@ -4,17 +4,10 @@
   <form id="menu-form">
     {% csrf_token %} 
     <div id="menu-fields">
-      {% if data_source == "world" %}
-        {% include "filters/sci_prod_world.html" %}
-    
-      {% elif data_source == "brazil" %}
-        {% include "filters/sci_prod_brazil.html" %}
-    
-      {% elif data_source == "scielo" %}
-        {% include "filters/sci_prod_scielo.html" %}
-    
-      {% elif data_source == "social" %}
+      {% if data_source == "social" %}
         {% include "filters/soc_prod.html" %}
+      {% else %}
+        {% include "filters/sci_prod_world.html" %}
       {% endif %}
     </div>
 

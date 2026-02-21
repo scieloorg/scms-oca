@@ -18,7 +18,7 @@ if (typeof window !== 'undefined') {
 }
 
 /* Função para facilitar a construção de objeto Datepicker */
-function setupDatePicker(fieldId, format="yyyy", view_mode="years", min_view_mode="years", autoclose=true, start_date="1900", end_date="2100") {
+function setupDatePicker(fieldId, format="yyyy", view_mode="years", min_view_mode="years", autoclose=true, start_date="1900", end_date="2100", container="body", orientation="bottom auto", z_index_offset=2000) {
     try {
         const dateElement = document.getElementById(fieldId);
         if (dateElement) {
@@ -29,6 +29,9 @@ function setupDatePicker(fieldId, format="yyyy", view_mode="years", min_view_mod
                 autoclose: autoclose,
                 startDate: start_date,
                 endDate: end_date,
+                container: container,
+                orientation: orientation,
+                zIndexOffset: z_index_offset,
             });
         }
     } catch (error) {
