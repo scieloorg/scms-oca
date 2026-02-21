@@ -1,72 +1,68 @@
 import logging
+from functools import cached_property
 
-from . import data_sources_with_settings
 from . import parser as response_parser
 from . import query as query_builder
-from .client import get_es_client, get_opensearch_client
+from .client import get_opensearch_client
+from .controller import get_mapped_filters
+from .models import DataSource
 
 logger = logging.getLogger(__name__)
 
 
 class SearchGatewayService:
-    def __init__(self, data_source_name, exclude_filter_fields=None):
+    def __init__(self, index_name):
         self.client = get_opensearch_client()
-        self.data_source_name = data_source_name
-        self._data_source = data_sources_with_settings.get_data_source(data_source_name=data_source_name)
-        self._field_settings = data_sources_with_settings.get_field_settings(data_source=data_source_name)
-        self._index_name = data_sources_with_settings.get_index_name_from_data_source(data_source=data_source_name)
-        self._exclude_filter_fields = data_sources_with_settings.get_filters_to_exclude_by_data_source(data_source=data_source_name) or exclude_filter_fields
-        self._source_fields = data_sources_with_settings.get_source_fields_by_data_source(data_source=data_source_name)
-        self._display_name = data_sources_with_settings.get_display_name_by_data_source(data_source=data_source_name)
+        self._index_name = index_name
 
-    @property
+    @cached_property
     def data_source(self):
-        return self.data_source_name
+        return DataSource.objects.prefetch_related("settings_filters").get(
+            index_name=self._index_name,
+        )
 
     @property
     def index_name(self):
-        """Get the Elasticsearch index name"""
         return self._index_name
 
     @property
-    def filters_to_exclude(self):
-        return self._exclude_filter_fields or []
+    def display_name(self):
+        return self.data_source.display_name
 
     @property
     def source_fields(self):
-        return self._source_fields or []
+        return self.data_source.source_fields or []
 
-    @property
-    def display_name(self):
-        return self._display_name
-
-    def get_filters(self, exclude_fields=None):
-        exclude_fields = self._exclude_filter_fields or exclude_fields
-        aggs = query_builder.build_filters_aggs(self._field_settings, exclude_fields)
-        body = {"size": 0, "aggs": aggs}
-        return body
+    def get_filters(self):
+        return self.data_source.build_filters_query
 
     def get_filter_metadata(self, filters):
-        """
-        Get metadata for filters (class_filter, label, etc.).
-        
-        Args:
-            filters: Dict of available filters.
-        
-        Returns:
-            Dict with filter metadata for each filter field.
-        """
-        filter_metadata = {}
-        for field_name in filters.keys():
-            if field_name in self._field_settings:
-                filter_metadata[field_name] = self._field_settings[field_name].get("settings", {})
-        return filter_metadata
+        return self.data_source.get_filter_metadata(filters=filters)
 
     def build_filters(self, body=None):
         body = body or self.get_filters()
         res = self.client.search(index=self.index_name, body=body, request_cache=True)
-        return response_parser.parse_filters_response(res, self.data_source)
+        return response_parser.parse_filters_response(response=res, index_name=self.index_name)
+
+    def extract_selected_filters(self, request, available_filters):
+        field_settings = self.data_source.get_field_settings_dict()
+        return response_parser.extract_selected_filters(
+            request, available_filters, field_settings=field_settings,
+        )
+
+    def search_documents(self, query_text=None, filters=None, page=1, page_size=10):
+        field_settings = self.data_source.get_field_settings_dict()
+        mapped_filters = get_mapped_filters(filters, field_settings)
+        body = query_builder.build_document_search_body(
+            query_text=query_text,
+            filters=mapped_filters,
+            page=page,
+            page_size=page_size,
+            source_fields=self.source_fields,
+        )
+        res = self.client.search(index=self.index_name, body=body)
+        return response_parser.parse_document_search_response(res)
 
     @property
-    def get_total_itens(self):
+    def total_items(self):
         return self.client.count(index=self.index_name)
