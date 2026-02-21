@@ -2,50 +2,96 @@ from search_gateway import data_sources_with_settings
 
 from . import utils
 
+JOURNAL_METRICS_SOURCE_FIELDS = [
+    "journal_id",
+    "journal_title",
+    "journal_issn",
+    "publisher_name",
+    "country",
+    "collection",
+    "category_id",
+    "category_level",
+    "publication_year",
+    "journal_publications_count",
+    "journal_citations_total",
+    "journal_citations_mean",
+    "journal_citations_mean_window_2y",
+    "journal_citations_mean_window_3y",
+    "journal_citations_mean_window_5y",
+    "journal_impact_normalized",
+    "journal_impact_normalized_window_2y",
+    "journal_impact_normalized_window_3y",
+    "journal_impact_normalized_window_5y",
+    "top_1pct_all_time_publications_share_pct",
+    "top_5pct_all_time_publications_share_pct",
+    "top_10pct_all_time_publications_share_pct",
+    "top_50pct_all_time_publications_share_pct",
+    "is_scielo",
+    "is_scopus",
+    "is_wos",
+    "is_doaj",
+    "is_openalex",
+    "is_journal_multilingual",
+]
+
 
 def build_journal_metrics_query(selected_year, query):
-    yearly_query = {"bool": {"must": []}}
-    if not query or "bool" not in query or "must" not in query["bool"]:
-        return yearly_query
+    base_bool = {}
 
-    for condition in query["bool"]["must"]:
-        if "term" in condition:
-            for field, value in condition["term"].items():
-                field_stz = field.replace(".keyword", "")
-                if field_stz in ("scimago_best_quartile", "openalex_docs_2024_5"):
-                    yearly_query["bool"]["must"].append(
-                        {"term": {f"yearly_info.{selected_year}.{field_stz}": value}}
-                    )
-                else:
-                    yearly_query["bool"]["must"].append({"term": {field: value}})
-    return yearly_query
+    if query and "bool" in query:
+        query_bool = query.get("bool", {})
+        must = list(query_bool.get("must", []))
+        must_not = list(query_bool.get("must_not", []))
+    else:
+        must = []
+        must_not = []
+
+    if selected_year not in (None, ""):
+        try:
+            normalized_year = int(selected_year)
+        except (TypeError, ValueError):
+            normalized_year = selected_year
+        must.append({"term": {"publication_year": normalized_year}})
+
+    if must:
+        base_bool["must"] = must
+    if must_not:
+        base_bool["must_not"] = must_not
+
+    return {"bool": base_bool} if base_bool else {"match_all": {}}
 
 
 def build_journal_metrics_body(selected_year=None, ranking_metric=None, size=500, query=None):
-    if not selected_year:
-        selected_year = "2024"
-
     if not ranking_metric:
-        ranking_metric = "cwts_snip"
+        ranking_metric = "journal_impact_normalized"
 
     return {
         "query": query if query else {"match_all": {}},
-        "size": size,
-        "sort": [{f"yearly_info.{selected_year}.{ranking_metric}": {"order": "desc", "missing": 0}}],
-        "_source": [
-            "journal", "issns", f"yearly_info.{selected_year}.cwts_snip",
-            f"yearly_info.{selected_year}.doaj_num_docs", f"yearly_info.{selected_year}.openalex_docs_2024_5",
-            f"yearly_info.{selected_year}.scielo_num_docs", f"yearly_info.{selected_year}.scimago_best_quartile",
-            f"yearly_info.{selected_year}.scimago_cites_by_doc_2_years", f"yearly_info.{selected_year}.scimago_estimated_apc",
-            f"yearly_info.{selected_year}.scimago_estimated_value", f"yearly_info.{selected_year}.scimago_female_authors_percent",
-            f"yearly_info.{selected_year}.scimago_overton", f"yearly_info.{selected_year}.scimago_sdg",
-            f"yearly_info.{selected_year}.scimago_sjr", f"yearly_info.{selected_year}.scimago_total_cites_3_years",
-            f"yearly_info.{selected_year}.scimago_total_docs"
-        ]
+        "size": int(size) if str(size).isdigit() else 500,
+        "track_total_hits": True,
+        "sort": [{ranking_metric: {"order": "desc", "missing": "_last"}}],
+        "collapse": {"field": "journal_id"},
+        "aggs": {
+            "unique_journals": {
+                "cardinality": {"field": "journal_id"}
+            }
+        },
+        "_source": JOURNAL_METRICS_SOURCE_FIELDS,
     }
 
 
 def build_query(filters, field_settings, data_source):
+    filters = dict(filters or {})
+
+    social_year_start = None
+    social_year_end = None
+    if data_source == "social":
+        social_year_start = filters.get("document_publication_year_start")
+        social_year_end = filters.get("document_publication_year_end")
+        filters.pop("document_publication_year_start", None)
+        filters.pop("document_publication_year_end", None)
+        filters.pop("document_publication_year_range", None)
+
     translated_filters = utils.translate_fields(filters, field_settings)
 
     must = []
@@ -57,7 +103,37 @@ def build_query(filters, field_settings, data_source):
 
     if data_source == "social":
         fl_name = field_settings.get("action", {}).get("index_field_name")
-        add_exists(fl_name, must)
+        if fl_name and fl_name.endswith(".keyword"):
+            base_field = fl_name.rsplit(".", 1)[0]
+            must.append({
+                "bool": {
+                    "should": [
+                        {"exists": {"field": fl_name}},
+                        {"exists": {"field": base_field}},
+                    ],
+                    "minimum_should_match": 1,
+                }
+            })
+        else:
+            add_exists(fl_name, must)
+
+        if social_year_start or social_year_end:
+            try:
+                start_int = int(social_year_start) if social_year_start not in (None, "") else None
+            except (TypeError, ValueError):
+                start_int = None
+            try:
+                end_int = int(social_year_end) if social_year_end not in (None, "") else None
+            except (TypeError, ValueError):
+                end_int = None
+
+            if start_int or end_int:
+                created_range = {}
+                if start_int:
+                    created_range["gte"] = f"{start_int}-01-01"
+                if end_int:
+                    created_range["lte"] = f"{end_int}-12-31"
+                must.append({"range": {"created": created_range}})
 
     query_operator_fields = data_sources_with_settings.get_query_operator_fields(data_source)
     index_field_name_to_filter_name_map = data_sources_with_settings.get_index_field_name_to_filter_name_map(data_source)
@@ -116,12 +192,10 @@ def add_terms(name, values, must):
 
 
 def _get_periodical_identifier_field(field_settings):
-    """Return a keyword field suitable for cardinality of periodicals."""
+    """Return a field suitable for cardinality of periodicals."""
     for candidate in ("issn", "journal", "source_name"):
         fl = field_settings.get(candidate, {}).get("index_field_name")
         if fl:
-            if not str(fl).endswith(".keyword"):
-                return f"{fl}.keyword"
             return fl
     return None
 
@@ -129,15 +203,26 @@ def _get_periodical_identifier_field(field_settings):
 def build_indicator_aggs(field_settings, breakdown_variable, data_source_name, study_unit="document"):
     if study_unit not in ("document", "journal"):
         study_unit = "document"
-    year_var = "publication_year" if data_source_name != "social" else "year"
+
     cited_by_count_field = field_settings.get("cited_by_count", {}).get("index_field_name")
 
     periodical_field = None
     if study_unit == "journal":
         periodical_field = _get_periodical_identifier_field(field_settings)
 
-    aggs = {
-        "per_year": {
+    if data_source_name == "social":
+        per_year = {
+            "date_histogram": {
+                "field": "created",
+                "calendar_interval": "year",
+                "format": "yyyy",
+                "min_doc_count": 1,
+            },
+            "aggs": {},
+        }
+    else:
+        year_var = "publication_year"
+        per_year = {
             "terms": {
                 "field": year_var,
                 "order": {"_key": "asc"},
@@ -145,7 +230,8 @@ def build_indicator_aggs(field_settings, breakdown_variable, data_source_name, s
             },
             "aggs": {},
         }
-    }
+
+    aggs = {"per_year": per_year}
 
     if cited_by_count_field:
         aggs["per_year"]["aggs"] = {
@@ -184,6 +270,17 @@ def build_indicator_aggs(field_settings, breakdown_variable, data_source_name, s
                     "docs_with_citations": {
                         "filter": {"range": {cited_by_count_field: {"gt": 0}}}
                     },
+                }
+                if study_unit == "journal" and periodical_field:
+                    aggs["per_year"]["aggs"]["breakdown"]["aggs"]["docs_with_citations"]["aggs"] = {
+                        "unique_periodicals": {"cardinality": {"field": periodical_field}}
+                    }
+            elif study_unit == "journal":
+                aggs["per_year"]["aggs"]["breakdown"]["aggs"] = {}
+
+            if study_unit == "journal" and periodical_field:
+                aggs["per_year"]["aggs"]["breakdown"]["aggs"]["unique_periodicals"] = {
+                    "cardinality": {"field": periodical_field}
                 }
 
     return aggs

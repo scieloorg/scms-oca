@@ -2,50 +2,126 @@
 
 <!-- Graphs -->
 <div class="col-lg-9 mx-0 ps-3 pe-0">
+    {% include "partials/warning_banner.html" %}
+
     <!-- Applied Filters -->
-    <div class="card mb-3 p-3 d-none bg-oca-light shadow-sm" id="applied-filters"></div>
+    <div class="card mb-3 p-3 d-none shadow-sm indicator-applied-filters" id="applied-filters"></div>
 
-    <!-- Periodicals Graph (Journal mode) -->
-    <div class="card mb-3 p-3 d-none shadow-sm" id="periodicals-chart-div" style="height:75vh;">
-        <div class="mx-auto" style="width:100%; height:100%;">
-            <div id="periodicals-chart" style="width:100%; height:100%;"></div>
+    <div class="row g-3">
+        <!-- Periodicals Graph (Journal mode) -->
+        <div class="col-12 col-lg-6 d-none" id="periodicals-chart-div">
+            <div class="card shadow-sm h-100 indicator-chart-card">
+                <div class="card-body p-3">
+                    <div class="indicator-chart-canvas" id="periodicals-chart"></div>
+                </div>
+            </div>
         </div>
+
+        <!-- Documents Graph -->
+        <div class="col-12 col-lg-6 d-none" id="docs-chart-div">
+            <div class="card shadow-sm h-100 indicator-chart-card">
+                <div class="card-body p-3">
+                    <div class="indicator-chart-canvas" id="docs-chart"></div>
+                </div>
+            </div>
+        </div>
+
+        {% if data_source != "social" %}
+            <!-- Citations Graph -->
+            <div class="col-12 col-lg-6 d-none" id="citations-chart-div">
+                <div class="card shadow-sm h-100 indicator-chart-card">
+                    <div class="card-body p-3">
+                        <div class="indicator-chart-canvas" id="citations-chart"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Citations per Document Graph -->
+            <div class="col-12 col-lg-6 d-none" id="citations-per-doc-chart-div">
+                <div class="card shadow-sm h-100 indicator-chart-card">
+                    <div class="card-body p-3">
+                        <div class="indicator-chart-canvas" id="citations-per-doc-chart"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cited Documents Graph -->
+            <div class="col-12 col-lg-6 d-none" id="cited-docs-chart-div">
+                <div class="card shadow-sm h-100 indicator-chart-card">
+                    <div class="card-body p-3">
+                        <div class="indicator-chart-canvas" id="cited-docs-chart"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- % Docs with >=1 Citation Graph (Journal mode) -->
+            <div class="col-12 col-lg-6 d-none" id="pct-cited-docs-chart-div">
+                <div class="card shadow-sm h-100 indicator-chart-card">
+                    <div class="card-body p-3">
+                        <div class="indicator-chart-canvas" id="pct-cited-docs-chart"></div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
     </div>
 
-    <!-- Documents Graph -->
-    <div class="card mb-3 p-3 d-none shadow-sm" id="docs-chart-div" style="height:75vh;">
-        <div class="mx-auto" style="width:100%; height:100%;">
-            <div id="docs-chart" style="width:100%; height:100%;"></div>
+    <div class="indicator-relative-section d-none mt-4" id="relative-metrics-section">
+        <div class="indicator-relative-section__head mb-2">
+            <h3 class="indicator-relative-section__title mb-1">{% trans "Filtered vs Total (%)" %}</h3>
+            <p class="indicator-relative-section__subtitle mb-0">
+                {% trans "Share of the selected filters compared to the same scope/year without analytical filters." %}
+            </p>
+        </div>
+        <div class="row g-3">
+            <div class="col-12 col-lg-6 d-none" id="periodicals-share-chart-div">
+                <div class="card shadow-sm h-100 indicator-chart-card">
+                    <div class="card-body p-3">
+                        <div class="indicator-chart-canvas" id="periodicals-share-chart"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-lg-6 d-none" id="docs-share-chart-div">
+                <div class="card shadow-sm h-100 indicator-chart-card">
+                    <div class="card-body p-3">
+                        <div class="indicator-chart-canvas" id="docs-share-chart"></div>
+                    </div>
+                </div>
+            </div>
+
+            {% if data_source != "social" %}
+                <div class="col-12 col-lg-6 d-none" id="citations-share-chart-div">
+                    <div class="card shadow-sm h-100 indicator-chart-card">
+                        <div class="card-body p-3">
+                            <div class="indicator-chart-canvas" id="citations-share-chart"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-lg-6 d-none" id="citations-per-doc-share-chart-div">
+                    <div class="card shadow-sm h-100 indicator-chart-card">
+                        <div class="card-body p-3">
+                            <div class="indicator-chart-canvas" id="citations-per-doc-share-chart"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-lg-6 d-none" id="cited-docs-share-chart-div">
+                    <div class="card shadow-sm h-100 indicator-chart-card">
+                        <div class="card-body p-3">
+                            <div class="indicator-chart-canvas" id="cited-docs-share-chart"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-lg-6 d-none" id="pct-cited-docs-share-chart-div">
+                    <div class="card shadow-sm h-100 indicator-chart-card">
+                        <div class="card-body p-3">
+                            <div class="indicator-chart-canvas" id="pct-cited-docs-share-chart"></div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
         </div>
     </div>
-
-    {% if data_source != "social" %}
-        <!-- Citations Graph -->
-        <div class="card mb-3 p-3 d-none shadow-sm" id="citations-chart-div" style="height:75vh;">
-            <div class="mx-auto" style="width:100%; height:100%;">
-                <div id="citations-chart" style="width:100%; height:100%;"></div>
-            </div>
-        </div>
-
-        <!-- Citations per Document Graph -->
-        <div class="card mb-3 p-3 d-none shadow-sm" id="citations-per-doc-chart-div" style="height:75vh;">
-            <div class="mx-auto" style="width:100%; height:100%;">
-                <div id="citations-per-doc-chart" style="width:100%; height:100%;"></div>
-            </div>
-        </div>
-
-        <!-- Cited Documents Graph -->
-        <div class="card mb-3 p-3 d-none shadow-sm" id="cited-docs-chart-div" style="height:75vh;">
-            <div class="mx-auto" style="width:100%; height:100%;">
-                <div id="cited-docs-chart" style="width:100%; height:100%;"></div>
-            </div>
-        </div>
-
-        <!-- % Docs with >=1 Citation Graph (Journal mode) -->
-        <div class="card mb-3 p-3 d-none shadow-sm" id="pct-cited-docs-chart-div" style="height:75vh;">
-            <div class="mx-auto" style="width:100%; height:100%;">
-                <div id="pct-cited-docs-chart" style="width:100%; height:100%;"></div>
-            </div>
-        </div>
-    {% endif %}
 </div>

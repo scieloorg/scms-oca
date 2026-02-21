@@ -6,6 +6,7 @@ from django.contrib import admin
 from django.urls import include, path, re_path
 from django.views import defaults as default_views
 from django.views.generic import TemplateView
+from django.views.i18n import JavaScriptCatalog
 from wagtail import urls as wagtail_urls
 from wagtail.admin import urls as wagtailadmin_urls
 from wagtail.documents import urls as wagtaildocs_urls
@@ -18,6 +19,8 @@ from search_gateway import urls as search_gateway_urls
 
 urlpatterns = [
     path("dash/", TemplateView.as_view(template_name="dash/dash.html"), name="dash"),
+    # Django JS i18n catalog for gettext()/ngettext() usage in static JS.
+    path("jsi18n/", JavaScriptCatalog.as_view(packages=("indicator", "search_gateway", "core")), name="javascript-catalog"),
     # Django Admin, use {% url "admin:index" %}
     path(settings.DJANGO_ADMIN_URL, admin.site.urls),
     # Wagtail Admin

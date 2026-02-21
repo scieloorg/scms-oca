@@ -15,6 +15,8 @@ def get_menu_context(request):
     path = getattr(request, "path", "") or ""
     get_params = getattr(request, "GET", None)
     menu_scope = get_params.get("menu_scope", "") if get_params is not None else ""
+    is_indicators_path = path.startswith("/indicators/")
+    is_indicators_social_path = path.startswith("/indicators/social")
 
     is_about_section = (
         "/sobre/" in path
@@ -32,16 +34,14 @@ def get_menu_context(request):
 
     is_social_context = (
         is_about_producao_social
-        or path.startswith("/indicators/social/")
+        or is_indicators_social_path
         or str(menu_scope).startswith("evolucao-producaosocial-")
         or (path.startswith("/searchv2") and bool(menu_scope))
     )
 
     is_scientific_context = (
         is_about_producao_cientifica
-        or path.startswith("/indicators/world/")
-        or path.startswith("/indicators/brazil/")
-        or path.startswith("/indicators/scielo/")
+        or (is_indicators_path and not is_indicators_social_path)
         or str(menu_scope).startswith("evolucao-producao-")
         or (path.startswith("/searchv2") and not bool(menu_scope))
     )

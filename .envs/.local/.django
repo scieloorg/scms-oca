@@ -12,3 +12,21 @@ REDIS_URL=redis://redis:6379/0
 # Flower
 CELERY_FLOWER_USER=PhFRdLexbrsBvrrbSXxjcMMOcVOavCrZ
 CELERY_FLOWER_PASSWORD=QgScyefPrYhHgO6onW61u0nazc5xdBuP4sM7jMRrBBFuA2RjsFhZLp7xbVYZbrwR
+
+# OpenSearch
+# ------------------------------------------------------------------------------
+OPENSEARCH_URL=
+OP_INDEX_SCI_PROD=bronze_*
+ES_URL=
+ES_INDEX_JOURNAL_METRICS=metrics_by_field
+
+# UI banners
+# ------------------------------------------------------------------------------
+UI_WARNING_BANNER_ENABLED=True
+UI_WARNING_BANNER_VARIANT=warning
+UI_WARNING_BANNER_MESSAGE=
+
+# Django
+# ------------------------------------------------------------------------------
+DJANGO_SETTINGS_MODULE=config.settings.local
+DJANGO_SECRET_KEY=

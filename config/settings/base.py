@@ -286,6 +286,26 @@ EMAIL_TIMEOUT = 5
 # https://docs.djangoproject.com/en/4.2/ref/settings/#std-setting-EMAIL_SUBJECT_PREFIX
 EMAIL_SUBJECT_PREFIX = env("DJANGO_EMAIL_SUBJECT_PREFIX", default="[OCABR] ")
 
+# UI / BANNERS
+# ------------------------------------------------------------------------------
+# Enable/disable indicator warning banner via environment variables.
+# Example:
+#   UI_WARNING_BANNER_ENABLED=True
+#   UI_WARNING_BANNER_VARIANT=warning   # or danger/info/success/primary/secondary
+#   UI_WARNING_BANNER_MESSAGE=Optional custom message
+UI_WARNING_BANNER_ENABLED = env.bool("UI_WARNING_BANNER_ENABLED", default=False)
+UI_WARNING_BANNER_VARIANT = env.str("UI_WARNING_BANNER_VARIANT", default="warning").strip().lower()
+if UI_WARNING_BANNER_VARIANT not in {
+    "warning",
+    "danger",
+    "info",
+    "success",
+    "primary",
+    "secondary",
+}:
+    UI_WARNING_BANNER_VARIANT = "warning"
+UI_WARNING_BANNER_MESSAGE = env.str("UI_WARNING_BANNER_MESSAGE", default="").strip()
+
 # ADMIN
 # ------------------------------------------------------------------------------
 # Django Admin URL.
@@ -386,7 +406,6 @@ URL_API_OPENALEX_JOURNALS = env.str("URL_API_OPENALEX_JOURNALS", default="https:
 
 LANGUAGES = [
     ("pt-BR", _('Português (Brasil)')),
-    ('pt', _('Português')),
     ('en', _('English')),
     ('es', _('Español')),
 ]
@@ -413,7 +432,7 @@ WAGTAILMENUS_FLAT_MENUS_HANDLE_CHOICES = [
     ("faq", "FAQ"),
     ("noticias", _("Notícias")),
     ("secundario", _("Menu Secundário")),
-    ("sobre_producao_cientifica", _("Sobre")),
+    ("about", _("About")),
     ("sobre_oca", _("Sobre o OCABr")),
 ]
 
@@ -434,8 +453,8 @@ HAYSTACK_CONNECTIONS = {
     },
     "es": {
         "ENGINE": "haystack.backends.elasticsearch7_backend.Elasticsearch7SearchEngine",
-        "URL": env("ES_URL", default="http://elastic:xxxxx@host.docker.internal:9200/"),
-        "INDEX_NAME": env("INDEX_NAME", default="openalex_works"),
+        "URL": env("ES_URL", default="https://admin:pass@localhost:9200/"),
+        "INDEX_NAME": env("INDEX_NAME", default="raw_openalex_works"),
         "SOLR_TIMEOUT": 10,
         "KWARGS": {
             "verify_certs": env.bool("ES_VERIFY_CERTS", default=False),
@@ -489,7 +508,7 @@ DIRECTORY_IMPORT_DELIMITER = env.str("DIRECTORY_IMPORT_DELIMITER", default=",")
 ES_INDEX_SCI_PROD_WORLD = env.str("ES_INDEX_SCI_PROD_WORLD", "openalex_works")
 ES_INDEX_SCI_PROD_BRAZIL = env.str("ES_INDEX_SCI_PROD_BRAZIL", "openalex_works")
 ES_INDEX_SCI_PROD_SCIELO = env.str("ES_INDEX_SCI_PROD_SCIELO", "scielo_works")
-ES_INDEX_SOC_PROD = env.str("ES_INDEX_SOC_PROD", "opoca")
+ES_INDEX_SOC_PROD = env.str("ES_INDEX_SOC_PROD", "social_production")
 ES_INDEX_JOURNAL_METRICS = env.str("ES_INDEX_JOURNAL_METRICS", "journal_annual_metrics")
 ES_INDEX_SOURCES = env.str("ES_INDEX_SOURCES", "journals")
 
@@ -498,7 +517,9 @@ ES_INDEX_SOCIAL_PRODUCTION = env.str("ES_INDEX_SOCIAL_PRODUCTION", "social_produ
 
 
 # Settings Opensearch index
-OPENSEARCH_URL = env("OPENSEARCH_URL", default="http://opensearch:9200") 
+OPENSEARCH_URL = env("OPENSEARCH_URL", default="http://opensearch:9200")
+OP_INDEX_SCI_PROD = env.str("OP_INDEX_SCI_PROD", "bronze_*")
+OP_INDEX_JOURNAL_METRICS = env.str("OP_INDEX_JOURNAL_METRICS", ES_INDEX_JOURNAL_METRICS)
 OPENSEARCH_INDEX_RAW_PREPRINT = env.str("OPENSEARCH_INDEX_RAW_PREPRINT", "raw_scielo_preprint")
 OPENSEARCH_INDEX_RAW_BOOK = env.str("OPENSEARCH_INDEX_RAW_BOOK", "raw_scielo_book")
 OPENSEARCH_INDEX_RAW_SCIELO_DATA_DATASET = env.str(
@@ -509,6 +530,8 @@ OPENSEARCH_INDEX_RAW_SCIELO_DATA_DATAVERSE = env.str(
     "OPENSEARCH_INDEX_RAW_SCIELO_DATA_DATAVERSE",
     "raw_scielo_data_comunities_dataverse",
 )
+OPENSEARCH_INDEX_RAW_SCIELO_DATA = env.str("OPENSEARCH_INDEX_RAW_SCIELO_DATA", "raw_scielo_data")
+OPENSEARCH_INDEX_BRONZE = env.str("OPENSEARCH_INDEX_BRONZE", "bronze_*")
 
 # HARVEST Books, Preprint, SciELO Data
 SCIELO_BOOKS_BASE_URL = env("SCIELO_BOOKS_BASE_URL", default=None)
