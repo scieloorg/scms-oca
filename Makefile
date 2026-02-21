@@ -47,6 +47,9 @@ up:  ## Start app using $(compose)
 logs: ## See all app logs using $(compose)
 	@docker compose -f $(compose) logs -f
 
+restart:
+	@docker-compose -f $(compose) restart django
+
 stop:  ## Stop all app using $(compose)
 	@docker compose -f $(compose) stop
 
