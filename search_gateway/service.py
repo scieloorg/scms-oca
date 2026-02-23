@@ -1,6 +1,8 @@
 import logging
 from functools import cached_property
 
+from opensearchpy.exceptions import ConnectionError as OpenSearchConnectionError
+
 from . import parser as response_parser
 from . import query as query_builder
 from .client import get_opensearch_client
@@ -41,13 +43,25 @@ class SearchGatewayService:
 
     def build_filters(self, body=None):
         body = body or self.get_filters()
-        res = self.client.search(index=self.index_name, body=body, request_cache=True)
-        return response_parser.parse_filters_response(response=res, index_name=self.index_name)
+        try:
+            res = self.client.search(
+                index=self.index_name,
+                body=body,
+                request_cache=True,
+            )
+            return response_parser.parse_filters_response_with_transform(
+                response=res,
+                data_source=self.data_source,
+            )
+        except OpenSearchConnectionError:
+            logger.warning("OpenSearch unavailable while building filters", exc_info=True)
+            return {}
 
     def extract_selected_filters(self, request, available_filters):
-        field_settings = self.data_source.get_field_settings_dict()
         return response_parser.extract_selected_filters(
-            request, available_filters, field_settings=field_settings,
+            request,
+            available_filters,
+            data_source=self.data_source,
         )
 
     def search_documents(self, query_text=None, filters=None, page=1, page_size=10):
@@ -60,9 +74,17 @@ class SearchGatewayService:
             page_size=page_size,
             source_fields=self.source_fields,
         )
-        res = self.client.search(index=self.index_name, body=body)
-        return response_parser.parse_document_search_response(res)
+        try:
+            res = self.client.search(index=self.index_name, body=body)
+            return response_parser.parse_document_search_response(res)
+        except OpenSearchConnectionError:
+            logger.warning("OpenSearch unavailable while searching documents", exc_info=True)
+            return {"search_results": [], "total_results": 0}
 
     @property
     def total_items(self):
-        return self.client.count(index=self.index_name)
+        try:
+            return self.client.count(index=self.index_name)
+        except OpenSearchConnectionError:
+            logger.warning("OpenSearch unavailable while counting items", exc_info=True)
+            return 0
