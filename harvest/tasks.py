@@ -69,11 +69,11 @@ def harvest_books_in_couchdb(
     since=None,
     db_name="scielobooks_1a",
     headers=None,
-    run_single_tasks=True,
+    run_single_tasks=False,
 ):
     user = User.objects.get(username=username)
     since = start if since is None else since
-    if not run_single_tasks:
+    if run_single_tasks:
         harvest_books(
             user=user,
             limit=limit,
