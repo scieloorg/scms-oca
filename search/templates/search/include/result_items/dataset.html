@@ -62,9 +62,18 @@
         <p class="card-text mb-1">
             <small class="text-muted">
                 <strong>{% trans "Language" %}:</strong>
-                {% for language in doc.source.language %}
-                    {{ language }}{% if not forloop.last %}, {% endif %}
-                {% endfor %}
+                {% if doc.source.language|length > 1 or doc.source.language.0 %}
+                    {% if doc.source.language|stringformat:"s" and doc.source.language.0 and doc.source.language != doc.source.language|stringformat:"s" %}
+                        {# Provavelmente é uma lista #}
+                        {% for language in doc.source.language %}
+                            {{ language }}{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    {% else %}
+                        {{ doc.source.language }}
+                    {% endif %}
+                {% else %}
+                    {{ doc.source.language }}
+                {% endif %}
             </small>
         </p>
         {% endif %}

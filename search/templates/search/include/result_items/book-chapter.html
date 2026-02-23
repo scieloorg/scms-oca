@@ -33,12 +33,12 @@
             </small>
         </p>
         {% endif %}
-        {% if doc.source.publisher_search %}
+        {% if doc.source.publishers %}
         <p class="card-text mb-1">
             <small class="text-muted">
                 <strong>{% trans "Publisher" %}:</strong>
-                {% for publisher in doc.source.publisher_search %}
-                    {{ publisher }}{% if not forloop.last %}, {% endif %}
+                {% for publisher in doc.source.publishers %}
+                    {{ publisher.name }}{% if not forloop.last %}, {% endif %}
                 {% endfor %}
             </small>
         </p>
@@ -50,13 +50,20 @@
             </small>
         </p>
         {% endif %}
-        {% if doc.source.biblio.pages %}
+        {% if doc.source.biblio.first_page %}
         <p class="card-text mb-1">
             <small class="text-muted">
-                <strong>{% trans "Pages" %}:</strong> {{ doc.source.biblio.pages }}
+                <strong>{% trans "First Page" %}:</strong> {{ doc.source.biblio.first_page }}
             </small>
         </p>
         {% endif %}
+        {% if doc.source.biblio.last_page %}
+        <p class="card-text mb-1">
+            <small class="text-muted">
+                <strong>{% trans "Last Page" %}:</strong> {{ doc.source.biblio.last_page }}
+            </small>
+        </p>
+        {% endif %}        
         {% if doc.source.ids.isbn %}
         <p class="card-text mb-0">
             <small class="text-muted">
