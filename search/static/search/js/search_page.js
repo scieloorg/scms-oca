@@ -73,7 +73,7 @@ class SearchPageManager {
     
     async loadFiltersForDataSource(dataSource) {
         try {
-            const response = await fetch(`/search/api/filters/?data_source=${dataSource}`);
+            const response = await fetch(`/search/api/filters/?index_name=${dataSource}`);
             if (!response.ok) throw new Error('Failed to load filters');
             
             const data = await response.json();
@@ -168,7 +168,7 @@ class SearchPageManager {
                 data: (params) => ({
                     q: params.term,
                     field_name: key,
-                    data_source: this.dataSourceName
+                    index_name: this.dataSourceName
                 }),
                 processResults: (data) => ({
                     results: data.map(item => ({
@@ -219,9 +219,9 @@ class SearchPageManager {
             params.append('search', this.searchQuery);
         }
         
-        // Add data source
+        // Add index name
         if (this.dataSourceName) {
-            params.append('data_source', this.dataSourceName);
+            params.append('index_name', this.dataSourceName);
         }
         
         Object.keys(this.filters).forEach(key => {
