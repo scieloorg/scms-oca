@@ -1,9 +1,12 @@
+import json
+import time
+
 from . import data_sources_with_settings
 from . import parser as response_parser
 from . import query as query_builder
 from .client import get_es_client, get_opensearch_client
-import json
-import time
+
+from .models import DataSource
 
 FILTERS_CACHE = {}
 FILTERS_CACHE_TTL_SECONDS = 300
@@ -72,48 +75,6 @@ def get_mapped_filters(filters, field_settings):
     return mapped_filters
 
 
-def search_documents(
-    data_source_name,
-    query_text=None,
-    filters=None,
-    page=1,
-    page_size=10,
-    source_fields=None,
-    client=None
-):
-    """
-    Search documents in Elasticsearch.
-    
-    Args:
-        data_source_name: Name of the data source.
-        query_text: Text to search for.
-        filters: Dict of filters to apply.
-        page: Page number (1-based).
-        page_size: Number of results per page.
-        source_fields: Fields to include in results.
-    
-    Returns:
-        Dict with 'search_results' and 'total_results'.
-    """
-    es = _get_search_client_for_data_source(data_source_name, client=client)
-    data_source = data_sources_with_settings.get_data_source(data_source_name)
-    field_settings = data_source.get("field_settings", {})
-    index_name = data_source.get("index_name")
-    mapped_filters = get_mapped_filters(filters, field_settings)
-    
-    body = query_builder.build_document_search_body(
-        query_text=query_text,
-        filters=mapped_filters,
-        page=page,
-        page_size=page_size,
-        source_fields=source_fields,
-        data_source_name=data_source_name,
-    )
-    
-    res = es.search(index=index_name, body=body)
-    return response_parser.parse_document_search_response(res)
-
-
 def search_as_you_type(data_source_name, query_text, field_name, client=None):
     """
     Perform search-as-you-type query for autocomplete.
@@ -127,19 +88,23 @@ def search_as_you_type(data_source_name, query_text, field_name, client=None):
         List of matching items.
     """
     es = _get_search_client_for_data_source(data_source_name, client=client)
-    data_source = data_sources_with_settings.get_data_source(data_source_name)
-    fl_name = data_sources_with_settings.get_index_field_name_from_data_source(data_source_name, field_name)
-    size = data_sources_with_settings.get_size_by_field_name(data_source_name, field_name)
-    field_autocomplete = data_sources_with_settings.get_field_autocomplete_from_data_source(data_source_name, field_name)
+    data_source = DataSource.get_by_index_name(index_name=data_source_name)
+    if not data_source and not data_source.settings_filters.get_by_field_name(field_name=field_name):
+        return []
+
+    settings_filter = data_source.settings_filters.get_by_field_name(field_name=field_name)
+    fl_name = settings_filter.index_field_name
+    field_autocomplete = settings_filter.field_autocomplete
+    size = (settings_filter.filter or {}).get("size", 20)
     body = query_builder.build_search_as_you_type_body(
         field_name=fl_name,
+        field_autocomplete=field_autocomplete,
         query=query_text,
         agg_size=size,
-        field_autocomplete=field_autocomplete
     )
 
-    res = es.search(index=data_source.get("index_name"), body=body)
-    return response_parser.parse_search_item_response(res, data_source_name, field_name)
+    res = es.search(index=data_source.index_name, body=body)
+    return response_parser.parse_search_item_response_with_transform(res, data_source, field_name)
 
 
 def search_item(q, data_source_name, field_name, client=None, filters=None):
