@@ -1,6 +1,6 @@
 from django.utils.translation import gettext as _
 
-from . import data_sources_with_settings, transforms
+from . import transforms
 
 
 def _transform_boolean_value(value):
@@ -19,6 +19,59 @@ def _transform_boolean_value(value):
         return False
     return None
 
+def parse_search_item_response_with_transform(response, data_source, field_name):
+    """
+    Versão posterior a parse_search_item_response, utilizando o modelo DataSource para obter a configuração dos campos
+    e aplicar as transformações de exibição.
+    
+    Args:
+        response: Resposta do Elasticsearch contendo as agregações.
+        data_source: Instância do modelo DataSource que fornece métodos para buscar configurações de campos.
+        field_name: Nome do campo de interesse.
+
+    Returns:
+        Lista de dicionários contendo os buckets transformados com chave, label e doc_count.
+    """
+    field_settings = data_source.get_field_settings_dict()
+    buckets = response.get("aggregations", {}).get("unique_items", {}).get("buckets", [])
+    return [
+        {
+            "key": b["key"],
+            "label": transforms._apply_display_transform_from_datasource(
+                field_settings,
+                field_name,
+                b["key"],
+            ),
+            "doc_count": b["doc_count"],
+        }
+        for b in buckets
+    ]
+
+
+def parse_filters_response_with_transform(response, data_source):
+    """
+    Versão posterior a parse_filters_response, utilizando o modelo DataSource para obter a configuração dos campos
+    e aplicar as transformações de exibição em todos os filtros retornados pelo Elasticsearch.
+
+    Args:
+        response: Resposta do Elasticsearch contendo as agregações.
+        data_source: Instância do modelo DataSource que fornece métodos para buscar configurações de campos.
+
+    Returns:
+        Dicionário com listas de buckets filtrados, cada um contendo chave, label transformada e doc_count.
+    """
+    field_settings = data_source.get_field_settings_dict()
+    return {
+        k: [
+            {
+                "key": b["key"],
+                "label": transforms._apply_display_transform_from_datasource(field_settings, k, b["key"]),
+                "doc_count": b.get("doc_count"),
+            }
+            for b in v.get("buckets", [])
+        ]
+        for k, v in response.get("aggregations", {}).items()
+    }
 
 def parse_search_item_response(response, data_source_name=None, field_name=None):
     buckets = response.get("aggregations", {}).get("unique_items", {}).get("buckets", [])
@@ -66,7 +119,7 @@ def _transform_document_search_results(search_results):
     return transformed_hits
 
 
-def extract_selected_filters(request, available_filters, data_source_name=None):
+def extract_selected_filters(request, available_filters, data_source):
     """
     Extracts filter values from the request GET parameters based on available filter keys.
     Applies value transformations (e.g., boolean) based on field settings.
@@ -74,7 +127,7 @@ def extract_selected_filters(request, available_filters, data_source_name=None):
     Args:
         request: Django request object.
         available_filters: Dict of available filter keys.
-        data_source_name: Name of the data source for field settings lookup.
+        data_source: DataSource model instance (source of field settings).
     
     Returns:
         Dict of selected filters with transformed values.
@@ -83,9 +136,7 @@ def extract_selected_filters(request, available_filters, data_source_name=None):
     if not available_filters:
         return selected_filters
     
-    field_settings = {}
-    if data_source_name:
-        field_settings = data_sources_with_settings.get_field_settings(data_source_name)
+    field_settings = data_source.get_field_settings_dict()
     
     for filter_key in available_filters.keys():
         values = request.GET.getlist(filter_key)
@@ -95,7 +146,7 @@ def extract_selected_filters(request, available_filters, data_source_name=None):
                 field_config = field_settings.get(filter_key, {})
                 transform_type = field_config.get("filter", {}).get("transform", {}).get("type")
                 if transform_type == "boolean":
-                    transformed_value = [_transform_boolean_value(value)for value in cleaned_values]
+                    transformed_value = [_transform_boolean_value(value) for value in cleaned_values]
                     if transformed_value is not None:
                         selected_filters[filter_key] = transformed_value
                 else:
