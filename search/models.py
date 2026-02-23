@@ -2,7 +2,7 @@ import logging
 
 from wagtail.contrib.routable_page.models import RoutablePageMixin, route
 from wagtail.models import Page
-
+from django.conf import settings
 from search_gateway.filters import FILTER_CATEGORIES
 from search_gateway.service import SearchGatewayService
 
@@ -26,8 +26,7 @@ class SearchPage(RoutablePageMixin, Page):
         service = SearchGatewayService(index_name=index_name)
         filters = service.build_filters()
         filter_metadata = service.get_filter_metadata(filters)
-        selected_filters = service.extract_selected_filters(request, filters)
-
+        selected_filters = service.extract_selected_filters(request=request, available_filters=filters)
         context.update({
             "filters": filters,
             "index_name": index_name,
@@ -40,7 +39,7 @@ class SearchPage(RoutablePageMixin, Page):
                 query_text=search_query,
                 filters=selected_filters,
                 page=get_save_number(request.GET.get("page"), 1),
-                page_size=get_save_number(request.GET.get("limit"), 50),
+                page_size=get_save_number(request.GET.get("limit"), 25),
             ),
         })
         return context
@@ -51,16 +50,25 @@ class SearchPage(RoutablePageMixin, Page):
 
     @route(r'^world/$')
     def world_route(self, request):
-        return self.render(request, index_name="bronze_*")
+        return self.render(request, index_name=getattr(settings, "OP_INDEX_ALL_BRONZE", ""))
 
     @route(r'^social/$')
     def social_route(self, request):
-        return self.render(request, index_name="bronze_social_production")
+        return self.render(request, index_name=getattr(settings, "OP_INDEX_SOC_PROD", ""))
 
     def group_filters_by_category(self, filters, filter_metadata):
         """Group filters by their category property."""
         categorized = {}
-        for key, options in filters.items():
+
+        ordered_filters = sorted(
+            filters.items(),
+            key=lambda item: (
+                filter_metadata.get(item[0], {}).get("order", float("inf")),
+                item[0],
+            ),
+        )
+
+        for key, options in ordered_filters:
             metadata = filter_metadata.get(key, {})
             category = metadata.get("category", "other")
             if category not in categorized:
