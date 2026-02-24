@@ -190,7 +190,6 @@ def build_document_search_body(
         sort_field=None,
         sort_order="asc",
         source_fields=None,
-        data_source_name=None,
 ):
     """
     Builds the body for a document search query with text and filters.
