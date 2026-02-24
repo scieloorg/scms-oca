@@ -30,10 +30,10 @@ class Command(BaseCommand):
             raise CommandError("OpenSearch client não configurado.")
 
         indices = {
-            "preprint": ("bronze_preprint", BRONZE_MAPPING_PREPRINT),
-            "books": ("bronze_books", BRONZE_MAPPING_BOOKS),
-            "dataset": ("bronze_dataset", BRONZE_MAPPING_DATASET),
-            "dataverse": ("bronze_dataverse", BRONZE_MAPPING_DATAVERSE),
+            "preprint": ("bronze_scielo_preprint", BRONZE_MAPPING_PREPRINT),
+            "books": ("bronze_scielo_books", BRONZE_MAPPING_BOOKS),
+            "dataset": ("bronze_scielo_dataset", BRONZE_MAPPING_DATASET),
+            "dataverse": ("bronze_scielo_dataverse", BRONZE_MAPPING_DATAVERSE),
             "social_production": (
                 "bronze_social_production",
                 BRONZE_MAPPING_SOCIAL_PRODUCTION,
