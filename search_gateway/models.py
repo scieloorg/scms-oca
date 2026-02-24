@@ -1,8 +1,8 @@
 from django.db import models
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext, gettext_lazy as _
 from modelcluster.models import ClusterableModel
 from wagtail.admin.panels import FieldPanel, InlinePanel
-from wagtail.models import ParentalKey
+from wagtail.models import Orderable, ParentalKey
 
 
 class DataSource(ClusterableModel):
@@ -25,7 +25,7 @@ class DataSource(ClusterableModel):
         FieldPanel("index_name"),
         FieldPanel("display_name"),
         FieldPanel("source_fields"),
-        InlinePanel("settings_filters", label=_("Filtros")),
+        InlinePanel("settings_filters", label=_("Filtros"), classname="collapsed"),
     ]
 
     class Meta:
@@ -80,9 +80,16 @@ class DataSource(ClusterableModel):
         """
         requested = set(filters.keys())
         metadata = {}
-        for fs in self.settings_filters.all():
-            if fs.field_name in requested and fs.settings:
-                metadata[fs.field_name] = fs.settings
+        ordered_filters = self.settings_filters.all().order_by("sort_order", "id")
+        for position, fs in enumerate(ordered_filters):
+            if fs.field_name not in requested:
+                continue
+            field_metadata = dict(fs.settings or {})
+            field_label = field_metadata.get("label")
+            if isinstance(field_label, str) and field_label:
+                field_metadata["label"] = gettext(field_label)
+            field_metadata["order"] = position
+            metadata[fs.field_name] = field_metadata
         return metadata
 
     def get_fields_with_transforms(self):
@@ -134,7 +141,7 @@ class SettingsFilterManager(models.Manager.from_queryset(SettingsFilterQuerySet)
     pass
 
 
-class SettingsFilter(models.Model):
+class SettingsFilter(Orderable, models.Model):
     objects = SettingsFilterManager()
 
     data_source = ParentalKey(
