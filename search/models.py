@@ -4,6 +4,7 @@ from wagtail.contrib.routable_page.models import RoutablePageMixin, route
 from wagtail.models import Page
 from django.conf import settings
 from search_gateway.filters import FILTER_CATEGORIES
+from search_gateway.models import DataSource
 from search_gateway.service import SearchGatewayService
 
 logger = logging.getLogger(__name__)
@@ -17,11 +18,33 @@ def get_save_number(item, default: int):
 
 
 class SearchPage(RoutablePageMixin, Page):
+    @staticmethod
+    def _resolve_index_name(requested_index_name, default_index_name):
+        if not requested_index_name:
+            return default_index_name
+
+        if DataSource.get_by_index_name(requested_index_name):
+            return requested_index_name
+
+        logger.warning(
+            f"Invalid index_name '{requested_index_name}'. Falling back to '{default_index_name}'."
+        )
+        return default_index_name
+
     def get_context(self, request, *args, **kwargs):
         context = super().get_context(request, *args, **kwargs)
         search_query = request.GET.get("search", "")
-        index_name = kwargs.get("index_name") or request.GET.get(
-            "index_name", getattr(settings, "OP_INDEX_ALL_BRONZE", "bronze_sc*")
+        default_index_name = getattr(
+            settings,
+            "OP_INDEX_ALL_BRONZE",
+            getattr(settings, "OP_INDEX_SCI_PROD", "sci*"),
+        )
+        requested_index_name = kwargs.get("index_name") or request.GET.get(
+            "index_name",
+        )
+        index_name = self._resolve_index_name(
+            requested_index_name=requested_index_name,
+            default_index_name=default_index_name,
         )
         service = SearchGatewayService(index_name=index_name)
         filters = service.build_filters()
@@ -50,11 +73,16 @@ class SearchPage(RoutablePageMixin, Page):
 
     @route(r'^world/$')
     def world_route(self, request):
-        return self.render(request, index_name=getattr(settings, "OP_INDEX_ALL_BRONZE", ""))
+        default_index_name = getattr(
+            settings,
+            "OP_INDEX_ALL_BRONZE",
+            getattr(settings, "OP_INDEX_SCI_PROD", "sci*"),
+        )        
+        return self.render(request, index_name=default_index_name)
 
     @route(r'^social/$')
     def social_route(self, request):
-        return self.render(request, index_name=getattr(settings, "OP_INDEX_SOC_PROD", ""))
+        return self.render(request, index_name=getattr(settings, "OP_INDEX_SOC_PROD", "bronze_social_production"))
 
     def group_filters_by_category(self, filters, filter_metadata):
         """Group filters by their category property."""

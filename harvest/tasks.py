@@ -178,7 +178,7 @@ def retry_failed_books(username, user_id=None, db_name="scielobooks_1a", headers
 
 
 @celery_app.task(name="Retry failed SciELO data")
-def retry_failed_scielo_data():
+def retry_failed_scielo_data(user_id=None):
     failed_data = HarvestedSciELOData.objects.filter(
         harvest_status=HarvestStatus.FAILED
     )
@@ -190,21 +190,21 @@ def retry_failed_scielo_data():
 
 
 @celery_app.task(name="Reindex failed preprints")
-def reindex_failed_preprints():
+def reindex_failed_preprints(user_id=None):
     failed = HarvestedPreprint.objects.filter(index_status=IndexStatus.FAILED)
     for obj in failed.iterator():
         index_harvested_instance(instance=obj, index_name=obj.index_name)
 
 
 @celery_app.task(name="Reindex failed books")
-def reindex_failed_books():
+def reindex_failed_books(user_id=None):
     failed = HarvestedBooks.objects.filter(index_status=IndexStatus.FAILED)
     for obj in failed.iterator():
         index_harvested_instance(instance=obj, index_name=obj.index_name)
 
 
 @celery_app.task(name="Reindex failed SciELO data")
-def reindex_failed_scielo_data():
+def reindex_failed_scielo_data(user_id=None):
     failed = HarvestedSciELOData.objects.filter(index_status=IndexStatus.FAILED)
     for obj in failed.iterator():
         index_harvested_instance(instance=obj, index_name=obj.index_name)

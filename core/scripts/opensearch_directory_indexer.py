@@ -151,8 +151,9 @@ def build_common_directory_doc(
         "pipeline": "oca",
         "graphs": ["thematic_level_0"],
         "type": "directory",
-        "created": to_iso(obj.created),
-        "updated": to_iso(obj.updated),
+        "created": to_iso(obj.created.date()),
+        "updated": to_iso(obj.updated.date()),
+        "creation_year": obj.created.date().year,
     }
     if related_names_field:
         doc[related_names_field] = [item.name for item in related_manager.all()]

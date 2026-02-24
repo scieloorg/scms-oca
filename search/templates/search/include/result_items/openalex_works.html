@@ -1,0 +1,133 @@
+{% load humanize %}
+{% load static %}
+{% load i18n %}
+{% load wagtailsettings_tags %}
+{% load wagtailcore_tags %}
+
+<div class="d-flex justify-content-between align-items-start gap-2">
+    <h5 class="card-title mb-0" style="flex: 1 1 auto; min-width: 0;">
+    {% if doc.source.ids.doi %}
+        <a href="{{ doc.source.ids.doi }}" target="_blank" class="text-decoration-none">
+            {{ doc.source.title }}
+        </a>
+    {% elif doc.source.content_url %}
+        <a href="{{ doc.source.content_url }}" target="_blank" class="text-decoration-none">
+            {{ doc.source.title }}
+        </a>
+    {% else %}
+        <a href="{{ pageurl }}" target="_blank" class="text-decoration-none">{{ doc.source.title }}</a>
+    {% endif %}
+    </h5>
+    {% if doc.source.type %}
+        <span class="badge bg-secondary ms-2 text-muted" style="flex-shrink: 0; white-space: nowrap;">{{ doc.source.type }}</span>
+    {% endif %}
+</div>
+
+{% if doc.source.authorships %}
+<p class="card-text">
+    {% for auth in doc.source.authorships %}
+        {% if auth.author.display_name %}
+            {{ auth.author.display_name }}
+        {% elif auth.name %}
+            {{ auth.name }}
+        {% endif %}
+        {% if auth.author.orcid %}
+            <a href="{{ auth.author.orcid }}" target="_blank"><img src="{% static 'images/authorIcon-orcid.png' %}" alt="ORCID"></a>
+        {% elif auth.orcid %}
+            <a href="{{ auth.orcid }}" target="_blank"><img src="{% static 'images/authorIcon-orcid.png' %}" alt="ORCID"></a>
+        {% endif %}
+        {% if not forloop.last %}; {% endif %}
+    {% endfor %}
+</p>
+{% endif %}
+
+{% if doc.source.primary_source_title %}
+<p class="card-text mb-1">
+    <small class="text-muted">
+        <strong>{% trans "Source" %}:</strong> {{ doc.source.primary_source_title }}
+    </small>
+</p>
+{% endif %}
+
+{% if doc.source.publication_year or doc.source.publication_date %}
+<p class="card-text mb-1">
+    <small class="text-muted">
+        {% if doc.source.publication_year %}<strong>{% trans "Year" %}:</strong> {{ doc.source.publication_year }}{% endif %}
+        {% if doc.source.publication_year and doc.source.publication_date %} - {% endif %}
+        {% if doc.source.publication_date %}<strong>{% trans "Publication Date" %}:</strong> {{ doc.source.publication_date }}{% endif %}
+    </small>
+</p>
+{% endif %}
+
+{% if doc.source.biblio.volume or doc.source.biblio.issue or doc.source.biblio.first_page or doc.source.biblio.last_page %}
+<p class="card-text mb-1">
+    <small class="text-muted">
+        {% if doc.source.biblio.volume %}<strong>{% trans "Volume" %}:</strong> {{ doc.source.biblio.volume }}{% endif %}
+        {% if doc.source.biblio.volume and doc.source.biblio.issue %}, {% endif %}
+        {% if doc.source.biblio.issue %}<strong>{% trans "N°" %}:</strong> {{ doc.source.biblio.issue }}{% endif %}
+        {% if doc.source.biblio.first_page or doc.source.biblio.last_page %}
+            {% if doc.source.biblio.volume or doc.source.biblio.issue %} - {% endif %}
+            <strong>{% trans "Pages" %}:</strong>
+            {{ doc.source.biblio.first_page|default:"" }}{% if doc.source.biblio.last_page %}-{{ doc.source.biblio.last_page }}{% endif %}
+        {% endif %}
+    </small>
+</p>
+{% endif %}
+
+{% if doc.source.primary_topic_name or doc.source.primary_topic_field or doc.source.primary_topic_domain %}
+<p class="card-text mb-1">
+    <small class="text-muted">
+        <strong>{% trans "Primary Topic" %}:</strong>
+        {{ doc.source.primary_topic_name|default:"" }}
+        {% if doc.source.primary_topic_name and doc.source.primary_topic_field %} - {% endif %}
+        {{ doc.source.primary_topic_field|default:"" }}
+        {% if doc.source.primary_topic_domain %}
+            {% if doc.source.primary_topic_name or doc.source.primary_topic_field %} ({% endif %}
+            {{ doc.source.primary_topic_domain }}
+            {% if doc.source.primary_topic_name or doc.source.primary_topic_field %}){% endif %}
+        {% endif %}
+    </small>
+</p>
+{% endif %}
+
+{% if doc.source.metrics.received_citations.total %}
+<p class="card-text mb-1">
+    <small class="text-muted">
+        <strong>{% trans "Citations" %}:</strong> {{ doc.source.metrics.received_citations.total }}
+    </small>
+</p>
+{% endif %}
+
+{% if doc.source.language %}
+<p class="card-text mb-1">
+    <small class="text-muted">
+        <strong>{% trans "Language" %}:</strong> {{ doc.source.language }}
+    </small>
+</p>
+{% endif %}
+
+{% if doc.source.open_access_status %}
+<p class="card-text mb-1">
+    <small class="text-muted">
+        <strong>{% trans "Open Access" %}:</strong> {{ doc.source.open_access_status }}
+    </small>
+</p>
+{% endif %}
+
+{% if doc.source.ids.doi %}
+<p class="card-text mb-0">
+    <small class="text-muted">
+        <strong>{% trans "DOI" %}:</strong>
+        <a href="https://doi.org/{{ doc.source.ids.doi }}" target="_blank">{{ doc.source.ids.doi }}</a>
+    </small>
+</p>
+{% endif %}
+
+{% if doc.source.ids.openalex %}
+<p class="card-text mb-0">
+    <small class="text-muted">
+        <strong>{% trans "OpenAlex ID" %}:</strong>
+        <a href="{{ doc.source.ids.openalex }}" target="_blank">{{ doc.source.ids.openalex }}</a>
+    </small>
+</p>
+{% endif %}

@@ -3,7 +3,6 @@ from search import views
 
 from .views import (
     get_filters_for_data_source,
-    get_search_results_json,
     search_view_list,
 )
 
@@ -35,7 +34,6 @@ urlpatterns = [
     path(
         "graph/context_facet", views.context_facet, name="context_facet"
     ),
-    path("api/search-results/", get_search_results_json, name="search_results_elastic_json"),
     path("api/search-results-list/", search_view_list, name="search_results_list"),
     path("api/filters/", get_filters_for_data_source, name="get_filters_for_data_source"),
 ]

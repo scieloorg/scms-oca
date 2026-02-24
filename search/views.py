@@ -576,45 +576,39 @@ def context_facet(request):
     )
 
 
-def get_search_results_json(request):
-    if request.method != "GET":
-        return HttpResponseNotAllowed(["GET"])
-    try:
-        search_data = SearchPage._get_search_data(request)
-        return JsonResponse(search_data)
-    except Exception as e:
-        logging.exception("Error in get_search_results_json")
-        return JsonResponse({"error": str(e)}, status=500)
-
-
 @require_GET
 def search_view_list(request):
-    index_name = request.GET.get("index_name", "bronze_social_production")
+    index_name = request.GET.get(
+        "index_name",
+        getattr(settings, "OP_INDEX_ALL_BRONZE", "sci*"),
+    )
     page = int(request.GET.get("page", 1))
     page_size = int(request.GET.get("limit", 25))
     text_search = request.GET.get("search", "")
+    try:
+        service = SearchGatewayService(index_name=index_name)
+        filters = service.build_filters()
+        selected_filters = service.extract_selected_filters(request, filters)
+        results_data = service.search_documents(
+            query_text=text_search,
+            filters=selected_filters,
+            page=page,
+            page_size=page_size,
+        )
 
-    service = SearchGatewayService(index_name=index_name)
-    filters = service.build_filters()
-    selected_filters = service.extract_selected_filters(request, filters)
-    results_data = service.search_documents(
-        query_text=text_search,
-        filters=selected_filters,
-        page=page,
-        page_size=page_size,
-    )
-
-    results_html = render_to_string(
-        "search/include/results_list.html",
-        {"results_data": results_data},
-        request=request,
-    )
-    return JsonResponse({
-        "total_results": results_data.get("total_results", 0),
-        "results_html": results_html,
-        "selected_filters": selected_filters,
-    })
-
+        results_html = render_to_string(
+            "search/include/results_list.html",
+            {"results_data": results_data},
+            request=request,
+        )
+        return JsonResponse({
+            "total_results": results_data.get("total_results", 0),
+            "results_html": results_html,
+            "selected_filters": selected_filters,
+        })
+    except Exception as e:
+        logging.exception(f"Error getting filters for index {index_name}. {e}")
+        return JsonResponse({"error": str(e)}, status=500)
 
 @require_GET
 def get_filters_for_data_source(request):
@@ -622,7 +616,10 @@ def get_filters_for_data_source(request):
     API endpoint to get filters and metadata for a specific data source.
     Used when switching data sources in the search page.
     """
-    index_name = request.GET.get("index_name", "bronze_social_production")
+    index_name = request.GET.get(
+        "index_name",
+        getattr(settings, "OP_INDEX_ALL_BRONZE", "sci*"),
+    )
 
     try:
         service = SearchGatewayService(index_name=index_name)
@@ -634,5 +631,5 @@ def get_filters_for_data_source(request):
             "filter_metadata": filter_metadata,
         })
     except Exception as e:
-        logging.exception(f"Error getting filters for index {index_name}")
+        logging.exception(f"Error getting filters for index {index_name}. {e}")
         return JsonResponse({"error": str(e)}, status=500)

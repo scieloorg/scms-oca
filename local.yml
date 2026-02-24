@@ -13,14 +13,18 @@ services:
       - mailhog
       - pgbouncer
       - solr
+      - opensearch
     links:
       - pgbouncer
       - solr
+      - opensearch
     volumes:
       - .:/app:z
     env_file:
       - ./.envs/.local/.django
       - ./.envs/.local/.postgres
+    environment:
+      - OPENSEARCH_URL=http://admin:Secret123@opensearch:9200
     ports:
       - "8000:8000"
     command: /start
@@ -64,6 +68,42 @@ services:
           - SOLR_JAVA_MEM=-Xms512m -Xmx512m
           - SOLR_HEAP=512m
 
+  opensearch:
+    image: opensearchproject/opensearch:3.3.2 
+    container_name: oca_local_opensearch
+    restart: always
+    environment:
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - plugins.security.disabled=true
+      - OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m
+      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=!@345!@#14%Sec#
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - opensearch-data:/usr/share/opensearch/data
+    ports:
+      - "9200:9200"
+      - "9600:9600"
+
+  opensearch-dashboards:
+    image: opensearchproject/opensearch-dashboards:3.3.0
+    container_name: oca_local_opensearch_dashboards
+    restart: always
+    depends_on:
+      - opensearch
+    environment:
+      - OPENSEARCH_HOSTS=["http://opensearch:9200"]
+      - DISABLE_SECURITY_DASHBOARDS_PLUGIN=true
+      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=!@345!@#14%Sec#
+    ports:
+      - "5601:5601"
+
   adminer:
     image: adminer
     ports:
@@ -105,6 +145,7 @@ services:
       - redis
       - postgres
       - mailhog
+      - opensearch
     ports: []
     command: /start-celeryworker
 
@@ -116,6 +157,7 @@ services:
       - redis
       - postgres
       - mailhog
+      - opensearch
     ports: []
     command: /start-celerybeat
 
@@ -126,3 +168,6 @@ services:
     ports:
       - "5555:5555"
     command: /start-flower
+
+volumes:
+  opensearch-data:
