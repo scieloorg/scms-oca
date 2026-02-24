@@ -286,7 +286,7 @@ msgstr "Nome do Periódico"
 #: search_gateway/data_sources_with_settings.py:378
 #: search_gateway/data_sources_with_settings.py:1491
 msgid "Publisher"
-msgstr "Casa Publicadora"
+msgstr "Publicador"
 
 #: article/models.py:105 scholarly_articles/models.py:240
 msgid "DOAJ"
@@ -3859,7 +3859,7 @@ msgstr ""
 #: search/templates/search/include/result_items/preprint.html:86
 #: search/templates/search/include/result_items/preprint.html:95
 msgid "Subjects"
-msgstr ""
+msgstr "Área temática"
 
 #: search/templates/search/include/result_items/dataset.html:86
 msgid "Files"
@@ -4068,15 +4068,10 @@ msgstr "Prática"
 msgid "Thematic Level"
 msgstr "Nível Temático"
 
-#: search_gateway/data_sources_with_settings.py:1429
-#, fuzzy
-#| msgid "Scientific Production - World"
-msgid "Scientific Production"
-msgstr "Produção Científica - Mundo"
 
 #: search_gateway/data_sources_with_settings.py:1474
 msgid "Subject"
-msgstr ""
+msgstr "Assunto"
 
 #: search_gateway/data_sources_with_settings.py:1578
 #, fuzzy
@@ -4573,3 +4568,23 @@ msgstr "Modelos Úteis"
 
 #~ msgid "Híbrido"
 #~ msgstr "Híbrido"
+
+# template
+msgid "Scientific Production"
+msgstr "Produção Científica"
+
+msgid "Actions, events and infrastructure"
+msgstr "Ações, eventos e infraestrutura"
+
+msgid "Type to filter"
+msgstr "Digite para filtrar"
+
+
+msgid "Creation year"
+msgstr "Ano de criação"
+
+msgid "Registration year"
+msgstr "Ano de registro"
+
+msgid "Support type"
+msgstr "Tipo de apoio"

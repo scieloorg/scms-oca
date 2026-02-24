@@ -454,3 +454,18 @@ msgstr "% Documents With ≥1 Citation"
 
 #~ msgid "Avg Cited Documents per Periodical"
 #~ msgstr "Avg Cited Documents per Periodical"
+
+msgid "Type to filter"
+msgstr "Type to filter"
+
+msgid "Loading..."
+msgstr "Loading..."
+
+msgid "No results found. Try adjusting your search or filters."
+msgstr "No results found. Try adjusting your search or filters."
+
+msgid "Filters applied"
+msgstr "Filters applied"
+
+msgid "Search"
+msgstr "Search"
