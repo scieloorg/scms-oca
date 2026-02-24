@@ -29,7 +29,6 @@ class SearchPage(RoutablePageMixin, Page):
             "index_name",
             default_index_name,
         )
-        print(index_name)
         service = SearchGatewayService(index_name=index_name)
         filters = service.build_filters()
         filter_metadata = service.get_filter_metadata(filters)
