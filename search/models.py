@@ -20,9 +20,16 @@ class SearchPage(RoutablePageMixin, Page):
     def get_context(self, request, *args, **kwargs):
         context = super().get_context(request, *args, **kwargs)
         search_query = request.GET.get("search", "")
-        index_name = kwargs.get("index_name") or request.GET.get(
-            "index_name", getattr(settings, "OP_INDEX_ALL_BRONZE", "bronze_sc*")
+        default_index_name = getattr(
+            settings,
+            "OP_INDEX_ALL_BRONZE",
+            getattr(settings, "OP_INDEX_SCI_PROD", "sci*"),
         )
+        index_name = kwargs.get("index_name") or request.GET.get(
+            "index_name",
+            default_index_name,
+        )
+        print(index_name)
         service = SearchGatewayService(index_name=index_name)
         filters = service.build_filters()
         filter_metadata = service.get_filter_metadata(filters)
@@ -50,11 +57,16 @@ class SearchPage(RoutablePageMixin, Page):
 
     @route(r'^world/$')
     def world_route(self, request):
-        return self.render(request, index_name=getattr(settings, "OP_INDEX_ALL_BRONZE", ""))
+        default_index_name = getattr(
+            settings,
+            "OP_INDEX_ALL_BRONZE",
+            getattr(settings, "OP_INDEX_SCI_PROD", "sci*"),
+        )        
+        return self.render(request, index_name=default_index_name)
 
     @route(r'^social/$')
     def social_route(self, request):
-        return self.render(request, index_name=getattr(settings, "OP_INDEX_SOC_PROD", ""))
+        return self.render(request, index_name=getattr(settings, "OP_INDEX_SOC_PROD", "bronze_social_production"))
 
     def group_filters_by_category(self, filters, filter_metadata):
         """Group filters by their category property."""
