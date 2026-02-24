@@ -23,42 +23,90 @@ BRONZE_MAPPING = {
     "mappings": {
         "dynamic": True,
         "properties": {
-            "publisher": {
-                "type": "text",
-                "analyzer": "multilingual",
-                "copy_to": ["publisher_search", "publisher_search_autocomplete"],
-                "fields": {
-                    "keyword": {
-                        "type": "keyword",
-                        "ignore_above": 256,
-                    }
+            "publishers": {
+                "type": "object",
+                "properties": {
+                    "id": {"type": "keyword"},
+                    "name": {
+                        "fields": {
+                            "keyword": {
+                                "type": "keyword",
+                            }
+                        },
+                        "copy_to": [
+                            "publishers_search",
+                            "publishers_search_autocomplete",
+                        ],
+                        "analyzer": "multilingual",
+                        "type": "text",
+                    },
                 },
             },
-            "publisher_search": {
-                "type": "text",
-                "analyzer": "multilingual",
-                "fields": {
-                    "keyword": {
-                        "type": "keyword",
-                        "ignore_above": 256,
-                    }
-                },
-            },
-            "publisher_search_autocomplete": {
+            "publishers_search_autocomplete": {
                 "doc_values": False,
                 "max_shingle_size": 3,
                 "type": "search_as_you_type",
             },
-            "type": {
-                "type": "keyword",
-                "fields": {"keyword": {"type": "keyword"}},
+            "publishers_search": {
+                "fields": {"keyword": {"type": "keyword", "ignore_above": 256}},
+                "analyzer": "multilingual",
+                "type": "text",
             },
+            "type": {"type": "keyword"},
             "sources": {
                 "type": "object",
                 "properties": {
-                    "url": {"type": "keyword"},
-                    "issn": {"type": "keyword"},
+                    "host_organization": {
+                        "type": "object",
+                        "properties": {
+                            "id": {"type": "keyword"},
+                            "name": {
+                                "fields": {
+                                    "keyword": {
+                                        "type": "keyword",
+                                        "ignore_above": 256,
+                                    }
+                                },
+                                "analyzer": "multilingual",
+                                "type": "text",
+                            },
+                        },
+                    },
+                    "id": {"type": "keyword"},
+                    "is_open_access": {"type": "boolean"},
+                    "is_primary": {"type": "boolean"},
+                    "landing_page_url": {"type": "keyword"},
+                    "title": {
+                        "fields": {
+                            "keyword": {
+                                "type": "keyword",
+                                "ignore_above": 256,
+                            }
+                        },
+                        "copy_to": [
+                            "sources_search",
+                            "sources_search_autocomplete",
+                        ],
+                        "analyzer": "multilingual",
+                        "type": "text",
+                    },
+                    "type": {"type": "keyword"},
                 },
+            },
+            "sources_search": {
+                "fields": {
+                    "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256,
+                    }
+                },
+                "analyzer": "multilingual",
+                "type": "text",
+            },
+            "sources_search_autocomplete": {
+                "doc_values": False,
+                "max_shingle_size": 3,
+                "type": "search_as_you_type",
             },
             "dataverse": {
                 "type": "object",
@@ -107,25 +155,20 @@ BRONZE_MAPPING = {
             "ids": {
                 "type": "object",
                 "properties": {
-                    "identifier": {
-                        "type": "keyword",
-                        "copy_to": ["ids_search"],
-                    },
-                    "doi": {
-                        "type": "keyword",
-                        "copy_to": ["ids_search"],
+                    "doi": {"copy_to": ["ids_search"], "type": "keyword"},
+                    "doi_with_lang": {
+                        "type": "object",
+                        "properties": {
+                            "doi": {"copy_to": ["ids_search"], "type": "keyword"},
+                            "language": {"type": "keyword"},
+                        },
                     },
                 },
             },
             "ids_search": {
-                "type": "text",
+                "fields": {"keyword": {"type": "keyword", "ignore_above": 256}},
                 "analyzer": "multilingual",
-                "fields": {
-                    "keyword": {
-                        "type": "keyword",
-                        "ignore_above": 256,
-                    }
-                },
+                "type": "text",
             },
             "title": {
                 "type": "text",
@@ -148,9 +191,35 @@ BRONZE_MAPPING = {
                     }
                 },
             },
+            "title_with_lang": {
+                "type": "object",
+                "properties": {
+                    "language": {"type": "keyword"},
+                    "title": {
+                        "fields": {
+                            "keyword": {
+                                "type": "keyword",
+                            }
+                        },
+                        "copy_to": ["title_search"],
+                        "analyzer": "multilingual",
+                        "type": "text",
+                    },
+                },
+            },
             "description": {
                 "type": "text",
                 "analyzer": "multilingual",
+            },
+            "description_with_lang": {
+                "type": "object",
+                "properties": {
+                    "description": {
+                        "type": "text",
+                        "analyzer": "multilingual",
+                    },
+                    "language": {"type": "keyword"},
+                },
             },
             "files": {
                 "type": "object",
@@ -169,7 +238,7 @@ BRONZE_MAPPING = {
                             }
                         },
                     },
-                    "description": {
+                    "abstract": {
                         "type": "text",
                         "analyzer": "multilingual",
                     },
@@ -178,38 +247,42 @@ BRONZE_MAPPING = {
             "authorships": {
                 "type": "object",
                 "properties": {
-                    "name": {
-                        "type": "text",
-                        "analyzer": "multilingual",
-                        "copy_to": ["authors_search"],
-                        "fields": {
-                            "keyword": {
-                                "type": "keyword",
-                                "ignore_above": 256,
-                            }
-                        },
-                    },
-                    "orcid": {"type": "keyword"},
+                    "countries": {"copy_to": ["countries_search"], "type": "keyword"},
+                    "id": {"type": "keyword"},
                     "institutions": {
                         "type": "object",
                         "properties": {
+                            "country_code": {"type": "keyword"},
+                            "id": {"type": "keyword"},
                             "name": {
-                                "type": "text",
-                                "analyzer": "multilingual",
+                                "fields": {
+                                    "keyword": {"type": "keyword", "ignore_above": 256}
+                                },
                                 "copy_to": [
                                     "institutions_search",
                                     "institutions_search_autocomplete",
                                 ],
-                                "fields": {
-                                    "keyword": {
-                                        "type": "keyword",
-                                        "ignore_above": 256,
-                                    }
-                                },
-                            }
+                                "analyzer": "multilingual",
+                                "type": "text",
+                            },
+                            "ror": {"type": "keyword"},
+                            "type": {"type": "keyword"},
                         },
                     },
+                    "name": {
+                        "fields": {"keyword": {"type": "keyword", "ignore_above": 256}},
+                        "copy_to": ["authors_search"],
+                        "analyzer": "multilingual",
+                        "type": "text",
+                    },
+                    "orcid": {"type": "keyword"},
+                    "position": {"type": "keyword"},
                 },
+            },
+            "countries_search": {
+                "fields": {"keyword": {"type": "keyword", "ignore_above": 256}},
+                "analyzer": "multilingual",
+                "type": "text",
             },
             "authors_search": {
                 "type": "text",
@@ -283,10 +356,50 @@ BRONZE_MAPPING = {
                 },
             },
             "language": {
-                "type": "text",
-                "fields": {"keyword": {"type": "keyword"}},
+                "copy_to": [
+                    "language_search",
+                    "language_search_autocomplete"
+                ],
+                "type": "keyword"
             },
+            "language_search": {
+                "fields": {
+                    "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 256
+                    }
+                },
+                "analyzer": "multilingual",
+                "type": "text"
+            },
+            "language_search_autocomplete": {
+                "doc_values": False,
+                "max_shingle_size": 3,
+                "type": "search_as_you_type"
+            },
+            "language_normalized": {
+                "type": "text",
+                "fields": {
+                    "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 256
+                    }
+                }
+            },            
             "citation_name": {"type": "keyword"},
+            "biblio": {
+                "type": "object",
+                "properties": {
+                    "first_page": {"type": "keyword"},
+                    "issue": {"type": "keyword"},
+                    "last_page": {"type": "keyword"},
+                    "volume": {"type": "keyword"},
+                },
+            },
+            "oca_data": {
+                "type": "object",
+                "properties": {"scope": {"type": "keyword"}},
+            },
         },
     },
 }

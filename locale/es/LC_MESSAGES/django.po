@@ -287,7 +287,7 @@ msgstr "Nombre de la revista"
 #: search_gateway/data_sources_with_settings.py:378
 #: search_gateway/data_sources_with_settings.py:1491
 msgid "Publisher"
-msgstr "Editorial"
+msgstr "Publicador"
 
 #: article/models.py:105 scholarly_articles/models.py:240
 msgid "DOAJ"
@@ -3935,7 +3935,7 @@ msgstr ""
 #: search/templates/search/include/result_items/preprint.html:86
 #: search/templates/search/include/result_items/preprint.html:95
 msgid "Subjects"
-msgstr ""
+msgstr "Area temática"
 
 #: search/templates/search/include/result_items/dataset.html:86
 msgid "Files"
@@ -4148,11 +4148,11 @@ msgstr "Nivel Temático"
 #, fuzzy
 #| msgid "Scientific Production - World"
 msgid "Scientific Production"
-msgstr "Produción Científica - Mundo"
+msgstr "Produción Científica"
 
 #: search_gateway/data_sources_with_settings.py:1474
 msgid "Subject"
-msgstr ""
+msgstr "Sujeto"
 
 #: search_gateway/data_sources_with_settings.py:1578
 #, fuzzy
@@ -4638,3 +4638,16 @@ msgstr "Modelos Úteis"
 
 #~ msgid "SciELO Network"
 #~ msgstr "Rede SciELO"
+
+msgid "Actions, events and infrastructure"
+msgstr "Acciones, eventos e infraestructura"
+
+msgid "Type to filter"
+msgstr "Escriba para filtrar"
+
+msgid "Creation year"
+msgstr "Año de creación"
+
+
+msgid "Support type"
+msgstr "Tipo de apoy"

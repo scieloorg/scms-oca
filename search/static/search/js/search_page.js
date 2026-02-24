@@ -6,21 +6,6 @@ class SearchPageManager {
         this.filters = config.filters || {};
         this.filterMetadata = config.filterMetadata || {};
         this.rangeFields = config.rangeFields || {};
-        this.i18n = config.i18n || {
-            loading: 'Carregando...',
-            resultsCountSingular: 'resultado encontrado',
-            resultsCountPlural: 'resultados encontrados',
-            noResults: 'Nenhum resultado encontrado. Tente ajustar sua busca ou filtros.',
-            filtersApplied: 'Filtros aplicados',
-            labelType: 'Tipo',
-            labelYear: 'Ano',
-            labelInstitutions: 'Instituições',
-            labelLocation: 'Localização',
-            labelPractice: 'Prática',
-            labelAction: 'Ação',
-            labelClassification: 'Classificação',
-            labelThematicAreas: 'Áreas Temáticas',
-        };
         
         this.init();
     }
@@ -73,7 +58,7 @@ class SearchPageManager {
     
     async loadFiltersForDataSource(dataSource) {
         try {
-            const response = await fetch(`/search/api/filters/?data_source=${dataSource}`);
+            const response = await fetch(`/search/api/filters/?index_name=${dataSource}`);
             if (!response.ok) throw new Error('Failed to load filters');
             
             const data = await response.json();
@@ -154,7 +139,7 @@ class SearchPageManager {
         
         const metadata = this.filterMetadata[key] || {};
         const config = {
-            placeholder: 'Start typing to search...',
+            placeholder: gettext('Type to filter'),
             theme: 'bootstrap-5',
             allowClear: metadata.multiple_selection == false,
             multiple: metadata.multiple_selection !== false
@@ -168,7 +153,7 @@ class SearchPageManager {
                 data: (params) => ({
                     q: params.term,
                     field_name: key,
-                    data_source: this.dataSourceName
+                    index_name: this.dataSourceName
                 }),
                 processResults: (data) => ({
                     results: data.map(item => ({
@@ -219,9 +204,9 @@ class SearchPageManager {
             params.append('search', this.searchQuery);
         }
         
-        // Add data source
+        // Add index name
         if (this.dataSourceName) {
-            params.append('data_source', this.dataSourceName);
+            params.append('index_name', this.dataSourceName);
         }
         
         Object.keys(this.filters).forEach(key => {
@@ -251,7 +236,7 @@ class SearchPageManager {
     
     showLoading(filterStatus, resultsContainer) {
         if (filterStatus) {
-            filterStatus.innerHTML = `<i class="icon-spinner icon-spin"></i> ${this.i18n.loading}`;
+            filterStatus.innerHTML = `<i class="icon-spinner icon-spin"></i> ${gettext('Loading...')}`;
         }
         if (resultsContainer) {
             resultsContainer.innerHTML = '<div class="text-center p-5"><i class="icon-spinner icon-spin icon-2x"></i></div>';
@@ -266,14 +251,14 @@ class SearchPageManager {
                 resultsContainer.innerHTML = `
                     <div class="alert alert-info" role="alert">
                         <i class="icon-info-sign"></i> 
-                        ${this.i18n.noResults}
+                        ${gettext('No results found. Try adjusting your search or filters.')}
                     </div>
                 `;
             }
         }
         
         if (filterStatus) {
-            filterStatus.innerHTML = `<i class="icon-ok text-success"></i> ${this.i18n.filtersApplied}`;
+            filterStatus.innerHTML = `<i class="icon-ok text-success"></i> ${gettext('Filters applied')}`;
             setTimeout(() => {
                 filterStatus.innerHTML = '';
             }, 2000);
@@ -309,6 +294,7 @@ class SearchPageManager {
         const searchBadge = document.getElementById('search-query-badge');
         const filtersSection = document.getElementById('filters-section');
         const filtersBadgesContainer = document.getElementById('selected-filters-badges');
+        const filtersCount = document.getElementById('active-filters-count');
         
         if (!container || !filtersBadgesContainer) return;
         
@@ -317,18 +303,21 @@ class SearchPageManager {
         if (searchBadge && searchSection) {
             if (hasSearchQuery) {
                 searchBadge.innerHTML = `
-                    <i class="icon-search"></i> ${this.escapeHtml(this.searchQuery)}
-                    <button type="button" class="btn-close btn-close-white ms-1" style="font-size: 0.7rem;" onclick="window.searchPageManager.clearSearchQuery()"></button>
+                <span class="applied-filter-chip">
+                    <i class="icon-filter"></i> <strong>${gettext('Search')}:</strong> ${this.escapeHtml(this.searchQuery)}
+                    <button type="button" class="btn-close btn-close-black ms-1" style="font-size: 0.7rem;" onclick="window.searchPageManager.clearSearchQuery()"></button>
+                </span>
                 `;
-                searchSection.style.display = 'block';
+                searchSection.classList.remove('d-none');
             } else {
-                searchSection.style.display = 'none';
+                searchSection.classList.add('d-none');
             }
         }
         
         // Build filter badges (blue color with filter icon)
         let filterBadgesHtml = '';
         let hasFilters = false;
+        let activeFilterCount = 0;
         
         Object.keys(this.filters).forEach(key => {
             const selectElement = document.getElementById(key);
@@ -345,11 +334,12 @@ class SearchPageManager {
                     // Single selection
                     const selectedOption = $(selectElement).find('option:selected');
                     const selectedText = selectedOption.text();
+                    activeFilterCount += 1;
                     
                     filterBadgesHtml += `
-                        <span class="badge" style="background-color: #5b9bd5; color: white; font-size: 0.85rem;">
-                            <i class="icon-filter"></i> <strong>${this.escapeHtml(label).toUpperCase()}:</strong> ${this.escapeHtml(selectedText)}
-                            <button type="button" class="btn-close btn-close-white ms-1" style="font-size: 0.7rem;" onclick="window.searchPageManager.removeFilter('${key}')"></button>
+                        <span class="applied-filter-chip">
+                            <i class="icon-filter"></i> <strong>${this.escapeHtml(label)}:</strong> ${this.escapeHtml(selectedText)}
+                            <button type="button" class="btn-close btn-close-black  ms-1" style="font-size: 0.7rem;" onclick="window.searchPageManager.removeFilter('${key}')"></button>
                         </span>
                     `;
                 } else {
@@ -357,11 +347,12 @@ class SearchPageManager {
                     selectedValues.forEach(value => {
                         const option = $(selectElement).find(`option[value="${this.escapeHtml(value)}"]`);
                         const optionText = option.text() || value;
+                        activeFilterCount += 1;
                         
                         filterBadgesHtml += `
-                            <span class="badge" style="background-color: #5b9bd5; color: white; font-size: 0.85rem;">
-                                <i class="icon-filter"></i> <strong>${this.escapeHtml(label).toUpperCase()}:</strong> ${this.escapeHtml(optionText)}
-                                <button type="button" class="btn-close btn-close-white ms-1" style="font-size: 0.7rem;" data-filter-key="${key}" data-filter-value="${this.escapeHtml(value)}"></button>
+                            <span class="applied-filter-chip">
+                                <i class="icon-filter"></i> <strong>${this.escapeHtml(label)}:</strong> ${this.escapeHtml(optionText)}
+                                <button type="button" class="btn-close btn-close-black  ms-1" style="font-size: 0.7rem;" data-filter-key="${key}" data-filter-value="${this.escapeHtml(value)}"></button>
                             </span>
                         `;
                     });
@@ -385,17 +376,20 @@ class SearchPageManager {
         // Show/hide filters section
         if (filtersSection) {
             if (hasFilters) {
-                filtersSection.style.display = 'block';
+                filtersSection.classList.remove('d-none');
             } else {
-                filtersSection.style.display = 'none';
+                filtersSection.classList.add('d-none');
             }
+        }
+        if (filtersCount) {
+            filtersCount.textContent = String(activeFilterCount);
         }
         
         // Show/hide main container based on whether there are active filters or search
         if (hasSearchQuery || hasFilters) {
-            container.style.display = 'block';
+            container.classList.remove('d-none');
         } else {
-            container.style.display = 'none';
+            container.classList.add('d-none');
         }
     }
     

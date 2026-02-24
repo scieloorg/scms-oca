@@ -4158,7 +4158,7 @@ msgstr "Thematic Level"
 #, fuzzy
 #| msgid "Scientific Production - World"
 msgid "Scientific Production"
-msgstr "Scientific Production - World"
+msgstr ""
 
 #: search_gateway/data_sources_with_settings.py:1474
 msgid "Subject"
@@ -4648,3 +4648,15 @@ msgstr "Useful Models"
 
 #~ msgid "SciELO Network"
 #~ msgstr "SciELO Network"
+
+msgid "Actions, events and infrastructure"
+msgstr ""
+
+msgid "Type to filter"
+msgstr ""
+
+msgid "Registration year"
+msgstr ""
+
+msgid "Support type"
+msgstr ""

@@ -458,3 +458,19 @@ msgstr "% de documentos com ≥1 citação (participação %)"
 
 #~ msgid "Funder"
 #~ msgstr "Financiador"
+
+
+msgid "Type to filter"
+msgstr "Digite para filtrar"
+
+msgid "Loading..."
+msgstr "Carregando..."
+
+msgid "No results found. Try adjusting your search or filters."
+msgstr "Nenhum resultado encontrado. Tente ajustar sua busca ou filtros."
+
+msgid "Filters applied"
+msgstr "Filtros aplicados"
+
+msgid "Search"
+msgstr "Busca"

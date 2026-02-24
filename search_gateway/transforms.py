@@ -54,3 +54,16 @@ def apply_transform(data_source, field_name, code):
             return code
     return code
 
+def _apply_display_transform_from_datasource(field_settings, field_name, value):
+    transform_type = (
+        (field_settings.get(field_name, {}) or {})
+        .get("settings", {})
+        .get("display_transform")
+    )
+    fn = TRANSFORMS.get(transform_type)
+    if not fn:
+        return value
+    try:
+        return fn(value)
+    except Exception:
+        return value

@@ -6,133 +6,129 @@
 {% load custom_filters %}
 
 
-<div class="card mb-3 result-item">
-    <div class="card-body">
-        <div class="d-flex justify-content-between align-items-start gap-2">
-            <h5 class="card-title mb-0" style="flex: 1 1 auto; min-width: 0;">
-                {% if doc.source.link %}
-                    <a href="{{ doc.source.link }}" target="_blank" class="text-decoration-none">
-                        {{ doc.source.title }}
-                    </a>
-                {% else %}
-                    {{ doc.source.title }}
-                {% endif %}
-            </h5>
-            {% if doc.source.action %}
-                <span class="badge bg-secondary ms-2 text-muted" style="flex-shrink: 0; white-space: nowrap;">{{ doc.source.action }}</span>
-            {% endif %}
-        </div>
-        {% if doc.source.description %}
-        <p class="card-text">
-            {{ doc.source.description|truncatewords:50 }}
-        </p>
+<div class="d-flex justify-content-between align-items-start gap-2">
+    <h5 class="card-title mb-0" style="flex: 1 1 auto; min-width: 0;">
+        {% if doc.source.link %}
+            <a href="{{ doc.source.link }}" target="_blank" class="text-decoration-none">
+                {{ doc.source.title }}
+            </a>
+        {% else %}
+            {{ doc.source.title }}
         {% endif %}
-        
-        {% if doc.source.directory_type %}
-        <p class="card-text mb-1">
-            <small class="text-muted">
-                <strong>{% trans "Type" %}:</strong> {{ doc.source.directory_type }}
-            </small>
-        </p>
-        {% endif %}
-        
-        {% if doc.source.start_date %}
-        <p class="card-text mb-1">
-            <small class="text-muted">
-                <strong>{% trans "Data Início" %}:</strong> {{ doc.source.start_date|format_date_br }}
-            </small>
-        </p>
-        {% endif %}
-
-        {% if doc.source.created %}
-        <p class="card-text mb-1">
-            <small class="text-muted">
-                <strong>{% trans "Data de inserção do registro" %}:</strong> {{ doc.source.created|format_date_br }}
-            </small>
-        </p>
-        {% endif %}
-        
-        {% if doc.source.institutions %}
-        <p class="card-text mb-1">
-            <small class="text-muted">
-                <strong>{% trans "Institutions" %}:</strong> 
-                {% if doc.source.institutions|length > 0 %}
-                    {% for inst in doc.source.institutions %}
-                        {{ inst }}{% if not forloop.last %}, {% endif %}
-                    {% endfor %}
-                {% endif %}
-            </small>
-        </p>
-        {% endif %}
-
-        {% if doc.source.organization %}
-        <p class="card-text mb-1">
-            <small class="text-muted">
-                <strong>{% trans "organization" %}:</strong> 
-                {% if doc.source.organization|length > 0 %}
-                    {% for inst in doc.source.organization %}
-                        {{ inst }}{% if not forloop.last %}, {% endif %}
-                    {% endfor %}
-                {% endif %}
-            </small>
-        </p>
-        {% endif %}
-        
-        {% if doc.source.cities or doc.source.states %}
-        <p class="card-text mb-1">
-            <small class="text-muted">
-                <strong>{% trans "Location" %}:</strong> 
-                {% if doc.source.cities %}
-                    {% for city in doc.source.cities %}
-                        {{ city }}{% if not forloop.last %}, {% endif %}
-                    {% endfor %}
-                {% endif %}
-                {% if doc.source.cities and doc.source.states %} - {% endif %}
-                {% if doc.source.states %}
-                    {% for state in doc.source.states %}
-                        {{ state }}{% if not forloop.last %}, {% endif %}
-                    {% endfor %}
-                {% endif %}
-            </small>
-        </p>
-        {% endif %}
-        
-        {% if doc.source.practice %}
-        <p class="card-text mb-1">
-            <small class="text-muted">
-                <strong>{% trans "Practice" %}:</strong> {{ doc.source.practice }}
-            </small>
-        </p>
-        {% endif %}
-        
-        {% if doc.source.action %}
-        <p class="card-text mb-1">
-            <small class="text-muted">
-                <strong>{% trans "Action" %}:</strong> {{ doc.source.action }}
-            </small>
-        </p>
-        {% endif %}
-        
-        {% if doc.source.classification %}
-        <p class="card-text mb-1">
-            <small class="text-muted">
-                <strong>{% trans "Classification" %}:</strong> {{ doc.source.classification }}
-            </small>
-        </p>
-        {% endif %}
-        
-        {% if doc.source.thematic_level_0 %}
-        <p class="card-text mb-0">
-            <small class="text-muted">
-                <strong>{% trans "Thematic Areas" %}:</strong> 
-                {% if doc.source.thematic_level_0|length > 0 %}
-                    {% for theme in doc.source.thematic_level_0 %}
-                        {{ theme }}{% if not forloop.last %}, {% endif %}
-                    {% endfor %}
-                {% endif %}
-            </small>
-        </p>
-        {% endif %}
-    </div>
+    </h5>
+    {% if doc.source.action %}
+        <span class="badge bg-secondary ms-2 text-muted" style="flex-shrink: 0; white-space: nowrap;">{{ doc.source.action }}</span>
+    {% endif %}
 </div>
+{% if doc.source.description %}
+<p class="card-text">
+    {{ doc.source.description|truncatewords:50 }}
+</p>
+{% endif %}
+
+{% if doc.source.directory_type %}
+<p class="card-text mb-1">
+    <small class="text-muted">
+        <strong>{% trans "Type" %}:</strong> {{ doc.source.directory_type }}
+    </small>
+</p>
+{% endif %}
+
+{% if doc.source.start_date %}
+<p class="card-text mb-1">
+    <small class="text-muted">
+        <strong>{% trans "Data Início" %}:</strong> {{ doc.source.start_date|format_date_br }}
+    </small>
+</p>
+{% endif %}
+
+{% if doc.source.created %}
+<p class="card-text mb-1">
+    <small class="text-muted">
+        <strong>{% trans "Data de inserção do registro" %}:</strong> {{ doc.source.created|format_date_br }}
+    </small>
+</p>
+{% endif %}
+
+{% if doc.source.institutions %}
+<p class="card-text mb-1">
+    <small class="text-muted">
+        <strong>{% trans "Institutions" %}:</strong> 
+        {% if doc.source.institutions|length > 0 %}
+            {% for inst in doc.source.institutions %}
+                {{ inst }}{% if not forloop.last %}, {% endif %}
+            {% endfor %}
+        {% endif %}
+    </small>
+</p>
+{% endif %}
+
+{% if doc.source.organization %}
+<p class="card-text mb-1">
+    <small class="text-muted">
+        <strong>{% trans "organization" %}:</strong> 
+        {% if doc.source.organization|length > 0 %}
+            {% for inst in doc.source.organization %}
+                {{ inst }}{% if not forloop.last %}, {% endif %}
+            {% endfor %}
+        {% endif %}
+    </small>
+</p>
+{% endif %}
+
+{% if doc.source.cities or doc.source.states %}
+<p class="card-text mb-1">
+    <small class="text-muted">
+        <strong>{% trans "Location" %}:</strong> 
+        {% if doc.source.cities %}
+            {% for city in doc.source.cities %}
+                {{ city }}{% if not forloop.last %}, {% endif %}
+            {% endfor %}
+        {% endif %}
+        {% if doc.source.cities and doc.source.states %} - {% endif %}
+        {% if doc.source.states %}
+            {% for state in doc.source.states %}
+                {{ state }}{% if not forloop.last %}, {% endif %}
+            {% endfor %}
+        {% endif %}
+    </small>
+</p>
+{% endif %}
+
+{% if doc.source.practice %}
+<p class="card-text mb-1">
+    <small class="text-muted">
+        <strong>{% trans "Practice" %}:</strong> {{ doc.source.practice }}
+    </small>
+</p>
+{% endif %}
+
+{% if doc.source.action %}
+<p class="card-text mb-1">
+    <small class="text-muted">
+        <strong>{% trans "Action" %}:</strong> {{ doc.source.action }}
+    </small>
+</p>
+{% endif %}
+
+{% if doc.source.classification %}
+<p class="card-text mb-1">
+    <small class="text-muted">
+        <strong>{% trans "Classification" %}:</strong> {{ doc.source.classification }}
+    </small>
+</p>
+{% endif %}
+
+{% if doc.source.thematic_level_0 %}
+<p class="card-text mb-0">
+    <small class="text-muted">
+        <strong>{% trans "Thematic Areas" %}:</strong> 
+        {% if doc.source.thematic_level_0|length > 0 %}
+            {% for theme in doc.source.thematic_level_0 %}
+                {{ theme }}{% if not forloop.last %}, {% endif %}
+            {% endfor %}
+        {% endif %}
+    </small>
+</p>
+{% endif %}
 

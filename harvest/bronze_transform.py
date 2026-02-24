@@ -120,7 +120,7 @@ def _run_reindex(*, body, log_prefix, error_context):
             ),
         }
     except Exception as exc:
-        logger.error("Erro ao transformar documento %s: %s", error_context, exc)
+        logger.error(f"Erro ao transformar documento {error_context}: {exc}")
         return {
             "status": "error",
             "message": f"Erro ao transformar documento {error_context}: {exc}",

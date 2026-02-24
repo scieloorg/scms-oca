@@ -5,64 +5,68 @@
 {% load wagtailcore_tags %}
 
 
-<div class="card mb-3 result-item">
-    <div class="card-body">
-        <div class="d-flex justify-content-between align-items-start gap-2">
-            <h5 class="card-title mb-0" style="flex: 1 1 auto; min-width: 0;">
-            {% if doc.source.ids.doi %}
-                <a href="https://doi.org/{{ doc.source.ids.doi }}" target="_blank" class="text-decoration-none">{{ doc.source.title }}</a>
-            {% else %}
-                <a href="{{pageurl}}" target="_blank" class="text-decoration-none">{{ doc.source.title }}</a>
-            {% endif %}
-            </h5>
-            {% if doc.source.type %}
-                <span class="badge bg-secondary ms-2 text-muted" style="flex-shrink: 0; white-space: nowrap;">{{ doc.source.type }}</span>
-            {% endif %}
-        </div>
-        {% if doc.source.authorships %}
-            <p class="card-text">
-                {% for author in doc.source.authorships %}
-                    {{ author.name }}{% if not forloop.last %}, {% endif %}
-                {% endfor %}
-            </p>
-        {% endif %}
-        {% if doc.source.monograph.title %}
-        <p class="card-text mb-1">
-            <small class="text-muted">
-                <strong>{% trans "Book" %}:</strong> {{ doc.source.monograph.title }}
-            </small>
-        </p>
-        {% endif %}
-        {% if doc.source.publisher_search %}
-        <p class="card-text mb-1">
-            <small class="text-muted">
-                <strong>{% trans "Publisher" %}:</strong>
-                {% for publisher in doc.source.publisher_search %}
-                    {{ publisher }}{% if not forloop.last %}, {% endif %}
-                {% endfor %}
-            </small>
-        </p>
-        {% endif %}
-        {% if doc.source.publication_year %}
-        <p class="card-text mb-1">
-            <small class="text-muted">
-                <strong>{% trans "Year" %}:</strong> {{ doc.source.publication_year }}
-            </small>
-        </p>
-        {% endif %}
-        {% if doc.source.biblio.pages %}
-        <p class="card-text mb-1">
-            <small class="text-muted">
-                <strong>{% trans "Pages" %}:</strong> {{ doc.source.biblio.pages }}
-            </small>
-        </p>
-        {% endif %}
-        {% if doc.source.ids.isbn %}
-        <p class="card-text mb-0">
-            <small class="text-muted">
-                <strong>{% trans "ISBN" %}:</strong> {{ doc.source.ids.isbn }}
-            </small>
-        </p>
-        {% endif %}
-    </div>
+
+<div class="d-flex justify-content-between align-items-start gap-2">
+    <h5 class="card-title mb-0" style="flex: 1 1 auto; min-width: 0;">
+    {% if doc.source.ids.doi %}
+        <a href="https://doi.org/{{ doc.source.ids.doi }}" target="_blank" class="text-decoration-none">{{ doc.source.title }}</a>
+    {% else %}
+        <a href="{{pageurl}}" target="_blank" class="text-decoration-none">{{ doc.source.title }}</a>
+    {% endif %}
+    </h5>
+    {% if doc.source.type %}
+        <span class="badge bg-secondary ms-2 text-muted" style="flex-shrink: 0; white-space: nowrap;">{{ doc.source.type }}</span>
+    {% endif %}
 </div>
+{% if doc.source.authorships %}
+    <p class="card-text">
+        {% for author in doc.source.authorships %}
+            {{ author.name }}{% if not forloop.last %}, {% endif %}
+        {% endfor %}
+    </p>
+{% endif %}
+{% if doc.source.monograph.title %}
+<p class="card-text mb-1">
+    <small class="text-muted">
+        <strong>{% trans "Book" %}:</strong> {{ doc.source.monograph.title }}
+    </small>
+</p>
+{% endif %}
+{% if doc.source.publishers %}
+<p class="card-text mb-1">
+    <small class="text-muted">
+        <strong>{% trans "Publisher" %}:</strong>
+        {% for publisher in doc.source.publishers %}
+            {{ publisher.name }}{% if not forloop.last %}, {% endif %}
+        {% endfor %}
+    </small>
+</p>
+{% endif %}
+{% if doc.source.publication_year %}
+<p class="card-text mb-1">
+    <small class="text-muted">
+        <strong>{% trans "Year" %}:</strong> {{ doc.source.publication_year }}
+    </small>
+</p>
+{% endif %}
+{% if doc.source.biblio.first_page %}
+<p class="card-text mb-1">
+    <small class="text-muted">
+        <strong>{% trans "First Page" %}:</strong> {{ doc.source.biblio.first_page }}
+    </small>
+</p>
+{% endif %}
+{% if doc.source.biblio.last_page %}
+<p class="card-text mb-1">
+    <small class="text-muted">
+        <strong>{% trans "Last Page" %}:</strong> {{ doc.source.biblio.last_page }}
+    </small>
+</p>
+{% endif %}        
+{% if doc.source.ids.isbn %}
+<p class="card-text mb-0">
+    <small class="text-muted">
+        <strong>{% trans "ISBN" %}:</strong> {{ doc.source.ids.isbn }}
+    </small>
+</p>
+{% endif %}

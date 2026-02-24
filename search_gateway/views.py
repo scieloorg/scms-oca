@@ -50,7 +50,7 @@ def search_item_view(request):
     field_name = request.GET.get("field_name", "journal")
     excluded_query_keys = {"q", "data_source", "field_name"}
     requested_filters = {}
-
+    
     for key in request.GET.keys():
         if key in excluded_query_keys:
             continue
@@ -58,7 +58,6 @@ def search_item_view(request):
         if not values:
             continue
         requested_filters[key] = values if len(values) > 1 else values[0]
-
     results, error = controller.search_item(
         q,
         data_source_name,
@@ -75,8 +74,8 @@ def search_item_view(request):
 @require_GET
 def search_as_you_type_view(request):
     q = request.GET.get("q", "")
-    data_source_name = request.GET.get("data_source", "world")
-    field_name = request.GET.get("field_name", "journal")
+    data_source_name = request.GET.get("index_name")
+    field_name = request.GET.get("field_name", "")
     client = get_opensearch_client()
     try:
         results = controller.search_as_you_type(data_source_name, q, field_name, client=client)

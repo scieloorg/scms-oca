@@ -20,9 +20,6 @@ from article.choices import LICENSE
 from core.utils import utils
 from indicator import indicator, indicatorOA
 from indicator.models import Indicator, IndicatorData, IndicatorFile
-from search_gateway.controller import search_documents
-from search_gateway.data_sources_with_settings import get_result_template_by_data_source
-from search_gateway.parser import extract_selected_filters
 from search_gateway.service import SearchGatewayService
 
 from . import choices, tools
@@ -592,30 +589,24 @@ def get_search_results_json(request):
 
 @require_GET
 def search_view_list(request):
-    data_source_name = request.GET.get("data_source", "world")
-    page = request.GET.get("page", 1)
-    page_size = request.GET.get("limit", 25)
+    index_name = request.GET.get("index_name", "bronze_social_production")
+    page = int(request.GET.get("page", 1))
+    page_size = int(request.GET.get("limit", 25))
     text_search = request.GET.get("search", "")
-    
-    service = SearchGatewayService(data_source_name=data_source_name)
-    body_filters = service.get_filters()
-    filters = service.build_filters(body=body_filters)
-    selected_filters = extract_selected_filters(request, filters, data_source_name)
-    results_data = search_documents(
-        data_source_name=data_source_name,
+
+    service = SearchGatewayService(index_name=index_name)
+    filters = service.build_filters()
+    selected_filters = service.extract_selected_filters(request, filters)
+    results_data = service.search_documents(
         query_text=text_search,
         filters=selected_filters,
         page=page,
         page_size=page_size,
-        client=service.client
     )
-
 
     results_html = render_to_string(
         "search/include/results_list.html",
-        {
-            "results_data": results_data,
-        },
+        {"results_data": results_data},
         request=request,
     )
     return JsonResponse({
@@ -631,13 +622,11 @@ def get_filters_for_data_source(request):
     API endpoint to get filters and metadata for a specific data source.
     Used when switching data sources in the search page.
     """
-    
-    data_source_name = request.GET.get("data_source", "world")
-    
+    index_name = request.GET.get("index_name", "bronze_social_production")
+
     try:
-        service = SearchGatewayService(data_source_name=data_source_name)
-        body_filters = service.get_filters()
-        filters = service.build_filters(body=body_filters)
+        service = SearchGatewayService(index_name=index_name)
+        filters = service.build_filters()
         filter_metadata = service.get_filter_metadata(filters)
 
         return JsonResponse({
@@ -645,5 +634,5 @@ def get_filters_for_data_source(request):
             "filter_metadata": filter_metadata,
         })
     except Exception as e:
-        logging.exception(f"Error getting filters for data source {data_source_name}")
+        logging.exception(f"Error getting filters for index {index_name}")
         return JsonResponse({"error": str(e)}, status=500)

@@ -62,7 +62,6 @@ def fetch_changes_page(base_url, db_name, since, limit, headers):
         f"{base_url}/{db_name}/_changes",
         {
             "since": since,
-            "limit": limit,
         },
     )
     payload = fetch_data(url, headers=headers, json=True, timeout=60, verify=False)

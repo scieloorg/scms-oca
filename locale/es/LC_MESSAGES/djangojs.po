@@ -454,3 +454,19 @@ msgstr "% de documentos con ≥1 cita"
 
 #~ msgid "Avg Cited Documents per Periodical"
 #~ msgstr "Promedio de documentos citados por revista"
+
+
+msgid "Type to filter"
+msgstr "Escriba para filtrar"
+
+msgid "Loading..."
+msgstr "Cargando..."
+
+msgid "No results found. Try adjusting your search or filters."
+msgstr "No se encontraron resultados. Intente ajustar su búsqueda o filtros."
+
+msgid "Filters applied"
+msgstr "Filtros aplicados"
+
+msgid "Search"
+msgstr "Búsqueda"

@@ -4,26 +4,23 @@
 <div id="results-count" class="mb-3">
     {% if results_data.total_results %}
     <p class="text-muted">
-        <strong>{{ results_data.total_results|default:"0" }}</strong> {% trans "resultado(s) encontrado(s)" %}
-        {% if results_data.total_results|default:"0" > 1 %}
-            {% trans "resultados" %}
-        {% else %}
-            {% trans "resultado" %}
-        {% endif %}
+        <strong>{{ results_data.total_results|default:"0" }}</strong> {% trans "Resultados" %}
     </p>
     {% endif %}
 </div>
 
 <div id="results-list" class="results-list">
     {% for doc in results_data.search_results %}
-        {% with item_type=doc.source.type|default_if_none:"" %}
+    <div class="card mb-3 result-item">
+        <div class="card-body" style="border-radius: 10px;">        
+        {% with item_type=doc.source.type|default_if_none:"" item_type_source=doc.source.sources.type|default_if_none:"" %}
             {% if item_type == "dataset" %}
                 {% include "search/include/result_items/dataset.html" with doc=doc %}
             {% elif item_type == "book" %}
                 {% include "search/include/result_items/book.html" with doc=doc %}
             {% elif item_type == "book-chapter" %}
                 {% include "search/include/result_items/book-chapter.html" with doc=doc %}
-            {% elif item_type == "JOURNALS" or item_type == "ORGANIZATIONS_INSTITUTIONS" %}
+            {% elif item_type_source == "journals" %}
                 {% include "search/include/result_items/journals.html" with doc=doc %}
             {% elif item_type == "preprint" %}
                 {% include "search/include/result_items/preprint.html" with doc=doc %}
@@ -33,5 +30,12 @@
                 {% include "search/include/result_items/default.html" with doc=doc %}
             {% endif %}
         {% endwith %}
+            {% if doc.source.oca_data.scope %}
+            <p class="text-muted">
+                <strong>{% trans "Scope" %}:</strong> {{ doc.source.oca_data.scope }}
+            </p>
+            {% endif %}
+        </div>
+    </div>
     {% endfor %}
 </div>

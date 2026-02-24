@@ -3895,7 +3895,7 @@ msgstr ""
 
 #: search_gateway/data_sources_with_settings.py:1429
 msgid "Scientific Production"
-msgstr ""
+msgstr "Produção Científica"
 
 #: search_gateway/data_sources_with_settings.py:1474
 msgid "Subject"

@@ -5,104 +5,100 @@
 {% load wagtailcore_tags %}
 
 
-<div class="card mb-3 result-item">
-    <div class="card-body">
-        <div class="d-flex justify-content-between align-items-start gap-2">
-            <h5 class="card-title mb-0" style="flex: 1 1 auto; min-width: 0;">
-            {% if doc.source.ids.doi %}
-                <a href="{{ doc.source.ids.doi }}" target="_blank" class="text-decoration-none">{{ doc.source.title }}</a>
-            {% else %}
-                <a href="{{pageurl}}" target="_blank" class="text-decoration-none">{{ doc.source.title }}</a>
-            {% endif %}
-            </h5>
-            {% if doc.source.type %}
-                <span class="badge bg-secondary ms-2 text-muted" style="flex-shrink: 0; white-space: nowrap;">{{ doc.source.type }}</span>
-            {% endif %}
-        </div>
-        {% if doc.source.authorships %}
-            <p class="card-text">
-                {% for author in doc.source.authorships %}
-                    {{ author.name }}{% if not forloop.last %}, {% endif %}
-                {% endfor %}
-            </p>
-        {% endif %}
-        {% if doc.source.synopsis %}
-        <p class="card-text">
-            {{ doc.source.synopsis|truncatewords:50 }}
-        </p>
-        {% endif %}
-
-
-        {% if doc.source.publisher_search %}
-        <p class="card-text mb-1">
-            <small class="text-muted">
-                <strong>{% trans "Publisher" %}:</strong>
-                {% for publisher in doc.source.publisher_search %}
-                    {{ publisher }}{% if not forloop.last %}, {% endif %}
-                {% endfor %}
-            </small>
-        </p>
-        {% endif %}
-
-        {% if doc.source.publication_year %}
-        <p class="card-text mb-1">
-            <small class="text-muted">
-                <strong>{% trans "Year" %}:</strong> {{ doc.source.publication_year }}
-            </small>
-        </p>
-        {% endif %}
-
-        {% if doc.source.biblio.pages %}
-        <p class="card-text mb-1">
-            <small class="text-muted">
-                <strong>{% trans "Pages" %}:</strong> {{ doc.source.biblio.pages }}
-            </small>
-        </p>
-        {% endif %}
-        
-        {% if doc.source.language %}
-        <p class="card-text mb-1">
-            <small class="text-muted">
-                <strong>{% trans "Language" %}:</strong> {{ doc.source.language }}
-            </small>
-        </p>
-        {% endif %}
-
-        {% if doc.source.biblio.city or doc.source.biblio.country %}
-        <p class="card-text mb-1">
-            <small class="text-muted">
-                <strong>{% trans "Location" %}:</strong>
-                {% if doc.source.biblio.city %}{{ doc.source.biblio.city }}{% endif %}
-                {% if doc.source.biblio.city and doc.source.biblio.country %} - {% endif %}
-                {% if doc.source.biblio.country %}{{ doc.source.biblio.country }}{% endif %}
-            </small>
-        </p>
-        {% endif %}
-
-        {% if doc.source.ids.isbn %}
-        <p class="card-text mb-0">
-            <small class="text-muted">
-                <strong>{% trans "ISBN" %}:</strong> {{ doc.source.ids.isbn }}
-            </small>
-        </p>
-        {% endif %}
-
-        {% if doc.source.ids.eisbn %}
-        <p class="card-text mb-0">
-            <small class="text-muted">
-                <strong>{% trans "eISBN" %}:</strong> {{ doc.source.ids.eisbn }}
-            </small>
-        </p>
-        {% endif %}
-        {% if doc.source.ids.bisac_code %}
-        <p class="card-text mb-0">
-            <small class="text-muted">
-                <strong>BISAC:</strong>
-                {% for code in doc.source.ids.bisac_code %}
-                    {{ code }}{% if not forloop.last %}, {% endif %}
-                {% endfor %}
-            </small>
-        </p>
-        {% endif %}
-    </div>
+<div class="d-flex justify-content-between align-items-start gap-2">
+    <h5 class="card-title mb-0" style="flex: 1 1 auto; min-width: 0;">
+    {% if doc.source.ids.doi %}
+        <a href="{{ doc.source.ids.doi }}" target="_blank" class="text-decoration-none">{{ doc.source.title }}</a>
+    {% else %}
+        <a href="{{pageurl}}" target="_blank" class="text-decoration-none">{{ doc.source.title }}</a>
+    {% endif %}
+    </h5>
+    {% if doc.source.type %}
+        <span class="badge bg-secondary ms-2 text-muted" style="flex-shrink: 0; white-space: nowrap;">{{ doc.source.type }}</span>
+    {% endif %}
 </div>
+{% if doc.source.authorships %}
+    <p class="card-text">
+        {% for author in doc.source.authorships %}
+            {{ author.name }}{% if not forloop.last %}, {% endif %}
+        {% endfor %}
+    </p>
+{% endif %}
+{% if doc.source.synopsis %}
+<p class="card-text">
+    {{ doc.source.synopsis|truncatewords:50 }}
+</p>
+{% endif %}
+
+
+{% if doc.source.publishers %}
+<p class="card-text mb-1">
+    <small class="text-muted">
+        <strong>{% trans "Publisher" %}:</strong>
+        {% for publisher in doc.source.publisher %}
+            {{ publisher }}{% if not forloop.last %}, {% endif %}
+        {% endfor %}
+    </small>
+</p>
+{% endif %}
+
+{% if doc.source.publication_year %}
+<p class="card-text mb-1">
+    <small class="text-muted">
+        <strong>{% trans "Year" %}:</strong> {{ doc.source.publication_year }}
+    </small>
+</p>
+{% endif %}
+
+{% if doc.source.biblio.pages %}
+<p class="card-text mb-1">
+    <small class="text-muted">
+        <strong>{% trans "Pages" %}:</strong> {{ doc.source.biblio.pages }}
+    </small>
+</p>
+{% endif %}
+
+{% if doc.source.language %}
+<p class="card-text mb-1">
+    <small class="text-muted">
+        <strong>{% trans "Language" %}:</strong> {{ doc.source.language }}
+    </small>
+</p>
+{% endif %}
+
+{% if doc.source.biblio.city or doc.source.biblio.country %}
+<p class="card-text mb-1">
+    <small class="text-muted">
+        <strong>{% trans "Location" %}:</strong>
+        {% if doc.source.biblio.city %}{{ doc.source.biblio.city }}{% endif %}
+        {% if doc.source.biblio.city and doc.source.biblio.country %} - {% endif %}
+        {% if doc.source.biblio.country %}{{ doc.source.biblio.country }}{% endif %}
+    </small>
+</p>
+{% endif %}
+
+{% if doc.source.ids.isbn %}
+<p class="card-text mb-0">
+    <small class="text-muted">
+        <strong>{% trans "ISBN" %}:</strong> {{ doc.source.ids.isbn }}
+    </small>
+</p>
+{% endif %}
+
+{% if doc.source.ids.eisbn %}
+<p class="card-text mb-0">
+    <small class="text-muted">
+        <strong>{% trans "eISBN" %}:</strong> {{ doc.source.ids.eisbn }}
+    </small>
+</p>
+{% endif %}
+{% if doc.source.ids.bisac_code %}
+<p class="card-text mb-0">
+    <small class="text-muted">
+        <strong>BISAC:</strong>
+        {% for code in doc.source.ids.bisac_code %}
+            {{ code }}{% if not forloop.last %}, {% endif %}
+        {% endfor %}
+    </small>
+</p>
+{% endif %}

@@ -1,29 +1,22 @@
-{% load filters_label %}
 {% load i18n %}
 
-<div class="row g-2">
-    <div class="col-6">
-        <input 
-            type="number" 
-            id="document_publication_year_start" 
-            name="document_publication_year_start"
-            class="form-control range-filter" 
-            placeholder="{% trans 'Start' %}"
-            min="1900"
-            max="2100"
-            value="{{ request.GET.document_publication_year_start }}"
-        >
-    </div>
-    <div class="col-6">
-        <input 
-            type="number" 
-            id="document_publication_year_end" 
-            name="document_publication_year_end"
-            class="form-control range-filter" 
-            placeholder="{% trans 'End' %}"
-            min="1900"
-            max="2100"
-            value="{{ request.GET.document_publication_year_end }}"
-        >
-    </div>
+<div class="input-group">
+    <input
+        id="document_publication_year_start"
+        name="document_publication_year_start"
+        type="text"
+        class="form-control is-height-2-4 range-filter"
+        aria-label="{% trans 'Publication Year Start' %}"
+        placeholder="{% trans 'Start' %}"
+        value="{{ request.GET.document_publication_year_start }}"
+    />
+    <input
+        id="document_publication_year_end"
+        name="document_publication_year_end"
+        type="text"
+        class="form-control is-height-2-4 range-filter"
+        aria-label="{% trans 'Publication Year End' %}"
+        placeholder="{% trans 'End' %}"
+        value="{{ request.GET.document_publication_year_end }}"
+    />
 </div>
