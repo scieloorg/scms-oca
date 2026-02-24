@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Mapping and index creation for bronze_dataverse.
+Mapping and index creation for bronze_scielo_dataverse.
 """
 
 
@@ -50,7 +50,7 @@ BRONZE_MAPPING = {
                         "ignore_above": 256,
                     }
                 },
-            },
+            }, 
             "ids": {
                 "type": "object",
                 "properties": {
@@ -91,17 +91,78 @@ BRONZE_MAPPING = {
                 "type": "text",
                 "analyzer": "multilingual",
             },
+            "description_with_lang": {
+                "type": "object",
+                "properties": {
+                    "description": {
+                        "type": "text",
+                        "analyzer": "multilingual",
+                    },
+                    "language": {"type": "keyword"},
+                },
+            },
             "publication_date": {
                 "type": "date",
             },
             "publication_year": {
                 "type": "long",
             },
-            "type": {
-                "type": "keyword",
-                "fields": {
-                    "keyword": {"type": "keyword"}
+            "sources": {
+                "type": "object",
+                "properties": {
+                    "host_organization": {
+                        "type": "object",
+                        "properties": {
+                            "id": {"type": "keyword"},
+                            "name": {
+                                "fields": {
+                                    "keyword": {
+                                        "type": "keyword",
+                                        "ignore_above": 256,
+                                    }
+                                },
+                                "analyzer": "multilingual",
+                                "type": "text",
+                            },
+                        },
+                    },
+                    "id": {"type": "keyword"},
+                    "is_open_access": {"type": "boolean"},
+                    "is_primary": {"type": "boolean"},
+                    "issn_l": {"type": "keyword"},
+                    "issns": {"type": "keyword"},
+                    "landing_page_url": {"type": "keyword"},
+                    "title": {
+                        "fields": {
+                            "keyword": {
+                                "type": "keyword",
+                                "ignore_above": 256,
+                            }
+                        },
+                        "copy_to": [
+                            "sources_search",
+                            "sources_search_autocomplete",
+                        ],
+                        "analyzer": "multilingual",
+                        "type": "text",
+                    },
+                    "type": {"type": "keyword"},
                 },
+            },
+            "sources_search": {
+                "fields": {
+                    "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256,
+                    }
+                },
+                "analyzer": "multilingual",
+                "type": "text",
+            },
+            "sources_search_autocomplete": {
+                "doc_values": False,
+                "max_shingle_size": 3,
+                "type": "search_as_you_type",
             },
             "dataverse_contacts": {
                 "type": "object",
@@ -128,7 +189,7 @@ BRONZE_MAPPING = {
                 "type": "search_as_you_type",
                 "doc_values": False,
                 "max_shingle_size": 3,
-            },
+            },                  
         },
     },
 }

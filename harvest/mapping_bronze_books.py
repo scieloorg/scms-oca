@@ -51,6 +51,8 @@ BRONZE_MAPPING = {
                         },
                     },
                     "order": {"type": "keyword"},
+                    "first_page": {"type": "keyword"},
+                    "last_page": {"type": "keyword"},
                     "pages": {
                         "fields": {"keyword": {"type": "keyword"}},
                         "type": "text",
@@ -61,15 +63,17 @@ BRONZE_MAPPING = {
                     },
                 },
             },
-            "descriptor": {
-                "fields": {"keyword": {"type": "keyword"}},
-                "analyzer": "multilingual",
+            "synopsis": {
                 "type": "text",
+                "analyzer": "multilingual",
             },
-            "descriptors_with_lang": {
+            "synopsis_with_lang": {
                 "type": "object",
                 "properties": {
-                    "descriptor": {"analyzer": "multilingual", "type": "text"},
+                    "synopsis": {
+                        "type": "text",
+                        "analyzer": "multilingual",
+                    },
                     "language": {"type": "keyword"},
                 },
             },
@@ -93,7 +97,37 @@ BRONZE_MAPPING = {
                 },
             },
             "ids_search": {"analyzer": "multilingual", "type": "text"},
-            "language": {"fields": {"keyword": {"type": "keyword"}}, "type": "text"},
+            "language": {
+                "copy_to": [
+                    "language_search",
+                    "language_search_autocomplete"
+                ],
+                "type": "keyword"
+            },
+            "language_search": {
+                "fields": {
+                    "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 256
+                    }
+                },
+                "analyzer": "multilingual",
+                "type": "text"
+            },
+            "language_search_autocomplete": {
+                "doc_values": False,
+                "max_shingle_size": 3,
+                "type": "search_as_you_type"
+            },
+            "language_normalized": {
+                "type": "text",
+                "fields": {
+                    "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 256
+                    }
+                }
+            },
             "monograph": {
                 "type": "object",
                 "properties": {
@@ -120,7 +154,7 @@ BRONZE_MAPPING = {
                         "type": "text",
                     },
                     "publication_year": {"type": "long"},
-                    "publisher": {
+                    "publishers": {
                         "fields": {
                             "keyword": {
                                 "type": "keyword",
@@ -147,29 +181,41 @@ BRONZE_MAPPING = {
                 "properties": {"scope": {"type": "keyword"}},
             },
             "publication_year": {"type": "long"},
-            "publisher": {
-                "fields": {
-                    "keyword": {
+            "publishers": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                    "type": "keyword"
+                    },
+                    "name": {
+                    "fields": {
+                        "keyword": {
                         "type": "keyword",
+                        }
+                    },
+                    "copy_to": [
+                        "publishers_search",
+                        "publishers_search_autocomplete"
+                    ],
+                    "analyzer": "multilingual",
+                    "type": "text"
                     }
-                },
-                "copy_to": ["publisher_search", "publisher_search_autocomplete"],
-                "analyzer": "multilingual",
-                "type": "text",
+                }
             },
-            "publisher_search_autocomplete": {
+            "publishers_search_autocomplete": {
                 "doc_values": False,
                 "max_shingle_size": 3,
                 "type": "search_as_you_type",
             },
-            "publisher_search": {
-                "type": "text",
-                "analyzer": "multilingual",
+            "publishers_search": {
                 "fields": {
                     "keyword": {
-                        "type": "keyword",
+                    "type": "keyword",
+                    "ignore_above": 256
                     }
                 },
+                "analyzer": "multilingual",
+                "type": "text"
             },
             "synopsis": {"analyzer": "multilingual", "type": "text"},
             "synopsis_with_lang": {
@@ -195,6 +241,11 @@ BRONZE_MAPPING = {
                 "properties": {
                     "language": {"type": "keyword"},
                     "title": {
+                        "fields":{
+                            "keyword":{
+                                "type": "keyword",
+                            }
+                        },
                         "copy_to": ["title_search"],
                         "analyzer": "multilingual",
                         "type": "text",
@@ -202,12 +253,7 @@ BRONZE_MAPPING = {
                 },
             },
             "type": {
-                "fields": {
-                    "keyword": {
-                        "type": "keyword",
-                    }
-                },
-                "type": "keyword",
+                "type": "keyword"
             },
             "subjects_search": {
                 "type": "text",
@@ -223,6 +269,61 @@ BRONZE_MAPPING = {
                 "type": "search_as_you_type",
                 "doc_values": False,
                 "max_shingle_size": 3,
+            },
+            "sources": {
+                "type": "object",
+                "properties": {
+                    "host_organization": {
+                        "type": "object",
+                        "properties": {
+                            "id": {"type": "keyword"},
+                            "name": {
+                                "fields": {
+                                    "keyword": {
+                                        "type": "keyword",
+                                        "ignore_above": 256,
+                                    }
+                                },
+                                "analyzer": "multilingual",
+                                "type": "text",
+                            },
+                        },
+                    },
+                    "id": {"type": "keyword"},
+                    "is_open_access": {"type": "boolean"},
+                    "is_primary": {"type": "boolean"},
+                    "landing_page_url": {"type": "keyword"},
+                    "title": {
+                        "fields": {
+                            "keyword": {
+                                "type": "keyword",
+                                "ignore_above": 256,
+                            }
+                        },
+                        "copy_to": [
+                            "sources_search",
+                            "sources_search_autocomplete",
+                        ],
+                        "analyzer": "multilingual",
+                        "type": "text",
+                    },
+                    "type": {"type": "keyword"},
+                },
+            },
+            "sources_search": {
+                "fields": {
+                    "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256,
+                    }
+                },
+                "analyzer": "multilingual",
+                "type": "text",
+            },
+            "sources_search_autocomplete": {
+                "doc_values": False,
+                "max_shingle_size": 3,
+                "type": "search_as_you_type",
             },
         },
     },
