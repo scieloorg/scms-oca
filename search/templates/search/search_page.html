@@ -4,16 +4,26 @@
 {% load i18n %}
 
 {% block header_content %}
-    <div class="row">
-        <div class="col-12" style="padding-right: 0% !important;">
-            <div class="card mb-2 p-3 bg-oca-light shadow-sm">
-                <div class="page-title-content">
-                    <h1 class="mb-1 fw-bold text-oca-blue-title">{{ display_name }}</h1>
-                    <span class="text-muted">{% trans "Data of the OCABr Observatory" %}</span>
-                </div>
-            </div>
+<div class="search-header-card">
+    <h1 class="search-header-card__title">{% trans display_name %}</h1>
+    <span class="search-header-card__subtitle">{% trans "Actions, events and infrastructure" %}</span>
+    <form method="get" action="{{self}}" id="search-form" class="search-header-card__search">
+        <div class="search-input-card__row">
+            <input
+                type="search"
+                name="search"
+                id="search-input"
+                class="search-input-card__input"
+                placeholder="{% if index_name == 'scielo_production' %}{% trans 'Search scientific production' %}{% else %}{% trans 'Search actions, events and infrastructure' %}{% endif %}"
+                value="{{ search_query }}"
+                autocomplete="off"
+            >
+            <button type="submit" class="btn btn-primary search-input-card__button">
+                {% trans "Buscar" %}
+            </button>
         </div>
-    </div>
+    </form>
+</div>
 {% endblock%}
 
 {% block search_sidebar %}
@@ -21,53 +31,21 @@
 {% endblock %}
 
 {% block search_content %}
-    <div class="card mb-3 p-3 bg-white shadow-sm">
-        <form method="get" action="{{self}}" id="search-form">
-            <div class="row g-2 align-items-end">
-                <div class="col-md-10">
-                    <label for="search-input" class="form-label">
-                        <i class="icon-search"></i> {% trans "Buscar" %}
-                    </label>
-                    <input 
-                        type="search" 
-                        name="search" 
-                        id="search-input" 
-                        class="form-control" 
-                        placeholder="{% trans 'Digite sua pesquisa...' %}" 
-                        value="{{ search_query }}"
-                        autocomplete="off"
-                    >
-                </div>
-                <div class="col-md-2">
-                    <button type="submit" class="btn btn-primary w-100" style="padding-bottom: 0% !important; margin-bottom: 0% !important; text-align: center;">
-                        {% trans "Buscar" %}
-                    </button>
-                </div>
-            </div>
-        </form>
-        
-        <div id="active-filters-container" class="mt-3 pt-2 border-top" style="display: none;">
-            <!-- Search Query Section -->
-            <div id="search-query-section" class="mb-2" style="display: none;">
-                <div class="d-flex flex-wrap gap-2 align-items-center">
-                    <small class="text-muted me-2"><strong>{% trans "Busca:" %}</strong></small>
-                    <span id="search-query-badge" class="badge bg-info" style="font-size: 0.9rem;">
-                        <!-- Search badge will be populated by JavaScript -->
-                    </span>
-                </div>
-            </div>
-            
-            <!-- Filters Section -->
-            <div id="filters-section" style="display: none;">
-                <div class="d-flex flex-wrap gap-2 align-items-center">
-                    <small class="text-muted me-2"><strong>{% trans "Filtros ativos:" %}</strong></small>
-                    <div id="selected-filters-badges" class="d-flex flex-wrap gap-2">
-                        <!-- Filter badges will be populated by JavaScript -->
-                    </div>
-                </div>
-            </div>
+    <div class="card mb-3 p-3 d-none shadow-sm indicator-applied-filters" id="active-filters-container">
+        <div class="applied-filters-head">
+            <span class="applied-filters-title">{% trans "Filtros aplicados" %}</span>
+            <span class="applied-filters-count" id="active-filters-count">0</span>
+        </div>
+
+        <div id="search-query-section" class="mb-2 d-none">
+            <span class="applied-filters-grid" id="search-query-badge"></span>
+        </div>
+
+        <div id="filters-section" class="d-none">
+            <div class="applied-filters-grid" id="selected-filters-badges"></div>
         </div>
     </div>
+
     {% include "search/include/results.html" %}
 {% endblock %}
 
@@ -76,28 +54,13 @@
 {{ filters|json_script:"filters-data" }}
 {{ filter_metadata|json_script:"filter-metadata-data" }}
 <script src="{% static 'search/js/search_page.js' %}"></script>
+<link href="{% static 'search/css/custom.css' %}" rel="stylesheet">
 <script>
     window.searchPageConfig = {
         initialSearchQuery: '{{ search_query|escapejs }}',
         dataSourceName: '{{ index_name }}',
         filters: JSON.parse(document.getElementById('filters-data').textContent),
         filterMetadata: JSON.parse(document.getElementById('filter-metadata-data').textContent),
-        i18n: {
-            loading: '{% trans "Carregando..." %}',
-            resultsCountSingular: '{% trans "resultado encontrado" %}',
-            resultsCountPlural: '{% trans "resultados encontrados" %}',
-            noResults: '{% trans "Nenhum resultado encontrado. Tente ajustar sua busca ou filtros." %}',
-            filtersApplied: '{% trans "Filtros aplicados" %}',
-            labelType: '{% trans "Tipo" %}',
-            labelYear: '{% trans "Ano" %}',
-            labelInstitutions: '{% trans "Instituições" %}',
-            labelLocation: '{% trans "Localização" %}',
-            labelPractice: '{% trans "Prática" %}',
-            labelAction: '{% trans "Ação" %}',
-            labelClassification: '{% trans "Classificação" %}',
-            labelThematicAreas: '{% trans "Áreas Temáticas" %}',
-        },
     };
-    
 </script>
 {% endblock %}

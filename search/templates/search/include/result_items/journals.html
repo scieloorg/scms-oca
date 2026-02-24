@@ -5,95 +5,91 @@
 {% load wagtailcore_tags %}
 
 
-<div class="card mb-3 result-item">
-    <div class="card-body">
-        <div class="d-flex justify-content-between align-items-start gap-2">
-            <h5 class="card-title mb-0" style="flex: 1 1 auto; min-width: 0;">
-            {% if doc.source.content_url %}
-                <a href="{{ doc.source.content_url }}" target="_blank" class="text-decoration-none">
-                    {{ doc.source.title }}
-                </a>
-            {% elif doc.source.locations %}
-                <a href="{{ doc.source.locations.0.landing_page_url }}" target="_blank" class="text-decoration-none">
-                    {{ doc.source.title }}
-                </a>
-            {% else %}
-                <a href="{{ pageurl }}" target="_blank" class="text-decoration-none">{{ doc.source.title }}</a>
-            {% endif %}
-            </h5>
-            {% if doc.source.type %}
-                <span class="badge bg-secondary ms-2 text-muted" style="flex-shrink: 0; white-space: nowrap;">{{ doc.source.type }}</span>
-            {% endif %}
-        </div>
-
-        {% if doc.source.affiliation %}
-        <p class="card-text mb-1">
-            <small class="text-muted">
-                <strong>{% trans "Affiliation" %}:</strong> {{ doc.source.affiliation }}
-            </small>
-        </p>
-        {% endif %}
-
-        {% if doc.source.description %}
-        <p class="card-text">
-            {{ doc.source.description|truncatewords_html:100|safe }}
-        </p>
-        {% endif %}
-
-        {% if doc.source.publication_year %}
-        <p class="card-text mb-1">
-            <small class="text-muted">
-                <strong>{% trans "Year" %}:</strong> {{ doc.source.publication_year }}
-            </small>
-        </p>
-        {% endif %}
-
-        {% if doc.source.publication_date %}
-        <p class="card-text mb-1">
-            <small class="text-muted">
-                <strong>{% trans "Publication Date" %}:</strong> {{ doc.source.publication_date }}
-            </small>
-        </p>
-        {% endif %}
-
-        {% if doc.source.ids.alias %}
-        <p class="card-text mb-1">
-            <small class="text-muted">
-                <strong>{% trans "Alias" %}:</strong> {{ doc.source.ids.alias }}
-            </small>
-        </p>
-        {% endif %}
-
-        {% if doc.source.ids_search %}
-        <p class="card-text mb-1">
-            <small class="text-muted">
-                <strong>{% trans "IDs" %}:</strong>
-                {% for id in doc.source.ids_search %}
-                    {{ id }}{% if not forloop.last %}, {% endif %}
-                {% endfor %}
-            </small>
-        </p>
-        {% endif %}
-
-        {% if doc.source.dataverse_contacts %}
-        <p class="card-text mb-1">
-            <small class="text-muted">
-                <strong>{% trans "Contacts" %}:</strong>
-                {% for contact in doc.source.dataverse_contacts %}
-                    {% if contact.contact_email %}
-                        <a href="mailto:{{ contact.contact_email }}">{{ contact.contact_email }}</a>{% if not forloop.last %}; {% endif %}
-                    {% endif %}
-                {% endfor %}
-            </small>
-        </p>
-        {% endif %}
-
-        {% if doc.source.content_url %}
-        <p class="card-text mb-0">
-            <small class="text-muted">
-                <a href="{{ doc.source.content_url }}" target="_blank">{{ doc.source.content_url }}</a>
-            </small>
-        </p>
-        {% endif %}
-    </div>
+<div class="d-flex justify-content-between align-items-start gap-2">
+    <h5 class="card-title mb-0" style="flex: 1 1 auto; min-width: 0;">
+    {% if doc.source.content_url %}
+        <a href="{{ doc.source.content_url }}" target="_blank" class="text-decoration-none">
+            {{ doc.source.title }}
+        </a>
+    {% elif doc.source.locations %}
+        <a href="{{ doc.source.locations.0.landing_page_url }}" target="_blank" class="text-decoration-none">
+            {{ doc.source.title }}
+        </a>
+    {% else %}
+        <a href="{{ pageurl }}" target="_blank" class="text-decoration-none">{{ doc.source.title }}</a>
+    {% endif %}
+    </h5>
+    {% if doc.source.type %}
+        <span class="badge bg-secondary ms-2 text-muted" style="flex-shrink: 0; white-space: nowrap;">{{ doc.source.type }}</span>
+    {% endif %}
 </div>
+
+{% if doc.source.affiliation %}
+<p class="card-text mb-1">
+    <small class="text-muted">
+        <strong>{% trans "Affiliation" %}:</strong> {{ doc.source.affiliation }}
+    </small>
+</p>
+{% endif %}
+
+{% if doc.source.description %}
+<p class="card-text">
+    {{ doc.source.description|truncatewords_html:100|safe }}
+</p>
+{% endif %}
+
+{% if doc.source.publication_year %}
+<p class="card-text mb-1">
+    <small class="text-muted">
+        <strong>{% trans "Year" %}:</strong> {{ doc.source.publication_year }}
+    </small>
+</p>
+{% endif %}
+
+{% if doc.source.publication_date %}
+<p class="card-text mb-1">
+    <small class="text-muted">
+        <strong>{% trans "Publication Date" %}:</strong> {{ doc.source.publication_date }}
+    </small>
+</p>
+{% endif %}
+
+{% if doc.source.ids.alias %}
+<p class="card-text mb-1">
+    <small class="text-muted">
+        <strong>{% trans "Alias" %}:</strong> {{ doc.source.ids.alias }}
+    </small>
+</p>
+{% endif %}
+
+{% if doc.source.ids_search %}
+<p class="card-text mb-1">
+    <small class="text-muted">
+        <strong>{% trans "IDs" %}:</strong>
+        {% for id in doc.source.ids_search %}
+            {{ id }}{% if not forloop.last %}, {% endif %}
+        {% endfor %}
+    </small>
+</p>
+{% endif %}
+
+{% if doc.source.dataverse_contacts %}
+<p class="card-text mb-1">
+    <small class="text-muted">
+        <strong>{% trans "Contacts" %}:</strong>
+        {% for contact in doc.source.dataverse_contacts %}
+            {% if contact.contact_email %}
+                <a href="mailto:{{ contact.contact_email }}">{{ contact.contact_email }}</a>{% if not forloop.last %}; {% endif %}
+            {% endif %}
+        {% endfor %}
+    </small>
+</p>
+{% endif %}
+
+{% if doc.source.content_url %}
+<p class="card-text mb-0">
+    <small class="text-muted">
+        <a href="{{ doc.source.content_url }}" target="_blank">{{ doc.source.content_url }}</a>
+    </small>
+</p>
+{% endif %}

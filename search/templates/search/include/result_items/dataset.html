@@ -4,110 +4,106 @@
 {% load wagtailsettings_tags %}
 {% load wagtailcore_tags %}
 
-
-<div class="card mb-3 result-item">
-    <div class="card-body">
-        <div class="d-flex justify-content-between align-items-start gap-2">
-            <h5 class="card-title mb-0" style="flex: 1 1 auto; min-width: 0;">
-            {% if doc.source.content_url %}
-                <a href="{{ doc.source.content_url }}" target="_blank" class="text-decoration-none">
-                    {{ doc.source.title }}
-                </a>
-            {% elif doc.source.sources.url %}
-                <a href="{{ doc.source.sources.url }}" target="_blank" class="text-decoration-none">
-                    {{ doc.source.title }}
-                </a>
-            {% else %}
-                <a href="{{pageurl}}" target="_blank" class="text-decoration-none">{{ doc.source.title }}</a>
-            {% endif %}
-            </h5>
-            {% if doc.source.type %}
-                <span class="badge bg-secondary ms-2 text-muted" style="flex-shrink: 0; white-space: nowrap;">{{ doc.source.type }}</span>
-            {% endif %}
-        </div>
-        {% if doc.source.authorships %}
-            <p class="card-text">
-                {% for author in doc.source.authorships %}
-                    {{ author.name }}{% if author.orcid %} <a href="{{ author.orcid }}" target="_blank"><img src="{% static 'images/authorIcon-orcid.png' %}" alt="ORCID"></a>{% endif %}{% if not forloop.last %}; {% endif %}
-                {% endfor %}
-            </p>
-        {% endif %}
-
-        {% if doc.source.description %}
-        <p class="card-text">
-            {{ doc.source.description|safe }}
-        </p>
-        {% endif %}
-
-        {% if doc.source.publisher_search %}
-        <p class="card-text mb-1">
-            <small class="text-muted">
-                <strong>{% trans "Publisher" %}:</strong>
-                {% for publisher in doc.source.publisher_search %}
-                    {{ publisher }}{% if not forloop.last %}, {% endif %}
-                {% endfor %}
-            </small>
-        </p>
-        {% endif %}
-
-        {% if doc.source.publication_year %}
-        <p class="card-text mb-1">
-            <small class="text-muted">
-                <strong>{% trans "Year" %}:</strong> {{ doc.source.publication_year }}
-            </small>
-        </p>
-        {% endif %}
-
-        {% if doc.source.language %}
-        <p class="card-text mb-1">
-            <small class="text-muted">
-                <strong>{% trans "Language" %}:</strong>
-                {% if doc.source.language|length > 1 or doc.source.language.0 %}
-                    {% if doc.source.language|stringformat:"s" and doc.source.language.0 and doc.source.language != doc.source.language|stringformat:"s" %}
-                        {# Provavelmente é uma lista #}
-                        {% for language in doc.source.language %}
-                            {{ language }}{% if not forloop.last %}, {% endif %}
-                        {% endfor %}
-                    {% else %}
-                        {{ doc.source.language }}
-                    {% endif %}
-                {% else %}
-                    {{ doc.source.language }}
-                {% endif %}
-            </small>
-        </p>
-        {% endif %}
-
-        {% if doc.source.subject_search %}
-        <p class="card-text mb-1">
-            <small class="text-muted">
-                <strong>{% trans "Subjects" %}:</strong>
-                {% for subject in doc.source.subject_search %}
-                    {{ subject }}{% if not forloop.last %}, {% endif %}
-                {% endfor %}
-            </small>
-        </p>
-        {% endif %}
-
-        {% if doc.source.files %}
-        <p class="card-text mb-0">
-            <small class="text-muted">
-                <strong>{% trans "Files" %}:</strong>
-                {% for file in doc.source.files %}
-                    <a href="{{ file.pid_url }}" target="_blank">{{ file.label }}</a>{% if not forloop.last %}; {% endif %}
-                {% endfor %}
-            </small>
-        </p>
-        {% endif %}
-
-        {% if doc.source.content_url %}
-        <p class="card-text mb-0">
-            <small class="text-muted">
-                <a href="{{ doc.source.content_url }}" target="_blank">
-                    {{ doc.source.content_url }}
-                </a>
-            </small>
-        </p>
-        {% endif %}
-    </div>
+<div class="d-flex justify-content-between align-items-start gap-2">
+    <h5 class="card-title mb-0" style="flex: 1 1 auto; min-width: 0;">
+    {% if doc.source.content_url %}
+        <a href="{{ doc.source.content_url }}" target="_blank" class="text-decoration-none">
+            {{ doc.source.title }}
+        </a>
+    {% elif doc.source.sources.url %}
+        <a href="{{ doc.source.sources.url }}" target="_blank" class="text-decoration-none">
+            {{ doc.source.title }}
+        </a>
+    {% else %}
+        <a href="{{pageurl}}" target="_blank" class="text-decoration-none">{{ doc.source.title }}</a>
+    {% endif %}
+    </h5>
+    {% if doc.source.type %}
+        <span class="badge bg-secondary ms-2 text-muted" style="flex-shrink: 0; white-space: nowrap;">{{ doc.source.type }}</span>
+    {% endif %}
 </div>
+{% if doc.source.authorships %}
+    <p class="card-text">
+        {% for author in doc.source.authorships %}
+            {{ author.name }}{% if author.orcid %} <a href="{{ author.orcid }}" target="_blank"><img src="{% static 'images/authorIcon-orcid.png' %}" alt="ORCID"></a>{% endif %}{% if not forloop.last %}; {% endif %}
+        {% endfor %}
+    </p>
+{% endif %}
+
+{% if doc.source.abstract %}
+<p class="card-text">
+    {{ doc.source.abstract|safe }}
+</p>
+{% endif %}
+
+{% if doc.source.publishers %}
+<p class="card-text mb-1">
+    <small class="text-muted">
+        <strong>{% trans "Publisher" %}:</strong>
+        {% for publisher in doc.source.publishers %}
+            {{ publisher }}{% if not forloop.last %}, {% endif %}
+        {% endfor %}
+    </small>
+</p>
+{% endif %}
+
+{% if doc.source.publication_year %}
+<p class="card-text mb-1">
+    <small class="text-muted">
+        <strong>{% trans "Year" %}:</strong> {{ doc.source.publication_year }}
+    </small>
+</p>
+{% endif %}
+
+{% if doc.source.language %}
+<p class="card-text mb-1">
+    <small class="text-muted">
+        <strong>{% trans "Language" %}:</strong>
+        {% if doc.source.language|length > 1 or doc.source.language.0 %}
+            {% if doc.source.language|stringformat:"s" and doc.source.language.0 and doc.source.language != doc.source.language|stringformat:"s" %}
+                {# Provavelmente é uma lista #}
+                {% for language in doc.source.language %}
+                    {{ language }}{% if not forloop.last %}, {% endif %}
+                {% endfor %}
+            {% else %}
+                {{ doc.source.language }}
+            {% endif %}
+        {% else %}
+            {{ doc.source.language }}
+        {% endif %}
+    </small>
+</p>
+{% endif %}
+
+{% if doc.source.subject_search %}
+<p class="card-text mb-1">
+    <small class="text-muted">
+        <strong>{% trans "Subjects" %}:</strong>
+        {% for subject in doc.source.subject_search %}
+            {{ subject }}{% if not forloop.last %}, {% endif %}
+        {% endfor %}
+    </small>
+</p>
+{% endif %}
+
+{% if doc.source.files %}
+<p class="card-text mb-0">
+    <small class="text-muted">
+        <strong>{% trans "Files" %}:</strong>
+        {% for file in doc.source.files %}
+            <a href="{{ file.pid_url }}" target="_blank">{{ file.label }}</a>{% if not forloop.last %}; {% endif %}
+        {% endfor %}
+    </small>
+</p>
+{% endif %}
+
+{% if doc.source.content_url %}
+<p class="card-text mb-0">
+    <small class="text-muted">
+        <a href="{{ doc.source.content_url }}" target="_blank">
+            {{ doc.source.content_url }}
+        </a>
+    </small>
+</p>
+{% endif %}
+
