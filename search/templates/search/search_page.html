@@ -58,7 +58,7 @@
 <script>
     window.searchPageConfig = {
         initialSearchQuery: '{{ search_query|escapejs }}',
-        dataSourceName: '{{ index_name }}',
+        dataSourceName: '{{ index_name|escapejs }}',
         filters: JSON.parse(document.getElementById('filters-data').textContent),
         filterMetadata: JSON.parse(document.getElementById('filter-metadata-data').textContent),
     };

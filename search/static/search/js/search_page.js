@@ -58,7 +58,9 @@ class SearchPageManager {
     
     async loadFiltersForDataSource(dataSource) {
         try {
-            const response = await fetch(`/search/api/filters/?index_name=${dataSource}`);
+            const response = await fetch(
+                `/search/api/filters/?index_name=${encodeURIComponent(dataSource)}`
+            );
             if (!response.ok) throw new Error('Failed to load filters');
             
             const data = await response.json();
