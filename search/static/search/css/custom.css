@@ -1,0 +1,89 @@
+/* Search Header Card - Para "Produção Científica" e "Filtros" */
+.search-header-card {
+    background: #eef2f6;
+    border: 1px solid #ccd6e1;
+    border-radius: 10px;
+    padding: 0.85rem 0.85rem 0.75rem;
+    margin-bottom: 0.9rem;
+}
+
+.search-header-card__title {
+    display: block;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #2f4050;
+    margin-bottom: 0.25rem;
+}
+
+.search-header-card__subtitle {
+    font-size: 0.8rem;
+    color: #576b7f;
+}
+
+.search-header-card__search {
+    margin-top: 0.9rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid #d9e1ea;
+}
+
+/* Variante para sidebar (Filtros) */
+.search-header-card--sidebar {
+    padding: 0.7rem 0.85rem;
+}
+
+.search-header-card__title--sidebar {
+    font-size: 0.95rem;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    margin-bottom: 0;
+}
+
+/* Search Input Card */
+.search-input-card {
+    background: #eef2f6;
+    border: 1px solid #ccd6e1;
+    border-radius: 10px;
+    padding: 0.85rem 0.85rem 0.75rem;
+    margin-bottom: 0.9rem;
+}
+
+.search-input-card__label {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: #2f4050;
+    margin-bottom: 0.5rem;
+}
+
+.search-input-card__row {
+    display: flex;
+    gap: 0.5rem;
+    align-items: stretch;
+}
+
+.search-input-card__input {
+    flex: 1;
+    min-width: 0;
+    height: 2.375rem;
+    border: 1px solid #ccd6e1;
+    border-radius: 10px;    
+}
+
+.search-input-card__button {
+    flex-shrink: 0;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+    height: 2.375rem;
+}
+
+@media (max-width: 767px) {
+    .search-input-card__row {
+        flex-direction: column;
+    }
+
+    .search-input-card__button {
+        width: 100%;
+    }
+}
