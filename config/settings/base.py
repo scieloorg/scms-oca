@@ -544,3 +544,4 @@ ENDPOINT_OAI_PMH_PREPRINT = env("ENDPOINT_OAI_PMH_PREPRINT", default="https://pr
 
 # ALIAS OPENSEARCHINDEX
 OP_INDEX_SOC_PROD = env.str("OP_INDEX_SOC_PROD", "bronze_social_production")
+OP_INDEX_ALL_BRONZE = env.str("OP_INDEX_ALL_BRONZE", "bronze_sc*")
