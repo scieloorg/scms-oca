@@ -26,7 +26,9 @@ def build_event_doc(obj):
         {
             "organization": [org.name for org in obj.organization.all()],
             "start_date": to_iso(obj.start_date),
+            "start_date_year": getattr(obj.start_date, "year", None),
             "end_date": to_iso(obj.end_date),
+            "end_date_year": getattr(obj.end_date, "year", None),
             "start_time": to_iso(obj.start_time),
             "end_time": to_iso(obj.end_time),
             "attendance": obj.attendance,
