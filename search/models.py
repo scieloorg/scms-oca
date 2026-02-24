@@ -21,7 +21,7 @@ class SearchPage(RoutablePageMixin, Page):
         context = super().get_context(request, *args, **kwargs)
         search_query = request.GET.get("search", "")
         index_name = kwargs.get("index_name") or request.GET.get(
-            "index_name", "bronze_social_production"
+            "index_name", getattr(settings, "OP_INDEX_ALL_BRONZE", "bronze_sc*")
         )
         service = SearchGatewayService(index_name=index_name)
         filters = service.build_filters()
