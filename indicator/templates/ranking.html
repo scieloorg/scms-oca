@@ -2,7 +2,7 @@
 {% load l10n %}
 {% load indicator_filters %}
 
-<div class="col-lg-9 mx-0 ps-3 pe-0">
+<div class="col-lg-9 mx-0 ps-3 pe-0 indicator-results-col">
     {% if error %}
     <div class="alert alert-danger shadow-sm mb-3" role="alert">
         {{ error }}
@@ -81,7 +81,7 @@
                             <th scope="col">{% trans "Publications" %}</th>
                             <th scope="col">{% trans "Total Citations" %}</th>
                             <th scope="col">{% trans "Mean Citations" %}</th>
-                            <th scope="col">{% trans "Normalized Impact" %}</th>
+                            <th scope="col">{% trans "Cohort Impact (Total)" %}</th>
                             <th scope="col">{% trans "Top 10% Share" %}</th>
                         </tr>
                     </thead>
@@ -165,7 +165,7 @@
                                 <div class="col-6 col-xl-2"><div class="journal-kpi"><div class="journal-kpi__label">{% trans "Publications" %}</div><div class="journal-kpi__value" id="kpi-publications">-</div></div></div>
                                 <div class="col-6 col-xl-2"><div class="journal-kpi"><div class="journal-kpi__label">{% trans "Total Citations" %}</div><div class="journal-kpi__value" id="kpi-total-citations">-</div></div></div>
                                 <div class="col-6 col-xl-2"><div class="journal-kpi"><div class="journal-kpi__label">{% trans "Mean Citations" %}</div><div class="journal-kpi__value" id="kpi-mean-citations">-</div></div></div>
-                                <div class="col-6 col-xl-2"><div class="journal-kpi"><div class="journal-kpi__label">{% trans "Normalized Impact" %}</div><div class="journal-kpi__value" id="kpi-impact">-</div></div></div>
+                                <div class="col-6 col-xl-2"><div class="journal-kpi"><div class="journal-kpi__label">{% trans "Cohort Impact (Total)" %}</div><div class="journal-kpi__value" id="kpi-impact">-</div></div></div>
                                 <div class="col-6 col-xl-2"><div class="journal-kpi"><div class="journal-kpi__label">{% trans "Top 10% Share" %}</div><div class="journal-kpi__value" id="kpi-top10">-</div></div></div>
                             </div>
 
@@ -220,7 +220,10 @@
     </div>
     {% elif not error %}
     <div class="card p-3 shadow-sm bg-oca-light">
-        {% trans "Select filters and click Generate to load journal metrics ranking and profile charts." %}
+        <p class="mb-2">{% trans "Select filters and click Generate to load journal metrics ranking and profile charts." %}</p>
+        <p class="mb-0 text-muted small">
+            {% trans "Cohort Impact ranks journals by citations received by documents published in the selected year and category, considering windows (2y, 3y, 5y) or total accumulation." %}
+        </p>
     </div>
     {% endif %}
 </div>
