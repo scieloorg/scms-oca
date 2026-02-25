@@ -87,13 +87,16 @@ function setupSelect2SearchAsYouType(fieldId, data_source, placeholder=null, all
             $(selectElement).select2(
                 {
                     ajax: {
-                        url: `/search-gateway/search-as-you-type/?field_name=${fieldId}&data_source=${data_source}`,
+                        url: `/search-gateway/search-as-you-type/?field_name=${fieldId}&data_source=${data_source}&use_data_source_model=false`,
                         dataType: 'json',
-                        delay: 300,
+                        delay: 100,
                         data: params => ({q: params.term}),
                         processResults: data => {
+                            const results = Array.isArray(data)
+                                ? data
+                                : (Array.isArray(data.results) ? data.results : []);
                             return {
-                                results: data.results.map(item => ({
+                                results: results.map(item => ({
                                     id: item.key,
                                     text: item.key
                                 }))
