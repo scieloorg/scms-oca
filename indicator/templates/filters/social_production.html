@@ -1,0 +1,206 @@
+{% load i18n static %}
+
+<div class="filter-group-card filter-group-card--muted filter-group-card--collapsible mb-3">
+  <div class="filter-group-card__title">{% trans "Graph Options" %}</div>
+  <div class="form-group mb-0">
+    <label for="breakdown_variable" class="form-label">{% trans "Breakdown Variable" %}</label>
+    <select id="breakdown_variable" class="form-control" name="breakdown_variable">
+      <option value="">{% trans "Select a variable" %}</option>
+      <option value="directory_type">{% trans "Directory Type" %}</option>
+      <option value="action">{% trans "Action" %}</option>
+      <option value="classification">{% trans "Classification" %}</option>
+      <option value="practice">{% trans "Practice" %}</option>
+      <option value="states">{% trans "State" %}</option>
+      <option value="cities">{% trans "City" %}</option>
+    </select>
+  </div>
+</div>
+
+<h4 class="my-2 pt-1">{% trans "Filters" %}</h4>
+
+<div class="filter-group-card filter-group-card--muted filter-group-card--collapsible">
+  <div class="filter-group-card__title">{% trans "Document Core" %}</div>
+
+  <div class="form-group mb-0">
+    <label class="form-label" for="document_publication_year_start">{% trans "Publication Year" %}</label>
+    <div class="input-group">
+      <input
+        id="document_publication_year_start"
+        name="document_publication_year_start"
+        type="text"
+        class="form-control is-height-2-4"
+        aria-label="{% trans 'Publication Year Start' %}"
+        placeholder="{% trans 'Start' %}"
+        value="2019"
+      />
+      <input
+        id="document_publication_year_end"
+        name="document_publication_year_end"
+        type="text"
+        class="form-control is-height-2-4"
+        aria-label="{% trans 'Publication Year End' %}"
+        placeholder="{% trans 'End' %}"
+        value="2025"
+      />
+    </div>
+  </div>
+</div>
+
+<div class="filter-group-card filter-group-card--muted filter-group-card--collapsible">
+  <div class="filter-group-card__title">{% trans "Directory Fields" %}</div>
+
+  <div class="form-group mb-3">
+      <label class="form-label" for="directory_type">{% trans "Directory Type" %}</label>
+      <select multiple id="directory_type" class="form-control" name="directory_type" aria-label="{% trans 'Directory Type' %}">
+      </select>
+  </div>
+
+  <div class="form-group mb-3">
+      <label class="form-label" for="action">{% trans "Action" %}</label>
+      <select multiple id="action" class="form-control" name="action" aria-label="{% trans 'Action' %}">
+      </select>
+  </div>
+
+  <div class="form-group mb-3">
+      <label class="form-label" for="classification">{% trans "Classification" %}</label>
+      <select multiple id="classification" class="form-control" name="classification" aria-label="{% trans 'Classification' %}">
+      </select>
+  </div>
+
+  <div class="form-group mb-3">
+      <label class="form-label" for="practice">{% trans "Practice" %}</label>
+      <select multiple id="practice" class="form-control" name="practice" aria-label="{% trans 'Practice' %}">
+      </select>
+  </div>
+</div>
+
+<div class="filter-group-card filter-group-card--muted filter-group-card--collapsible">
+  <div class="filter-group-card__title">{% trans "Institution" %}</div>
+
+  <div class="form-group mb-0">
+      <label class="form-label" for="institution">{% trans "Institution" %}</label>
+      <select multiple id="institutions" class="form-control" name="institutions" aria-label="{% trans 'Institution' %}"></select>
+  </div>
+</div>
+
+<div class="filter-group-card filter-group-card--muted filter-group-card--collapsible">
+  <div class="filter-group-card__title">{% trans "Location" %}</div>
+
+  <div class="form-group mb-3">
+      <label class="form-label" for="states">{% trans "State" %}</label>
+      <select multiple id="states" class="form-control" name="states" aria-label="{% trans 'State' %}"></select>
+  </div>
+
+  <div class="form-group mb-0">
+      <label class="form-label" for="cities">{% trans "City" %}</label>
+      <select multiple id="cities" class="form-control" name="cities" aria-label="{% trans 'City' %}"></select>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+    const currentDataSource = "{{ data_source|default:'social'|escapejs }}";
+    const searchPlaceholder = "{% filter escapejs %}{% trans 'Start typing to search...' %}{% endfilter %}";
+    const placeholders = {
+        breakdown_variable: "{% filter escapejs %}{% trans 'Select a breakdown variable' %}{% endfilter %}",
+        directory_type: "{% filter escapejs %}{% trans 'Select directory types' %}{% endfilter %}",
+        action: "{% filter escapejs %}{% trans 'Select actions' %}{% endfilter %}",
+        classification: "{% filter escapejs %}{% trans 'Select classifications' %}{% endfilter %}",
+        practice: "{% filter escapejs %}{% trans 'Select practices' %}{% endfilter %}",
+        institutions: "{% filter escapejs %}{% trans 'Select institutions' %}{% endfilter %}",
+        states: "{% filter escapejs %}{% trans 'Select states' %}{% endfilter %}",
+        cities: "{% filter escapejs %}{% trans 'Select cities' %}{% endfilter %}",
+    };
+    
+    try {
+        // Populate filters
+        const data = await fetchFilters('social');
+        populateSelectFilters(
+            // Filters data retrieved from the index API
+            data,
+            // Fields that we don't want to populate because they are handled differently
+            [
+              'institutions',
+              'document_publication_year_start',
+              'document_publication_year_end',
+            ]
+        );
+    } catch (error) {
+        console.error('Error loading filters', error);
+    }
+
+    // Initialize Bootstrap Datepicker for year fields
+    const yearFields = [
+        'document_publication_year_start',
+        'document_publication_year_end',
+    ];
+    yearFields.forEach(fieldId => {
+        const yearInput = document.getElementById(fieldId);
+        if (yearInput) {
+            $(yearInput).datepicker({
+                format: "yyyy",
+                viewMode: "years",
+                minViewMode: "years",
+                autoclose: true,
+                startDate: '1900',
+                endDate: '2100'
+            });
+        }
+    });
+
+    // Initialize Select2 for single select fields
+    const singleSelectFields = [
+        'breakdown_variable',
+    ];
+    singleSelectFields.forEach(fieldId => {
+        const selectElement = document.getElementById(fieldId);
+        if (selectElement) {
+            $(selectElement).select2({
+                placeholder: placeholders[fieldId] || searchPlaceholder,
+                allowClear: true,
+                minimumResultsForSearch: Infinity,
+                theme: 'bootstrap-5',
+            }).on('select2:open', function(e) {
+                document.querySelector(`[aria-controls="select2-${e.target.id}-results"]`).focus();
+            });
+        }
+    });
+
+    try {
+        // Initialize Select2 for multi select fields
+        const selectFields = [
+            'directory_type',
+            'action',
+            'classification',
+            'practice',
+            'states',
+            'cities',
+        ];
+        selectFields.forEach(fieldId => {
+            const selectElement = document.getElementById(fieldId);
+            if (selectElement) {
+                $(selectElement).select2({
+                    placeholder: placeholders[fieldId] || searchPlaceholder,
+                    allowClear: true,
+                    theme: 'bootstrap-5',
+                });
+            }
+        });
+    } catch (error) {
+        console.error('Error initializing Select2', error);
+    }
+
+    // Initialize SearchAsYouType fields
+    const saytFieldsOpts = [
+        ['institutions', currentDataSource, placeholders.institutions, true],
+    ];
+    saytFieldsOpts.forEach(([fieldId, fieldDataSource, fieldPlaceholder, allowClear]) => {
+        setupSelect2SearchAsYouType(fieldId, fieldDataSource, fieldPlaceholder, allowClear);
+    });
+
+    document.dispatchEvent(new CustomEvent('indicator:filters-ready', {
+        detail: { dataSource: 'social' }
+    }));
+});
+
+</script>

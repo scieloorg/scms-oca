@@ -1,0 +1,216 @@
+{% load i18n static %}
+
+<h4 class="my-2 pt-1">{% trans "Ranking Configuration" %}</h4>
+
+<div class="filter-group-card filter-group-card--muted filter-group-card--collapsible mb-3">
+    <div class="filter-group-card__title">{% trans "Ranking" %}</div>
+
+    <div class="form-group mb-3">
+        <label class="form-label" for="publication_year">{% trans "Publication Year" %}</label>
+        <input
+            id="publication_year"
+            class="form-control"
+            name="publication_year"
+            aria-label="{% trans 'Publication Year' %}"
+            type="text"
+            value="{{ applied_filters.publication_year|default:default_publication_year|default:'' }}"
+            placeholder="{% trans 'Publication Year' %}"
+        />
+    </div>
+
+    <div class="form-group mb-3">
+        <label class="form-label" for="ranking_metric">{% trans "Ranking metric" %}</label>
+        <select id="ranking_metric" class="form-control" name="ranking_metric" aria-label="{% trans 'Ranking metric' %}">
+            <optgroup label="{% trans 'Cohort Impact' %}">
+                <option {% if applied_filters.ranking_metric == "journal_impact_normalized" %}selected{% endif %} value="journal_impact_normalized">{% trans "Cohort Impact (Total)" %}</option>
+                <option {% if applied_filters.ranking_metric == "journal_impact_normalized_window_2y" %}selected{% endif %} value="journal_impact_normalized_window_2y">{% trans "Cohort Impact (2 years)" %}</option>
+                <option {% if applied_filters.ranking_metric == "journal_impact_normalized_window_3y" or not applied_filters.ranking_metric %}selected{% endif %} value="journal_impact_normalized_window_3y">{% trans "Cohort Impact (3 years)" %}</option>
+                <option {% if applied_filters.ranking_metric == "journal_impact_normalized_window_5y" %}selected{% endif %} value="journal_impact_normalized_window_5y">{% trans "Cohort Impact (5 years)" %}</option>
+            </optgroup>
+            <optgroup label="{% trans 'Citations' %}">
+                <option {% if applied_filters.ranking_metric == "journal_citations_total" %}selected{% endif %} value="journal_citations_total">{% trans "Total Citations" %}</option>
+                <option {% if applied_filters.ranking_metric == "journal_citations_mean" %}selected{% endif %} value="journal_citations_mean">{% trans "Mean Citations" %}</option>
+                <option {% if applied_filters.ranking_metric == "journal_citations_mean_window_2y" %}selected{% endif %} value="journal_citations_mean_window_2y">{% trans "Mean Citations (2 years)" %}</option>
+                <option {% if applied_filters.ranking_metric == "journal_citations_mean_window_3y" %}selected{% endif %} value="journal_citations_mean_window_3y">{% trans "Mean Citations (3 years)" %}</option>
+                <option {% if applied_filters.ranking_metric == "journal_citations_mean_window_5y" %}selected{% endif %} value="journal_citations_mean_window_5y">{% trans "Mean Citations (5 years)" %}</option>
+            </optgroup>
+            <optgroup label="{% trans 'Publications' %}">
+                <option {% if applied_filters.ranking_metric == "journal_publications_count" %}selected{% endif %} value="journal_publications_count">{% trans "Publication Count" %}</option>
+                <option {% if applied_filters.ranking_metric == "top_1pct_all_time_publications_share_pct" %}selected{% endif %} value="top_1pct_all_time_publications_share_pct">{% trans "Top 1% Publications Share" %}</option>
+                <option {% if applied_filters.ranking_metric == "top_5pct_all_time_publications_share_pct" %}selected{% endif %} value="top_5pct_all_time_publications_share_pct">{% trans "Top 5% Publications Share" %}</option>
+                <option {% if applied_filters.ranking_metric == "top_10pct_all_time_publications_share_pct" %}selected{% endif %} value="top_10pct_all_time_publications_share_pct">{% trans "Top 10% Publications Share" %}</option>
+                <option {% if applied_filters.ranking_metric == "top_50pct_all_time_publications_share_pct" %}selected{% endif %} value="top_50pct_all_time_publications_share_pct">{% trans "Top 50% Publications Share" %}</option>
+            </optgroup>
+        </select>
+        <div class="form-text text-muted mt-2">
+            {% trans "Cohort Impact ranks journals by citations received by documents published in the selected year and category, considering windows (2y, 3y, 5y) or total accumulation." %}
+        </div>
+    </div>
+
+    <div class="form-group mb-0">
+        <label class="form-label" for="limit">{% trans "Number of results" %}</label>
+        <select id="limit" class="form-control" name="limit" aria-label="{% trans 'Number of results' %}">
+            <option value="10" {% if applied_filters.limit == "10" %}selected{% endif %}>10</option>
+            <option value="25" {% if applied_filters.limit == "25" %}selected{% endif %}>25</option>
+            <option value="50" {% if applied_filters.limit == "50" %}selected{% endif %}>50</option>
+            <option value="100" {% if applied_filters.limit == "100" or not applied_filters.limit %}selected{% endif %}>100</option>
+            <option value="200" {% if applied_filters.limit == "200" %}selected{% endif %}>200</option>
+            <option value="500" {% if applied_filters.limit == "500" %}selected{% endif %}>500</option>
+            <option value="1000" {% if applied_filters.limit == "1000" %}selected{% endif %}>1000</option>
+        </select>
+    </div>
+</div>
+
+<h4 class="my-2 pt-1">{% trans "Filters" %}</h4>
+
+<div class="filter-group-card filter-group-card--muted filter-group-card--collapsible">
+    <div class="filter-group-card__title">{% trans "Journal Identity" %}</div>
+
+    <div class="form-group mb-3">
+        <label class="form-label" for="journal_title">{% trans "Journal" %}</label>
+        <select id="journal_title" class="form-control" name="journal_title" aria-label="{% trans 'Journal' %}"></select>
+    </div>
+
+    <div class="form-group mb-3">
+        <label class="form-label" for="journal_issn">{% trans "ISSN" %}</label>
+        <select id="journal_issn" class="form-control" name="journal_issn" aria-label="{% trans 'ISSN' %}"></select>
+    </div>
+
+    <div class="form-group mb-3">
+        <label class="form-label" for="publisher_name">{% trans "Publisher" %}</label>
+        <select id="publisher_name" class="form-control" name="publisher_name" aria-label="{% trans 'Publisher' %}"></select>
+    </div>
+
+    <div class="form-group mb-3">
+        <label class="form-label" for="country">{% trans "Country" %}</label>
+        <select id="country" class="form-control" name="country" aria-label="{% trans 'Country' %}">
+            <option></option>
+            {% for option in filters_data.country %}
+                <option value="{{ option.key }}" {% if applied_filters.country == option.key|stringformat:'s' %}selected{% endif %}>{{ option.label }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="form-group mb-0">
+        <label class="form-label" for="collection">{% trans "Collection" %}</label>
+        <select id="collection" class="form-control" name="collection" aria-label="{% trans 'Collection' %}">
+            <option></option>
+            {% for option in filters_data.collection %}
+                <option value="{{ option.key }}" {% if applied_filters.collection == option.key|stringformat:'s' %}selected{% endif %}>{{ option.label }}</option>
+            {% endfor %}
+        </select>
+    </div>
+</div>
+
+<div class="filter-group-card filter-group-card--muted filter-group-card--collapsible">
+    <div class="filter-group-card__title">{% trans "Category" %}</div>
+
+    <div class="form-group mb-3">
+        <label class="form-label" for="category_level">{% trans "Category Type" %}</label>
+        {% with selected_category_level=applied_filters.category_level|default:"field" %}
+        <select id="category_level" class="form-control" name="category_level" aria-label="{% trans 'Category Type' %}">
+            {% if not filters_data.category_level %}
+                <option value="field" selected>{% trans "Field" %}</option>
+            {% endif %}
+            {% for option in filters_data.category_level %}
+                <option value="{{ option.key }}" {% if selected_category_level == option.key|stringformat:'s' %}selected{% endif %}>{{ option.label }}</option>
+            {% endfor %}
+        </select>
+        {% endwith %}
+    </div>
+
+    <div class="form-group mb-3">
+        <label class="form-label" for="category_id">{% trans "Category" %}</label>
+        <select id="category_id" class="form-control" name="category_id" aria-label="{% trans 'Category' %}">
+            <option></option>
+        </select>
+    </div>
+</div>
+
+<div class="filter-group-card filter-group-card--muted filter-group-card--collapsible">
+    <div class="filter-group-card__title">{% trans "Indexing / Coverage" %}</div>
+
+    <div class="form-group mb-3">
+        <label class="form-label" for="is_scielo">{% trans "Is SciELO" %}</label>
+        <select id="is_scielo" class="form-control" name="is_scielo" aria-label="{% trans 'Is SciELO' %}">
+            <option value="">{% trans "Select an option" %}</option>
+            <option value="Yes" {% if applied_filters.is_scielo == "Yes" %}selected{% endif %}>{% trans "Yes" %}</option>
+            <option value="No" {% if applied_filters.is_scielo == "No" %}selected{% endif %}>{% trans "No" %}</option>
+        </select>
+    </div>
+
+    <div class="form-group mb-3">
+        <label class="form-label" for="is_scopus">{% trans "Is Scopus" %}</label>
+        <select id="is_scopus" class="form-control" name="is_scopus" aria-label="{% trans 'Is Scopus' %}">
+            <option value="">{% trans "Select an option" %}</option>
+            <option value="Yes" {% if applied_filters.is_scopus == "Yes" %}selected{% endif %}>{% trans "Yes" %}</option>
+            <option value="No" {% if applied_filters.is_scopus == "No" %}selected{% endif %}>{% trans "No" %}</option>
+        </select>
+    </div>
+
+    <div class="form-group mb-3">
+        <label class="form-label" for="is_wos">{% trans "Is WoS" %}</label>
+        <select id="is_wos" class="form-control" name="is_wos" aria-label="{% trans 'Is WoS' %}">
+            <option value="">{% trans "Select an option" %}</option>
+            <option value="Yes" {% if applied_filters.is_wos == "Yes" %}selected{% endif %}>{% trans "Yes" %}</option>
+            <option value="No" {% if applied_filters.is_wos == "No" %}selected{% endif %}>{% trans "No" %}</option>
+        </select>
+    </div>
+
+    <div class="form-group mb-3">
+        <label class="form-label" for="is_doaj">{% trans "Is DOAJ" %}</label>
+        <select id="is_doaj" class="form-control" name="is_doaj" aria-label="{% trans 'Is DOAJ' %}">
+            <option value="">{% trans "Select an option" %}</option>
+            <option value="Yes" {% if applied_filters.is_doaj == "Yes" %}selected{% endif %}>{% trans "Yes" %}</option>
+            <option value="No" {% if applied_filters.is_doaj == "No" %}selected{% endif %}>{% trans "No" %}</option>
+        </select>
+    </div>
+
+    <div class="form-group mb-3">
+        <label class="form-label" for="is_openalex">{% trans "Is OpenAlex" %}</label>
+        <select id="is_openalex" class="form-control" name="is_openalex" aria-label="{% trans 'Is OpenAlex' %}">
+            <option value="">{% trans "Select an option" %}</option>
+            <option value="Yes" {% if applied_filters.is_openalex == "Yes" %}selected{% endif %}>{% trans "Yes" %}</option>
+            <option value="No" {% if applied_filters.is_openalex == "No" %}selected{% endif %}>{% trans "No" %}</option>
+        </select>
+    </div>
+
+    <div class="form-group mb-0">
+        <label class="form-label" for="is_journal_multilingual">{% trans "Is Multilingual" %}</label>
+        <select id="is_journal_multilingual" class="form-control" name="is_journal_multilingual" aria-label="{% trans 'Is Multilingual' %}">
+            <option value="">{% trans "Select an option" %}</option>
+            <option value="Yes" {% if applied_filters.is_journal_multilingual == "Yes" %}selected{% endif %}>{% trans "Yes" %}</option>
+            <option value="No" {% if applied_filters.is_journal_multilingual == "No" %}selected{% endif %}>{% trans "No" %}</option>
+        </select>
+    </div>
+</div>
+
+{% trans "Any value" as placeholder_any_value %}
+{% trans "Select a country" as placeholder_country %}
+{% trans "Select a collection" as placeholder_collection %}
+{% trans "Select a category type" as placeholder_category_level %}
+{% trans "Select a ranking metric" as placeholder_ranking_metric %}
+{% trans "Select a value" as placeholder_select_value %}
+{% trans "Type journal name..." as placeholder_journal_title %}
+{% trans "Type ISSN..." as placeholder_journal_issn %}
+{% trans "Type publisher name..." as placeholder_publisher_name %}
+{% trans "Select a category id" as placeholder_category_id %}
+{% trans "Type to search..." as placeholder_type_to_search %}
+
+<div
+    id="journal-metrics-filters-config"
+    class="d-none"
+    data-applied-filters='{{ applied_filters_json|default:"{}"|escape }}'
+    data-default-category-level="{{ applied_filters.category_level|default:'field'|escape }}"
+    data-any-value-placeholder="{{ placeholder_any_value|escape }}"
+    data-placeholder-country="{{ placeholder_country|escape }}"
+    data-placeholder-collection="{{ placeholder_collection|escape }}"
+    data-placeholder-category-level="{{ placeholder_category_level|escape }}"
+    data-placeholder-ranking-metric="{{ placeholder_ranking_metric|escape }}"
+    data-placeholder-select-value="{{ placeholder_select_value|escape }}"
+    data-placeholder-journal-title="{{ placeholder_journal_title|escape }}"
+    data-placeholder-journal-issn="{{ placeholder_journal_issn|escape }}"
+    data-placeholder-publisher-name="{{ placeholder_publisher_name|escape }}"
+    data-placeholder-category-id="{{ placeholder_category_id|escape }}"
+    data-placeholder-type-to-search="{{ placeholder_type_to_search|escape }}"
+></div>
