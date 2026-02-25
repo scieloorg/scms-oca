@@ -10,7 +10,7 @@ from .client import get_opensearch_client
 from .models import DataSource
 
 
-def search_as_you_type(data_source_name, query_text, field_name, client=None):
+def search_as_you_type(data_source_name, query_text, field_name, client=None, use_data_source_model=True):
     """
     Perform search-as-you-type query for autocomplete.
     
@@ -18,27 +18,50 @@ def search_as_you_type(data_source_name, query_text, field_name, client=None):
         data_source_name: Name of the data source.
         query_text: Text to search for.
         field_name: Field to search in.
+        client: Optional Elasticsearch client to use.
+        use_data_source_model: Whether to use the DataSource model for retrieving settings.
     
     Returns:
         List of matching items.
     """
     es = get_opensearch_client() if client is None else client
+    if not es or not data_source_name or not field_name:
+        return []
+
+    if not use_data_source_model:
+        index_name = data_sources_with_settings.get_index_name_from_data_source(data_source_name)
+        field_data = data_sources_with_settings.get_data_by_field_name(data_source_name, field_name) or {}
+        fl_name = data_sources_with_settings.get_index_field_name_from_data_source(data_source_name, field_name)
+        field_autocomplete = field_data.get("field_autocomplete")
+        supports_search_as_you_type = bool(
+            data_sources_with_settings.field_supports_search_as_you_type(data_source_name, field_name)
+            and field_autocomplete
+        )
+        size = data_sources_with_settings.get_size_by_field_name(data_source_name, field_name)
+
+        if index_name and supports_search_as_you_type:
+            body = query_builder.build_search_as_you_type_body(
+                field_name=fl_name,
+                field_autocomplete=field_autocomplete,
+                query=query_text,
+                agg_size=size,
+            )
+            res = es.search(index=index_name, body=body)
+            return response_parser.parse_search_item_response(res, data_source_name, field_name)
+
     data_source = DataSource.get_by_index_name(index_name=data_source_name)
     if not data_source:
         return []
 
     settings_filter = data_source.settings_filters.get_by_field_name(field_name=field_name)
-    if not settings_filter:
+    if not settings_filter or not settings_filter.field_autocomplete:
         return []
 
-    fl_name = settings_filter.index_field_name
-    field_autocomplete = settings_filter.field_autocomplete
-    size = (settings_filter.filter or {}).get("size", 20)
     body = query_builder.build_search_as_you_type_body(
-        field_name=fl_name,
-        field_autocomplete=field_autocomplete,
+        field_name=settings_filter.index_field_name,
+        field_autocomplete=settings_filter.field_autocomplete,
         query=query_text,
-        agg_size=size,
+        agg_size=(settings_filter.filter or {}).get("size", 20),
     )
     res = es.search(index=data_source.index_name, body=body)
     return response_parser.parse_search_item_response_with_transform(res, data_source, field_name)
