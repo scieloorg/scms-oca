@@ -5,9 +5,9 @@
     {% csrf_token %} 
     <div id="menu-fields">
       {% if data_source == "social" %}
-        {% include "filters/soc_prod.html" %}
+        {% include "filters/social_production.html" %}
       {% else %}
-        {% include "filters/sci_prod_world.html" %}
+        {% include "filters/scientific_production.html" %}
       {% endif %}
     </div>
 
