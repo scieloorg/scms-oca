@@ -1693,8 +1693,23 @@ DATA_SOURCES = {
                     "support_query_operator": False,
                     "category": "document",                           
                 }
+            },
+            "directory_type": {
+                "index_field_name": "directory_type",
+                "filter":{
+                    "size": 20,
+                    "order":{
+                        "_key": "asc"
+                    }
+                },
+                "settings": {
+                    "class_filter": "select2",
+                    "label": _("Directory Type"),
+                    "support_search_as_you_type": False,
+                    "support_query_operator": False,
+                    "category": "document",                           
+                }
             }
-            
         }
     }
 }
