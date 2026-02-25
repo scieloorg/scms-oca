@@ -1,13 +1,16 @@
 import logging
+
 from functools import cached_property
 
 from opensearchpy.exceptions import ConnectionError as OpenSearchConnectionError
 
 from . import parser as response_parser
 from . import query as query_builder
+
 from .client import get_opensearch_client
-from .controller import get_mapped_filters
 from .models import DataSource
+from .utils import get_mapped_filters
+
 
 logger = logging.getLogger(__name__)
 
