@@ -284,28 +284,28 @@ msgid "Total Citations"
 msgstr "Total Citations"
 
 #: indicator/static/indicator/js/journal_metrics.js:230
-msgid "Impact and Mean Citations per Year"
-msgstr ""
+msgid "Cohort Impact and Mean Citations per Year"
+msgstr "Cohort Impact and Mean Citations per Year"
 
 #: indicator/static/indicator/js/journal_metrics.js:234
 #: indicator/static/indicator/js/journal_metrics.js:255
-msgid "Normalized Impact"
-msgstr "Normalized Impact"
+msgid "Cohort Impact (Total)"
+msgstr "Cohort Impact (Total)"
 
 #: indicator/static/indicator/js/journal_metrics.js:235
 #: indicator/static/indicator/js/journal_metrics.js:261
-msgid "Normalized Impact (2 years)"
-msgstr "Normalized Impact (2 years)"
+msgid "Cohort Impact (2 years)"
+msgstr "Cohort Impact (2 years)"
 
 #: indicator/static/indicator/js/journal_metrics.js:236
 #: indicator/static/indicator/js/journal_metrics.js:267
-msgid "Normalized Impact (3 years)"
-msgstr "Normalized Impact (3 years)"
+msgid "Cohort Impact (3 years)"
+msgstr "Cohort Impact (3 years)"
 
 #: indicator/static/indicator/js/journal_metrics.js:237
 #: indicator/static/indicator/js/journal_metrics.js:273
-msgid "Normalized Impact (5 years)"
-msgstr "Normalized Impact (5 years)"
+msgid "Cohort Impact (5 years)"
+msgstr "Cohort Impact (5 years)"
 
 #: indicator/static/indicator/js/journal_metrics.js:238
 #: indicator/static/indicator/js/journal_metrics.js:279

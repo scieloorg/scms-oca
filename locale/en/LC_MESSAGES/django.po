@@ -2345,29 +2345,34 @@ msgid "Ranking metric"
 msgstr "Ranking metric"
 
 #: indicator/templates/filters/sci_prod_journal.html:24
-msgid "Impact"
-msgstr ""
+msgid "Cohort Impact"
+msgstr "Cohort Impact"
 
 #: indicator/templates/filters/sci_prod_journal.html:25
 #: indicator/templates/ranking.html:92 indicator/templates/ranking.html:176
 #: indicator/templatetags/indicator_filters.py:127
-msgid "Normalized Impact"
-msgstr "Normalized Impact"
+msgid "Cohort Impact (Total)"
+msgstr "Cohort Impact (Total)"
 
 #: indicator/templates/filters/sci_prod_journal.html:26
 #: indicator/templatetags/indicator_filters.py:128
-msgid "Normalized Impact (2 years)"
-msgstr "Normalized Impact (2 years)"
+msgid "Cohort Impact (2 years)"
+msgstr "Cohort Impact (2 years)"
 
 #: indicator/templates/filters/sci_prod_journal.html:27
 #: indicator/templatetags/indicator_filters.py:129
-msgid "Normalized Impact (3 years)"
-msgstr "Normalized Impact (3 years)"
+msgid "Cohort Impact (3 years)"
+msgstr "Cohort Impact (3 years)"
 
 #: indicator/templates/filters/sci_prod_journal.html:28
 #: indicator/templatetags/indicator_filters.py:130
-msgid "Normalized Impact (5 years)"
-msgstr "Normalized Impact (5 years)"
+msgid "Cohort Impact (5 years)"
+msgstr "Cohort Impact (5 years)"
+
+#: indicator/templates/filters/journal_metrics.html:46
+#: indicator/templates/ranking.html:247
+msgid "Cohort Impact ranks journals by citations received by documents published in the selected year and category, considering windows (2y, 3y, 5y) or total accumulation."
+msgstr "Cohort Impact ranks journals by citations received by documents published in the selected year and category, considering windows (2y, 3y, 5y) or total accumulation."
 
 #: indicator/templates/filters/sci_prod_journal.html:30
 #, fuzzy
