@@ -2,6 +2,7 @@ from search_gateway import data_sources_with_settings
 
 from . import utils
 
+
 JOURNAL_METRICS_SOURCE_FIELDS = [
     "journal_id",
     "journal_title",
@@ -96,10 +97,6 @@ def build_query(filters, field_settings, data_source):
 
     must = []
     must_not = []
-
-    if data_source == "brazil":
-        fl_name = field_settings.get("country", {}).get("index_field_name")
-        add_term(fl_name, "BR", must)
 
     if data_source == "social":
         fl_name = field_settings.get("action", {}).get("index_field_name")

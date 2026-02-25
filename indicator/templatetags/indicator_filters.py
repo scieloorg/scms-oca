@@ -124,10 +124,10 @@ def ui_value(value, field_key=None):
         # Journal Metrics ranking metric codes -> translated labels.
         metric_key = raw.strip()
         mapping = {
-            "journal_impact_normalized": _("Normalized Impact"),
-            "journal_impact_normalized_window_2y": _("Normalized Impact (2 years)"),
-            "journal_impact_normalized_window_3y": _("Normalized Impact (3 years)"),
-            "journal_impact_normalized_window_5y": _("Normalized Impact (5 years)"),
+            "journal_impact_normalized": _("Cohort Impact (Total)"),
+            "journal_impact_normalized_window_2y": _("Cohort Impact (2 years)"),
+            "journal_impact_normalized_window_3y": _("Cohort Impact (3 years)"),
+            "journal_impact_normalized_window_5y": _("Cohort Impact (5 years)"),
             "journal_citations_total": _("Total Citations"),
             "journal_citations_mean": _("Mean Citations"),
             "journal_citations_mean_window_2y": _("Mean Citations (2 years)"),

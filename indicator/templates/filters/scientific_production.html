@@ -6,7 +6,7 @@
     <label for="breakdown_variable" class="form-label">{% trans "Breakdown Variable" %}</label>
     <select id="breakdown_variable" class="form-control" name="breakdown_variable">
       <option></option>
-      <option value="source_index_open_alex">{% trans "Indexed in" %}</option>
+      <option value="scope">{% trans "Scope" %}</option>
       <option value="source_type">{% trans "Source Type" %}</option>
       <option value="document_type">{% trans "Document Type" %}</option>
       <option value="document_language">{% trans "Document Language" %}</option>
@@ -26,8 +26,8 @@
   <div class="filter-group-card__title">{% trans "Indexing" %}</div>
 
   <div class="form-group mb-3">
-      <label class="form-label" for="source_index_open_alex">{% trans "Indexed in" %}</label>
-      <select multiple id="source_index_open_alex" class="form-control" name="source_index_open_alex" aria-label="{% trans 'Indexed in' %}">
+      <label class="form-label" for="source_indexed_in">{% trans "Indexed in" %}</label>
+      <select multiple id="source_indexed_in" class="form-control" name="source_indexed_in" aria-label="{% trans 'Indexed in' %}">
       </select>
   </div>
 
@@ -71,10 +71,6 @@
       </div>
   </div>
 
-  <div class="form-group mb-0">
-      <label class="form-label" for="issn">{% trans "ISSN" %}</label>
-      <select id="issn" class="form-control" name="issn" aria-label="{% trans 'ISSN' %}"></select>
-  </div>
 </div>
 
 <div class="filter-group-card filter-group-card--muted filter-group-card--collapsible">
@@ -90,7 +86,7 @@
         class="form-control is-height-2-4"
         aria-label="{% trans 'Publication Year Start' %}"
         placeholder="{% trans 'Start' %}"
-        value="2015"
+        value="2019"
       />
       <input
         id="document_publication_year_end"
@@ -99,7 +95,7 @@
         class="form-control is-height-2-4"
         aria-label="{% trans 'Publication Year End' %}"
         placeholder="{% trans 'End' %}"
-        value="2024"
+        value="2025"
       />
     </div>
   </div>
@@ -131,8 +127,8 @@
   </div>
 
   <div class="form-group mb-3">
-      <label class="form-label" for="access_type">{% trans "Access Type" %}</label>
-      <select multiple id="access_type" class="form-control" name="access_type" aria-label="{% trans 'Access Type' %}">
+      <label class="form-label" for="open_access_status">{% trans "Access Type" %}</label>
+      <select multiple id="open_access_status" class="form-control" name="open_access_status" aria-label="{% trans 'Access Type' %}">
       </select>
   </div>
 </div>
@@ -155,12 +151,6 @@
   <div class="form-group mb-3">
       <label class="form-label" for="subject_area_level_2">{% trans "Subfield" %}</label>
       <select multiple id="subject_area_level_2" class="form-control" name="subject_area_level_2" aria-label="{% trans 'Subfield' %}">
-      </select>
-  </div>
-
-  <div class="form-group mb-0">
-      <label class="form-label" for="topic">{% trans "Topic" %}</label>
-      <select multiple id="topic" class="form-control" name="topic" aria-label="{% trans 'Topic' %}">
       </select>
   </div>
 </div>
@@ -206,26 +196,26 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', async () => {
-    const currentDataSource = "{{ data_source|default:'world'|escapejs }}";
+    const currentDataSource = "{{ data_source|default:'scientific'|escapejs }}";
     const currentQueryParams = new URLSearchParams(window.location.search);
-    const selectedScope = currentQueryParams.get('scope') || currentQueryParams.get('source_index_open_alex') || '';
+    const selectedScope = (currentQueryParams.get('scope') || '').trim();
     const filterParams = selectedScope ? { scope: selectedScope } : {};
-    // Placeholders translated server-side to avoid relying on makemessages_js for inline scripts.
+
     const ph = {
         breakdown_variable: "{% filter escapejs %}{% trans 'Select a breakdown variable' %}{% endfilter %}",
         document_language: "{% filter escapejs %}{% trans 'Select a language' %}{% endfilter %}",
         open_access: "{% filter escapejs %}{% trans 'Select an open access status' %}{% endfilter %}",
-        access_type: "{% filter escapejs %}{% trans 'Select an access type' %}{% endfilter %}",
+        open_access_status: "{% filter escapejs %}{% trans 'Select an access type' %}{% endfilter %}",
         country: "{% filter escapejs %}{% trans 'Search for a country' %}{% endfilter %}",
         document_type: "{% filter escapejs %}{% trans 'Select a document type' %}{% endfilter %}",
-        source_index_open_alex: "{% filter escapejs %}{% trans 'Select source indexes' %}{% endfilter %}",
+        source_indexed_in: "{% filter escapejs %}{% trans 'Select source indexes' %}{% endfilter %}",
         source_type: "{% filter escapejs %}{% trans 'Select a source type' %}{% endfilter %}",
         subject_area_level_0: "{% filter escapejs %}{% trans 'Select a domain' %}{% endfilter %}",
         subject_area_level_1: "{% filter escapejs %}{% trans 'Select a field' %}{% endfilter %}",
         subject_area_level_2: "{% filter escapejs %}{% trans 'Select a subfield' %}{% endfilter %}",
+        subject_area_level_3: "{% filter escapejs %}{% trans 'Select a topic' %}{% endfilter %}",
         topic: "{% filter escapejs %}{% trans 'Select a topic' %}{% endfilter %}",
         institution: "{% filter escapejs %}{% trans 'Search for an institution' %}{% endfilter %}",
-        issn: "{% filter escapejs %}{% trans 'Search for an ISSN' %}{% endfilter %}",
         funder: "{% filter escapejs %}{% trans 'Search for a funder' %}{% endfilter %}",
         publisher: "{% filter escapejs %}{% trans 'Search for a publisher' %}{% endfilter %}",
         source_country: "{% filter escapejs %}{% trans 'Search for a country' %}{% endfilter %}",
@@ -246,7 +236,6 @@ document.addEventListener('DOMContentLoaded', async () => {
               'document_publication_year_start',
               'funder',
               'institution',
-              'issn',
               'open_access',
               'publisher',
               'source_country',
@@ -279,15 +268,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Initialize multiselect fields
     const multiSelectFieldsOpts = [
-        ['access_type', ph.access_type, false],
+        ['open_access_status', ph.open_access_status, false],
         ["country", ph.country, false],
         ['document_type', ph.document_type, false],
-        ['source_index_open_alex', ph.source_index_open_alex, false],
+        ['source_indexed_in', ph.source_indexed_in, false],
         ['source_type', ph.source_type, false],
         ['subject_area_level_0', ph.subject_area_level_0, false],
         ['subject_area_level_1', ph.subject_area_level_1, false],
         ['subject_area_level_2', ph.subject_area_level_2, false],
-        ['topic', ph.topic, false],
     ];
     multiSelectFieldsOpts.forEach(([fieldId, fieldPlaceholder, allowClear]) => {
         setupSelect2Multiple(fieldId, fieldPlaceholder, allowClear);
@@ -296,7 +284,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Initialize SearchAsYouType fields
     const saytFieldsOpts = [
             ['institution', currentDataSource, ph.institution, true],
-            ['issn', currentDataSource, ph.issn, true],
             ['funder', currentDataSource, ph.funder, true],
             ['publisher', currentDataSource, ph.publisher, true],
             ['source_country', currentDataSource, ph.source_country, true],

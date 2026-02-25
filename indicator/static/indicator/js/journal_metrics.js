@@ -227,14 +227,14 @@
 
   function buildImpactChart(data) {
     return {
-      title: { text: gettext('Impact and Mean Citations per Year') },
+      title: { text: gettext('Cohort Impact and Mean Citations per Year') },
       tooltip: { trigger: 'axis' },
       legend: {
         data: [
-          gettext('Normalized Impact'),
-          gettext('Normalized Impact (2 years)'),
-          gettext('Normalized Impact (3 years)'),
-          gettext('Normalized Impact (5 years)'),
+          gettext('Cohort Impact (Total)'),
+          gettext('Cohort Impact (2 years)'),
+          gettext('Cohort Impact (3 years)'),
+          gettext('Cohort Impact (5 years)'),
           gettext('Mean Citations'),
         ],
         bottom: 0,
@@ -252,25 +252,25 @@
       yAxis: { type: 'value' },
       series: [
         {
-          name: gettext('Normalized Impact'),
+          name: gettext('Cohort Impact (Total)'),
           type: 'line',
           smooth: true,
           data: data.journal_impact_normalized_per_year || [],
         },
         {
-          name: gettext('Normalized Impact (2 years)'),
+          name: gettext('Cohort Impact (2 years)'),
           type: 'line',
           smooth: true,
           data: data.journal_impact_normalized_window_2y_per_year || [],
         },
         {
-          name: gettext('Normalized Impact (3 years)'),
+          name: gettext('Cohort Impact (3 years)'),
           type: 'line',
           smooth: true,
           data: data.journal_impact_normalized_window_3y_per_year || [],
         },
         {
-          name: gettext('Normalized Impact (5 years)'),
+          name: gettext('Cohort Impact (5 years)'),
           type: 'line',
           smooth: true,
           data: data.journal_impact_normalized_window_5y_per_year || [],
@@ -657,7 +657,318 @@
     return null;
   }
 
+  function getFilterConfigAttr(configElement, attrName, fallback = '') {
+    if (!configElement) return fallback;
+    const value = configElement.getAttribute(attrName);
+    if (value === null || value === undefined || value === '') return fallback;
+    return value;
+  }
+
+  function parseAppliedFilters(rawAppliedFilters) {
+    if (!rawAppliedFilters) return {};
+    try {
+      const parsed = JSON.parse(rawAppliedFilters);
+      return parsed && typeof parsed === 'object' ? parsed : {};
+    } catch (error) {
+      console.error('Error parsing journal metrics filters payload', error);
+      return {};
+    }
+  }
+
+  function focusSelect2SearchInput(event) {
+    const targetId = event?.target?.id;
+    if (!targetId) return;
+    const searchInput = document.querySelector(`[aria-controls="select2-${targetId}-results"]`);
+    if (searchInput) {
+      searchInput.focus();
+    }
+  }
+
+  async function initJournalMetricsFilters() {
+    const configElement = document.getElementById('journal-metrics-filters-config');
+    if (!configElement) return;
+
+    try {
+      const appliedFilters = parseAppliedFilters(
+        getFilterConfigAttr(configElement, 'data-applied-filters', '{}'),
+      );
+      const defaultCategoryLevel = String(
+        appliedFilters.category_level
+        || getFilterConfigAttr(configElement, 'data-default-category-level', 'field'),
+      ).trim().toLowerCase() || 'field';
+
+      const placeholders = {
+        anyValue: getFilterConfigAttr(configElement, 'data-any-value-placeholder', gettext('Any value')),
+        country: getFilterConfigAttr(configElement, 'data-placeholder-country', gettext('Select a country')),
+        collection: getFilterConfigAttr(configElement, 'data-placeholder-collection', gettext('Select a collection')),
+        categoryLevel: getFilterConfigAttr(
+          configElement,
+          'data-placeholder-category-level',
+          gettext('Select a category type'),
+        ),
+        rankingMetric: getFilterConfigAttr(
+          configElement,
+          'data-placeholder-ranking-metric',
+          gettext('Select a ranking metric'),
+        ),
+        selectValue: getFilterConfigAttr(configElement, 'data-placeholder-select-value', gettext('Select a value')),
+        journalTitle: getFilterConfigAttr(
+          configElement,
+          'data-placeholder-journal-title',
+          gettext('Type journal name...'),
+        ),
+        journalIssn: getFilterConfigAttr(configElement, 'data-placeholder-journal-issn', gettext('Type ISSN...')),
+        publisherName: getFilterConfigAttr(
+          configElement,
+          'data-placeholder-publisher-name',
+          gettext('Type publisher name...'),
+        ),
+        categoryId: getFilterConfigAttr(
+          configElement,
+          'data-placeholder-category-id',
+          gettext('Select a category id'),
+        ),
+        typeToSearch: getFilterConfigAttr(configElement, 'data-placeholder-type-to-search', gettext('Type to search...')),
+      };
+
+      const simpleSelectFields = [
+        'is_scielo',
+        'is_scopus',
+        'is_wos',
+        'is_doaj',
+        'is_openalex',
+        'is_journal_multilingual',
+        'limit',
+      ];
+
+      try {
+        simpleSelectFields.forEach(fieldId => {
+          const selectElement = document.getElementById(fieldId);
+          if (!selectElement || typeof $ === 'undefined' || !$.fn || !$.fn.select2) return;
+
+          $(selectElement).select2({
+            placeholder: placeholders.anyValue || '',
+            allowClear: true,
+            minimumResultsForSearch: Infinity,
+            theme: 'bootstrap-5',
+          }).on('select2:open', focusSelect2SearchInput);
+        });
+      } catch (error) {
+        console.error('Error initializing basic journal metrics Select2 fields', error);
+      }
+
+      setupDatePicker('publication_year', 'yyyy', 'years', 'years', true, '1800', '2100', 'body', 'bottom auto', 2000);
+
+      const searchableSingleSelectFields = [
+        'country',
+        'collection',
+        'category_level',
+        'ranking_metric',
+      ];
+
+      const searchableSinglePlaceholders = {
+        country: placeholders.country,
+        collection: placeholders.collection,
+        category_level: placeholders.categoryLevel,
+        ranking_metric: placeholders.rankingMetric,
+      };
+
+      searchableSingleSelectFields.forEach(fieldId => {
+        const selectElement = document.getElementById(fieldId);
+        if (!selectElement || typeof $ === 'undefined' || !$.fn || !$.fn.select2) return;
+
+        $(selectElement).select2({
+          placeholder: searchableSinglePlaceholders[fieldId] || placeholders.selectValue,
+          allowClear: fieldId !== 'category_level',
+          theme: 'bootstrap-5',
+        }).on('select2:open', focusSelect2SearchInput);
+      });
+
+      const categoryLevelSelect = document.getElementById('category_level');
+      if (categoryLevelSelect && !String(categoryLevelSelect.value || '').trim()) {
+        const hasDefaultOption = Array.from(categoryLevelSelect.options || [])
+          .some(option => option.value === defaultCategoryLevel);
+        if (!hasDefaultOption) {
+          categoryLevelSelect.add(new Option(defaultCategoryLevel, defaultCategoryLevel, false, false));
+        }
+        categoryLevelSelect.value = defaultCategoryLevel;
+        if (typeof $ !== 'undefined' && $.fn && $.fn.select2) {
+          $(categoryLevelSelect).trigger('change.select2');
+        }
+      }
+
+      const specialSelectConfig = {
+        journal_title: {
+          placeholder: placeholders.journalTitle,
+          minimumInputLength: 2,
+        },
+        journal_issn: {
+          placeholder: placeholders.journalIssn,
+          minimumInputLength: 2,
+        },
+        publisher_name: {
+          placeholder: placeholders.publisherName,
+          minimumInputLength: 2,
+        },
+        category_id: {
+          placeholder: placeholders.categoryId,
+          minimumInputLength: 0,
+        },
+      };
+
+      const formatSearchOptionText = item => item.label || item.key;
+
+      const appendOptionIfMissing = (selectElement, value, text, selected = false) => {
+        if (!selectElement || !value) return;
+        const normalizedValue = String(value);
+        const alreadyExists = Array.from(selectElement.options)
+          .some(option => option.value === normalizedValue);
+        if (!alreadyExists) {
+          const option = new Option(text || normalizedValue, normalizedValue, selected, selected);
+          selectElement.add(option);
+          return;
+        }
+
+        if (selected) {
+          selectElement.value = normalizedValue;
+        }
+      };
+
+      const buildSearchItemUrl = (fieldId, queryTerm = '') => {
+        const params = new URLSearchParams({
+          field_name: fieldId,
+          data_source: 'journal_metrics',
+          q: queryTerm || '',
+        });
+
+        if (fieldId === 'category_id') {
+          const categoryLevelElement = document.getElementById('category_level');
+          const categoryLevelValue = (categoryLevelElement ? categoryLevelElement.value : '') || defaultCategoryLevel;
+          params.set('category_level', categoryLevelValue);
+        }
+
+        return `/search-gateway/search-item/?${params.toString()}`;
+      };
+
+      const preloadSpecialSelectOptions = async (fieldId, selectedValue = null) => {
+        const fieldConfig = specialSelectConfig[fieldId];
+        const selectElement = document.getElementById(fieldId);
+        if (!fieldConfig || !selectElement) return;
+
+        if (fieldId === 'category_id') {
+          selectElement.innerHTML = '<option></option>';
+        }
+
+        try {
+          const response = await fetch(buildSearchItemUrl(fieldId, ''));
+          if (!response.ok) return;
+
+          const data = await response.json();
+          const results = Array.isArray(data.results) ? data.results : [];
+          results.forEach(item => {
+            appendOptionIfMissing(selectElement, item.key, formatSearchOptionText(item));
+          });
+
+          if (selectedValue) {
+            appendOptionIfMissing(selectElement, selectedValue, selectedValue, true);
+          } else if (fieldId === 'category_id') {
+            selectElement.value = '';
+          }
+
+          if (typeof $ !== 'undefined' && $.fn && $.fn.select2) {
+            $(selectElement).trigger('change.select2');
+          }
+        } catch (error) {
+          console.error(`Error preloading options for ${fieldId}`, error);
+        }
+      };
+
+      Object.entries(specialSelectConfig).forEach(([fieldId, fieldConfig]) => {
+        const selectElement = document.getElementById(fieldId);
+        if (!selectElement || typeof $ === 'undefined' || !$.fn || !$.fn.select2) return;
+
+        $(selectElement).select2({
+          ajax: {
+            url: () => '/search-gateway/search-item/',
+            dataType: 'json',
+            delay: 300,
+            data: params => {
+              const requestParams = {
+                field_name: fieldId,
+                data_source: 'journal_metrics',
+                q: params.term || '',
+              };
+
+              if (fieldId === 'category_id') {
+                const categoryLevelElement = document.getElementById('category_level');
+                const categoryLevelValue = (categoryLevelElement ? categoryLevelElement.value : '') || defaultCategoryLevel;
+                requestParams.category_level = categoryLevelValue;
+              }
+
+              return requestParams;
+            },
+            processResults: data => ({
+              results: (data.results || []).map(item => ({
+                id: item.key,
+                text: formatSearchOptionText(item),
+              })),
+            }),
+          },
+          minimumInputLength: fieldConfig.minimumInputLength,
+          placeholder: fieldConfig.placeholder || placeholders.typeToSearch,
+          theme: 'bootstrap-5',
+          allowClear: true,
+        }).on('select2:open', focusSelect2SearchInput);
+
+        if (fieldId !== 'category_id' && appliedFilters[fieldId]) {
+          appendOptionIfMissing(selectElement, appliedFilters[fieldId], appliedFilters[fieldId], true);
+          $(selectElement).trigger('change');
+        }
+      });
+
+      await preloadSpecialSelectOptions('category_id', appliedFilters.category_id || null);
+
+      const categoryLevelElement = document.getElementById('category_level');
+      if (categoryLevelElement) {
+        categoryLevelElement.addEventListener('change', function () {
+          if (!String(this.value || '').trim()) {
+            this.value = defaultCategoryLevel;
+            if (typeof $ !== 'undefined' && $.fn && $.fn.select2) {
+              $(this).trigger('change.select2');
+            }
+          }
+
+          const categoryIdElement = document.getElementById('category_id');
+          if (categoryIdElement && typeof $ !== 'undefined' && $.fn && $.fn.select2) {
+            $(categoryIdElement).val(null).trigger('change');
+          } else if (categoryIdElement) {
+            categoryIdElement.value = '';
+          }
+
+          preloadSpecialSelectOptions('category_id');
+        });
+      }
+
+      const resetButton = document.getElementById('menu-reset-journal-metrics');
+      if (resetButton) {
+        resetButton.addEventListener('click', function (event) {
+          event.preventDefault();
+          const resetUrl = `${window.location.pathname}${window.location.search}`;
+          window.location.assign(resetUrl);
+        });
+      }
+    } catch (error) {
+      console.error('Error initializing journal metrics filter controls', error);
+    } finally {
+      document.dispatchEvent(new CustomEvent('indicator:filters-ready', {
+        detail: { dataSource: 'journal_metrics' },
+      }));
+    }
+  }
+
   document.addEventListener('DOMContentLoaded', function () {
+    initJournalMetricsFilters();
+
     const rankingTable = document.getElementById('ranking-table');
     const configElement = document.getElementById('journal-metrics-config');
     const modalElement = document.getElementById('journal-profile-modal');

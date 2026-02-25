@@ -2205,29 +2205,34 @@ msgid "Ranking metric"
 msgstr ""
 
 #: indicator/templates/filters/sci_prod_journal.html:24
-msgid "Impact"
-msgstr ""
+msgid "Cohort Impact"
+msgstr "Impacto por Coorte"
 
 #: indicator/templates/filters/sci_prod_journal.html:25
 #: indicator/templates/ranking.html:92 indicator/templates/ranking.html:176
 #: indicator/templatetags/indicator_filters.py:127
-msgid "Normalized Impact"
-msgstr ""
+msgid "Cohort Impact (Total)"
+msgstr "Impacto por Coorte (Total)"
 
 #: indicator/templates/filters/sci_prod_journal.html:26
 #: indicator/templatetags/indicator_filters.py:128
-msgid "Normalized Impact (2 years)"
-msgstr ""
+msgid "Cohort Impact (2 years)"
+msgstr "Impacto por Coorte (2 anos)"
 
 #: indicator/templates/filters/sci_prod_journal.html:27
 #: indicator/templatetags/indicator_filters.py:129
-msgid "Normalized Impact (3 years)"
-msgstr ""
+msgid "Cohort Impact (3 years)"
+msgstr "Impacto por Coorte (3 anos)"
 
 #: indicator/templates/filters/sci_prod_journal.html:28
 #: indicator/templatetags/indicator_filters.py:130
-msgid "Normalized Impact (5 years)"
-msgstr ""
+msgid "Cohort Impact (5 years)"
+msgstr "Impacto por Coorte (5 anos)"
+
+#: indicator/templates/filters/journal_metrics.html:46
+#: indicator/templates/ranking.html:247
+msgid "Cohort Impact ranks journals by citations received by documents published in the selected year and category, considering windows (2y, 3y, 5y) or total accumulation."
+msgstr "O Impacto por Coorte classifica periódicos pelas citações recebidas por documentos publicados no ano e na categoria selecionados, considerando janelas (2, 3, 5 anos) ou o acumulado total."
 
 #: indicator/templates/filters/sci_prod_journal.html:30
 msgid "Citations"
@@ -2768,11 +2773,11 @@ msgstr ""
 
 #: indicator/templates/ranking.html:139
 msgid "Journal Profile and Charts"
-msgstr ""
+msgstr "Perfil do periódico e gráficos"
 
 #: indicator/templates/ranking.html:140
 msgid "Close"
-msgstr ""
+msgstr "Fechar"
 
 #: indicator/templates/ranking.html:145
 msgid "Loading journal profile..."
@@ -2780,29 +2785,31 @@ msgstr ""
 
 #: indicator/templates/ranking.html:149
 msgid "Selection Controls"
-msgstr ""
+msgstr "Controles de seleção"
 
 #: indicator/templates/ranking.html:163
 msgid "Selected Journal"
-msgstr ""
+msgstr "Periódico selecionado"
 
 #: indicator/templates/ranking.html:166
 msgid "Journal profile"
-msgstr ""
+msgstr "Perfil do periódico"
 
 #: indicator/templates/ranking.html:186
 msgid "Multilingual"
-msgstr ""
+msgstr "Multilíngue"
 
 #: indicator/templates/ranking.html:191
 msgid "Charts"
-msgstr ""
+msgstr "Gráficos"
 
 #: indicator/templates/ranking.html:231
 msgid ""
 "Select filters and click Generate to load journal metrics ranking and "
 "profile charts."
 msgstr ""
+"Selecione os filtros e clique em Gerar para carregar o ranking de métricas "
+"de periódicos e os gráficos do perfil."
 
 #: indicator/templates/scope.html:7
 msgid "Aggregation Mode"

@@ -2332,86 +2332,75 @@ msgid "Ranking metric"
 msgstr "Métrica de ranking"
 
 #: indicator/templates/filters/sci_prod_journal.html:24
-msgid "Impact"
-msgstr ""
+msgid "Cohort Impact"
+msgstr "Impacto por cohorte"
 
 #: indicator/templates/filters/sci_prod_journal.html:25
 #: indicator/templates/ranking.html:92 indicator/templates/ranking.html:176
 #: indicator/templatetags/indicator_filters.py:127
-msgid "Normalized Impact"
-msgstr "Impacto normalizado"
+msgid "Cohort Impact (Total)"
+msgstr "Impacto por cohorte (total)"
 
 #: indicator/templates/filters/sci_prod_journal.html:26
 #: indicator/templatetags/indicator_filters.py:128
-msgid "Normalized Impact (2 years)"
-msgstr "Impacto normalizado (2 años)"
+msgid "Cohort Impact (2 years)"
+msgstr "Impacto por cohorte (2 años)"
 
 #: indicator/templates/filters/sci_prod_journal.html:27
 #: indicator/templatetags/indicator_filters.py:129
-msgid "Normalized Impact (3 years)"
-msgstr "Impacto normalizado (3 años)"
+msgid "Cohort Impact (3 years)"
+msgstr "Impacto por cohorte (3 años)"
 
 #: indicator/templates/filters/sci_prod_journal.html:28
 #: indicator/templatetags/indicator_filters.py:130
-msgid "Normalized Impact (5 years)"
-msgstr "Impacto normalizado (5 años)"
+msgid "Cohort Impact (5 years)"
+msgstr "Impacto por cohorte (5 años)"
+
+#: indicator/templates/filters/journal_metrics.html:46
+#: indicator/templates/ranking.html:247
+msgid "Cohort Impact ranks journals by citations received by documents published in the selected year and category, considering windows (2y, 3y, 5y) or total accumulation."
+msgstr "El Impacto por cohorte clasifica revistas por las citas recibidas por documentos publicados en el año y la categoría seleccionados, considerando ventanas (2, 3, 5 años) o el acumulado total."
 
 #: indicator/templates/filters/sci_prod_journal.html:30
-#, fuzzy
-#| msgid "Citation Name"
 msgid "Citations"
-msgstr "Nombre de Citación"
+msgstr "Citas"
 
 #: indicator/templates/filters/sci_prod_journal.html:31
 #: indicator/templates/ranking.html:90 indicator/templates/ranking.html:174
 #: indicator/templatetags/indicator_filters.py:131
-#, fuzzy
-#| msgid "Total Citations (3 years)"
 msgid "Total Citations"
-msgstr "Citações Totais (3 anos)"
+msgstr "Citas totales"
 
 #: indicator/templates/filters/sci_prod_journal.html:32
 #: indicator/templates/ranking.html:91 indicator/templates/ranking.html:175
 #: indicator/templatetags/indicator_filters.py:132
-#, fuzzy
-#| msgid "Can edit locations"
 msgid "Mean Citations"
-msgstr "Pode editar localizações"
+msgstr "Citas medias"
 
 #: indicator/templates/filters/sci_prod_journal.html:33
 #: indicator/templatetags/indicator_filters.py:133
-#, fuzzy
-#| msgid "Total Citations (3 years)"
 msgid "Mean Citations (2 years)"
-msgstr "Citações Totais (3 anos)"
+msgstr "Citas medias (2 años)"
 
 #: indicator/templates/filters/sci_prod_journal.html:34
 #: indicator/templatetags/indicator_filters.py:134
-#, fuzzy
-#| msgid "Total Citations (3 years)"
 msgid "Mean Citations (3 years)"
-msgstr "Citações Totais (3 anos)"
+msgstr "Citas medias (3 años)"
 
 #: indicator/templates/filters/sci_prod_journal.html:35
 #: indicator/templatetags/indicator_filters.py:135
-#, fuzzy
-#| msgid "Total Citations (3 years)"
 msgid "Mean Citations (5 years)"
-msgstr "Citações Totais (3 anos)"
+msgstr "Citas medias (5 años)"
 
 #: indicator/templates/filters/sci_prod_journal.html:37
 #: indicator/templates/ranking.html:89 indicator/templates/ranking.html:173
-#, fuzzy
-#| msgid "Publication Year"
 msgid "Publications"
-msgstr "Año de publicación"
+msgstr "Publicaciones"
 
 #: indicator/templates/filters/sci_prod_journal.html:38
 #: indicator/templatetags/indicator_filters.py:136
-#, fuzzy
-#| msgid "Publication Date"
 msgid "Publication Count"
-msgstr "Data de Publicación"
+msgstr "Número de publicaciones"
 
 #: indicator/templates/filters/sci_prod_journal.html:39
 #, fuzzy, python-format
@@ -2987,59 +2976,51 @@ msgstr "Posición"
 #: indicator/templates/ranking.html:93 indicator/templates/ranking.html:177
 #, python-format
 msgid "Top 10%% Share"
-msgstr ""
+msgstr "Participación Top 10%%"
 
 #: indicator/templates/ranking.html:111
-#, fuzzy
-#| msgid "Loading journal profile..."
 msgid "Open journal profile"
-msgstr "Cargando perfil de la revista..."
+msgstr "Abrir perfil de la revista"
 
 #: indicator/templates/ranking.html:139
 msgid "Journal Profile and Charts"
-msgstr ""
+msgstr "Perfil de la revista y gráficos"
 
 #: indicator/templates/ranking.html:140
-#, fuzzy
-#| msgid "Closed"
 msgid "Close"
-msgstr "Cerrado"
+msgstr "Cerrar"
 
 #: indicator/templates/ranking.html:145
 msgid "Loading journal profile..."
 msgstr "Cargando perfil de la revista..."
 
 #: indicator/templates/ranking.html:149
-#, fuzzy
-#| msgid "Select an option"
 msgid "Selection Controls"
-msgstr "Seleccione una opción"
+msgstr "Controles de selección"
 
 #: indicator/templates/ranking.html:163
-#, fuzzy
-#| msgid "Source Journals"
 msgid "Selected Journal"
-msgstr "Periódicos de Origen"
+msgstr "Revista seleccionada"
 
 #: indicator/templates/ranking.html:166
-#, fuzzy
-#| msgid "Journal Article"
 msgid "Journal profile"
-msgstr "Artículo de Revista"
+msgstr "Perfil de la revista"
 
 #: indicator/templates/ranking.html:186
 msgid "Multilingual"
-msgstr ""
+msgstr "Multilingüe"
 
 #: indicator/templates/ranking.html:191
 msgid "Charts"
-msgstr ""
+msgstr "Gráficos"
 
 #: indicator/templates/ranking.html:231
 msgid ""
 "Select filters and click Generate to load journal metrics ranking and "
 "profile charts."
 msgstr ""
+"Seleccione los filtros y haga clic en Generar para cargar el ranking de "
+"métricas de revistas y los gráficos del perfil."
 
 #: indicator/templates/scope.html:7
 msgid "Aggregation Mode"

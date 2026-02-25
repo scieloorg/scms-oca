@@ -1,17 +1,10 @@
-from search_gateway.client import get_es_client, get_opensearch_client
+from search_gateway.client import get_opensearch_client
 from search_gateway import data_sources_with_settings
 
 from . import query as indicator_query
 from . import parser as indicator_parser
 from . import utils
 
-INDICATOR_OPENSEARCH_DATA_SOURCES = {
-    "world",
-    "brazil",
-    "scielo",
-    "social",
-    "journal_metrics",
-}
 
 BASELINE_PRESERVED_FILTER_KEYS = {
     "scope",
@@ -24,6 +17,7 @@ BASELINE_PRESERVED_FILTER_KEYS = {
 CONTROL_FILTER_KEYS = {
     "breakdown_variable",
     "study_unit",
+    "return_study_unit",
     "csrfmiddlewaretoken",
 }
 
@@ -33,19 +27,11 @@ DEFAULT_JOURNAL_METRICS_PUBLICATION_YEAR = "2020"
 DEFAULT_JOURNAL_METRICS_RANKING_METRIC = "journal_impact_normalized_window_3y"
 
 
-def _get_opensearch_or_error():
-    os_client = get_opensearch_client()
-    if not os_client:
-        return None, "Service unavailable"
-    return os_client, None
-
-
-def _get_index_name_or_error(data_source_name):
-    data_source_config = data_sources_with_settings.get_data_source(data_source_name)
-    index_name = data_source_config.get("index_name") if data_source_config else None
-    if not index_name:
-        return None, "Invalid data_source"
-    return index_name, None
+def _normalize_indicator_study_unit(study_unit):
+    value = str(study_unit or "").strip().lower()
+    if value in ("source", "journal"):
+        return "journal"
+    return "document"
 
 
 def _has_filter_value(value):
@@ -103,6 +89,9 @@ def _build_journal_metrics_filter_clauses(form_filters, selected_category_level)
         "year",
         "ranking_metric",
         "limit",
+        "scope",
+        "return_study_unit",
+        "study_unit",
         "csrfmiddlewaretoken",
         "journal_title",
         "journal_issn",
@@ -125,15 +114,14 @@ def get_journal_metrics_data(form_filters):
     """
     Orchestrates the retrieval of journal metrics data.
     """
-    es, error = _get_opensearch_or_error()
-    if error:
-        return None, error
+    es = get_opensearch_client()
 
     data_source = "journal_metrics"
-    data_source_settings = data_sources_with_settings.get_field_settings(data_source)
-    index_name, error = _get_index_name_or_error(data_source)
-    if error:
-        return None, error
+    data_source_config = data_sources_with_settings.get_data_source(data_source)
+    index_name = data_source_config.get("index_name") if data_source_config else None
+    field_settings = data_source_config.get("field_settings", {}) if data_source_config else {}
+    if not index_name:
+        return None, "Invalid data_source"
 
     payload_filters = dict(form_filters)
     payload_filters["category_level"] = _normalize_journal_metrics_category_level(
@@ -174,7 +162,7 @@ def get_journal_metrics_data(form_filters):
 
     cleaned_filters = utils.clean_form_filters(payload_filters)
 
-    query = indicator_query.build_query(cleaned_filters, data_source_settings, data_source)
+    query = indicator_query.build_query(cleaned_filters, field_settings, data_source)
     jm_query = indicator_query.build_journal_metrics_query(publication_year, query)
 
     body = indicator_query.build_journal_metrics_body(
@@ -206,14 +194,13 @@ def get_journal_metrics_timeseries(
     if not issn and not journal:
         return None, "Missing journal identifier"
 
-    es, error = _get_opensearch_or_error()
-    if error:
-        return None, error
+    es = get_opensearch_client()
 
     data_source = "journal_metrics"
-    index_name, error = _get_index_name_or_error(data_source)
-    if error:
-        return None, error
+    data_source_config = data_sources_with_settings.get_data_source(data_source)
+    index_name = data_source_config.get("index_name") if data_source_config else None
+    if not index_name:
+        return None, "Invalid data_source"
 
     selected_category_level = _normalize_journal_metrics_category_level(category_level)
     inherited_must, inherited_must_not = _build_journal_metrics_filter_clauses(
@@ -356,15 +343,9 @@ def get_indicator_data(data_source_name, filters, study_unit="document"):
     """Orchestrates the retrieval of indicator data from Elasticsearch."""
 
     filters = filters or {}
+    normalized_study_unit = _normalize_indicator_study_unit(study_unit)
 
-    if study_unit == "source":
-        study_unit = "journal"
-    if study_unit not in ("document", "journal"):
-        study_unit = "document"
-    if data_source_name in INDICATOR_OPENSEARCH_DATA_SOURCES:
-        es = get_opensearch_client()
-    else:
-        es = get_es_client()
+    es = get_opensearch_client()
     if not es:
         return None, "Service unavailable"
 
@@ -383,7 +364,7 @@ def get_indicator_data(data_source_name, filters, study_unit="document"):
     )
 
     aggs = indicator_query.build_indicator_aggs(
-        field_settings, breakdown_variable, data_source_name, study_unit=study_unit
+        field_settings, breakdown_variable, data_source_name, study_unit=normalized_study_unit
     )
 
     body = {"size": 0, "query": query, "aggs": aggs}
@@ -393,7 +374,11 @@ def get_indicator_data(data_source_name, filters, study_unit="document"):
     except Exception:
         return None, "Error executing search"
 
-    data = indicator_parser.parse_indicator_response(res, breakdown_variable, study_unit=study_unit)
+    data = indicator_parser.parse_indicator_response(
+        res,
+        breakdown_variable,
+        study_unit=normalized_study_unit,
+    )
     baseline_filters, comparative_filter_keys = _build_comparison_baseline_filters(filters)
     relative_metrics = {
         "enabled": False,
@@ -410,7 +395,7 @@ def get_indicator_data(data_source_name, filters, study_unit="document"):
             field_settings,
             None,
             data_source_name,
-            study_unit=study_unit,
+            study_unit=normalized_study_unit,
         )
         baseline_body = {"size": 0, "query": baseline_query, "aggs": baseline_aggs}
 
@@ -419,12 +404,12 @@ def get_indicator_data(data_source_name, filters, study_unit="document"):
             baseline_data = indicator_parser.parse_indicator_response(
                 baseline_res,
                 breakdown_variable=None,
-                study_unit=study_unit,
+                study_unit=normalized_study_unit,
             )
             relative_metrics = indicator_parser.compute_indicator_relative_metrics(
                 data,
                 baseline_data,
-                study_unit=study_unit,
+                study_unit=normalized_study_unit,
             )
             relative_metrics["compared_filters"] = sorted(comparative_filter_keys)
         except Exception:

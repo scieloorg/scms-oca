@@ -257,24 +257,22 @@ msgstr "a"
 
 #: indicator/static/indicator/js/journal_metrics.js:89
 msgid "Select a journal"
-msgstr ""
+msgstr "Seleccione una revista"
 
 #: indicator/static/indicator/js/journal_metrics.js:97
 msgid "Select a category"
-msgstr ""
+msgstr "Seleccione una categoría"
 
 #: indicator/static/indicator/js/journal_metrics.js:191
 msgid "Publications and Total Citations per Year"
-msgstr ""
+msgstr "Publicaciones y citas totales por año"
 
 #: indicator/static/indicator/js/journal_metrics.js:194
 #: indicator/static/indicator/js/journal_metrics.js:208
 #: indicator/static/indicator/js/journal_metrics.js:213
 #: indicator/static/indicator/js/journal_metrics.js:463
-#, fuzzy
-#| msgid "Publication Year"
 msgid "Publications"
-msgstr "Año de publicación"
+msgstr "Publicaciones"
 
 #: indicator/static/indicator/js/journal_metrics.js:194
 #: indicator/static/indicator/js/journal_metrics.js:218
@@ -284,42 +282,38 @@ msgid "Total Citations"
 msgstr "Total de citas"
 
 #: indicator/static/indicator/js/journal_metrics.js:230
-msgid "Impact and Mean Citations per Year"
-msgstr ""
+msgid "Cohort Impact and Mean Citations per Year"
+msgstr "Impacto por cohorte y citas medias por año"
 
 #: indicator/static/indicator/js/journal_metrics.js:234
 #: indicator/static/indicator/js/journal_metrics.js:255
-msgid "Normalized Impact"
-msgstr "Impacto normalizado"
+msgid "Cohort Impact (Total)"
+msgstr "Impacto por cohorte (total)"
 
 #: indicator/static/indicator/js/journal_metrics.js:235
 #: indicator/static/indicator/js/journal_metrics.js:261
-msgid "Normalized Impact (2 years)"
-msgstr "Impacto normalizado (2 años)"
+msgid "Cohort Impact (2 years)"
+msgstr "Impacto por cohorte (2 años)"
 
 #: indicator/static/indicator/js/journal_metrics.js:236
 #: indicator/static/indicator/js/journal_metrics.js:267
-msgid "Normalized Impact (3 years)"
-msgstr "Impacto normalizado (3 años)"
+msgid "Cohort Impact (3 years)"
+msgstr "Impacto por cohorte (3 años)"
 
 #: indicator/static/indicator/js/journal_metrics.js:237
 #: indicator/static/indicator/js/journal_metrics.js:273
-msgid "Normalized Impact (5 years)"
-msgstr "Impacto normalizado (5 años)"
+msgid "Cohort Impact (5 years)"
+msgstr "Impacto por cohorte (5 años)"
 
 #: indicator/static/indicator/js/journal_metrics.js:238
 #: indicator/static/indicator/js/journal_metrics.js:279
 #: indicator/static/indicator/js/journal_metrics.js:471
-#, fuzzy
-#| msgid "Citations"
 msgid "Mean Citations"
-msgstr "Citas"
+msgstr "Citas medias"
 
 #: indicator/static/indicator/js/journal_metrics.js:290
-#, fuzzy
-#| msgid "Publication Year"
 msgid "Top Publications Share (%) per Year"
-msgstr "Año de publicación"
+msgstr "Participación de publicaciones top (%) por año"
 
 #: indicator/static/indicator/js/journal_metrics.js:293
 #: indicator/static/indicator/js/journal_metrics.js:309
@@ -344,19 +338,17 @@ msgstr ""
 #: indicator/static/indicator/js/journal_metrics.js:343
 #: indicator/static/indicator/js/journal_metrics.js:361
 msgid "by Category"
-msgstr ""
+msgstr "por categoría"
 
 #: indicator/static/indicator/js/journal_metrics.js:349
 msgid "No category data available"
-msgstr ""
+msgstr "No hay datos de categoría disponibles"
 
 #: indicator/static/indicator/js/journal_metrics.js:413
 msgid "Journal profile"
-msgstr ""
+msgstr "Perfil de la revista"
 
 #: indicator/static/indicator/js/journal_metrics.js:434
-#, fuzzy
-#| msgid "Publication Year"
 msgid "Publication year"
 msgstr "Año de publicación"
 

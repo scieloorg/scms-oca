@@ -114,24 +114,20 @@ async function populateSelectFilters(data, exclude=[]) {
                 const optionValue = String(rawValue);
                 const optionLabel = item?.label ?? item?.text ?? optionValue;
                 const optionLabelStz = standardizeFieldValue(key, optionLabel);
-                const optionDocCount = Number(item?.doc_count);
 
                 return {
                     optionValue,
                     optionLabelStz,
-                    optionDocCount: Number.isFinite(optionDocCount) ? optionDocCount : null,
                 };
             })
             .filter(Boolean)
             .sort((a, b) => a.optionLabelStz.localeCompare(b.optionLabelStz, undefined, { sensitivity: 'base' }));
 
         // Add sorted options to fragment
-        options.forEach(({ optionValue, optionLabelStz, optionDocCount }) => {
+        options.forEach(({ optionValue, optionLabelStz }) => {
             const option = document.createElement('option');
             option.value = optionValue;
-            option.textContent = optionDocCount === null
-                ? optionLabelStz
-                : `${optionLabelStz} (${optionDocCount.toLocaleString()})`;
+            option.textContent = optionLabelStz;
             fragment.appendChild(option);
         });
 

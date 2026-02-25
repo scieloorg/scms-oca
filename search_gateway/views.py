@@ -2,7 +2,6 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_GET
 
 from . import controller
-from .client import get_opensearch_client
 
 
 def _parse_bool_param(value):
@@ -27,10 +26,6 @@ def filters_view(request):
         if not values:
             continue
         requested_filters[key] = values if len(values) > 1 else values[0]
-
-    # Backward compatibility: old URLs used source_index_open_alex to mean scope.
-    if "scope" not in requested_filters and "source_index_open_alex" in requested_filters:
-        requested_filters["scope"] = requested_filters.pop("source_index_open_alex")
 
     filters, error = controller.get_filters_data(
         data_source,
@@ -76,9 +71,8 @@ def search_as_you_type_view(request):
     q = request.GET.get("q", "")
     data_source_name = request.GET.get("index_name")
     field_name = request.GET.get("field_name", "")
-    client = get_opensearch_client()
     try:
-        results = controller.search_as_you_type(data_source_name, q, field_name, client=client)
+        results = controller.search_as_you_type(data_source_name, q, field_name)
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500) # TODO: Handle different error codes
     return JsonResponse(results, safe=False)

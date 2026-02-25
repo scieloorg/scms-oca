@@ -144,12 +144,14 @@ def build_filters_aggs(field_settings, exclude_fields=None):
     for form_field_name, field_info in field_settings.items():
         if form_field_name in exclude_fields:
             continue
+
         if field_info.get("filter", {}).get("use") is False:
             continue
 
         fl_name = field_info.get("index_field_name")
         if not fl_name:
             continue
+        
         fl_size = field_info.get("filter", {}).get("size", 1)
         fl_order = field_info.get("filter", {}).get("order")
 

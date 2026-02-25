@@ -87,7 +87,7 @@ function setupSelect2SearchAsYouType(fieldId, data_source, placeholder=null, all
             $(selectElement).select2(
                 {
                     ajax: {
-                        url: `/search-gateway/search-item/?field_name=${fieldId}&data_source=${data_source}`,
+                        url: `/search-gateway/search-as-you-type/?field_name=${fieldId}&data_source=${data_source}`,
                         dataType: 'json',
                         delay: 300,
                         data: params => ({q: params.term}),

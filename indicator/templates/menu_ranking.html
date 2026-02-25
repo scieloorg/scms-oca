@@ -4,7 +4,7 @@
   <form method="POST" action="{% url 'indicator_journal_metrics' %}" id="menu-form-journal-metrics">
     {% csrf_token %}
     <div id="menu-fields-journal-metrics">
-        {% include "filters/sci_prod_journal.html" %}
+        {% include "filters/journal_metrics.html" %}
     </div>
 
     <div class="menu-floating-actions mt-6">

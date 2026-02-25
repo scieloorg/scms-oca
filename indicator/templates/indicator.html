@@ -15,9 +15,9 @@
 {% block content %}
 <section id="content">
   <div class="container">
-    <div class="row ml-oca-filter" id="mainContent">
+    <div class="row ml-oca-filter indicator-layout" id="mainContent">
       <!-- Add filters menu -->
-      <div class="col-lg-3 card border-0 mb-2 pt-0 align-self-start">
+      <div class="col-12 col-lg-3 card border-0 mb-2 pt-0 align-self-start indicator-filters-col" id="indicator-filters-col">
         <div id="menu-container">
           {% if data_source != "social" %}
             <!-- Add scope selectors -->
@@ -31,6 +31,17 @@
             {% include "menu.html" %}
           {% endif %}
         </div>
+        <button
+          type="button"
+          id="indicator-filters-toggle"
+          class="indicator-filters-toggle d-none d-lg-inline-flex"
+          data-label-show="{% trans 'Show filters' %}"
+          data-label-hide="{% trans 'Hide filters' %}"
+          aria-expanded="true"
+          aria-controls="indicator-filters-col">
+          <span class="indicator-filters-toggle__icon" aria-hidden="true"></span>
+          <span class="indicator-filters-toggle__text visually-hidden">{% trans "Hide filters" %}</span>
+        </button>
       </div>
 
       {% if data_source == "journal_metrics" %}
@@ -54,6 +65,7 @@
   <script src="{% static 'indicator/js/helpers.js' %}"></script>
   <script src="{% static 'indicator/js/charts.js' %}"></script>
   <script src="{% static 'indicator/js/menu.js' %}"></script>
+  <script src="{% static 'indicator/js/layout.js' %}"></script>
   <script src="{% static 'indicator/js/button.js' %}"></script>
   {% if data_source == "journal_metrics" %}
     <script src="{% static 'indicator/js/journal_metrics.js' %}"></script>
