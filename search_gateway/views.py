@@ -69,10 +69,17 @@ def search_item_view(request):
 @require_GET
 def search_as_you_type_view(request):
     q = request.GET.get("q", "")
-    data_source_name = request.GET.get("index_name")
+    data_source_name = request.GET.get("data_source") or request.GET.get("index_name")
     field_name = request.GET.get("field_name", "")
+    use_data_source_model = _parse_bool_param(request.GET.get("use_data_source_model", "true"))
+
     try:
-        results = controller.search_as_you_type(data_source_name, q, field_name)
+        results = controller.search_as_you_type(
+            data_source_name,
+            q, 
+            field_name, 
+            use_data_source_model=use_data_source_model
+        )
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500) # TODO: Handle different error codes
-    return JsonResponse(results, safe=False)
+    return JsonResponse({"results": results})
