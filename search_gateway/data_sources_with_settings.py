@@ -1699,6 +1699,7 @@ DATA_SOURCES = {
     }
 }
 
+DATA_SOURCES["social"] = DATA_SOURCES["bronze_social_production"]
 
 
 def get_data_source(data_source_name):
