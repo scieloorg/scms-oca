@@ -38,6 +38,7 @@ def get_es_client():
         http_auth=(username, password),
         verify_certs=es_kwargs.get("verify_certs", False),
         ca_certs=es_kwargs.get("ca_certs"),
+        request_timeout=getattr(settings, "OPENSEARCH_REQUEST_TIMEOUT", 40),
     )
 
 
@@ -52,6 +53,7 @@ def get_opensearch_client():
     opensearch_url = opensearch_url or "http://localhost:9200"
     verify_certs = getattr(settings, "OPENSEARCH_VERIFY_CERTS", False)
     ca_certs = getattr(settings, "OPENSEARCH_CA_CERTS", None)
+    request_timeout = getattr(settings, "OPENSEARCH_REQUEST_TIMEOUT", 40)
 
     parsed_url = urlparse(opensearch_url)
     host = parsed_url.hostname or "localhost"
@@ -64,6 +66,7 @@ def get_opensearch_client():
         "use_ssl": use_ssl,
         "verify_certs": verify_certs,
         "ca_certs": ca_certs,
+        "timeout": request_timeout,
         "ssl_assert_hostname": False,
         "ssl_show_warn": False,
     }
