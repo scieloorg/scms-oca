@@ -155,47 +155,34 @@ def get_filters_data(
         if not field_settings:
             return {}, None
 
-    cache_key = (
-        data_source_name,
-        index_name,
-        tuple(sorted(exclude_fields)),
-        tuple(sorted(include_fields)),
-        _normalize_filters_for_cache(filters),
-        _field_settings_cache_fingerprint(field_settings),
+    cache_key = filters_cache.build_filters_cache_key(
+        data_source_name=data_source_name,
+        index_name=index_name,
+        exclude_fields=exclude_fields,
+        include_fields=include_fields,
+        filters=filters,
+        field_settings=field_settings,
     )
-    if not force_refresh and cache_key in FILTERS_CACHE:
-        cached_data, cached_at = _parse_filters_cache_entry(FILTERS_CACHE[cache_key])
-        if cached_at is None or (time.monotonic() - cached_at) <= FILTERS_CACHE_TTL_SECONDS:
-            return cached_data, None
+    
+    cached_data = filters_cache.get_cached_filters(cache_key, force_refresh=force_refresh)
+    if cached_data is not None:
+        return cached_data, None
 
     aggs = query_builder.build_filters_aggs(field_settings, exclude_fields)
-    body = {"size": 0, "aggs": aggs}
-    mapped_filters = get_mapped_filters(filters or {}, field_settings)
-    if mapped_filters:
-        body["query"] = {"bool": {"filter": query_builder.query_filters(mapped_filters)}}
+    mapped_filters = utils.get_mapped_filters(filters or {}, field_settings)
+    body = utils.build_filters_body(aggs, mapped_filters=mapped_filters)
 
     try:
-        res = es.search(index=index_name, body=body)
-        filters_data = response_parser.parse_filters_response(res, data_source_name)
-        _store_filters_cache(cache_key, filters_data)
-        return filters_data, None
-    except Exception as exc:
-        fallback_filters, fallback_errors = _get_filters_data_with_field_fallback(
-            es=es,
-            index_name=index_name,
-            data_source_name=data_source_name,
-            field_settings=field_settings,
-            mapped_filters=mapped_filters,
-            exclude_fields=exclude_fields,
+        res = es.search(
+            index=index_name,
+            body=body,
+            request_timeout=getattr(settings, "OPENSEARCH_REQUEST_TIMEOUT", 40),
         )
-        if fallback_filters:
-            _store_filters_cache(cache_key, fallback_filters)
-            return fallback_filters, None
 
-        if fallback_errors:
-            details = "; ".join(
-                f"{field_name}: {error}" for field_name, error in sorted(fallback_errors.items())
-            )
-            return None, f"Error retrieving filters: {exc}. Fallback errors: {details}"
+        filters_data = response_parser.parse_filters_response(res, data_source_name)
+        filters_cache.store_filters_cache(cache_key, filters_data)
 
+        return filters_data, None
+
+    except Exception as exc:
         return None, f"Error retrieving filters: {exc}"
