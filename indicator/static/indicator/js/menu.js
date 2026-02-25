@@ -1,6 +1,6 @@
 function getScopeFilterFromUrl() {
   const params = new URLSearchParams(window.location.search);
-  const value = params.get('scope') || params.get('source_index_open_alex');
+  const value = params.get('scope');
   return value ? String(value).trim() : '';
 }
 
@@ -25,6 +25,182 @@ function syncScopeFilterIntoForm(menuForm) {
   } else {
     scopeSelect.value = scopeFromUrl;
   }
+}
+
+function normalizeStudyUnit(studyUnit, fallback = 'document') {
+  const normalized = String(studyUnit || '').trim().toLowerCase();
+  if (normalized === 'journal') return 'source';
+  if (['document', 'source', 'journal_metrics'].includes(normalized)) {
+    return normalized;
+  }
+  return fallback;
+}
+
+function buildIndicatorRedirectUrl({ indicatorHomeUrl, isJournalMetricsPage, studyUnit, scopeValue }) {
+  const params = isJournalMetricsPage
+    ? new URLSearchParams()
+    : new URLSearchParams(window.location.search);
+
+  params.set('study_unit', normalizeStudyUnit(studyUnit, 'document'));
+  params.delete('return_study_unit');
+
+  if (scopeValue) {
+    params.set('scope', scopeValue);
+  } else {
+    params.delete('scope');
+  }
+
+  const query = params.toString();
+  return query ? `${indicatorHomeUrl}?${query}` : indicatorHomeUrl;
+}
+
+function buildJournalMetricsRedirectUrl({ journalMetricsUrl, currentStudyUnit }) {
+  const params = new URLSearchParams();
+  params.set('return_study_unit', ['document', 'source'].includes(currentStudyUnit) ? currentStudyUnit : 'source');
+
+  const query = params.toString();
+  return query ? `${journalMetricsUrl}?${query}` : journalMetricsUrl;
+}
+
+async function populateScopeSelectOptions(selectIndexScope, { scopeDataSource, currentScopeFilter, allScopesLabel }) {
+  if (!selectIndexScope) return;
+
+  selectIndexScope.innerHTML = '';
+  const allOption = document.createElement('option');
+  allOption.value = '';
+  allOption.textContent = allScopesLabel || 'All scopes';
+  selectIndexScope.appendChild(allOption);
+
+  try {
+    const data = await fetchFilters(scopeDataSource, {
+      fields: 'scope',
+      refresh: '1',
+    });
+    const scopeOptions = Array.isArray(data?.scope) ? data.scope : [];
+
+    const seen = new Set();
+    scopeOptions.forEach(option => {
+      const optionValue = String(option?.key ?? '').trim();
+      if (!optionValue || seen.has(optionValue)) return;
+      seen.add(optionValue);
+
+      const optionLabel = String(option?.label ?? optionValue);
+      const selectOption = document.createElement('option');
+      selectOption.value = optionValue;
+      selectOption.textContent = optionLabel;
+      selectIndexScope.appendChild(selectOption);
+    });
+  } catch (error) {
+    console.error('Error loading scope options', error);
+  }
+
+  if (!currentScopeFilter) {
+    selectIndexScope.value = '';
+    return;
+  }
+
+  const hasCurrentScope = Array.from(selectIndexScope.options).some(option => option.value === currentScopeFilter);
+  if (!hasCurrentScope) {
+    const dynamicOption = document.createElement('option');
+    dynamicOption.value = currentScopeFilter;
+    dynamicOption.textContent = currentScopeFilter;
+    selectIndexScope.appendChild(dynamicOption);
+  }
+  selectIndexScope.value = currentScopeFilter;
+}
+
+function initScopeControls() {
+  const scopeControlsRoot = document.getElementById('scope-controls');
+  if (!scopeControlsRoot) return;
+
+  const scopeFilterForm = document.getElementById('scope-filter-form');
+  const selectIndexScope = document.getElementById('selectIndexScope');
+  const hasScopeFilterControls = !!(scopeFilterForm && selectIndexScope);
+
+  const studyUnitForm = document.getElementById('study-unit-form');
+  const selectStudyUnit = document.getElementById('selectStudyUnit');
+  const currentDataSource = String(scopeControlsRoot.dataset.dataSource || 'scientific').trim();
+  const isJournalMetricsPage = currentDataSource === 'journal_metrics';
+  const scopeDataSource = isJournalMetricsPage ? 'world' : currentDataSource;
+  const indicatorHomeUrl = scopeControlsRoot.dataset.indicatorHomeUrl || '/indicators/';
+  const journalMetricsUrl = scopeControlsRoot.dataset.journalMetricsUrl || '/indicators/journal-metrics/';
+  const allScopesLabel = scopeControlsRoot.dataset.allScopesLabel || 'All scopes';
+  const currentQueryParams = new URLSearchParams(window.location.search);
+  const currentScopeFilter = String(currentQueryParams.get('scope') || '').trim();
+  const returnStudyUnitParam = (currentQueryParams.get('return_study_unit') || '').trim().toLowerCase();
+  const returnStudyUnit = ['document', 'source'].includes(returnStudyUnitParam)
+    ? returnStudyUnitParam
+    : 'source';
+  const currentStudyUnit = normalizeStudyUnit(
+    scopeControlsRoot.dataset.studyUnit,
+    isJournalMetricsPage ? 'journal_metrics' : 'document',
+  );
+
+  if (selectStudyUnit) {
+    const hasOption = Array.from(selectStudyUnit.options).some(option => option.value === currentStudyUnit);
+    if (hasOption) {
+      selectStudyUnit.value = currentStudyUnit;
+    }
+  }
+
+  if (studyUnitForm && selectStudyUnit) {
+    studyUnitForm.addEventListener('submit', event => {
+      event.preventDefault();
+
+      const selectedStudyUnit = normalizeStudyUnit(selectStudyUnit.value, currentStudyUnit);
+      const selectedScope = hasScopeFilterControls
+        ? String(selectIndexScope.value || '').trim()
+        : currentScopeFilter;
+      const redirectUrl = selectedStudyUnit === 'journal_metrics'
+        ? buildJournalMetricsRedirectUrl({
+            journalMetricsUrl,
+            currentStudyUnit,
+          })
+        : buildIndicatorRedirectUrl({
+            indicatorHomeUrl,
+            isJournalMetricsPage,
+            studyUnit: selectedStudyUnit,
+            scopeValue: selectedScope,
+          });
+      window.location.assign(redirectUrl);
+    });
+
+    selectStudyUnit.addEventListener('change', () => {
+      studyUnitForm.requestSubmit();
+    });
+  }
+
+  if (!hasScopeFilterControls) return;
+
+  scopeFilterForm.addEventListener('submit', event => {
+    event.preventDefault();
+
+    const selectedScope = String(selectIndexScope.value || '').trim();
+    const redirectUrl = isJournalMetricsPage
+      ? buildIndicatorRedirectUrl({
+          indicatorHomeUrl,
+          isJournalMetricsPage,
+          studyUnit: returnStudyUnit,
+          scopeValue: selectedScope,
+        })
+      : buildIndicatorRedirectUrl({
+          indicatorHomeUrl,
+          isJournalMetricsPage,
+          studyUnit: currentStudyUnit,
+          scopeValue: selectedScope,
+        });
+    window.location.assign(redirectUrl);
+  });
+
+  selectIndexScope.addEventListener('change', () => {
+    scopeFilterForm.requestSubmit();
+  });
+
+  populateScopeSelectOptions(selectIndexScope, {
+    scopeDataSource,
+    currentScopeFilter,
+    allScopesLabel,
+  });
 }
 
 function initIndicatorForm(dataSource, studyUnit) {
@@ -180,6 +356,10 @@ function initIndicatorForm(dataSource, studyUnit) {
   document.addEventListener('indicator:filters-ready', onFiltersReady);
   window.setTimeout(triggerInitialRender, 1800);
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+  initScopeControls();
+});
 
 // Django JS i18n fallback (jsi18n usually loads this)
 if (typeof window !== 'undefined' && typeof window.gettext !== 'function') {

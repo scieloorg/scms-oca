@@ -38,14 +38,15 @@ function buildToolbox(magicTypes) {
 }
 
 // Builds the chart legend
-function buildLegend(keys) {
+function buildLegend(keys, overrides) {
     if (!Array.isArray(keys) || !keys.length) return null;
 
     return {
         type: 'scroll',
         data: keys,
         orient: 'horizontal',
-        bottom: 0
+        bottom: 0,
+        ...overrides,
     };
 }
 
@@ -110,6 +111,83 @@ function hasNonZeroSeriesData(series) {
         }
     }
     return false;
+}
+
+function hasAnyNonZeroValue(data) {
+    if (!Array.isArray(data) || !data.length) return false;
+    return data.some(value => {
+        const num = Number(value);
+        return Number.isFinite(num) && Math.abs(num) > 0;
+    });
+}
+
+function getSeriesTotal(data) {
+    if (!Array.isArray(data) || !data.length) return 0;
+    return data.reduce((acc, value) => {
+        const num = Number(value);
+        if (!Number.isFinite(num)) return acc;
+        return acc + num;
+    }, 0);
+}
+
+function escapeHtml(value) {
+    return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+function formatTooltipNumber(value, isPercent = false) {
+    const numericValue = Number(value);
+    if (!Number.isFinite(numericValue)) return '-';
+
+    const formatter = new Intl.NumberFormat(undefined, {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: Math.abs(numericValue) < 100 ? 2 : 1,
+    });
+
+    const formatted = formatter.format(numericValue);
+    return isPercent ? `${formatted}%` : formatted;
+}
+
+function buildBreakdownTooltipFormatter(forcePercentAxis = false) {
+    return (params) => {
+        const items = Array.isArray(params) ? params : [params];
+        if (!items.length) return '';
+
+        const yearValue = items[0]?.axisValueLabel || items[0]?.axisValue || items[0]?.name || '';
+        const sortedRows = items
+            .map(item => {
+                const numericValue = Number(item?.value);
+                return {
+                    marker: item?.marker || '',
+                    seriesName: item?.seriesName || '',
+                    value: Number.isFinite(numericValue) ? numericValue : 0,
+                };
+            })
+            .filter(item => Math.abs(item.value) > 0)
+            .sort((a, b) => b.value - a.value);
+
+        const rowsHtml = sortedRows.length
+            ? sortedRows.map(item => `
+                <div class="indicator-tooltip__row">
+                    <span class="indicator-tooltip__label">${item.marker}${escapeHtml(item.seriesName)}</span>
+                    <span class="indicator-tooltip__value">${formatTooltipNumber(item.value, forcePercentAxis)}</span>
+                </div>
+            `).join('')
+            : `<div class="indicator-tooltip__empty">${escapeHtml(gettext('No non-zero values'))}</div>`;
+
+        return `
+            <div class="indicator-tooltip">
+                <div class="indicator-tooltip__year">${escapeHtml(yearValue)}</div>
+                <div class="indicator-tooltip__rows">
+                    ${rowsHtml}
+                </div>
+            </div>
+        `;
+    };
 }
 
 // Ensures old chart instances are destroyed
@@ -270,6 +348,9 @@ Indicators.renderChart = function({
     }
 
     series = series || [];
+    if (hasBreakdown) {
+        series = series.filter(s => hasAnyNonZeroValue(s?.data));
+    }
 
     const years = Array.isArray(data.years) ? data.years : [];
     const hasData = years.length > 0 && hasNonZeroSeriesData(series);
@@ -288,6 +369,20 @@ Indicators.renderChart = function({
     const subtitleLineCount = wrappedSubtitle ? wrappedSubtitle.split('\n').length : 0;
     const subtitleHeight = subtitleLineCount ? (18 + ((subtitleLineCount - 1) * 14)) : 0;
     const gridTop = Math.max(86, 86 + ((titleLineCount - 1) * 16) + subtitleHeight);
+    const legendNames = hasBreakdown
+        ? series
+            .slice()
+            .sort((a, b) => getSeriesTotal(b?.data) - getSeriesTotal(a?.data))
+            .map(s => s.name)
+        : series.map(s => s.name);
+    const tooltipOptions = hasBreakdown
+        ? buildTooltip({
+            trigger: 'axis',
+            axisPointer: { type: 'shadow' },
+            formatter: buildBreakdownTooltipFormatter(forcePercentAxis),
+            extraCssText: 'background:transparent;border:none;box-shadow:none;padding:0;',
+        })
+        : buildTooltip({ trigger: 'axis', axisPointer: { type: 'shadow' } });
 
     const chartOpts = {
         title: {
@@ -306,7 +401,7 @@ Indicators.renderChart = function({
                 lineHeight: 14,
             },
         },
-        tooltip: buildTooltip({ trigger: 'axis', axisPointer: { type: 'shadow' } }),
+        tooltip: tooltipOptions,
         grid: buildGrid({ top: gridTop }),
         toolbox: buildToolbox(['bar', 'line']),
         xAxis: { type: 'category', data: years },
@@ -317,7 +412,10 @@ Indicators.renderChart = function({
             }
             : { type: 'value' },
         series: series,
-        legend: buildLegend(series.map(s => s.name))
+        legend: buildLegend(
+            legendNames,
+            hasBreakdown ? { left: 0, right: 'auto' } : undefined,
+        ),
     };
 
     chartObj.setOption(chartOpts, true);
