@@ -133,12 +133,16 @@ def extract_selected_filters(request, available_filters, data_source):
         Dict of selected filters with transformed values.
     """
     selected_filters = {}
-    if not available_filters:
-        return selected_filters
-    
     field_settings = data_source.get_field_settings_dict()
-    
-    for filter_key in available_filters.keys():
+
+    # If available filters were not loaded from OpenSearch, fallback to configured field keys.
+    filter_keys = (
+        available_filters.keys()
+        if available_filters
+        else field_settings.keys()
+    )
+
+    for filter_key in filter_keys:
         values = request.GET.getlist(filter_key)
         if values:
             cleaned_values = [v for v in values if v]
