@@ -4587,3 +4587,15 @@ msgstr "Ano de registro"
 
 msgid "Support type"
 msgstr "Tipo de apoio"
+
+msgid "Division"
+msgstr "Colégio"
+
+msgid "Area"
+msgstr "Área"
+
+msgid "Subarea"
+msgstr "Subárea"
+
+msgid "articles, preprints, datasets, books"
+msgstr "artigos, preprints, datasets, livros"

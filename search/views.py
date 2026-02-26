@@ -575,7 +575,6 @@ def context_facet(request):
         }
     )
 
-
 @require_GET
 def search_view_list(request):
     index_name = request.GET.get(
@@ -593,6 +592,8 @@ def search_view_list(request):
             filters=selected_filters,
             page=page,
             page_size=page_size,
+            sort_field="publication_year",
+            sort_order="desc",
         )
         results_html = render_to_string(
             "search/include/results_list.html",

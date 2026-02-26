@@ -85,13 +85,24 @@ class SearchGatewayService:
             data_source=self.data_source,
         )
 
-    def search_documents(self, query_text=None, filters=None, page=1, page_size=10):
-        mapped_filters = get_mapped_filters(filters, self.field_settings)
+    def search_documents(
+        self,
+        query_text=None,
+        filters=None,
+        page=1,
+        page_size=10,
+        sort_field=None,
+        sort_order="desc",
+    ):
+        field_settings = self.data_source.get_field_settings_dict()
+        mapped_filters = get_mapped_filters(filters, field_settings)
         body = query_builder.build_document_search_body(
             query_text=query_text,
             filters=mapped_filters,
             page=page,
             page_size=page_size,
+            sort_field=sort_field,
+            sort_order=sort_order,
             source_fields=self.source_fields,
         )
         try:

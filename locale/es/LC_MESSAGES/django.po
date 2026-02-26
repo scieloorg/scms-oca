@@ -4629,6 +4629,17 @@ msgstr "Escriba para filtrar"
 msgid "Creation year"
 msgstr "Año de creación"
 
-
 msgid "Support type"
 msgstr "Tipo de apoy"
+
+msgid "Division"
+msgstr "División"
+
+msgid "Area"
+msgstr "Área"
+
+msgid "Subarea"
+msgstr "Subárea"
+
+msgid "articles, preprints, datasets, books"
+msgstr "artículos, preimpresiones, conjuntos de datos, libros"

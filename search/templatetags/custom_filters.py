@@ -28,7 +28,7 @@ def _get_request_lang_code(context):
     return context.get("LANGUAGE_CODE")
 
 
-def _split_matches_by_lang(items, field_name, lang_code):
+def _split_matches_by_lang(items, field_name, lang_code, value_key=None):
     if not isinstance(items, list):
         return [], []
 
@@ -36,11 +36,12 @@ def _split_matches_by_lang(items, field_name, lang_code):
     if not requested:
         return [], []
 
+    key = value_key if value_key else field_name
     exact_matches = []
     base_matches = []
 
     for item in items:
-        value = _get_attr_or_key(item, field_name)
+        value = _get_attr_or_key(item, key)
         if value in (None, ""):
             continue
 
@@ -59,8 +60,10 @@ def _split_matches_by_lang(items, field_name, lang_code):
     return exact_matches, base_matches
 
 
-def _pick_value_from_with_lang(items, field_name, lang_code):
-    exact_matches, base_matches = _split_matches_by_lang(items, field_name, lang_code)
+def _pick_value_from_with_lang(items, field_name, lang_code, value_key=None):
+    exact_matches, base_matches = _split_matches_by_lang(
+        items, field_name, lang_code, value_key=value_key
+    )
     if exact_matches:
         return exact_matches[0]
     if base_matches:
@@ -79,8 +82,10 @@ def _dedupe_keep_order(values):
     return result
 
 
-def _pick_values_from_with_lang(items, field_name, lang_code):
-    exact_matches, base_matches = _split_matches_by_lang(items, field_name, lang_code)
+def _pick_values_from_with_lang(items, field_name, lang_code, value_key=None):
+    exact_matches, base_matches = _split_matches_by_lang(
+        items, field_name, lang_code, value_key=value_key
+    )
     if exact_matches:
         return _dedupe_keep_order(exact_matches)
     if base_matches:
@@ -123,19 +128,31 @@ def format_date_br(value):
 
 
 @register.simple_tag(takes_context=True)
-def get_localized_field(context, source, field_name, as_list=False):
+def get_localized_field(context, source, field_name, *args):
     """
     Return localized field from `<field>_with_lang` using request language.
 
-    If `as_list` is truthy, always return a list of values.
-    Otherwise, return a scalar value.
+    Optional 4th arg: value_key (e.g. "text") — key used inside each item to get
+    the value. Defaults to field_name. Use when items use {"language": "x", "text": "..."}.
+
+    Optional 4th/5th arg: "list" (or truthy) — return list of values instead of scalar.
     """
+    value_key = None
+    as_list = False
+    for arg in args:
+        if _as_bool(arg):
+            as_list = True
+        elif value_key is None and arg and not _as_bool(arg):
+            value_key = str(arg).strip() or None
+
     language_code = _get_request_lang_code(context)
     base_value = _get_attr_or_key(source, field_name)
     with_lang_items = _get_attr_or_key(source, f"{field_name}_with_lang")
 
-    if _as_bool(as_list):
-        localized_values = _pick_values_from_with_lang(with_lang_items, field_name, language_code)
+    if as_list:
+        localized_values = _pick_values_from_with_lang(
+            with_lang_items, field_name, language_code, value_key=value_key
+        )
         if localized_values:
             return localized_values
         if isinstance(base_value, list):
@@ -144,5 +161,7 @@ def get_localized_field(context, source, field_name, as_list=False):
             return []
         return [base_value]
 
-    localized_value = _pick_value_from_with_lang(with_lang_items, field_name, language_code)
+    localized_value = _pick_value_from_with_lang(
+        with_lang_items, field_name, language_code, value_key=value_key
+    )
     return localized_value if localized_value not in (None, "") else base_value
