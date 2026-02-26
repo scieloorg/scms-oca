@@ -1,10 +1,14 @@
 from unittest.mock import patch
 
-from django.test import TestCase
+from django.test import SimpleTestCase, TestCase
 from django.utils import timezone
 from lxml import etree
 
 from core.users.models import User
+from harvest.language_normalizer import (
+    normalize_language_field,
+    normalize_language_value,
+)
 
 from .exception_logs import ExceptionContext
 from .harvests.harvest_data import harvest_data
@@ -247,3 +251,37 @@ class HarvestTestOAIPMH(TestCase):
         dataset_obj = HarvestedSciELOData.objects.get(identifier="ds-1")
         self.assertEqual(dataverse_obj.raw_data["identifier"], "dv-1")
         self.assertEqual(dataset_obj.raw_data["identifier"], "ds-1")
+
+
+class LanguageNormalizerTests(SimpleTestCase):
+    def test_expected_examples_are_normalized(self):
+        examples = {
+            "English": "en",
+            "ENG": "en",
+            "Portuguese": "pt",
+            "French": "fr",
+            "Spanish Sign Language": "es",
+            "Spanish": "es",
+            "Castilian": "es",
+        }
+        for source, expected in examples.items():
+            with self.subTest(source=source):
+                self.assertEqual(normalize_language_value(source), expected)
+
+    def test_iso_639_2_codes(self):
+        examples = {
+            "por": "pt",
+            "fre": "fr",
+            "fra": "fr",
+            "spa": "es",
+        }
+        for source, expected in examples.items():
+            with self.subTest(source=source):
+                self.assertEqual(normalize_language_value(source), expected)
+
+    def test_fallback_keeps_original(self):
+        self.assertEqual(normalize_language_value("unknown-language-x"), "unknown-language-x")
+
+    def test_list_input_deduplicates_preserving_order(self):
+        languages = ["English", "ENG", "Portuguese", "pt", "Castilian", "Spanish", "EN-US", "Spanish Sign Language", "Spanish, Castilian", "DUTCH"]
+        self.assertEqual(normalize_language_field(languages), ["en", "pt", "es", "nl"])

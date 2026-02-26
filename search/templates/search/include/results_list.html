@@ -4,7 +4,7 @@
 <div id="results-count" class="mb-3">
     {% if results_data.total_results %}
     <p class="text-muted">
-        <strong>{{ results_data.total_results|default:"0" }}</strong> {% trans "Resultados" %}
+        <strong>{{ results_data.total_results|default:"0"|intcomma }}</strong> {% trans "Resultados" %}
     </p>
     {% endif %}
 </div>
@@ -29,7 +29,7 @@
             {% elif item_type == "directory" %}
                 {% include "search/include/result_items/social_production.html" with doc=doc %}
             {% else %}
-                {% include "search/include/result_items/default.html" with doc=doc %}
+                {% include "search/include/result_items/openalex_works.html" with doc=doc %}
             {% endif %}
         {% endwith %}
             {% if doc.source.oca_data.scope %}

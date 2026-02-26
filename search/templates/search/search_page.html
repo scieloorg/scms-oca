@@ -14,7 +14,7 @@
                 name="search"
                 id="search-input"
                 class="search-input-card__input"
-                placeholder="{% if index_name == 'scielo_production' %}{% trans 'Search scientific production' %}{% else %}{% trans 'Search actions, events and infrastructure' %}{% endif %}"
+                placeholder="{% if index_name == 'scielo_production' %}{% trans 'Search scientific production' %}{% else %}{% trans 'Search' %} {% trans 'Actions, events and infrastructure' %}{% endif %}"
                 value="{{ search_query }}"
                 autocomplete="off"
             >

@@ -5,7 +5,6 @@ from pycountry import countries
 
 from .data_sources_with_settings import get_display_transform_by_field_name
 
-@lru_cache(maxsize=512)
 def _get_language_name(code):
     try:
         return _(Lang(code).name)
