@@ -6,7 +6,7 @@
 {% block header_content %}
 <div class="search-header-card">
     <h1 class="search-header-card__title">{% trans display_name %}</h1>
-    <span class="search-header-card__subtitle">{% trans "Actions, events and infrastructure" %}</span>
+    <span class="search-header-card__subtitle">{% if index_name == 'sci*' %}{% trans 'articles, preprints, datasets, books' %}...{% else %}{% trans 'Actions, events and infrastructure' %}{% endif %}</span>
     <form method="get" action="{{self}}" id="search-form" class="search-header-card__search">
         <div class="search-input-card__row">
             <input
@@ -14,7 +14,7 @@
                 name="search"
                 id="search-input"
                 class="search-input-card__input"
-                placeholder="{% if index_name == 'scielo_production' %}{% trans 'Search scientific production' %}{% else %}{% trans 'Search' %} {% trans 'Actions, events and infrastructure' %}{% endif %}"
+                placeholder="{% trans 'Search' %} {% if index_name == 'sci*' %}{% trans 'articles, preprints, datasets, books' %}...{% else %}{% trans 'Actions, events and infrastructure' %}{% endif %}"
                 value="{{ search_query }}"
                 autocomplete="off"
             >

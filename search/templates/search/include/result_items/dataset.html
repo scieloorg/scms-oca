@@ -45,7 +45,7 @@
     <small class="text-muted">
         <strong>{% trans "Publisher" %}:</strong>
         {% for publisher in doc.source.publishers %}
-            {{ publisher }}{% if not forloop.last %}, {% endif %}
+            {{ publisher.name }}{% if not forloop.last %}, {% endif %}
         {% endfor %}
     </small>
 </p>

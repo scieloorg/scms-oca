@@ -6,16 +6,16 @@
 {% load custom_filters %}
 
 {% get_localized_field doc.source "title" as display_title %}
-{% get_localized_field doc.source "abstract" as display_abstract %}
+{% get_localized_field doc.source "abstract" "text" as display_abstract %}
 
 <div class="d-flex justify-content-between align-items-start gap-2">
     <h5 class="card-title mb-0" style="flex: 1 1 auto; min-width: 0;">
-    {% if doc.source.ids.doi %}
-        <a href="{{ doc.source.ids.doi }}" target="_blank" class="text-decoration-none">
+        {% if doc.source.content_url %}
+    <a href="{{ doc.source.content_url.0 }}" target="_blank" class="text-decoration-none">
             {{ display_title }}
         </a>
-    {% elif doc.source.content_url %}
-        <a href="{{ doc.source.content_url }}" target="_blank" class="text-decoration-none">
+    {% elif doc.source.ids.doi %}
+        <a href="{{ doc.source.ids.doi }}" target="_blank" class="text-decoration-none">
             {{ display_title }}
         </a>
     {% else %}
