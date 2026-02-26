@@ -3,19 +3,23 @@
 {% load i18n %}
 {% load wagtailsettings_tags %}
 {% load wagtailcore_tags %}
+{% load custom_filters %}
+
+{% get_localized_field doc.source "title" as display_title %}
+{% get_localized_field doc.source "abstract" as display_abstract %}
 
 <div class="d-flex justify-content-between align-items-start gap-2">
     <h5 class="card-title mb-0" style="flex: 1 1 auto; min-width: 0;">
     {% if doc.source.content_url %}
         <a href="{{ doc.source.content_url }}" target="_blank" class="text-decoration-none">
-            {{ doc.source.title }}
+            {{ display_title }}
         </a>
     {% elif doc.source.sources.url %}
         <a href="{{ doc.source.sources.url }}" target="_blank" class="text-decoration-none">
-            {{ doc.source.title }}
+            {{ display_title }}
         </a>
     {% else %}
-        <a href="{{pageurl}}" target="_blank" class="text-decoration-none">{{ doc.source.title }}</a>
+        <a href="{{pageurl}}" target="_blank" class="text-decoration-none">{{ display_title }}</a>
     {% endif %}
     </h5>
     {% if doc.source.type %}
@@ -30,9 +34,9 @@
     </p>
 {% endif %}
 
-{% if doc.source.abstract %}
+{% if display_abstract %}
 <p class="card-text">
-    {{ doc.source.abstract|safe }}
+    {{ display_abstract|safe }}
 </p>
 {% endif %}
 

@@ -3,19 +3,23 @@
 {% load i18n %}
 {% load wagtailsettings_tags %}
 {% load wagtailcore_tags %}
+{% load custom_filters %}
+
+{% get_localized_field doc.source "title" as display_title %}
+{% get_localized_field doc.source "abstract" as display_abstract %}
 
 <div class="d-flex justify-content-between align-items-start gap-2">
     <h5 class="card-title mb-0" style="flex: 1 1 auto; min-width: 0;">
     {% if doc.source.ids.doi %}
         <a href="{{ doc.source.ids.doi }}" target="_blank" class="text-decoration-none">
-            {{ doc.source.title }}
+            {{ display_title }}
         </a>
     {% elif doc.source.content_url %}
         <a href="{{ doc.source.content_url }}" target="_blank" class="text-decoration-none">
-            {{ doc.source.title }}
+            {{ display_title }}
         </a>
     {% else %}
-        <a href="{{ pageurl }}" target="_blank" class="text-decoration-none">{{ doc.source.title }}</a>
+        <a href="{{ pageurl }}" target="_blank" class="text-decoration-none">{{ display_title }}</a>
     {% endif %}
     </h5>
     {% if doc.source.type %}
@@ -41,6 +45,12 @@
 </p>
 {% endif %}
 
+{% if display_abstract %}
+<p class="card-text" style="justify-content: justify;">
+    {{ display_abstract|safe }}
+</p>
+{% endif %}
+
 {% if doc.source.primary_source_title %}
 <p class="card-text mb-1">
     <small class="text-muted">
@@ -49,12 +59,10 @@
 </p>
 {% endif %}
 
-{% if doc.source.publication_year or doc.source.publication_date %}
+{% if doc.source.publication_year %}
 <p class="card-text mb-1">
     <small class="text-muted">
-        {% if doc.source.publication_year %}<strong>{% trans "Year" %}:</strong> {{ doc.source.publication_year }}{% endif %}
-        {% if doc.source.publication_year and doc.source.publication_date %} - {% endif %}
-        {% if doc.source.publication_date %}<strong>{% trans "Publication Date" %}:</strong> {{ doc.source.publication_date }}{% endif %}
+        <strong>{% trans "Year" %}:</strong> {{ doc.source.publication_year }}
     </small>
 </p>
 {% endif %}
