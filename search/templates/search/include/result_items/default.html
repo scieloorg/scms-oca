@@ -3,6 +3,9 @@
 {% load i18n %}
 {% load wagtailsettings_tags %}
 {% load wagtailcore_tags %}
+{% load custom_filters %}
+
+{% get_localized_field doc.source "title" as display_title %}
 
 
 <div class="card mb-3 result-item">
@@ -11,10 +14,10 @@
             <h5 class="card-title mb-0" style="flex: 1 1 auto; min-width: 0;">
             {% if doc.source.locations %}
                 <a href="{{ doc.source.locations.0.landing_page_url }}" target="_blank" class="text-decoration-none">
-                    {{ doc.source.title }}
+                    {{ display_title }}
                 </a>
             {% else %}
-                <a href="{{pageurl}}" target="_blank" class="text-decoration-none">{{ doc.source.title }}</a>
+                <a href="{{pageurl}}" target="_blank" class="text-decoration-none">{{ display_title }}</a>
             {% endif %}
             </h5>
             {% if doc.source.type %}
