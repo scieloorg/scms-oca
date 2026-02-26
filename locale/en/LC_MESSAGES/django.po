@@ -4665,3 +4665,15 @@ msgstr ""
 
 msgid "Support type"
 msgstr ""
+
+msgid "Division"
+msgstr ""
+
+msgid "Area"
+msgstr ""
+
+msgid "Subarea"
+msgstr ""
+
+msgid "articles, preprints, datasets, books"
+msgstr ""
