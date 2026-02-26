@@ -17,7 +17,7 @@ FILTER_CATEGORIES = {
         "order": 3,
     },
     "document": {
-        "label": _("Document"),
+        "label": _("Document Core"),
         "icon": "icon-file-text",
         "order": 4,
     },
@@ -25,15 +25,20 @@ FILTER_CATEGORIES = {
         "label": _("Category"),
         "icon": "icon-file-text",
         "order": 5,
-    },    
+    },
+    "type":{
+        "label": _("Open Access"),
+        "icon": "icon-filter",
+        "order": 6,
+    },
     "author_affiliation": {
         "label": _("Author Affiliation"),
         "icon": "icon-barcode",
-        "order": 6,
+        "order": 7,
     },
     "other": {
         "label": _("Other Filters"),
         "icon": "icon-filter",
         "order": 99,
-    },
+    }
 }
