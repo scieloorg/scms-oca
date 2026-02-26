@@ -1,0 +1,14 @@
+{% load menu_tags %}
+
+{% if menu_items %}
+  <ul class="sub-menu-container menu-container">
+    {% for item in menu_items %}
+      <li class="menu-item {{ item.active_class }}{% if item.has_children_in_menu %} sub-menu{% endif %}">
+        <a class="menu-link" href="{{ item.href }}"><div>{{ item.text }}</div></a>
+        {% if item.has_children_in_menu %}
+          {% sub_menu item template='menus/flat_menu_sub_menu.html' %}
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+{% endif %}
