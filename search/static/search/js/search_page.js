@@ -6,6 +6,7 @@ class SearchPageManager {
         this.filters = config.filters || {};
         this.filterMetadata = config.filterMetadata || {};
         this.rangeFields = config.rangeFields || {};
+        this.isUpdatingFilterOptions = false;
         
         this.init();
     }
@@ -56,24 +57,39 @@ class SearchPageManager {
         }
     }
     
-    async loadFiltersForDataSource(dataSource) {
+    async loadFiltersForDataSource(dataSource, selectedFilters = {}, options = {}) {
+        const { optionsOnly = false } = options;
         try {
-            const response = await fetch(
-                `/search/api/filters/?index_name=${encodeURIComponent(dataSource)}`
-            );
+            const params = new URLSearchParams();
+            params.append('index_name', dataSource);
+
+            Object.entries(selectedFilters).forEach(([filterKey, values]) => {
+                (values || []).forEach(value => {
+                    if (value !== null && value !== undefined && value !== '') {
+                        params.append(filterKey, value);
+                    }
+                });
+            });
+
+            const response = await fetch(`/search/api/filters/?${params.toString()}`);
             if (!response.ok) throw new Error('Failed to load filters');
             
             const data = await response.json();
             this.filters = data.filters || {};
             this.filterMetadata = data.filter_metadata || {};
-            
-            // Re-render filters HTML
-            this.renderFilters();
-            
-            // Re-initialize Select2 for new filters
-            this.setupFilters();
+
+            if (optionsOnly) {
+                this.updateFilterOptionsOnly(selectedFilters);
+            } else {
+                // Re-render filters HTML
+                this.renderFilters();
+
+                // Re-initialize Select2 for new filters
+                this.setupFilters();
+            }
         } catch (error) {
             console.error('Error loading filters:', error);
+            if (optionsOnly) return;
             const filtersContainer = document.getElementById('filters-container');
             if (filtersContainer) {
                 filtersContainer.innerHTML = `
@@ -134,6 +150,73 @@ class SearchPageManager {
             this.initializeSelect2(key);
         });
     }
+
+    getCurrentSelectedFilters() {
+        const selectedFilters = {};
+
+        Object.keys(this.filters).forEach(key => {
+            const selectElement = document.getElementById(key);
+            if (!selectElement) return;
+
+            const selectedValues = $(selectElement).val();
+            const metadata = this.filterMetadata[key] || {};
+
+            if (metadata.multiple_selection === false) {
+                if (selectedValues && selectedValues !== '') {
+                    selectedFilters[key] = [selectedValues];
+                }
+            } else if (Array.isArray(selectedValues) && selectedValues.length > 0) {
+                const validValues = selectedValues.filter(value => value && value !== '');
+                if (validValues.length > 0) {
+                    selectedFilters[key] = validValues;
+                }
+            }
+        });
+
+        return selectedFilters;
+    }
+
+    updateFilterOptionsOnly(selectedFilters = {}) {
+        Object.keys(this.filters).forEach(key => {
+            const selectElement = document.getElementById(key);
+            if (!selectElement) return;
+
+            const metadata = this.filterMetadata[key] || {};
+            const options = this.filters[key] || [];
+            const placeholderOption = metadata.multiple_selection === false
+                ? `<option value="">${metadata.label || key}</option>`
+                : '';
+
+            selectElement.innerHTML = `
+                ${placeholderOption}
+                ${options.map(opt => `<option value="${opt.key}">${opt.label}</option>`).join('')}
+            `;
+
+            // Keep Select2 in sync with updated <option> list
+            $(selectElement).trigger('change.select2');
+        });
+
+        this.restoreSelectedFilters(selectedFilters);
+    }
+
+    restoreSelectedFilters(selectedFilters = {}) {
+        Object.keys(selectedFilters).forEach(key => {
+            const selectElement = document.getElementById(key);
+            if (!selectElement) return;
+
+            const metadata = this.filterMetadata[key] || {};
+            const availableValues = new Set(Array.from(selectElement.options).map(option => option.value));
+            const validValues = (selectedFilters[key] || []).filter(value => availableValues.has(value));
+
+            if (metadata.multiple_selection === false) {
+                $(selectElement).val(validValues[0] || '');
+            } else {
+                $(selectElement).val(validValues);
+            }
+
+            $(selectElement).trigger('change.select2');
+        });
+    }
     
     initializeSelect2(key) {
         const selectElement = document.getElementById(key);
@@ -157,12 +240,15 @@ class SearchPageManager {
                     field_name: key,
                     index_name: this.dataSourceName
                 }),
-                processResults: (data) => ({
-                    results: data.map(item => ({
+                processResults: (data) => {
+                    const items = Array.isArray(data) ? data : Array.isArray(data?.results) ? data.results : [];
+                    return {
+                        results: items.map(item => ({
                         id: item.key,
                         text: item.label || item.key
                     }))
-                })
+                    };
+                }
             };
             config.minimumInputLength = 2;
         }
@@ -176,9 +262,20 @@ class SearchPageManager {
         });
         
         // AJAX on change
-        $(selectElement).on('change', () => {
-            this.updateActiveFilters();
-            this.applyFiltersAjax();
+        $(selectElement).on('change', async () => {
+            if (this.isUpdatingFilterOptions) return;
+
+            this.isUpdatingFilterOptions = true;
+            try {
+                const selectedFilters = this.getCurrentSelectedFilters();
+                await this.loadFiltersForDataSource(this.dataSourceName, selectedFilters, { optionsOnly: true });
+                this.updateActiveFilters();
+                this.applyFiltersAjax();
+            } catch (error) {
+                console.error('Error updating filter options:', error);
+            } finally {
+                this.isUpdatingFilterOptions = false;
+            }
         });
     }
     
