@@ -4,7 +4,7 @@
 <div id="results-count" class="mb-3">
     {% if results_data.total_results %}
     <p class="text-muted">
-        <strong>{{ results_data.total_results|default:"0" }}</strong> {% trans "Resultados" %}
+        <strong>{{ results_data.total_results|default:"0"|intcomma }}</strong> {% trans "Resultados" %}
     </p>
     {% endif %}
 </div>
