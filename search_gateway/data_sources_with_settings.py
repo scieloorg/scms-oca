@@ -155,7 +155,7 @@ DATA_SOURCES = {
             },
             "document_language": {
                 "index_field_name": "language",
-                "filter": {"size": 200, "order": {"_key": "asc"}},
+                "filter": {"size": 500, "order": {"_key": "asc"}},
                 "settings": {
                     "class_filter": "select2",
                     "label": _("Document Language"),
