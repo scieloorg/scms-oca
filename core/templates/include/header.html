@@ -51,7 +51,7 @@
               <ul class="menu-container mobile-menu-list mobile-menu-list-right">
                 {% for handle in config.WAGTAILMENUS_FLAT_MENUS_HANDLE_CHOICES %}
                   <li class="menu-item mobile-flat-menu">
-                    {% flat_menu handle.0 max_levels=2 show_menu_heading=True fall_back_to_default_site_menus=False %}
+                    {% flat_menu handle.0 max_levels=4 show_menu_heading=True fall_back_to_default_site_menus=False template='menus/flat_menu.html' sub_menu_template='menus/flat_menu_sub_menu.html' %}
                   </li>
                 {% endfor %}
               </ul>
@@ -59,9 +59,9 @@
           </div>
         </nav>
         
-        <div class="d-none d-lg-flex align-items-center ms-auto">
+        <div class="primary-menu d-none d-lg-flex align-items-center ms-auto">
           {% for handle in config.WAGTAILMENUS_FLAT_MENUS_HANDLE_CHOICES %}
-              {% flat_menu handle.0 max_levels=2 show_menu_heading=True fall_back_to_default_site_menus=False %}
+              {% flat_menu handle.0 max_levels=4 show_menu_heading=True fall_back_to_default_site_menus=False template='menus/flat_menu.html' sub_menu_template='menus/flat_menu_sub_menu.html' %}
           {% endfor %}
           <span class="mx-2">{% include 'include/language.html' %}</span>
           
