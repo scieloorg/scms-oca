@@ -587,15 +587,13 @@ def search_view_list(request):
     text_search = request.GET.get("search", "")
     try:
         service = SearchGatewayService(index_name=index_name)
-        filters = service.build_filters()
-        selected_filters = service.extract_selected_filters(request, filters)
+        selected_filters = service.extract_selected_filters(request)
         results_data = service.search_documents(
             query_text=text_search,
             filters=selected_filters,
             page=page,
             page_size=page_size,
         )
-
         results_html = render_to_string(
             "search/include/results_list.html",
             {"results_data": results_data},
@@ -625,7 +623,6 @@ def get_filters_for_data_source(request):
         service = SearchGatewayService(index_name=index_name)
         filters = service.build_filters()
         filter_metadata = service.get_filter_metadata(filters)
-
         return JsonResponse({
             "filters": filters,
             "filter_metadata": filter_metadata,
