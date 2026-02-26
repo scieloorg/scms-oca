@@ -63,6 +63,8 @@ class SearchPage(RoutablePageMixin, Page):
                 filters=selected_filters,
                 page=get_save_number(request.GET.get("page"), 1),
                 page_size=get_save_number(request.GET.get("limit"), 25),
+                sort_field="publication_year",
+                sort_order="desc",
             ),
         })
         return context
