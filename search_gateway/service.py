@@ -78,7 +78,7 @@ class SearchGatewayService:
             source_fields=self.source_fields,
         )
         try:
-            res = self.client.search(index=self.index_name, body=body)
+            res = self.client.search(index=self.index_name, body=body, request_cache=True)
             return response_parser.parse_document_search_response(res)
         except OpenSearchConnectionError:
             logger.warning("OpenSearch unavailable while searching documents", exc_info=True)
