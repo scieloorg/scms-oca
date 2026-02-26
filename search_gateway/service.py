@@ -2,6 +2,8 @@ import logging
 
 from functools import cached_property
 
+from django.conf import settings
+from django.core.cache import cache
 from opensearchpy.exceptions import ConnectionError as OpenSearchConnectionError
 
 from . import parser as response_parser
@@ -38,29 +40,45 @@ class SearchGatewayService:
     def source_fields(self):
         return self.data_source.source_fields or []
 
+    @cached_property
+    def field_settings(self):
+        return self.data_source.get_field_settings_dict()
+
     def get_filters(self):
         return self.data_source.build_filters_query
 
     def get_filter_metadata(self, filters):
         return self.data_source.get_filter_metadata(filters=filters)
 
+    def _filters_cache_key(self):
+        return f"search_gateway:filters:{self.index_name}"
+
     def build_filters(self, body=None):
+        use_cache = body is None
         body = body or self.get_filters()
+        if use_cache:
+            cached_filters = cache.get(self._filters_cache_key())
+            if cached_filters is not None:
+                return cached_filters
         try:
             res = self.client.search(
                 index=self.index_name,
                 body=body,
                 request_cache=True,
             )
-            return response_parser.parse_filters_response_with_transform(
+            parsed = response_parser.parse_filters_response_with_transform(
                 response=res,
                 data_source=self.data_source,
             )
+            if use_cache:
+                cache_ttl = getattr(settings, "SEARCH_GATEWAY_FILTERS_CACHE_TTL", 60)
+                cache.set(self._filters_cache_key(), parsed, timeout=cache_ttl)
+            return parsed
         except OpenSearchConnectionError:
             logger.warning("OpenSearch unavailable while building filters", exc_info=True)
             return {}
 
-    def extract_selected_filters(self, request, available_filters):
+    def extract_selected_filters(self, request, available_filters=None):
         return response_parser.extract_selected_filters(
             request,
             available_filters,
@@ -89,7 +107,8 @@ class SearchGatewayService:
         )
         try:
             res = self.client.search(index=self.index_name, body=body, request_cache=True)
-            return response_parser.parse_document_search_response(res)
+            parsed = response_parser.parse_document_search_response(res)
+            return parsed
         except OpenSearchConnectionError:
             logger.warning("OpenSearch unavailable while searching documents", exc_info=True)
             return {"search_results": [], "total_results": 0}
