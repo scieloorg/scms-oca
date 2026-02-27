@@ -186,11 +186,38 @@ class SearchPageManager {
             const placeholderOption = metadata.multiple_selection === false
                 ? `<option value="">${metadata.label || key}</option>`
                 : '';
+            const selectedLabelsByValue = new Map();
+            const preservedValues = selectedFilters[key] || [];
+
+            // Preserve currently selected labels (including async Select2 options)
+            // so we can re-add them if they are not returned in refreshed buckets.
+            Array.from(selectElement.options).forEach(option => {
+                if (option.value !== '') {
+                    selectedLabelsByValue.set(option.value, option.text);
+                }
+            });
+
+            const select2Data = $(selectElement).select2('data') || [];
+            select2Data.forEach(item => {
+                if (item && item.id !== undefined && item.id !== null) {
+                    selectedLabelsByValue.set(String(item.id), item.text || String(item.id));
+                }
+            });
 
             selectElement.innerHTML = `
                 ${placeholderOption}
                 ${options.map(opt => `<option value="${opt.key}">${opt.label}</option>`).join('')}
             `;
+
+            const availableValues = new Set(Array.from(selectElement.options).map(option => option.value));
+            preservedValues.forEach(value => {
+                if (!value || availableValues.has(value)) return;
+
+                const fallbackLabel = selectedLabelsByValue.get(value) || value;
+                const option = new Option(fallbackLabel, value, false, true);
+                selectElement.add(option);
+                availableValues.add(value);
+            });
 
             // Keep Select2 in sync with updated <option> list
             $(selectElement).trigger('change.select2');
