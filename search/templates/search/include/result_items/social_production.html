@@ -40,7 +40,7 @@
 {% if doc.source.start_date %}
 <p class="card-text mb-1">
     <small class="text-muted">
-        <strong>{% trans "Data Início" %}:</strong> {{ doc.source.start_date|format_date_br }}
+        <strong>{% trans "Ano de registro" %}:</strong> {{ doc.source.start_date|format_date_br }}
     </small>
 </p>
 {% endif %}
@@ -48,7 +48,7 @@
 {% if doc.source.created %}
 <p class="card-text mb-1">
     <small class="text-muted">
-        <strong>{% trans "Data de inserção do registro" %}:</strong> {{ doc.source.created|format_date_br }}
+        <strong>{% trans "Ano de criação" %}:</strong> {{ doc.source.created|format_date_br }}
     </small>
 </p>
 {% endif %}
