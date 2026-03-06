@@ -7,33 +7,8 @@ from .views import (
 )
 
 app_name = "search"
+
 urlpatterns = [
-    # path /
-    path("", views.search, name="search"),
-    path(
-        "detail/<str:indicator_slug>",
-        views.indicator_detail,
-        name="indicator_detail",
-    ),
-    path(
-        "indicator/<str:indicator_slug>/summarized/",
-        views.indicator_summarized,
-        name="indicator_summarized",
-    ),
-    path(
-        "indicator/<str:indicator_slug>/raw_data/",
-        views.indicator_raw_data,
-        name="indicator_raw_data",
-    ),
-    path(
-        "graph/", views.graph, name="graph"
-    ),
-    path(
-        "graph/json", views.graph_json, name="graph_json"
-    ),
-    path(
-        "graph/context_facet", views.context_facet, name="context_facet"
-    ),
     path("api/search-results-list/", search_view_list, name="search_results_list"),
     path("api/filters/", get_filters_for_data_source, name="get_filters_for_data_source"),
 ]
