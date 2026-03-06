@@ -3,7 +3,6 @@ import logging
 from django.conf import settings
 from django.http import JsonResponse
 from django.template.loader import render_to_string
-from django.utils.translation import gettext as _
 from django.views.decorators.http import require_GET
 
 from search_gateway.service import SearchGatewayService
@@ -40,7 +39,7 @@ def search_view_list(request):
             "selected_filters": selected_filters,
         })
     except Exception as e:
-        logging.exception(f"Error getting filters for index {index_name}. {e}")
+        logging.exception(f"Error searching documents for index {index_name}. {e}")
         return JsonResponse({"error": str(e)}, status=500)
 
 
