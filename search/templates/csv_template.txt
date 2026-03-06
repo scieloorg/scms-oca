@@ -1,2 +1,0 @@
-{% for row in search_results %}"{{ row.django_id }}"; "{{ row.record_type }}"; "{{ row.title }}"; "{{ row.directory_type }}"; "{{ row.link }}"; "{{ row.description }}"; "{{ row.practice }}"; "{{ row.action }}"; "{{ row.keywords|join:"|" }}"; "{{ row.thematic_areas|join:":" }}"; "{{ row.record_status }}"; "{{ row.source }}"
-{% endfor %}
