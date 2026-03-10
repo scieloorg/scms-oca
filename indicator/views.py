@@ -5,6 +5,7 @@ from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_GET, require_POST
+from wagtail.views import serve as wagtail_serve
 from wagtail_modeladmin.views import CreateView, EditView
 
 from core import tasks
@@ -12,10 +13,20 @@ from core_settings.models import Moderation
 from search_gateway import data_sources_with_settings
 from search_gateway.controller import get_filters_data
 
-from .search import controller, utils
+from .journal_metrics import config as journal_metrics_config
+from .journal_metrics import params as journal_metrics_params
+from .journal_metrics import presentation as journal_metrics_presentation
+from .search import controller as search_controller, utils
 from .permission_helper import IndicatorPermissionHelper
 
-JOURNAL_METRICS_NON_FILTER_KEYS = {"scope", "return_study_unit", "study_unit"}
+
+@require_GET
+def root_journal_metrics_redirect_view(request):
+    query_profile_issn = journal_metrics_params.get_profile_issn(request.GET)
+    if query_profile_issn:
+        return HttpResponseRedirect(journal_metrics_params.build_profile_url(request.GET, query_profile_issn))
+
+    return wagtail_serve(request, "")
 
 
 @require_POST
@@ -29,7 +40,7 @@ def data_view(request):
     filters = payload.get("filters", {})
     study_unit = payload.get("study_unit") or request.GET.get("study_unit") or "document"
 
-    data, error = controller.get_indicator_data(data_source_name, dict(filters), study_unit=study_unit)
+    data, error = search_controller.get_indicator_data(data_source_name, dict(filters), study_unit=study_unit)
     if error:
         status_code = 503 if error == "Service unavailable" else 400 if error == "Invalid data_source" else 500
         return JsonResponse({"error": error}, status=status_code)
@@ -56,25 +67,72 @@ def indicator_view(request, data_source_name):
     return render(request, "indicator.html", context)
 
 
+def _render_journal_metrics_profile(request, issn=None):
+    journal_issn = journal_metrics_params.get_profile_issn(request.GET, issn=issn)
+    if not journal_issn:
+        return JsonResponse({"error": "Missing journal parameter"}, status=400)
+
+    selected_category_level = str(request.GET.get("category_level") or "").strip()
+    if not selected_category_level:
+        selected_category_level = journal_metrics_config.DEFAULT_CATEGORY_LEVEL
+
+    selected_publication_year = str(request.GET.get("publication_year") or "").strip()
+    if not selected_publication_year:
+        selected_publication_year = str(journal_metrics_config.DEFAULT_PUBLICATION_YEAR)
+
+    selected_category_id = str(request.GET.get("category_id") or "").strip()
+    profile_passthrough_filters = journal_metrics_params.extract_profile_passthrough_filters(request.GET)
+
+    field_settings = data_sources_with_settings.get_field_settings("journal_metrics")
+    filter_fields_to_load = {"category_level"}
+    exclude_fields = [name for name in field_settings.keys() if name not in filter_fields_to_load]
+
+    filters_data, filters_error = get_filters_data("journal_metrics", exclude_fields=exclude_fields)
+
+    profile_data, profile_error = search_controller.get_journal_metrics_timeseries(
+        issn=journal_issn or None,
+        journal=None,
+        category_id=selected_category_id or None,
+        category_level=selected_category_level,
+        publication_year=selected_publication_year,
+        form_filters=profile_passthrough_filters,
+    )
+
+    context = journal_metrics_presentation.build_profile_context(
+        journal_issn=journal_issn,
+        profile_data=profile_data,
+        selected_category_level=selected_category_level,
+        selected_category_id=selected_category_id,
+        selected_publication_year=selected_publication_year,
+        profile_passthrough_filters=profile_passthrough_filters,
+        filters_data=filters_data,
+        filters_error=filters_error,
+        profile_error=profile_error,
+    )
+
+    return render(request, "journal_profile.html", context)
+
+
 def journal_metrics_view(request):
+    query_profile_issn = journal_metrics_params.get_profile_issn(request.GET)
+    if request.method == "GET" and query_profile_issn:
+        return _render_journal_metrics_profile(request, query_profile_issn)
+
     data_source_name = "journal_metrics"
     data_source = data_sources_with_settings.get_data_source(data_source_name)
 
-    cleaned_get_filters = utils.clean_form_filters(request.GET.dict())
-    for key in JOURNAL_METRICS_NON_FILTER_KEYS:
-        cleaned_get_filters.pop(key, None)
-
-    if "year" in cleaned_get_filters and "publication_year" not in cleaned_get_filters:
-        cleaned_get_filters["publication_year"] = cleaned_get_filters.pop("year")
-
-    if not str(cleaned_get_filters.get("category_level") or "").strip():
-        cleaned_get_filters["category_level"] = controller.DEFAULT_JOURNAL_METRICS_CATEGORY_LEVEL
+    cleaned_get_filters = journal_metrics_params.normalize_request_filters(
+        request.GET.dict(),
+        source_filters=request.GET,
+        clean=True,
+    )
 
     context = {
         "data_source": data_source_name,
         "data_source_display_name": data_source.get("display_name"),
         "applied_filters": cleaned_get_filters,
         "study_unit": "journal_metrics",
+        "default_category_id": journal_metrics_config.DEFAULT_CATEGORY_ID,
     }
 
     field_settings = data_sources_with_settings.get_field_settings(data_source_name)
@@ -88,26 +146,24 @@ def journal_metrics_view(request):
     if filters_error:
         context["error"] = _("Error loading filters: %s") % filters_error
 
-    default_publication_year = controller.DEFAULT_JOURNAL_METRICS_PUBLICATION_YEAR
+    default_publication_year = journal_metrics_config.DEFAULT_PUBLICATION_YEAR
     context["default_publication_year"] = default_publication_year
 
-    form_filters = request.POST.dict() if request.method == "POST" else request.GET.dict()
-    for key in JOURNAL_METRICS_NON_FILTER_KEYS:
-        form_filters.pop(key, None)
-    if not str(form_filters.get("category_level") or "").strip():
-        form_filters["category_level"] = controller.DEFAULT_JOURNAL_METRICS_CATEGORY_LEVEL
+    request_filters = request.POST if request.method == "POST" else request.GET
+    form_filters = journal_metrics_params.normalize_request_filters(
+        request_filters.dict(),
+        source_filters=request_filters,
+        clean=False,
+    )
 
-    cleaned_form_filters = utils.clean_form_filters(form_filters.copy())
-    for key in JOURNAL_METRICS_NON_FILTER_KEYS:
-        cleaned_form_filters.pop(key, None)
-    if "year" in cleaned_form_filters and "publication_year" not in cleaned_form_filters:
-        cleaned_form_filters["publication_year"] = cleaned_form_filters.pop("year")
-
-    if not str(cleaned_form_filters.get("category_level") or "").strip():
-        cleaned_form_filters["category_level"] = controller.DEFAULT_JOURNAL_METRICS_CATEGORY_LEVEL
+    cleaned_form_filters = journal_metrics_params.normalize_request_filters(
+        form_filters,
+        source_filters=request_filters,
+        clean=True,
+    )
     context["applied_filters"].update(cleaned_form_filters)
 
-    ranking_data, error = controller.get_journal_metrics_data(form_filters)
+    ranking_data, error = search_controller.get_journal_metrics_data(form_filters)
 
     if error:
         context["error"] = _("Error executing search: %s") % error
@@ -120,42 +176,28 @@ def journal_metrics_view(request):
     if default_publication_year and "publication_year" not in context["applied_filters"]:
         context["applied_filters"]["publication_year"] = default_publication_year
 
+    context.update(
+        journal_metrics_presentation.build_ranking_context(
+            context["applied_filters"],
+            ranking_data,
+        )
+    )
+
     context["applied_filters_json"] = json.dumps(context["applied_filters"])
 
     return render(request, "indicator.html", context)
 
-
 @require_GET
 def journal_metrics_timeseries_view(request):
-    issn = request.GET.get("issn") or request.GET.get("journal_issn")
-    journal = request.GET.get("journal") or request.GET.get("journal_title")
-    category_id = request.GET.get("category_id")
-    category_level = request.GET.get("category_level")
-    publication_year = request.GET.get("publication_year")
-    
-    form_filters = request.GET.dict()
-    
-    for key in (
-        "issn",
-        "journal",
-        "journal_issn",
-        "journal_title",
-        "category_id",
-        "category_level",
-        "publication_year",
-        "scope",
-        "return_study_unit",
-        "study_unit",
-    ):
-        form_filters.pop(key, None)
+    timeseries_request = journal_metrics_params.build_timeseries_request(request.GET.dict())
 
-    data, error = controller.get_journal_metrics_timeseries(
-        issn=issn,
-        journal=journal,
-        category_id=category_id,
-        category_level=category_level,
-        publication_year=publication_year,
-        form_filters=form_filters,
+    data, error = search_controller.get_journal_metrics_timeseries(
+        issn=timeseries_request["issn"],
+        journal=None,
+        category_id=timeseries_request["category_id"],
+        category_level=timeseries_request["category_level"],
+        publication_year=timeseries_request["publication_year"],
+        form_filters=timeseries_request["form_filters"],
     )
 
     if error:
@@ -185,7 +227,7 @@ def periodical_timeseries_view(request):
 
     filters = {field_name: value}
     
-    data, error = controller.get_indicator_data(data_source_name, filters)
+    data, error = search_controller.get_indicator_data(data_source_name, filters)
     if error:
         status_code = 503 if error == "Service unavailable" else 400 if error == "Invalid data_source" else 500
         return JsonResponse({"error": error}, status=status_code)
