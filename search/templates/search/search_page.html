@@ -46,6 +46,18 @@
         </div>
     </div>
 
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div></div>
+        <div class="d-flex align-items-center gap-2">
+            <label for="sort-select" class="mb-0 text-muted">{% trans "Ordenar por" %}:</label>
+            <select id="sort-select" class="form-select form-select-sm" style="width: auto; min-width: 200px;">
+                <option value="publication_year:desc">{% trans "Mais recentes" %}</option>
+                <option value="publication_year:asc">{% trans "Mais antigos" %}</option>
+                <option value="metrics.received_citations.total:desc">{% trans "Mais citações" %}</option>
+            </select>
+        </div>
+    </div>
+
     {% include "search/include/results.html" %}
 {% endblock %}
 
