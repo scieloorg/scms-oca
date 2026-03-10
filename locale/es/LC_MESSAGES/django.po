@@ -2575,6 +2575,10 @@ msgstr "Seleccione un país"
 msgid "Select a collection"
 msgstr "Seleccione una colección"
 
+#: indicator/templates/filters/journal_metrics.html:214
+msgid "Select a SciELO collection"
+msgstr "Seleccione una colección SciELO"
+
 #: indicator/templates/filters/sci_prod_journal.html:246
 #, fuzzy
 #| msgid "Select a Year"

@@ -2430,6 +2430,10 @@ msgstr "Selecione um país"
 msgid "Select a collection"
 msgstr "Selecione uma coleção"
 
+#: indicator/templates/filters/journal_metrics.html:214
+msgid "Select a SciELO collection"
+msgstr "Selecione uma coleção SciELO"
+
 #: indicator/templates/filters/sci_prod_journal.html:246
 msgid "Select a category type"
 msgstr "Selecione um tipo de categoria"
