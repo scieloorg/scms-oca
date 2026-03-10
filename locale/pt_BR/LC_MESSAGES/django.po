@@ -286,7 +286,7 @@ msgstr "Nome do Periódico"
 #: search_gateway/data_sources_with_settings.py:378
 #: search_gateway/data_sources_with_settings.py:1491
 msgid "Publisher"
-msgstr "Publicador"
+msgstr "Editora"
 
 #: article/models.py:105 scholarly_articles/models.py:240
 msgid "DOAJ"
@@ -2593,7 +2593,7 @@ msgstr "Digite o ISSN..."
 
 #: indicator/templates/filters/sci_prod_journal.html:287
 msgid "Type publisher name..."
-msgstr "Digite o nome da Casa Publicadora..."
+msgstr "Digite o nome da editora..."
 
 #: indicator/templates/filters/sci_prod_journal.html:292
 msgid "Select a category id"
@@ -2941,9 +2941,65 @@ msgstr "Carregando perfil do periódico..."
 msgid "Selection Controls"
 msgstr "Controles de seleção"
 
-#: indicator/templates/ranking.html:163
-msgid "Selected Journal"
-msgstr "Periódico selecionado"
+#: indicator/templates/journal_profile.html:8
+msgid "Journal Profile"
+msgstr "Perfil do periódico"
+
+#: indicator/templates/journal_profile.html:107
+msgid "Analytical Summary"
+msgstr "Síntese analítica"
+
+#: indicator/templates/journal_profile.html:158
+msgid "Selected Category"
+msgstr "Categoria selecionada"
+
+#: indicator/templates/journal_profile.html:190
+msgid "Category Comparison"
+msgstr "Comparação entre categorias"
+
+#: indicator/templates/journal_profile.html:158
+msgid "Time Series in Selected Category"
+msgstr "Série temporal na categoria selecionada"
+
+#: indicator/templates/journal_profile.html:184
+msgid "Category Comparison in Selected Year"
+msgstr "Comparação entre categorias no ano selecionado"
+
+#: indicator/templates/journal_profile.html:165
+msgid "Historical series for the journal in the selected category."
+msgstr "Séries históricas do periódico na categoria selecionada."
+
+#: indicator/templates/journal_profile.html:197
+msgid "Comparison across categories for the selected year and category type."
+msgstr "Comparação entre categorias para o ano e o tipo de categoria selecionados."
+
+#: indicator/templates/journal_profile.html:43
+msgid "Ranking Controls"
+msgstr "Controles de ranking"
+
+#: indicator/templates/journal_profile.html:126
+msgid "Journal Attributes"
+msgstr "Atributos do periódico"
+
+#: indicator/templates/journal_profile.html:160
+msgid "Visualizations"
+msgstr "Visualizações"
+
+#: indicator/templates/filters/journal_metrics.html:125
+msgid "SciELO Collection"
+msgstr "Coleção SciELO"
+
+#: indicator/templates/journal_profile.html:111
+msgid "Indicators and journal attributes for the selected year and category."
+msgstr "Indicadores e atributos do periódico para o ano e a categoria selecionados."
+
+#: indicator/static/indicator/js/journal_metrics.js:312
+msgid "Copy"
+msgstr "Copiar"
+
+#: indicator/static/indicator/js/journal_metrics.js:932
+msgid "Collection code"
+msgstr "Código da coleção"
 
 #: indicator/templates/ranking.html:166
 msgid "Journal profile"

@@ -18,6 +18,103 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
+# journal_metrics.js / charts.js / journal_profile.html (manual additions)
+msgid "Category Type"
+msgstr "Category Type"
+
+msgid "Ranking Controls"
+msgstr "Ranking Controls"
+
+msgid "Journal Attributes"
+msgstr "Journal Attributes"
+
+msgid "Category"
+msgstr "Category"
+
+msgid "Year"
+msgstr "Year"
+
+msgid "Data"
+msgstr "Data"
+
+msgid "Copy"
+msgstr "Copy"
+
+msgid "Analytical Summary"
+msgstr "Analytical Summary"
+
+msgid "SciELO Collection"
+msgstr "SciELO Collection"
+
+msgid "Publisher"
+msgstr "Publisher"
+
+msgid "Indicators and journal attributes for the selected year and category."
+msgstr "Indicators and journal attributes for the selected year and category."
+
+msgid "Any value"
+msgstr "Any value"
+
+msgid "Close"
+msgstr "Close"
+
+msgid "Domain"
+msgstr "Domain"
+
+msgid "Field"
+msgstr "Field"
+
+msgid "Subfield"
+msgstr "Subfield"
+
+msgid "Topic"
+msgstr "Topic"
+
+msgid "Copied"
+msgstr "Copied"
+
+msgid "Copy failed"
+msgstr "Copy failed"
+
+msgid "ISSN"
+msgstr "ISSN"
+
+msgid "No data available"
+msgstr "No data available"
+
+msgid "No non-zero values"
+msgstr "No non-zero values"
+
+msgid "Select a country"
+msgstr "Select a country"
+
+msgid "Select a collection"
+msgstr "Select a collection"
+
+msgid "Select a category type"
+msgstr "Select a category type"
+
+msgid "Select a ranking metric"
+msgstr "Select a ranking metric"
+
+msgid "Select a value"
+msgstr "Select a value"
+
+msgid "Type journal name..."
+msgstr "Type journal name..."
+
+msgid "Type ISSN..."
+msgstr "Type ISSN..."
+
+msgid "Type publisher name..."
+msgstr "Type publisher name..."
+
+msgid "Select a category id"
+msgstr "Select a category"
+
+msgid "Type to search..."
+msgstr "Type to search..."
+
 #: indicator/static/indicator/js/button.js:85
 msgid "Start typing to search..."
 msgstr "Start typing to search..."

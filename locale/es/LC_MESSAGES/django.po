@@ -287,7 +287,7 @@ msgstr "Nombre de la revista"
 #: search_gateway/data_sources_with_settings.py:378
 #: search_gateway/data_sources_with_settings.py:1491
 msgid "Publisher"
-msgstr "Publicador"
+msgstr "Editorial"
 
 #: article/models.py:105 scholarly_articles/models.py:240
 msgid "DOAJ"
@@ -415,7 +415,7 @@ msgstr "A tabela de licenças possui duplicidade...."
 #: search/templates/search/include/result_items/journals.html:46
 #: search/templates/search/include/result_items/preprint.html:55
 msgid "Year"
-msgstr "Ano"
+msgstr "Año"
 
 #: article/models.py:980 article/models.py:1135 scholarly_articles/models.py:14
 #: scholarly_articles/models.py:448 scholarly_articles/models.py:519
@@ -2470,7 +2470,7 @@ msgstr "Colección"
 #, fuzzy
 #| msgid "Categoria"
 msgid "Category"
-msgstr "Categoria"
+msgstr "Categoría"
 
 #: indicator/templates/filters/sci_prod_journal.html:106
 #: indicator/templates/filters/sci_prod_journal.html:108
@@ -2479,7 +2479,7 @@ msgstr "Categoria"
 #, fuzzy
 #| msgid "Directory Type"
 msgid "Category Type"
-msgstr "Tipo de Diretório"
+msgstr "Tipo de categoría"
 
 #: indicator/templates/filters/sci_prod_journal.html:110
 #: indicator/templates/filters/sci_prod_world.html:16
@@ -2488,7 +2488,7 @@ msgstr "Tipo de Diretório"
 #: indicator/templatetags/indicator_filters.py:144
 #: search_gateway/data_sources_with_settings.py:247
 msgid "Field"
-msgstr ""
+msgstr "Área"
 
 #: indicator/templates/filters/sci_prod_journal.html:128
 msgid "Indexing / Coverage"
@@ -2561,57 +2561,57 @@ msgstr ""
 
 #: indicator/templates/filters/sci_prod_journal.html:190
 msgid "Any value"
-msgstr ""
+msgstr "Cualquier valor"
 
 #: indicator/templates/filters/sci_prod_journal.html:244
 #, fuzzy
 #| msgid "Select a Year"
 msgid "Select a country"
-msgstr "Seleccione un año"
+msgstr "Seleccione un país"
 
 #: indicator/templates/filters/sci_prod_journal.html:245
 #, fuzzy
 #| msgid "Select an option"
 msgid "Select a collection"
-msgstr "Seleccione una opción"
+msgstr "Seleccione una colección"
 
 #: indicator/templates/filters/sci_prod_journal.html:246
 #, fuzzy
 #| msgid "Select a Year"
 msgid "Select a category type"
-msgstr "Seleccione un año"
+msgstr "Seleccione un tipo de categoría"
 
 #: indicator/templates/filters/sci_prod_journal.html:247
 #, fuzzy
 #| msgid "Ranking metric"
 msgid "Select a ranking metric"
-msgstr "Métrica de ranking"
+msgstr "Seleccione una métrica de ranking"
 
 #: indicator/templates/filters/sci_prod_journal.html:255
 #, fuzzy
 #| msgid "Select a variable"
 msgid "Select a value"
-msgstr "Selecione uma variável"
+msgstr "Seleccione un valor"
 
 #: indicator/templates/filters/sci_prod_journal.html:277
 #, fuzzy
 #| msgid "Journal Name"
 msgid "Type journal name..."
-msgstr "Nombre de la revista"
+msgstr "Escriba el nombre de la revista..."
 
 #: indicator/templates/filters/sci_prod_journal.html:282
 msgid "Type ISSN..."
-msgstr ""
+msgstr "Escriba el ISSN..."
 
 #: indicator/templates/filters/sci_prod_journal.html:287
 msgid "Type publisher name..."
-msgstr ""
+msgstr "Escriba el nombre de la editorial..."
 
 #: indicator/templates/filters/sci_prod_journal.html:292
 #, fuzzy
 #| msgid "Select a Year"
 msgid "Select a category id"
-msgstr "Seleccione un año"
+msgstr "Seleccione una categoría"
 
 #: indicator/templates/filters/sci_prod_world.html:4
 #: indicator/templates/filters/soc_prod.html:4
@@ -2676,7 +2676,7 @@ msgstr "Tipo de Acesso"
 #: indicator/templatetags/indicator_filters.py:143
 #: search_gateway/data_sources_with_settings.py:233
 msgid "Domain"
-msgstr ""
+msgstr "Dominio"
 
 #: indicator/templates/filters/sci_prod_world.html:17
 #: indicator/templates/filters/sci_prod_world.html:156
@@ -2684,7 +2684,7 @@ msgstr ""
 #: indicator/templatetags/indicator_filters.py:145
 #: search_gateway/data_sources_with_settings.py:261
 msgid "Subfield"
-msgstr ""
+msgstr "Subárea"
 
 #: indicator/templates/filters/sci_prod_world.html:18
 #: indicator/templates/filters/sci_prod_world.html:162
@@ -2692,7 +2692,7 @@ msgstr ""
 #: indicator/templatetags/indicator_filters.py:146
 #: search_gateway/data_sources_with_settings.py:275
 msgid "Topic"
-msgstr ""
+msgstr "Tema"
 
 #: indicator/templates/filters/sci_prod_world.html:26
 msgid "Indexing"
@@ -2998,9 +2998,65 @@ msgstr "Cargando perfil de la revista..."
 msgid "Selection Controls"
 msgstr "Controles de selección"
 
-#: indicator/templates/ranking.html:163
-msgid "Selected Journal"
-msgstr "Revista seleccionada"
+#: indicator/templates/journal_profile.html:8
+msgid "Journal Profile"
+msgstr "Perfil de la revista"
+
+#: indicator/templates/journal_profile.html:107
+msgid "Analytical Summary"
+msgstr "Síntesis analítica"
+
+#: indicator/templates/journal_profile.html:158
+msgid "Selected Category"
+msgstr "Categoría seleccionada"
+
+#: indicator/templates/journal_profile.html:190
+msgid "Category Comparison"
+msgstr "Comparación entre categorías"
+
+#: indicator/templates/journal_profile.html:158
+msgid "Time Series in Selected Category"
+msgstr "Serie temporal en la categoría seleccionada"
+
+#: indicator/templates/journal_profile.html:184
+msgid "Category Comparison in Selected Year"
+msgstr "Comparación entre categorías en el año seleccionado"
+
+#: indicator/templates/journal_profile.html:165
+msgid "Historical series for the journal in the selected category."
+msgstr "Series históricas de la revista en la categoría seleccionada."
+
+#: indicator/templates/journal_profile.html:197
+msgid "Comparison across categories for the selected year and category type."
+msgstr "Comparación entre categorías para el año y el tipo de categoría seleccionados."
+
+#: indicator/templates/journal_profile.html:43
+msgid "Ranking Controls"
+msgstr "Controles de ranking"
+
+#: indicator/templates/journal_profile.html:126
+msgid "Journal Attributes"
+msgstr "Atributos de la revista"
+
+#: indicator/templates/journal_profile.html:160
+msgid "Visualizations"
+msgstr "Visualizaciones"
+
+#: indicator/templates/filters/journal_metrics.html:125
+msgid "SciELO Collection"
+msgstr "Colección SciELO"
+
+#: indicator/templates/journal_profile.html:111
+msgid "Indicators and journal attributes for the selected year and category."
+msgstr "Indicadores y atributos de la revista para el año y la categoría seleccionados."
+
+#: indicator/static/indicator/js/journal_metrics.js:312
+msgid "Copy"
+msgstr "Copiar"
+
+#: indicator/static/indicator/js/journal_metrics.js:932
+msgid "Collection code"
+msgstr "Código de la colección"
 
 #: indicator/templates/ranking.html:166
 msgid "Journal profile"
