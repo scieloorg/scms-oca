@@ -24,16 +24,29 @@ function buildGrid(overrides) {
 }
 
 // Builds the chart toolbox
-function buildToolbox(magicTypes) {
+function buildToolbox(magicTypes, dataViewOptions = {}) {
+  const feature = {
+    dataView: {
+      show: true,
+      title: gettext('Data'),
+      readOnly: true,
+      lang: ['', gettext('Close')],
+      ...dataViewOptions,
+    },
+    saveAsImage: { show: true },
+    restore: { show: true },
+    dataZoom: {}
+  };
+
+  if (magicTypes === undefined || magicTypes === null) {
+    feature.magicType = { type: ['bar', 'line'] };
+  } else if (magicTypes.length) {
+    feature.magicType = { type: magicTypes };
+  }
+
   return {
     orient: 'vertical',
-    feature: {
-      magicType: { type: magicTypes || ['bar', "line"] },
-      dataView: { show: true, title: 'Data', readOnly: true, lang: ['', 'Close'] },
-      saveAsImage: { show: true },
-      restore: { show: true },
-      dataZoom: {}
-    }
+    feature,
   };
 }
 
@@ -130,26 +143,272 @@ function getSeriesTotal(data) {
     }, 0);
 }
 
-function escapeHtml(value) {
-    return String(value ?? '')
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
+let chartNumberLocale = null;
+const chartNumberFormatterCache = new Map();
+
+function normalizeChartNumberLocale(locale) {
+    const normalizedLocale = String(locale || '').trim().replace(/_/g, '-');
+    if (!normalizedLocale) return null;
+
+    if (typeof Intl !== 'undefined' && typeof Intl.getCanonicalLocales === 'function') {
+        try {
+            const [canonicalLocale] = Intl.getCanonicalLocales(normalizedLocale);
+            return canonicalLocale || normalizedLocale;
+        } catch (_error) {
+            return normalizedLocale;
+        }
+    }
+
+    return normalizedLocale;
 }
 
-function formatTooltipNumber(value, isPercent = false) {
+function setChartNumberLocale(locale) {
+    const nextLocale = normalizeChartNumberLocale(locale);
+    if (nextLocale === chartNumberLocale) return;
+    chartNumberLocale = nextLocale;
+    chartNumberFormatterCache.clear();
+}
+
+function getChartNumberFormatter(options = {}) {
+    const formatterLocale = chartNumberLocale || undefined;
+    const cacheKey = JSON.stringify([formatterLocale || '', options]);
+
+    if (!chartNumberFormatterCache.has(cacheKey)) {
+        chartNumberFormatterCache.set(
+            cacheKey,
+            new Intl.NumberFormat(formatterLocale, options),
+        );
+    }
+
+    return chartNumberFormatterCache.get(cacheKey);
+}
+
+function formatChartNumber(value, options = {}) {
+    if (value === null || value === undefined || value === '') return '-';
+
     const numericValue = Number(value);
     if (!Number.isFinite(numericValue)) return '-';
 
-    const formatter = new Intl.NumberFormat(undefined, {
+    return getChartNumberFormatter(options).format(numericValue);
+}
+
+function formatChartAxisNumber(value, options = {}) {
+    const {
+        decimals = null,
+        isPercent = false,
+    } = options;
+
+    if (value === null || value === undefined || value === '') return '-';
+
+    const numericValue = Number(value);
+    if (!Number.isFinite(numericValue)) return '-';
+
+    const maximumFractionDigits = Number.isInteger(decimals)
+        ? decimals
+        : (Number.isInteger(numericValue) ? 0 : 2);
+
+    const formatted = formatChartNumber(numericValue, {
         minimumFractionDigits: 0,
-        maximumFractionDigits: Math.abs(numericValue) < 100 ? 2 : 1,
+        maximumFractionDigits,
     });
 
-    const formatted = formatter.format(numericValue);
     return isPercent ? `${formatted}%` : formatted;
+}
+
+function formatTooltipNumber(value, options = {}) {
+    const {
+        decimals = null,
+        isPercent = false,
+    } = typeof options === 'boolean' ? { isPercent: options } : options;
+
+    const numericValue = Number(value);
+    if (!Number.isFinite(numericValue)) return '-';
+
+    const formatterOptions = {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: Number.isInteger(decimals)
+            ? decimals
+            : (Math.abs(numericValue) < 100 ? 2 : 1),
+    };
+
+    const formatted = formatChartNumber(numericValue, formatterOptions);
+    return isPercent ? `${formatted}%` : formatted;
+}
+
+function buildEncodedCopyText(columns, rows) {
+    const lines = [
+        (columns || []).map(column => String(column.label || '')),
+        ...((rows || []).map(row => (row || []).map(cell => String(cell ?? '')))),
+    ];
+    const copyText = lines.map(line => line.join('\t')).join('\n');
+    return encodeURIComponent(copyText);
+}
+
+function formatDataViewNumber(value, options = {}) {
+    const {
+        decimals = null,
+        isPercent = false,
+    } = options;
+
+    const numericValue = Number(value);
+    if (!Number.isFinite(numericValue)) return '-';
+
+    const maximumFractionDigits = Number.isInteger(decimals)
+        ? decimals
+        : (Number.isInteger(numericValue)
+            ? 0
+            : (Math.abs(numericValue) >= 1 ? 2 : 4));
+
+    const formatterOptions = {
+        minimumFractionDigits: 0,
+        maximumFractionDigits,
+    };
+
+    const formatted = formatChartNumber(numericValue, formatterOptions);
+
+    return isPercent ? `${formatted}%` : formatted;
+}
+
+function buildDataViewTable({ title, columns, rows, emptyMessage }) {
+    const copyButtonHtml = Array.isArray(rows) && rows.length
+        ? `
+            <button
+                type="button"
+                class="indicator-data-view__copy"
+                data-copy-text="${buildEncodedCopyText(columns, rows)}"
+                data-label-default="${escapeHtml(gettext('Copy'))}"
+                data-label-success="${escapeHtml(gettext('Copied'))}"
+                data-label-error="${escapeHtml(gettext('Copy failed'))}">
+                ${escapeHtml(gettext('Copy'))}
+            </button>
+        `
+        : '';
+    const titleHtml = title
+        ? `<div class="indicator-data-view__title">${escapeHtml(title)}</div>`
+        : '';
+    const dataViewHeaderHtml = (titleHtml || copyButtonHtml)
+        ? `
+            <div class="indicator-data-view__header">
+                ${titleHtml || '<div></div>'}
+                ${copyButtonHtml ? `<div class="indicator-data-view__actions">${copyButtonHtml}</div>` : ''}
+            </div>
+        `
+        : '';
+
+    if (!Array.isArray(rows) || !rows.length) {
+        return `
+            <div class="indicator-data-view">
+                ${dataViewHeaderHtml}
+                <div class="indicator-data-view__empty">${escapeHtml(emptyMessage || gettext('No data available'))}</div>
+            </div>
+        `;
+    }
+
+    const tableHeaderHtml = (columns || []).map(column => {
+        const alignClass = column.align === 'right' ? ' indicator-data-view__cell--numeric' : '';
+        return `<th class="indicator-data-view__cell${alignClass}">${escapeHtml(column.label)}</th>`;
+    }).join('');
+
+    const rowsHtml = rows.map(row => `
+        <tr>
+            ${(row || []).map((cellValue, index) => {
+                const column = columns[index] || {};
+                const alignClass = column.align === 'right' ? ' indicator-data-view__cell--numeric' : '';
+                return `<td class="indicator-data-view__cell${alignClass}">${escapeHtml(cellValue)}</td>`;
+            }).join('')}
+        </tr>
+    `).join('');
+
+    return `
+        <div class="indicator-data-view">
+            ${dataViewHeaderHtml}
+            <div class="indicator-data-view__scroll">
+                <table class="indicator-data-view__table">
+                    <thead>
+                        <tr>${tableHeaderHtml}</tr>
+                    </thead>
+                    <tbody>${rowsHtml}</tbody>
+                </table>
+            </div>
+        </div>
+    `;
+}
+
+function buildTimeSeriesDataView({ title, axisLabel, axisValues, series, forcePercentAxis = false, emptyMessage }) {
+    const columns = [{ label: axisLabel || gettext('Year') }, ...(series || []).map(item => ({
+        label: item.name,
+        align: 'right',
+    }))];
+
+    const rows = Array.isArray(axisValues)
+        ? axisValues.map((axisValue, index) => [
+            axisValue,
+            ...(series || []).map(item => {
+                const formatter = typeof item.dataViewFormatter === 'function'
+                    ? item.dataViewFormatter
+                    : (value => formatDataViewNumber(value, { isPercent: forcePercentAxis || Boolean(item.isPercentSeries) }));
+                const value = Array.isArray(item.data) ? item.data[index] : null;
+                return formatter(value);
+            }),
+        ])
+        : [];
+
+    return buildDataViewTable({
+        title,
+        columns,
+        rows,
+        emptyMessage: emptyMessage || gettext('No data available'),
+    });
+}
+
+function buildTooltipCard(title, rowsHtml, emptyMessage) {
+    const contentHtml = rowsHtml || `<div class="indicator-tooltip__empty">${escapeHtml(emptyMessage || gettext('No data available'))}</div>`;
+
+    return `
+        <div class="indicator-tooltip">
+            <div class="indicator-tooltip__year">${escapeHtml(title)}</div>
+            <div class="indicator-tooltip__rows">
+                ${contentHtml}
+            </div>
+        </div>
+    `;
+}
+
+function buildAxisTooltipFormatter(forcePercentAxis = false) {
+    const {
+        forcePercentAxis: resolvedForcePercentAxis = false,
+        series = [],
+        emptyMessage = null,
+    } = typeof forcePercentAxis === 'boolean' ? { forcePercentAxis } : (forcePercentAxis || {});
+
+    const seriesFormatterMap = new Map(
+        (series || []).map(item => [
+            item.name,
+            typeof item.tooltipFormatter === 'function'
+                ? item.tooltipFormatter
+                : (value => formatTooltipNumber(value, {
+                    isPercent: resolvedForcePercentAxis || Boolean(item.isPercentSeries),
+                })),
+        ]),
+    );
+
+    return (params) => {
+        const items = Array.isArray(params) ? params : [params];
+        if (!items.length) return '';
+
+        const axisValue = items[0]?.axisValueLabel || items[0]?.axisValue || items[0]?.name || '';
+        const rowsHtml = items.map(item => {
+            const formatter = seriesFormatterMap.get(item?.seriesName) || (value => formatTooltipNumber(value, resolvedForcePercentAxis));
+            return `
+                <div class="indicator-tooltip__row">
+                    <span class="indicator-tooltip__label">${item?.marker || ''}${escapeHtml(item?.seriesName || '')}</span>
+                    <span class="indicator-tooltip__value">${formatter(item?.value)}</span>
+                </div>
+            `;
+        }).join('');
+
+        return buildTooltipCard(axisValue, rowsHtml, emptyMessage);
+    };
 }
 
 function buildBreakdownTooltipFormatter(forcePercentAxis = false) {
@@ -369,12 +628,12 @@ Indicators.renderChart = function({
     const subtitleLineCount = wrappedSubtitle ? wrappedSubtitle.split('\n').length : 0;
     const subtitleHeight = subtitleLineCount ? (18 + ((subtitleLineCount - 1) * 14)) : 0;
     const gridTop = Math.max(86, 86 + ((titleLineCount - 1) * 16) + subtitleHeight);
-    const legendNames = hasBreakdown
+    const dataViewSeries = hasBreakdown
         ? series
             .slice()
             .sort((a, b) => getSeriesTotal(b?.data) - getSeriesTotal(a?.data))
-            .map(s => s.name)
-        : series.map(s => s.name);
+        : series;
+    const legendNames = dataViewSeries.map(s => s.name);
     const tooltipOptions = hasBreakdown
         ? buildTooltip({
             trigger: 'axis',
@@ -382,7 +641,12 @@ Indicators.renderChart = function({
             formatter: buildBreakdownTooltipFormatter(forcePercentAxis),
             extraCssText: 'background:transparent;border:none;box-shadow:none;padding:0;',
         })
-        : buildTooltip({ trigger: 'axis', axisPointer: { type: 'shadow' } });
+        : buildTooltip({
+            trigger: 'axis',
+            axisPointer: { type: 'shadow' },
+            formatter: buildAxisTooltipFormatter(forcePercentAxis),
+            extraCssText: 'background:transparent;border:none;box-shadow:none;padding:0;',
+        });
 
     const chartOpts = {
         title: {
@@ -403,7 +667,15 @@ Indicators.renderChart = function({
         },
         tooltip: tooltipOptions,
         grid: buildGrid({ top: gridTop }),
-        toolbox: buildToolbox(['bar', 'line']),
+        toolbox: buildToolbox(['bar', 'line'], {
+            optionToContent: () => buildTimeSeriesDataView({
+                title: [title, subtitle].filter(Boolean).join(' - '),
+                axisLabel: gettext('Year'),
+                axisValues: years,
+                series: dataViewSeries,
+                forcePercentAxis,
+            }),
+        }),
         xAxis: { type: 'category', data: years },
         yAxis: forcePercentAxis
             ? {
