@@ -74,7 +74,7 @@ DATA_SOURCES = {
             "source_country": {
                 "index_field_name": "oca_data.source.country_search",
                 "field_autocomplete": "oca_data.source.country_search_autocomplete",
-                "filter": {"size": 10, "order": {"_key": "asc"}},
+                "filter": {"size": 500, "order": {"_key": "asc"}},
                 "settings": {
                     "class_filter": "select2",
                     "label": _("Source Country"),
@@ -214,7 +214,7 @@ DATA_SOURCES = {
             },
             "subject_area_level_2": {
                 "index_field_name": "topic_subfields",
-                "filter": {"size": 5, "order": {"_key": "asc"}},
+                "filter": {"size": 500, "order": {"_key": "asc"}},
                 "settings": {
                     "class_filter": "select2",
                     "label": _("Subfield"),
@@ -263,7 +263,7 @@ DATA_SOURCES = {
             },
             "country": {
                 "index_field_name": "author_country_codes",
-                "filter": {"size": 200, "order": {"_key": "asc"}},
+                "filter": {"size": 500, "order": {"_key": "asc"}},
                 "settings": {
                     "class_filter": "select2",
                     "label": _("Country"),
