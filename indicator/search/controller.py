@@ -1,6 +1,17 @@
 from search_gateway.client import get_opensearch_client
 from search_gateway import data_sources_with_settings
 
+from indicator.journal_metrics.config import (
+    ALLOWED_RANKING_METRICS,
+    DEFAULT_CATEGORY_ID,
+    DEFAULT_MINIMUM_PUBLICATIONS,
+    DEFAULT_PUBLICATION_YEAR,
+    DEFAULT_RANKING_METRIC,
+    get_index_field_name,
+    normalize_category_level,
+    normalize_minimum_publications,
+    normalize_ranking_metric,
+)
 from . import query as indicator_query
 from . import parser as indicator_parser
 from . import utils
@@ -20,11 +31,6 @@ CONTROL_FILTER_KEYS = {
     "return_study_unit",
     "csrfmiddlewaretoken",
 }
-
-DEFAULT_JOURNAL_METRICS_CATEGORY_LEVEL = "field"
-VALID_JOURNAL_METRICS_CATEGORY_LEVELS = {"domain", "field", "subfield", "topic"}
-DEFAULT_JOURNAL_METRICS_PUBLICATION_YEAR = "2020"
-DEFAULT_JOURNAL_METRICS_RANKING_METRIC = "journal_impact_normalized_window_3y"
 
 
 def _normalize_indicator_study_unit(study_unit):
@@ -70,13 +76,17 @@ def _build_comparison_baseline_filters(filters):
     return baseline_filters, comparative_filter_keys
 
 
-def _normalize_journal_metrics_category_level(category_level):
-    value = str(category_level or "").strip().lower()
-    if not value:
-        return DEFAULT_JOURNAL_METRICS_CATEGORY_LEVEL
-    if value not in VALID_JOURNAL_METRICS_CATEGORY_LEVELS:
-        return DEFAULT_JOURNAL_METRICS_CATEGORY_LEVEL
-    return value
+def _append_must_clause(query, clause):
+    if not clause:
+        return query
+
+    if isinstance(query, dict) and "bool" in query:
+        bool_query = query.setdefault("bool", {})
+        must_clauses = bool_query.setdefault("must", [])
+        must_clauses.append(clause)
+        return query
+
+    return {"bool": {"must": [clause]}}
 
 
 def _build_journal_metrics_filter_clauses(form_filters, selected_category_level):
@@ -89,6 +99,7 @@ def _build_journal_metrics_filter_clauses(form_filters, selected_category_level)
         "year",
         "ranking_metric",
         "limit",
+        "minimum_publications",
         "scope",
         "return_study_unit",
         "study_unit",
@@ -124,32 +135,23 @@ def get_journal_metrics_data(form_filters):
         return None, "Invalid data_source"
 
     payload_filters = dict(form_filters)
-    payload_filters["category_level"] = _normalize_journal_metrics_category_level(
-        payload_filters.get("category_level")
-    )
+    has_explicit_category_level = str(payload_filters.get("category_level") or "").strip() != ""
+    has_explicit_category_id = str(payload_filters.get("category_id") or "").strip() != ""
+    payload_filters["category_level"] = normalize_category_level(payload_filters.get("category_level"))
+    if not has_explicit_category_level and not has_explicit_category_id:
+        payload_filters["category_id"] = DEFAULT_CATEGORY_ID
 
     publication_year = payload_filters.pop("publication_year", None) or payload_filters.pop("year", None)
-    ranking_metric = payload_filters.pop("ranking_metric", DEFAULT_JOURNAL_METRICS_RANKING_METRIC)
+    ranking_metric = payload_filters.pop("ranking_metric", DEFAULT_RANKING_METRIC)
     limit = payload_filters.pop("limit", 100)
+    minimum_publications = normalize_minimum_publications(payload_filters.pop("minimum_publications", None))
+    if minimum_publications is None:
+        minimum_publications = DEFAULT_MINIMUM_PUBLICATIONS
 
-    allowed_ranking_metrics = {
-        "journal_publications_count",
-        "journal_citations_total",
-        "journal_citations_mean",
-        "journal_citations_mean_window_2y",
-        "journal_citations_mean_window_3y",
-        "journal_citations_mean_window_5y",
-        "journal_impact_normalized",
-        "journal_impact_normalized_window_2y",
-        "journal_impact_normalized_window_3y",
-        "journal_impact_normalized_window_5y",
-        "top_1pct_all_time_publications_share_pct",
-        "top_5pct_all_time_publications_share_pct",
-        "top_10pct_all_time_publications_share_pct",
-        "top_50pct_all_time_publications_share_pct",
-    }
-    if ranking_metric not in allowed_ranking_metrics:
-        ranking_metric = DEFAULT_JOURNAL_METRICS_RANKING_METRIC
+    ranking_metric = normalize_ranking_metric(ranking_metric)
+
+    if ranking_metric not in ALLOWED_RANKING_METRICS:
+        ranking_metric = DEFAULT_RANKING_METRIC
 
     try:
         limit = int(limit)
@@ -158,12 +160,17 @@ def get_journal_metrics_data(form_filters):
     limit = max(1, min(limit, 5000))
 
     if not publication_year:
-        publication_year = DEFAULT_JOURNAL_METRICS_PUBLICATION_YEAR
+        publication_year = DEFAULT_PUBLICATION_YEAR
 
     cleaned_filters = utils.clean_form_filters(payload_filters)
 
     query = indicator_query.build_query(cleaned_filters, field_settings, data_source)
     jm_query = indicator_query.build_journal_metrics_query(publication_year, query)
+    if minimum_publications is not None:
+        jm_query = _append_must_clause(
+            jm_query,
+            {"range": {"journal_publications_count": {"gte": minimum_publications}}},
+        )
 
     body = indicator_query.build_journal_metrics_body(
         selected_year=publication_year,
@@ -202,7 +209,7 @@ def get_journal_metrics_timeseries(
     if not index_name:
         return None, "Invalid data_source"
 
-    selected_category_level = _normalize_journal_metrics_category_level(category_level)
+    selected_category_level = normalize_category_level(category_level)
     inherited_must, inherited_must_not = _build_journal_metrics_filter_clauses(
         form_filters,
         selected_category_level,
@@ -273,7 +280,7 @@ def get_journal_metrics_timeseries(
         },
         "sort": [
             {"publication_year": {"order": "asc"}},
-            {"journal_impact_normalized": {"order": "desc", "missing": "_last"}},
+            {get_index_field_name("journal_impact_cohort"): {"order": "desc", "missing": "_last"}},
         ],
         "collapse": {"field": "publication_year"},
         "_source": indicator_query.JOURNAL_METRICS_SOURCE_FIELDS,
