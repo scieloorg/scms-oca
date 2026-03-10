@@ -72,11 +72,11 @@
           <div class="journal-profile-controls-bar__field">
             <label class="form-label mb-1" for="journal-profile-category-level-select">{% trans "Category Type" %}</label>
             <select id="journal-profile-category-level-select" class="form-select" name="category_level" data-profile-category-level>
-              {% if not filters_data.category_level %}
+              {% if not profile_category_level_options %}
               <option value="{{ selected_category_level }}" selected>{{ selected_category_level|ui_value:"category_level" }}</option>
               {% endif %}
-              {% for option in filters_data.category_level %}
-              <option value="{{ option.key }}" {% if selected_category_level == option.key|stringformat:'s' %}selected{% endif %}>{{ option.key|ui_value:"category_level" }}</option>
+              {% for option in profile_category_level_options %}
+              <option value="{{ option }}" {% if selected_category_level == option|stringformat:'s' %}selected{% endif %}>{{ option|ui_value:"category_level" }}</option>
               {% endfor %}
             </select>
           </div>

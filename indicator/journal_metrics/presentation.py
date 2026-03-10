@@ -69,6 +69,11 @@ def build_profile_context(
     selected_year_metrics = {}
     profile_year_options = [resolved_publication_year] if resolved_publication_year else []
     profile_category_options = [resolved_category_id] if resolved_category_id else []
+    profile_category_level_options = [
+        str((option or {}).get("key") if isinstance(option, dict) else option).strip()
+        for option in (filters_data or {}).get("category_level", [])
+        if str((option or {}).get("key") if isinstance(option, dict) else option).strip()
+    ]
 
     if profile_data:
         journal_title = str(profile_data.get("journal_title") or "").strip()
@@ -92,6 +97,13 @@ def build_profile_context(
         )
         profile_year_options = list(reversed(available_years))
         profile_category_options = profile_data.get("available_categories") or []
+        available_category_levels = [
+            str(level).strip()
+            for level in (profile_data.get("available_category_levels") or [])
+            if str(level).strip()
+        ]
+        if available_category_levels:
+            profile_category_level_options = available_category_levels
 
     collection_display_value = _build_collection_display_value(profile_data, selected_year_metrics)
     profile_header_attributes = _build_profile_header_attributes(
@@ -159,6 +171,7 @@ def build_profile_context(
         "profile_kpis": profile_kpis,
         "profile_badges": profile_badges,
         "profile_year_options": profile_year_options,
+        "profile_category_level_options": profile_category_level_options,
         "profile_category_options": profile_category_options,
         "filters_data": filters_data or {},
     }
