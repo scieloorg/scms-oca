@@ -18,6 +18,103 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
+# journal_metrics.js / charts.js / journal_profile.html (manual additions)
+msgid "Category Type"
+msgstr "Tipo de categoría"
+
+msgid "Ranking Controls"
+msgstr "Controles de ranking"
+
+msgid "Journal Attributes"
+msgstr "Atributos de la revista"
+
+msgid "Category"
+msgstr "Categoría"
+
+msgid "Year"
+msgstr "Año"
+
+msgid "Data"
+msgstr "Datos"
+
+msgid "Copy"
+msgstr "Copiar"
+
+msgid "Analytical Summary"
+msgstr "Síntesis analítica"
+
+msgid "SciELO Collection"
+msgstr "Colección SciELO"
+
+msgid "Publisher"
+msgstr "Editorial"
+
+msgid "Indicators and journal attributes for the selected year and category."
+msgstr "Indicadores y atributos de la revista para el año y la categoría seleccionados."
+
+msgid "Any value"
+msgstr "Cualquier valor"
+
+msgid "Close"
+msgstr "Cerrar"
+
+msgid "Domain"
+msgstr "Dominio"
+
+msgid "Field"
+msgstr "Área"
+
+msgid "Subfield"
+msgstr "Subárea"
+
+msgid "Topic"
+msgstr "Tema"
+
+msgid "Copied"
+msgstr "Copiado"
+
+msgid "Copy failed"
+msgstr "Error al copiar"
+
+msgid "ISSN"
+msgstr "ISSN"
+
+msgid "No data available"
+msgstr "No hay datos disponibles"
+
+msgid "No non-zero values"
+msgstr "No hay valores distintos de cero"
+
+msgid "Select a country"
+msgstr "Seleccione un país"
+
+msgid "Select a collection"
+msgstr "Seleccione una colección"
+
+msgid "Select a category type"
+msgstr "Seleccione un tipo de categoría"
+
+msgid "Select a ranking metric"
+msgstr "Seleccione una métrica de ranking"
+
+msgid "Select a value"
+msgstr "Seleccione un valor"
+
+msgid "Type journal name..."
+msgstr "Escriba el nombre de la revista..."
+
+msgid "Type ISSN..."
+msgstr "Escriba el ISSN..."
+
+msgid "Type publisher name..."
+msgstr "Escriba el nombre de la editorial..."
+
+msgid "Select a category id"
+msgstr "Seleccione una categoría"
+
+msgid "Type to search..."
+msgstr "Escriba para buscar..."
+
 #: indicator/static/indicator/js/button.js:85
 msgid "Start typing to search..."
 msgstr "Comience a escribir para buscar..."

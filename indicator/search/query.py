@@ -1,39 +1,12 @@
 from search_gateway import data_sources_with_settings
 
+from indicator.journal_metrics.config import (
+    DEFAULT_RANKING_METRIC,
+    SOURCE_FIELDS as JOURNAL_METRICS_SOURCE_FIELDS,
+    get_index_field_name,
+    normalize_ranking_metric,
+)
 from . import utils
-
-
-JOURNAL_METRICS_SOURCE_FIELDS = [
-    "journal_id",
-    "journal_title",
-    "journal_issn",
-    "publisher_name",
-    "country",
-    "collection",
-    "category_id",
-    "category_level",
-    "publication_year",
-    "journal_publications_count",
-    "journal_citations_total",
-    "journal_citations_mean",
-    "journal_citations_mean_window_2y",
-    "journal_citations_mean_window_3y",
-    "journal_citations_mean_window_5y",
-    "journal_impact_normalized",
-    "journal_impact_normalized_window_2y",
-    "journal_impact_normalized_window_3y",
-    "journal_impact_normalized_window_5y",
-    "top_1pct_all_time_publications_share_pct",
-    "top_5pct_all_time_publications_share_pct",
-    "top_10pct_all_time_publications_share_pct",
-    "top_50pct_all_time_publications_share_pct",
-    "is_scielo",
-    "is_scopus",
-    "is_wos",
-    "is_doaj",
-    "is_openalex",
-    "is_journal_multilingual",
-]
 
 
 def build_journal_metrics_query(selected_year, query):
@@ -64,13 +37,16 @@ def build_journal_metrics_query(selected_year, query):
 
 def build_journal_metrics_body(selected_year=None, ranking_metric=None, size=500, query=None):
     if not ranking_metric:
-        ranking_metric = "journal_impact_normalized"
+        ranking_metric = DEFAULT_RANKING_METRIC
+
+    ranking_metric = normalize_ranking_metric(ranking_metric)
+    ranking_metric_field = get_index_field_name(ranking_metric)
 
     return {
         "query": query if query else {"match_all": {}},
         "size": int(size) if str(size).isdigit() else 500,
         "track_total_hits": True,
-        "sort": [{ranking_metric: {"order": "desc", "missing": "_last"}}],
+        "sort": [{ranking_metric_field: {"order": "desc", "missing": "_last"}}],
         "collapse": {"field": "journal_id"},
         "aggs": {
             "unique_journals": {

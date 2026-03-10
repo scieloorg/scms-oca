@@ -74,7 +74,7 @@ DATA_SOURCES = {
             "source_country": {
                 "index_field_name": "oca_data.source.country_search",
                 "field_autocomplete": "oca_data.source.country_search_autocomplete",
-                "filter": {"size": 10, "order": {"_key": "asc"}},
+                "filter": {"size": 500, "order": {"_key": "asc"}},
                 "settings": {
                     "class_filter": "select2",
                     "label": _("Source Country"),
@@ -214,7 +214,7 @@ DATA_SOURCES = {
             },
             "subject_area_level_2": {
                 "index_field_name": "topic_subfields",
-                "filter": {"size": 5, "order": {"_key": "asc"}},
+                "filter": {"size": 500, "order": {"_key": "asc"}},
                 "settings": {
                     "class_filter": "select2",
                     "label": _("Subfield"),
@@ -263,7 +263,7 @@ DATA_SOURCES = {
             },
             "country": {
                 "index_field_name": "author_country_codes",
-                "filter": {"size": 200, "order": {"_key": "asc"}},
+                "filter": {"size": 500, "order": {"_key": "asc"}},
                 "settings": {
                     "class_filter": "select2",
                     "label": _("Country"),
@@ -830,7 +830,7 @@ DATA_SOURCES = {
         "display_name": _("Journal Metrics"),
         "field_settings": {
             "country": {
-                "index_field_name": "country",
+                "index_field_name": "journal_country",
                 "filter": {
                     "size": 500,
                     "order": {
@@ -866,7 +866,7 @@ DATA_SOURCES = {
                 }
             },
             "publisher_name": {
-                "index_field_name": "publisher_name",
+                "index_field_name": "journal_publisher",
                 "filter": {
                     "size": 1,
                     "order": {
@@ -875,7 +875,7 @@ DATA_SOURCES = {
                 }
             },
             "collection": {
-                "index_field_name": "collection",
+                "index_field_name": "scielo_collection",
                 "filter": {
                     "size": 100,
                     "order": {
@@ -948,6 +948,18 @@ DATA_SOURCES = {
             },
             "is_doaj": {
                 "index_field_name": "is_doaj",
+                "filter": {
+                    "transform": {
+                        "type": "boolean"
+                    },
+                    "size": 2,
+                    "order": {
+                        "_key": "asc"
+                    }
+                }
+            },
+            "is_journal_oa": {
+                "index_field_name": "is_journal_oa",
                 "filter": {
                     "transform": {
                         "type": "boolean"
@@ -1043,7 +1055,7 @@ DATA_SOURCES = {
                 }
             },
             "journal_impact_normalized": {
-                "index_field_name": "journal_impact_normalized",
+                "index_field_name": "journal_impact_cohort",
                 "filter": {
                     "use": False,
                     "size": 1,
@@ -1053,7 +1065,7 @@ DATA_SOURCES = {
                 }
             },
             "journal_impact_normalized_window_2y": {
-                "index_field_name": "journal_impact_normalized_window_2y",
+                "index_field_name": "journal_impact_cohort_window_2y",
                 "filter": {
                     "use": False,
                     "size": 1,
@@ -1063,7 +1075,7 @@ DATA_SOURCES = {
                 }
             },
             "journal_impact_normalized_window_3y": {
-                "index_field_name": "journal_impact_normalized_window_3y",
+                "index_field_name": "journal_impact_cohort_window_3y",
                 "filter": {
                     "use": False,
                     "size": 1,
@@ -1073,7 +1085,7 @@ DATA_SOURCES = {
                 }
             },
             "journal_impact_normalized_window_5y": {
-                "index_field_name": "journal_impact_normalized_window_5y",
+                "index_field_name": "journal_impact_cohort_window_5y",
                 "filter": {
                     "use": False,
                     "size": 1,

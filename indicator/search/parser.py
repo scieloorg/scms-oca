@@ -1,9 +1,13 @@
+from indicator.journal_metrics.config import DEFAULT_RANKING_METRIC, get_index_field_name, normalize_ranking_metric
+
 from . import utils
 
 
 def parse_journal_metrics_response(response, selected_year=None, ranking_metric=None):
     if not ranking_metric:
-        ranking_metric = "journal_impact_normalized"
+        ranking_metric = DEFAULT_RANKING_METRIC
+
+    ranking_metric = normalize_ranking_metric(ranking_metric)
 
     def _to_float(value, fallback=0.0):
         try:
@@ -17,6 +21,9 @@ def parse_journal_metrics_response(response, selected_year=None, ranking_metric=
         except (TypeError, ValueError):
             return fallback
 
+    def _get_value(source, field_name, default=None):
+        return source.get(get_index_field_name(field_name), default)
+
     hits = response.get("hits", {}).get("hits", [])
     journals = []
     for hit in hits:
@@ -25,9 +32,11 @@ def parse_journal_metrics_response(response, selected_year=None, ranking_metric=
             "journal_id": source.get("journal_id"),
             "title": source.get("journal_title", "Unknown"),
             "issn": source.get("journal_issn", ""),
-            "publisher_name": source.get("publisher_name", ""),
-            "country": source.get("country", ""),
-            "collection": source.get("collection", ""),
+            "publisher_name": _get_value(source, "publisher_name", ""),
+            "country": _get_value(source, "country", ""),
+            "collection": _get_value(source, "collection", ""),
+            "collection_name": _get_value(source, "collection_name", ""),
+            "collection_acronym": _get_value(source, "collection_acronym", ""),
             "category_id": source.get("category_id", ""),
             "category_level": source.get("category_level", ""),
             "publication_year": _to_int(source.get("publication_year")),
@@ -37,10 +46,16 @@ def parse_journal_metrics_response(response, selected_year=None, ranking_metric=
             "journal_citations_mean_window_2y": _to_float(source.get("journal_citations_mean_window_2y")),
             "journal_citations_mean_window_3y": _to_float(source.get("journal_citations_mean_window_3y")),
             "journal_citations_mean_window_5y": _to_float(source.get("journal_citations_mean_window_5y")),
-            "journal_impact_normalized": _to_float(source.get("journal_impact_normalized")),
-            "journal_impact_normalized_window_2y": _to_float(source.get("journal_impact_normalized_window_2y")),
-            "journal_impact_normalized_window_3y": _to_float(source.get("journal_impact_normalized_window_3y")),
-            "journal_impact_normalized_window_5y": _to_float(source.get("journal_impact_normalized_window_5y")),
+            "journal_impact_cohort": _to_float(_get_value(source, "journal_impact_cohort")),
+            "journal_impact_cohort_window_2y": _to_float(
+                _get_value(source, "journal_impact_cohort_window_2y")
+            ),
+            "journal_impact_cohort_window_3y": _to_float(
+                _get_value(source, "journal_impact_cohort_window_3y")
+            ),
+            "journal_impact_cohort_window_5y": _to_float(
+                _get_value(source, "journal_impact_cohort_window_5y")
+            ),
             "top_1pct_all_time_publications_share_pct": _to_float(
                 source.get("top_1pct_all_time_publications_share_pct")
             ),
@@ -59,6 +74,7 @@ def parse_journal_metrics_response(response, selected_year=None, ranking_metric=
             "is_doaj": bool(source.get("is_doaj", False)),
             "is_openalex": bool(source.get("is_openalex", False)),
             "is_journal_multilingual": bool(source.get("is_journal_multilingual", False)),
+            "is_journal_oa": bool(source.get("is_journal_oa", False)),
         }
         journals.append(journal)
 
@@ -86,7 +102,7 @@ def parse_journal_metrics_timeseries(hits):
             "journal_publications_count_per_year": [],
             "journal_citations_total_per_year": [],
             "journal_citations_mean_per_year": [],
-            "journal_impact_normalized_per_year": [],
+            "journal_impact_cohort_per_year": [],
             "top_1pct_all_time_publications_share_pct_per_year": [],
             "top_5pct_all_time_publications_share_pct_per_year": [],
             "top_10pct_all_time_publications_share_pct_per_year": [],
@@ -108,6 +124,9 @@ def parse_journal_metrics_timeseries(hits):
         except (TypeError, ValueError):
             return fallback
 
+    def _get_value(source, field_name, default=None):
+        return source.get(get_index_field_name(field_name), default)
+
     snapshots = []
     for hit in hits:
         source = hit.get("_source", {})
@@ -119,10 +138,16 @@ def parse_journal_metrics_timeseries(hits):
             "journal_citations_mean_window_2y": _to_float(source.get("journal_citations_mean_window_2y")),
             "journal_citations_mean_window_3y": _to_float(source.get("journal_citations_mean_window_3y")),
             "journal_citations_mean_window_5y": _to_float(source.get("journal_citations_mean_window_5y")),
-            "journal_impact_normalized": _to_float(source.get("journal_impact_normalized")),
-            "journal_impact_normalized_window_2y": _to_float(source.get("journal_impact_normalized_window_2y")),
-            "journal_impact_normalized_window_3y": _to_float(source.get("journal_impact_normalized_window_3y")),
-            "journal_impact_normalized_window_5y": _to_float(source.get("journal_impact_normalized_window_5y")),
+            "journal_impact_cohort": _to_float(_get_value(source, "journal_impact_cohort")),
+            "journal_impact_cohort_window_2y": _to_float(
+                _get_value(source, "journal_impact_cohort_window_2y")
+            ),
+            "journal_impact_cohort_window_3y": _to_float(
+                _get_value(source, "journal_impact_cohort_window_3y")
+            ),
+            "journal_impact_cohort_window_5y": _to_float(
+                _get_value(source, "journal_impact_cohort_window_5y")
+            ),
             "top_1pct_all_time_publications_share_pct": _to_float(
                 source.get("top_1pct_all_time_publications_share_pct")
             ),
@@ -141,11 +166,14 @@ def parse_journal_metrics_timeseries(hits):
             "is_doaj": bool(source.get("is_doaj", False)),
             "is_openalex": bool(source.get("is_openalex", False)),
             "is_journal_multilingual": bool(source.get("is_journal_multilingual", False)),
+            "is_journal_oa": bool(source.get("is_journal_oa", False)),
             "category_id": source.get("category_id"),
             "category_level": source.get("category_level"),
-            "publisher_name": source.get("publisher_name"),
-            "country": source.get("country"),
-            "collection": source.get("collection"),
+            "publisher_name": _get_value(source, "publisher_name"),
+            "country": _get_value(source, "country"),
+            "collection": _get_value(source, "collection"),
+            "collection_name": _get_value(source, "collection_name"),
+            "collection_acronym": _get_value(source, "collection_acronym"),
         })
 
     snapshots = sorted(snapshots, key=lambda item: item["publication_year"])
@@ -161,6 +189,8 @@ def parse_journal_metrics_timeseries(hits):
         "publisher_name": latest.get("publisher_name"),
         "country": latest.get("country"),
         "collection": latest.get("collection"),
+        "collection_name": latest.get("collection_name"),
+        "collection_acronym": latest.get("collection_acronym"),
         "years": years,
         "journal_publications_count_per_year": [item["journal_publications_count"] for item in snapshots],
         "journal_citations_total_per_year": [item["journal_citations_total"] for item in snapshots],
@@ -174,15 +204,15 @@ def parse_journal_metrics_timeseries(hits):
         "journal_citations_mean_window_5y_per_year": [
             item["journal_citations_mean_window_5y"] for item in snapshots
         ],
-        "journal_impact_normalized_per_year": [item["journal_impact_normalized"] for item in snapshots],
-        "journal_impact_normalized_window_2y_per_year": [
-            item["journal_impact_normalized_window_2y"] for item in snapshots
+        "journal_impact_cohort_per_year": [item["journal_impact_cohort"] for item in snapshots],
+        "journal_impact_cohort_window_2y_per_year": [
+            item["journal_impact_cohort_window_2y"] for item in snapshots
         ],
-        "journal_impact_normalized_window_3y_per_year": [
-            item["journal_impact_normalized_window_3y"] for item in snapshots
+        "journal_impact_cohort_window_3y_per_year": [
+            item["journal_impact_cohort_window_3y"] for item in snapshots
         ],
-        "journal_impact_normalized_window_5y_per_year": [
-            item["journal_impact_normalized_window_5y"] for item in snapshots
+        "journal_impact_cohort_window_5y_per_year": [
+            item["journal_impact_cohort_window_5y"] for item in snapshots
         ],
         "top_1pct_all_time_publications_share_pct_per_year": [
             item["top_1pct_all_time_publications_share_pct"] for item in snapshots

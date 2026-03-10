@@ -68,6 +68,7 @@
   <script src="{% static 'indicator/js/layout.js' %}"></script>
   <script src="{% static 'indicator/js/button.js' %}"></script>
   {% if data_source == "journal_metrics" %}
-    <script src="{% static 'indicator/js/journal_metrics.js' %}"></script>
+    <script src="{% static 'indicator/js/journal_metrics_common.js' %}"></script>
+    <script src="{% static 'indicator/js/journal_metrics_filters.js' %}"></script>
   {% endif %}
 {% endblock %}

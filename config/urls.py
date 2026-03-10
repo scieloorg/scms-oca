@@ -15,9 +15,11 @@ from wagtailautocomplete.urls.admin import urlpatterns as autocomplete_admin_url
 from core.api import api_router
 from core.search_site import views as search_views  # noqa isort:skip
 from indicator import urls as indicator_urls
+from indicator import views as indicator_views
 from search_gateway import urls as search_gateway_urls
 
 urlpatterns = [
+    path("", indicator_views.root_journal_metrics_redirect_view, name="root_home"),
     path("dash/", TemplateView.as_view(template_name="dash/dash.html"), name="dash"),
     # Django JS i18n catalog for gettext()/ngettext() usage in static JS.
     path("jsi18n/", JavaScriptCatalog.as_view(packages=("indicator", "search_gateway", "core")), name="javascript-catalog"),

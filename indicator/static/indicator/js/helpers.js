@@ -2,6 +2,13 @@
 /**
  * Fetch filters from the server for a given data source
  */
+function translateMsg(msgid) {
+    if (typeof window !== 'undefined' && typeof window.gettext === 'function') {
+        return window.gettext(msgid);
+    }
+    return msgid;
+}
+
 async function fetchFilters(dataSource, extraParams = {}) {
     let url = `/search-gateway/filters/?data_source=${encodeURIComponent(dataSource)}`;
     if (extraParams && typeof extraParams === 'object') {
@@ -89,8 +96,81 @@ function initCollapsibleFilterGroups() {
     });
 }
 
+async function copyTextToClipboard(text) {
+    const normalizedText = String(text ?? '');
+
+    if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function' && window.isSecureContext) {
+        await navigator.clipboard.writeText(normalizedText);
+        return;
+    }
+
+    const textarea = document.createElement('textarea');
+    textarea.value = normalizedText;
+    textarea.setAttribute('readonly', 'readonly');
+    textarea.style.position = 'fixed';
+    textarea.style.top = '-9999px';
+    textarea.style.left = '-9999px';
+    document.body.appendChild(textarea);
+    textarea.select();
+
+    try {
+        const copied = document.execCommand('copy');
+        if (!copied) {
+            throw new Error('execCommand copy returned false');
+        }
+    } finally {
+        textarea.remove();
+    }
+}
+
+function initIndicatorDataViewCopy() {
+    if (document.documentElement.dataset.indicatorDataViewCopyReady === 'true') return;
+
+    document.addEventListener('click', async event => {
+        const button = event.target.closest('.indicator-data-view__copy');
+        if (!button) return;
+
+        const encodedCopyText = button.getAttribute('data-copy-text') || '';
+        const copyText = encodedCopyText ? decodeURIComponent(encodedCopyText) : '';
+        const defaultLabel = button.getAttribute('data-label-default') || translateMsg('Copy');
+        const successLabel = button.getAttribute('data-label-success') || translateMsg('Copied');
+        const errorLabel = button.getAttribute('data-label-error') || translateMsg('Copy failed');
+
+        button.setAttribute('title', defaultLabel);
+        button.setAttribute('aria-label', defaultLabel);
+        button.disabled = true;
+
+        try {
+            await copyTextToClipboard(copyText);
+            button.textContent = successLabel;
+            button.setAttribute('title', successLabel);
+            button.setAttribute('aria-label', successLabel);
+            button.classList.remove('is-error');
+            button.classList.add('is-copied');
+        } catch (error) {
+            console.error('Error copying indicator data view', error);
+            button.textContent = errorLabel;
+            button.setAttribute('title', errorLabel);
+            button.setAttribute('aria-label', errorLabel);
+            button.classList.remove('is-copied');
+            button.classList.add('is-error');
+        } finally {
+            window.setTimeout(() => {
+                button.disabled = false;
+                button.textContent = defaultLabel;
+                button.setAttribute('title', defaultLabel);
+                button.setAttribute('aria-label', defaultLabel);
+                button.classList.remove('is-copied', 'is-error');
+            }, 1400);
+        }
+    });
+
+    document.documentElement.dataset.indicatorDataViewCopyReady = 'true';
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     initCollapsibleFilterGroups();
+    initIndicatorDataViewCopy();
 });
 
 /**
@@ -314,6 +394,18 @@ function standardizeOpenAccessValue(value) {
     return value;
 }
 
+function standardizeCategoryLevel(value) {
+    const normalizedValue = String(value || '').trim().toLowerCase();
+    const categoryLevels = {
+        domain: gettext('Domain'),
+        field: gettext('Field'),
+        subfield: gettext('Subfield'),
+        topic: gettext('Topic'),
+    };
+
+    return categoryLevels[normalizedValue] || value;
+}
+
 /**
  * Standardize field value based on field type
  */
@@ -333,6 +425,10 @@ function standardizeFieldValue(field, value) {
 
     if (field === 'open_access' || field === 'Open Access') {
         return standardizeOpenAccessValue(value);
+    }
+
+    if (field === 'category_level' || field === 'Category Type' || field === 'category_type') {
+        return standardizeCategoryLevel(value);
     }
 
     return value;
