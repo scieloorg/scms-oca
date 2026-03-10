@@ -17,8 +17,9 @@ def build_ranking_context(applied_filters, ranking_data):
     if ranking_data:
         passthrough_filters = {
             key: value
-            for key, value in (applied_filters or {}).items()
-            if key not in params.PROFILE_NON_FILTER_KEYS and value not in (None, "")
+            for key in params.PROFILE_PASSTHROUGH_PARAM_KEYS
+            for value in [(applied_filters or {}).get(key)]
+            if value not in (None, "")
         }
         ranking_publication_year = ranking_data.get("year") or applied_filters.get("publication_year")
 

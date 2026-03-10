@@ -10,7 +10,7 @@ from .config import (
     normalize_minimum_publications,
     normalize_ranking_metric,
 )
-from ..search import utils as search_utils
+from indicator.search.utils import clean_form_filters
 
 ISSN_PATTERN = re.compile(r"^\d{4}-[\dXx]{4}$")
 
@@ -37,7 +37,6 @@ RANKING_CONFIGURATION_KEYS = {
     "category_id",
     "minimum_publications",
 }
-TIMESERIES_NON_FILTER_KEYS = PROFILE_NON_FILTER_KEYS | {"minimum_publications"}
 
 
 def looks_like_issn(value):
@@ -54,16 +53,10 @@ def get_profile_issn(params, issn=None):
 
 def build_profile_url(params, issn):
     redirect_url = reverse("indicator_journal_metrics")
-    source_params = params.copy()
-
-    for key in PROFILE_ROUTE_PARAM_KEYS:
-        if key in source_params:
-            source_params.pop(key)
-
     query_params = QueryDict("", mutable=True)
     query_params["journal"] = str(issn).strip()
 
-    source_items = list(source_params.lists()) if hasattr(source_params, "lists") else list(dict(source_params).items())
+    source_items = list(params.lists()) if hasattr(params, "lists") else list(dict(params or {}).items())
 
     for key in PROFILE_QUERY_PARAM_KEYS:
         for source_key, source_values in source_items:
@@ -80,7 +73,7 @@ def build_profile_url(params, issn):
 
 
 def normalize_request_filters(filters, source_filters=None, clean=False):
-    normalized_filters = search_utils.clean_form_filters(dict(filters or {})) if clean else dict(filters or {})
+    normalized_filters = clean_form_filters(dict(filters or {})) if clean else dict(filters or {})
     source_filters = source_filters if source_filters is not None else filters or {}
 
     for key in ("scope", "return_study_unit", "study_unit"):
@@ -120,7 +113,7 @@ def build_timeseries_request(params):
         issn = journal_param
 
     form_filters = dict(params or {})
-    for key in TIMESERIES_NON_FILTER_KEYS:
+    for key in PROFILE_NON_FILTER_KEYS:
         form_filters.pop(key, None)
 
     return {
@@ -128,5 +121,5 @@ def build_timeseries_request(params):
         "category_id": params.get("category_id"),
         "category_level": params.get("category_level"),
         "publication_year": params.get("publication_year"),
-        "form_filters": search_utils.clean_form_filters(form_filters),
+        "form_filters": clean_form_filters(form_filters),
     }
