@@ -584,16 +584,20 @@ def search_view_list(request):
     page = int(request.GET.get("page", 1))
     page_size = int(request.GET.get("limit", 25))
     text_search = request.GET.get("search", "")
+    sort_field = request.GET.get("sort_field", "publication_year")
+    sort_order = request.GET.get("sort_order", "desc")
+    
     try:
         service = SearchGatewayService(index_name=index_name)
-        selected_filters = service.extract_selected_filters(request)
+        filters = service.build_filters()
+        selected_filters = service.extract_selected_filters(request, filters)
         results_data = service.search_documents(
             query_text=text_search,
             filters=selected_filters,
             page=page,
             page_size=page_size,
-            sort_field="publication_year",
-            sort_order="desc",
+            sort_field=sort_field,
+            sort_order=sort_order,
         )
         results_html = render_to_string(
             "search/include/results_list.html",
