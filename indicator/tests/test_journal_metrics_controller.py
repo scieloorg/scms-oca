@@ -47,6 +47,14 @@ def _patch_journal_metrics_dependencies(monkeypatch, client):
     )
     monkeypatch.setattr(
         search_controller.data_sources_with_settings,
+        "get_field_settings",
+        lambda _data_source: {
+            "category_id": {"index_field_name": "category_id"},
+            "category_level": {"index_field_name": "category_level"},
+        },
+    )
+    monkeypatch.setattr(
+        search_controller.data_sources_with_settings,
         "get_query_operator_fields",
         lambda _data_source: set(),
     )
@@ -139,3 +147,89 @@ def test_build_journal_metrics_profile_context_uses_profile_data_defaults():
     assert profile_context["selected_publication_year"] == "2021"
     assert profile_context["profile_year_options"] == ["2021", "2020"]
     assert profile_context["profile_category_options"] == ["Health", "Policy"]
+
+
+class JournalProfileFallbackClient:
+    def __init__(self):
+        self.calls = []
+
+    def search(self, index, body):
+        self.calls.append({"index": index, "body": body})
+        aggs = body.get("aggs", {})
+        must_clauses = body.get("query", {}).get("bool", {}).get("must", [])
+        category_level = next(
+            (
+                clause.get("term", {}).get("category_level")
+                for clause in must_clauses
+                if "term" in clause and "category_level" in clause.get("term", {})
+            ),
+            None,
+        )
+
+        if "category_levels" in aggs:
+            return {
+                "aggregations": {
+                    "category_levels": {
+                        "buckets": [{"key": "field", "doc_count": 3}],
+                    }
+                }
+            }
+
+        if "categories" in aggs:
+            buckets = [{"key": "Health", "doc_count": 3}] if category_level == "field" else []
+            return {
+                "aggregations": {
+                    "categories": {
+                        "buckets": buckets,
+                    }
+                }
+            }
+
+        if "by_category" in aggs:
+            return {
+                "aggregations": {
+                    "by_category": {
+                        "buckets": [],
+                    }
+                }
+            }
+
+        if category_level == "field":
+            return {
+                "hits": {
+                    "hits": [
+                        {
+                            "_source": {
+                                "journal_title": "Journal A",
+                                "journal_issn": "1234-5678",
+                                "publication_year": 2020,
+                                "category_level": "field",
+                                "category_id": "Health",
+                                "journal_publications_count": 10,
+                                "journal_citations_total": 20,
+                                "journal_citations_mean": 2.0,
+                                "journal_impact_cohort": 1.5,
+                            }
+                        }
+                    ]
+                }
+            }
+
+        return {"hits": {"hits": []}}
+
+
+def test_get_journal_metrics_timeseries_falls_back_to_available_category_level(monkeypatch):
+    client = JournalProfileFallbackClient()
+    _patch_journal_metrics_dependencies(monkeypatch, client)
+
+    profile_data, error = search_controller.get_journal_metrics_timeseries(
+        issn="1234-5678",
+        category_level="topic",
+        publication_year="2020",
+        form_filters={},
+    )
+
+    assert error is None
+    assert profile_data["selected_category_level"] == "field"
+    assert profile_data["available_category_levels"] == ["field"]
+    assert profile_data["selected_category_id"] == "Health"
