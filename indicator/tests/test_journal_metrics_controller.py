@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.http import QueryDict
 
 if not settings.configured:
     settings.configure(
@@ -119,6 +120,41 @@ def test_normalize_journal_metrics_request_filters_applies_defaults():
     assert normalized_filters["category_level"] == journal_metrics_config.DEFAULT_CATEGORY_LEVEL
     assert normalized_filters["category_id"] == journal_metrics_config.DEFAULT_CATEGORY_ID
     assert normalized_filters["minimum_publications"] == str(journal_metrics_config.DEFAULT_MINIMUM_PUBLICATIONS)
+
+
+def test_build_profile_url_keeps_only_profile_query_params(monkeypatch):
+    querydict = QueryDict("", mutable=True)
+    querydict["collection"] = "scl"
+    querydict["publication_year"] = "2022"
+    querydict["category_level"] = "field"
+    querydict["category_id"] = "Social Sciences"
+    querydict["country"] = "Brazil"
+    querydict["is_scielo"] = "No"
+
+    monkeypatch.setattr(
+        journal_metrics_params,
+        "reverse",
+        lambda _name: "/indicators/journal-metrics/",
+    )
+
+    profile_url = journal_metrics_params.build_profile_url(querydict, "1809-4031")
+
+    assert profile_url == (
+        "/indicators/journal-metrics/"
+        "?journal=1809-4031&collection=scl&publication_year=2022"
+        "&category_level=field&category_id=Social+Sciences"
+    )
+
+
+def test_extract_profile_passthrough_filters_keeps_only_collection():
+    querydict = QueryDict("", mutable=True)
+    querydict["collection"] = "scl"
+    querydict["country"] = "Brazil"
+    querydict["is_scielo"] = "No"
+
+    filters = journal_metrics_params.extract_profile_passthrough_filters(querydict)
+
+    assert filters == {"collection": "scl"}
 
 
 def test_build_journal_metrics_profile_context_uses_profile_data_defaults():

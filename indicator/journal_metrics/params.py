@@ -16,6 +16,7 @@ ISSN_PATTERN = re.compile(r"^\d{4}-[\dXx]{4}$")
 
 PROFILE_ROUTE_PARAM_KEYS = {"issn", "journal", "journal_issn", "journal_title"}
 PROFILE_QUERY_PARAM_KEYS = ("collection", "publication_year", "category_level", "category_id")
+PROFILE_PASSTHROUGH_PARAM_KEYS = {"collection"}
 PROFILE_NON_FILTER_KEYS = PROFILE_ROUTE_PARAM_KEYS | {
     "category_id",
     "category_level",
@@ -63,7 +64,6 @@ def build_profile_url(params, issn):
     query_params["journal"] = str(issn).strip()
 
     source_items = list(source_params.lists()) if hasattr(source_params, "lists") else list(dict(source_params).items())
-    appended_keys = set()
 
     for key in PROFILE_QUERY_PARAM_KEYS:
         for source_key, source_values in source_items:
@@ -73,20 +73,7 @@ def build_profile_url(params, issn):
             values = source_values if isinstance(source_values, (list, tuple)) else [source_values]
             for value in values:
                 query_params.appendlist(key, value)
-            appended_keys.add(key)
             break
-
-    if hasattr(source_params, "lists"):
-        for key, values in source_params.lists():
-            if key in appended_keys:
-                continue
-            for value in values:
-                query_params.appendlist(key, value)
-    else:
-        for key, value in dict(source_params).items():
-            if key in appended_keys:
-                continue
-            query_params[key] = value
 
     query_string = query_params.urlencode()
     return f"{redirect_url}?{query_string}" if query_string else redirect_url
@@ -120,9 +107,9 @@ def normalize_request_filters(filters, source_filters=None, clean=False):
 
 def extract_profile_passthrough_filters(filters):
     return {
-        key: value
-        for key, value in search_utils.clean_form_filters(dict(filters or {})).items()
-        if key not in PROFILE_NON_FILTER_KEYS
+        key: str(filters.get(key) or "").strip()
+        for key in PROFILE_PASSTHROUGH_PARAM_KEYS
+        if str(filters.get(key) or "").strip()
     }
 
 
