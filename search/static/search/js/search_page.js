@@ -1,10 +1,12 @@
 class SearchPageManager {
     constructor(config) {
         this.searchQuery = config.initialSearchQuery || '';
+        this.searchClauses = config.initialSearchClauses || [];
         this.dataSourceName = config.dataSourceName;
         this.apiEndpoint = config.apiEndpoint || '/search/api/search-results-list/';
         this.filters = config.filters || {};
         this.filterMetadata = config.filterMetadata || {};
+        this.searchableFields = config.searchableFields || [];
         this.rangeFields = config.rangeFields || {};
         this.isUpdatingFilterOptions = false;
         
@@ -14,6 +16,7 @@ class SearchPageManager {
     init() {
         this.setupDataSourceSelector();
         this.setupSearchForm();
+        this.setupAdvancedSearchUI();
         this.setupFilters();
         this.updateActiveFilters();
         this.preselectFiltersFromURL();
@@ -137,11 +140,74 @@ class SearchPageManager {
         if (searchForm) {
             searchForm.addEventListener('submit', (e) => {
                 e.preventDefault();
-                const searchInput = document.getElementById('search-input');
-                this.searchQuery = searchInput ? searchInput.value : '';
+                this.searchClauses = this.getSearchClauses();
                 this.updateActiveFilters();
                 this.applyFiltersAjax();
             });
+        }
+    }
+
+    setupAdvancedSearchUI() {
+        const btnAdd = document.getElementById('btn-add-field');
+        const btnClear = document.getElementById('btn-clear');
+        if (btnAdd) {
+            btnAdd.addEventListener('click', () => this.addSearchRow());
+        }
+        if (btnClear) {
+            btnClear.addEventListener('click', () => this.clearSearchQuery());
+        }
+        document.getElementById('advanced-search-rows')?.addEventListener('click', (e) => {
+            if (e.target.closest('.btn-remove-row')) {
+                this.removeSearchRow(e.target.closest('.btn-remove-row'));
+            }
+        });
+    }
+
+    getSearchClauses() {
+        const clauses = [];
+        const firstRow = document.querySelector('.advanced-search-row[data-row-index="0"]');
+        if (firstRow) {
+            const fieldSelect = firstRow.querySelector('.search-field-select');
+            const textInput = firstRow.querySelector('.search-text-input');
+            const text = textInput ? textInput.value.trim() : '';
+            if (text) {
+                clauses.push({
+                    operator: '',
+                    field: fieldSelect ? fieldSelect.value : 'all',
+                    text: text
+                });
+            }
+        }
+        document.querySelectorAll('#advanced-search-rows .advanced-search-row').forEach(row => {
+            const operatorSelect = row.querySelector('.search-operator');
+            const fieldSelect = row.querySelector('.search-field-select');
+            const textInput = row.querySelector('.search-text-input');
+            const text = textInput ? textInput.value.trim() : '';
+            if (text) {
+                clauses.push({
+                    operator: operatorSelect ? operatorSelect.value : 'AND',
+                    field: fieldSelect ? fieldSelect.value : 'all',
+                    text: text
+                });
+            }
+        });
+        return clauses;
+    }
+
+    addSearchRow() {
+        const template = document.getElementById('advanced-search-row-template');
+        const container = document.getElementById('advanced-search-rows');
+        if (!template || !container) return;
+        const clone = template.content.cloneNode(true);
+        const row = clone.querySelector('.advanced-search-row');
+        row.dataset.rowIndex = String(container.children.length + 1);
+        container.appendChild(clone);
+    }
+
+    removeSearchRow(btn) {
+        const row = btn?.closest('.advanced-search-row');
+        if (row && row.parentElement?.id === 'advanced-search-rows') {
+            row.remove();
         }
     }
     
@@ -325,12 +391,14 @@ class SearchPageManager {
     
     buildSearchParams() {
         const params = new URLSearchParams();
+        const clauses = this.getSearchClauses();
         
-        if (this.searchQuery) {
+        if (clauses.length > 0) {
+            params.append('search_clauses', JSON.stringify(clauses));
+        } else if (this.searchQuery) {
             params.append('search', this.searchQuery);
         }
         
-        // Add index name
         if (this.dataSourceName) {
             params.append('index_name', this.dataSourceName);
         }
@@ -424,13 +492,20 @@ class SearchPageManager {
         
         if (!container || !filtersBadgesContainer) return;
         
-        // Update search query badge (cyan/info color)
-        const hasSearchQuery = this.searchQuery && this.searchQuery.trim() !== '';
+        const clauses = this.searchClauses.length > 0 ? this.searchClauses : this.getSearchClauses();
+        const hasSearchClauses = clauses.length > 0;
+        const fieldLabels = Object.fromEntries((this.searchableFields || []).map(f => [f.value, f.label]));
+        
         if (searchBadge && searchSection) {
-            if (hasSearchQuery) {
+            if (hasSearchClauses) {
+                const badges = clauses.map((c, i) => {
+                    const fieldLabel = fieldLabels[c.field] || c.field;
+                    const op = c.operator ? ` ${c.operator} ` : '';
+                    return `<span class="applied-filter-chip">${i > 0 ? op : ''}<i class="icon-filter"></i> <strong>${this.escapeHtml(fieldLabel)}:</strong> ${this.escapeHtml(c.text)}</span>`;
+                }).join('');
                 searchBadge.innerHTML = `
+                ${badges}
                 <span class="applied-filter-chip">
-                    <i class="icon-filter"></i> <strong>${gettext('Search')}:</strong> ${this.escapeHtml(this.searchQuery)}
                     <button type="button" class="btn-close btn-close-black ms-1" style="font-size: 0.7rem;" onclick="window.searchPageManager.clearSearchQuery()"></button>
                 </span>
                 `;
@@ -511,8 +586,7 @@ class SearchPageManager {
             filtersCount.textContent = String(activeFilterCount);
         }
         
-        // Show/hide main container based on whether there are active filters or search
-        if (hasSearchQuery || hasFilters) {
+        if (hasSearchClauses || hasFilters) {
             container.classList.remove('d-none');
         } else {
             container.classList.add('d-none');
@@ -521,10 +595,16 @@ class SearchPageManager {
     
     clearSearchQuery() {
         this.searchQuery = '';
-        const searchInput = document.getElementById('search-input');
-        if (searchInput) {
-            searchInput.value = '';
+        this.searchClauses = [];
+        const firstRow = document.querySelector('.advanced-search-row[data-row-index="0"]');
+        if (firstRow) {
+            const fieldSelect = firstRow.querySelector('.search-field-select');
+            const textInput = firstRow.querySelector('.search-text-input');
+            if (fieldSelect) fieldSelect.value = 'all';
+            if (textInput) textInput.value = '';
         }
+        const extraRows = document.getElementById('advanced-search-rows');
+        if (extraRows) extraRows.innerHTML = '';
         this.updateActiveFilters();
         this.applyFiltersAjax();
     }
@@ -548,6 +628,44 @@ class SearchPageManager {
     preselectFiltersFromURL() {
         const urlParams = new URLSearchParams(window.location.search);
         
+        const searchClausesParam = urlParams.get('search_clauses');
+        if (searchClausesParam) {
+            try {
+                const clauses = JSON.parse(searchClausesParam);
+                if (Array.isArray(clauses) && clauses.length > 0) {
+                    this.searchClauses = clauses;
+                    const firstRow = document.querySelector('.advanced-search-row[data-row-index="0"]');
+                    if (firstRow && clauses[0]) {
+                        const c = clauses[0];
+                        const fieldSelect = firstRow.querySelector('.search-field-select');
+                        const textInput = firstRow.querySelector('.search-text-input');
+                        if (fieldSelect) fieldSelect.value = c.field || 'all';
+                        if (textInput) textInput.value = c.text || '';
+                    }
+                    const container = document.getElementById('advanced-search-rows');
+                    if (container) {
+                        container.innerHTML = '';
+                        for (let i = 1; i < clauses.length; i++) {
+                            this.addSearchRow();
+                            const rows = container.querySelectorAll('.advanced-search-row');
+                            const row = rows[rows.length - 1];
+                            if (row && clauses[i]) {
+                                const c = clauses[i];
+                                const operatorSelect = row.querySelector('.search-operator');
+                                const fieldSelect = row.querySelector('.search-field-select');
+                                const textInput = row.querySelector('.search-text-input');
+                                if (operatorSelect) operatorSelect.value = c.operator || 'AND';
+                                if (fieldSelect) fieldSelect.value = c.field || 'all';
+                                if (textInput) textInput.value = c.text || '';
+                            }
+                        }
+                    }
+                }
+            } catch (e) {
+                console.warn('Invalid search_clauses in URL', e);
+            }
+        }
+        
         Object.keys(this.filters).forEach(key => {
             const urlValues = urlParams.getAll(key);
             if (urlValues.length > 0) {
@@ -563,7 +681,6 @@ class SearchPageManager {
             }
         });
         
-        // Update active filters display after preselecting from URL
         this.updateActiveFilters();
     }
 }
