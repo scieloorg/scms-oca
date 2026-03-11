@@ -287,7 +287,7 @@ msgstr ""
 #: search_gateway/data_sources_with_settings.py:378
 #: search_gateway/data_sources_with_settings.py:1491
 msgid "Publisher"
-msgstr ""
+msgstr "Editora"
 
 #: article/models.py:105 scholarly_articles/models.py:240
 msgid "DOAJ"
@@ -413,7 +413,7 @@ msgstr ""
 #: search/templates/search/include/result_items/journals.html:46
 #: search/templates/search/include/result_items/preprint.html:55
 msgid "Year"
-msgstr ""
+msgstr "Ano"
 
 #: article/models.py:980 article/models.py:1135 scholarly_articles/models.py:14
 #: scholarly_articles/models.py:448 scholarly_articles/models.py:519
@@ -2335,14 +2335,14 @@ msgstr ""
 #: indicator/templates/ranking.html:87 indicator/templates/ranking.html:156
 #: indicator/templatetags/indicator_filters.py:93
 msgid "Category"
-msgstr ""
+msgstr "Categoria"
 
 #: indicator/templates/filters/sci_prod_journal.html:106
 #: indicator/templates/filters/sci_prod_journal.html:108
 #: indicator/templates/ranking.html:86
 #: indicator/templatetags/indicator_filters.py:92
 msgid "Category Type"
-msgstr ""
+msgstr "Tipo de categoria"
 
 #: indicator/templates/filters/sci_prod_journal.html:110
 #: indicator/templates/filters/sci_prod_world.html:16
@@ -2351,7 +2351,7 @@ msgstr ""
 #: indicator/templatetags/indicator_filters.py:144
 #: search_gateway/data_sources_with_settings.py:247
 msgid "Field"
-msgstr ""
+msgstr "Área"
 
 #: indicator/templates/filters/sci_prod_journal.html:128
 msgid "Indexing / Coverage"
@@ -2420,43 +2420,47 @@ msgstr ""
 
 #: indicator/templates/filters/sci_prod_journal.html:190
 msgid "Any value"
-msgstr ""
+msgstr "Qualquer valor"
 
 #: indicator/templates/filters/sci_prod_journal.html:244
 msgid "Select a country"
-msgstr ""
+msgstr "Selecione um país"
 
 #: indicator/templates/filters/sci_prod_journal.html:245
 msgid "Select a collection"
-msgstr ""
+msgstr "Selecione uma coleção"
+
+#: indicator/templates/filters/journal_metrics.html:214
+msgid "Select a SciELO collection"
+msgstr "Selecione uma coleção SciELO"
 
 #: indicator/templates/filters/sci_prod_journal.html:246
 msgid "Select a category type"
-msgstr ""
+msgstr "Selecione um tipo de categoria"
 
 #: indicator/templates/filters/sci_prod_journal.html:247
 msgid "Select a ranking metric"
-msgstr ""
+msgstr "Selecione uma métrica de ranking"
 
 #: indicator/templates/filters/sci_prod_journal.html:255
 msgid "Select a value"
-msgstr ""
+msgstr "Selecione um valor"
 
 #: indicator/templates/filters/sci_prod_journal.html:277
 msgid "Type journal name..."
-msgstr ""
+msgstr "Digite o nome do periódico..."
 
 #: indicator/templates/filters/sci_prod_journal.html:282
 msgid "Type ISSN..."
-msgstr ""
+msgstr "Digite o ISSN..."
 
 #: indicator/templates/filters/sci_prod_journal.html:287
 msgid "Type publisher name..."
-msgstr ""
+msgstr "Digite o nome da editora..."
 
 #: indicator/templates/filters/sci_prod_journal.html:292
 msgid "Select a category id"
-msgstr ""
+msgstr "Selecione uma categoria"
 
 #: indicator/templates/filters/sci_prod_world.html:4
 #: indicator/templates/filters/soc_prod.html:4
@@ -2520,7 +2524,7 @@ msgstr ""
 #: indicator/templatetags/indicator_filters.py:143
 #: search_gateway/data_sources_with_settings.py:233
 msgid "Domain"
-msgstr ""
+msgstr "Domínio"
 
 #: indicator/templates/filters/sci_prod_world.html:17
 #: indicator/templates/filters/sci_prod_world.html:156
@@ -2528,7 +2532,7 @@ msgstr ""
 #: indicator/templatetags/indicator_filters.py:145
 #: search_gateway/data_sources_with_settings.py:261
 msgid "Subfield"
-msgstr ""
+msgstr "Subárea"
 
 #: indicator/templates/filters/sci_prod_world.html:18
 #: indicator/templates/filters/sci_prod_world.html:162
@@ -2536,7 +2540,7 @@ msgstr ""
 #: indicator/templatetags/indicator_filters.py:146
 #: search_gateway/data_sources_with_settings.py:275
 msgid "Topic"
-msgstr ""
+msgstr "Tópico"
 
 #: indicator/templates/filters/sci_prod_world.html:26
 msgid "Indexing"
@@ -2787,9 +2791,65 @@ msgstr ""
 msgid "Selection Controls"
 msgstr "Controles de seleção"
 
-#: indicator/templates/ranking.html:163
-msgid "Selected Journal"
-msgstr "Periódico selecionado"
+#: indicator/templates/journal_profile.html:8
+msgid "Journal Profile"
+msgstr "Perfil do periódico"
+
+#: indicator/templates/journal_profile.html:107
+msgid "Analytical Summary"
+msgstr "Síntese analítica"
+
+#: indicator/templates/journal_profile.html:158
+msgid "Selected Category"
+msgstr "Categoria selecionada"
+
+#: indicator/templates/journal_profile.html:190
+msgid "Category Comparison"
+msgstr "Comparação entre categorias"
+
+#: indicator/templates/journal_profile.html:158
+msgid "Time Series in Selected Category"
+msgstr "Série temporal na categoria selecionada"
+
+#: indicator/templates/journal_profile.html:184
+msgid "Category Comparison in Selected Year"
+msgstr "Comparação entre categorias no ano selecionado"
+
+#: indicator/templates/journal_profile.html:165
+msgid "Historical series for the journal in the selected category."
+msgstr "Séries históricas do periódico na categoria selecionada."
+
+#: indicator/templates/journal_profile.html:197
+msgid "Comparison across categories for the selected year and category type."
+msgstr "Comparação entre categorias para o ano e o tipo de categoria selecionados."
+
+#: indicator/templates/journal_profile.html:43
+msgid "Ranking Controls"
+msgstr "Controles de ranking"
+
+#: indicator/templates/journal_profile.html:126
+msgid "Journal Attributes"
+msgstr "Atributos do periódico"
+
+#: indicator/templates/journal_profile.html:160
+msgid "Visualizations"
+msgstr "Visualizações"
+
+#: indicator/templates/filters/journal_metrics.html:125
+msgid "SciELO Collection"
+msgstr "Coleção SciELO"
+
+#: indicator/templates/journal_profile.html:111
+msgid "Indicators and journal attributes for the selected year and category."
+msgstr "Indicadores e atributos do periódico para o ano e a categoria selecionados."
+
+#: indicator/static/indicator/js/journal_metrics.js:312
+msgid "Copy"
+msgstr "Copiar"
+
+#: indicator/static/indicator/js/journal_metrics.js:932
+msgid "Collection code"
+msgstr "Código da coleção"
 
 #: indicator/templates/ranking.html:166
 msgid "Journal profile"

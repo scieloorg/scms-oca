@@ -22,26 +22,54 @@
                 <span>:</span>
                 <span class="applied-filter-chip__value">{{ ranking_data.year }}</span>
             </span>
+            {% if ranking_configuration.category_level %}
+            <span class="applied-filter-chip">
+                <span class="applied-filter-chip__label">{% trans "Category Type" %}</span>
+                <span>:</span>
+                <span class="applied-filter-chip__value">{{ ranking_configuration.category_level|ui_value:"category_level" }}</span>
+            </span>
+            {% endif %}
+            {% if ranking_configuration.category_id %}
+            <span class="applied-filter-chip">
+                <span class="applied-filter-chip__label">{% trans "Category" %}</span>
+                <span>:</span>
+                <span class="applied-filter-chip__value">{{ ranking_configuration.category_id|ui_value:"category_id" }}</span>
+            </span>
+            {% endif %}
             <span class="applied-filter-chip">
                 <span class="applied-filter-chip__label">{% trans "Metric" %}</span>
                 <span>:</span>
                 <span class="applied-filter-chip__value">{{ ranking_data.ranking_metric|ui_value:"ranking_metric" }}</span>
             </span>
+            {% if ranking_configuration.minimum_publications %}
+            <span class="applied-filter-chip">
+                <span class="applied-filter-chip__label">{% trans "Minimum publications" %}</span>
+                <span>:</span>
+                <span class="applied-filter-chip__value">{{ ranking_configuration.minimum_publications|floatformat:"0g" }}</span>
+            </span>
+            {% endif %}
+            {% if ranking_configuration.limit %}
+            <span class="applied-filter-chip">
+                <span class="applied-filter-chip__label">{% trans "Number of results" %}</span>
+                <span>:</span>
+                <span class="applied-filter-chip__value">{{ ranking_configuration.limit|floatformat:"0g" }}</span>
+            </span>
+            {% endif %}
             <span class="applied-filter-chip">
                 <span class="applied-filter-chip__label">{% trans "Journals" %}</span>
                 <span>:</span>
-                <span class="applied-filter-chip__value">{{ ranking_data.returned_journals }} / {{ ranking_data.total_journals }}</span>
+                <span class="applied-filter-chip__value">{{ ranking_data.returned_journals|floatformat:"0g" }} / {{ ranking_data.total_journals|floatformat:"0g" }}</span>
             </span>
         </div>
 
-        {% if applied_filters and applied_filters.items %}
+        {% if display_applied_filters and display_applied_filters.items %}
         <div class="journal-metrics-applied" id="applied-filters-journal-metrics">
             <div class="applied-filters-head">
                 <span class="applied-filters-title">{% trans "Applied Filters" %}</span>
-                <span class="applied-filters-count">{{ applied_filters|length }}</span>
+                <span class="applied-filters-count">{{ display_applied_filters|length }}</span>
             </div>
             <div class="applied-filters-grid">
-                {% for key, value in applied_filters.items %}
+                {% for key, value in display_applied_filters.items %}
                 <span class="applied-filter-chip">
                     <span class="applied-filter-chip__label">{{ key|ui_label }}</span>
                     <span>:</span>
@@ -55,16 +83,6 @@
 
     <div class="card mb-3 shadow-sm indicator-chart-card">
         <div class="card-body p-2 p-lg-3">
-            <div class="journal-ranking-tip mb-3" role="note">
-                <span class="journal-ranking-tip__icon" aria-hidden="true">
-                    <svg viewBox="0 0 16 16" focusable="false">
-                        <circle cx="8" cy="8" r="7" fill="#0f6cbf"></circle>
-                        <rect x="7.25" y="6.7" width="1.5" height="4.6" rx="0.75" fill="#ffffff"></rect>
-                        <circle cx="8" cy="4.5" r="0.9" fill="#ffffff"></circle>
-                    </svg>
-                </span>
-                <span class="journal-ranking-tip__text">{% trans "Click the journal name to open the periodical profile and charts." %}</span>
-            </div>
             <div class="box is-invisible" id="ranking-container">
                 <table id="ranking-table" class="table table-striped display nowrap">
                     <thead>
@@ -75,8 +93,7 @@
                             <th scope="col">{% trans "ISSN" %}</th>
                             <th scope="col">{% trans "Country" %}</th>
                             <th scope="col">{% trans "Publisher" %}</th>
-                            <th scope="col">{% trans "Category Type" %}</th>
-                            <th scope="col">{% trans "Category" %}</th>
+                            <th scope="col">{% trans "Is Open Access" %}</th>
                             <th scope="col">{% trans "Publication Year" %}</th>
                             <th scope="col">{% trans "Publications" %}</th>
                             <th scope="col">{% trans "Total Citations" %}</th>
@@ -85,142 +102,53 @@
                             <th scope="col">{% trans "Top 10% Share" %}</th>
                         </tr>
                     </thead>
-                    {% localize off %}
                     <tbody id="ranking-table-body">
                         {% for entry in ranking_data.journals %}
-                        <tr data-journal-title="{{ entry.title|escape }}" data-journal-issn="{{ entry.issn|escape }}" data-category-id="{{ entry.category_id|escape }}" data-category-level="{{ entry.category_level|escape }}">
-                            <td>{{ forloop.counter }}</td>
-                            <td>
-                                {% with metric_value=entry|get_attr:ranking_data.ranking_metric %}
-                                    {% if ranking_data.ranking_metric == "journal_publications_count" %}
-                                        {{ metric_value|floatformat:0 }}
-                                    {% else %}
-                                        {{ metric_value|floatformat:1 }}
-                                    {% endif %}
-                                {% endwith %}
+                        <tr>
+                            <td data-order="{{ forloop.counter }}">{{ forloop.counter }}</td>
+                            {% with metric_value=entry|get_attr:ranking_data.ranking_metric %}
+                            <td data-order="{{ metric_value|default_if_none:''|unlocalize }}">
+                                {% if ranking_data.ranking_metric == "journal_publications_count" %}
+                                    {{ metric_value|floatformat:"0g" }}
+                                {% else %}
+                                    {{ metric_value|floatformat:"1g" }}
+                                {% endif %}
                             </td>
+                            {% endwith %}
                             <td>
-                                <button type="button" class="journal-ranking-link" title="{% trans 'Open journal profile' %}">
+                                {% if entry.issn %}
+                                <a
+                                    href="{{ entry.profile_url }}"
+                                    target="_blank"
+                                    rel="noopener"
+                                    class="journal-ranking-link"
+                                    title="{% trans 'Open journal page' %}">
                                     {{ entry.title }}
-                                </button>
+                                </a>
+                                {% else %}
+                                <span>{{ entry.title }}</span>
+                                {% endif %}
                             </td>
                             <td>{{ entry.issn|default:"-" }}</td>
                             <td>{{ entry.country|default:"-" }}</td>
                             <td>{{ entry.publisher_name|default:"-" }}</td>
-                            <td>{{ entry.category_level|default:"-" }}</td>
-                            <td>{{ entry.category_id|default:"-" }}</td>
-                            <td>{{ entry.publication_year }}</td>
-                            <td>{{ entry.journal_publications_count }}</td>
-                            <td>{{ entry.journal_citations_total|floatformat:0 }}</td>
-                            <td>{{ entry.journal_citations_mean|floatformat:1 }}</td>
-                            <td>{{ entry.journal_impact_normalized|floatformat:1 }}</td>
-                            <td>{{ entry.top_10pct_all_time_publications_share_pct|floatformat:1 }}</td>
+                            <td>{{ entry.is_journal_oa|ui_value }}</td>
+                            <td data-order="{{ entry.publication_year|default_if_none:''|unlocalize }}">{{ entry.publication_year }}</td>
+                            <td data-order="{{ entry.journal_publications_count|default_if_none:''|unlocalize }}">{{ entry.journal_publications_count|floatformat:"0g" }}</td>
+                            <td data-order="{{ entry.journal_citations_total|default_if_none:''|unlocalize }}">{{ entry.journal_citations_total|floatformat:"0g" }}</td>
+                            <td data-order="{{ entry.journal_citations_mean|default_if_none:''|unlocalize }}">{{ entry.journal_citations_mean|floatformat:"1g" }}</td>
+                            <td data-order="{{ entry.journal_impact_cohort|default_if_none:''|unlocalize }}">{{ entry.journal_impact_cohort|floatformat:"1g" }}</td>
+                            <td data-order="{{ entry.top_10pct_all_time_publications_share_pct|default_if_none:''|unlocalize }}">{{ entry.top_10pct_all_time_publications_share_pct|floatformat:"1g" }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
-                    {% endlocalize %}
                 </table>
             </div>
         </div>
     </div>
-
-    <div class="modal fade" id="journal-profile-modal" tabindex="-1" aria-labelledby="journal-profile-modal-title" aria-hidden="true">
-        <div class="modal-dialog modal-fullscreen-lg-down modal-xl modal-dialog-scrollable">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="journal-profile-modal-title">{% trans "Journal Profile and Charts" %}</h5>
-                    <button type="button" class="btn-close journal-profile-modal-close" data-bs-dismiss="modal" aria-label="{% trans 'Close' %}"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="journal-profile-loading d-none" id="journal-profile-loading" role="status" aria-live="polite">
-                        <span class="spinner-border spinner-border-sm text-primary" aria-hidden="true"></span>
-                        <span>{% trans "Loading journal profile..." %}</span>
-                    </div>
-                    <div class="d-none" id="journal-profile-panel">
-                        <div class="journal-profile-section journal-profile-section--selectors">
-                            <div class="journal-profile-section__title">{% trans "Selection Controls" %}</div>
-                            <div class="row g-3">
-                                <div class="col-12 col-lg-6">
-                                    <label class="form-label mb-1" for="journal-profile-journal-select">{% trans "Journal" %}</label>
-                                    <select id="journal-profile-journal-select" class="form-control"></select>
-                                </div>
-                                <div class="col-12 col-lg-6">
-                                    <label class="form-label mb-1" for="journal-profile-category-select">{% trans "Category" %}</label>
-                                    <select id="journal-profile-category-select" class="form-control"></select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="journal-profile-section journal-profile-section--selection">
-                            <div class="journal-profile-section__title">{% trans "Selected Journal" %}</div>
-                            <div class="d-flex flex-wrap justify-content-between gap-2 mb-3 align-items-start">
-                                <div>
-                                    <h5 class="mb-1" id="journal-profile-title">{% trans "Journal profile" %}</h5>
-                                    <p class="mb-0 text-muted" id="journal-profile-subtitle"></p>
-                                </div>
-                                <div class="text-muted small" id="journal-profile-year"></div>
-                            </div>
-
-                            <div class="row g-2 mb-3" id="journal-profile-kpis">
-                                <div class="col-6 col-xl-2"><div class="journal-kpi"><div class="journal-kpi__label">{% trans "Publications" %}</div><div class="journal-kpi__value" id="kpi-publications">-</div></div></div>
-                                <div class="col-6 col-xl-2"><div class="journal-kpi"><div class="journal-kpi__label">{% trans "Total Citations" %}</div><div class="journal-kpi__value" id="kpi-total-citations">-</div></div></div>
-                                <div class="col-6 col-xl-2"><div class="journal-kpi"><div class="journal-kpi__label">{% trans "Mean Citations" %}</div><div class="journal-kpi__value" id="kpi-mean-citations">-</div></div></div>
-                                <div class="col-6 col-xl-2"><div class="journal-kpi"><div class="journal-kpi__label">{% trans "Cohort Impact (Total)" %}</div><div class="journal-kpi__value" id="kpi-impact">-</div></div></div>
-                                <div class="col-6 col-xl-2"><div class="journal-kpi"><div class="journal-kpi__label">{% trans "Top 10% Share" %}</div><div class="journal-kpi__value" id="kpi-top10">-</div></div></div>
-                            </div>
-
-                            <div class="d-flex flex-wrap gap-2" id="journal-profile-badges">
-                                <span class="badge rounded-pill journal-source-badge" id="badge-scielo" data-source-label="SciELO">SciELO</span>
-                                <span class="badge rounded-pill journal-source-badge" id="badge-scopus" data-source-label="Scopus">Scopus</span>
-                                <span class="badge rounded-pill journal-source-badge" id="badge-wos" data-source-label="WoS">WoS</span>
-                                <span class="badge rounded-pill journal-source-badge" id="badge-doaj" data-source-label="DOAJ">DOAJ</span>
-                                <span class="badge rounded-pill journal-source-badge" id="badge-openalex" data-source-label="OpenAlex">OpenAlex</span>
-                                <span class="badge rounded-pill journal-source-badge" id="badge-multilingual" data-source-label="{% trans 'Multilingual' %}">{% trans "Multilingual" %}</span>
-                            </div>
-                        </div>
-
-                        <div class="journal-profile-section journal-profile-section--charts">
-                            <div class="journal-profile-section__title">{% trans "Charts" %}</div>
-                            <div class="row g-3">
-                                <div class="col-12 col-xl-6">
-                                    <div class="journal-profile-chart" id="journal-profile-output-chart"></div>
-                                </div>
-                                <div class="col-12 col-xl-6">
-                                    <div class="journal-profile-chart" id="journal-profile-impact-chart"></div>
-                                </div>
-                                <div class="col-12 col-xl-6">
-                                    <div class="journal-profile-chart" id="journal-profile-top-share-chart"></div>
-                                </div>
-                                <div class="col-12 col-xl-6">
-                                    <div class="journal-profile-chart" id="journal-profile-category-radar"></div>
-                                </div>
-                                <div class="col-12 col-xl-6">
-                                    <div class="journal-profile-chart" id="journal-profile-category-citations-total-radar"></div>
-                                </div>
-                                <div class="col-12 col-xl-6">
-                                    <div class="journal-profile-chart" id="journal-profile-category-citations-mean-radar"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div
-        id="journal-metrics-config"
-        data-timeseries-url="{% url 'indicator_journal_metrics_timeseries' %}"
-        data-selected-publication-year="{% if ranking_data.year %}{{ ranking_data.year }}{% endif %}"
-        data-selected-category-level="{{ applied_filters.category_level|default:''|escape }}"
-        data-applied-filters="{{ applied_filters_json|default:'{}'|escape }}"
-        data-default-journal-title="{% if ranking_data.journals %}{{ ranking_data.journals.0.title|escape }}{% endif %}"
-        data-default-journal-issn="{% if ranking_data.journals %}{{ ranking_data.journals.0.issn|escape }}{% endif %}"
-        data-default-category-id="{% if ranking_data.journals %}{{ ranking_data.journals.0.category_id|escape }}{% endif %}">
-    </div>
     {% elif not error %}
     <div class="card p-3 shadow-sm bg-oca-light">
-        <p class="mb-2">{% trans "Select filters and click Generate to load journal metrics ranking and profile charts." %}</p>
+        <p class="mb-2">{% trans "Select filters and click Generate to load the journal metrics ranking." %}</p>
         <p class="mb-0 text-muted small">
             {% trans "Cohort Impact ranks journals by citations received by documents published in the selected year and category, considering windows (2y, 3y, 5y) or total accumulation." %}
         </p>

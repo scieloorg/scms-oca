@@ -2508,7 +2508,7 @@ msgstr "Category"
 #, fuzzy
 #| msgid "Directory Type"
 msgid "Category Type"
-msgstr "Directory Type"
+msgstr "Category Type"
 
 #: indicator/templates/filters/sci_prod_journal.html:110
 #: indicator/templates/filters/sci_prod_world.html:16
@@ -2517,7 +2517,7 @@ msgstr "Directory Type"
 #: indicator/templatetags/indicator_filters.py:144
 #: search_gateway/data_sources_with_settings.py:247
 msgid "Field"
-msgstr ""
+msgstr "Field"
 
 #: indicator/templates/filters/sci_prod_journal.html:128
 msgid "Indexing / Coverage"
@@ -2590,57 +2590,61 @@ msgstr ""
 
 #: indicator/templates/filters/sci_prod_journal.html:190
 msgid "Any value"
-msgstr ""
+msgstr "Any value"
 
 #: indicator/templates/filters/sci_prod_journal.html:244
 #, fuzzy
 #| msgid "Select a Year"
 msgid "Select a country"
-msgstr "Select a Year"
+msgstr "Select a country"
 
 #: indicator/templates/filters/sci_prod_journal.html:245
 #, fuzzy
 #| msgid "Select an option"
 msgid "Select a collection"
-msgstr "Select an option"
+msgstr "Select a collection"
+
+#: indicator/templates/filters/journal_metrics.html:214
+msgid "Select a SciELO collection"
+msgstr "Select a SciELO collection"
 
 #: indicator/templates/filters/sci_prod_journal.html:246
 #, fuzzy
 #| msgid "Select a Year"
 msgid "Select a category type"
-msgstr "Select a Year"
+msgstr "Select a category type"
 
 #: indicator/templates/filters/sci_prod_journal.html:247
 #, fuzzy
 #| msgid "Ranking metric"
 msgid "Select a ranking metric"
-msgstr "Ranking metric"
+msgstr "Select a ranking metric"
 
 #: indicator/templates/filters/sci_prod_journal.html:255
 #, fuzzy
 #| msgid "Select a variable"
 msgid "Select a value"
-msgstr "Select a variable"
+msgstr "Select a value"
 
 #: indicator/templates/filters/sci_prod_journal.html:277
 #, fuzzy
 #| msgid "Journal Name"
 msgid "Type journal name..."
-msgstr "Journal Name"
+msgstr "Type journal name..."
 
 #: indicator/templates/filters/sci_prod_journal.html:282
 msgid "Type ISSN..."
-msgstr ""
+msgstr "Type ISSN..."
 
 #: indicator/templates/filters/sci_prod_journal.html:287
 msgid "Type publisher name..."
-msgstr ""
+msgstr "Type publisher name..."
 
 #: indicator/templates/filters/sci_prod_journal.html:292
 #, fuzzy
 #| msgid "Select a Year"
 msgid "Select a category id"
-msgstr "Select a Year"
+msgstr "Select a category"
 
 #: indicator/templates/filters/sci_prod_world.html:4
 #: indicator/templates/filters/soc_prod.html:4
@@ -2705,7 +2709,7 @@ msgstr "Access Type"
 #: indicator/templatetags/indicator_filters.py:143
 #: search_gateway/data_sources_with_settings.py:233
 msgid "Domain"
-msgstr ""
+msgstr "Domain"
 
 #: indicator/templates/filters/sci_prod_world.html:17
 #: indicator/templates/filters/sci_prod_world.html:156
@@ -2713,7 +2717,7 @@ msgstr ""
 #: indicator/templatetags/indicator_filters.py:145
 #: search_gateway/data_sources_with_settings.py:261
 msgid "Subfield"
-msgstr ""
+msgstr "Subfield"
 
 #: indicator/templates/filters/sci_prod_world.html:18
 #: indicator/templates/filters/sci_prod_world.html:162
@@ -2721,7 +2725,7 @@ msgstr ""
 #: indicator/templatetags/indicator_filters.py:146
 #: search_gateway/data_sources_with_settings.py:275
 msgid "Topic"
-msgstr ""
+msgstr "Topic"
 
 #: indicator/templates/filters/sci_prod_world.html:26
 msgid "Indexing"
@@ -3020,7 +3024,7 @@ msgstr ""
 #, fuzzy
 #| msgid "Closed"
 msgid "Close"
-msgstr "Closed"
+msgstr "Close"
 
 #: indicator/templates/ranking.html:145
 msgid "Loading journal profile..."
@@ -3032,11 +3036,65 @@ msgstr "Loading journal profile..."
 msgid "Selection Controls"
 msgstr "Select an option"
 
-#: indicator/templates/ranking.html:163
-#, fuzzy
-#| msgid "Source Journals"
-msgid "Selected Journal"
-msgstr "Source Journals"
+#: indicator/templates/journal_profile.html:8
+msgid "Journal Profile"
+msgstr "Journal Profile"
+
+#: indicator/templates/journal_profile.html:107
+msgid "Analytical Summary"
+msgstr "Analytical Summary"
+
+#: indicator/templates/journal_profile.html:158
+msgid "Selected Category"
+msgstr "Selected Category"
+
+#: indicator/templates/journal_profile.html:190
+msgid "Category Comparison"
+msgstr "Category Comparison"
+
+#: indicator/templates/journal_profile.html:158
+msgid "Time Series in Selected Category"
+msgstr "Time Series in Selected Category"
+
+#: indicator/templates/journal_profile.html:184
+msgid "Category Comparison in Selected Year"
+msgstr "Category Comparison in Selected Year"
+
+#: indicator/templates/journal_profile.html:165
+msgid "Historical series for the journal in the selected category."
+msgstr "Historical series for the journal in the selected category."
+
+#: indicator/templates/journal_profile.html:197
+msgid "Comparison across categories for the selected year and category type."
+msgstr "Comparison across categories for the selected year and category type."
+
+#: indicator/templates/journal_profile.html:43
+msgid "Ranking Controls"
+msgstr "Ranking Controls"
+
+#: indicator/templates/journal_profile.html:126
+msgid "Journal Attributes"
+msgstr "Journal Attributes"
+
+#: indicator/templates/journal_profile.html:160
+msgid "Visualizations"
+msgstr "Visualizations"
+
+#: indicator/templates/filters/journal_metrics.html:125
+msgid "SciELO Collection"
+msgstr "SciELO Collection"
+
+#: indicator/templates/journal_profile.html:111
+msgid "Indicators and journal attributes for the selected year and category."
+msgstr "Indicators and journal attributes for the selected year and category."
+
+#: indicator/static/indicator/js/journal_metrics.js:312
+msgid "Copy"
+msgstr "Copy"
+
+#: indicator/static/indicator/js/journal_metrics.js:932
+msgid "Collection code"
+msgstr "Collection code"
 
 #: indicator/templates/ranking.html:166
 #, fuzzy

@@ -1,0 +1,254 @@
+{% extends "base.html" %}
+{% load static %}
+{% load i18n %}
+{% load indicator_filters %}
+{% get_current_language as CURRENT_LANGUAGE %}
+
+{% block title %}
+  {% trans "Journal Profile" %}{% if journal_title or journal_issn %} | {% firstof journal_title journal_issn %}{% endif %}
+{% endblock title %}
+
+{% block body_class %}{{ block.super }} journal-profile-body{% endblock %}
+
+{% block content %}
+<section id="content" class="journal-profile-page">
+  <div class="container">
+    <div class="journal-profile-page__header">
+      <h1 class="journal-profile-page__title">{% trans "Journal Profile" %}</h1>
+      <div class="journal-profile-page__context">
+        <h2 class="journal-profile-page__headline" id="journal-profile-header-title">{% firstof journal_title journal_issn %}</h2>
+        {% if profile_header_attributes %}
+        <div class="journal-profile-page__attributes" id="journal-profile-header-meta">
+          {% for attribute in profile_header_attributes %}
+          <span class="journal-profile-attribute">
+            <span class="journal-profile-attribute__label">{{ attribute.label }}</span>
+            <span class="journal-profile-attribute__value">{{ attribute.value }}</span>
+          </span>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    {% if error %}
+    <div class="alert alert-warning shadow-sm mb-3" role="alert">
+      {{ error }}
+    </div>
+    {% endif %}
+
+    {% if filters_error %}
+    <div class="alert alert-warning shadow-sm mb-3" role="alert">
+      {{ filters_error }}
+    </div>
+    {% endif %}
+
+    <form
+      id="journal-profile-controls-form"
+      method="get"
+      action="{% url 'indicator_journal_metrics' %}"
+      class="card mb-3 p-3 shadow-sm indicator-applied-filters journal-profile-controls-bar"
+      data-profile-timeseries-url="{% url 'indicator_journal_metrics_timeseries' %}"
+      data-profile-journal-issn="{{ journal_issn|escape }}">
+      <input type="hidden" name="journal" value="{{ journal_issn|escape }}">
+      {% for key, value in profile_passthrough_filters.items %}
+      <input type="hidden" name="{{ key }}" value="{{ value }}">
+      {% endfor %}
+      <div class="applied-filters-head">
+        <span class="applied-filters-title">{% trans "Ranking Controls" %}</span>
+      </div>
+      <div class="row g-3 align-items-end journal-profile-controls-bar__grid">
+        <div class="col-12 col-md-6 col-xl-3">
+          <div class="journal-profile-controls-bar__field">
+            <label class="form-label mb-1" for="journal-profile-publication-year-select">{% trans "Publication Year" %}</label>
+            <select id="journal-profile-publication-year-select" class="form-select" name="publication_year">
+              {% for year_option in profile_year_options %}
+              <option value="{{ year_option }}" {% if selected_publication_year == year_option %}selected{% endif %}>{{ year_option }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <div class="col-12 col-md-6 col-xl-3">
+          <div class="journal-profile-controls-bar__field">
+            <label class="form-label mb-1" for="journal-profile-category-level-select">{% trans "Category Type" %}</label>
+            <select id="journal-profile-category-level-select" class="form-select" name="category_level" data-profile-category-level>
+              {% if not profile_category_level_options %}
+              <option value="{{ selected_category_level }}" selected>{{ selected_category_level|ui_value:"category_level" }}</option>
+              {% endif %}
+              {% for option in profile_category_level_options %}
+              <option value="{{ option }}" {% if selected_category_level == option|stringformat:'s' %}selected{% endif %}>{{ option|ui_value:"category_level" }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <div class="col-12 col-md-6 col-xl-4">
+          <div class="journal-profile-controls-bar__field">
+            <label class="form-label mb-1" for="journal-profile-category-select">{% trans "Category" %}</label>
+            <select id="journal-profile-category-select" class="form-select" name="category_id" data-profile-category-id>
+              {% for category_option in profile_category_options %}
+              <option value="{{ category_option }}" {% if selected_category_id == category_option %}selected{% endif %}>{{ category_option|ui_value:"category_id" }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        <div class="col-12 col-md-6 col-xl-2 journal-profile-controls-bar__actions">
+          <div class="journal-profile-controls-bar__field journal-profile-controls-bar__field--action">
+            <span class="form-label mb-1 journal-profile-controls-bar__label-placeholder" aria-hidden="true">{% trans "Update" %}</span>
+            <button type="submit" class="btn btn-primary journal-profile-controls-bar__submit" data-profile-submit>{% trans "Update" %}</button>
+          </div>
+        </div>
+      </div>
+    </form>
+
+    {% if profile_data %}
+      <div class="journal-profile-section-heading journal-profile-section-heading--summary">
+        <div class="journal-profile-grid-title journal-profile-grid-title--summary">{% trans "Analytical Summary" %}</div>
+        <div class="journal-profile-section-heading__context">
+          {% if selected_publication_year %}
+          <span class="journal-profile-section-heading__context-item">
+            <span class="journal-profile-section-heading__context-label">{% trans "Year" %}</span>
+            <span class="journal-profile-section-heading__context-value">{{ selected_publication_year }}</span>
+          </span>
+          {% endif %}
+          {% if selected_category_level %}
+          <span class="journal-profile-section-heading__context-item">
+            <span class="journal-profile-section-heading__context-label">{% trans "Category Type" %}</span>
+            <span class="journal-profile-section-heading__context-value">{{ selected_category_level|ui_value:"category_level" }}</span>
+          </span>
+          {% endif %}
+          {% if selected_category_id %}
+          <span class="journal-profile-section-heading__context-item">
+            <span class="journal-profile-section-heading__context-label">{% trans "Category" %}</span>
+            <span class="journal-profile-section-heading__context-value">{{ selected_category_id|ui_value:"category_id" }}</span>
+          </span>
+          {% endif %}
+        </div>
+      </div>
+      <div class="journal-profile-section journal-profile-summary-card">
+        <div class="row g-2 mb-3" id="journal-profile-kpis">
+          {% for kpi in profile_kpis %}
+          <div class="col-6 col-xl-2">
+            <div class="journal-kpi">
+              <div class="journal-kpi__label">{{ kpi.label }}</div>
+              <div class="journal-kpi__value">{{ kpi.value }}</div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+
+        <div id="journal-profile-badges">
+          <div class="journal-profile-badge-group">
+            <div class="journal-profile-badge-group__title">{% trans "Journal Attributes" %}</div>
+            <div class="d-flex flex-wrap gap-2">
+              {% for badge in profile_badges.attributes %}
+              <span class="badge rounded-pill journal-source-badge {% if badge.active %}journal-source-badge--active{% else %}journal-source-badge--inactive{% endif %}">{{ badge.label }}</span>
+              {% endfor %}
+            </div>
+          </div>
+          <div class="journal-profile-badge-group">
+            <div class="journal-profile-badge-group__title">{% trans "Indexing" %}</div>
+            <div class="d-flex flex-wrap gap-2">
+              {% for badge in profile_badges.indexing %}
+              <span class="badge rounded-pill journal-source-badge {% if badge.active %}journal-source-badge--active{% else %}journal-source-badge--inactive{% endif %}">{{ badge.label }}</span>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="journal-profile-chart-group">
+        <div class="journal-profile-section-heading journal-profile-chart-group__header">
+          <div class="journal-profile-grid-title journal-profile-grid-title--summary">{% trans "Time Series in Selected Category" %}</div>
+          <div class="journal-profile-section-heading__context">
+            {% if selected_category_level %}
+            <span class="journal-profile-section-heading__context-item">
+              <span class="journal-profile-section-heading__context-label">{% trans "Category Type" %}</span>
+              <span class="journal-profile-section-heading__context-value">{{ selected_category_level|ui_value:"category_level" }}</span>
+            </span>
+            {% endif %}
+            {% if selected_category_id %}
+            <span class="journal-profile-section-heading__context-item">
+              <span class="journal-profile-section-heading__context-label">{% trans "Category" %}</span>
+              <span class="journal-profile-section-heading__context-value">{{ selected_category_id|ui_value:"category_id" }}</span>
+            </span>
+            {% endif %}
+          </div>
+        </div>
+        <div class="row g-3 journal-profile-charts-grid">
+          <div class="col-12 col-xl-6">
+            <div class="journal-profile-chart-card">
+              <div class="journal-profile-chart" id="journal-profile-output-chart"></div>
+            </div>
+          </div>
+          <div class="col-12 col-xl-6">
+            <div class="journal-profile-chart-card">
+              <div class="journal-profile-chart" id="journal-profile-impact-chart"></div>
+            </div>
+          </div>
+          <div class="col-12 col-xl-6">
+            <div class="journal-profile-chart-card">
+              <div class="journal-profile-chart" id="journal-profile-top-share-chart"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="journal-profile-chart-group">
+        <div class="journal-profile-section-heading journal-profile-chart-group__header">
+          <div class="journal-profile-grid-title journal-profile-grid-title--summary">{% trans "Category Comparison in Selected Year" %}</div>
+          <div class="journal-profile-section-heading__context">
+            {% if selected_publication_year %}
+            <span class="journal-profile-section-heading__context-item">
+              <span class="journal-profile-section-heading__context-label">{% trans "Year" %}</span>
+              <span class="journal-profile-section-heading__context-value">{{ selected_publication_year }}</span>
+            </span>
+            {% endif %}
+            {% if selected_category_level %}
+            <span class="journal-profile-section-heading__context-item">
+              <span class="journal-profile-section-heading__context-label">{% trans "Category Type" %}</span>
+              <span class="journal-profile-section-heading__context-value">{{ selected_category_level|ui_value:"category_level" }}</span>
+            </span>
+            {% endif %}
+          </div>
+        </div>
+        <div class="row g-3 journal-profile-charts-grid">
+          <div class="col-12 col-xl-6">
+            <div class="journal-profile-chart-card">
+              <div class="journal-profile-chart" id="journal-profile-category-radar"></div>
+            </div>
+          </div>
+          <div class="col-12 col-xl-6">
+            <div class="journal-profile-chart-card">
+              <div class="journal-profile-chart" id="journal-profile-category-citations-total-radar"></div>
+            </div>
+          </div>
+          <div class="col-12 col-xl-6">
+            <div class="journal-profile-chart-card">
+              <div class="journal-profile-chart" id="journal-profile-category-citations-mean-radar"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {{ profile_data|json_script:"journal-profile-data" }}
+    {% endif %}
+  </div>
+</section>
+
+<div
+  id="journal-profile-config"
+  data-number-locale="{{ CURRENT_LANGUAGE|default:request.LANGUAGE_CODE|escape }}">
+</div>
+{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'indicator/css/custom.css' %}">
+{% endblock %}
+
+{% block inline_javascript %}
+  <script src="{% static 'js/echarts/echarts.min.js' %}"></script>
+  <script src="{% static 'indicator/js/helpers.js' %}"></script>
+  <script src="{% static 'indicator/js/charts.js' %}"></script>
+  <script src="{% static 'indicator/js/journal_metrics_common.js' %}"></script>
+  <script src="{% static 'indicator/js/journal_profile.js' %}"></script>
+{% endblock %}

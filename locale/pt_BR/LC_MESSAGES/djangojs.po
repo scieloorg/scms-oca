@@ -17,6 +17,103 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
+# journal_metrics.js / charts.js / journal_profile.html (manual additions)
+msgid "Category Type"
+msgstr "Tipo de categoria"
+
+msgid "Ranking Controls"
+msgstr "Controles de ranking"
+
+msgid "Journal Attributes"
+msgstr "Atributos do periódico"
+
+msgid "Category"
+msgstr "Categoria"
+
+msgid "Year"
+msgstr "Ano"
+
+msgid "Data"
+msgstr "Dados"
+
+msgid "Copy"
+msgstr "Copiar"
+
+msgid "Analytical Summary"
+msgstr "Síntese analítica"
+
+msgid "SciELO Collection"
+msgstr "Coleção SciELO"
+
+msgid "Publisher"
+msgstr "Editora"
+
+msgid "Indicators and journal attributes for the selected year and category."
+msgstr "Indicadores e atributos do periódico para o ano e a categoria selecionados."
+
+msgid "Any value"
+msgstr "Qualquer valor"
+
+msgid "Close"
+msgstr "Fechar"
+
+msgid "Domain"
+msgstr "Domínio"
+
+msgid "Field"
+msgstr "Área"
+
+msgid "Subfield"
+msgstr "Subárea"
+
+msgid "Topic"
+msgstr "Tópico"
+
+msgid "Copied"
+msgstr "Copiado"
+
+msgid "Copy failed"
+msgstr "Falha ao copiar"
+
+msgid "ISSN"
+msgstr "ISSN"
+
+msgid "No data available"
+msgstr "Nenhum dado disponível"
+
+msgid "No non-zero values"
+msgstr "Nenhum valor diferente de zero"
+
+msgid "Select a country"
+msgstr "Selecione um país"
+
+msgid "Select a collection"
+msgstr "Selecione uma coleção"
+
+msgid "Select a category type"
+msgstr "Selecione um tipo de categoria"
+
+msgid "Select a ranking metric"
+msgstr "Selecione uma métrica de ranking"
+
+msgid "Select a value"
+msgstr "Selecione um valor"
+
+msgid "Type journal name..."
+msgstr "Digite o nome do periódico..."
+
+msgid "Type ISSN..."
+msgstr "Digite o ISSN..."
+
+msgid "Type publisher name..."
+msgstr "Digite o nome da editora..."
+
+msgid "Select a category id"
+msgstr "Selecione uma categoria"
+
+msgid "Type to search..."
+msgstr "Digite para pesquisar..."
+
 #: indicator/static/indicator/js/button.js:85
 msgid "Start typing to search..."
 msgstr "Comece a digitar para pesquisar..."
@@ -414,44 +511,8 @@ msgstr "% de documentos com ≥1 citação (participação %)"
 #~ msgid "Avg Cited Documents per Periodical"
 #~ msgstr "Média de Documentos Citados por Periódico"
 
-#~ msgid "Any value"
-#~ msgstr "Qualquer valor"
-
-#~ msgid "Select a value"
-#~ msgstr "Selecione um valor"
-
-#~ msgid "Type to search..."
-#~ msgstr "Digite para pesquisar..."
-
-#~ msgid "Type journal name..."
-#~ msgstr "Digite o nome do periódico..."
-
-#~ msgid "Type ISSN..."
-#~ msgstr "Digite o ISSN..."
-
-#~ msgid "Type publisher name..."
-#~ msgstr "Digite o nome da Casa Publicadora..."
-
-#~ msgid "Select a category id"
-#~ msgstr "Selecione uma categoria"
-
 #~ msgid "Document Core"
 #~ msgstr "Dados do documento"
-
-#~ msgid "Category"
-#~ msgstr "Categoria"
-
-#~ msgid "Domain"
-#~ msgstr "Domínio"
-
-#~ msgid "Field"
-#~ msgstr "Campo"
-
-#~ msgid "Subfield"
-#~ msgstr "Subcampo"
-
-#~ msgid "Topic"
-#~ msgstr "Tópico"
 
 #~ msgid "Funding"
 #~ msgstr "Financiamento"

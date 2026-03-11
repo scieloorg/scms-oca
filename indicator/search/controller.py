@@ -1,6 +1,18 @@
 from search_gateway.client import get_opensearch_client
 from search_gateway import data_sources_with_settings
 
+from indicator.journal_metrics.config import (
+    ALLOWED_RANKING_METRICS,
+    DEFAULT_CATEGORY_ID,
+    DEFAULT_MINIMUM_PUBLICATIONS,
+    DEFAULT_PUBLICATION_YEAR,
+    DEFAULT_RANKING_METRIC,
+    VALID_CATEGORY_LEVELS,
+    get_index_field_name,
+    normalize_category_level,
+    normalize_minimum_publications,
+    normalize_ranking_metric,
+)
 from . import query as indicator_query
 from . import parser as indicator_parser
 from . import utils
@@ -21,10 +33,7 @@ CONTROL_FILTER_KEYS = {
     "csrfmiddlewaretoken",
 }
 
-DEFAULT_JOURNAL_METRICS_CATEGORY_LEVEL = "field"
-VALID_JOURNAL_METRICS_CATEGORY_LEVELS = {"domain", "field", "subfield", "topic"}
-DEFAULT_JOURNAL_METRICS_PUBLICATION_YEAR = "2020"
-DEFAULT_JOURNAL_METRICS_RANKING_METRIC = "journal_impact_normalized_window_3y"
+CATEGORY_LEVEL_ORDER = tuple(level for level in ("domain", "field", "subfield", "topic") if level in VALID_CATEGORY_LEVELS)
 
 
 def _normalize_indicator_study_unit(study_unit):
@@ -70,13 +79,17 @@ def _build_comparison_baseline_filters(filters):
     return baseline_filters, comparative_filter_keys
 
 
-def _normalize_journal_metrics_category_level(category_level):
-    value = str(category_level or "").strip().lower()
-    if not value:
-        return DEFAULT_JOURNAL_METRICS_CATEGORY_LEVEL
-    if value not in VALID_JOURNAL_METRICS_CATEGORY_LEVELS:
-        return DEFAULT_JOURNAL_METRICS_CATEGORY_LEVEL
-    return value
+def _append_must_clause(query, clause):
+    if not clause:
+        return query
+
+    if isinstance(query, dict) and "bool" in query:
+        bool_query = query.setdefault("bool", {})
+        must_clauses = bool_query.setdefault("must", [])
+        must_clauses.append(clause)
+        return query
+
+    return {"bool": {"must": [clause]}}
 
 
 def _build_journal_metrics_filter_clauses(form_filters, selected_category_level):
@@ -89,6 +102,7 @@ def _build_journal_metrics_filter_clauses(form_filters, selected_category_level)
         "year",
         "ranking_metric",
         "limit",
+        "minimum_publications",
         "scope",
         "return_study_unit",
         "study_unit",
@@ -110,6 +124,131 @@ def _build_journal_metrics_filter_clauses(form_filters, selected_category_level)
     return [], []
 
 
+def _strip_term_clause(clauses, field_name):
+    return [
+        clause
+        for clause in (clauses or [])
+        if not (
+            isinstance(clause, dict)
+            and isinstance(clause.get("term"), dict)
+            and field_name in clause.get("term", {})
+        )
+    ]
+
+
+def _list_available_category_levels(es, index_name, base_must, inherited_must_not):
+    body = {
+        "size": 0,
+        "query": {
+            "bool": {
+                "must": list(base_must),
+                **({"must_not": inherited_must_not} if inherited_must_not else {}),
+            }
+        },
+        "aggs": {
+            "category_levels": {
+                "terms": {
+                    "field": "category_level",
+                    "size": len(CATEGORY_LEVEL_ORDER) or len(VALID_CATEGORY_LEVELS),
+                }
+            }
+        },
+    }
+
+    try:
+        response = es.search(index=index_name, body=body)
+    except Exception:
+        return []
+
+    level_order = {level: index for index, level in enumerate(CATEGORY_LEVEL_ORDER)}
+    normalized_levels = []
+    for level in indicator_parser.parse_terms_agg_keys(response, "category_levels"):
+        normalized_level = str(level or "").strip().lower()
+        if normalized_level not in VALID_CATEGORY_LEVELS or normalized_level in normalized_levels:
+            continue
+        normalized_levels.append(normalized_level)
+
+    return sorted(normalized_levels, key=lambda level: level_order.get(level, len(level_order)))
+
+
+def _list_available_categories(es, index_name, base_must, selected_category_level, publication_year, inherited_must_not):
+    categories_must = list(base_must)
+    categories_must.append({"term": {"category_level": selected_category_level}})
+
+    if publication_year not in (None, ""):
+        try:
+            categories_year = int(publication_year)
+        except (TypeError, ValueError):
+            categories_year = publication_year
+        categories_must.append({"term": {"publication_year": categories_year}})
+
+    categories_body = {
+        "size": 0,
+        "query": {
+            "bool": {
+                "must": categories_must,
+                **({"must_not": inherited_must_not} if inherited_must_not else {}),
+            }
+        },
+        "aggs": {
+            "categories": {
+                "terms": {
+                    "field": "category_id",
+                    "size": 2000,
+                    "order": {"publications_total": "desc"},
+                },
+                "aggs": {
+                    "publications_total": {"sum": {"field": "journal_publications_count"}},
+                },
+            }
+        },
+    }
+
+    try:
+        response = es.search(index=index_name, body=categories_body)
+    except Exception:
+        return []
+
+    return indicator_parser.parse_terms_agg_keys(response, "categories")
+
+
+def _search_journal_metrics_profile_hits(
+    es,
+    index_name,
+    base_must,
+    selected_category_level,
+    selected_category_id,
+    inherited_must_not,
+):
+    data_must = list(base_must)
+    data_must.append({"term": {"category_level": selected_category_level}})
+    if selected_category_id:
+        data_must.append({"term": {"category_id": selected_category_id}})
+
+    body = {
+        "size": 1000,
+        "query": {
+            "bool": {
+                "must": data_must,
+                **({"must_not": inherited_must_not} if inherited_must_not else {}),
+            }
+        },
+        "sort": [
+            {"publication_year": {"order": "asc"}},
+            {get_index_field_name("journal_impact_cohort"): {"order": "desc", "missing": "_last"}},
+        ],
+        "collapse": {"field": "publication_year"},
+        "_source": indicator_query.JOURNAL_METRICS_SOURCE_FIELDS,
+    }
+
+    try:
+        response = es.search(index=index_name, body=body)
+    except Exception as e:
+        return None, f"Error executing search: {e}"
+
+    return response.get("hits", {}).get("hits", []), None
+
+
 def get_journal_metrics_data(form_filters):
     """
     Orchestrates the retrieval of journal metrics data.
@@ -124,32 +263,23 @@ def get_journal_metrics_data(form_filters):
         return None, "Invalid data_source"
 
     payload_filters = dict(form_filters)
-    payload_filters["category_level"] = _normalize_journal_metrics_category_level(
-        payload_filters.get("category_level")
-    )
+    has_explicit_category_level = str(payload_filters.get("category_level") or "").strip() != ""
+    has_explicit_category_id = str(payload_filters.get("category_id") or "").strip() != ""
+    payload_filters["category_level"] = normalize_category_level(payload_filters.get("category_level"))
+    if not has_explicit_category_level and not has_explicit_category_id:
+        payload_filters["category_id"] = DEFAULT_CATEGORY_ID
 
     publication_year = payload_filters.pop("publication_year", None) or payload_filters.pop("year", None)
-    ranking_metric = payload_filters.pop("ranking_metric", DEFAULT_JOURNAL_METRICS_RANKING_METRIC)
+    ranking_metric = payload_filters.pop("ranking_metric", DEFAULT_RANKING_METRIC)
     limit = payload_filters.pop("limit", 100)
+    minimum_publications = normalize_minimum_publications(payload_filters.pop("minimum_publications", None))
+    if minimum_publications is None:
+        minimum_publications = DEFAULT_MINIMUM_PUBLICATIONS
 
-    allowed_ranking_metrics = {
-        "journal_publications_count",
-        "journal_citations_total",
-        "journal_citations_mean",
-        "journal_citations_mean_window_2y",
-        "journal_citations_mean_window_3y",
-        "journal_citations_mean_window_5y",
-        "journal_impact_normalized",
-        "journal_impact_normalized_window_2y",
-        "journal_impact_normalized_window_3y",
-        "journal_impact_normalized_window_5y",
-        "top_1pct_all_time_publications_share_pct",
-        "top_5pct_all_time_publications_share_pct",
-        "top_10pct_all_time_publications_share_pct",
-        "top_50pct_all_time_publications_share_pct",
-    }
-    if ranking_metric not in allowed_ranking_metrics:
-        ranking_metric = DEFAULT_JOURNAL_METRICS_RANKING_METRIC
+    ranking_metric = normalize_ranking_metric(ranking_metric)
+
+    if ranking_metric not in ALLOWED_RANKING_METRICS:
+        ranking_metric = DEFAULT_RANKING_METRIC
 
     try:
         limit = int(limit)
@@ -158,12 +288,17 @@ def get_journal_metrics_data(form_filters):
     limit = max(1, min(limit, 5000))
 
     if not publication_year:
-        publication_year = DEFAULT_JOURNAL_METRICS_PUBLICATION_YEAR
+        publication_year = DEFAULT_PUBLICATION_YEAR
 
     cleaned_filters = utils.clean_form_filters(payload_filters)
 
     query = indicator_query.build_query(cleaned_filters, field_settings, data_source)
     jm_query = indicator_query.build_journal_metrics_query(publication_year, query)
+    if minimum_publications is not None:
+        jm_query = _append_must_clause(
+            jm_query,
+            {"range": {"journal_publications_count": {"gte": minimum_publications}}},
+        )
 
     body = indicator_query.build_journal_metrics_body(
         selected_year=publication_year,
@@ -202,11 +337,12 @@ def get_journal_metrics_timeseries(
     if not index_name:
         return None, "Invalid data_source"
 
-    selected_category_level = _normalize_journal_metrics_category_level(category_level)
+    selected_category_level = normalize_category_level(category_level)
     inherited_must, inherited_must_not = _build_journal_metrics_filter_clauses(
         form_filters,
         selected_category_level,
     )
+    inherited_must = _strip_term_clause(inherited_must, "category_level")
 
     base_must = list(inherited_must)
     if issn:
@@ -214,77 +350,78 @@ def get_journal_metrics_timeseries(
     if journal:
         base_must.append({"term": {"journal_title": journal}})
 
-    categories_must = list(base_must)
-    categories_must.append({"term": {"category_level": selected_category_level}})
-
-    if publication_year not in (None, ""):
-        try:
-            categories_year = int(publication_year)
-        except (TypeError, ValueError):
-            categories_year = publication_year
-        categories_must.append({"term": {"publication_year": categories_year}})
-
-    categories_body = {
-        "size": 0,
-        "query": {
-            "bool": {
-                "must": categories_must,
-                **({"must_not": inherited_must_not} if inherited_must_not else {}),
-            }
-        },
-        "aggs": {
-            "categories": {
-                "terms": {
-                    "field": "category_id",
-                    "size": 2000,
-                    "order": {"publications_total": "desc"},
-                },
-                "aggs": {
-                    "publications_total": {"sum": {"field": "journal_publications_count"}},
-                },
-            }
-        },
-    }
+    available_category_levels = _list_available_category_levels(
+        es,
+        index_name,
+        base_must,
+        inherited_must_not,
+    )
+    if available_category_levels and selected_category_level not in available_category_levels:
+        selected_category_level = available_category_levels[0]
 
     selected_category_id = str(category_id).strip() if category_id not in (None, "") else None
-    available_categories = []
-    try:
-        categories_res = es.search(index=index_name, body=categories_body)
-        available_categories = indicator_parser.parse_terms_agg_keys(categories_res, "categories")
-        if selected_category_id and selected_category_id not in available_categories:
-            selected_category_id = None
-        if not selected_category_id and available_categories:
-            selected_category_id = available_categories[0]
-    except Exception:
-        available_categories = []
+    available_categories = _list_available_categories(
+        es,
+        index_name,
+        base_must,
+        selected_category_level,
+        publication_year,
+        inherited_must_not,
+    )
+    if selected_category_id and selected_category_id not in available_categories:
+        selected_category_id = None
+    if not selected_category_id and available_categories:
+        selected_category_id = available_categories[0]
 
-    data_must = list(base_must)
-    data_must.append({"term": {"category_level": selected_category_level}})
-    if selected_category_id:
-        data_must.append({"term": {"category_id": selected_category_id}})
+    hits, search_error = _search_journal_metrics_profile_hits(
+        es,
+        index_name,
+        base_must,
+        selected_category_level,
+        selected_category_id,
+        inherited_must_not,
+    )
+    if search_error:
+        return None, search_error
 
-    body = {
-        "size": 1000,
-        "query": {
-            "bool": {
-                "must": data_must,
-                **({"must_not": inherited_must_not} if inherited_must_not else {}),
-            }
-        },
-        "sort": [
-            {"publication_year": {"order": "asc"}},
-            {"journal_impact_normalized": {"order": "desc", "missing": "_last"}},
-        ],
-        "collapse": {"field": "publication_year"},
-        "_source": indicator_query.JOURNAL_METRICS_SOURCE_FIELDS,
-    }
+    if not hits and available_category_levels:
+        for fallback_category_level in available_category_levels:
+            if fallback_category_level == selected_category_level:
+                continue
 
-    try:
-        res = es.search(index=index_name, body=body)
-    except Exception as e:
-        return None, f"Error executing search: {e}"
+            fallback_available_categories = _list_available_categories(
+                es,
+                index_name,
+                base_must,
+                fallback_category_level,
+                publication_year,
+                inherited_must_not,
+            )
+            fallback_selected_category_id = selected_category_id
+            if fallback_selected_category_id and fallback_selected_category_id not in fallback_available_categories:
+                fallback_selected_category_id = None
+            if not fallback_selected_category_id and fallback_available_categories:
+                fallback_selected_category_id = fallback_available_categories[0]
 
-    hits = res.get("hits", {}).get("hits", [])
+            fallback_hits, search_error = _search_journal_metrics_profile_hits(
+                es,
+                index_name,
+                base_must,
+                fallback_category_level,
+                fallback_selected_category_id,
+                inherited_must_not,
+            )
+            if search_error:
+                return None, search_error
+            if not fallback_hits:
+                continue
+
+            selected_category_level = fallback_category_level
+            selected_category_id = fallback_selected_category_id
+            available_categories = fallback_available_categories
+            hits = fallback_hits
+            break
+
     if not hits:
         return None, "Not found"
 
@@ -333,6 +470,7 @@ def get_journal_metrics_timeseries(
         category_spider = []
 
     parsed["available_categories"] = available_categories
+    parsed["available_category_levels"] = available_category_levels or [selected_category_level]
     parsed["selected_category_id"] = selected_category_id
     parsed["selected_category_level"] = selected_category_level
     parsed["category_publications_spider"] = category_spider
