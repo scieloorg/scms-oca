@@ -339,6 +339,10 @@ class EducationDirectory(CommonControlField):
         return self.title
     get_title.short_description = "Title"
 
+    def get_link(self):
+        return self.link
+    get_link.short_description = "Link"
+
     def get_description(self):
         return self.description
     get_description.short_description = "Description"
