@@ -1,3 +1,7 @@
+import re
+
+from search.choices import QUERY_STRING_FIELD_ALIASES, SEARCH_FIELD_MAPPING, QUERY_STRING_FIELDS
+
 def query_filters(filters):
     """
     Build filter clauses for Elasticsearch query.
@@ -164,6 +168,146 @@ def build_filters_aggs(field_settings, exclude_fields=None):
     return aggs
 
 
+
+def _is_advanced_query(text):
+    """Detect if text contains advanced query syntax (field:value, OR, AND, parentheses)."""
+    if not text or not isinstance(text, str):
+        return False
+    t = text.strip()
+    if re.search(r"\w+:\S+", t):
+        return True
+    if re.search(r"\b(OR|AND|NOT)\b", t, re.IGNORECASE):
+        return True
+    if "(" in t or ")" in t:
+        return True
+    return False
+
+
+def _rewrite_field_aliases_in_query(query_text):
+    """Rewrite user-friendly field names to index field names in the query string."""
+    result = query_text
+    for alias, index_field in sorted(
+        QUERY_STRING_FIELD_ALIASES.items(), key=lambda x: -len(x[0])
+    ):
+        result = re.sub(
+            rf"\b{re.escape(alias)}\s*:",
+            f"{index_field}:",
+            result,
+            flags=re.IGNORECASE,
+        )
+    return result
+
+
+def _build_advanced_query(query_text):
+    """Build a query_string query for advanced syntax like (title:covid OR abstract:covid)."""
+    rewritten = _rewrite_field_aliases_in_query(query_text)
+    return {
+        "query_string": {
+            "query": rewritten,
+            "fields": QUERY_STRING_FIELDS,
+            "default_operator": "AND",
+        }
+    }
+
+
+def _build_clause_query(field_key, query_text):
+    """Build a clause for a given field and text. Uses query_string if advanced syntax detected."""
+    if _is_advanced_query(query_text):
+        return _build_advanced_query(query_text)
+    fields = SEARCH_FIELD_MAPPING.get(field_key, ["title_search", "ids_search"])
+    return {
+        "simple_query_string": {
+            "query": query_text,
+            "default_operator": "AND",
+            "fields": fields,
+        }
+    }
+
+
+def _normalize_query_clauses(query_clauses):
+    """Return only valid clauses, with normalized operators."""
+    normalized = []
+
+    for clause in query_clauses or []:
+        text = (clause.get("text") or "").strip()
+        if not text:
+            continue
+
+        normalized.append(
+            {
+                "operator": "" if not normalized else (clause.get("operator") or "AND").upper(),
+                "query": _build_clause_query(clause.get("field") or "all", text),
+            }
+        )
+
+    return normalized
+
+
+def _group_or_clauses(clauses):
+    """Group consecutive OR clauses into a single logical unit."""
+    groups = []
+
+    for clause in clauses:
+        operator = clause["operator"]
+        query = clause["query"]
+
+        if not groups:
+            groups.append({"operator": "", "queries": [query]})
+            continue
+
+        if operator == "OR":
+            groups[-1]["queries"].append(query)
+            continue
+
+        groups.append({"operator": operator, "queries": [query]})
+
+    return groups
+
+
+def _build_or_group_query(queries):
+    """Convert an OR group into a single OpenSearch query."""
+    if len(queries) == 1:
+        return queries[0]
+
+    return {
+        "bool": {
+            "should": queries,
+            "minimum_should_match": 1,
+        }
+    }
+
+
+def build_bool_from_clauses(query_clauses):
+    """
+    Build a bool query from normalized groups of clauses.
+
+    Consecutive OR clauses become one group. Each group is converted to either:
+    - a single query, or
+    - a bool/should query with minimum_should_match=1
+
+    Then the group is appended to must or must_not according to the
+    operator that precedes it.
+    """
+    normalized_clauses = _normalize_query_clauses(query_clauses)
+    if not normalized_clauses:
+        return {"must": [{"match_all": {}}]}
+
+    bool_query = {"must": [], "must_not": []}
+
+    for group in _group_or_clauses(normalized_clauses):
+        group_query = _build_or_group_query(group["queries"])
+        target = "must_not" if group["operator"] == "NOT" else "must"
+        bool_query[target].append(group_query)
+
+    if not bool_query["must"] and not bool_query["must_not"]:
+        return {"must": [{"match_all": {}}]}
+
+    if not bool_query["must"]:
+        bool_query["must"].append({"match_all": {}})
+
+    return bool_query
+
+
 def build_search_text_body(query_text):
     """
     Builds a simple text search query body.
@@ -186,6 +330,7 @@ def build_search_text_body(query_text):
 
 def build_document_search_body(
         query_text=None,
+        query_clauses=None,
         filters=None,
         page=1,
         page_size=10,
@@ -197,32 +342,34 @@ def build_document_search_body(
     Builds the body for a document search query with text and filters.
 
     Args:
-        query_text: Text to search for.
+        query_text: Text to search for (legacy, used when query_clauses is empty).
+        query_clauses: List of {operator, field, text} for advanced search.
         filters: Dict of filters (should already be mapped to ES field names).
         page: Page number (1-based).
         page_size: Number of results per page.
         sort_field: Field to sort by.
         sort_order: Sort order ('asc' or 'desc').
         source_fields: List of fields to include in results.
-        data_source_name: Name of the data source (for future use).
 
     Returns:
         Elasticsearch query body dict.
     """
-    bool_query = {"must": []}
-
-    if query_text:
-        bool_query["must"].append(
-            {
-                "simple_query_string": {
-                    "query": query_text,
-                    "default_operator": "AND",
-                    "fields": ["title_search", "ids_search"],  # TODO: Definir os fields para a busca
-                }
-            }
-        )
+    if query_clauses:
+        bool_query = build_bool_from_clauses(query_clauses)
     else:
-        bool_query["must"].append({"match_all": {}})
+        bool_query = {"must": []}
+        if query_text:
+            bool_query["must"].append(
+                {
+                    "simple_query_string": {
+                        "query": query_text,
+                        "default_operator": "AND",
+                        "fields": ["title_search", "ids_search"],
+                    }
+                }
+            )
+        else:
+            bool_query["must"].append({"match_all": {}})
 
     if filters:
         bool_query["filter"] = query_filters(filters)
