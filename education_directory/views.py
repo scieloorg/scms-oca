@@ -306,8 +306,3 @@ def download_sample(request):
             )
             return response
     raise Http404
-
-    start_time = models.TimeField(
-        _("Start Time"), max_length=255, null=True, blank=True
-    )
-    end_time = models.TimeField(_("End Time"), max_length=255, null=True, blank=True)

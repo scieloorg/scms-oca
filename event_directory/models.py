@@ -336,19 +336,19 @@ class EventDirectory(CommonControlField):
 
     def get_start_date(self):
         return self.start_date
-    get_start_date.short_start_date = "Start Date"
+    get_start_date.short_description = "Start Date"
 
     def get_end_date(self):
         return self.end_date
-    get_end_date.short_end_date = "End Date"
+    get_end_date.short_description = "End Date"
 
     def get_start_time(self):
         return self.start_time
-    get_start_time.short_start_time = "Start Time"
+    get_start_time.short_description = "Start Time"
 
     def get_end_time(self):
         return self.end_time
-    get_end_time.short_end_time = "End Time"
+    get_end_time.short_description = "End Time"
 
     def get_thematic_areas_level0(self):
         return "| ".join([t.level0 for t in self.thematic_areas.all()])
