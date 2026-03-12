@@ -63,12 +63,19 @@ class Command(BaseCommand):
         self._delete_concepts_and_thematic_areas()
 
     def _delete_licenses(self):
+        # Collect all license IDs referenced by ScholarlyArticles upfront
+        scholarly_license_ids = set(
+            ScholarlyArticles.objects.filter(
+                license__isnull=False
+            ).values_list("license_id", flat=True)
+        )
+
         licenses = article_models.License.objects.all()
         deleted_count = 0
         skipped_count = 0
 
         for license_obj in licenses:
-            if ScholarlyArticles.objects.filter(license_id=license_obj.pk).exists():
+            if license_obj.pk in scholarly_license_ids:
                 self.stdout.write(
                     self.style.WARNING(
                         f"License '{license_obj}' is referenced by ScholarlyArticles. Skipping."
@@ -100,19 +107,26 @@ class Command(BaseCommand):
             self.style.SUCCESS(f"Deleted {concepts_count} Concepts")
         )
 
+        # Collect ThematicArea IDs referenced by directory models
+        directory_ta_ids = set()
+        for DirectoryModel in (
+            EducationDirectory,
+            InfrastructureDirectory,
+            EventDirectory,
+            PolicyDirectory,
+        ):
+            directory_ta_ids.update(
+                DirectoryModel.objects.filter(
+                    thematic_areas__id__in=thematic_area_ids
+                ).values_list("thematic_areas__id", flat=True)
+            )
+
         # Try to delete the ThematicAreas that were associated with Concepts
         deleted_count = 0
         skipped_count = 0
 
         for ta in ThematicArea.objects.filter(id__in=thematic_area_ids):
-            in_use = (
-                EducationDirectory.objects.filter(thematic_areas=ta).exists()
-                or InfrastructureDirectory.objects.filter(thematic_areas=ta).exists()
-                or EventDirectory.objects.filter(thematic_areas=ta).exists()
-                or PolicyDirectory.objects.filter(thematic_areas=ta).exists()
-            )
-
-            if in_use:
+            if ta.pk in directory_ta_ids:
                 self.stdout.write(
                     self.style.WARNING(
                         f"ThematicArea '{ta}' is referenced by directory models. Skipping."
