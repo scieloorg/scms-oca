@@ -7,6 +7,8 @@ class SearchPageManager {
         this.filterMetadata = config.filterMetadata || {};
         this.rangeFields = config.rangeFields || {};
         this.isUpdatingFilterOptions = false;
+        this.sortField = 'publication_year';
+        this.sortOrder = 'desc';
         
         this.init();
     }
@@ -15,6 +17,7 @@ class SearchPageManager {
         this.setupDataSourceSelector();
         this.setupSearchForm();
         this.setupFilters();
+        this.setupSortSelector();
         this.updateActiveFilters();
         this.preselectFiltersFromURL();
     }
@@ -140,6 +143,18 @@ class SearchPageManager {
                 const searchInput = document.getElementById('search-input');
                 this.searchQuery = searchInput ? searchInput.value : '';
                 this.updateActiveFilters();
+                this.applyFiltersAjax();
+            });
+        }
+    }
+    
+    setupSortSelector() {
+        const sortSelect = document.getElementById('sort-select');
+        if (sortSelect) {
+            sortSelect.addEventListener('change', (e) => {
+                const [field, order] = e.target.value.split(':');
+                this.sortField = field;
+                this.sortOrder = order;
                 this.applyFiltersAjax();
             });
         }
@@ -333,6 +348,14 @@ class SearchPageManager {
         // Add index name
         if (this.dataSourceName) {
             params.append('index_name', this.dataSourceName);
+        }
+        
+        // Add sort parameters
+        if (this.sortField) {
+            params.append('sort_field', this.sortField);
+        }
+        if (this.sortOrder) {
+            params.append('sort_order', this.sortOrder);
         }
         
         Object.keys(this.filters).forEach(key => {
