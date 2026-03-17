@@ -1,13 +1,10 @@
 from django.db import models
 from django.utils.translation import gettext as _
-from modelcluster.fields import ParentalKey
-from wagtail.models import Orderable
+from wagtailautocomplete.edit_handlers import AutocompletePanel
 
 from core.models import CommonControlField
 from usefulmodels.models import City, Country, State
-from wagtailautocomplete.edit_handlers import AutocompletePanel
 
-from . import choices
 from .forms import LocationForm
 
 
@@ -80,11 +77,11 @@ class Location(CommonControlField):
             state__name=location_state,
             city__name=location_city,
         ).exists():
-            return cls.objects.get(
+            return cls.objects.filter(
                 country__name_pt=location_country,
                 state__name=location_state,
                 city__name=location_city,
-            )
+            ).first()
         else:
             location = Location()
             if location_country:
