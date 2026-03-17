@@ -61,3 +61,7 @@ type=String
 [Source]
 data_required=False
 type=String
+
+[Date]
+data_required=False
+type=Date
