@@ -6,7 +6,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("search", "0001_initial"),
-        ("search_gateway", "0002_datasource_field_settings_delete_settingsfilter"),
+        ("search_gateway", "0001_initial"),
     ]
 
     operations = [
