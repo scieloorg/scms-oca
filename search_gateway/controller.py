@@ -53,15 +53,16 @@ def search_as_you_type(data_source_name, query_text, field_name, client=None, us
     if not data_source:
         return []
 
-    settings_filter = data_source.settings_filters.get_by_field_name(field_name=field_name)
-    if not settings_filter or not settings_filter.field_autocomplete:
+    field_data = (data_source.field_settings or {}).get(field_name, {})
+    field_autocomplete = field_data.get("field_autocomplete")
+    if not field_data or not field_autocomplete:
         return []
 
     body = query_builder.build_search_as_you_type_body(
-        field_name=settings_filter.index_field_name,
-        field_autocomplete=settings_filter.field_autocomplete,
+        field_name=field_data.get("index_field_name", field_name),
+        field_autocomplete=field_autocomplete,
         query=query_text,
-        agg_size=(settings_filter.filter or {}).get("size", 20),
+        agg_size=(field_data.get("filter") or {}).get("size", 20),
     )
     res = es.search(index=data_source.index_name, body=body)
     return response_parser.parse_search_item_response_with_transform(res, data_source, field_name)

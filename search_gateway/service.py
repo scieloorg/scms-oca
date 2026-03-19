@@ -24,9 +24,7 @@ class SearchGatewayService:
 
     @cached_property
     def data_source(self):
-        return DataSource.objects.prefetch_related("settings_filters").get(
-            index_name=self._index_name,
-        )
+        return DataSource.objects.get(index_name=self._index_name)
 
     @property
     def index_name(self):
