@@ -108,3 +108,4 @@ Sickle==0.7.0  # https://pypi.org/project/sickle/
 # ------------------------------------------------------------------------------
 oaipmh-scythe==0.13.0  # https://pypi.org/project/oaipmh-scythe/
 
+wagtail-json-widget==0.0.9  # https://pypi.org/project/wagtail-json-widget/
