@@ -1,4 +1,5 @@
 from django import template
+
 from search.models import SearchPage
 
 register = template.Library()
@@ -10,5 +11,8 @@ def startswith(text, starts):
     return False
 
 @register.simple_tag()
-def get_search_page():
-    return SearchPage.objects.live().first()
+def get_search_page(data_source_name=None):
+    qs = SearchPage.objects.live()
+    if data_source_name:
+        qs = qs.filter(data_source__index_name=data_source_name)
+    return qs.first()
