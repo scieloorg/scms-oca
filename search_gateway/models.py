@@ -124,4 +124,4 @@ class DataSource(models.Model):
             return cls.objects.get(index_name=index_name)
         except cls.DoesNotExist:
             return None
-            return None
+
