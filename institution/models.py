@@ -100,20 +100,31 @@ class Institution(CommonControlField, ClusterableModel):
     def get_or_create(
         cls, inst_name, location_country, location_state, location_city, user
     ):
-        # Institution
-        # check if exists the institution
-        if cls.objects.filter(name=inst_name).exists():
-            return cls.objects.get(name=inst_name)
-        else:
-            institution = cls()
-            institution.name = inst_name
-            institution.creator = user
+        if not inst_name:
+            return None
 
-            institution.location = Location.get_or_create(
+        location = None
+        if location_country and location_state and location_city:
+            location = Location.get_or_create(
                 user, location_country, location_state, location_city
             )
 
-            institution.save()
+        if location:
+            obj = cls.objects.filter(name=inst_name, location=location).first()
+            if obj:
+                return obj
+        else:
+            obj = cls.objects.filter(name=inst_name).first()
+            if obj:
+                return obj
+
+        institution = cls()
+        institution.name = inst_name
+        institution.creator = user
+        if location:
+            institution.location = location
+        institution.save()
+
         return institution
 
     @classmethod
@@ -211,7 +222,7 @@ class Institution(CommonControlField, ClusterableModel):
         except Institution.DoesNotExist:
             inst = cls.objects.create()
             created = 1
-        except Institution.MultipleObjectsReturned as e:
+        except Institution.MultipleObjectsReturned:
             print(_("The institution table have duplicity...."))
             raise (Institution.MultipleObjectsReturned)
 
@@ -363,7 +374,7 @@ class SourceInstitution(ClusterableModel):
         except SourceInstitution.DoesNotExist:
             inst = cls.objects.create()
             created = 1
-        except SourceInstitution.MultipleObjectsReturned as e:
+        except SourceInstitution.MultipleObjectsReturned:
             print(_("The source institution table have duplicity...."))
             raise (SourceInstitution.MultipleObjectsReturned)
 
@@ -435,7 +446,7 @@ class InstitutionTranslateName(Orderable):
             and not kwargs.get("source_institution")
         ):
             raise ValueError("Param name and language and object SourceInstitution is required")
-            
+
         filters = {
             "name": kwargs.get("name"),
             "language__name": kwargs.get("language"),
@@ -480,7 +491,7 @@ class InstitutionTranslateName(Orderable):
             )
             trans.save()
             created = 1
-        except InstitutionTranslateName.MultipleObjectsReturned as e:
+        except InstitutionTranslateName.MultipleObjectsReturned:
             print(_("The institution translate table have duplicity...."))
             raise (InstitutionTranslateName.MultipleObjectsReturned)
 

@@ -339,25 +339,29 @@ class EducationDirectory(CommonControlField):
         return self.title
     get_title.short_description = "Title"
 
+    def get_link(self):
+        return self.link
+    get_link.short_description = "Link"
+
     def get_description(self):
         return self.description
     get_description.short_description = "Description"
 
     def get_start_date(self):
         return self.start_date
-    get_start_date.short_start_date = "Start Date"
+    get_start_date.short_description = "Start Date"
 
     def get_end_date(self):
         return self.end_date
-    get_end_date.short_end_date = "End Date"
+    get_end_date.short_description = "End Date"
 
     def get_start_time(self):
         return self.start_time
-    get_start_time.short_start_time = "Start Time"
+    get_start_time.short_description = "Start Time"
 
     def get_end_time(self):
         return self.end_time
-    get_end_time.short_end_time = "End Time"
+    get_end_time.short_description = "End Time"
 
     def get_institutions(self):
         return "| ".join([a.name for a in self.institutions.all()])

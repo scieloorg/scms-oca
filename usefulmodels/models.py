@@ -1,15 +1,16 @@
 from django.db import models
 from django.db.models import Count
-from django.utils.translation import gettext as _
 from django.utils.text import slugify
+from django.utils.translation import gettext as _
+
 from core.models import CommonControlField
 from usefulmodels.forms import (
+    ActionForm,
     CityForm,
     CountryForm,
+    PracticeForm,
     StateForm,
     ThematicAreaForm,
-    PracticeForm,
-    ActionForm,
 )
 
 from . import choices
@@ -51,7 +52,7 @@ class City(CommonControlField):
         if cls.objects.filter(name__exact=name).exists():
             try:
                 return cls.objects.get(name__exact=name)
-            except:
+            except cls.DoesNotExist:
                 return cls.objects.filter(name__exact=name).first()
         else:
             city = City()
@@ -326,7 +327,10 @@ class ThematicArea(CommonControlField):
         if ThematicArea.objects.filter(
             level0=level0, level1=level1, level2=level2
         ).exists():
-            return ThematicArea.objects.get(level0=level0, level1=level1, level2=level2)
+            return ThematicArea.objects.filter(
+                level0=level0,
+                level1=level1,
+                level2=level2).first()
         else:
             the_area = ThematicArea()
             the_area.level0 = level0

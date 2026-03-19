@@ -1,8 +1,11 @@
+import json
 import logging
 
+from django.conf import settings
 from wagtail.contrib.routable_page.models import RoutablePageMixin, route
 from wagtail.models import Page
-from django.conf import settings
+
+from search.choices import SEARCHABLE_FIELDS
 from search_gateway.filters import FILTER_CATEGORIES
 from search_gateway.models import DataSource
 from search_gateway.service import SearchGatewayService
@@ -31,6 +34,19 @@ class SearchPage(RoutablePageMixin, Page):
         )
         return default_index_name
 
+    @classmethod
+    def query_clauses(cls, request):
+        query_clauses = None
+        search_clauses_param = request.GET.get("search_clauses")        
+        if search_clauses_param:
+            try:
+                query_clauses = json.loads(search_clauses_param)
+                if not isinstance(query_clauses, list):
+                    query_clauses = None
+            except (json.JSONDecodeError, TypeError):
+                pass
+        return query_clauses
+
     def get_context(self, request, *args, **kwargs):
         context = super().get_context(request, *args, **kwargs)
         search_query = request.GET.get("search", "")
@@ -50,16 +66,19 @@ class SearchPage(RoutablePageMixin, Page):
         filters = service.build_filters()
         filter_metadata = service.get_filter_metadata(filters)
         selected_filters = service.extract_selected_filters(request=request, available_filters=filters)
+        query_clauses = self.query_clauses(request)
         context.update({
             "filters": filters,
             "index_name": index_name,
             "filter_metadata": filter_metadata,
             "display_name": service.display_name,
             "search_query": search_query,
+            "searchable_fields": SEARCHABLE_FIELDS,
             "filter_categories": FILTER_CATEGORIES,
             "grouped_filters": self.group_filters_by_category(filters, filter_metadata),
             "results_data": service.search_documents(
-                query_text=search_query,
+                query_text=search_query if not query_clauses else None,
+                query_clauses=query_clauses,
                 filters=selected_filters,
                 page=get_save_number(request.GET.get("page"), 1),
                 page_size=get_save_number(request.GET.get("limit"), 25),

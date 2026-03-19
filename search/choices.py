@@ -120,6 +120,48 @@ translates = {
     "peer review aberto": "Peer review aberto",
 }
 
+SEARCHABLE_FIELDS = [
+    ("all", _("Todos os campos")),
+    ("title_search", _("Título")),
+    ("ids_search", _("DOI, ISBN, identificadores")),
+    ("authors_search", _("Autores")),
+    ("institutions_search", _("Instituição")),
+    ("description_search", _("Descrição")),
+]
+
+SEARCH_OPERATORS = [
+    ("AND", "AND"),
+    ("OR", "OR"),
+    ("NOT", "NOT"),
+]
+
+SEARCH_FIELD_MAPPING = {
+    "all": ["title_search", "ids_search"],
+    "title_search": ["title_search"],
+    "ids_search": ["ids_search"],
+    "authors_search": ["authors_search"],
+    "subjects_search": ["subjects_search"],
+    "publishers_search": ["publishers_search"],
+    "sources_search": ["sources_search"],
+    "institutions_search": ["institutions_search"],
+}
+
+# Aliases for query_string: user-friendly name -> index field
+QUERY_STRING_FIELD_ALIASES = {
+    "title": "title_search",
+    "abstract": "abstract",
+    "ids": "ids_search",
+    "authors": "authors_search",
+    "subjects": "subjects_search",
+    "publishers": "publishers_search",
+    "sources": "sources_search",
+    "institutions": "institutions_search",
+}
+
+QUERY_STRING_FIELDS = list(
+    dict.fromkeys(QUERY_STRING_FIELD_ALIASES.values())
+)
+
 
 country_list = [
     ("United States of America", "US"),

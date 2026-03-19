@@ -42,7 +42,28 @@ class EventDirectoryAdmin(ModelAdmin):
         "institutional_contribution",
     )
     search_fields = ("title", "description")
-    list_export = ("id", "get_title", "get_link", "get_description",  "get_thematic_areas_level0", "get_thematic_areas_level1", "get_thematic_areas_level2", "get_keywords", "get_classification", "get_practice", "get_action", "get_source")
+    list_export = (
+        "id",
+        "get_title",
+        "get_link",
+        "get_description",
+        "get_start_date",
+        "get_end_date",
+        "get_start_time",
+        "get_end_time",
+        "get_organization",
+        "get_organization_country",
+        "get_organization_state",
+        "get_organization_city",
+        "get_thematic_areas_level0",
+        "get_thematic_areas_level1",
+        "get_thematic_areas_level2",
+        "get_keywords",
+        "get_classification",
+        "get_practice",
+        "get_action",
+        "get_source",
+    )
     export_filename = "event_directory"
 
     def get_queryset(self, request):

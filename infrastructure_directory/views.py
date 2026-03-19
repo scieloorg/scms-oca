@@ -1,20 +1,29 @@
 import csv
 import os
 
-from django.http import Http404, HttpResponse, HttpResponseRedirect
+from django.conf import settings
+from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
 from django.template.loader import render_to_string
-from django.conf import settings
 from django.utils.translation import gettext as _
 from wagtail.admin import messages
 from wagtail_modeladmin.views import CreateView, EditView
 
 from core import tasks
-from core.libs import chkcsv
+from core.directory_import import (
+    build_institutions,
+    build_thematic_areas,
+    download_sample_file,
+    format_date,
+    get_directory_instance,
+    get_row_value,
+    set_common_fields,
+    sync_keywords,
+    sync_related_items,
+    validate_directory_file,
+)
 from core_settings.models import Moderation
-from infrastructure_directory.search_indexes import InfraStructureIndex
-from institution.models import Institution
-from usefulmodels.models import Action, Practice, ThematicArea
+from usefulmodels.models import Action
 
 from .models import InfrastructureDirectory, InfrastructureDirectoryFile
 from .permission_helper import InfrastructureDirectoryPermissionHelper
@@ -133,44 +142,14 @@ class InfrastructureDirectoryFileCreateView(CreateView):
 
 def validate(request):
     """
-    This view function validade a csv file based on a pre definition os the fmt
-    file.
-
-    The check_csv_file function check that all of the required columns and data
-    are present in the CSV file, and that the data conform to the appropriate
-    type and other specifications, when it is not valid return a list with the
-    errors.
+    Validate CSV file for InfrastructureDirectory import.
     """
-    errorlist = []
-    file_id = request.GET.get("file_id", None)
-
-    if file_id:
-        file_upload = get_object_or_404(InfrastructureDirectoryFile, pk=file_id)
-
-    if request.method == "GET":
-        try:
-            upload_path = file_upload.attachment.file.path
-            cols = chkcsv.read_format_specs(
-                os.path.dirname(os.path.abspath(__file__)) + "/chkcsvfmt.fmt",
-                True,
-                False,
-            )
-            errorlist = chkcsv.check_csv_file(
-                upload_path, cols, True, True, True, False
-            )
-            if errorlist:
-                raise Exception(_("Validation error"))
-            else:
-                file_upload.is_valid = True
-                fp = open(upload_path)
-                file_upload.line_count = len(fp.readlines())
-                file_upload.save()
-        except Exception as ex:
-            messages.error(request, _("Validation error: %s") % errorlist)
-        else:
-            messages.success(request, _("File successfully validated!"))
-
-    return redirect(request.META.get("HTTP_REFERER"))
+    format_file_path = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)), "chkcsvfmt.fmt"
+    )
+    return validate_directory_file(
+        request, InfrastructureDirectoryFile, format_file_path
+    )
 
 
 def import_file(request):
@@ -198,88 +177,28 @@ def import_file(request):
             )
 
             for line, row in enumerate(data):
-
-                record_id = row.get("Id", "").strip()
-                if (
-                    record_id
-                    and InfrastructureDirectory.objects.filter(id=record_id).exists()
-                ):
-                    isd = InfrastructureDirectory.objects.get(id=record_id)
-                else:
-                    isd = InfrastructureDirectory()
-
-                isd.title = row["Title"]
-                isd.link = row["Link"]
-                isd.description = row["Description"]
-
-                isd.creator = request.user
+                record_id = get_row_value(row, "Id")
+                isd = get_directory_instance(InfrastructureDirectory, record_id)
+                set_common_fields(
+                    isd, row, request.user, action_filter="infraestrutura"
+                )
+                isd.date = format_date(get_row_value(row, "date"), "%d/%m/%Y")
                 isd.save()
-
-                # Institution
-                inst_name = row["Institution Name"]
-                if inst_name:
-                    inst_country = row["Institution Country"]
-                    inst_state = row["Institution State"]
-                    inst_city = row["Institution City"]
-
-                    institution = Institution.get_or_create(
-                        inst_name, inst_country, inst_state, inst_city, request.user
-                    )
-                    isd.institutions.add(institution)
-
-                # Thematic Area
-                level0 = row["Thematic Area Level0"].strip()
-                if level0:
-                    level1 = row["Thematic Area Level1"].strip()
-                    level2 = row["Thematic Area Level2"].strip()
-                    the_area = ThematicArea.get_or_create(
-                        level0, level1, level2, request.user
-                    )
-
-                    isd.thematic_areas.add(the_area)
-
-                # Keywords
-                if row["Keywords"]:
-                    for key in row["Keywords"].split("|"):
-                        isd.keywords.add(key)
-
-                if row["Classification"]:
-                    isd.classification = row["Classification"]
-
-                # Practice
-                if row["Practice"]:
-                    practice_name = row["Practice"]
-                    if Practice.objects.filter(name=practice_name).exists():
-                        pratice = Practice.objects.get(name=practice_name)
-                        isd.practice = pratice
-                    else:
-                        messages.warning(
-                            request, _("Unknown Practice, line: %s") % str(line + 1)
-                        )
-
-                # Action
-                if row["Action"]:
-                    if Action.objects.filter(name__icontains="infraestrutura").exists():
-                        isd.action = Action.objects.get(
-                            name__icontains="infraestrutura"
-                        )
-
-                if row["Source"]:
-                    isd.source = row["Source"]
+                sync_related_items(
+                    isd.institutions,
+                    build_institutions(row, request.user),
+                )
+                sync_related_items(
+                    isd.thematic_areas,
+                    build_thematic_areas(row, request.user),
+                )
+                sync_keywords(isd.keywords, row.get("Keywords"))
 
                 isd.save()
-
-                # Update de index.
-                InfraStructureIndex().update_object(instance=isd)
-
     except Exception as ex:
         messages.error(
             request,
-            _("Import error: %(error)s, Line: %(line)s")
-            % {
-                "error": ex,
-                "line": line + 2,
-            },
+            _(f"Import error: {ex}, Line: {line + 2}")
         )
     else:
         messages.success(request, _("File imported successfully!"))
@@ -289,14 +208,9 @@ def import_file(request):
 
 def download_sample(request):
     """
-    This view function a CSV sample for model InfraestructureDirectoryFile.
+    Download CSV sample file for InfrastructureDirectory import.
     """
-    file_path = os.path.dirname(os.path.abspath(__file__)) + "/example_infra.csv"
-    if os.path.exists(file_path):
-        with open(file_path, "rb") as fh:
-            response = HttpResponse(fh.read(), content_type="text/csv")
-            response["Content-Disposition"] = "inline; filename=" + os.path.basename(
-                file_path
-            )
-            return response
-    raise Http404
+    sample_file_path = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)), "example_infra.csv"
+    )
+    return download_sample_file(sample_file_path)
