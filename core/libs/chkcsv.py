@@ -579,6 +579,12 @@ def check_csv_file(
     """
     errorlist = []
     dialect = csv.Sniffer().sniff(open(csv_fname, "rt").readline())
+    # Sniffing only the header line often sets doublequote=False. RFC 4180 / Excel
+    # and exports from Wagtail use "" to escape double quotes inside quoted fields.
+    # With doublequote=False those rows are parsed as too many columns
+    # ("more data values than column headers").
+    if not dialect.doublequote:
+        dialect.doublequote = True
     encoding = "utf-8" if not encoding else encoding
     if sys.version_info < (3,):
         inf = UnicodeReader(open(csv_fname, "rt"), dialect, encoding)

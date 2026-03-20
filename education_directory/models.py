@@ -363,6 +363,14 @@ class EducationDirectory(CommonControlField):
         return self.end_time
     get_end_time.short_description = "End Time"
 
+    def get_availability(self):
+        return self.availability or ""
+    get_availability.short_description = "Availability"
+
+    def get_attendance(self):
+        return self.attendance or ""
+    get_attendance.short_description = "Attendance"
+
     def get_institutions(self):
         return "| ".join([a.name for a in self.institutions.all()])
     get_institutions.short_description = "Institution Name"
@@ -374,19 +382,31 @@ class EducationDirectory(CommonControlField):
     def get_institutions_state(self):
         return "| ".join([a.location.state.name for a in self.institutions.all() if a.location and a.location.state])
     get_institutions_state.short_description = "Institution State"
-    
+
     def get_institutions_city(self):
         return "| ".join([a.location.city.name for a in self.institutions.all() if a.location and a.location.city])
     get_institutions_city.short_description = "Institution City"
-    
+
+    def get_location_country(self):
+        return "| ".join([loc.country.name_pt for loc in self.locations.all() if loc.country])
+    get_location_country.short_description = "Location Country"
+
+    def get_location_state(self):
+        return "| ".join([loc.state.name for loc in self.locations.all() if loc.state])
+    get_location_state.short_description = "Location State"
+
+    def get_location_city(self):
+        return "| ".join([loc.city.name for loc in self.locations.all() if loc.city])
+    get_location_city.short_description = "Location City"
+
     def get_thematic_areas_level0(self):
         return "| ".join([t.level0 for t in self.thematic_areas.all()])
     get_thematic_areas_level0.short_description = "Thematic Area Level0"
-    
+
     def get_thematic_areas_level1(self):
         return "| ".join([t.level1 for t in self.thematic_areas.all()])
     get_thematic_areas_level1.short_description = "Thematic Area Level1"
-    
+
     def get_thematic_areas_level2(self):
         return "| ".join([t.level2 for t in self.thematic_areas.all()])
     get_thematic_areas_level2.short_description = "Thematic Area Level2"
@@ -394,19 +414,27 @@ class EducationDirectory(CommonControlField):
     def get_keywords(self):
         return "| ".join([t.name for t in self.keywords.all()])
     get_keywords.short_description = "Keywords"
-    
+
     def get_classification(self):
-        return self.classification 
+        return self.classification
     get_classification.short_description = "Classification"
-    
+
     def get_practice(self):
-        return self.practice
+        return self.practice.name if self.practice else ""
     get_practice.short_description = "Practice"
-    
+
     def get_action(self):
-        return self.action
+        return self.action.name if self.action else ""
     get_action.short_description = "Action"
-    
+
+    def get_institutional_contribution(self):
+        return self.institutional_contribution or ""
+    get_institutional_contribution.short_description = "Institutional Contribution"
+
+    def get_notes(self):
+        return self.notes or ""
+    get_notes.short_description = "Notes"
+
     def get_source(self):
         return self.source
     get_source.short_description = "Source"

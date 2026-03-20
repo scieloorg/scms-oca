@@ -16,6 +16,7 @@ from core.directory_import import (
     download_sample_file,
     get_directory_instance,
     get_row_value,
+    parse_csv_date,
     set_common_fields,
     sync_keywords,
     sync_related_items,
@@ -186,8 +187,7 @@ def import_file(request):
                     request.user,
                     action_filter="políticas públicas e institucionais",
                 )
-                po.date = get_row_value(row, "Date")
-
+                po.parsed_date = parse_csv_date(get_row_value(row, "Date"))
                 po.save()
 
                 sync_related_items(

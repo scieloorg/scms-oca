@@ -12,6 +12,7 @@ from wagtail_modeladmin.views import CreateView, EditView
 from core import tasks
 from core.directory_import import (
     build_institutions,
+    build_location,
     build_thematic_areas,
     download_sample_file,
     get_dates_and_times,
@@ -169,20 +170,23 @@ def import_file(request):
 
     file_path = file_upload.attachment.file.path
 
+    line_no = None
     try:
         with open(file_path, "r") as csvfile:
             data = csv.DictReader(
                 csvfile, delimiter=settings.DIRECTORY_IMPORT_DELIMITER
             )
-            for line, row in enumerate(data):
+            for line_no, row in enumerate(data):
                 record_id = get_row_value(row, "Id")
+                print(row)
                 ed = get_directory_instance(EducationDirectory, record_id)
 
                 set_common_fields(
                     ed, row, request.user, action_filter="educação / capacitação"
                 )
                 get_dates_and_times(ed, row)
-
+                ed.attendance = get_row_value(row, "Attendance")
+                ed.availability = get_row_value(row, "availability")
                 ed.save()
                 sync_related_items(
                     ed.institutions,
@@ -192,13 +196,20 @@ def import_file(request):
                     ed.thematic_areas,
                     build_thematic_areas(row, request.user),
                 )
+                sync_related_items(
+                    ed.locations,
+                    build_location(row, request.user),
+                )
                 sync_keywords(ed.keywords, row.get("Keywords"))
 
                 ed.save()
     except Exception as ex:
+        line_suffix = (
+            f", Line: {line_no + 2}" if line_no is not None else ""
+        )
         messages.error(
             request,
-            _(f"Import error: {ex}, Line: {line + 2}")
+            _(f"Import error: {ex}{line_suffix}")
         )
     else:
         messages.success(request, _("File imported successfully!"))
