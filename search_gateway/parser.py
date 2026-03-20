@@ -6,10 +6,10 @@ from . import transforms
 def _transform_boolean_value(value):
     """
     Transform a string value to a boolean for ES queries.
-    
+
     Args:
         value: String value ("true", "false", "1", "0") or boolean.
-    
+
     Returns:
         Boolean value or None if not a valid boolean representation.
     """
@@ -23,7 +23,7 @@ def parse_search_item_response_with_transform(response, data_source, field_name)
     """
     Versão posterior a parse_search_item_response, utilizando o modelo DataSource para obter a configuração dos campos
     e aplicar as transformações de exibição.
-    
+
     Args:
         response: Resposta do Elasticsearch contendo as agregações.
         data_source: Instância do modelo DataSource que fornece métodos para buscar configurações de campos.
@@ -32,7 +32,7 @@ def parse_search_item_response_with_transform(response, data_source, field_name)
     Returns:
         Lista de dicionários contendo os buckets transformados com chave, label e doc_count.
     """
-    field_settings = data_source.get_field_settings_dict()
+    field_settings = data_source.field_settings_dict
     buckets = response.get("aggregations", {}).get("unique_items", {}).get("buckets", [])
     return [
         {
@@ -60,7 +60,7 @@ def parse_filters_response_with_transform(response, data_source):
     Returns:
         Dicionário com listas de buckets filtrados, cada um contendo chave, label transformada e doc_count.
     """
-    field_settings = data_source.get_field_settings_dict()
+    field_settings = data_source.field_settings_dict
     return {
         k: [
             {
@@ -123,17 +123,17 @@ def extract_selected_filters(request, available_filters, data_source):
     """
     Extracts filter values from the request GET parameters based on available filter keys.
     Applies value transformations (e.g., boolean) based on field settings.
-    
+
     Args:
         request: Django request object.
         available_filters: Dict of available filter keys.
         data_source: DataSource model instance (source of field settings).
-    
+
     Returns:
         Dict of selected filters with transformed values.
     """
     selected_filters = {}
-    field_settings = data_source.get_field_settings_dict()
+    field_settings = data_source.field_settings_dict
 
     # If available filters were not loaded from OpenSearch, fallback to configured field keys.
     filter_keys = (

@@ -132,6 +132,7 @@ LOCAL_APPS = [
     "chart",
     "search_gateway",
     "harvest",
+    'wagtail_json_widget',
 ]
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps

@@ -1,11 +1,11 @@
 import json
 import logging
 
-from django.conf import settings
-from wagtail.contrib.routable_page.models import RoutablePageMixin, route
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+from wagtail.admin.panels import FieldPanel
 from wagtail.models import Page
 
-from search.choices import SEARCHABLE_FIELDS
 from search_gateway.filters import FILTER_CATEGORIES
 from search_gateway.models import DataSource
 from search_gateway.service import SearchGatewayService
@@ -20,90 +20,69 @@ def get_save_number(item, default: int):
         return default
 
 
-class SearchPage(RoutablePageMixin, Page):
-    @staticmethod
-    def _resolve_index_name(requested_index_name, default_index_name):
-        if not requested_index_name:
-            return default_index_name
+class SearchPage(Page):
+    data_source = models.ForeignKey(
+        DataSource,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="search_pages",
+        verbose_name=_("Data Source"),
+        help_text=_("Fonte de dados OpenSearch associada a esta página de busca."),
+    )
 
-        if DataSource.get_by_index_name(requested_index_name):
-            return requested_index_name
+    content_panels = Page.content_panels + [
+        FieldPanel("data_source"),
+    ]
 
-        logger.warning(
-            f"Invalid index_name '{requested_index_name}'. Falling back to '{default_index_name}'."
-        )
-        return default_index_name
+    def _build_search_context(self, request):
+        """Return the search-specific context dict.
 
-    @classmethod
-    def query_clauses(cls, request):
-        query_clauses = None
-        search_clauses_param = request.GET.get("search_clauses")        
-        if search_clauses_param:
-            try:
-                query_clauses = json.loads(search_clauses_param)
-                if not isinstance(query_clauses, list):
-                    query_clauses = None
-            except (json.JSONDecodeError, TypeError):
-                pass
-        return query_clauses
-
-    def get_context(self, request, *args, **kwargs):
-        context = super().get_context(request, *args, **kwargs)
+        When no data_source is configured every value is an empty default
+        so templates can render safely without conditionals.
+        """
         search_query = request.GET.get("search", "")
-        default_index_name = getattr(
-            settings,
-            "OP_INDEX_ALL_BRONZE",
-            getattr(settings, "OP_INDEX_SCI_PROD", "sci*"),
-        )
-        requested_index_name = kwargs.get("index_name") or request.GET.get(
-            "index_name",
-        )
-        index_name = self._resolve_index_name(
-            requested_index_name=requested_index_name,
-            default_index_name=default_index_name,
-        )
-        service = SearchGatewayService(index_name=index_name)
-        filters = service.build_filters()
-        filter_metadata = service.get_filter_metadata(filters)
-        selected_filters = service.extract_selected_filters(request=request, available_filters=filters)
-        query_clauses = self.query_clauses(request)
-        context.update({
-            "filters": filters,
-            "index_name": index_name,
-            "filter_metadata": filter_metadata,
-            "display_name": service.display_name,
-            "search_query": search_query,
-            "searchable_fields": SEARCHABLE_FIELDS,
-            "filter_categories": FILTER_CATEGORIES,
-            "grouped_filters": self.group_filters_by_category(filters, filter_metadata),
-            "results_data": service.search_documents(
-                query_text=search_query if not query_clauses else None,
-                query_clauses=query_clauses,
+        filters = {}
+        filter_metadata = {}
+        results_data = {"search_results": [], "total_results": 0}
+        index_name = ""
+        display_name = ""
+
+        if self.data_source:
+            service = SearchGatewayService(index_name=self.data_source.index_name)
+            filters = service.build_filters()
+            filter_metadata = service.get_filter_metadata(filters)
+            selected_filters = service.extract_selected_filters(
+                request=request, available_filters=filters,
+            )
+            results_data = service.search_documents(
+                query_text=search_query,
                 filters=selected_filters,
                 page=get_save_number(request.GET.get("page"), 1),
                 page_size=get_save_number(request.GET.get("limit"), 25),
                 sort_field="publication_year",
                 sort_order="desc",
-            ),
-        })
+            )
+            index_name = self.data_source.index_name
+            display_name = service.display_name
+        else:
+            logger.warning(f"SearchPage '{self.title}' has no data_source configured.")
+
+        return {
+            "filters": filters,
+            "index_name": index_name,
+            "filter_metadata": filter_metadata,
+            "display_name": display_name,
+            "search_query": search_query,
+            "filter_categories": FILTER_CATEGORIES,
+            "grouped_filters": self.group_filters_by_category(filters, filter_metadata),
+            "results_data": results_data,
+        }
+
+    def get_context(self, request, *args, **kwargs):
+        context = super().get_context(request, *args, **kwargs)
+        context.update(self._build_search_context(request))
         return context
-
-    @route(r'^$')
-    def index_route(self, request):
-        return self.render(request)
-
-    @route(r'^world/$')
-    def world_route(self, request):
-        default_index_name = getattr(
-            settings,
-            "OP_INDEX_ALL_BRONZE",
-            getattr(settings, "OP_INDEX_SCI_PROD", "sci*"),
-        )        
-        return self.render(request, index_name=default_index_name)
-
-    @route(r'^social/$')
-    def social_route(self, request):
-        return self.render(request, index_name=getattr(settings, "OP_INDEX_SOC_PROD", "bronze_social_production"))
 
     def group_filters_by_category(self, filters, filter_metadata):
         """Group filters by their category property."""

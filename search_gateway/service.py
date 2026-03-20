@@ -21,9 +21,7 @@ class SearchGatewayService:
 
     @cached_property
     def data_source(self):
-        return DataSource.objects.prefetch_related("settings_filters").get(
-            index_name=self._index_name,
-        )
+        return DataSource.objects.get(index_name=self._index_name)
 
     @property
     def index_name(self):
@@ -39,7 +37,7 @@ class SearchGatewayService:
 
     @cached_property
     def field_settings(self):
-        return self.data_source.get_field_settings_dict()
+        return self.data_source.field_settings_dict
 
     def get_filters(self):
         return self.data_source.build_filters_query
@@ -92,7 +90,7 @@ class SearchGatewayService:
         sort_field=None,
         sort_order="desc",
     ):
-        field_settings = self.data_source.get_field_settings_dict()
+        field_settings = self.data_source.field_settings_dict
         mapped_filters = get_mapped_filters(filters, field_settings)
         body = query_builder.build_document_search_body(
             query_text=query_text,
