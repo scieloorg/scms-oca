@@ -5,8 +5,7 @@
 
 {% get_menu_context request as menu_ctx %}
 
-{% get_search_page "sci*" as scientific_search_page %}
-{% get_search_page "bronze_social_production" as social_search_page %}
+{% get_menu_search_pages as menu_search_pages %}
 
 <!-- Indicadores -->
 <li class="menu-item {% if menu_ctx.is_about_indicadores or menu_ctx.path|startswith:'/indicators/' %}active{% endif %}">
@@ -39,8 +38,8 @@
     {% if menu_ctx.is_about_section %}
         <a class="menu-link" href="/{{ request.LANGUAGE_CODE }}/sobre-busca-bibliografica/"><div>{% trans "Busca" %}</div></a>
     {% elif menu_ctx.is_social_context %}
-        <a class="menu-link" href="{% pageurl social_search_page %}"><div>{% trans "Busca" %}</div></a>
+        <a class="menu-link" href="{% pageurl menu_search_pages.social %}"><div>{% trans "Busca" %}</div></a>
     {% else %}
-        <a class="menu-link" href="{% pageurl scientific_search_page %}"><div>{% trans "Busca" %}</div></a>
+        <a class="menu-link" href="{% pageurl menu_search_pages.scientific %}"><div>{% trans "Busca" %}</div></a>
     {% endif %}
 </li>
