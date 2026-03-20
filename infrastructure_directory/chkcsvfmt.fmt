@@ -6,6 +6,10 @@ type=integer
 data_required=True
 type=String
 
+[Date]
+data_required=False
+type=Date
+
 [Link]
 data_required=False
 type=String
@@ -58,10 +62,14 @@ type=String
 data_required=False
 type=String
 
-[Source]
+[Institutional Contribution]
 data_required=False
 type=String
 
-[Date]
+[Notes]
 data_required=False
-type=Date
+type=String
+
+[Source]
+data_required=False
+type=String

@@ -1,3 +1,8 @@
+[Id]
+data_required=False
+type=integer
+
+
 [Title]
 data_required=True
 type=String
@@ -26,6 +31,10 @@ type=String
 data_required=False
 type=String
 
+[Attendance]
+data_required=False
+type=String
+
 [Institution Name]
 data_required=False
 type=String
@@ -39,6 +48,10 @@ data_required=False
 type=String
 
 [Institution City]
+data_required=False
+type=String
+
+[Location]
 data_required=False
 type=String
 
@@ -71,5 +84,9 @@ data_required=False
 type=String
 
 [Source]
+data_required=False
+type=String
+
+[Notes]
 data_required=False
 type=String

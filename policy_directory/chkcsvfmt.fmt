@@ -1,3 +1,7 @@
+[Id]
+data_required=False
+type=integer
+
 [Title]
 data_required=True
 type=String
@@ -55,6 +59,14 @@ data_required=False
 type=String
 
 [Action]
+data_required=False
+type=String
+
+[Institutional Contribution]
+data_required=False
+type=String
+
+[Notes]
 data_required=False
 type=String
 

@@ -1,6 +1,6 @@
 [Id]
-data_required=True
-type=String
+data_required=False
+type=integer
 
 [Title]
 data_required=True
@@ -23,12 +23,18 @@ data_required=False
 type=Date
 
 [Start Time]
-column_required=False 
 data_required=False
 type=String
 
 [End Time]
-column_required=False 
+data_required=False
+type=String
+
+[Availability]
+data_required=False
+type=String
+
+[Attendance]
 data_required=False
 type=String
 
@@ -45,6 +51,18 @@ data_required=False
 type=String
 
 [Institution City]
+data_required=False
+type=String
+
+[Location Country]
+data_required=False
+type=String
+
+[Location State]
+data_required=False
+type=String
+
+[Location City]
 data_required=False
 type=String
 
@@ -73,6 +91,14 @@ data_required=False
 type=String
 
 [Action]
+data_required=False
+type=String
+
+[Institutional Contribution]
+data_required=False
+type=String
+
+[Notes]
 data_required=False
 type=String
 
