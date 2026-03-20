@@ -60,14 +60,15 @@ class DataSource(models.Model):
             "field_settings": self.field_settings or {},
         }
 
-    def get_field_settings_dict(self):
+    @property
+    def field_settings_dict(self):
         return self.field_settings or {}
 
     @property
     def build_filters_query(self):
         """Build the ES aggregation query body for this data source's filters."""
         aggs = {}
-        for field_name, cfg in (self.field_settings or {}).items():
+        for field_name, cfg in self.field_settings_dict.items():
             fl_filter = cfg.get("filter") or {}
             fl_size = fl_filter.get("size", 1)
             fl_order = fl_filter.get("order")
@@ -88,7 +89,7 @@ class DataSource(models.Model):
         requested = set(filters.keys())
         metadata = {}
         for position, (field_name, cfg) in enumerate(
-            (self.field_settings or {}).items()
+            self.field_settings_dict.items()
         ):
             if field_name not in requested:
                 continue
@@ -108,7 +109,7 @@ class DataSource(models.Model):
         - display transform: field_settings[key].settings.display_transform
         """
         fields = {}
-        for field_name, cfg in (self.field_settings or {}).items():
+        for field_name, cfg in self.field_settings_dict.items():
             flt = (cfg.get("filter") or {}).get("transform")
             disp = (cfg.get("settings") or {}).get("display_transform")
             if flt or disp:
