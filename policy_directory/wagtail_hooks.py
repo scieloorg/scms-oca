@@ -59,6 +59,8 @@ class PolicyDirectoryAdmin(ModelAdmin):
         "get_classification",
         "get_practice",
         "get_action",
+        "get_institutional_contribution",
+        "get_notes",
         "get_source",
     )
     export_filename = "policy_directory"

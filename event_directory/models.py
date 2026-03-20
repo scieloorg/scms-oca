@@ -350,30 +350,38 @@ class EventDirectory(CommonControlField):
         return self.end_time
     get_end_time.short_description = "End Time"
 
-    def get_organization(self):
+    def get_attendance(self):
+        return self.attendance or ""
+    get_attendance.short_description = "Attendance"
+
+    def get_institution(self):
         return "| ".join([a.name for a in self.organization.all()])
-    get_organization.short_description = "Organization Name"
+    get_institution.short_description = "Institution Name"
 
-    def get_organization_country(self):
-        return "| ".join([a.location.country.name_pt for a in self.organization.all() if a.location])
-    get_organization_country.short_description = "Organization Country"
+    def get_institution_country(self):
+        return "| ".join([a.location.country.name_pt for a in self.organization.all() if a.location and a.location.country])
+    get_institution_country.short_description = "Institution Country"
 
-    def get_organization_state(self):
+    def get_institution_state(self):
         return "| ".join([a.location.state.name for a in self.organization.all() if a.location and a.location.state])
-    get_organization_state.short_description = "Organization State"
-    
-    def get_organization_city(self):
+    get_institution_state.short_description = "Institution State"
+
+    def get_institution_city(self):
         return "| ".join([a.location.city.name for a in self.organization.all() if a.location and a.location.city])
-    get_organization_city.short_description = "Organization City"
+    get_institution_city.short_description = "Institution City"
+
+    def get_locations(self):
+        return "| ".join([str(loc) for loc in self.locations.all()])
+    get_locations.short_description = "Location"
 
     def get_thematic_areas_level0(self):
         return "| ".join([t.level0 for t in self.thematic_areas.all()])
     get_thematic_areas_level0.short_description = "Thematic Area Level0"
-    
+
     def get_thematic_areas_level1(self):
         return "| ".join([t.level1 for t in self.thematic_areas.all()])
     get_thematic_areas_level1.short_description = "Thematic Area Level1"
-    
+
     def get_thematic_areas_level2(self):
         return "| ".join([t.level2 for t in self.thematic_areas.all()])
     get_thematic_areas_level2.short_description = "Thematic Area Level2"
@@ -381,19 +389,27 @@ class EventDirectory(CommonControlField):
     def get_keywords(self):
         return "| ".join([t.name for t in self.keywords.all()])
     get_keywords.short_description = "Keywords"
-    
+
     def get_classification(self):
-        return self.classification 
+        return self.classification
     get_classification.short_description = "Classification"
-    
+
     def get_practice(self):
-        return self.practice
+        return self.practice.name if self.practice else ""
     get_practice.short_description = "Practice"
-    
+
     def get_action(self):
-        return self.action
+        return self.action.name if self.action else ""
     get_action.short_description = "Action"
-    
+
+    def get_institutional_contribution(self):
+        return self.institutional_contribution or ""
+    get_institutional_contribution.short_description = "Institutional Contribution"
+
+    def get_notes(self):
+        return self.notes or ""
+    get_notes.short_description = "Notes"
+
     def get_source(self):
         return self.source
     get_source.short_description = "Source"
