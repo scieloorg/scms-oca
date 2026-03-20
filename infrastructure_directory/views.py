@@ -14,7 +14,7 @@ from core.directory_import import (
     build_institutions,
     build_thematic_areas,
     download_sample_file,
-    format_date,
+    parse_csv_date,
     get_directory_instance,
     get_row_value,
     set_common_fields,
@@ -182,7 +182,7 @@ def import_file(request):
                 set_common_fields(
                     isd, row, request.user, action_filter="infraestrutura"
                 )
-                isd.date = format_date(get_row_value(row, "date"), "%d/%m/%Y")
+                isd.date = parse_csv_date(get_row_value(row, "date"))
                 isd.save()
                 sync_related_items(
                     isd.institutions,
