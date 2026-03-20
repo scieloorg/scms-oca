@@ -4,17 +4,22 @@ from itertools import zip_longest
 
 from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect
+from django.utils.dateparse import parse_date, parse_time
 from django.utils.translation import gettext as _
 from wagtail.admin import messages
 
 from core.libs import chkcsv
 from institution.models import Institution
+from location.models import Location
 from usefulmodels.models import Action, Practice, ThematicArea
 
 
 def get_row_value(row, *column_names):
     """
     Return the first non-empty CSV value among the given columns.
+
+    A cell containing only ``-`` (common export placeholder for empty) is treated
+    as empty and is not returned.
     """
     fallback_value = ""
 
@@ -22,7 +27,9 @@ def get_row_value(row, *column_names):
         if column_name not in row:
             continue
 
-        value = (row.get(column_name) or "").strip()
+        raw = (row.get(column_name) or "").strip()
+        value = "" if raw == "-" else raw
+
         if not fallback_value:
             fallback_value = value
         if value:
@@ -138,6 +145,32 @@ def build_thematic_areas(
     return thematic_areas
 
 
+def build_location(
+    row,
+    user,
+    country_columns=("Location Country",),
+    state_columns=("Location State",),
+    city_columns=("Location City",),
+):
+    """
+    Create or fetch Location instances from a CSV row, combining pipe-separated
+    columns by position (same pattern as :func:`build_institutions`).
+    """
+    location_values = combine_pipe_columns(
+        get_row_value(row, *country_columns),
+        get_row_value(row, *state_columns),
+        get_row_value(row, *city_columns),
+    )
+    locations = []
+    for loc_country, loc_state, loc_city in location_values:
+        if not any((loc_country, loc_state, loc_city)):
+            continue
+        locations.append(
+            Location.get_or_create(user, loc_country, loc_state, loc_city)
+        )
+    return locations
+
+
 def get_directory_instance(model_class, record_id):
     """
     Get existing directory instance by ID or create new one.
@@ -220,6 +253,12 @@ def set_common_fields(instance, row, user, action_filter=None):
     if source := get_row_value(row, "Source"):
         instance.source = source
 
+    if institutional_contribution := get_row_value(row, "Institutional Contribution"):
+        instance.institutional_contribution = institutional_contribution
+
+    if notes := get_row_value(row, "Notes"):
+        instance.notes = notes
+
 
 def get_dates_and_times(instance_directory, row):
     """
@@ -234,28 +273,81 @@ def get_dates_and_times(instance_directory, row):
     """
     date_time_data = {}
 
-    if hasattr(instance_directory, "start_date") and row.get("Start Date"):
-        instance_directory.start_date = format_date(row["Start Date"], "%d/%m/%Y")
-        date_time_data["start_date"] = instance_directory.start_date
+    if hasattr(instance_directory, "start_date"):
+        start_d = parse_csv_date(get_row_value(row, "Start Date"))
+        if start_d is not None:
+            instance_directory.start_date = start_d
+            date_time_data["start_date"] = start_d
 
-    if hasattr(instance_directory, "end_date") and row.get("End Date"):
-        instance_directory.end_date = format_date(row["End Date"], "%d/%m/%Y")
-        date_time_data["end_date"] = instance_directory.end_date
+    if hasattr(instance_directory, "end_date"):
+        end_d = parse_csv_date(get_row_value(row, "End Date"))
+        if end_d is not None:
+            instance_directory.end_date = end_d
+            date_time_data["end_date"] = end_d
 
-    if hasattr(instance_directory, "start_time") and row.get("Start Time"):
-        instance_directory.start_time = row["Start Time"]
-        date_time_data["start_time"] = instance_directory.start_time
+    if hasattr(instance_directory, "start_time"):
+        start_t = parse_csv_time(get_row_value(row, "Start Time"))
+        if start_t is not None:
+            instance_directory.start_time = start_t
+            date_time_data["start_time"] = start_t
 
-    if hasattr(instance_directory, "end_time") and row.get("End Time"):
-        instance_directory.end_time = row["End Time"]
-        date_time_data["end_time"] = instance_directory.end_time
+    if hasattr(instance_directory, "end_time"):
+        end_t = parse_csv_time(get_row_value(row, "End Time"))
+        if end_t is not None:
+            instance_directory.end_time = end_t
+            date_time_data["end_time"] = end_t
 
     return date_time_data
 
 
-def format_date(date, format):
-    if date and isinstance(str, format):
-        return datetime.strptime(date, format)
+def parse_csv_date(value):
+    """
+    Parse a CSV cell into ``datetime.date`` for ``DateField``.
+
+    Supports ``YYYY-MM-DD`` (hyphen) and ``DD/MM/YYYY`` (slash), plus formats
+    accepted by :func:`django.utils.dateparse.parse_date`.
+    """
+    if value is None:
+        return None
+    s = str(value).strip()
+    if not s:
+        return None
+
+    d = parse_date(s)
+    if d is not None:
+        return d
+
+    for fmt in ("%d/%m/%Y", "%Y-%m-%d"):
+        try:
+            return datetime.strptime(s, fmt).date()
+        except ValueError:
+            continue
+    return None
+
+
+def parse_csv_time(value):
+    """
+    Parse a CSV cell into ``datetime.time`` for ``TimeField``.
+
+    Supports ``HH:MM``, ``HH:MM:SS``, fractional seconds, and strings
+    understood by :func:`django.utils.dateparse.parse_time`.
+    """
+    if value is None:
+        return None
+    s = str(value).strip()
+    if not s:
+        return None
+
+    parsed = parse_time(s)
+    if parsed is not None:
+        return parsed
+
+    for fmt in ("%H:%M:%S.%f", "%H:%M:%S", "%H:%M"):
+        try:
+            return datetime.strptime(s, fmt).time()
+        except ValueError:
+            continue
+    return None
 
 
 def validate_directory_file(request, file_model_class, format_file_path):
