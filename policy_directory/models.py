@@ -292,7 +292,7 @@ class PolicyDirectory(CommonControlField):
 
     def get_date(self):
         return self.date
-    get_date.short_date = "Date"
+    get_date.short_description = "Date"
 
     def get_institutions(self):
         return "| ".join([a.name for a in self.institutions.all()])

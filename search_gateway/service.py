@@ -1,5 +1,4 @@
 import logging
-
 from functools import cached_property
 
 from django.conf import settings
@@ -8,11 +7,9 @@ from opensearchpy.exceptions import ConnectionError as OpenSearchConnectionError
 
 from . import parser as response_parser
 from . import query as query_builder
-
 from .client import get_opensearch_client
 from .models import DataSource
 from .utils import get_mapped_filters
-
 
 logger = logging.getLogger(__name__)
 
@@ -86,6 +83,7 @@ class SearchGatewayService:
     def search_documents(
         self,
         query_text=None,
+        query_clauses=None,
         filters=None,
         page=1,
         page_size=10,
@@ -96,6 +94,7 @@ class SearchGatewayService:
         mapped_filters = get_mapped_filters(filters, field_settings)
         body = query_builder.build_document_search_body(
             query_text=query_text,
+            query_clauses=query_clauses,
             filters=mapped_filters,
             page=page,
             page_size=page_size,

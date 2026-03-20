@@ -5,25 +5,59 @@
 
 {% block header_content %}
 <div class="search-header-card">
-    <h1 class="search-header-card__title">{% trans display_name %}</h1>
+    <h1 class="search-header-card__title">{% trans "Busca avançada" %}</h1>
     <span class="search-header-card__subtitle">{% if index_name == 'sci*' %}{% trans 'articles, preprints, datasets, books' %}...{% else %}{% trans 'Actions, events and infrastructure' %}{% endif %}</span>
     <form method="get" action="{{self}}" id="search-form" class="search-header-card__search">
-        <div class="search-input-card__row">
-            <input
-                type="search"
-                name="search"
-                id="search-input"
-                class="search-input-card__input"
-                placeholder="{% trans 'Search' %} {% if index_name == 'sci*' %}{% trans 'articles, preprints, datasets, books' %}...{% else %}{% trans 'Actions, events and infrastructure' %}{% endif %}"
-                value="{{ search_query }}"
-                autocomplete="off"
-            >
+        <div class="advanced-search-rows">
+            <div class="advanced-search-row search-input-card__row" data-row-index="0">
+                <select id="search-field-0" name="search_field_0" class="form-select search-field-select" aria-label="{% trans 'Campo de busca' %}">
+                    {% for value, label in searchable_fields %}
+                    <option value="{{ value }}">{{ label }}</option>
+                    {% endfor %}
+                </select>
+                <input
+                    type="search"
+                    name="search_text_0"
+                    id="search-input-0"
+                    class="search-input-card__input search-text-input"
+                    placeholder="{% trans 'Termos de pesquisa...' %}"
+                    value="{{ search_query }}"
+                    autocomplete="off"
+                >
+            </div>
+            <div id="advanced-search-rows"></div>
+        </div>
+        <div class="advanced-search-actions mt-2">
+            <button type="button" class="btn btn-outline-secondary btn-sm" id="btn-add-field">
+                + {% trans "ADICIONAR CAMPO" %}
+            </button>
+        </div>
+        <div class="search-input-card__row mt-3">
+            <button type="button" class="btn btn-outline-primary" id="btn-clear">{% trans "LIMPAR" %}</button>
             <button type="submit" class="btn btn-primary search-input-card__button">
-                {% trans "Buscar" %}
+                <i class="icon-search"></i> {% trans "PESQUISAR" %}
             </button>
         </div>
     </form>
 </div>
+<template id="advanced-search-row-template">
+    <div class="advanced-search-row search-input-card__row" data-row-index="">
+        <select class="form-select search-operator" aria-label="{% trans 'Operador lógico' %}">
+            <option value="AND">AND</option>
+            <option value="OR">OR</option>
+            <option value="NOT">NOT</option>
+        </select>
+        <select class="form-select search-field-select" aria-label="{% trans 'Campo de busca' %}">
+            {% for value, label in searchable_fields %}
+            <option value="{{ value }}">{{ label }}</option>
+            {% endfor %}
+        </select>
+        <input type="search" class="search-input-card__input search-text-input" placeholder="{% trans 'Termos de pesquisa...' %}" autocomplete="off">
+        <button type="button" class="btn btn-outline-danger btn-remove-row" aria-label="{% trans 'Remover' %}">
+            <i class="icon-trash"></i>
+        </button>
+    </div>
+</template>
 {% endblock%}
 
 {% block search_sidebar %}
@@ -61,6 +95,11 @@
         dataSourceName: '{{ index_name|escapejs }}',
         filters: JSON.parse(document.getElementById('filters-data').textContent),
         filterMetadata: JSON.parse(document.getElementById('filter-metadata-data').textContent),
+        searchableFields: [
+            {% for value, label in searchable_fields %}
+            { value: '{{ value|escapejs }}', label: '{{ label|escapejs }}' }{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ],
     };
 </script>
 {% endblock %}

@@ -336,19 +336,35 @@ class EventDirectory(CommonControlField):
 
     def get_start_date(self):
         return self.start_date
-    get_start_date.short_start_date = "Start Date"
+    get_start_date.short_description = "Start Date"
 
     def get_end_date(self):
         return self.end_date
-    get_end_date.short_end_date = "End Date"
+    get_end_date.short_description = "End Date"
 
     def get_start_time(self):
         return self.start_time
-    get_start_time.short_start_time = "Start Time"
+    get_start_time.short_description = "Start Time"
 
     def get_end_time(self):
         return self.end_time
-    get_end_time.short_end_time = "End Time"
+    get_end_time.short_description = "End Time"
+
+    def get_organization(self):
+        return "| ".join([a.name for a in self.organization.all()])
+    get_organization.short_description = "Organization Name"
+
+    def get_organization_country(self):
+        return "| ".join([a.location.country.name_pt for a in self.organization.all() if a.location])
+    get_organization_country.short_description = "Organization Country"
+
+    def get_organization_state(self):
+        return "| ".join([a.location.state.name for a in self.organization.all() if a.location and a.location.state])
+    get_organization_state.short_description = "Organization State"
+    
+    def get_organization_city(self):
+        return "| ".join([a.location.city.name for a in self.organization.all() if a.location and a.location.city])
+    get_organization_city.short_description = "Organization City"
 
     def get_thematic_areas_level0(self):
         return "| ".join([t.level0 for t in self.thematic_areas.all()])

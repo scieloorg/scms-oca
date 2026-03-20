@@ -78,6 +78,45 @@
     height: 2.375rem;
 }
 
+/* Advanced Search */
+.advanced-search-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.advanced-search-row {
+    display: flex;
+    gap: 0.5rem;
+    align-items: stretch;
+}
+
+.advanced-search-row .search-operator {
+    flex: 0 0 5rem;
+    min-width: 5rem;
+    max-width: 5rem;
+}
+
+.advanced-search-row .search-field-select {
+    flex: 0 0 12rem;
+    min-width: 10rem;
+}
+
+.advanced-search-row .search-text-input {
+    flex: 1;
+    min-width: 0;
+}
+
+.advanced-search-row .btn-remove-row {
+    flex-shrink: 0;
+    padding: 0.375rem 0.5rem;
+    height: 2.375rem;
+}
+
+.advanced-search-actions {
+    margin-top: 0.5rem;
+}
+
 @media (max-width: 767px) {
     .search-input-card__row {
         flex-direction: column;
@@ -85,5 +124,15 @@
 
     .search-input-card__button {
         width: 100%;
+    }
+
+    .advanced-search-row {
+        flex-wrap: wrap;
+    }
+
+    .advanced-search-row .search-operator,
+    .advanced-search-row .search-field-select {
+        flex: 1 1 auto;
+        min-width: 8rem;
     }
 }

@@ -584,11 +584,14 @@ def search_view_list(request):
     page = int(request.GET.get("page", 1))
     page_size = int(request.GET.get("limit", 25))
     text_search = request.GET.get("search", "")
+    query_clauses = SearchPage.query_clauses(request)
+
     try:
         service = SearchGatewayService(index_name=index_name)
         selected_filters = service.extract_selected_filters(request)
         results_data = service.search_documents(
-            query_text=text_search,
+            query_text=text_search if not query_clauses else None,
+            query_clauses=query_clauses,
             filters=selected_filters,
             page=page,
             page_size=page_size,
