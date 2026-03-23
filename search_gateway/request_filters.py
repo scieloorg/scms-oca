@@ -1,5 +1,7 @@
 from django.conf import settings
 
+from . import transforms
+
 
 DEFAULT_FILTER_SUFFIXES = ("_operator", "_bool_not")
 FILTER_SUFFIXES = tuple(getattr(settings, "SEARCH_GATEWAY_FILTER_SUFFIXES", DEFAULT_FILTER_SUFFIXES))
@@ -71,6 +73,53 @@ def _apply_default_filters(applied_filters, data_source, form_key=None):
         resolved_filters[field.field_name] = str(default_value)
 
     return resolved_filters
+
+
+def extract_requested_filters(source, excluded_keys=None, allowed_keys=None):
+    excluded_keys = set(excluded_keys or [])
+    allowed_keys = set(allowed_keys or [])
+    requested_filters = {}
+
+    for key in source.keys():
+        if key in excluded_keys:
+            continue
+        if allowed_keys and key not in allowed_keys:
+            continue
+
+        values = [value for value in source.getlist(key) if value not in (None, "")]
+        if not values:
+            continue
+        requested_filters[key] = values if len(values) > 1 else values[0]
+
+    return requested_filters
+
+
+def extract_selected_filters(source, data_source, available_filters=None):
+    selected_filters = {}
+    field_settings = data_source.get_field_settings_dict()
+    filter_keys = available_filters.keys() if available_filters else field_settings.keys()
+
+    for filter_key in filter_keys:
+        values = source.getlist(filter_key)
+        if not values:
+            continue
+
+        cleaned_values = [value for value in values if value]
+        if not cleaned_values:
+            continue
+
+        field_config = field_settings.get(filter_key, {})
+        transform_type = (field_config.get("filter") or {}).get("transform", {}).get("type")
+        if transform_type == "boolean":
+            transformed_value = [transforms.coerce_boolean(value) for value in cleaned_values]
+            transformed_value = [value for value in transformed_value if value is not None]
+            if transformed_value:
+                selected_filters[filter_key] = transformed_value
+            continue
+
+        selected_filters[filter_key] = cleaned_values
+
+    return selected_filters
 
 
 def extract_applied_filters(source, data_source, form_key=None, extra_excluded_keys=None):

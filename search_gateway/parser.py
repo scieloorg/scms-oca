@@ -64,28 +64,3 @@ def _transform_document_search_results(search_results):
         }
         for hit in search_results["hits"]["hits"]
     ]
-
-
-def extract_selected_filters(request, available_filters, data_source):
-    selected_filters = {}
-    field_settings = data_source.get_field_settings_dict()
-
-    filter_keys = available_filters.keys() if available_filters else field_settings.keys()
-
-    for filter_key in filter_keys:
-        values = request.GET.getlist(filter_key)
-        if not values:
-            continue
-        cleaned_values = [v for v in values if v]
-        if not cleaned_values:
-            continue
-        field_config = field_settings.get(filter_key, {})
-        transform_type = field_config.get("filter", {}).get("transform", {}).get("type")
-        if transform_type == "boolean":
-            transformed_value = [transforms.coerce_boolean(value) for value in cleaned_values]
-            transformed_value = [value for value in transformed_value if value is not None]
-            if transformed_value:
-                selected_filters[filter_key] = transformed_value
-            continue
-        selected_filters[filter_key] = cleaned_values
-    return selected_filters

@@ -4,6 +4,7 @@ from django.views.decorators.http import require_GET
 from .forms import render_filter_sidebar
 from .models import DataSource
 from .request_filters import extract_applied_filters
+from .request_filters import extract_requested_filters
 from .service import SearchGatewayService
 
 
@@ -58,16 +59,10 @@ def filters_view(request):
     fields_param = request.GET.get("fields", "")
     include_fields = [item.strip() for item in fields_param.split(",") if item.strip()]
     refresh = _parse_bool_param(request.GET.get("refresh"))
-    excluded_query_keys = {"data_source", "fields", "refresh", "include_form", "form"}
-    requested_filters = {}
-
-    for key in request.GET.keys():
-        if key in excluded_query_keys:
-            continue
-        values = [value for value in request.GET.getlist(key) if value not in (None, "")]
-        if not values:
-            continue
-        requested_filters[key] = values if len(values) > 1 else values[0]
+    requested_filters = extract_requested_filters(
+        request.GET,
+        excluded_keys={"data_source", "fields", "refresh", "include_form", "form"},
+    )
 
     service = SearchGatewayService(index_name=data_source_name)
     filters, error = service.get_filters_data(
@@ -85,16 +80,10 @@ def search_item_view(request):
     q = request.GET.get("q", "")
     data_source_name = request.GET.get("data_source", "journal_metrics_by_*")
     field_name = request.GET.get("field_name", "journal_title")
-    excluded_query_keys = {"q", "data_source", "field_name"}
-    requested_filters = {}
-
-    for key in request.GET.keys():
-        if key in excluded_query_keys:
-            continue
-        values = [value for value in request.GET.getlist(key) if value not in (None, "")]
-        if not values:
-            continue
-        requested_filters[key] = values if len(values) > 1 else values[0]
+    requested_filters = extract_requested_filters(
+        request.GET,
+        excluded_keys={"q", "data_source", "field_name"},
+    )
 
     service = SearchGatewayService(index_name=data_source_name)
     results, error = service.search_item(
