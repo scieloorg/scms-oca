@@ -12,9 +12,9 @@ from core import tasks
 from core_settings.models import Moderation
 from search_gateway.forms import build_data_source_form_payload
 from search_gateway.forms import render_filter_sidebar
-from search_gateway.controller import get_filters_data
 from search_gateway.models import DataSource
 from search_gateway.request_filters import extract_applied_filters
+from search_gateway.service import SearchGatewayService
 
 from .journal_metrics import data_source as journal_metrics_data_source
 from .journal_metrics import params as journal_metrics_params
@@ -149,11 +149,12 @@ def _render_journal_metrics_profile(request, issn=None):
     if not data_source:
         return JsonResponse({"error": "Invalid data_source"}, status=404)
 
+    search_gateway_service = SearchGatewayService(index_name=journal_metrics_data_source.JOURNAL_METRICS_DATA_SOURCE)
     field_settings = data_source.field_settings_dict
     filter_fields_to_load = {"category_level"}
     exclude_fields = [name for name in field_settings.keys() if name not in filter_fields_to_load]
 
-    filters_data, filters_error = get_filters_data(journal_metrics_data_source.JOURNAL_METRICS_DATA_SOURCE, exclude_fields=exclude_fields)
+    filters_data, filters_error = search_gateway_service.get_filters_data(exclude_fields=exclude_fields)
 
     profile_data, profile_error = search_controller.get_journal_metrics_timeseries(
         issn=journal_issn or None,
@@ -210,7 +211,8 @@ def journal_metrics_view(request):
 
     exclude_fields = [name for name in field_settings.keys() if name not in filter_fields_to_load]
 
-    filters_data, filters_error = get_filters_data(data_source_name, exclude_fields=exclude_fields)
+    search_gateway_service = SearchGatewayService(index_name=data_source_name)
+    filters_data, filters_error = search_gateway_service.get_filters_data(exclude_fields=exclude_fields)
     context["filters_data"] = filters_data or {}
 
     if filters_error:
