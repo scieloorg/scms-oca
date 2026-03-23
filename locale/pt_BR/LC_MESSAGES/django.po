@@ -17,6 +17,10 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
+#: search_gateway/models.py:51 search_gateway/wagtail_hooks.py:14
+msgid "Data Sources"
+msgstr "Fontes de Dados"
+
 #: article/choices.py:5 indicator/choices.py:49 scholarly_articles/choices.py:5
 msgid "Book Section"
 msgstr "Seção de Livro"
@@ -4659,3 +4663,306 @@ msgstr "Subárea"
 
 msgid "articles, preprints, datasets, books"
 msgstr "artigos, preprints, datasets, livros"
+
+msgid "Publishing Model"
+msgstr "Modelo editorial"
+
+msgid "Timeline"
+msgstr "Linha do tempo"
+
+msgid "Activity Profile"
+msgstr "Perfil da atividade"
+
+msgid "Thematic Scope"
+msgstr "Escopo temático"
+
+msgid "Document Identity"
+msgstr "Identidade do documento"
+
+msgid "Source Coverage"
+msgstr "Cobertura da fonte"
+
+msgid "Minimum publications"
+msgstr "Publicações mínimas"
+
+msgid "FILTRAR"
+msgstr "FILTRAR"
+
+msgid "LIMPAR"
+msgstr "LIMPAR"
+
+msgid "APLICAR"
+msgstr "APLICAR"
+
+msgid "APPLY"
+msgstr "APLICAR"
+
+msgid "Apply"
+msgstr "Aplicar"
+
+msgid "Show filters"
+msgstr "Mostrar filtros"
+
+msgid "Hide filters"
+msgstr "Ocultar filtros"
+
+msgid "Ranking setup"
+msgstr "Configuração do ranking"
+
+msgid "Configuration values that shape the ranking before the lateral filters refine the result set."
+msgstr "Valores de configuração que definem o ranking antes que os filtros laterais refinem o conjunto de resultados."
+
+msgid "Remove filter"
+msgstr "Remover filtro"
+
+msgid "AND"
+msgstr "E"
+
+msgid "OR"
+msgstr "OU"
+
+msgid "Error loading results. Try again."
+msgstr "Erro ao carregar resultados. Tente novamente."
+
+msgid "No results found. Try adjusting your search or filters."
+msgstr "Nenhum resultado encontrado. Tente ajustar sua busca ou seus filtros."
+
+msgid "Busca avançada"
+msgstr "Busca avançada"
+
+msgid "Campo de busca"
+msgstr "Campo de busca"
+
+msgid "Operador lógico"
+msgstr "Operador lógico"
+
+msgid "Termos de pesquisa..."
+msgstr "Termos de pesquisa..."
+
+msgid "Adicionar campo"
+msgstr "Adicionar campo"
+
+msgid "Pesquisar"
+msgstr "Pesquisar"
+
+msgid "Controles dos resultados"
+msgstr "Controles dos resultados"
+
+msgid "Ordenar por:"
+msgstr "Ordenar por:"
+
+msgid "Ordenar resultados"
+msgstr "Ordenar resultados"
+
+msgid "Exibir:"
+msgstr "Exibir:"
+
+msgid "Selecionar página"
+msgstr "Selecionar página"
+
+msgid "Paginação dos resultados"
+msgstr "Paginação dos resultados"
+
+msgid "Mostrando"
+msgstr "Mostrando"
+
+msgid "Mostrar filtros"
+msgstr "Mostrar filtros"
+
+msgid "Ocultar filtros"
+msgstr "Ocultar filtros"
+
+msgid "Mais recentes"
+msgstr "Mais recentes"
+
+msgid "Mais antigos"
+msgstr "Mais antigos"
+
+msgid "Mais citados"
+msgstr "Mais citados"
+
+msgid "Grade"
+msgstr "Grade"
+
+msgid "Lista"
+msgstr "Lista"
+
+msgid "selecionado"
+msgstr "selecionado"
+
+msgid "selecionados"
+msgstr "selecionados"
+
+msgid "Anterior"
+msgstr "Anterior"
+
+msgid "Próxima"
+msgstr "Próxima"
+
+msgid "Acessar"
+msgstr "Acessar"
+
+msgid "Ano de criação"
+msgstr "Ano de criação"
+
+msgid "Ano de registro"
+msgstr "Ano de registro"
+
+msgid "Citar"
+msgstr "Citar"
+
+msgid "Compartilhar"
+msgstr "Compartilhar"
+
+msgid "Exportar"
+msgstr "Exportar"
+
+msgid "Imprimir"
+msgstr "Imprimir"
+
+msgid "Limpar"
+msgstr "Limpar"
+
+msgid "Open access"
+msgstr "Acesso aberto"
+
+msgid "Organization"
+msgstr "Organização"
+
+msgid "Primary Topic"
+msgstr "Tópico principal"
+
+msgid "Publication"
+msgstr "Publicação"
+
+msgid "Registro"
+msgstr "Registro"
+
+msgid "Remover"
+msgstr "Remover"
+
+msgid "Selecione uma opção"
+msgstr "Selecione uma opção"
+
+msgid "Select filters and click Filtrar to load the journal metrics ranking."
+msgstr "Selecione os filtros e clique em Filtrar para carregar o ranking de métricas de periódicos."
+
+msgid "Open journal page"
+msgstr "Abrir página do periódico"
+
+msgid "Top 10% Share"
+msgstr "Participação no Top 10%"
+
+msgid "Publications and Total Citations per Year"
+msgstr "Publicações e citações totais por ano"
+
+msgid "Cohort Impact and Mean Citations per Year"
+msgstr "Impacto de coorte e média de citações por ano"
+
+msgid "Top Publications Share (%) per Year"
+msgstr "Participação das publicações de topo (%) por ano"
+
+msgid "No category data available"
+msgstr "Nenhum dado de categoria disponível"
+
+msgid "by"
+msgstr "por"
+
+msgid "by Category"
+msgstr "por categoria"
+
+msgid "per Year"
+msgstr "por ano"
+
+msgid "% Documents With ≥1 Citation"
+msgstr "% de documentos com ≥1 citação"
+
+msgid "% Documents With ≥1 Citation Share (%)"
+msgstr "Participação de % de documentos com ≥1 citação (%)"
+
+msgid "% Sources With ≥1 Cited Document"
+msgstr "% de fontes com ≥1 documento citado"
+
+msgid "% Sources With ≥1 Cited Document Share (%)"
+msgstr "Participação de % de fontes com ≥1 documento citado (%)"
+
+msgid "Avg Citations per Source"
+msgstr "Média de citações por fonte"
+
+msgid "Avg Cited Documents per Source"
+msgstr "Média de documentos citados por fonte"
+
+msgid "Avg Documents per Source"
+msgstr "Média de documentos por fonte"
+
+msgid "Citations Share (%)"
+msgstr "Participação de citações (%)"
+
+msgid "Citations per Document"
+msgstr "Citações por documento"
+
+msgid "Citations per Document Share (%)"
+msgstr "Participação de citações por documento (%)"
+
+msgid "Citations per Source Share (%)"
+msgstr "Participação de citações por fonte (%)"
+
+msgid "Cited Documents (≥1 citation)"
+msgstr "Documentos citados (≥1 citação)"
+
+msgid "Cited Documents Share (%)"
+msgstr "Participação de documentos citados (%)"
+
+msgid "Cited Documents per Source Share (%)"
+msgstr "Participação de documentos citados por fonte (%)"
+
+msgid "Documents Share (%)"
+msgstr "Participação de documentos (%)"
+
+msgid "Documents per Source Share (%)"
+msgstr "Participação de documentos por fonte (%)"
+
+msgid "Filtered vs Total (%)"
+msgstr "Filtrado vs total (%)"
+
+msgid "Per year, filtered vs total baseline"
+msgstr "Por ano, filtrado vs linha de base total"
+
+msgid "Error loading indicator data."
+msgstr "Erro ao carregar os dados do indicador."
+
+msgid "Unexpected response while loading indicator data."
+msgstr "Resposta inesperada ao carregar os dados do indicador."
+
+msgid "Top 1%"
+msgstr "Top 1%"
+
+msgid "Top 5%"
+msgstr "Top 5%"
+
+msgid "Top 10%"
+msgstr "Top 10%"
+
+msgid "Top 50%"
+msgstr "Top 50%"
+
+msgid "Total Documents"
+msgstr "Total de documentos"
+
+msgid "Unique Sources"
+msgstr "Fontes únicas"
+
+msgid "Unique Sources Share (%)"
+msgstr "Participação de fontes únicas (%)"
+
+msgid "Nome do índice no OpenSearch"
+msgstr "Nome do índice no OpenSearch"
+
+msgid "Nome de exibição para o usuário"
+msgstr "Nome de exibição para o usuário"
+
+msgid "Lista de campos retornados do ES, ex: ['_id', 'title']"
+msgstr "Lista de campos retornados do ES, ex: ['_id', 'title']"
+
+msgid "Fonte de dados OpenSearch associada a esta página de busca."
+msgstr "Fonte de dados OpenSearch associada a esta página de busca."
