@@ -2,39 +2,29 @@
 
 <div
   id="scope-controls"
-  data-data-source="{{ data_source|default:'scientific'|escape }}"
+  class="indicator-scope-panel"
+  data-data-source="{{ data_source|default:'scientific_production'|escape }}"
   data-study-unit="{{ study_unit|default:'document'|escape }}"
   data-indicator-home-url="{% url 'indicator_home' %}"
   data-journal-metrics-url="{% url 'indicator_journal_metrics' %}"
-  data-all-scopes-label="{% trans 'All scopes' %}"
 >
-  <h4 class="mt-0 mb-2">{% trans "Scope" %}</h4>
-
-  <div class="filter-group-card filter-group-card--muted filter-group-card--collapsible mb-2">
-    <div class="filter-group-card__title">{% trans "Aggregation Mode" %}</div>
-    <form id="study-unit-form" class="mb-0">
-      <label class="form-label" for="study_unit">{% trans "Study unit" %}</label>
-      <div class="input-group">
-        <select class="form-select" id="selectStudyUnit" name="study_unit" style="height: 2.25rem;">
-            <option selected value="document">{% trans "Document" %}</option>
-            <option value="source">{% trans "Source" %}</option>
-            <option value="journal_metrics">{% trans "Journal Metrics" %}</option>
-        </select>
-      </div>
-    </form>
+  <div class="indicator-scope-panel__head">
+    <div class="indicator-scope-panel__title">{% trans "Scope" %}</div>
   </div>
 
-  {% if study_unit != "journal_metrics" %}
-    <div class="filter-group-card filter-group-card--muted filter-group-card--collapsible mb-2">
-      <div class="filter-group-card__title">{% trans "Data Scope" %}</div>
-      <form id="scope-filter-form" class="mb-0">
-        <label class="form-label" for="selectIndexScope">{% trans "Scope" %}</label>
+  <div class="indicator-scope-panel__body">
+    <div class="indicator-scope-panel__section">
+      <div class="indicator-scope-panel__section-title">{% trans "Aggregation Mode" %}</div>
+      <form id="study-unit-form" class="mb-0">
+        <label class="indicator-scope-panel__label" for="selectStudyUnit">{% trans "Study unit" %}</label>
         <div class="input-group">
-          <select class="form-select" id="selectIndexScope" name="scope" style="height: 2.25rem;">
-              <option value="">{% trans "All scopes" %}</option>
+          <select class="form-select indicator-scope-panel__select" id="selectStudyUnit" name="study_unit">
+            <option selected value="document">{% trans "Document" %}</option>
+            <option value="source">{% trans "Source" %}</option>
+            <option value="journal_metrics_by_*">{% trans "Journal Metrics" %}</option>
           </select>
         </div>
       </form>
     </div>
-  {% endif %}
+  </div>
 </div>

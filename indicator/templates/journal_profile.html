@@ -46,7 +46,7 @@
       id="journal-profile-controls-form"
       method="get"
       action="{% url 'indicator_journal_metrics' %}"
-      class="card mb-3 p-3 shadow-sm indicator-applied-filters journal-profile-controls-bar"
+      class="card mb-3 p-3 shadow-sm search-gateway-applied-filters journal-profile-controls-bar"
       data-profile-timeseries-url="{% url 'indicator_journal_metrics_timeseries' %}"
       data-profile-journal-issn="{{ journal_issn|escape }}">
       <input type="hidden" name="journal" value="{{ journal_issn|escape }}">
@@ -242,13 +242,13 @@
 {% endblock %}
 
 {% block extra_css %}
+  <link rel="stylesheet" href="{% static 'search_gateway/css/custom.css' %}">
   <link rel="stylesheet" href="{% static 'indicator/css/custom.css' %}">
 {% endblock %}
 
 {% block inline_javascript %}
   <script src="{% static 'js/echarts/echarts.min.js' %}"></script>
-  <script src="{% static 'indicator/js/helpers.js' %}"></script>
+  <script src="{% static 'search_gateway/js/helpers.js' %}"></script>
   <script src="{% static 'indicator/js/charts.js' %}"></script>
-  <script src="{% static 'indicator/js/journal_metrics_common.js' %}"></script>
   <script src="{% static 'indicator/js/journal_profile.js' %}"></script>
 {% endblock %}

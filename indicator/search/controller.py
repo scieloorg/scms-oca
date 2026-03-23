@@ -1,17 +1,21 @@
 from search_gateway.client import get_opensearch_client
-from search_gateway import data_sources_with_settings
+from search_gateway.models import DataSource
 
-from indicator.journal_metrics.config import (
-    ALLOWED_RANKING_METRICS,
-    DEFAULT_CATEGORY_ID,
-    DEFAULT_MINIMUM_PUBLICATIONS,
-    DEFAULT_PUBLICATION_YEAR,
-    DEFAULT_RANKING_METRIC,
-    VALID_CATEGORY_LEVELS,
+from indicator.journal_metrics.data_source import (
+    get_allowed_ranking_metrics,
+    get_category_level_order,
+    get_default_category_id,
+    get_default_limit,
+    get_default_minimum_publications,
+    get_default_publication_year,
+    get_default_ranking_metric,
+    get_journal_metrics_data_source,
+    get_valid_category_levels,
     get_index_field_name,
     normalize_category_level,
     normalize_minimum_publications,
     normalize_ranking_metric,
+    JOURNAL_METRICS_DATA_SOURCE,
 )
 from . import query as indicator_query
 from . import parser as indicator_parser
@@ -26,15 +30,12 @@ BASELINE_PRESERVED_FILTER_KEYS = {
     "document_publication_year_range",
 }
 
-CONTROL_FILTER_KEYS = {
+TRANSPORT_FILTER_KEYS = {
     "breakdown_variable",
     "study_unit",
     "return_study_unit",
     "csrfmiddlewaretoken",
 }
-
-CATEGORY_LEVEL_ORDER = tuple(level for level in ("domain", "field", "subfield", "topic") if level in VALID_CATEGORY_LEVELS)
-
 
 def _normalize_indicator_study_unit(study_unit):
     value = str(study_unit or "").strip().lower()
@@ -49,15 +50,28 @@ def _has_filter_value(value):
     return str(value).strip() != ""
 
 
-def _build_comparison_baseline_filters(filters):
+def _build_indicator_control_filter_keys(data_source):
+    if not data_source:
+        return set(TRANSPORT_FILTER_KEYS)
+
+    control_filter_keys = set(TRANSPORT_FILTER_KEYS)
+    try:
+        control_filter_keys.update(data_source.get_form_control_field_names("indicator"))
+    except Exception:
+        pass
+    return control_filter_keys
+
+
+def _build_comparison_baseline_filters(filters, control_filter_keys=None):
     if not isinstance(filters, dict):
         return {}, []
 
+    control_filter_keys = set(control_filter_keys or TRANSPORT_FILTER_KEYS)
     baseline_filters = {}
     comparative_filter_keys = []
 
     for key, value in filters.items():
-        if key in CONTROL_FILTER_KEYS:
+        if key in control_filter_keys:
             continue
         if key.endswith("_operator") or key.endswith("_bool_not"):
             continue
@@ -93,20 +107,21 @@ def _append_must_clause(query, clause):
 
 
 def _build_journal_metrics_filter_clauses(form_filters, selected_category_level):
-    data_source = "journal_metrics"
-    field_settings = data_sources_with_settings.get_field_settings(data_source)
+    data_source_name = JOURNAL_METRICS_DATA_SOURCE
+    data_source = get_journal_metrics_data_source()
+    field_settings = data_source.field_settings_dict if data_source else {}
 
     cleaned_filters = utils.clean_form_filters(dict(form_filters or {}))
+    control_filter_keys = set(TRANSPORT_FILTER_KEYS)
+    try:
+        control_filter_keys.update(data_source.get_form_control_field_names("journal_metrics"))
+    except Exception:
+        pass
+    for key in control_filter_keys:
+        cleaned_filters.pop(key, None)
     for key in (
         "publication_year",
         "year",
-        "ranking_metric",
-        "limit",
-        "minimum_publications",
-        "scope",
-        "return_study_unit",
-        "study_unit",
-        "csrfmiddlewaretoken",
         "journal_title",
         "journal_issn",
         "category_id",
@@ -116,7 +131,7 @@ def _build_journal_metrics_filter_clauses(form_filters, selected_category_level)
 
     cleaned_filters["category_level"] = selected_category_level
 
-    query = indicator_query.build_query(cleaned_filters, field_settings, data_source)
+    query = indicator_query.build_query(cleaned_filters, field_settings, data_source_name)
     if isinstance(query, dict) and "bool" in query:
         bool_query = query.get("bool") or {}
         return list(bool_query.get("must", [])), list(bool_query.get("must_not", []))
@@ -137,6 +152,8 @@ def _strip_term_clause(clauses, field_name):
 
 
 def _list_available_category_levels(es, index_name, base_must, inherited_must_not):
+    valid_levels = get_valid_category_levels()
+    category_level_order = get_category_level_order()
     body = {
         "size": 0,
         "query": {
@@ -149,7 +166,7 @@ def _list_available_category_levels(es, index_name, base_must, inherited_must_no
             "category_levels": {
                 "terms": {
                     "field": "category_level",
-                    "size": len(CATEGORY_LEVEL_ORDER) or len(VALID_CATEGORY_LEVELS),
+                    "size": len(category_level_order) or len(valid_levels),
                 }
             }
         },
@@ -160,11 +177,11 @@ def _list_available_category_levels(es, index_name, base_must, inherited_must_no
     except Exception:
         return []
 
-    level_order = {level: index for index, level in enumerate(CATEGORY_LEVEL_ORDER)}
+    level_order = {level: index for index, level in enumerate(category_level_order)}
     normalized_levels = []
     for level in indicator_parser.parse_terms_agg_keys(response, "category_levels"):
         normalized_level = str(level or "").strip().lower()
-        if normalized_level not in VALID_CATEGORY_LEVELS or normalized_level in normalized_levels:
+        if normalized_level not in valid_levels or normalized_level in normalized_levels:
             continue
         normalized_levels.append(normalized_level)
 
@@ -238,7 +255,6 @@ def _search_journal_metrics_profile_hits(
             {get_index_field_name("journal_impact_cohort"): {"order": "desc", "missing": "_last"}},
         ],
         "collapse": {"field": "publication_year"},
-        "_source": indicator_query.JOURNAL_METRICS_SOURCE_FIELDS,
     }
 
     try:
@@ -255,44 +271,43 @@ def get_journal_metrics_data(form_filters):
     """
     es = get_opensearch_client()
 
-    data_source = "journal_metrics"
-    data_source_config = data_sources_with_settings.get_data_source(data_source)
-    index_name = data_source_config.get("index_name") if data_source_config else None
-    field_settings = data_source_config.get("field_settings", {}) if data_source_config else {}
-    if not index_name:
+    data_source = get_journal_metrics_data_source()
+    if not data_source:
         return None, "Invalid data_source"
+    index_name = data_source.index_name
+    field_settings = data_source.field_settings_dict
 
     payload_filters = dict(form_filters)
     has_explicit_category_level = str(payload_filters.get("category_level") or "").strip() != ""
     has_explicit_category_id = str(payload_filters.get("category_id") or "").strip() != ""
     payload_filters["category_level"] = normalize_category_level(payload_filters.get("category_level"))
     if not has_explicit_category_level and not has_explicit_category_id:
-        payload_filters["category_id"] = DEFAULT_CATEGORY_ID
+        payload_filters["category_id"] = get_default_category_id()
 
     publication_year = payload_filters.pop("publication_year", None) or payload_filters.pop("year", None)
-    ranking_metric = payload_filters.pop("ranking_metric", DEFAULT_RANKING_METRIC)
-    limit = payload_filters.pop("limit", 100)
+    ranking_metric = payload_filters.pop("ranking_metric", get_default_ranking_metric())
+    limit = payload_filters.pop("limit", get_default_limit())
     minimum_publications = normalize_minimum_publications(payload_filters.pop("minimum_publications", None))
     if minimum_publications is None:
-        minimum_publications = DEFAULT_MINIMUM_PUBLICATIONS
+        minimum_publications = get_default_minimum_publications()
 
     ranking_metric = normalize_ranking_metric(ranking_metric)
 
-    if ranking_metric not in ALLOWED_RANKING_METRICS:
-        ranking_metric = DEFAULT_RANKING_METRIC
+    if ranking_metric not in get_allowed_ranking_metrics():
+        ranking_metric = get_default_ranking_metric()
 
     try:
         limit = int(limit)
     except (TypeError, ValueError):
-        limit = 100
+        limit = get_default_limit()
     limit = max(1, min(limit, 5000))
 
     if not publication_year:
-        publication_year = DEFAULT_PUBLICATION_YEAR
+        publication_year = get_default_publication_year()
 
     cleaned_filters = utils.clean_form_filters(payload_filters)
 
-    query = indicator_query.build_query(cleaned_filters, field_settings, data_source)
+    query = indicator_query.build_query(cleaned_filters, field_settings, data_source.index_name)
     jm_query = indicator_query.build_journal_metrics_query(publication_year, query)
     if minimum_publications is not None:
         jm_query = _append_must_clause(
@@ -331,11 +346,10 @@ def get_journal_metrics_timeseries(
 
     es = get_opensearch_client()
 
-    data_source = "journal_metrics"
-    data_source_config = data_sources_with_settings.get_data_source(data_source)
-    index_name = data_source_config.get("index_name") if data_source_config else None
-    if not index_name:
+    data_source = get_journal_metrics_data_source()
+    if not data_source:
         return None, "Invalid data_source"
+    index_name = data_source.index_name
 
     selected_category_level = normalize_category_level(category_level)
     inherited_must, inherited_must_not = _build_journal_metrics_filter_clauses(
@@ -487,13 +501,13 @@ def get_indicator_data(data_source_name, filters, study_unit="document"):
     if not es:
         return None, "Service unavailable"
 
-    data_source = data_sources_with_settings.get_data_source(data_source_name)
+    data_source = DataSource.get_by_index_name(index_name=data_source_name)
     if not data_source:
         return None, "Invalid data_source"
 
     breakdown_variable = filters.get("breakdown_variable")
 
-    field_settings = data_source.get("field_settings")
+    field_settings = data_source.field_settings_dict
 
     query = indicator_query.build_query(
         filters,
@@ -508,7 +522,7 @@ def get_indicator_data(data_source_name, filters, study_unit="document"):
     body = {"size": 0, "query": query, "aggs": aggs}
 
     try:
-        res = es.search(index=data_source.get("index_name"), body=body)
+        res = es.search(index=data_source.index_name, body=body)
     except Exception:
         return None, "Error executing search"
 
@@ -517,7 +531,11 @@ def get_indicator_data(data_source_name, filters, study_unit="document"):
         breakdown_variable,
         study_unit=normalized_study_unit,
     )
-    baseline_filters, comparative_filter_keys = _build_comparison_baseline_filters(filters)
+    control_filter_keys = _build_indicator_control_filter_keys(data_source)
+    baseline_filters, comparative_filter_keys = _build_comparison_baseline_filters(
+        filters,
+        control_filter_keys=control_filter_keys,
+    )
     relative_metrics = {
         "enabled": False,
         "compared_filters": sorted(comparative_filter_keys),
@@ -538,7 +556,7 @@ def get_indicator_data(data_source_name, filters, study_unit="document"):
         baseline_body = {"size": 0, "query": baseline_query, "aggs": baseline_aggs}
 
         try:
-            baseline_res = es.search(index=data_source.get("index_name"), body=baseline_body)
+            baseline_res = es.search(index=data_source.index_name, body=baseline_body)
             baseline_data = indicator_parser.parse_indicator_response(
                 baseline_res,
                 breakdown_variable=None,

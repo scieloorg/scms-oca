@@ -2,7 +2,7 @@
 {% load l10n %}
 {% load indicator_filters %}
 
-<div class="col-lg-9 mx-0 ps-3 pe-0 indicator-results-col">
+<div class="col-lg-9 mx-0 ps-3 pe-0 indicator-results-col sg-layout__content-col sg-layout__content">
     {% if error %}
     <div class="alert alert-danger shadow-sm mb-3" role="alert">
         {{ error }}
@@ -10,77 +10,9 @@
     {% endif %}
 
     {% include "partials/warning_banner.html" %}
+    {% include "controls_bar.html" %}
 
     {% if ranking_data %}
-    <div class="card mb-3 p-3 shadow-sm indicator-applied-filters" id="journal-metrics-panel">
-        <div class="applied-filters-head">
-            <span class="applied-filters-title">{% trans "Ranking Overview" %}</span>
-        </div>
-        <div class="applied-filters-grid">
-            <span class="applied-filter-chip">
-                <span class="applied-filter-chip__label">{% trans "Year" %}</span>
-                <span>:</span>
-                <span class="applied-filter-chip__value">{{ ranking_data.year }}</span>
-            </span>
-            {% if ranking_configuration.category_level %}
-            <span class="applied-filter-chip">
-                <span class="applied-filter-chip__label">{% trans "Category Type" %}</span>
-                <span>:</span>
-                <span class="applied-filter-chip__value">{{ ranking_configuration.category_level|ui_value:"category_level" }}</span>
-            </span>
-            {% endif %}
-            {% if ranking_configuration.category_id %}
-            <span class="applied-filter-chip">
-                <span class="applied-filter-chip__label">{% trans "Category" %}</span>
-                <span>:</span>
-                <span class="applied-filter-chip__value">{{ ranking_configuration.category_id|ui_value:"category_id" }}</span>
-            </span>
-            {% endif %}
-            <span class="applied-filter-chip">
-                <span class="applied-filter-chip__label">{% trans "Metric" %}</span>
-                <span>:</span>
-                <span class="applied-filter-chip__value">{{ ranking_data.ranking_metric|ui_value:"ranking_metric" }}</span>
-            </span>
-            {% if ranking_configuration.minimum_publications %}
-            <span class="applied-filter-chip">
-                <span class="applied-filter-chip__label">{% trans "Minimum publications" %}</span>
-                <span>:</span>
-                <span class="applied-filter-chip__value">{{ ranking_configuration.minimum_publications|floatformat:"0g" }}</span>
-            </span>
-            {% endif %}
-            {% if ranking_configuration.limit %}
-            <span class="applied-filter-chip">
-                <span class="applied-filter-chip__label">{% trans "Number of results" %}</span>
-                <span>:</span>
-                <span class="applied-filter-chip__value">{{ ranking_configuration.limit|floatformat:"0g" }}</span>
-            </span>
-            {% endif %}
-            <span class="applied-filter-chip">
-                <span class="applied-filter-chip__label">{% trans "Journals" %}</span>
-                <span>:</span>
-                <span class="applied-filter-chip__value">{{ ranking_data.returned_journals|floatformat:"0g" }} / {{ ranking_data.total_journals|floatformat:"0g" }}</span>
-            </span>
-        </div>
-
-        {% if display_applied_filters and display_applied_filters.items %}
-        <div class="journal-metrics-applied" id="applied-filters-journal-metrics">
-            <div class="applied-filters-head">
-                <span class="applied-filters-title">{% trans "Applied Filters" %}</span>
-                <span class="applied-filters-count">{{ display_applied_filters|length }}</span>
-            </div>
-            <div class="applied-filters-grid">
-                {% for key, value in display_applied_filters.items %}
-                <span class="applied-filter-chip">
-                    <span class="applied-filter-chip__label">{{ key|ui_label }}</span>
-                    <span>:</span>
-                    <span class="applied-filter-chip__value">{{ value|ui_value:key }}</span>
-                </span>
-                {% endfor %}
-            </div>
-        </div>
-        {% endif %}
-    </div>
-
     <div class="card mb-3 shadow-sm indicator-chart-card">
         <div class="card-body p-2 p-lg-3">
             <div class="box is-invisible" id="ranking-container">
@@ -148,7 +80,7 @@
     </div>
     {% elif not error %}
     <div class="card p-3 shadow-sm bg-oca-light">
-        <p class="mb-2">{% trans "Select filters and click Generate to load the journal metrics ranking." %}</p>
+        <p class="mb-2">{% trans "Select filters and click Filtrar to load the journal metrics ranking." %}</p>
         <p class="mb-0 text-muted small">
             {% trans "Cohort Impact ranks journals by citations received by documents published in the selected year and category, considering windows (2y, 3y, 5y) or total accumulation." %}
         </p>

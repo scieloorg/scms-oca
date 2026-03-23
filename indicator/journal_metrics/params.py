@@ -3,9 +3,9 @@ import re
 from django.http import QueryDict
 from django.urls import reverse
 
-from .config import (
-    DEFAULT_CATEGORY_ID,
-    DEFAULT_MINIMUM_PUBLICATIONS,
+from .data_source import (
+    get_default_category_id,
+    get_default_minimum_publications,
     normalize_category_level,
     normalize_minimum_publications,
     normalize_ranking_metric,
@@ -90,10 +90,12 @@ def normalize_request_filters(filters, source_filters=None, clean=False):
     has_explicit_category_level = str(source_filters.get("category_level") or "").strip() != ""
     has_explicit_category_id = str(source_filters.get("category_id") or "").strip() != ""
     if not has_explicit_category_level and not has_explicit_category_id:
-        normalized_filters["category_id"] = DEFAULT_CATEGORY_ID
+        normalized_filters["category_id"] = get_default_category_id()
 
     minimum_publications = normalize_minimum_publications(source_filters.get("minimum_publications"))
-    normalized_filters["minimum_publications"] = str(minimum_publications or DEFAULT_MINIMUM_PUBLICATIONS)
+    normalized_filters["minimum_publications"] = str(
+        minimum_publications or get_default_minimum_publications()
+    )
 
     return normalized_filters
 

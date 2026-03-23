@@ -10,14 +10,45 @@ from wagtail_modeladmin.views import CreateView, EditView
 
 from core import tasks
 from core_settings.models import Moderation
-from search_gateway import data_sources_with_settings
+from search_gateway.forms import build_data_source_form_payload
+from search_gateway.forms import render_filter_sidebar
 from search_gateway.controller import get_filters_data
+from search_gateway.models import DataSource
+from search_gateway.request_filters import extract_applied_filters
 
-from .journal_metrics import config as journal_metrics_config
+from .journal_metrics import data_source as journal_metrics_data_source
 from .journal_metrics import params as journal_metrics_params
 from .journal_metrics import presentation as journal_metrics_presentation
 from .search import controller as search_controller, utils
 from .permission_helper import IndicatorPermissionHelper
+
+def _collect_form_group_fields(payload, group_keys):
+    selected_fields = []
+    selected_names = set()
+    normalized_group_keys = {str(group_key or "").strip() for group_key in (group_keys or []) if str(group_key or "").strip()}
+
+    for group in (payload or {}).get("form_groups") or []:
+        if str(group.get("key") or "").strip() not in normalized_group_keys:
+            continue
+        for field in group.get("fields") or []:
+            field_name = str(field.get("name") or "").strip()
+            if not field_name or field_name in selected_names:
+                continue
+            selected_names.add(field_name)
+            selected_fields.append(field)
+
+    return selected_fields
+
+
+def _infer_panel_groups_from_payload(payload):
+    panel_groups = []
+    for group in (payload or {}).get("form_groups") or []:
+        group_key = str(group.get("key") or "").strip()
+        if not group_key:
+            continue
+        if any(str(field.get("kind") or "").strip() == "control" for field in (group.get("fields") or [])):
+            panel_groups.append(group_key)
+    return panel_groups
 
 
 @require_GET
@@ -49,16 +80,47 @@ def data_view(request):
 
 
 def indicator_view(request, data_source_name):
-    data_source = data_sources_with_settings.get_data_source(data_source_name)
+    data_source = DataSource.get_by_index_name(index_name=data_source_name)
     if not data_source:
         return JsonResponse({"error": "Invalid data_source"}, status=404)
 
-    cleaned_filters = utils.clean_form_filters(request.GET.dict())
+    applied_filters = extract_applied_filters(request.GET, data_source, form_key="indicator")
+    breakdown_payload = build_data_source_form_payload(
+        data_source,
+        form_key="indicator",
+        applied_filters=applied_filters,
+        include_fields=["breakdown_variable"],
+    )
+    breakdown_field = None
+    for group in breakdown_payload.get("form_groups") or []:
+        fields = group.get("fields") or []
+        if fields:
+            breakdown_field = fields[0]
+            break
+
+    sidebar_payload = render_filter_sidebar(
+        request,
+        data_source=data_source,
+        form_key="indicator",
+        applied_filters=applied_filters,
+        exclude_fields=["breakdown_variable"],
+        sidebar_form_id="indicator-filter-form",
+        sidebar_form_method="post",
+        submit_label=_("FILTRAR"),
+        reset_label=_("LIMPAR"),
+        submit_id="menu-submit",
+        reset_id="menu-reset",
+        reset_type="button",
+    )
 
     context = {
         "data_source": data_source_name,
-        "data_source_display_name": data_source.get("display_name"),
-        "applied_filters": cleaned_filters,
+        "data_source_display_name": data_source.display_name,
+        "applied_filters": applied_filters,
+        "indicator_sidebar_html": sidebar_payload["form_html"],
+        "indicator_breakdown_field": breakdown_field,
+        "indicator_has_study_unit_control": data_source_name != "social_production",
+        "is_journal_metrics": False,
         "study_unit": request.GET.get("study_unit", "document"),
     }
 
@@ -74,20 +136,24 @@ def _render_journal_metrics_profile(request, issn=None):
 
     selected_category_level = str(request.GET.get("category_level") or "").strip()
     if not selected_category_level:
-        selected_category_level = journal_metrics_config.DEFAULT_CATEGORY_LEVEL
+        selected_category_level = journal_metrics_data_source.get_default_category_level()
 
     selected_publication_year = str(request.GET.get("publication_year") or "").strip()
     if not selected_publication_year:
-        selected_publication_year = str(journal_metrics_config.DEFAULT_PUBLICATION_YEAR)
+        selected_publication_year = str(journal_metrics_data_source.get_default_publication_year())
 
     selected_category_id = str(request.GET.get("category_id") or "").strip()
     profile_passthrough_filters = journal_metrics_params.extract_profile_passthrough_filters(request.GET)
 
-    field_settings = data_sources_with_settings.get_field_settings("journal_metrics")
+    data_source = journal_metrics_data_source.get_journal_metrics_data_source()
+    if not data_source:
+        return JsonResponse({"error": "Invalid data_source"}, status=404)
+
+    field_settings = data_source.field_settings_dict
     filter_fields_to_load = {"category_level"}
     exclude_fields = [name for name in field_settings.keys() if name not in filter_fields_to_load]
 
-    filters_data, filters_error = get_filters_data("journal_metrics", exclude_fields=exclude_fields)
+    filters_data, filters_error = get_filters_data(journal_metrics_data_source.JOURNAL_METRICS_DATA_SOURCE, exclude_fields=exclude_fields)
 
     profile_data, profile_error = search_controller.get_journal_metrics_timeseries(
         issn=journal_issn or None,
@@ -118,8 +184,10 @@ def journal_metrics_view(request):
     if request.method == "GET" and query_profile_issn:
         return _render_journal_metrics_profile(request, query_profile_issn)
 
-    data_source_name = "journal_metrics"
-    data_source = data_sources_with_settings.get_data_source(data_source_name)
+    data_source_name = journal_metrics_data_source.JOURNAL_METRICS_DATA_SOURCE
+    data_source = journal_metrics_data_source.get_journal_metrics_data_source()
+    if not data_source:
+        return JsonResponse({"error": "Invalid data_source"}, status=404)
 
     cleaned_get_filters = journal_metrics_params.normalize_request_filters(
         request.GET.dict(),
@@ -129,13 +197,15 @@ def journal_metrics_view(request):
 
     context = {
         "data_source": data_source_name,
-        "data_source_display_name": data_source.get("display_name"),
+        "data_source_display_name": data_source.display_name,
         "applied_filters": cleaned_get_filters,
-        "study_unit": "journal_metrics",
-        "default_category_id": journal_metrics_config.DEFAULT_CATEGORY_ID,
+        "study_unit": journal_metrics_data_source.JOURNAL_METRICS_DATA_SOURCE,
+        "default_category_id": journal_metrics_data_source.get_default_category_id(),
+        "indicator_has_study_unit_control": True,
+        "is_journal_metrics": True,
     }
 
-    field_settings = data_sources_with_settings.get_field_settings(data_source_name)
+    field_settings = data_source.field_settings_dict
     filter_fields_to_load = {"country", "collection", "category_level", "publication_year"}
 
     exclude_fields = [name for name in field_settings.keys() if name not in filter_fields_to_load]
@@ -146,7 +216,7 @@ def journal_metrics_view(request):
     if filters_error:
         context["error"] = _("Error loading filters: %s") % filters_error
 
-    default_publication_year = journal_metrics_config.DEFAULT_PUBLICATION_YEAR
+    default_publication_year = journal_metrics_data_source.get_default_publication_year()
     context["default_publication_year"] = default_publication_year
 
     request_filters = request.POST if request.method == "POST" else request.GET
@@ -184,6 +254,39 @@ def journal_metrics_view(request):
     )
 
     context["applied_filters_json"] = json.dumps(context["applied_filters"])
+    configuration_payload = build_data_source_form_payload(
+        data_source,
+        form_key="journal_metrics",
+        applied_filters=context["applied_filters"],
+    )
+    panel_groups = data_source.get_form_panel_groups("journal_metrics")
+    if not panel_groups:
+        panel_groups = _infer_panel_groups_from_payload(configuration_payload)
+    context["indicator_config_fields"] = _collect_form_group_fields(configuration_payload, panel_groups)
+    context["indicator_config_form_id"] = "journal-metrics-filter-form"
+    context["indicator_config_submit_label"] = _("APPLY")
+    config_field_names = [
+        str(field.get("name") or "").strip()
+        for field in context["indicator_config_fields"]
+        if str(field.get("name") or "").strip()
+    ]
+
+    sidebar_payload = render_filter_sidebar(
+        request,
+        data_source=data_source,
+        form_key="journal_metrics",
+        applied_filters=context["applied_filters"],
+        exclude_fields=config_field_names,
+        sidebar_form_id="journal-metrics-filter-form",
+        sidebar_form_method="get",
+        sidebar_form_action=request.path,
+        submit_label=_("FILTRAR"),
+        reset_label=_("LIMPAR"),
+        submit_id="menu-submit-journal-metrics",
+        reset_id="menu-reset-journal-metrics",
+        reset_type="reset",
+    )
+    context["indicator_sidebar_html"] = sidebar_payload["form_html"]
 
     return render(request, "indicator.html", context)
 
@@ -212,7 +315,7 @@ def periodical_timeseries_view(request):
     """Time series for a single periodical using the *documents* indices.
 
     Example:
-      /indicators/periodical/timeseries/?data_source=scientific&field_name=issn&value=1234-5678
+      /indicators/periodical/timeseries/?data_source=scientific_production&field_name=issn&value=1234-5678
     """
 
     data_source_name = request.GET.get("data_source")

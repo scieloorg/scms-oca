@@ -1,12 +1,12 @@
-from search_gateway import data_sources_with_settings
-
-from indicator.journal_metrics.config import (
-    DEFAULT_RANKING_METRIC,
-    SOURCE_FIELDS as JOURNAL_METRICS_SOURCE_FIELDS,
+from indicator.journal_metrics.data_source import (
+    get_default_ranking_metric,
     get_index_field_name,
     normalize_ranking_metric,
 )
 from . import utils
+
+
+SOCIAL_DATA_SOURCE = "social_production"
 
 
 def build_journal_metrics_query(selected_year, query):
@@ -37,7 +37,7 @@ def build_journal_metrics_query(selected_year, query):
 
 def build_journal_metrics_body(selected_year=None, ranking_metric=None, size=500, query=None):
     if not ranking_metric:
-        ranking_metric = DEFAULT_RANKING_METRIC
+        ranking_metric = get_default_ranking_metric()
 
     ranking_metric = normalize_ranking_metric(ranking_metric)
     ranking_metric_field = get_index_field_name(ranking_metric)
@@ -53,7 +53,6 @@ def build_journal_metrics_body(selected_year=None, ranking_metric=None, size=500
                 "cardinality": {"field": "journal_id"}
             }
         },
-        "_source": JOURNAL_METRICS_SOURCE_FIELDS,
     }
 
 
@@ -62,7 +61,7 @@ def build_query(filters, field_settings, data_source):
 
     social_year_start = None
     social_year_end = None
-    if data_source == "social":
+    if data_source == SOCIAL_DATA_SOURCE:
         social_year_start = filters.get("document_publication_year_start")
         social_year_end = filters.get("document_publication_year_end")
         filters.pop("document_publication_year_start", None)
@@ -74,7 +73,7 @@ def build_query(filters, field_settings, data_source):
     must = []
     must_not = []
 
-    if data_source == "social":
+    if data_source == SOCIAL_DATA_SOURCE:
         fl_name = field_settings.get("action", {}).get("index_field_name")
         if fl_name and fl_name.endswith(".keyword"):
             base_field = fl_name.rsplit(".", 1)[0]
@@ -108,8 +107,17 @@ def build_query(filters, field_settings, data_source):
                     created_range["lte"] = f"{end_int}-12-31"
                 must.append({"range": {"created": created_range}})
 
-    query_operator_fields = data_sources_with_settings.get_query_operator_fields(data_source)
-    index_field_name_to_filter_name_map = data_sources_with_settings.get_index_field_name_to_filter_name_map(data_source)
+    query_operator_fields = {
+        field_name: cfg.get("index_field_name")
+        for field_name, cfg in field_settings.items()
+        if cfg.get("settings", {}).get("support_query_operator")
+        and cfg.get("index_field_name")
+    }
+    index_field_name_to_filter_name_map = {
+        cfg.get("index_field_name"): field_name
+        for field_name, cfg in field_settings.items()
+        if cfg.get("index_field_name")
+    }
 
     for index_field_name, value in translated_filters.items():
         filter_name = index_field_name_to_filter_name_map.get(index_field_name)
@@ -183,7 +191,7 @@ def build_indicator_aggs(field_settings, breakdown_variable, data_source_name, s
     if study_unit == "journal":
         periodical_field = _get_periodical_identifier_field(field_settings)
 
-    if data_source_name == "social":
+    if data_source_name == SOCIAL_DATA_SOURCE:
         per_year = {
             "date_histogram": {
                 "field": "created",

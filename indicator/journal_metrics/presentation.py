@@ -3,7 +3,7 @@ from django.utils import formats
 from django.utils.translation import gettext as _
 
 from . import params
-from .config import DEFAULT_PUBLICATION_YEAR, normalize_category_level
+from .data_source import get_default_publication_year, normalize_category_level
 
 
 def build_ranking_context(applied_filters, ranking_data):
@@ -64,7 +64,7 @@ def build_profile_context(
 ):
     resolved_category_level = normalize_category_level(selected_category_level)
     resolved_category_id = str(selected_category_id or "").strip()
-    resolved_publication_year = str(selected_publication_year or DEFAULT_PUBLICATION_YEAR).strip()
+    resolved_publication_year = str(selected_publication_year or get_default_publication_year()).strip()
 
     journal_title = ""
     selected_year_metrics = {}

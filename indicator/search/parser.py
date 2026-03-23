@@ -1,11 +1,15 @@
-from indicator.journal_metrics.config import DEFAULT_RANKING_METRIC, get_index_field_name, normalize_ranking_metric
+from indicator.journal_metrics.data_source import (
+    get_default_ranking_metric,
+    get_index_field_name,
+    normalize_ranking_metric,
+)
 
 from . import utils
 
 
 def parse_journal_metrics_response(response, selected_year=None, ranking_metric=None):
     if not ranking_metric:
-        ranking_metric = DEFAULT_RANKING_METRIC
+        ranking_metric = get_default_ranking_metric()
 
     ranking_metric = normalize_ranking_metric(ranking_metric)
 
