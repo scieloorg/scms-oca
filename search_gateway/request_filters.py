@@ -75,10 +75,10 @@ def _apply_default_filters(applied_filters, data_source, form_key=None):
     return resolved_filters
 
 
-def extract_requested_filters(source, excluded_keys=None, allowed_keys=None):
+def _extract_filters_from_source(source, excluded_keys=None, allowed_keys=None):
     excluded_keys = set(excluded_keys or [])
     allowed_keys = set(allowed_keys or [])
-    requested_filters = {}
+    extracted_filters = {}
 
     for key in source.keys():
         if key in excluded_keys:
@@ -89,9 +89,50 @@ def extract_requested_filters(source, excluded_keys=None, allowed_keys=None):
         values = [value for value in source.getlist(key) if value not in (None, "")]
         if not values:
             continue
-        requested_filters[key] = values if len(values) > 1 else values[0]
+        extracted_filters[key] = values if len(values) > 1 else values[0]
 
-    return requested_filters
+    return extracted_filters
+
+
+def _build_allowed_applied_filter_keys(data_source, form_key=None):
+    field_names = set()
+    transform_source_names = set()
+
+    for field in data_source.get_ordered_fields(form_key=form_key):
+        field_names.add(field.field_name)
+        transform_source_names.update(field.get_transform_sources())
+        if field.supports_query_operator():
+            field_names.add(field.get_operator_field_name())
+            field_names.add(field.get_bool_not_field_name())
+
+    return field_names | transform_source_names
+
+
+def extract_applied_filters_from_source(source, data_source, form_key=None, extra_excluded_keys=None):
+    extra_excluded_keys = set(extra_excluded_keys or [])
+    excluded_keys = set(EXCLUDED_QUERY_KEYS) | extra_excluded_keys
+    allowed_keys = _build_allowed_applied_filter_keys(data_source, form_key=form_key)
+    return _extract_filters_from_source(
+        source,
+        excluded_keys=excluded_keys,
+        allowed_keys=allowed_keys,
+    )
+
+
+def apply_default_filters(applied_filters, data_source, form_key=None, skip_defaults=False):
+    resolved_filters = dict(applied_filters or {})
+    if skip_defaults:
+        resolved_filters[CLEAR_DEFAULTS_INTERNAL_FLAG] = True
+        return resolved_filters
+    return _apply_default_filters(resolved_filters, data_source, form_key=form_key)
+
+
+def extract_requested_filters(source, excluded_keys=None, allowed_keys=None):
+    return _extract_filters_from_source(
+        source,
+        excluded_keys=excluded_keys,
+        allowed_keys=allowed_keys,
+    )
 
 
 def extract_selected_filters(source, data_source, available_filters=None):
@@ -123,37 +164,36 @@ def extract_selected_filters(source, data_source, available_filters=None):
 
 
 def extract_applied_filters(source, data_source, form_key=None, extra_excluded_keys=None):
-    extra_excluded_keys = set(extra_excluded_keys or [])
-    excluded_keys = set(EXCLUDED_QUERY_KEYS) | extra_excluded_keys
-    field_names = set()
-    transform_source_names = set()
+    extracted_filters = extract_applied_filters_from_source(
+        source,
+        data_source,
+        form_key=form_key,
+        extra_excluded_keys=extra_excluded_keys,
+    )
+    return apply_default_filters(
+        extracted_filters,
+        data_source,
+        form_key=form_key,
+        skip_defaults=_should_skip_default_filters(source),
+    )
 
-    for field in data_source.get_ordered_fields(form_key=form_key):
-        field_names.add(field.field_name)
-        transform_source_names.update(field.get_transform_sources())
-        if field.supports_query_operator():
-            field_names.add(field.get_operator_field_name())
-            field_names.add(field.get_bool_not_field_name())
 
-    allowed_keys = field_names | transform_source_names
-    applied_filters = {}
+def build_option_filters(applied_filters, field, excluded_filter_names=None):
+    excluded_names = set(excluded_filter_names or [])
+    excluded_names.add(field.field_name)
 
-    for key in source.keys():
-        if key in excluded_keys:
-            continue
-        if allowed_keys and key not in allowed_keys:
-            continue
+    operator_field_name = field.get_operator_field_name()
+    if operator_field_name:
+        excluded_names.add(operator_field_name)
 
-        values = [value for value in source.getlist(key) if value not in (None, "")]
-        if not values:
-            continue
-        applied_filters[key] = values if len(values) > 1 else values[0]
+    bool_not_field_name = field.get_bool_not_field_name()
+    if bool_not_field_name:
+        excluded_names.add(bool_not_field_name)
 
-    if _should_skip_default_filters(source):
-        applied_filters[CLEAR_DEFAULTS_INTERNAL_FLAG] = True
-        return applied_filters
-
-    return _apply_default_filters(applied_filters, data_source, form_key=form_key)
+    return normalize_option_filters(
+        applied_filters,
+        excluded_filter_names=excluded_names,
+    )
 
 
 def normalize_option_filters(applied_filters, excluded_filter_names=None):
