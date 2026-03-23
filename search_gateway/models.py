@@ -51,10 +51,7 @@ class ResolvedField:
         return self.get_filter_config().get(key, default)
 
     def get_lookup_config(self):
-        lookup = self.config.get("lookup")
-        if not isinstance(lookup, dict):
-            lookup = self.get_ui_setting("lookup")
-        return dict(lookup or {})
+        return dict(self.config.get("lookup") or {})
 
     def get_transform_config(self):
         transform = self.get_filter_setting("transform") or {}
@@ -67,8 +64,8 @@ class ResolvedField:
         return list(self.get_transform_config().get("sources") or [])
 
     def get_group_key(self):
-        raw_group = self.get_ui_setting("group") or self.get_ui_setting("category")
-        return _normalize_group_key(raw_group, default="default")
+        raw_group = self.get_ui_setting("group")
+        return normalize_group_key(raw_group, default="default")
 
     def get_group_meta(self):
         group_key = self.get_group_key()
@@ -129,8 +126,8 @@ class ResolvedField:
 
     def get_widget_name(self):
         settings = self.get_ui_settings()
-        return _normalize_widget_name(
-            settings.get("widget") or settings.get("class_filter"),
+        return normalize_widget_name(
+            settings.get("widget"),
             transform_type=self.get_transform_type(),
             has_lookup=bool(self.get_lookup_config()),
         )
@@ -300,25 +297,19 @@ class DataSource(models.Model):
                 "sources": list(config.get("source_fields") or []),
             }
 
-        lookup_config = config.get("lookup")
-        if not isinstance(lookup_config, dict):
-            lookup_config = settings.get("lookup")
-        lookup_config = dict(lookup_config or {})
+        lookup_config = dict(config.get("lookup") or {})
 
         transform_type = (filter_config.get("transform") or {}).get("type")
-        widget = _normalize_widget_name(
-            settings.get("widget") or settings.get("class_filter"),
+        widget = normalize_widget_name(
+            settings.get("widget"),
             transform_type=transform_type,
             has_lookup=bool(lookup_config),
         )
         settings["widget"] = widget
-        settings.pop("class_filter", None)
-        settings.pop("support_search_as_you_type", None)
-        settings.pop("lookup", None)
 
-        group_key = settings.get("group") or settings.get("category")
+        group_key = settings.get("group")
         if group_key:
-            normalized_group_key = _normalize_group_key(group_key)
+            normalized_group_key = normalize_group_key(group_key)
             settings["group"] = normalized_group_key
 
         if "multiple_selection" not in settings:
@@ -347,71 +338,46 @@ class DataSource(models.Model):
         raw_fields = raw_field_settings.get("fields")
         raw_forms = raw_field_settings.get("forms")
 
-        if isinstance(raw_fields, dict):
-            fields = {
-                field_name: cls._normalize_field_config(field_name, field_config)
-                for field_name, field_config in raw_fields.items()
-                if isinstance(field_name, str)
-            }
-            forms = {}
-            if isinstance(raw_forms, dict):
-                for form_key, form_config in raw_forms.items():
-                    if not isinstance(form_key, str):
-                        continue
-                    normalized_form = {
-                        key: deepcopy(value)
-                        for key, value in (form_config or {}).items()
-                        if key != "fields"
-                    }
-                    form_fields = []
-                    for item in list((form_config or {}).get("fields") or []):
-                        if isinstance(item, str):
-                            form_fields.append(item)
-                            continue
-                        if not isinstance(item, dict):
-                            continue
-                        item_name = str(item.get("name") or "").strip()
-                        if not item_name:
-                            continue
-                        form_fields.append(
-                            {
-                                "name": item_name,
-                                "overrides": deepcopy(item.get("overrides") or {}),
-                            }
-                        )
-                    normalized_form["fields"] = form_fields
-                    forms[form_key] = normalized_form
-            return {"fields": fields, "forms": forms}
+        if not isinstance(raw_fields, dict):
+            return {"fields": {}, "forms": {}}
 
         fields = {
             field_name: cls._normalize_field_config(field_name, field_config)
-            for field_name, field_config in raw_field_settings.items()
+            for field_name, field_config in raw_fields.items()
             if isinstance(field_name, str)
         }
-        default_form = {"fields": list(fields.keys())}
-        return {"fields": fields, "forms": {"default": default_form}}
+        forms = {}
+        if isinstance(raw_forms, dict):
+            for form_key, form_config in raw_forms.items():
+                if not isinstance(form_key, str):
+                    continue
+                normalized_form = {
+                    key: deepcopy(value)
+                    for key, value in (form_config or {}).items()
+                    if key != "fields"
+                }
+                form_fields = []
+                for item in list((form_config or {}).get("fields") or []):
+                    if isinstance(item, str):
+                        form_fields.append(item)
+                        continue
+                    if not isinstance(item, dict):
+                        continue
+                    item_name = str(item.get("name") or "").strip()
+                    if not item_name:
+                        continue
+                    form_fields.append(
+                        {
+                            "name": item_name,
+                            "overrides": deepcopy(item.get("overrides") or {}),
+                        }
+                    )
+                normalized_form["fields"] = form_fields
+                forms[form_key] = normalized_form
+        return {"fields": fields, "forms": forms}
 
     def get_field_settings_schema(self):
-        schema = self._normalize_schema(self.field_settings or {})
-
-        # Compatibility bridge while existing DB rows are being resynced:
-        # scientific indicators now expose `scope` inside the shared filter form.
-        if self.index_name == "scientific_production":
-            fields = schema.get("fields", {})
-            forms = schema.get("forms", {})
-            indicator_form = forms.get("indicator") or {}
-            indicator_fields = list(indicator_form.get("fields") or [])
-            has_scope_field = "scope" in fields
-            has_scope_in_form = any(
-                item == "scope" or (isinstance(item, dict) and str(item.get("name") or "").strip() == "scope")
-                for item in indicator_fields
-            )
-            if has_scope_field and not has_scope_in_form:
-                insert_at = 1 if indicator_fields else 0
-                indicator_fields.insert(insert_at, "scope")
-                forms["indicator"] = {"fields": indicator_fields}
-
-        return schema
+        return self._normalize_schema(self.field_settings or {})
 
     @property
     def field_settings_schema(self):
@@ -443,7 +409,7 @@ class DataSource(models.Model):
     def get_form_group_labels(self, form_key):
         group_labels = {}
         for group_key, label in (self.get_form_spec(form_key).get("group_labels") or {}).items():
-            normalized_key = _normalize_group_key(group_key)
+            normalized_key = normalize_group_key(group_key)
             normalized_label = str(label or "").strip()
             if normalized_key and normalized_label:
                 group_labels[normalized_key] = normalized_label
@@ -452,7 +418,7 @@ class DataSource(models.Model):
     def get_form_panel_groups(self, form_key):
         normalized_groups = []
         for group_key in self.get_form_spec(form_key).get("panel_groups") or []:
-            normalized_key = _normalize_group_key(group_key)
+            normalized_key = normalize_group_key(group_key)
             if normalized_key and normalized_key not in normalized_groups:
                 normalized_groups.append(normalized_key)
         return normalized_groups
