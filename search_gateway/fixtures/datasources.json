@@ -1,0 +1,1859 @@
+[
+  {
+    "model": "search_gateway.datasource",
+    "pk": 1,
+    "fields": {
+      "index_name": "scientific_production",
+      "display_name": "Scientific Production",
+      "source_fields": [],
+      "field_settings": {
+        "fields": {
+          "scope": {
+            "kind": "index",
+            "index_field_name": "oca_data.scope",
+            "filter": {
+              "size": 4,
+              "order": {
+                "_key": "asc"
+              }
+            },
+            "settings": {
+              "label": "Scope",
+              "support_query_operator": false,
+              "widget": "select",
+              "multiple_selection": true,
+              "group": "scope",
+              "group_order": 0
+            }
+          },
+          "source_indexed_in": {
+            "kind": "index",
+            "index_field_name": "indexed_in",
+            "filter": {
+              "size": 10,
+              "order": {
+                "_key": "asc"
+              }
+            },
+            "settings": {
+              "label": "Indexed In",
+              "support_query_operator": false,
+              "widget": "select",
+              "multiple_selection": true,
+              "group": "source_coverage",
+              "group_order": 20
+            }
+          },
+          "publisher": {
+            "kind": "index",
+            "index_field_name": "publishers.id",
+            "filter": {
+              "size": 10,
+              "order": {
+                "_key": "asc"
+              },
+              "use": false
+            },
+            "settings": {
+              "label": "Publisher",
+              "support_query_operator": true,
+              "widget": "lookup",
+              "multiple_selection": true,
+              "group": "source_identity",
+              "group_order": 10
+            },
+            "lookup": {
+              "index_name": "lookup_publisher",
+              "search_field": "label_search",
+              "sort_field": "label",
+              "value_field": "value",
+              "label_field": "label",
+              "source_value_field": "value",
+              "source_label_field": "label",
+              "size": 100
+            }
+          },
+          "source_name": {
+            "kind": "index",
+            "index_field_name": "sources.id",
+            "filter": {
+              "size": 5,
+              "order": {
+                "_key": "asc"
+              },
+              "use": false
+            },
+            "settings": {
+              "label": "Source",
+              "support_query_operator": true,
+              "widget": "lookup",
+              "multiple_selection": true,
+              "group": "source_identity",
+              "group_order": 10
+            },
+            "lookup": {
+              "index_name": "lookup_source",
+              "search_field": "label_search",
+              "sort_field": "label",
+              "value_field": "value",
+              "label_field": "label",
+              "source_value_field": "value",
+              "source_label_field": "label",
+              "size": 100
+            }
+          },
+          "source_type": {
+            "kind": "index",
+            "index_field_name": "sources.type",
+            "filter": {
+              "size": 30,
+              "order": {
+                "_key": "asc"
+              }
+            },
+            "settings": {
+              "label": "Source Type",
+              "support_query_operator": false,
+              "widget": "select",
+              "multiple_selection": true,
+              "group": "source_identity",
+              "group_order": 10
+            }
+          },
+          "source_country": {
+            "kind": "index",
+            "index_field_name": "oca_data.source.country_search",
+            "filter": {
+              "size": 500,
+              "order": {
+                "_key": "asc"
+              },
+              "use": false
+            },
+            "settings": {
+              "label": "Source Country",
+              "support_query_operator": true,
+              "widget": "lookup",
+              "multiple_selection": true,
+              "display_transform": "country",
+              "group": "source_identity",
+              "group_order": 10
+            },
+            "lookup": {
+              "index_name": "lookup_source_country",
+              "search_field": "label_search",
+              "sort_field": "label",
+              "value_field": "value",
+              "label_field": "label",
+              "source_value_field": "value",
+              "source_label_field": "label",
+              "size": 200
+            }
+          },
+          "publication_year": {
+            "kind": "index",
+            "index_field_name": "publication_year",
+            "filter": {
+              "size": 100,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "label": "Publication Year",
+              "support_query_operator": false,
+              "widget": "select",
+              "multiple_selection": true,
+              "group": "document_identity",
+              "group_order": 30
+            }
+          },
+          "document_publication_year_start": {
+            "kind": "index",
+            "index_field_name": "publication_year",
+            "filter": {
+              "transform": {
+                "type": "year_range",
+                "sources": [
+                  "document_publication_year_start",
+                  "document_publication_year_end"
+                ]
+              },
+              "size": 500,
+              "order": {
+                "_key": "asc"
+              }
+            },
+            "settings": {
+              "widget": "range",
+              "multiple_selection": false
+            }
+          },
+          "document_publication_year_end": {
+            "kind": "index",
+            "index_field_name": "publication_year",
+            "filter": {
+              "transform": {
+                "type": "year_range",
+                "sources": [
+                  "document_publication_year_start",
+                  "document_publication_year_end"
+                ]
+              },
+              "size": 500,
+              "order": {
+                "_key": "asc"
+              }
+            },
+            "settings": {
+              "widget": "range",
+              "multiple_selection": false
+            }
+          },
+          "document_publication_year_range": {
+            "kind": "index",
+            "index_field_name": "publication_year",
+            "filter": {
+              "use": false,
+              "transform": {
+                "type": "year_range",
+                "sources": [
+                  "document_publication_year_start",
+                  "document_publication_year_end"
+                ]
+              }
+            },
+            "settings": {
+              "widget": "range",
+              "label": "Publication Year",
+              "default_value": {
+                "start": "2019",
+                "end": "2025"
+              },
+              "group": "document_identity",
+              "group_order": 30,
+              "support_query_operator": false,
+              "multiple_selection": false
+            }
+          },
+          "document_type": {
+            "kind": "index",
+            "index_field_name": "type",
+            "filter": {
+              "size": 30,
+              "order": {
+                "_key": "asc"
+              }
+            },
+            "settings": {
+              "label": "Document Type",
+              "support_query_operator": false,
+              "widget": "select",
+              "multiple_selection": true,
+              "group": "document_identity",
+              "group_order": 30
+            }
+          },
+          "document_language": {
+            "kind": "index",
+            "index_field_name": "language",
+            "filter": {
+              "size": 500,
+              "order": {
+                "_key": "asc"
+              }
+            },
+            "settings": {
+              "label": "Document Language",
+              "support_query_operator": true,
+              "display_transform": "language",
+              "widget": "select",
+              "multiple_selection": true,
+              "group": "document_identity",
+              "group_order": 30
+            }
+          },
+          "open_access": {
+            "kind": "index",
+            "index_field_name": "is_open_access",
+            "filter": {
+              "transform": {
+                "type": "boolean"
+              },
+              "size": 3,
+              "order": {
+                "_key": "asc"
+              }
+            },
+            "settings": {
+              "label": "Open Access",
+              "support_query_operator": false,
+              "display_transform": "boolean",
+              "multiple_selection": false,
+              "widget": "select",
+              "group": "access",
+              "group_order": 40
+            }
+          },
+          "open_access_status": {
+            "kind": "index",
+            "index_field_name": "open_access_status",
+            "filter": {
+              "size": 10,
+              "order": {
+                "_key": "asc"
+              }
+            },
+            "settings": {
+              "label": "Access Type",
+              "support_query_operator": false,
+              "widget": "select",
+              "multiple_selection": true,
+              "group": "access",
+              "group_order": 40
+            }
+          },
+          "subject_area_level_0": {
+            "kind": "index",
+            "index_field_name": "topic_domains",
+            "filter": {
+              "size": 3,
+              "order": {
+                "_key": "asc"
+              }
+            },
+            "settings": {
+              "label": "Domain",
+              "support_query_operator": false,
+              "widget": "select",
+              "multiple_selection": true,
+              "group": "thematic_scope",
+              "group_order": 50
+            }
+          },
+          "subject_area_level_1": {
+            "kind": "index",
+            "index_field_name": "topic_fields",
+            "filter": {
+              "size": 27,
+              "order": {
+                "_key": "asc"
+              }
+            },
+            "settings": {
+              "label": "Field",
+              "support_query_operator": false,
+              "widget": "select",
+              "multiple_selection": true,
+              "group": "thematic_scope",
+              "group_order": 50
+            }
+          },
+          "subject_area_level_2": {
+            "kind": "index",
+            "index_field_name": "topic_subfields",
+            "filter": {
+              "size": 500,
+              "order": {
+                "_key": "asc"
+              }
+            },
+            "settings": {
+              "label": "Subfield",
+              "support_query_operator": false,
+              "widget": "select",
+              "multiple_selection": true,
+              "group": "thematic_scope",
+              "group_order": 50
+            }
+          },
+          "subjects": {
+            "kind": "index",
+            "index_field_name": "subjects_search.keyword",
+            "filter": {
+              "size": 10,
+              "order": {
+                "_key": "asc"
+              },
+              "use": false
+            },
+            "settings": {
+              "label": "Topic",
+              "support_query_operator": false,
+              "widget": "lookup",
+              "multiple_selection": true,
+              "group": "thematic_scope",
+              "group_order": 50
+            },
+            "lookup": {
+              "index_name": "lookup_topic",
+              "search_field": "label_search",
+              "sort_field": "label",
+              "value_field": "value",
+              "label_field": "label",
+              "source_value_field": "value",
+              "source_label_field": "label",
+              "size": 100
+            }
+          },
+          "institution": {
+            "kind": "index",
+            "index_field_name": "authorships.institutions.id",
+            "filter": {
+              "size": 10,
+              "order": {
+                "_key": "asc"
+              },
+              "use": false
+            },
+            "settings": {
+              "label": "Institution",
+              "support_query_operator": false,
+              "widget": "lookup",
+              "multiple_selection": true,
+              "group": "affiliation",
+              "group_order": 60
+            },
+            "lookup": {
+              "index_name": "lookup_institution",
+              "search_field": "label_search",
+              "sort_field": "label",
+              "value_field": "value",
+              "label_field": "label",
+              "source_value_field": "value",
+              "source_label_field": "label",
+              "size": 100
+            }
+          },
+          "funder": {
+            "kind": "index",
+            "index_field_name": "funders.id",
+            "filter": {
+              "size": 5,
+              "order": {
+                "_key": "asc"
+              },
+              "use": false
+            },
+            "settings": {
+              "label": "Funder",
+              "support_query_operator": true,
+              "widget": "lookup",
+              "multiple_selection": true,
+              "group": "funding",
+              "group_order": 70
+            },
+            "lookup": {
+              "index_name": "lookup_funder",
+              "search_field": "label_search",
+              "sort_field": "label",
+              "value_field": "value",
+              "label_field": "label",
+              "source_value_field": "value",
+              "source_label_field": "label",
+              "size": 100
+            }
+          },
+          "country": {
+            "kind": "index",
+            "index_field_name": "author_country_codes",
+            "filter": {
+              "size": 500,
+              "order": {
+                "_key": "asc"
+              }
+            },
+            "settings": {
+              "label": "Country",
+              "support_query_operator": true,
+              "widget": "select",
+              "multiple_selection": true,
+              "display_transform": "country",
+              "group": "affiliation",
+              "group_order": 60
+            }
+          },
+          "cited_by_count": {
+            "kind": "index",
+            "index_field_name": "metrics.received_citations.total",
+            "filter": {
+              "size": 10,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "label": "Cited by Count",
+              "support_query_operator": false,
+              "widget": "select",
+              "multiple_selection": true,
+              "group": "other",
+              "group_order": 90
+            }
+          },
+          "breakdown_variable": {
+            "kind": "control",
+            "index_field_name": "",
+            "filter": {},
+            "settings": {
+              "label": "Breakdown Variable",
+              "widget": "select",
+              "multiple_selection": false,
+              "allow_clear": true,
+              "static_options": [
+                {
+                  "value": "scope",
+                  "label": "Scope"
+                },
+                {
+                  "value": "source_type",
+                  "label": "Source Type"
+                },
+                {
+                  "value": "document_type",
+                  "label": "Document Type"
+                },
+                {
+                  "value": "document_language",
+                  "label": "Document Language"
+                },
+                {
+                  "value": "open_access",
+                  "label": "Open Access"
+                },
+                {
+                  "value": "open_access_status",
+                  "label": "Access Type"
+                },
+                {
+                  "value": "subject_area_level_0",
+                  "label": "Domain"
+                },
+                {
+                  "value": "subject_area_level_1",
+                  "label": "Field"
+                },
+                {
+                  "value": "subject_area_level_2",
+                  "label": "Subfield"
+                },
+                {
+                  "value": "subjects",
+                  "label": "Topic"
+                }
+              ],
+              "group": "graph_options",
+              "group_order": 0
+            }
+          }
+        },
+        "forms": {
+          "search": {
+            "group_labels": {
+              "scope": "Scope",
+              "source_identity": "Source Identity",
+              "source_coverage": "Source Coverage",
+              "document_identity": "Document Identity",
+              "access": "Access",
+              "thematic_scope": "Thematic Scope",
+              "funding": "Funding",
+              "affiliation": "Affiliation"
+            },
+            "fields": [
+              "scope",
+              "source_indexed_in",
+              "source_type",
+              {
+                "name": "source_name",
+                "overrides": {
+                  "settings": {
+                    "support_query_operator": false
+                  }
+                }
+              },
+              {
+                "name": "publisher",
+                "overrides": {
+                  "settings": {
+                    "support_query_operator": false
+                  }
+                }
+              },
+              {
+                "name": "source_country",
+                "overrides": {
+                  "settings": {
+                    "support_query_operator": false
+                  }
+                }
+              },
+              "publication_year",
+              "document_type",
+              {
+                "name": "document_language",
+                "overrides": {
+                  "settings": {
+                    "support_query_operator": false
+                  }
+                }
+              },
+              "open_access",
+              "open_access_status",
+              "subject_area_level_0",
+              "subject_area_level_1",
+              "subject_area_level_2",
+              "subjects",
+              {
+                "name": "funder",
+                "overrides": {
+                  "settings": {
+                    "support_query_operator": false
+                  }
+                }
+              },
+              "institution",
+              {
+                "name": "country",
+                "overrides": {
+                  "settings": {
+                    "support_query_operator": false
+                  }
+                }
+              }
+            ]
+          },
+          "indicator": {
+            "group_labels": {
+              "graph_options": "Graph Options",
+              "scope": "Scope",
+              "source_identity": "Source Identity",
+              "source_coverage": "Source Coverage",
+              "document_identity": "Document Identity",
+              "access": "Access",
+              "thematic_scope": "Thematic Scope",
+              "funding": "Funding",
+              "affiliation": "Affiliation"
+            },
+            "fields": [
+              "breakdown_variable",
+              "scope",
+              "source_indexed_in",
+              "source_type",
+              {
+                "name": "source_name",
+                "overrides": {
+                  "settings": {
+                    "multiple_selection": false
+                  }
+                }
+              },
+              {
+                "name": "publisher",
+                "overrides": {
+                  "settings": {
+                    "multiple_selection": false
+                  }
+                }
+              },
+              {
+                "name": "source_country",
+                "overrides": {
+                  "settings": {
+                    "multiple_selection": false
+                  }
+                }
+              },
+              "publication_year",
+              "document_type",
+              {
+                "name": "document_language",
+                "overrides": {
+                  "settings": {
+                    "multiple_selection": false
+                  }
+                }
+              },
+              "open_access",
+              "open_access_status",
+              "subject_area_level_0",
+              "subject_area_level_1",
+              "subject_area_level_2",
+              {
+                "name": "funder",
+                "overrides": {
+                  "settings": {
+                    "multiple_selection": false
+                  }
+                }
+              },
+              "institution",
+              "country"
+            ]
+          }
+        }
+      }
+    }
+  },
+  {
+    "model": "search_gateway.datasource",
+    "pk": 2,
+    "fields": {
+      "index_name": "social_production",
+      "display_name": "Social Production",
+      "source_fields": [],
+      "field_settings": {
+        "fields": {
+          "publication_year": {
+            "kind": "index",
+            "index_field_name": "creation_year",
+            "filter": {
+              "size": 100,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "label": "Creation Year",
+              "support_query_operator": false,
+              "widget": "select",
+              "multiple_selection": true,
+              "group": "timeline",
+              "group_order": 10
+            }
+          },
+          "action": {
+            "kind": "index",
+            "index_field_name": "action",
+            "filter": {
+              "size": 100,
+              "order": {
+                "_key": "asc"
+              }
+            },
+            "settings": {
+              "label": "Action",
+              "support_query_operator": false,
+              "widget": "select",
+              "multiple_selection": true,
+              "group": "activity_profile",
+              "group_order": 20
+            }
+          },
+          "thematic_level_0": {
+            "kind": "index",
+            "index_field_name": "thematic_level_0",
+            "filter": {
+              "size": 100,
+              "order": {
+                "_key": "asc"
+              }
+            },
+            "settings": {
+              "label": "Division",
+              "support_query_operator": false,
+              "widget": "select",
+              "multiple_selection": true,
+              "group": "thematic_scope",
+              "group_order": 30
+            }
+          },
+          "thematic_level_1": {
+            "kind": "index",
+            "index_field_name": "thematic_level_1",
+            "filter": {
+              "size": 100,
+              "order": {
+                "_key": "asc"
+              }
+            },
+            "settings": {
+              "label": "Area",
+              "support_query_operator": false,
+              "widget": "select",
+              "multiple_selection": true,
+              "group": "thematic_scope",
+              "group_order": 30
+            }
+          },
+          "practice": {
+            "kind": "index",
+            "index_field_name": "practice",
+            "filter": {
+              "size": 100,
+              "order": {
+                "_key": "asc"
+              }
+            },
+            "settings": {
+              "label": "Practice",
+              "support_query_operator": false,
+              "widget": "select",
+              "multiple_selection": true,
+              "group": "activity_profile",
+              "group_order": 20
+            }
+          },
+          "institutions": {
+            "kind": "index",
+            "index_field_name": "institutions_search.keyword",
+            "filter": {
+              "size": 10,
+              "order": {
+                "_key": "asc"
+              },
+              "use": false
+            },
+            "settings": {
+              "label": "Institution",
+              "support_query_operator": false,
+              "widget": "lookup",
+              "multiple_selection": true,
+              "group": "institution",
+              "group_order": 40
+            },
+            "lookup": {
+              "index_name": "lookup_institution",
+              "search_field": "label_search",
+              "sort_field": "label",
+              "value_field": "value",
+              "label_field": "label",
+              "source_value_field": "value",
+              "source_label_field": "label",
+              "size": 100
+            }
+          },
+          "classification": {
+            "kind": "index",
+            "index_field_name": "classification",
+            "filter": {
+              "size": 100,
+              "order": {
+                "_key": "asc"
+              }
+            },
+            "settings": {
+              "label": "Classification",
+              "support_query_operator": false,
+              "widget": "select",
+              "multiple_selection": true,
+              "group": "activity_profile",
+              "group_order": 20
+            }
+          },
+          "cities": {
+            "kind": "index",
+            "index_field_name": "cities",
+            "filter": {
+              "size": 100,
+              "order": {
+                "_key": "asc"
+              }
+            },
+            "settings": {
+              "label": "City",
+              "support_query_operator": false,
+              "widget": "select",
+              "multiple_selection": true,
+              "group": "location",
+              "group_order": 50
+            }
+          },
+          "states": {
+            "kind": "index",
+            "index_field_name": "states",
+            "filter": {
+              "size": 100,
+              "order": {
+                "_key": "asc"
+              }
+            },
+            "settings": {
+              "label": "State",
+              "support_query_operator": false,
+              "widget": "select",
+              "multiple_selection": true,
+              "group": "location",
+              "group_order": 50
+            }
+          },
+          "directory_type": {
+            "kind": "index",
+            "index_field_name": "directory_type",
+            "filter": {
+              "size": 20,
+              "order": {
+                "_key": "asc"
+              }
+            },
+            "settings": {
+              "label": "Directory Type",
+              "support_query_operator": false,
+              "widget": "select",
+              "multiple_selection": true,
+              "group": "activity_profile",
+              "group_order": 20
+            }
+          },
+          "thematic_level_2": {
+            "kind": "index",
+            "index_field_name": "thematic_level_2",
+            "filter": {
+              "size": 100,
+              "order": {
+                "_key": "asc"
+              }
+            },
+            "settings": {
+              "label": "Subarea",
+              "support_query_operator": false,
+              "widget": "select",
+              "multiple_selection": true,
+              "group": "thematic_scope",
+              "group_order": 30
+            }
+          },
+          "start_date_year": {
+            "kind": "index",
+            "index_field_name": "start_date_year",
+            "filter": {
+              "size": 100,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "label": "Registration Year",
+              "support_query_operator": false,
+              "widget": "select",
+              "multiple_selection": true,
+              "group": "timeline",
+              "group_order": 10
+            }
+          },
+          "document_publication_year_range": {
+            "kind": "index",
+            "index_field_name": "creation_year",
+            "filter": {
+              "use": false,
+              "transform": {
+                "type": "year_range",
+                "sources": [
+                  "document_publication_year_start",
+                  "document_publication_year_end"
+                ]
+              }
+            },
+            "settings": {
+              "widget": "range",
+              "label": "Creation Year",
+              "default_value": {
+                "start": "2019",
+                "end": "2025"
+              },
+              "group": "timeline",
+              "group_order": 10,
+              "multiple_selection": false
+            }
+          },
+          "breakdown_variable": {
+            "kind": "control",
+            "index_field_name": "",
+            "filter": {},
+            "settings": {
+              "label": "Breakdown Variable",
+              "widget": "select",
+              "multiple_selection": false,
+              "allow_clear": true,
+              "static_options": [
+                {
+                  "value": "directory_type",
+                  "label": "Directory Type"
+                },
+                {
+                  "value": "action",
+                  "label": "Action"
+                },
+                {
+                  "value": "classification",
+                  "label": "Classification"
+                },
+                {
+                  "value": "practice",
+                  "label": "Practice"
+                },
+                {
+                  "value": "states",
+                  "label": "State"
+                },
+                {
+                  "value": "cities",
+                  "label": "City"
+                }
+              ],
+              "group": "graph_options",
+              "group_order": 0
+            }
+          }
+        },
+        "forms": {
+          "search": {
+            "group_labels": {
+              "timeline": "Timeline",
+              "activity_profile": "Activity Profile",
+              "thematic_scope": "Thematic Scope",
+              "institution": "Institution",
+              "location": "Location"
+            },
+            "fields": [
+              "publication_year",
+              "directory_type",
+              "action",
+              "thematic_level_0",
+              "thematic_level_1",
+              "thematic_level_2",
+              "classification",
+              "practice",
+              "institutions",
+              "states",
+              "cities",
+              "start_date_year"
+            ]
+          },
+          "indicator": {
+            "group_labels": {
+              "graph_options": "Graph Options",
+              "timeline": "Timeline",
+              "activity_profile": "Activity Profile",
+              "thematic_scope": "Thematic Scope",
+              "institution": "Institution",
+              "location": "Location"
+            },
+            "fields": [
+              "breakdown_variable",
+              "publication_year",
+              "directory_type",
+              "action",
+              "thematic_level_0",
+              "thematic_level_1",
+              "thematic_level_2",
+              "classification",
+              "practice",
+              "institutions",
+              "states",
+              "cities",
+              "start_date_year"
+            ]
+          }
+        }
+      }
+    }
+  },
+  {
+    "model": "search_gateway.datasource",
+    "pk": 3,
+    "fields": {
+      "index_name": "journal_metrics_by_*",
+      "display_name": "Journal Metrics",
+      "source_fields": [],
+      "field_settings": {
+        "fields": {
+          "country": {
+            "kind": "index",
+            "index_field_name": "journal_country",
+            "filter": {
+              "size": 500,
+              "order": {
+                "_key": "asc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Country",
+              "group": "journal_identity",
+              "group_order": 20
+            }
+          },
+          "journal_title": {
+            "kind": "index",
+            "index_field_name": "journal_title",
+            "filter": {
+              "size": 1,
+              "order": {
+                "_key": "asc"
+              },
+              "use": false
+            },
+            "settings": {
+              "widget": "lookup",
+              "multiple_selection": false,
+              "label": "Journal",
+              "group": "journal_identity",
+              "group_order": 20
+            },
+            "lookup": {
+              "index_name": "lookup_source",
+              "search_field": "label_search",
+              "sort_field": "label",
+              "source_value_field": "label",
+              "source_label_field": "label",
+              "size": 100
+            }
+          },
+          "journal_issn": {
+            "kind": "index",
+            "index_field_name": "journal_issn",
+            "filter": {
+              "size": 1,
+              "order": {
+                "_key": "asc"
+              },
+              "use": false
+            },
+            "settings": {
+              "widget": "lookup",
+              "multiple_selection": false,
+              "label": "ISSN",
+              "group": "journal_identity",
+              "group_order": 20
+            },
+            "lookup": {
+              "index_name": "lookup_source",
+              "search_field": "label_search",
+              "sort_field": "label",
+              "source_value_field": "source_issn_l",
+              "source_label_field": "label",
+              "size": 100
+            }
+          },
+          "journal_id": {
+            "kind": "index",
+            "index_field_name": "journal_id",
+            "filter": {
+              "size": 1,
+              "order": {
+                "_key": "asc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": true,
+              "label": "Journal ID",
+              "hidden_in_form": true,
+              "group": "journal_identity",
+              "group_order": 20
+            }
+          },
+          "publisher_name": {
+            "kind": "index",
+            "index_field_name": "journal_publisher",
+            "filter": {
+              "size": 1,
+              "order": {
+                "_key": "asc"
+              },
+              "use": false
+            },
+            "settings": {
+              "widget": "lookup",
+              "multiple_selection": false,
+              "label": "Publisher",
+              "group": "journal_identity",
+              "group_order": 20
+            },
+            "lookup": {
+              "index_name": "lookup_publisher",
+              "search_field": "label_search",
+              "sort_field": "label",
+              "value_field": "value",
+              "label_field": "label",
+              "source_value_field": "value",
+              "source_label_field": "label",
+              "size": 100
+            }
+          },
+          "collection": {
+            "kind": "index",
+            "index_field_name": "scielo_collection",
+            "filter": {
+              "size": 100,
+              "order": {
+                "_key": "asc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "SciELO Collection",
+              "group": "journal_identity",
+              "group_order": 20
+            }
+          },
+          "collection_name": {
+            "kind": "index",
+            "index_field_name": "scielo_collection_name",
+            "filter": {
+              "size": 1,
+              "order": {
+                "_key": "asc"
+              },
+              "use": false
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "SciELO Collection Name",
+              "hidden_in_form": true,
+              "group": "journal_identity",
+              "group_order": 20
+            }
+          },
+          "collection_acronym": {
+            "kind": "index",
+            "index_field_name": "scielo_collection_acronym",
+            "filter": {
+              "size": 1,
+              "order": {
+                "_key": "asc"
+              },
+              "use": false
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "SciELO Collection Acronym",
+              "hidden_in_form": true,
+              "group": "journal_identity",
+              "group_order": 20
+            }
+          },
+          "category_level": {
+            "kind": "index",
+            "index_field_name": "category_level",
+            "filter": {
+              "size": 50,
+              "order": {
+                "_key": "asc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Category Type",
+              "static_options": [
+                {
+                  "value": "domain",
+                  "label": "Domain"
+                },
+                {
+                  "value": "field",
+                  "label": "Area"
+                },
+                {
+                  "value": "subfield",
+                  "label": "Subarea"
+                },
+                {
+                  "value": "topic",
+                  "label": "Topic"
+                }
+              ],
+              "default_value": "field",
+              "display_transform": "category_level",
+              "group": "ranking",
+              "group_order": 0
+            }
+          },
+          "category_id": {
+            "kind": "index",
+            "index_field_name": "category_id",
+            "filter": {
+              "size": 1000,
+              "order": {
+                "_key": "asc"
+              },
+              "use": false
+            },
+            "settings": {
+              "widget": "lookup",
+              "multiple_selection": false,
+              "label": "Category",
+              "preload_options": true,
+              "dependencies": [
+                "category_level"
+              ],
+              "lookup_use_data_source_values": true,
+              "default_value": "Social Sciences",
+              "group": "ranking",
+              "group_order": 0
+            },
+            "lookup": {
+              "index_name": "lookup_topic",
+              "search_field": "label_search",
+              "sort_field": "label",
+              "value_field": "value",
+              "label_field": "label",
+              "source_value_field": "value",
+              "source_label_field": "label",
+              "size": 100
+            }
+          },
+          "publication_year": {
+            "kind": "index",
+            "index_field_name": "publication_year",
+            "filter": {
+              "size": 200,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "year",
+              "multiple_selection": false,
+              "label": "Publication Year",
+              "input_type": "text",
+              "default_value": "2020",
+              "group": "ranking",
+              "group_order": 0
+            }
+          },
+          "is_scielo": {
+            "kind": "index",
+            "index_field_name": "is_scielo",
+            "filter": {
+              "transform": {
+                "type": "boolean"
+              },
+              "size": 2,
+              "order": {
+                "_key": "asc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Is SciELO",
+              "display_transform": "boolean",
+              "group": "indexing_coverage",
+              "group_order": 30
+            }
+          },
+          "is_scopus": {
+            "kind": "index",
+            "index_field_name": "is_scopus",
+            "filter": {
+              "transform": {
+                "type": "boolean"
+              },
+              "size": 2,
+              "order": {
+                "_key": "asc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Is Scopus",
+              "display_transform": "boolean",
+              "group": "indexing_coverage",
+              "group_order": 30
+            }
+          },
+          "is_wos": {
+            "kind": "index",
+            "index_field_name": "is_wos",
+            "filter": {
+              "transform": {
+                "type": "boolean"
+              },
+              "size": 2,
+              "order": {
+                "_key": "asc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Is WoS",
+              "display_transform": "boolean",
+              "group": "indexing_coverage",
+              "group_order": 30
+            }
+          },
+          "is_doaj": {
+            "kind": "index",
+            "index_field_name": "is_doaj",
+            "filter": {
+              "transform": {
+                "type": "boolean"
+              },
+              "size": 2,
+              "order": {
+                "_key": "asc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Is DOAJ",
+              "display_transform": "boolean",
+              "group": "indexing_coverage",
+              "group_order": 30
+            }
+          },
+          "is_journal_oa": {
+            "kind": "index",
+            "index_field_name": "is_journal_oa",
+            "filter": {
+              "transform": {
+                "type": "boolean"
+              },
+              "size": 2,
+              "order": {
+                "_key": "asc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Is Open Access",
+              "display_transform": "boolean",
+              "group": "publishing_model",
+              "group_order": 25
+            }
+          },
+          "is_openalex": {
+            "kind": "index",
+            "index_field_name": "is_openalex",
+            "filter": {
+              "transform": {
+                "type": "boolean"
+              },
+              "size": 2,
+              "order": {
+                "_key": "asc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Is OpenAlex",
+              "display_transform": "boolean",
+              "group": "indexing_coverage",
+              "group_order": 30
+            }
+          },
+          "is_journal_multilingual": {
+            "kind": "index",
+            "index_field_name": "is_journal_multilingual",
+            "filter": {
+              "transform": {
+                "type": "boolean"
+              },
+              "size": 2,
+              "order": {
+                "_key": "asc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Is Multilingual",
+              "display_transform": "boolean",
+              "group": "publishing_model",
+              "group_order": 25
+            }
+          },
+          "journal_publications_count": {
+            "kind": "index",
+            "index_field_name": "journal_publications_count",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": true
+            }
+          },
+          "journal_citations_total": {
+            "kind": "index",
+            "index_field_name": "journal_citations_total",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": true
+            }
+          },
+          "journal_citations_mean": {
+            "kind": "index",
+            "index_field_name": "journal_citations_mean",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": true
+            }
+          },
+          "journal_citations_mean_window_2y": {
+            "kind": "index",
+            "index_field_name": "journal_citations_mean_window_2y",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": true
+            }
+          },
+          "journal_citations_mean_window_3y": {
+            "kind": "index",
+            "index_field_name": "journal_citations_mean_window_3y",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": true
+            }
+          },
+          "journal_citations_mean_window_5y": {
+            "kind": "index",
+            "index_field_name": "journal_citations_mean_window_5y",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": true
+            }
+          },
+          "journal_impact_normalized": {
+            "kind": "index",
+            "index_field_name": "journal_impact_cohort",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": true
+            }
+          },
+          "journal_impact_normalized_window_2y": {
+            "kind": "index",
+            "index_field_name": "journal_impact_cohort_window_2y",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": true
+            }
+          },
+          "journal_impact_normalized_window_3y": {
+            "kind": "index",
+            "index_field_name": "journal_impact_cohort_window_3y",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": true
+            }
+          },
+          "journal_impact_normalized_window_5y": {
+            "kind": "index",
+            "index_field_name": "journal_impact_cohort_window_5y",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": true
+            }
+          },
+          "top_1pct_all_time_publications_share_pct": {
+            "kind": "index",
+            "index_field_name": "top_1pct_all_time_publications_share_pct",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": true
+            }
+          },
+          "top_5pct_all_time_publications_share_pct": {
+            "kind": "index",
+            "index_field_name": "top_5pct_all_time_publications_share_pct",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": true
+            }
+          },
+          "top_10pct_all_time_publications_share_pct": {
+            "kind": "index",
+            "index_field_name": "top_10pct_all_time_publications_share_pct",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": true
+            }
+          },
+          "top_50pct_all_time_publications_share_pct": {
+            "kind": "index",
+            "index_field_name": "top_50pct_all_time_publications_share_pct",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": true
+            }
+          },
+          "ranking_metric": {
+            "kind": "control",
+            "index_field_name": "",
+            "filter": {},
+            "settings": {
+              "label": "Ranking metric",
+              "widget": "select",
+              "multiple_selection": false,
+              "static_options": [
+                {
+                  "value": "journal_impact_cohort",
+                  "label": "Cohort Impact (Total)",
+                  "group": "Cohort Impact"
+                },
+                {
+                  "value": "journal_impact_cohort_window_2y",
+                  "label": "Cohort Impact (2 years)",
+                  "group": "Cohort Impact"
+                },
+                {
+                  "value": "journal_impact_cohort_window_3y",
+                  "label": "Cohort Impact (3 years)",
+                  "group": "Cohort Impact"
+                },
+                {
+                  "value": "journal_impact_cohort_window_5y",
+                  "label": "Cohort Impact (5 years)",
+                  "group": "Cohort Impact"
+                },
+                {
+                  "value": "journal_citations_total",
+                  "label": "Total Citations",
+                  "group": "Citations"
+                },
+                {
+                  "value": "journal_citations_mean",
+                  "label": "Mean Citations",
+                  "group": "Citations"
+                },
+                {
+                  "value": "journal_citations_mean_window_2y",
+                  "label": "Mean Citations (2 years)",
+                  "group": "Citations"
+                },
+                {
+                  "value": "journal_citations_mean_window_3y",
+                  "label": "Mean Citations (3 years)",
+                  "group": "Citations"
+                },
+                {
+                  "value": "journal_citations_mean_window_5y",
+                  "label": "Mean Citations (5 years)",
+                  "group": "Citations"
+                },
+                {
+                  "value": "journal_publications_count",
+                  "label": "Publication Count",
+                  "group": "Publications"
+                },
+                {
+                  "value": "top_1pct_all_time_publications_share_pct",
+                  "label": "Top 1% Publications Share",
+                  "group": "Publications"
+                },
+                {
+                  "value": "top_5pct_all_time_publications_share_pct",
+                  "label": "Top 5% Publications Share",
+                  "group": "Publications"
+                },
+                {
+                  "value": "top_10pct_all_time_publications_share_pct",
+                  "label": "Top 10% Publications Share",
+                  "group": "Publications"
+                },
+                {
+                  "value": "top_50pct_all_time_publications_share_pct",
+                  "label": "Top 50% Publications Share",
+                  "group": "Publications"
+                }
+              ],
+              "default_value": "journal_impact_cohort_window_3y",
+              "help_text": "Cohort Impact ranks journals by citations received by documents published in the selected year and category.",
+              "group": "ranking",
+              "group_order": 0
+            }
+          },
+          "minimum_publications": {
+            "kind": "control",
+            "index_field_name": "",
+            "filter": {},
+            "settings": {
+              "label": "Minimum publications",
+              "widget": "number",
+              "multiple_selection": false,
+              "input_type": "number",
+              "min": 1,
+              "step": 1,
+              "default_value": "50",
+              "help_text": "Minimum number of publications required for the journal in the selected category and year.",
+              "group": "ranking",
+              "group_order": 0
+            }
+          },
+          "limit": {
+            "kind": "control",
+            "index_field_name": "",
+            "filter": {},
+            "settings": {
+              "label": "Number of results",
+              "widget": "select",
+              "multiple_selection": false,
+              "static_options": [
+                {
+                  "value": "10",
+                  "label": "10"
+                },
+                {
+                  "value": "25",
+                  "label": "25"
+                },
+                {
+                  "value": "50",
+                  "label": "50"
+                },
+                {
+                  "value": "100",
+                  "label": "100"
+                },
+                {
+                  "value": "200",
+                  "label": "200"
+                },
+                {
+                  "value": "500",
+                  "label": "500"
+                },
+                {
+                  "value": "1000",
+                  "label": "1000"
+                }
+              ],
+              "default_value": "100",
+              "group": "ranking",
+              "group_order": 0
+            }
+          }
+        },
+        "forms": {
+          "journal_metrics": {
+            "group_labels": {
+              "ranking": "Ranking",
+              "journal_identity": "Journal Identity",
+              "publishing_model": "Publishing Model",
+              "indexing_coverage": "Indexing / Coverage"
+            },
+            "panel_groups": [
+              "ranking"
+            ],
+            "fields": [
+              "publication_year",
+              "category_level",
+              "category_id",
+              "ranking_metric",
+              "minimum_publications",
+              "limit",
+              "country",
+              "publisher_name",
+              "collection",
+              "journal_title",
+              "is_journal_oa",
+              "is_journal_multilingual",
+              "is_scielo",
+              "is_scopus",
+              "is_wos",
+              "is_doaj",
+              "is_openalex"
+            ]
+          }
+        }
+      }
+    }
+  }
+]

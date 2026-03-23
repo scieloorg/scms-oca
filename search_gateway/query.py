@@ -2,6 +2,28 @@ import re
 
 from search.choices import QUERY_STRING_FIELD_ALIASES, SEARCH_FIELD_MAPPING, QUERY_STRING_FIELDS
 
+
+def build_exists_clause(field_name):
+    if field_name in (None, ""):
+        return None
+    return {"exists": {"field": field_name}}
+
+
+def build_term_clause(field_name, value):
+    if field_name in (None, "") or value in (None, ""):
+        return None
+    return {"term": {field_name: value}}
+
+
+def build_terms_clause(field_name, values):
+    if field_name in (None, ""):
+        return None
+    cleaned_values = [value for value in (values or []) if value not in (None, "")]
+    if not cleaned_values:
+        return None
+    return {"terms": {field_name: cleaned_values}}
+
+
 def query_filters(filters):
     """
     Build filter clauses for Elasticsearch query.
@@ -21,10 +43,67 @@ def query_filters(filters):
     filters_clauses = []
     for f_field, f_value in filters.items():
         if isinstance(f_value, list):
-            filters_clauses.append({"terms": {f_field: f_value}})
+            clause = build_terms_clause(f_field, f_value)
         else:
-            filters_clauses.append({"term": {f_field: f_value}})
+            clause = build_term_clause(f_field, f_value)
+        if clause:
+            filters_clauses.append(clause)
     return filters_clauses
+
+
+def build_unique_items_aggregation_body(field_name, aggregation_size=20):
+    return {
+        "size": 0,
+        "aggs": {
+            "unique_items": {
+                "terms": {
+                    "field": field_name,
+                    "size": aggregation_size,
+                }
+            }
+        },
+    }
+
+
+def build_lookup_hits_body(
+    query_text=None,
+    search_fields=None,
+    size=20,
+    source_fields=None,
+    sort_field=None,
+):
+    search_fields = [field for field in (search_fields or []) if field]
+    cleaned_query = str(query_text or "").strip()
+
+    if cleaned_query and search_fields:
+        should = []
+        escaped_query = cleaned_query.replace("\\", "\\\\").replace("*", "\\*").replace("?", "\\?")
+        for search_field in search_fields:
+            should.append({"match_phrase_prefix": {search_field: cleaned_query}})
+            keyword_candidate = search_field if search_field.endswith(".keyword") else f"{search_field}.keyword"
+            should.append(
+                {
+                    "wildcard": {
+                        keyword_candidate: {
+                            "value": f"*{escaped_query}*",
+                            "case_insensitive": True,
+                        }
+                    }
+                }
+            )
+        query = {"bool": {"should": should, "minimum_should_match": 1}}
+    else:
+        query = {"match_all": {}}
+
+    body = {
+        "size": size,
+        "query": query,
+    }
+    if source_fields:
+        body["_source"] = source_fields
+    if sort_field:
+        body["sort"] = [{sort_field: {"order": "asc", "unmapped_type": "keyword"}}]
+    return body
 
 
 def build_search_as_you_type_body(field_name, field_autocomplete, query, agg_size=20, add_keyword_term=False):

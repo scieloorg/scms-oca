@@ -61,7 +61,7 @@ class SearchGatewayService:
                 body=body,
                 request_cache=True,
             )
-            parsed = response_parser.parse_filters_response_with_transform(
+            parsed = response_parser.parse_filters_response(
                 response=res,
                 data_source=self.data_source,
             )

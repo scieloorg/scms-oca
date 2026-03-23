@@ -1,138 +1,217 @@
 from django.conf import settings
 
-from . import data_sources_with_settings
 from . import filters_cache
-from . import utils
+from . import lookup
 from . import parser as response_parser
 from . import query as query_builder
-
+from . import utils
 from .client import get_opensearch_client
 from .models import DataSource
 
 
-def search_as_you_type(data_source_name, query_text, field_name, client=None, use_data_source_model=True):
-    """
-    Perform search-as-you-type query for autocomplete.
-    
-    Args:
-        data_source_name: Name of the data source.
-        query_text: Text to search for.
-        field_name: Field to search in.
-        client: Optional Elasticsearch client to use.
-        use_data_source_model: Whether to use the DataSource model for retrieving settings.
-    
-    Returns:
-        List of matching items.
-    """
-    es = get_opensearch_client() if client is None else client
-    if not es or not data_source_name or not field_name:
-        return []
+def _resolve_data_source(identifier):
+    return DataSource.resolve(identifier)
 
-    if not use_data_source_model:
-        index_name = data_sources_with_settings.get_index_name_from_data_source(data_source_name)
-        field_data = data_sources_with_settings.get_data_by_field_name(data_source_name, field_name) or {}
-        fl_name = data_sources_with_settings.get_index_field_name_from_data_source(data_source_name, field_name)
-        field_autocomplete = field_data.get("field_autocomplete")
-        supports_search_as_you_type = bool(
-            data_sources_with_settings.field_supports_search_as_you_type(data_source_name, field_name)
-            and field_autocomplete
-        )
-        size = data_sources_with_settings.get_size_by_field_name(data_source_name, field_name)
 
-        if index_name and supports_search_as_you_type:
-            body = query_builder.build_search_as_you_type_body(
-                field_name=fl_name,
-                field_autocomplete=field_autocomplete,
-                query=query_text,
-                agg_size=size,
+def _build_field_option_bodies(index_field_name, query_text, size):
+    candidates = utils.get_index_field_candidates(index_field_name) or [index_field_name]
+    cleaned_query = str(query_text or "").strip()
+    bodies = []
+
+    if not cleaned_query:
+        for candidate_field in candidates:
+            bodies.append(query_builder.build_unique_items_aggregation_body(candidate_field, aggregation_size=size))
+        return bodies
+
+    seen = set()
+    for candidate_field in candidates:
+        if candidate_field not in seen:
+            bodies.append(query_builder.build_term_search_body(candidate_field, cleaned_query, aggregation_size=size))
+            seen.add(candidate_field)
+
+        contains_key = f"contains:{candidate_field}"
+        if contains_key not in seen:
+            bodies.append(
+                query_builder.build_keyword_contains_search_body(
+                    candidate_field,
+                    cleaned_query,
+                    aggregation_size=size,
+                )
             )
-            res = es.search(index=index_name, body=body)
-            return response_parser.parse_search_item_response(res, data_source_name, field_name)
+            seen.add(contains_key)
 
-    data_source = DataSource.get_by_index_name(index_name=data_source_name)
-    if not data_source:
-        return []
+    return bodies
 
-    field_data = (data_source.field_settings or {}).get(field_name, {})
-    field_autocomplete = field_data.get("field_autocomplete")
-    if not field_data or not field_autocomplete:
-        return []
 
-    body = query_builder.build_search_as_you_type_body(
-        field_name=field_data.get("index_field_name", field_name),
-        field_autocomplete=field_autocomplete,
-        query=query_text,
-        agg_size=(field_data.get("filter") or {}).get("size", 20),
+def _search_data_source_field_options(es, data_source, settings_filter, query_text="", filters=None):
+    field_settings = data_source.get_field_settings_dict()
+    mapped_filters = utils.get_mapped_filters(filters or {}, field_settings)
+    mapped_filters.pop(settings_filter.index_field_name, None)
+    cleaned_query = str(query_text or "").strip()
+    size = settings_filter.get_option_limit(default=20 if cleaned_query else 100)
+    if cleaned_query:
+        max_size_with_query = getattr(settings, "SEARCH_GATEWAY_SEARCH_ITEM_MAX_SIZE", 20)
+        try:
+            max_size_with_query = max(1, int(max_size_with_query))
+        except (TypeError, ValueError):
+            max_size_with_query = 20
+        size = min(size, max_size_with_query)
+
+    errors = []
+    for body in _build_field_option_bodies(settings_filter.index_field_name, query_text, size):
+        try:
+            search_body = utils.apply_search_filters_to_body(body, mapped_filters)
+            response = es.search(
+                index=data_source.index_name,
+                body=search_body,
+                request_timeout=getattr(settings, "OPENSEARCH_REQUEST_TIMEOUT", 40),
+            )
+            parsed = response_parser.parse_search_item_response_with_transform(
+                response,
+                data_source,
+                settings_filter.field_name,
+            )
+            return parsed, None
+        except Exception as exc:
+            errors.append(str(exc))
+
+    if errors:
+        return None, f"Error executing or parsing search: {errors[0]}"
+    return [], None
+
+
+def _enrich_options_with_lookup_labels(data_source_name, field_name, options, client=None):
+    normalized_options = []
+    values = []
+    option_map = {}
+
+    for option in options or []:
+        value = str(option.get("key") or option.get("value") or "").strip()
+        if not value:
+            continue
+        values.append(value)
+        option_map[value] = dict(option)
+
+    lookup_options, error = get_lookup_options_by_values(
+        data_source_name,
+        field_name,
+        values,
+        client=client,
     )
-    res = es.search(index=data_source.index_name, body=body)
-    return response_parser.parse_search_item_response_with_transform(res, data_source, field_name)
+    if error or not lookup_options:
+        return options, error
+
+    lookup_map = {str(option.get("key") or ""): option for option in lookup_options if option.get("key")}
+    for value in values:
+        base_option = dict(option_map.get(value) or {})
+        lookup_option = lookup_map.get(value) or {}
+        base_option["label"] = lookup_option.get("label") or base_option.get("label") or value
+        normalized_options.append(base_option)
+    return normalized_options, None
 
 
-def search_item(q, data_source_name, field_name, client=None, filters=None):
-    """
-    Search
-    
-    Args:
-        q: Query text.
-        data_source_name: Name of the data source.
-        field_name: Field to search in.
-    
-    Returns:
-        Tuple of (results_dict, error_message).
-    """
+def get_field_options(data_source_name, field_name, query_text="", client=None, filters=None):
     es = get_opensearch_client() if client is None else client
     if not es:
         return None, "Service unavailable"
 
-    data_source = data_sources_with_settings.get_data_source(data_source_name)
+    data_source = _resolve_data_source(data_source_name)
     if not data_source:
         return None, "Invalid data_source"
 
-    field_settings = data_source.get("field_settings", {})
-    field_data = data_sources_with_settings.get_data_by_field_name(data_source_name, field_name) or {}
-    fl_name = data_sources_with_settings.get_index_field_name_from_data_source(data_source_name, field_name)
-    field_autocomplete = field_data.get("field_autocomplete")
-    supports_search_as_you_type = bool(data_sources_with_settings.field_supports_search_as_you_type(data_source_name, field_name) and field_autocomplete)
-    size = data_sources_with_settings.get_size_by_field_name(data_source_name, field_name)
-    mapped_filters = utils.get_mapped_filters(filters or {}, field_settings)
+    settings_filter = data_source.get_field(field_name)
+    if not settings_filter:
+        return None, "Invalid field_name"
 
-    if fl_name in mapped_filters:
-        mapped_filters.pop(fl_name, None)
-
-    if supports_search_as_you_type:
-        bodies = [
-            query_builder.build_search_as_you_type_body(
-                field_name=fl_name,
-                field_autocomplete=field_autocomplete,
-                query=q,
-                agg_size=size,
+    lookup_config = settings_filter.get_lookup_config()
+    if lookup_config:
+        if (
+            settings_filter.get_ui_setting("lookup_use_data_source_values")
+            and not str(query_text or "").strip()
+            and filters
+        ):
+            data_source_options, data_source_error = _search_data_source_field_options(
+                es,
+                data_source,
+                settings_filter,
+                query_text=query_text,
+                filters=filters,
             )
-        ]
-    else:
-        bodies = [query_builder.build_term_search_body(fl_name, q)]
-
-        for candidate_field in utils.get_index_field_candidates(fl_name):
-            bodies.append(query_builder.build_keyword_contains_search_body(candidate_field, q))
-
-            if candidate_field != fl_name:
-                bodies.append(query_builder.build_term_search_body(candidate_field, q))
-
-    search_errors = []
-    for body in bodies:
+            if data_source_error:
+                return None, data_source_error
+            return _enrich_options_with_lookup_labels(
+                data_source.index_name,
+                field_name,
+                data_source_options,
+                client=es,
+            )
         try:
-            search_body = utils.apply_search_filters_to_body(body, mapped_filters)
-            res = es.search(index=data_source.get("index_name"), body=search_body)
-            parsed_results = response_parser.parse_search_item_response(res, data_source_name, field_name)
-        
-            return {"results": parsed_results}, None
-        
+            return lookup.search_lookup_options(
+                es,
+                data_source,
+                settings_filter,
+                query_text=query_text,
+                filters=filters,
+            )
         except Exception as exc:
-            search_errors.append(str(exc))
+            return None, f"Error retrieving lookup options: {exc}"
 
-    if search_errors:
-        return None, f"Error executing or parsing search: {search_errors[0]}"
-    
-    return None, "Error executing or parsing search"
+    if not settings_filter.index_field_name:
+        return [], None
+
+    return _search_data_source_field_options(
+        es,
+        data_source,
+        settings_filter,
+        query_text=query_text,
+        filters=filters,
+    )
+
+
+def get_lookup_options_by_values(data_source_name, field_name, values, client=None):
+    es = get_opensearch_client() if client is None else client
+    if not es:
+        return None, "Service unavailable"
+
+    data_source = _resolve_data_source(data_source_name)
+    if not data_source:
+        return None, "Invalid data_source"
+
+    settings_filter = data_source.get_field(field_name)
+    if not settings_filter:
+        return None, "Invalid field_name"
+
+    lookup_config = settings_filter.get_lookup_config()
+    if not lookup_config:
+        return None, "Lookup not configured"
+
+    try:
+        return lookup.search_lookup_options_by_values(es, data_source, settings_filter, values)
+    except Exception as exc:
+        return None, f"Error retrieving lookup options: {exc}"
+
+
+def search_as_you_type(data_source_name, query_text, field_name, client=None):
+    results, _error = get_field_options(
+        data_source_name,
+        field_name,
+        query_text=query_text,
+        client=client,
+    )
+    return results or []
+
+
+def search_item(q, data_source_name, field_name, client=None, filters=None):
+    results, error = get_field_options(
+        data_source_name,
+        field_name,
+        query_text=q,
+        client=client,
+        filters=filters,
+    )
+    if error:
+        return None, error
+    return {"results": results or []}, None
 
 
 def get_filters_data(
@@ -143,41 +222,26 @@ def get_filters_data(
     filters=None,
     client=None,
 ):
-    """
-    Get available filter options from Elasticsearch.
-    
-    Args:
-        data_source_name: Name of the data source.
-        exclude_fields: List of fields to exclude.
-        include_fields: List of fields to include.
-        force_refresh: Whether to force refresh the cache.
-        filters: Additional filters to apply.
-    
-    Returns:
-        Tuple of (filters_dict, error_message).
-    """
     es = get_opensearch_client() if client is None else client
     if not es:
         return None, "Service unavailable"
 
-    index_name = data_sources_with_settings.get_index_name_from_data_source(data_source_name)
-    if not index_name:
-        return None, "Invalid index name"
+    data_source = _resolve_data_source(data_source_name)
+    if not data_source:
+        return None, "Invalid data_source"
 
-    field_settings = data_sources_with_settings.get_field_settings(data_source_name)
+    index_name = data_source.index_name
+    field_settings = data_source.get_field_settings_dict(
+        include_fields=include_fields,
+        exclude_fields=exclude_fields,
+    )
+    field_settings = {
+        field_name: field_info
+        for field_name, field_info in field_settings.items()
+        if field_info.get("kind") != "control"
+    }
     if not field_settings:
-        return None, "Field settings not found"
-
-    exclude_fields = exclude_fields or []
-    include_fields = include_fields or []
-    if include_fields:
-        field_settings = {
-            field_name: field_info
-            for field_name, field_info in field_settings.items()
-            if field_name in include_fields
-        }
-        if not field_settings:
-            return {}, None
+        return {}, None
 
     cache_key = filters_cache.build_filters_cache_key(
         data_source_name=data_source_name,
@@ -187,7 +251,7 @@ def get_filters_data(
         filters=filters,
         field_settings=field_settings,
     )
-    
+
     cached_data = filters_cache.get_cached_filters(cache_key, force_refresh=force_refresh)
     if cached_data is not None:
         return cached_data, None
@@ -197,16 +261,17 @@ def get_filters_data(
     body = utils.build_filters_body(aggs, mapped_filters=mapped_filters)
 
     try:
-        res = es.search(
+        response = es.search(
             index=index_name,
             body=body,
             request_timeout=getattr(settings, "OPENSEARCH_REQUEST_TIMEOUT", 40),
         )
 
-        filters_data = response_parser.parse_filters_response(res, data_source_name)
+        filters_data = response_parser.parse_filters_response_with_transform(
+            response,
+            data_source,
+        )
         filters_cache.store_filters_cache(cache_key, filters_data)
-
         return filters_data, None
-
     except Exception as exc:
         return None, f"Error retrieving filters: {exc}"
