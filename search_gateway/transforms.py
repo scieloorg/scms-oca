@@ -168,7 +168,3 @@ def apply_display_transform_from_field_settings(field_settings, field_name, valu
         .get("display_transform")
     )
     return apply_display_transform(transform_type, value)
-
-
-def _apply_display_transform_from_datasource(field_settings, field_name, value):
-    return apply_display_transform_from_field_settings(field_settings, field_name, value)
