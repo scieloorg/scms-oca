@@ -1,693 +1,377 @@
 class SearchPageManager {
-    constructor(config) {
-        this.searchQuery = config.initialSearchQuery || '';
-        this.searchClauses = config.initialSearchClauses || [];
-        this.dataSourceName = config.dataSourceName;
-        this.apiEndpoint = config.apiEndpoint || '/search/api/search-results-list/';
-        this.filters = config.filters || {};
-        this.filterMetadata = config.filterMetadata || {};
-        this.searchableFields = config.searchableFields || [];
-        this.rangeFields = config.rangeFields || {};
-        this.isUpdatingFilterOptions = false;
-        
-        this.init();
+  constructor(config) {
+    this.searchQuery = config.initialSearchQuery || '';
+    this.searchClauses = config.initialSearchClauses || [];
+    this.dataSourceName = config.dataSourceName || '';
+    this.apiEndpoint = config.apiEndpoint || '/search/api/search-results-list/';
+    this.searchableFields = config.searchableFields || [];
+    this.searchForm = document.getElementById('search-form');
+    this.sidebarRoot = document.getElementById('search-sidebar-root');
+    this.resultsContainer = document.getElementById('results-container');
+    this.layoutRoot = document.getElementById('mainContent');
+    this.headerRow = document.getElementById('search-header-row');
+    this.sidebarToggleButton = document.getElementById('search-sidebar-toggle');
+
+    this.init();
+  }
+
+  async init() {
+    this.setupSearchForm();
+    this.setupAdvancedSearchUI();
+    this.setupSidebarToggle();
+    this.restoreSearchClauses();
+    await this.initSidebar();
+    this.setupResultsUi();
+  }
+
+  get sidebarForm() {
+    return document.getElementById('search-filter-form');
+  }
+
+  setupSearchForm() {
+    if (!this.searchForm) return;
+    this.searchForm.addEventListener('submit', event => {
+      event.preventDefault();
+      this.searchClauses = this.getSearchClauses();
+      this.applyFiltersAjax();
+    });
+  }
+
+  setupAdvancedSearchUI() {
+    const btnAdd = document.getElementById('btn-add-field');
+    const btnClear = document.getElementById('btn-clear');
+    const extraRows = document.getElementById('advanced-search-rows');
+
+    if (btnAdd) {
+      btnAdd.addEventListener('click', () => this.addSearchRow());
     }
-    
-    init() {
-        this.setupDataSourceSelector();
-        this.setupSearchForm();
-        this.setupAdvancedSearchUI();
-        this.setupFilters();
-        this.updateActiveFilters();
-        this.preselectFiltersFromURL();
+    if (btnClear) {
+      btnClear.addEventListener('click', () => this.clearSearchQuery());
     }
-    
-    setupDataSourceSelector() {
-        const dataSourceSelect = document.getElementById('data-source-select');
-        if (dataSourceSelect) {
-            dataSourceSelect.addEventListener('change', (e) => {
-                this.handleDataSourceChange(e.target.value);
-            });
+    if (extraRows) {
+      extraRows.addEventListener('click', event => {
+        if (event.target.closest('.btn-remove-row')) {
+          this.removeSearchRow(event.target.closest('.btn-remove-row'));
         }
+      });
     }
-    
-    async handleDataSourceChange(newDataSource) {
-        this.dataSourceName = newDataSource;
-        
-        // Clear current filters
-        this.clearAllFilters();
-        
-        // Fetch new filters for the selected data source
-        await this.loadFiltersForDataSource(newDataSource);
-        
-        // Apply filters and get new results
-        this.applyFiltersAjax();
+  }
+
+  setupSidebarToggle() {
+    const toggleButton = this.sidebarToggleButton;
+    const layoutRoot = this.layoutRoot;
+    const headerRow = this.headerRow;
+    if (!toggleButton || !layoutRoot) return;
+
+    const hiddenClass = 'sg-layout--filters-hidden';
+    const storageKey = 'searchPageFiltersHidden';
+    const toggleLabel = toggleButton.querySelector('.search-header-card__toggle-text');
+
+    const applyState = hidden => {
+      layoutRoot.classList.toggle(hiddenClass, hidden);
+      if (headerRow) {
+        headerRow.classList.toggle(hiddenClass, hidden);
+      }
+      toggleButton.setAttribute('aria-expanded', hidden ? 'false' : 'true');
+      if (toggleLabel) {
+        toggleLabel.textContent = hidden
+          ? (toggleButton.dataset.labelShow || gettext('Mostrar filtros'))
+          : (toggleButton.dataset.labelHide || gettext('Ocultar filtros'));
+      }
+    };
+
+    const storedState = window.localStorage.getItem(storageKey);
+    applyState(storedState === 'true');
+
+    toggleButton.addEventListener('click', () => {
+      const nextHidden = !layoutRoot.classList.contains(hiddenClass);
+      applyState(nextHidden);
+      window.localStorage.setItem(storageKey, nextHidden ? 'true' : 'false');
+    });
+  }
+
+  restoreSearchClauses() {
+    if (!Array.isArray(this.searchClauses) || !this.searchClauses.length) return;
+
+    const firstRow = document.querySelector('.advanced-search-row[data-row-index="0"]');
+    if (firstRow && this.searchClauses[0]) {
+      const clause = this.searchClauses[0];
+      const fieldSelect = firstRow.querySelector('.search-field-select');
+      const textInput = firstRow.querySelector('.search-text-input');
+      if (fieldSelect) fieldSelect.value = clause.field || 'all';
+      if (textInput) textInput.value = clause.text || '';
     }
-    
-    clearAllFilters() {
-        // Destroy all Select2 instances
-        Object.keys(this.filters).forEach(key => {
-            const selectElement = document.getElementById(key);
-            if (selectElement && $(selectElement).data('select2')) {
-                $(selectElement).select2('destroy');
-            }
+
+    const container = document.getElementById('advanced-search-rows');
+    if (!container) return;
+
+    container.innerHTML = '';
+    for (let index = 1; index < this.searchClauses.length; index += 1) {
+      this.addSearchRow();
+      const row = container.querySelector('.advanced-search-row:last-child');
+      const clause = this.searchClauses[index];
+      if (!row || !clause) continue;
+
+      const operatorSelect = row.querySelector('.search-operator');
+      const fieldSelect = row.querySelector('.search-field-select');
+      const textInput = row.querySelector('.search-text-input');
+      if (operatorSelect) operatorSelect.value = clause.operator || 'AND';
+      if (fieldSelect) fieldSelect.value = clause.field || 'all';
+      if (textInput) textInput.value = clause.text || '';
+    }
+  }
+
+  getSearchClauses() {
+    const clauses = [];
+
+    const firstRow = document.querySelector('.advanced-search-row[data-row-index="0"]');
+    if (firstRow) {
+      const fieldSelect = firstRow.querySelector('.search-field-select');
+      const textInput = firstRow.querySelector('.search-text-input');
+      const text = textInput ? textInput.value.trim() : '';
+      if (text) {
+        clauses.push({
+          operator: '',
+          field: fieldSelect ? fieldSelect.value : 'all',
+          text,
         });
-        
-        // Clear filters container
-        const filtersContainer = document.getElementById('filters-container');
-        if (filtersContainer) {
-            filtersContainer.innerHTML = '<div class="text-center p-3"><i class="icon-spinner icon-spin"></i> Carregando filtros...</div>';
-        }
-    }
-    
-    async loadFiltersForDataSource(dataSource, selectedFilters = {}, options = {}) {
-        const { optionsOnly = false } = options;
-        try {
-            const params = new URLSearchParams();
-            params.append('index_name', dataSource);
-
-            Object.entries(selectedFilters).forEach(([filterKey, values]) => {
-                (values || []).forEach(value => {
-                    if (value !== null && value !== undefined && value !== '') {
-                        params.append(filterKey, value);
-                    }
-                });
-            });
-
-            const response = await fetch(`/search/api/filters/?${params.toString()}`);
-            if (!response.ok) throw new Error('Failed to load filters');
-            
-            const data = await response.json();
-            this.filters = data.filters || {};
-            this.filterMetadata = data.filter_metadata || {};
-
-            if (optionsOnly) {
-                this.updateFilterOptionsOnly(selectedFilters);
-            } else {
-                // Re-render filters HTML
-                this.renderFilters();
-
-                // Re-initialize Select2 for new filters
-                this.setupFilters();
-            }
-        } catch (error) {
-            console.error('Error loading filters:', error);
-            if (optionsOnly) return;
-            const filtersContainer = document.getElementById('filters-container');
-            if (filtersContainer) {
-                filtersContainer.innerHTML = `
-                    <div class="alert alert-danger" role="alert">
-                        <i class="icon-exclamation-sign"></i> 
-                        Erro ao carregar filtros.
-                    </div>
-                `;
-            }
-        }
-    }
-    
-    renderFilters() {
-        const filtersContainer = document.getElementById('filters-container');
-        if (!filtersContainer) return;
-        
-        let html = '';
-        Object.keys(this.filters).forEach(key => {
-            const options = this.filters[key];
-            const metadata = this.filterMetadata[key] || {};
-            const label = metadata.label || key;
-            
-            if (metadata.class_filter === 'range') {
-                // Range filters would need special handling
-                return;
-            }
-            
-            const multiple = metadata.multiple_selection !== false ? 'multiple' : '';
-            html += `
-                <div class="form-group mb-3">
-                    <label class="form-label" for="${key}">${label}</label>
-                    <select ${multiple} id="${key}" name="${key}" class="form-control filter-select" data-filter-key="${key}" aria-label="${label}">
-                        ${metadata.multiple_selection === false ? `<option value="">${label}</option>` : ''}
-                        ${options.map(opt => `<option value="${opt.key}">${opt.label}</option>`).join('')}
-                    </select>
-                </div>
-            `;
-        });
-        
-        filtersContainer.innerHTML = html;
-    }
-    
-    setupSearchForm() {
-        const searchForm = document.getElementById('search-form');
-        if (searchForm) {
-            searchForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                this.searchClauses = this.getSearchClauses();
-                this.updateActiveFilters();
-                this.applyFiltersAjax();
-            });
-        }
+      }
     }
 
-    setupAdvancedSearchUI() {
-        const btnAdd = document.getElementById('btn-add-field');
-        const btnClear = document.getElementById('btn-clear');
-        if (btnAdd) {
-            btnAdd.addEventListener('click', () => this.addSearchRow());
-        }
-        if (btnClear) {
-            btnClear.addEventListener('click', () => this.clearSearchQuery());
-        }
-        document.getElementById('advanced-search-rows')?.addEventListener('click', (e) => {
-            if (e.target.closest('.btn-remove-row')) {
-                this.removeSearchRow(e.target.closest('.btn-remove-row'));
-            }
-        });
+    document.querySelectorAll('#advanced-search-rows .advanced-search-row').forEach(row => {
+      const operatorSelect = row.querySelector('.search-operator');
+      const fieldSelect = row.querySelector('.search-field-select');
+      const textInput = row.querySelector('.search-text-input');
+      const text = textInput ? textInput.value.trim() : '';
+      if (!text) return;
+      clauses.push({
+        operator: operatorSelect ? operatorSelect.value : 'AND',
+        field: fieldSelect ? fieldSelect.value : 'all',
+        text,
+      });
+    });
+
+    return clauses;
+  }
+
+  addSearchRow() {
+    const template = document.getElementById('advanced-search-row-template');
+    const container = document.getElementById('advanced-search-rows');
+    if (!template || !container) return;
+
+    const clone = template.content.cloneNode(true);
+    const row = clone.querySelector('.advanced-search-row');
+    row.dataset.rowIndex = String(container.children.length + 1);
+    container.appendChild(clone);
+  }
+
+  removeSearchRow(button) {
+    const row = button?.closest('.advanced-search-row');
+    if (row && row.parentElement?.id === 'advanced-search-rows') {
+      row.remove();
     }
+  }
 
-    getSearchClauses() {
-        const clauses = [];
-        const firstRow = document.querySelector('.advanced-search-row[data-row-index="0"]');
-        if (firstRow) {
-            const fieldSelect = firstRow.querySelector('.search-field-select');
-            const textInput = firstRow.querySelector('.search-text-input');
-            const text = textInput ? textInput.value.trim() : '';
-            if (text) {
-                clauses.push({
-                    operator: '',
-                    field: fieldSelect ? fieldSelect.value : 'all',
-                    text: text
-                });
-            }
-        }
-        document.querySelectorAll('#advanced-search-rows .advanced-search-row').forEach(row => {
-            const operatorSelect = row.querySelector('.search-operator');
-            const fieldSelect = row.querySelector('.search-field-select');
-            const textInput = row.querySelector('.search-text-input');
-            const text = textInput ? textInput.value.trim() : '';
-            if (text) {
-                clauses.push({
-                    operator: operatorSelect ? operatorSelect.value : 'AND',
-                    field: fieldSelect ? fieldSelect.value : 'all',
-                    text: text
-                });
-            }
-        });
-        return clauses;
+  async initSidebar() {
+    if (window.SearchGatewayFilterForm) {
+      await window.SearchGatewayFilterForm.init(this.sidebarRoot || document);
     }
+    this.bindSidebarEvents();
+  }
 
-    addSearchRow() {
-        const template = document.getElementById('advanced-search-row-template');
-        const container = document.getElementById('advanced-search-rows');
-        if (!template || !container) return;
-        const clone = template.content.cloneNode(true);
-        const row = clone.querySelector('.advanced-search-row');
-        row.dataset.rowIndex = String(container.children.length + 1);
-        container.appendChild(clone);
-    }
+  bindSidebarEvents() {
+    const form = this.sidebarForm;
+    if (!form) return;
 
-    removeSearchRow(btn) {
-        const row = btn?.closest('.advanced-search-row');
-        if (row && row.parentElement?.id === 'advanced-search-rows') {
-            row.remove();
-        }
-    }
-    
-    setupFilters() {
-        Object.keys(this.filters).forEach(key => {
-            this.initializeSelect2(key);
-        });
-    }
+    if (form.dataset.searchPageBound === 'true') return;
 
-    getCurrentSelectedFilters() {
-        const selectedFilters = {};
+    form.addEventListener('submit', event => {
+      event.preventDefault();
+      this.applyFiltersAjax();
+    });
 
-        Object.keys(this.filters).forEach(key => {
-            const selectElement = document.getElementById(key);
-            if (!selectElement) return;
+    form.addEventListener('search-gateway:filters-changed', () => {
+      this.applyFiltersAjax();
+    });
 
-            const selectedValues = $(selectElement).val();
-            const metadata = this.filterMetadata[key] || {};
-
-            if (metadata.multiple_selection === false) {
-                if (selectedValues && selectedValues !== '') {
-                    selectedFilters[key] = [selectedValues];
-                }
-            } else if (Array.isArray(selectedValues) && selectedValues.length > 0) {
-                const validValues = selectedValues.filter(value => value && value !== '');
-                if (validValues.length > 0) {
-                    selectedFilters[key] = validValues;
-                }
-            }
-        });
-
-        return selectedFilters;
-    }
-
-    updateFilterOptionsOnly(selectedFilters = {}) {
-        Object.keys(this.filters).forEach(key => {
-            const selectElement = document.getElementById(key);
-            if (!selectElement) return;
-
-            const metadata = this.filterMetadata[key] || {};
-            const options = this.filters[key] || [];
-            const placeholderOption = metadata.multiple_selection === false
-                ? `<option value="">${metadata.label || key}</option>`
-                : '';
-            const selectedLabelsByValue = new Map();
-            const preservedValues = selectedFilters[key] || [];
-
-            // Preserve currently selected labels (including async Select2 options)
-            // so we can re-add them if they are not returned in refreshed buckets.
-            Array.from(selectElement.options).forEach(option => {
-                if (option.value !== '') {
-                    selectedLabelsByValue.set(option.value, option.text);
-                }
-            });
-
-            const select2Data = $(selectElement).select2('data') || [];
-            select2Data.forEach(item => {
-                if (item && item.id !== undefined && item.id !== null) {
-                    selectedLabelsByValue.set(String(item.id), item.text || String(item.id));
-                }
-            });
-
-            selectElement.innerHTML = `
-                ${placeholderOption}
-                ${options.map(opt => `<option value="${opt.key}">${opt.label}</option>`).join('')}
-            `;
-
-            const availableValues = new Set(Array.from(selectElement.options).map(option => option.value));
-            preservedValues.forEach(value => {
-                if (!value || availableValues.has(value)) return;
-
-                const fallbackLabel = selectedLabelsByValue.get(value) || value;
-                const option = new Option(fallbackLabel, value, false, true);
-                selectElement.add(option);
-                availableValues.add(value);
-            });
-
-            // Keep Select2 in sync with updated <option> list
-            $(selectElement).trigger('change.select2');
-        });
-
-        this.restoreSelectedFilters(selectedFilters);
-    }
-
-    restoreSelectedFilters(selectedFilters = {}) {
-        Object.keys(selectedFilters).forEach(key => {
-            const selectElement = document.getElementById(key);
-            if (!selectElement) return;
-
-            const metadata = this.filterMetadata[key] || {};
-            const availableValues = new Set(Array.from(selectElement.options).map(option => option.value));
-            const validValues = (selectedFilters[key] || []).filter(value => availableValues.has(value));
-
-            if (metadata.multiple_selection === false) {
-                $(selectElement).val(validValues[0] || '');
-            } else {
-                $(selectElement).val(validValues);
-            }
-
-            $(selectElement).trigger('change.select2');
-        });
-    }
-    
-    initializeSelect2(key) {
-        const selectElement = document.getElementById(key);
-        if (!selectElement) return;
-        
-        const metadata = this.filterMetadata[key] || {};
-        const config = {
-            placeholder: gettext('Type to filter'),
-            theme: 'bootstrap-5',
-            allowClear: metadata.multiple_selection == false,
-            multiple: metadata.multiple_selection !== false
-        };
-        
-        if (metadata.support_search_as_you_type) {
-            config.ajax = {
-                url: '/search-gateway/search-as-you-type/',
-                dataType: 'json',
-                delay: 300,
-                data: (params) => ({
-                    q: params.term,
-                    field_name: key,
-                    index_name: this.dataSourceName
-                }),
-                processResults: (data) => {
-                    const items = Array.isArray(data) ? data : Array.isArray(data?.results) ? data.results : [];
-                    return {
-                        results: items.map(item => ({
-                        id: item.key,
-                        text: item.label || item.key
-                    }))
-                    };
-                }
-            };
-            config.minimumInputLength = 2;
-        }
-        
-        $(selectElement).select2(config);
-        
-        // Auto-focus
-        $(selectElement).on('select2:open', (e) => {
-            const searchField = document.querySelector(`[aria-controls="select2-${e.target.id}-results"]`);
-            if (searchField) searchField.focus();
-        });
-        
-        // AJAX on change
-        $(selectElement).on('change', async () => {
-            if (this.isUpdatingFilterOptions) return;
-
-            this.isUpdatingFilterOptions = true;
-            try {
-                const selectedFilters = this.getCurrentSelectedFilters();
-                await this.loadFiltersForDataSource(this.dataSourceName, selectedFilters, { optionsOnly: true });
-                this.updateActiveFilters();
-                this.applyFiltersAjax();
-            } catch (error) {
-                console.error('Error updating filter options:', error);
-            } finally {
-                this.isUpdatingFilterOptions = false;
-            }
-        });
-    }
-    
-    applyFiltersAjax() {
-        const resultsContainer = document.getElementById('results-container');
-        const filterStatus = document.getElementById('filter-status');
-        
-        this.showLoading(filterStatus, resultsContainer);
-        
-        const params = this.buildSearchParams();
-        
-        fetch(`${this.apiEndpoint}?${params.toString()}`)
-            .then(response => {
-                if (!response.ok) throw new Error('Network response was not ok');
-                return response.json();
-            })
-            .then(data => this.handleSearchResults(data, resultsContainer, filterStatus))
-            .catch(error => this.handleSearchError(error, resultsContainer, filterStatus));
-    }
-    
-    buildSearchParams() {
-        const params = new URLSearchParams();
-        const clauses = this.getSearchClauses();
-        
-        if (clauses.length > 0) {
-            params.append('search_clauses', JSON.stringify(clauses));
-        } else if (this.searchQuery) {
-            params.append('search', this.searchQuery);
-        }
-        
-        if (this.dataSourceName) {
-            params.append('index_name', this.dataSourceName);
-        }
-        
-        Object.keys(this.filters).forEach(key => {
-            const selectElement = document.getElementById(key);
-            if (!selectElement) return;
-            
-            const selectedValues = $(selectElement).val();
-            const metadata = this.filterMetadata[key] || {};
-            
-            if (metadata.multiple_selection === false) {
-                if (selectedValues && selectedValues !== '') {
-                    params.append(key, selectedValues);
-                }
-            } else {
-                if (selectedValues && selectedValues.length > 0) {
-                    selectedValues.forEach(value => {
-                        if (value && value !== '') {
-                            params.append(key, value);
-                        }
-                    });
-                }
-            }
-        });
-        
-        return params;
-    }
-    
-    showLoading(filterStatus, resultsContainer) {
-        if (filterStatus) {
-            filterStatus.innerHTML = `<i class="icon-spinner icon-spin"></i> ${gettext('Loading...')}`;
-        }
-        if (resultsContainer) {
-            resultsContainer.innerHTML = '<div class="text-center p-5"><i class="icon-spinner icon-spin icon-2x"></i></div>';
-        }
-    }
-    
-    handleSearchResults(data, resultsContainer, filterStatus) {
-        if (resultsContainer) {
-            if (data.results_html) {
-                resultsContainer.innerHTML = data.results_html;
-            } else {
-                resultsContainer.innerHTML = `
-                    <div class="alert alert-info" role="alert">
-                        <i class="icon-info-sign"></i> 
-                        ${gettext('No results found. Try adjusting your search or filters.')}
-                    </div>
-                `;
-            }
-        }
-        
-        if (filterStatus) {
-            filterStatus.innerHTML = `<i class="icon-ok text-success"></i> ${gettext('Filters applied')}`;
-            setTimeout(() => {
-                filterStatus.innerHTML = '';
-            }, 2000);
-        }
-    }
-
-
-    escapeHtml(text) {
-        if (!text) return '';
-        const div = document.createElement('div');
-        div.textContent = String(text);
-        return div.innerHTML;
-    }
-    
-    handleSearchError(error, resultsContainer, filterStatus) {
-        console.error('Error applying filters:', error);
-        if (resultsContainer) {
-            resultsContainer.innerHTML = `
-                <div class="alert alert-danger" role="alert">
-                    <i class="icon-exclamation-sign"></i> 
-                    Erro ao carregar resultados. Tente novamente.
-                </div>
-            `;
-        }
-        if (filterStatus) {
-            filterStatus.innerHTML = '<i class="icon-exclamation-sign text-danger"></i> Erro';
-        }
-    }
-    
-    updateActiveFilters() {
-        const container = document.getElementById('active-filters-container');
-        const searchSection = document.getElementById('search-query-section');
-        const searchBadge = document.getElementById('search-query-badge');
-        const filtersSection = document.getElementById('filters-section');
-        const filtersBadgesContainer = document.getElementById('selected-filters-badges');
-        const filtersCount = document.getElementById('active-filters-count');
-        
-        if (!container || !filtersBadgesContainer) return;
-        
-        const clauses = this.searchClauses.length > 0 ? this.searchClauses : this.getSearchClauses();
-        const hasSearchClauses = clauses.length > 0;
-        const fieldLabels = Object.fromEntries((this.searchableFields || []).map(f => [f.value, f.label]));
-        
-        if (searchBadge && searchSection) {
-            if (hasSearchClauses) {
-                const badges = clauses.map((c, i) => {
-                    const fieldLabel = fieldLabels[c.field] || c.field;
-                    const op = c.operator ? ` ${c.operator} ` : '';
-                    return `<span class="applied-filter-chip">${i > 0 ? op : ''}<i class="icon-filter"></i> <strong>${this.escapeHtml(fieldLabel)}:</strong> ${this.escapeHtml(c.text)}</span>`;
-                }).join('');
-                searchBadge.innerHTML = `
-                ${badges}
-                <span class="applied-filter-chip">
-                    <button type="button" class="btn-close btn-close-black ms-1" style="font-size: 0.7rem;" onclick="window.searchPageManager.clearSearchQuery()"></button>
-                </span>
-                `;
-                searchSection.classList.remove('d-none');
-            } else {
-                searchSection.classList.add('d-none');
-            }
-        }
-        
-        // Build filter badges (blue color with filter icon)
-        let filterBadgesHtml = '';
-        let hasFilters = false;
-        let activeFilterCount = 0;
-        
-        Object.keys(this.filters).forEach(key => {
-            const selectElement = document.getElementById(key);
-            if (!selectElement) return;
-            
-            const selectedValues = $(selectElement).val();
-            const metadata = this.filterMetadata[key] || {};
-            const label = metadata.label || key;
-            
-            if (selectedValues && selectedValues.length > 0) {
-                hasFilters = true;
-                
-                if (metadata.multiple_selection === false) {
-                    // Single selection
-                    const selectedOption = $(selectElement).find('option:selected');
-                    const selectedText = selectedOption.text();
-                    activeFilterCount += 1;
-                    
-                    filterBadgesHtml += `
-                        <span class="applied-filter-chip">
-                            <i class="icon-filter"></i> <strong>${this.escapeHtml(label)}:</strong> ${this.escapeHtml(selectedText)}
-                            <button type="button" class="btn-close btn-close-black  ms-1" style="font-size: 0.7rem;" onclick="window.searchPageManager.removeFilter('${key}')"></button>
-                        </span>
-                    `;
-                } else {
-                    // Multiple selection
-                    selectedValues.forEach(value => {
-                        const option = $(selectElement).find(`option[value="${this.escapeHtml(value)}"]`);
-                        const optionText = option.text() || value;
-                        activeFilterCount += 1;
-                        
-                        filterBadgesHtml += `
-                            <span class="applied-filter-chip">
-                                <i class="icon-filter"></i> <strong>${this.escapeHtml(label)}:</strong> ${this.escapeHtml(optionText)}
-                                <button type="button" class="btn-close btn-close-black  ms-1" style="font-size: 0.7rem;" data-filter-key="${key}" data-filter-value="${this.escapeHtml(value)}"></button>
-                            </span>
-                        `;
-                    });
-                }
-            }
-        });
-        
-        filtersBadgesContainer.innerHTML = filterBadgesHtml;
-        
-        // Add event listeners to filter close buttons
-        filtersBadgesContainer.querySelectorAll('.btn-close').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const filterKey = e.target.getAttribute('data-filter-key');
-                const filterValue = e.target.getAttribute('data-filter-value');
-                if (filterKey && filterValue) {
-                    this.removeFilterValue(filterKey, filterValue);
-                }
-            });
-        });
-        
-        // Show/hide filters section
-        if (filtersSection) {
-            if (hasFilters) {
-                filtersSection.classList.remove('d-none');
-            } else {
-                filtersSection.classList.add('d-none');
-            }
-        }
-        if (filtersCount) {
-            filtersCount.textContent = String(activeFilterCount);
-        }
-        
-        if (hasSearchClauses || hasFilters) {
-            container.classList.remove('d-none');
+    const resetButton = document.getElementById('search-filter-reset');
+    if (resetButton) {
+      resetButton.addEventListener('click', () => {
+        if (window.SearchGatewayFilterForm) {
+          window.SearchGatewayFilterForm.resetForm(form);
         } else {
-            container.classList.add('d-none');
+          form.reset();
         }
-    }
-    
-    clearSearchQuery() {
-        this.searchQuery = '';
-        this.searchClauses = [];
-        const firstRow = document.querySelector('.advanced-search-row[data-row-index="0"]');
-        if (firstRow) {
-            const fieldSelect = firstRow.querySelector('.search-field-select');
-            const textInput = firstRow.querySelector('.search-text-input');
-            if (fieldSelect) fieldSelect.value = 'all';
-            if (textInput) textInput.value = '';
-        }
-        const extraRows = document.getElementById('advanced-search-rows');
-        if (extraRows) extraRows.innerHTML = '';
-        this.updateActiveFilters();
         this.applyFiltersAjax();
+      });
     }
-    
-    removeFilter(filterKey) {
-        const selectElement = document.getElementById(filterKey);
-        if (selectElement) {
-            $(selectElement).val(null).trigger('change');
-        }
+
+    form.dataset.searchPageBound = 'true';
+  }
+
+  buildSearchParams() {
+    const params = new URLSearchParams();
+    const clauses = this.getSearchClauses();
+    if (clauses.length > 0) {
+      params.set('search_clauses', JSON.stringify(clauses));
+    } else if (this.searchQuery) {
+      params.set('search', this.searchQuery);
     }
-    
-    removeFilterValue(filterKey, value) {
-        const selectElement = document.getElementById(filterKey);
-        if (selectElement) {
-            const currentValues = $(selectElement).val() || [];
-            const newValues = currentValues.filter(v => v !== value);
-            $(selectElement).val(newValues).trigger('change');
-        }
+
+    if (this.dataSourceName) {
+      params.set('index_name', this.dataSourceName);
     }
-    
-    preselectFiltersFromURL() {
-        const urlParams = new URLSearchParams(window.location.search);
-        
-        const searchClausesParam = urlParams.get('search_clauses');
-        if (searchClausesParam) {
-            try {
-                const clauses = JSON.parse(searchClausesParam);
-                if (Array.isArray(clauses) && clauses.length > 0) {
-                    this.searchClauses = clauses;
-                    const firstRow = document.querySelector('.advanced-search-row[data-row-index="0"]');
-                    if (firstRow && clauses[0]) {
-                        const c = clauses[0];
-                        const fieldSelect = firstRow.querySelector('.search-field-select');
-                        const textInput = firstRow.querySelector('.search-text-input');
-                        if (fieldSelect) fieldSelect.value = c.field || 'all';
-                        if (textInput) textInput.value = c.text || '';
-                    }
-                    const container = document.getElementById('advanced-search-rows');
-                    if (container) {
-                        container.innerHTML = '';
-                        for (let i = 1; i < clauses.length; i++) {
-                            this.addSearchRow();
-                            const rows = container.querySelectorAll('.advanced-search-row');
-                            const row = rows[rows.length - 1];
-                            if (row && clauses[i]) {
-                                const c = clauses[i];
-                                const operatorSelect = row.querySelector('.search-operator');
-                                const fieldSelect = row.querySelector('.search-field-select');
-                                const textInput = row.querySelector('.search-text-input');
-                                if (operatorSelect) operatorSelect.value = c.operator || 'AND';
-                                if (fieldSelect) fieldSelect.value = c.field || 'all';
-                                if (textInput) textInput.value = c.text || '';
-                            }
-                        }
-                    }
-                }
-            } catch (e) {
-                console.warn('Invalid search_clauses in URL', e);
-            }
-        }
-        
-        Object.keys(this.filters).forEach(key => {
-            const urlValues = urlParams.getAll(key);
-            if (urlValues.length > 0) {
-                const selectElement = document.getElementById(key);
-                if (selectElement) {
-                    const metadata = this.filterMetadata[key] || {};
-                    if (metadata.multiple_selection === false) {
-                        $(selectElement).val(urlValues[0]).trigger('change.select2');
-                    } else {
-                        $(selectElement).val(urlValues).trigger('change.select2');
-                    }
-                }
-            }
+
+    const filters = window.SearchGatewayFilterForm
+      ? window.SearchGatewayFilterForm.serializeForm(this.sidebarForm)
+      : {};
+    Object.entries(filters).forEach(([key, value]) => {
+      if (Array.isArray(value)) {
+        value.forEach(item => params.append(key, item));
+        return;
+      }
+      params.append(key, value);
+    });
+
+    return params;
+  }
+
+  showLoading() {
+    if (this.resultsContainer) {
+      this.resultsContainer.innerHTML = '<div class="text-center p-5"><i class="icon-spinner icon-spin icon-2x"></i></div>';
+    }
+  }
+
+  async applyFiltersAjax() {
+    this.showLoading();
+    const params = this.buildSearchParams();
+
+    try {
+      const response = await fetch(`${this.apiEndpoint}?${params.toString()}`);
+      if (!response.ok) throw new Error('Network response was not ok');
+      const data = await response.json();
+
+      if (this.resultsContainer) {
+        this.resultsContainer.innerHTML = data.results_html || `
+          <div class="alert alert-info" role="alert">
+            ${gettext('No results found. Try adjusting your search or filters.')}
+          </div>
+        `;
+        this.setupResultsUi();
+      }
+
+      if (this.sidebarRoot && data.sidebar_html) {
+        this.sidebarRoot.innerHTML = data.sidebar_html;
+        await this.initSidebar();
+      }
+
+      const url = new URL(window.location.href);
+      url.search = params.toString();
+      window.history.replaceState({}, '', url.toString());
+    } catch (error) {
+      console.error('Error applying filters:', error);
+      if (this.resultsContainer) {
+        this.resultsContainer.innerHTML = `
+          <div class="alert alert-danger" role="alert">
+            ${gettext('Error loading results. Try again.')}
+          </div>
+        `;
+      }
+    }
+  }
+
+  clearSearchQuery() {
+    this.searchQuery = '';
+    this.searchClauses = [];
+
+    const firstRow = document.querySelector('.advanced-search-row[data-row-index="0"]');
+    if (firstRow) {
+      const fieldSelect = firstRow.querySelector('.search-field-select');
+      const textInput = firstRow.querySelector('.search-text-input');
+      if (fieldSelect) fieldSelect.value = 'all';
+      if (textInput) textInput.value = '';
+    }
+
+    const extraRows = document.getElementById('advanced-search-rows');
+    if (extraRows) extraRows.innerHTML = '';
+
+    this.applyFiltersAjax();
+  }
+
+  setupResultsUi() {
+    this.bindResultsSelectionControls();
+    this.bindResultsDecorativeControls();
+  }
+
+  bindResultsSelectionControls() {
+    const selectPage = document.getElementById('results-select-page');
+    const itemCheckboxes = Array.from(document.querySelectorAll('.result-item__select-input'));
+    const selectedCounter = document.getElementById('results-selected-counter');
+
+    if (!selectPage || !selectedCounter) return;
+
+    const singularLabel = selectedCounter.dataset.labelSingular || gettext('selecionado');
+    const pluralLabel = selectedCounter.dataset.labelPlural || gettext('selecionados');
+
+    const updateSelectionState = () => {
+      const selectedCount = itemCheckboxes.filter(input => input.checked).length;
+      const label = selectedCount === 1 ? singularLabel : pluralLabel;
+      selectedCounter.textContent = `${selectedCount} ${label}`;
+
+      if (!itemCheckboxes.length) {
+        selectPage.checked = false;
+        selectPage.indeterminate = false;
+        return;
+      }
+
+      if (selectedCount === 0) {
+        selectPage.checked = false;
+        selectPage.indeterminate = false;
+        return;
+      }
+
+      if (selectedCount === itemCheckboxes.length) {
+        selectPage.checked = true;
+        selectPage.indeterminate = false;
+        return;
+      }
+
+      selectPage.checked = false;
+      selectPage.indeterminate = true;
+    };
+
+    selectPage.addEventListener('change', () => {
+      itemCheckboxes.forEach(input => {
+        input.checked = selectPage.checked;
+      });
+      updateSelectionState();
+    });
+
+    itemCheckboxes.forEach(input => {
+      input.addEventListener('change', updateSelectionState);
+    });
+
+    updateSelectionState();
+  }
+
+  bindResultsDecorativeControls() {
+    document.querySelectorAll('[data-results-limit-option]').forEach(button => {
+      if (button.dataset.bound === 'true') return;
+
+      button.addEventListener('click', () => {
+        document.querySelectorAll('[data-results-limit-option]').forEach(option => {
+          option.classList.remove('results-controls__limit-option--active');
         });
-        
-        this.updateActiveFilters();
-    }
+        button.classList.add('results-controls__limit-option--active');
+      });
+
+      button.dataset.bound = 'true';
+    });
+  }
 }
 
-// Initialize when DOM is ready
-document.addEventListener('DOMContentLoaded', function() {
-    if (window.searchPageConfig) {
-        window.searchPageManager = new SearchPageManager(window.searchPageConfig);
-    }
+document.addEventListener('DOMContentLoaded', () => {
+  if (window.searchPageConfig) {
+    window.searchPageManager = new SearchPageManager(window.searchPageConfig);
+  }
 });

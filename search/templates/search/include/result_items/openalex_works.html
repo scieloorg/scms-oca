@@ -7,135 +7,137 @@
 
 {% get_localized_field doc.source "title" as display_title %}
 {% get_localized_field doc.source "abstract" "text" as display_abstract %}
+{% firstof doc.source.resolved_source_name doc.source.primary_source_title doc.source.primary_location.source.display_name doc.source.primary_location.source.title doc.source.source_name as display_source_name %}
 
-<div class="d-flex justify-content-between align-items-start gap-2">
-    <h5 class="card-title mb-0" style="flex: 1 1 auto; min-width: 0;">
+<div class="result-card__inner result-card__inner--work">
+    <div class="result-card__header result-card__header--work">
+        <div class="result-card__eyebrow">
+            {% if result_number %}
+            <span class="result-card__index">{{ result_number }}.</span>
+            {% endif %}
+            {% if doc.source.open_access_status and doc.source.open_access_status|lower != "closed" %}
+            <span class="result-card__flag result-card__flag--open-access">
+                <span class="result-card__flag-icon result-card__flag-icon--open-access" aria-hidden="true"></span>
+                <span class="result-card__flag-text">{% trans "Open access" %}</span>
+            </span>
+            {% endif %}
+            {% if doc.source.type %}
+            <span class="result-card__flag result-card__flag--type">
+                <span class="result-card__flag-icon {% if doc.source.type|lower == 'article' %}result-card__flag-icon--article{% else %}result-card__flag-icon--generic{% endif %}" aria-hidden="true"></span>
+                <span class="result-card__flag-text">{{ doc.source.type }}</span>
+            </span>
+            {% endif %}
+        </div>
+        {% if doc.source.language %}
+        <span class="result-card__language">{{ doc.source.language }}</span>
+        {% endif %}
+    </div>
+
+    <h3 class="result-card__title">
         {% if doc.source.content_url %}
-    <a href="{{ doc.source.content_url.0 }}" target="_blank" class="text-decoration-none">
+        <a href="{{ doc.source.content_url.0 }}" target="_blank" rel="noopener noreferrer" class="result-card__title-link">
             {{ display_title }}
         </a>
     {% elif doc.source.ids.doi %}
-        <a href="{{ doc.source.ids.doi }}" target="_blank" class="text-decoration-none">
+        <a href="https://doi.org/{{ doc.source.ids.doi|cut:'https://doi.org/'|cut:'http://doi.org/' }}" target="_blank" rel="noopener noreferrer" class="result-card__title-link">
             {{ display_title }}
         </a>
     {% else %}
-        <a href="{{ pageurl }}" target="_blank" class="text-decoration-none">{{ display_title }}</a>
+        <a href="{{ pageurl }}" target="_blank" rel="noopener noreferrer" class="result-card__title-link">{{ display_title }}</a>
     {% endif %}
-    </h5>
-    {% if doc.source.type %}
-        <span class="badge bg-secondary ms-2 text-muted" style="flex-shrink: 0; white-space: nowrap;">{{ doc.source.type }}</span>
+    </h3>
+
+    {% if doc.source.authorships %}
+    <p class="result-card__authors">
+        {% for auth in doc.source.authorships %}
+            {% if auth.author.display_name %}
+                {{ auth.author.display_name }}
+            {% elif auth.name %}
+                {{ auth.name }}
+            {% endif %}
+            {% if auth.author.orcid %}
+                <a href="{{ auth.author.orcid }}" target="_blank" rel="noopener noreferrer" class="result-card__orcid-link"><img src="{% static 'images/authorIcon-orcid.png' %}" alt="ORCID" class="result-card__orcid-icon"></a>
+            {% elif auth.orcid %}
+                <a href="{{ auth.orcid }}" target="_blank" rel="noopener noreferrer" class="result-card__orcid-link"><img src="{% static 'images/authorIcon-orcid.png' %}" alt="ORCID" class="result-card__orcid-icon"></a>
+            {% endif %}
+            {% if not forloop.last %}<span class="result-card__author-separator">;</span>{% endif %}
+        {% endfor %}
+    </p>
+    {% endif %}
+
+    {% if display_source_name or doc.source.biblio.volume or doc.source.biblio.issue or doc.source.publication_year or doc.source.biblio.pages or doc.source.biblio.first_page or doc.source.biblio.last_page %}
+    <p class="result-card__source-line">
+        {% if display_source_name %}
+        <span class="result-card__source-name">{{ display_source_name }}</span>
+        {% endif %}
+        {% if doc.source.biblio.volume %}
+        <span class="result-card__source-meta">vol.{{ doc.source.biblio.volume }}</span>
+        {% endif %}
+        {% if doc.source.biblio.issue %}
+        <span class="result-card__source-meta">n.{{ doc.source.biblio.issue }}</span>
+        {% endif %}
+        {% if doc.source.publication_year %}
+        <span class="result-card__source-meta">{{ doc.source.publication_year }}</span>
+        {% endif %}
+        {% if doc.source.biblio.pages %}
+        <span class="result-card__source-meta">{% trans "Pages" %} {{ doc.source.biblio.pages }}</span>
+        {% elif doc.source.biblio.first_page or doc.source.biblio.last_page %}
+        <span class="result-card__source-meta">{% trans "Pages" %} {{ doc.source.biblio.first_page|default:"" }}{% if doc.source.biblio.last_page %}-{{ doc.source.biblio.last_page }}{% endif %}</span>
+        {% endif %}
+    </p>
+    {% endif %}
+
+    {% if display_abstract %}
+    <div class="result-card__abstract">
+        {{ display_abstract|safe }}
+    </div>
+    {% endif %}
+
+    {% if doc.source.primary_topic_name or doc.source.primary_topic_field or doc.source.primary_topic_domain or doc.source.metrics.received_citations.total %}
+    <div class="result-card__meta-list result-card__meta-list--chips">
+        {% if doc.source.primary_topic_name or doc.source.primary_topic_field or doc.source.primary_topic_domain %}
+        <p class="result-card__meta-row">
+            <strong>{% trans "Primary Topic" %}:</strong>
+            {{ doc.source.primary_topic_name|default:"" }}
+            {% if doc.source.primary_topic_name and doc.source.primary_topic_field %} - {% endif %}
+            {{ doc.source.primary_topic_field|default:"" }}
+            {% if doc.source.primary_topic_domain %}
+                {% if doc.source.primary_topic_name or doc.source.primary_topic_field %} ({% endif %}
+                {{ doc.source.primary_topic_domain }}
+                {% if doc.source.primary_topic_name or doc.source.primary_topic_field %}){% endif %}
+            {% endif %}
+        </p>
+        {% endif %}
+        {% if doc.source.metrics.received_citations.total %}
+        <p class="result-card__meta-row">
+            <strong>{% trans "Citations" %}:</strong> {{ doc.source.metrics.received_citations.total }}
+        </p>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {% if doc.source.content_url or doc.source.ids.doi or doc.source.ids.openalex %}
+    <div class="result-card__footer">
+        <div class="result-card__actions">
+            {% if doc.source.content_url %}
+            <a href="{{ doc.source.content_url.0 }}" target="_blank" rel="noopener noreferrer" class="result-card__action">{% trans "Acessar" %}</a>
+            {% endif %}
+            {% if doc.source.ids.openalex %}
+            <a href="{{ doc.source.ids.openalex }}" target="_blank" rel="noopener noreferrer" class="result-card__action result-card__action--ghost">OpenAlex</a>
+            {% endif %}
+        </div>
+        <div class="result-card__footer-side">
+            {% if doc.source.ids.doi %}
+            <div class="result-card__identifier">
+                <span class="result-card__identifier-label">DOI</span>
+                <a href="https://doi.org/{{ doc.source.ids.doi|cut:'https://doi.org/'|cut:'http://doi.org/' }}" target="_blank" rel="noopener noreferrer" class="result-card__identifier-link">{{ doc.source.ids.doi|cut:'https://doi.org/'|cut:'http://doi.org/' }}</a>
+            </div>
+            {% endif %}
+            <span class="result-card__action result-card__action--ghost result-card__action--static">
+                <span class="result-card__action-icon result-card__action-icon--quotes" aria-hidden="true"></span>
+                {% trans "Citar" %}
+            </span>
+        </div>
+    </div>
     {% endif %}
 </div>
-
-{% if doc.source.authorships %}
-<p class="card-text">
-    {% for auth in doc.source.authorships %}
-        {% if auth.author.display_name %}
-            {{ auth.author.display_name }}
-        {% elif auth.name %}
-            {{ auth.name }}
-        {% endif %}
-        {% if auth.author.orcid %}
-            <a href="{{ auth.author.orcid }}" target="_blank"><img src="{% static 'images/authorIcon-orcid.png' %}" alt="ORCID"></a>
-        {% elif auth.orcid %}
-            <a href="{{ auth.orcid }}" target="_blank"><img src="{% static 'images/authorIcon-orcid.png' %}" alt="ORCID"></a>
-        {% endif %}
-        {% if not forloop.last %}; {% endif %}
-    {% endfor %}
-</p>
-{% endif %}
-
-{% if display_abstract %}
-<p class="card-text" style="justify-content: justify;">
-    {{ display_abstract|safe }}
-</p>
-{% endif %}
-
-{% if doc.source.primary_source_title %}
-<p class="card-text mb-1">
-    <small class="text-muted">
-        <strong>{% trans "Source" %}:</strong> {{ doc.source.primary_source_title }}
-    </small>
-</p>
-{% endif %}
-
-{% if doc.source.publication_year %}
-<p class="card-text mb-1">
-    <small class="text-muted">
-        <strong>{% trans "Year" %}:</strong> {{ doc.source.publication_year }}
-    </small>
-</p>
-{% endif %}
-
-{% if doc.source.biblio.volume or doc.source.biblio.issue or doc.source.biblio.first_page or doc.source.biblio.last_page %}
-<p class="card-text mb-1">
-    <small class="text-muted">
-        {% if doc.source.biblio.volume %}<strong>{% trans "Volume" %}:</strong> {{ doc.source.biblio.volume }}{% endif %}
-        {% if doc.source.biblio.volume and doc.source.biblio.issue %}, {% endif %}
-        {% if doc.source.biblio.issue %}<strong>{% trans "N°" %}:</strong> {{ doc.source.biblio.issue }}{% endif %}
-        {% if doc.source.biblio.first_page or doc.source.biblio.last_page %}
-            {% if doc.source.biblio.volume or doc.source.biblio.issue %} - {% endif %}
-            <strong>{% trans "Pages" %}:</strong>
-            {{ doc.source.biblio.first_page|default:"" }}{% if doc.source.biblio.last_page %}-{{ doc.source.biblio.last_page }}{% endif %}
-        {% endif %}
-    </small>
-</p>
-{% endif %}
-
-{% if doc.source.primary_topic_name or doc.source.primary_topic_field or doc.source.primary_topic_domain %}
-<p class="card-text mb-1">
-    <small class="text-muted">
-        <strong>{% trans "Primary Topic" %}:</strong>
-        {{ doc.source.primary_topic_name|default:"" }}
-        {% if doc.source.primary_topic_name and doc.source.primary_topic_field %} - {% endif %}
-        {{ doc.source.primary_topic_field|default:"" }}
-        {% if doc.source.primary_topic_domain %}
-            {% if doc.source.primary_topic_name or doc.source.primary_topic_field %} ({% endif %}
-            {{ doc.source.primary_topic_domain }}
-            {% if doc.source.primary_topic_name or doc.source.primary_topic_field %}){% endif %}
-        {% endif %}
-    </small>
-</p>
-{% endif %}
-
-{% if doc.source.metrics.received_citations.total %}
-<p class="card-text mb-1">
-    <small class="text-muted">
-        <strong>{% trans "Citations" %}:</strong> {{ doc.source.metrics.received_citations.total }}
-    </small>
-</p>
-{% endif %}
-
-{% if doc.source.language %}
-<p class="card-text mb-1">
-    <small class="text-muted">
-        <strong>{% trans "Language" %}:</strong> {{ doc.source.language }}
-    </small>
-</p>
-{% endif %}
-
-{% if doc.source.open_access_status %}
-<p class="card-text mb-1">
-    <small class="text-muted">
-        <strong>{% trans "Open Access" %}:</strong> {{ doc.source.open_access_status }}
-    </small>
-</p>
-{% endif %}
-
-{% if doc.source.ids.doi %}
-<p class="card-text mb-0">
-    <small class="text-muted">
-        <strong>{% trans "DOI" %}:</strong>
-        <a href="https://doi.org/{{ doc.source.ids.doi }}" target="_blank">{{ doc.source.ids.doi }}</a>
-    </small>
-</p>
-{% endif %}
-
-{% if doc.source.ids.openalex %}
-<p class="card-text mb-0">
-    <small class="text-muted">
-        <strong>{% trans "OpenAlex ID" %}:</strong>
-        <a href="{{ doc.source.ids.openalex }}" target="_blank">{{ doc.source.ids.openalex }}</a>
-    </small>
-</p>
-{% endif %}

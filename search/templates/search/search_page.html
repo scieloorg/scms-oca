@@ -1,13 +1,29 @@
-{% extends "search/search.html" %}
+{% extends "search_gateway/search_gateway.html" %}
 {% load custom_filters %}
 {% load static %}
 {% load i18n %}
 
 {% block header_content %}
 <div class="search-header-card">
-    <h1 class="search-header-card__title">{% trans "Busca avançada" %}</h1>
-    <span class="search-header-card__subtitle">{% if index_name == 'sci*' %}{% trans 'articles, preprints, datasets, books' %}...{% else %}{% trans 'Actions, events and infrastructure' %}{% endif %}</span>
-    <form method="get" action="{{self}}" id="search-form" class="search-header-card__search">
+    <div class="search-header-card__top">
+        <div class="search-header-card__heading">
+            <h1 class="search-header-card__title">{% trans "Busca avançada" %}</h1>
+            <span class="search-header-card__subtitle">{% if is_scientific_data_source %}{% trans 'articles, preprints, datasets, books' %}...{% else %}{% trans 'Actions, events and infrastructure' %}{% endif %}</span>
+        </div>
+        <button
+            type="button"
+            id="search-sidebar-toggle"
+            class="search-header-card__toggle"
+            data-label-show="{% trans 'Mostrar filtros' %}"
+            data-label-hide="{% trans 'Ocultar filtros' %}"
+            aria-expanded="true"
+            aria-controls="search-sidebar-col"
+        >
+            <span class="search-header-card__toggle-icon" aria-hidden="true"></span>
+            <span class="search-header-card__toggle-text">{% trans "Ocultar filtros" %}</span>
+        </button>
+    </div>
+    <form method="get" action="{{ request.path }}" id="search-form" class="search-header-card__search">
         <div class="advanced-search-rows">
             <div class="advanced-search-row search-input-card__row" data-row-index="0">
                 <select id="search-field-0" name="search_field_0" class="form-select search-field-select" aria-label="{% trans 'Campo de busca' %}">
@@ -27,15 +43,17 @@
             </div>
             <div id="advanced-search-rows"></div>
         </div>
-        <div class="advanced-search-actions mt-2">
-            <button type="button" class="btn btn-outline-secondary btn-sm" id="btn-add-field">
-                + {% trans "ADICIONAR CAMPO" %}
-            </button>
-        </div>
-        <div class="search-input-card__row mt-3">
-            <button type="button" class="btn btn-outline-primary" id="btn-clear">{% trans "LIMPAR" %}</button>
-            <button type="submit" class="btn btn-primary search-input-card__button">
-                <i class="icon-search"></i> {% trans "PESQUISAR" %}
+        <div class="advanced-search-divider"></div>
+        <div class="search-header-card__footer">
+            <div class="advanced-search-actions">
+                <button type="button" class="search-header-card__action-link" id="btn-add-field">
+                    <span class="search-header-card__action-link-icon" aria-hidden="true"></span>
+                    <span>{% trans "Adicionar campo" %}</span>
+                </button>
+                <button type="button" class="search-header-card__clear" id="btn-clear">{% trans "Limpar" %}</button>
+            </div>
+            <button type="submit" class="search-header-card__submit">
+                {% trans "Pesquisar" %}
             </button>
         </div>
     </form>
@@ -43,9 +61,9 @@
 <template id="advanced-search-row-template">
     <div class="advanced-search-row search-input-card__row" data-row-index="">
         <select class="form-select search-operator" aria-label="{% trans 'Operador lógico' %}">
-            <option value="AND">AND</option>
-            <option value="OR">OR</option>
-            <option value="NOT">NOT</option>
+            <option value="AND">{% trans "AND" %}</option>
+            <option value="OR">{% trans "OR" %}</option>
+            <option value="NOT">{% trans "NOT" %}</option>
         </select>
         <select class="form-select search-field-select" aria-label="{% trans 'Campo de busca' %}">
             {% for value, label in searchable_fields %}
@@ -53,7 +71,7 @@
             {% endfor %}
         </select>
         <input type="search" class="search-input-card__input search-text-input" placeholder="{% trans 'Termos de pesquisa...' %}" autocomplete="off">
-        <button type="button" class="btn btn-outline-danger btn-remove-row" aria-label="{% trans 'Remover' %}">
+        <button type="button" class="btn-remove-row" aria-label="{% trans 'Remover' %}">
             <i class="icon-trash"></i>
         </button>
     </div>
@@ -61,40 +79,27 @@
 {% endblock%}
 
 {% block search_sidebar %}
-    {% include "search/include/filters.html" %}
+    <div id="search-sidebar-root">{{ search_sidebar_html|safe }}</div>
 {% endblock %}
 
 {% block search_content %}
-    <div class="card mb-3 p-3 d-none shadow-sm indicator-applied-filters" id="active-filters-container">
-        <div class="applied-filters-head">
-            <span class="applied-filters-title">{% trans "Filtros aplicados" %}</span>
-            <span class="applied-filters-count" id="active-filters-count">0</span>
-        </div>
-
-        <div id="search-query-section" class="mb-2 d-none">
-            <span class="applied-filters-grid" id="search-query-badge"></span>
-        </div>
-
-        <div id="filters-section" class="d-none">
-            <div class="applied-filters-grid" id="selected-filters-badges"></div>
-        </div>
-    </div>
-
     {% include "search/include/results.html" %}
+{% endblock %}
+
+{% block extra_css %}
+{{ block.super }}
+<link href="{% static 'search/css/custom.css' %}" rel="stylesheet">
 {% endblock %}
 
 {% block javascript %}
 {{ block.super }}
-{{ filters|json_script:"filters-data" }}
-{{ filter_metadata|json_script:"filter-metadata-data" }}
+{{ search_clauses|json_script:"search-clauses-data" }}
 <script src="{% static 'search/js/search_page.js' %}"></script>
-<link href="{% static 'search/css/custom.css' %}" rel="stylesheet">
 <script>
     window.searchPageConfig = {
         initialSearchQuery: '{{ search_query|escapejs }}',
+        initialSearchClauses: JSON.parse(document.getElementById('search-clauses-data').textContent),
         dataSourceName: '{{ index_name|escapejs }}',
-        filters: JSON.parse(document.getElementById('filters-data').textContent),
-        filterMetadata: JSON.parse(document.getElementById('filter-metadata-data').textContent),
         searchableFields: [
             {% for value, label in searchable_fields %}
             { value: '{{ value|escapejs }}', label: '{{ label|escapejs }}' }{% if not forloop.last %},{% endif %}

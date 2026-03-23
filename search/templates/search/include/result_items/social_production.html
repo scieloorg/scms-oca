@@ -8,80 +8,69 @@
 {% get_localized_field doc.source "title" as display_title %}
 {% get_localized_field doc.source "description" as display_description %}
 
+<div class="result-card__inner result-card__inner--social">
+    <div class="result-card__header">
+        <div class="result-card__eyebrow">
+            {% if result_number %}
+            <span class="result-card__index">{{ result_number }}.</span>
+            {% endif %}
+            {% if doc.source.action %}
+            <span class="result-card__badge result-card__badge--accent">{{ doc.source.action }}</span>
+            {% endif %}
+            {% if doc.source.directory_type %}
+            <span class="result-card__badge">{{ doc.source.directory_type }}</span>
+            {% endif %}
+        </div>
+    </div>
 
-<div class="d-flex justify-content-between align-items-start gap-2">
-    <h5 class="card-title mb-0" style="flex: 1 1 auto; min-width: 0;">
+    <h3 class="result-card__title">
         {% if doc.source.link %}
-            <a href="{{ doc.source.link }}" target="_blank" class="text-decoration-none">
+            <a href="{{ doc.source.link }}" target="_blank" rel="noopener noreferrer" class="result-card__title-link">
                 {{ display_title }}
             </a>
         {% else %}
             {{ display_title }}
         {% endif %}
-    </h5>
-    {% if doc.source.action %}
-        <span class="badge bg-secondary ms-2 text-muted" style="flex-shrink: 0; white-space: nowrap;">{{ doc.source.action }}</span>
-    {% endif %}
-</div>
+    </h3>
 {% if display_description %}
-<p class="card-text">
+<div class="result-card__abstract result-card__abstract--compact">
     {{ display_description|truncatewords:50 }}
-</p>
+</div>
 {% endif %}
 
-{% if doc.source.directory_type %}
-<p class="card-text mb-1">
-    <small class="text-muted">
-        <strong>{% trans "Type" %}:</strong> {{ doc.source.directory_type }}
-    </small>
-</p>
-{% endif %}
+<div class="result-card__meta-list result-card__meta-list--social">
+    {% if doc.source.start_date %}
+    <p class="result-card__meta-row"><strong>{% trans "Ano de registro" %}:</strong> {{ doc.source.start_date|format_date_br }}</p>
+    {% endif %}
 
-{% if doc.source.start_date %}
-<p class="card-text mb-1">
-    <small class="text-muted">
-        <strong>{% trans "Ano de registro" %}:</strong> {{ doc.source.start_date|format_date_br }}
-    </small>
-</p>
-{% endif %}
+    {% if doc.source.created %}
+    <p class="result-card__meta-row"><strong>{% trans "Ano de criação" %}:</strong> {{ doc.source.created|format_date_br }}</p>
+    {% endif %}
 
-{% if doc.source.created %}
-<p class="card-text mb-1">
-    <small class="text-muted">
-        <strong>{% trans "Ano de criação" %}:</strong> {{ doc.source.created|format_date_br }}
-    </small>
-</p>
-{% endif %}
-
-{% if doc.source.institutions %}
-<p class="card-text mb-1">
-    <small class="text-muted">
+    {% if doc.source.institutions %}
+    <p class="result-card__meta-row">
         <strong>{% trans "Institutions" %}:</strong> 
         {% if doc.source.institutions|length > 0 %}
             {% for inst in doc.source.institutions %}
                 {{ inst }}{% if not forloop.last %}, {% endif %}
             {% endfor %}
         {% endif %}
-    </small>
-</p>
-{% endif %}
+    </p>
+    {% endif %}
 
-{% if doc.source.organization %}
-<p class="card-text mb-1">
-    <small class="text-muted">
-        <strong>{% trans "organization" %}:</strong> 
+    {% if doc.source.organization %}
+    <p class="result-card__meta-row">
+        <strong>{% trans "Organization" %}:</strong> 
         {% if doc.source.organization|length > 0 %}
             {% for inst in doc.source.organization %}
                 {{ inst }}{% if not forloop.last %}, {% endif %}
             {% endfor %}
         {% endif %}
-    </small>
-</p>
-{% endif %}
+    </p>
+    {% endif %}
 
-{% if doc.source.cities or doc.source.states %}
-<p class="card-text mb-1">
-    <small class="text-muted">
+    {% if doc.source.cities or doc.source.states %}
+    <p class="result-card__meta-row">
         <strong>{% trans "Location" %}:</strong> 
         {% if doc.source.cities %}
             {% for city in doc.source.cities %}
@@ -94,44 +83,34 @@
                 {{ state }}{% if not forloop.last %}, {% endif %}
             {% endfor %}
         {% endif %}
-    </small>
-</p>
-{% endif %}
+    </p>
+    {% endif %}
 
-{% if doc.source.practice %}
-<p class="card-text mb-1">
-    <small class="text-muted">
-        <strong>{% trans "Practice" %}:</strong> {{ doc.source.practice }}
-    </small>
-</p>
-{% endif %}
+    {% if doc.source.practice %}
+    <p class="result-card__meta-row"><strong>{% trans "Practice" %}:</strong> {{ doc.source.practice }}</p>
+    {% endif %}
 
-{% if doc.source.action %}
-<p class="card-text mb-1">
-    <small class="text-muted">
-        <strong>{% trans "Action" %}:</strong> {{ doc.source.action }}
-    </small>
-</p>
-{% endif %}
+    {% if doc.source.classification %}
+    <p class="result-card__meta-row"><strong>{% trans "Classification" %}:</strong> {{ doc.source.classification }}</p>
+    {% endif %}
 
-{% if doc.source.classification %}
-<p class="card-text mb-1">
-    <small class="text-muted">
-        <strong>{% trans "Classification" %}:</strong> {{ doc.source.classification }}
-    </small>
-</p>
-{% endif %}
-
-{% if doc.source.thematic_level_0 %}
-<p class="card-text mb-0">
-    <small class="text-muted">
+    {% if doc.source.thematic_level_0 %}
+    <p class="result-card__meta-row">
         <strong>{% trans "Thematic Areas" %}:</strong> 
         {% if doc.source.thematic_level_0|length > 0 %}
             {% for theme in doc.source.thematic_level_0 %}
                 {{ theme }}{% if not forloop.last %}, {% endif %}
             {% endfor %}
         {% endif %}
-    </small>
-</p>
-{% endif %}
+    </p>
+    {% endif %}
+</div>
 
+{% if doc.source.link %}
+<div class="result-card__footer">
+    <div class="result-card__actions">
+        <a href="{{ doc.source.link }}" target="_blank" rel="noopener noreferrer" class="result-card__action">{% trans "Acessar" %}</a>
+    </div>
+</div>
+{% endif %}
+</div>

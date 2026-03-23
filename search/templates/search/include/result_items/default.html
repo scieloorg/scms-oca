@@ -7,62 +7,56 @@
 
 {% get_localized_field doc.source "title" as display_title %}
 
-
-<div class="card mb-3 result-item">
-    <div class="card-body">
-        <div class="d-flex justify-content-between align-items-start gap-2">
-            <h5 class="card-title mb-0" style="flex: 1 1 auto; min-width: 0;">
+<div class="result-card__inner">
+        <div class="result-card__header">
+            <div class="result-card__badges">
+                {% if doc.source.type %}
+                <span class="result-card__badge">{{ doc.source.type }}</span>
+                {% endif %}
+            </div>
+        </div>
+        <h3 class="result-card__title">
             {% if doc.source.locations %}
-                <a href="{{ doc.source.locations.0.landing_page_url }}" target="_blank" class="text-decoration-none">
+                <a href="{{ doc.source.locations.0.landing_page_url }}" target="_blank" rel="noopener noreferrer" class="result-card__title-link">
                     {{ display_title }}
                 </a>
             {% else %}
-                <a href="{{pageurl}}" target="_blank" class="text-decoration-none">{{ display_title }}</a>
+                <a href="{{pageurl}}" target="_blank" rel="noopener noreferrer" class="result-card__title-link">{{ display_title }}</a>
             {% endif %}
-            </h5>
-            {% if doc.source.type %}
-                <span class="badge bg-secondary ms-2 text-muted" style="flex-shrink: 0; white-space: nowrap;">{{ doc.source.type }}</span>
-            {% endif %}
-        </div>
+        </h3>
         {% if doc.source.authorships %}
-            <p class="card-text">
+            <p class="result-card__authors">
                 {% for auth in doc.source.authorships %}
-                    {{ auth.author.display_name }}{% if auth.author.orcid %} <a href="{{ auth.author.orcid }}" target="_blank"><img src="{% static 'images/authorIcon-orcid.png' %}" alt="ORCID"></a>{% endif %}{% if not forloop.last %}; {% endif %}
+                    {{ auth.author.display_name }}{% if auth.author.orcid %} <a href="{{ auth.author.orcid }}" target="_blank" rel="noopener noreferrer" class="result-card__orcid-link"><img src="{% static 'images/authorIcon-orcid.png' %}" alt="ORCID" class="result-card__orcid-icon"></a>{% endif %}{% if not forloop.last %}<span class="result-card__author-separator">;</span>{% endif %}
                 {% endfor %}
             </p>
         {% endif %}
         
+        <div class="result-card__meta-list">
         {% if doc.source.primary_location.source.display_name %}
-        <p class="card-text">
-            <small class="text-muted">
-                {{ doc.source.primary_location.source.display_name }} {% if doc.source.primary_location.source.id %} <a href="{{doc.primary_location.source.id}}" target="_blank">{{doc.primary_location.source.id}}</a>{% endif %}
-            </small>
+        <p class="result-card__meta-row">
+            <strong>{% trans "Source" %}:</strong>
+            {{ doc.source.primary_location.source.display_name }} {% if doc.source.primary_location.source.id %} <a href="{{ doc.source.primary_location.source.id }}" target="_blank" rel="noopener noreferrer">{{ doc.source.primary_location.source.id }}</a>{% endif %}
         </p>
         {% endif %}
         {% if doc.source.publication_year or doc.source.biblio.volume or doc.source.biblio.issue %}
-        <p class="card-text">
-            <small class="text-muted">
-                {% if doc.source.publication_year %}{{ doc.source.publication_year }}{% endif %}{% if doc.source.publication_year and doc.source.biblio.volume %}, {% endif %}{% if doc.source.biblio.volume %}{% trans "Volume" %} {{ doc.source.biblio.volume }}{% endif %}{% if doc.source.biblio.issue %} {% trans "N°" %} {{ doc.source.biblio.issue }}{% endif %}
-            </small>
+        <p class="result-card__meta-row">
+            <strong>{% trans "Publication" %}:</strong>
+            {% if doc.source.publication_year %}{{ doc.source.publication_year }}{% endif %}{% if doc.source.publication_year and doc.source.biblio.volume %}, {% endif %}{% if doc.source.biblio.volume %}{% trans "Volume" %} {{ doc.source.biblio.volume }}{% endif %}{% if doc.source.biblio.issue %} {% trans "N°" %} {{ doc.source.biblio.issue }}{% endif %}
         </p>
         {% endif %}
-        {% if doc.source.primary_location.doi %}
-        <p class="card-text mb-0">
-            <small class="text-muted">
-                <a href="https://doi.org/{{ doc.source.primary_location.doi }}" target="_blank">
-                    {{ doc.source.primary_location.doi }}
-                </a>
-            </small>
-        </p>
+        </div>
+
+        {% if doc.source.primary_location.doi or doc.id %}
+        <div class="result-card__footer">
+            <div class="result-card__actions">
+                {% if doc.source.primary_location.doi %}
+                <a href="https://doi.org/{{ doc.source.primary_location.doi|cut:'https://doi.org/'|cut:'http://doi.org/' }}" target="_blank" rel="noopener noreferrer" class="result-card__action">DOI</a>
+                {% endif %}
+                {% if doc.id %}
+                <a href="{{ doc.id }}" target="_blank" rel="noopener noreferrer" class="result-card__action result-card__action--ghost">{% trans "Registro" %}</a>
+                {% endif %}
+            </div>
+        </div>
         {% endif %}
-        {% if doc.id %}
-        <p class="card-text mb-0">
-            <small class="text-muted">
-                <a href="{{ doc.id }}" target="_blank">
-                    {{ doc.id }}
-                </a>
-            </small>
-        </p>
-        {% endif %}
-    </div>
 </div>
