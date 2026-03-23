@@ -38,7 +38,7 @@ def build_event_doc(obj):
 
 
 def get_event_index_name(index_name=None):
-    return index_name or getattr(settings, "OP_INDEX_SOC_PROD", None)
+    return index_name or getattr(settings, "OP_INDEX_SOCIAL_PRODUCTION", None)
 
 
 def index_event_instance(instance, index_name=None, refresh=True):

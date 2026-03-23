@@ -504,58 +504,20 @@ THEMATIC_AREA_INDEX = env.str("THEMATIC_AREA_INDEX", "thematicareas")
 
 DIRECTORY_IMPORT_DELIMITER = env.str("DIRECTORY_IMPORT_DELIMITER", default=",")
 
+# Opensearch Base Settings
+OS_URL = env("OS_URL", default="http://opensearch:9200")
+OS_REQUEST_TIMEOUT = env.int("OS_REQUEST_TIMEOUT", default=40)
 
-# Elasticsearch indices for indicators
-ES_INDEX_SCI_PROD_WORLD = env.str("ES_INDEX_SCI_PROD_WORLD", "openalex_works")
-ES_INDEX_SCI_PROD_BRAZIL = env.str("ES_INDEX_SCI_PROD_BRAZIL", "openalex_works")
-ES_INDEX_SCI_PROD_SCIELO = env.str("ES_INDEX_SCI_PROD_SCIELO", "scielo_works")
-ES_INDEX_SOC_PROD = env.str("ES_INDEX_SOC_PROD", "social_production")
-ES_INDEX_JOURNAL_METRICS = env.str("ES_INDEX_JOURNAL_METRICS", "journal_annual_metrics")
-ES_INDEX_SOURCES = env.str("ES_INDEX_SOURCES", "journals")
+# OpenSearch Index Names
+OP_INDEX_SOCIAL_PRODUCTION = env.str("OP_INDEX_SOCIAL_PRODUCTION", "social_production")
+OP_INDEX_SCIENTIFIC_PRODUCTION = env.str("OP_INDEX_SCIENTIFIC_PRODUCTION", "scientific_production")
 
-# New version of index opoca
-ES_INDEX_SOCIAL_PRODUCTION = env.str("ES_INDEX_SOCIAL_PRODUCTION", "social_production")
-
-
-# Settings Opensearch index
-OPENSEARCH_URL = env("OPENSEARCH_URL", default="http://opensearch:9200")
-OPENSEARCH_REQUEST_TIMEOUT = env.int("OPENSEARCH_REQUEST_TIMEOUT", default=40)
-OP_INDEX_SCI_PROD = env.str("OP_INDEX_SCI_PROD", "bronze_*")
-OPENSEARCH_INDEX_JOURNAL_METRICS = env.str("OPENSEARCH_INDEX_JOURNAL_METRICS", "journal_metrics_*")
-OPENSEARCH_INDEX_RAW_PREPRINT = env.str("OPENSEARCH_INDEX_RAW_PREPRINT", "raw_scielo_preprint")
-OPENSEARCH_INDEX_RAW_BOOK = env.str("OPENSEARCH_INDEX_RAW_BOOK", "raw_scielo_book")
-OPENSEARCH_INDEX_RAW_SCIELO_DATA_DATASET = env.str(
-    "OPENSEARCH_INDEX_RAW_SCIELO_DATA_DATASET",
-    "raw_scielo_data_dataset",
-)
-OPENSEARCH_INDEX_RAW_SCIELO_DATA_DATAVERSE = env.str(
-    "OPENSEARCH_INDEX_RAW_SCIELO_DATA_DATAVERSE",
-    "raw_scielo_data_comunities_dataverse",
-)
-OPENSEARCH_INDEX_RAW_SCIELO_DATA = env.str("OPENSEARCH_INDEX_RAW_SCIELO_DATA", "raw_scielo_data")
-OPENSEARCH_INDEX_BRONZE = env.str("OPENSEARCH_INDEX_BRONZE", "bronze_*")
-
-# Journal Metrics defaults
-JOURNAL_METRICS_DEFAULT_CATEGORY_ID = env.str(
-    "JOURNAL_METRICS_DEFAULT_CATEGORY_ID",
-    default="Social Sciences",
-)
-JOURNAL_METRICS_DEFAULT_CATEGORY_LEVEL = env.str(
-    "JOURNAL_METRICS_DEFAULT_CATEGORY_LEVEL",
-    default="field",
-)
-JOURNAL_METRICS_DEFAULT_MINIMUM_PUBLICATIONS = env.int(
-    "JOURNAL_METRICS_DEFAULT_MINIMUM_PUBLICATIONS",
-    default=50,
-)
-JOURNAL_METRICS_DEFAULT_PUBLICATION_YEAR = env.str(
-    "JOURNAL_METRICS_DEFAULT_PUBLICATION_YEAR",
-    default="2020",
-)
-JOURNAL_METRICS_DEFAULT_RANKING_METRIC = env.str(
-    "JOURNAL_METRICS_DEFAULT_RANKING_METRIC",
-    default="journal_impact_cohort_window_3y",
-)
+# OpenSearch Raw Index Names
+OS_INDEX_RAW_PREPRINT = env.str("OS_INDEX_RAW_PREPRINT", "raw_scielo_preprint")
+OS_INDEX_RAW_BOOK = env.str("OS_INDEX_RAW_BOOK", "raw_scielo_book")
+OS_INDEX_RAW_SCIELO_DATA_DATASET = env.str("OS_INDEX_RAW_SCIELO_DATA_DATASET", "raw_scielo_data_dataset")
+OS_INDEX_RAW_SCIELO_DATA_DATAVERSE = env.str("OS_INDEX_RAW_SCIELO_DATA_DATAVERSE", "raw_scielo_data_comunities_dataverse")
+OS_INDEX_RAW_SCIELO_DATA = env.str("OS_INDEX_RAW_SCIELO_DATA", "raw_scielo_data")
 
 # HARVEST Books, Preprint, SciELO Data
 SCIELO_BOOKS_BASE_URL = env("SCIELO_BOOKS_BASE_URL", default=None)
@@ -565,7 +527,3 @@ USER_AGENT = env(
     default="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
 )
 ENDPOINT_OAI_PMH_PREPRINT = env("ENDPOINT_OAI_PMH_PREPRINT", default="https://preprints.scielo.org/index.php/scielo/oai")
-
-# ALIAS OPENSEARCHINDEX
-OP_INDEX_SOC_PROD = env.str("OP_INDEX_SOC_PROD", "bronze_social_production")
-OP_INDEX_ALL_BRONZE = env.str("OP_INDEX_ALL_BRONZE", "sci*")
