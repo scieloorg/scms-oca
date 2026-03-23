@@ -3,10 +3,17 @@ from collections import OrderedDict
 from django.utils.translation import gettext
 
 
-def normalize_widget_name(widget_name, transform_type=None):
-    if widget_name in (None, ""):
-        return "range" if transform_type == "year_range" else "select"
-    return str(widget_name).strip().lower()
+def normalize_widget_name(widget_name, transform_type=None, has_lookup=False):
+    normalized_widget = str(widget_name or "").strip().lower()
+    if normalized_widget in {"lookup", "select", "range", "text", "number", "year"}:
+        return normalized_widget
+    if transform_type == "year_range":
+        return "range"
+    if has_lookup or normalized_widget in {"autocomplete"}:
+        return "lookup"
+    if normalized_widget in {"input", "string"}:
+        return "text"
+    return "select"
 
 
 def normalize_group_key(group_key, default="default"):
