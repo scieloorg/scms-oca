@@ -1,6 +1,6 @@
 from wagtail.admin.panels import FieldPanel
 from wagtail_modeladmin.options import (
-    ModelAdmin, modeladmin_register
+    ModelAdmin
 )
 from .models import Chart
 
@@ -24,4 +24,4 @@ class ChartAdmin(ModelAdmin):
         FieldPanel("data_zip"),
     ]
 
-modeladmin_register(ChartAdmin)
+# modeladmin_register(ChartAdmin)

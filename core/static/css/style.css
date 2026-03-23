@@ -160,7 +160,7 @@ table,
 fieldset { margin-bottom: 10px; }
 
 form {
-	margin-bottom: 30px;
+	margin-bottom: 0.65rem;
 }
 
 small { font-family: 'Lato', sans-serif; }
