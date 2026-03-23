@@ -152,7 +152,7 @@ def search_lookup_options(es, data_source, settings_filter, query_text="", filte
     response = es.search(
         index=lookup_index_name,
         body=body,
-        request_timeout=getattr(settings, "OPENSEARCH_REQUEST_TIMEOUT", 40),
+        request_timeout=getattr(settings, "OS_REQUEST_TIMEOUT", 40),
     )
     return _parse_lookup_hits(response, lookup_config), None
 
