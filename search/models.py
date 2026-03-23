@@ -9,7 +9,6 @@ from wagtail.admin.panels import FieldPanel
 from wagtail.models import Page
 
 from .choices import SEARCHABLE_FIELDS
-from search_gateway.controller import get_lookup_options_by_values
 from search_gateway.forms import render_filter_sidebar
 from search_gateway.models import DataSource
 from search_gateway.request_filters import extract_applied_filters
@@ -154,8 +153,8 @@ class SearchPage(Page):
         if not lookup_values:
             return results_data
 
-        lookup_options, error = get_lookup_options_by_values(
-            data_source.index_name,
+        service = SearchGatewayService(index_name=data_source.index_name)
+        lookup_options, error = service.get_lookup_options_by_values(
             "source_name",
             list(dict.fromkeys(lookup_values)),
         )

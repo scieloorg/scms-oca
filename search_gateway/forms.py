@@ -1,10 +1,8 @@
 from django.template.loader import render_to_string
 from django.utils.translation import gettext_lazy as _
 
-from .controller import get_field_options
-from .controller import get_filters_data
-from .controller import get_lookup_options_by_values
 from .request_filters import normalize_option_filters
+from .service import SearchGatewayService
 from .ui import build_data_source_form_groups
 
 
@@ -36,6 +34,7 @@ def _build_field_option_filters(
 
 
 def _append_selected_lookup_options(
+    service,
     data_source,
     *,
     form_key=None,
@@ -76,8 +75,7 @@ def _append_selected_lookup_options(
         if not missing_values:
             continue
 
-        lookup_options, _error = get_lookup_options_by_values(
-            data_source.index_name,
+        lookup_options, _error = service.get_lookup_options_by_values(
             field.field_name,
             missing_values,
         )
@@ -108,6 +106,7 @@ def build_data_source_form_payload(
     exclude_fields=None,
     excluded_filter_names=None,
 ):
+    service = SearchGatewayService(index_name=data_source.index_name)
     option_filters = normalize_option_filters(
         applied_filters,
         excluded_filter_names=excluded_filter_names,
@@ -119,8 +118,7 @@ def build_data_source_form_payload(
     )
     index_field_names = [field.field_name for field in form_fields if field.kind == "index"]
 
-    filters_data, filters_error = get_filters_data(
-        data_source.index_name,
+    filters_data, filters_error = service.get_filters_data(
         include_fields=index_field_names or include_fields,
         exclude_fields=exclude_fields,
         filters=option_filters,
@@ -141,8 +139,7 @@ def build_data_source_form_payload(
             field,
             excluded_filter_names=excluded_filter_names,
         )
-        options, error = get_field_options(
-            data_source.index_name,
+        options, error = service.get_field_options(
             field.field_name,
             query_text="",
             filters=field_option_filters,
@@ -153,6 +150,7 @@ def build_data_source_form_payload(
             field_errors.append(error)
 
     _append_selected_lookup_options(
+        service,
         data_source,
         form_key=form_key,
         applied_filters=applied_filters,

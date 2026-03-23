@@ -1,10 +1,10 @@
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET
 
-from . import controller
 from .forms import render_filter_sidebar
 from .models import DataSource
 from .request_filters import extract_applied_filters
+from .service import SearchGatewayService
 
 
 def _parse_bool_param(value):
@@ -69,8 +69,8 @@ def filters_view(request):
             continue
         requested_filters[key] = values if len(values) > 1 else values[0]
 
-    filters, error = controller.get_filters_data(
-        data_source_name,
+    service = SearchGatewayService(index_name=data_source_name)
+    filters, error = service.get_filters_data(
         include_fields=include_fields,
         force_refresh=refresh,
         filters=requested_filters,
@@ -96,9 +96,9 @@ def search_item_view(request):
             continue
         requested_filters[key] = values if len(values) > 1 else values[0]
 
-    results, error = controller.search_item(
+    service = SearchGatewayService(index_name=data_source_name)
+    results, error = service.search_item(
         q,
-        data_source_name,
         field_name,
         filters=requested_filters,
     )
