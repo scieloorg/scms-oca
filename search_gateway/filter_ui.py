@@ -21,7 +21,7 @@ def _translate_text(value, default=""):
     return value
 
 
-def apply_form_group_expanded_state(grouped_fields):
+def _apply_form_group_expanded_state(grouped_fields):
     grouped_items = sorted(grouped_fields.values(), key=lambda item: (item["order"], item["label"]))
     has_active_fields = any(
         field.get("is_active")
@@ -52,7 +52,7 @@ def _build_form_groups(fields, form_group_labels=None):
             }
         grouped_fields[group_key]["fields"].append(field)
 
-    return apply_form_group_expanded_state(grouped_fields)
+    return _apply_form_group_expanded_state(grouped_fields)
 
 
 def _field_is_active(*, widget, value="", range_start_value="", range_end_value="", options=None):
@@ -201,10 +201,7 @@ def _resolve_search_placeholder(widget, configured_placeholder, field_label):
     if configured_placeholder and configured_placeholder != field_label:
         return configured_placeholder
 
-    default_search_placeholder = gettext("Search...")
-    if default_search_placeholder == "Search...":
-        return "Buscar..."
-    return default_search_placeholder
+    return gettext("Search...")
 
 
 def _resolve_field_texts(field):
