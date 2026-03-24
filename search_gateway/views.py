@@ -3,15 +3,18 @@ from django.views.decorators.http import require_GET
 
 from .filter_ui import render_filter_sidebar
 from .models import DataSource
-from .request_filters import extract_applied_filters
-from .request_filters import extract_requested_filters
+from .request_filters import (
+    TRUTHY_FLAG_VALUES,
+    extract_applied_filters,
+    extract_requested_filters,
+)
 from .service import SearchGatewayService
 
 
 def _parse_bool_param(value):
     if value is None:
         return False
-    return str(value).strip().lower() in {"1", "true", "yes", "y", "on"}
+    return str(value).strip().lower() in TRUTHY_FLAG_VALUES
 
 
 def _status_code_for_error(error):

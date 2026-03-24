@@ -1,9 +1,5 @@
 from .query import query_filters
-from .transforms import coerce_boolean
-
-
-def _normalize_boolean_value(value):
-    return coerce_boolean(value)
+from .option_normalization import normalize_boolean
 
 
 def _build_year_range_values(start_value, end_value):
@@ -42,13 +38,13 @@ def _map_transformed_filter(field_name, field_info, filters):
         raw_value = filters.get(field_name)
         handled_fields = {field_name}
         if isinstance(raw_value, list):
-            normalized_values = [_normalize_boolean_value(value) for value in raw_value]
+            normalized_values = [normalize_boolean(value) for value in raw_value]
             normalized_values = [value for value in normalized_values if value is not None]
             if normalized_values:
                 return (real_field_name, normalized_values), handled_fields
             return None, handled_fields
 
-        normalized_value = _normalize_boolean_value(raw_value)
+        normalized_value = normalize_boolean(raw_value)
         if normalized_value is not None:
             return (real_field_name, normalized_value), handled_fields
         return None, handled_fields
@@ -137,21 +133,8 @@ def get_index_field_candidates(index_field_name):
         return []
 
     if index_field_name.endswith(".keyword"):
-        candidates = [index_field_name, index_field_name[:-8]]
-    else:
-        candidates = [index_field_name, f"{index_field_name}.keyword"]
-
-    seen = set()
-    unique_candidates = []
-
-    for candidate in candidates:
-        if not candidate or candidate in seen:
-            continue
-
-        seen.add(candidate)
-        unique_candidates.append(candidate)
-
-    return unique_candidates
+        return [index_field_name, index_field_name[:-8]]
+    return [index_field_name, f"{index_field_name}.keyword"]
 
 
 def build_filters_body(aggs, mapped_filters=None):

@@ -1,6 +1,7 @@
 from django.conf import settings
 
-from .transforms import coerce_boolean
+from .option_normalization import normalize_filter_default_value
+from .transforms import TRUE_VALUES, normalize_boolean
 
 
 DEFAULT_FILTER_SUFFIXES = ("_operator", "_bool_not")
@@ -29,7 +30,7 @@ EXCLUDED_QUERY_KEYS = frozenset(
 
 CLEAR_DEFAULTS_QUERY_PARAM = getattr(settings, "SEARCH_GATEWAY_CLEAR_DEFAULTS_QUERY_PARAM", "clear_defaults")
 CLEAR_DEFAULTS_INTERNAL_FLAG = "__clear_defaults__"
-TRUTHY_FLAG_VALUES = {"1", "true", "yes", "y", "sim", "on"}
+TRUTHY_FLAG_VALUES = TRUE_VALUES
 
 
 def _should_skip_default_filters(source):
@@ -37,23 +38,9 @@ def _should_skip_default_filters(source):
     return value in TRUTHY_FLAG_VALUES
 
 
-def _normalize_default_values(default_value):
-    if isinstance(default_value, (list, tuple)):
-        values = [str(value) for value in default_value if value not in (None, "")]
-        if not values:
-            return None
-        return values if len(values) > 1 else values[0]
-    return str(default_value)
-
-
 def _extract_non_empty_values(source, key):
     values = [value for value in source.getlist(key) if value not in (None, "")]
     return values if values else []
-
-
-def _coerce_boolean_values(values):
-    coerced_values = [coerce_boolean(value) for value in values]
-    return [value for value in coerced_values if value is not None]
 
 
 def _apply_default_filters(applied_filters, data_source, form_key=None):
@@ -80,7 +67,7 @@ def _apply_default_filters(applied_filters, data_source, form_key=None):
         if field.field_name in resolved_filters:
             continue
 
-        normalized_default_value = _normalize_default_values(default_value)
+        normalized_default_value = normalize_filter_default_value(default_value)
         if normalized_default_value is not None:
             resolved_filters[field.field_name] = normalized_default_value
 
@@ -98,7 +85,7 @@ def _extract_filters_from_source(source, excluded_keys=None, allowed_keys=None):
         if allowed_keys and key not in allowed_keys:
             continue
 
-        values = [value for value in source.getlist(key) if value not in (None, "")]
+        values = _extract_non_empty_values(source, key)
         if not values:
             continue
         extracted_filters[key] = values if len(values) > 1 else values[0]
@@ -156,7 +143,7 @@ def extract_selected_filters(source, data_source, available_filters=None):
         field_config = field_settings.get(filter_key, {})
         transform_type = (field_config.get("filter") or {}).get("transform", {}).get("type")
         if transform_type == "boolean":
-            transformed_value = _coerce_boolean_values(cleaned_values)
+            transformed_value = normalize_boolean(cleaned_values)
             if transformed_value:
                 selected_filters[filter_key] = transformed_value
             continue

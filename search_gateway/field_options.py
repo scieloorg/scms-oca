@@ -1,6 +1,4 @@
-from .request_filters import build_option_filters
-from .request_filters import normalize_option_filters
-
+from .request_filters import build_option_filters, normalize_option_filters
 
 def _normalize_selected_lookup_values(applied_filters, field_name):
     selected_values = (applied_filters or {}).get(field_name)
@@ -14,11 +12,11 @@ def _normalize_selected_lookup_values(applied_filters, field_name):
 def _normalize_lookup_options(lookup_options):
     return [
         {
-            "value": str(option.get("key") or "").strip(),
-            "label": str(option.get("label") or option.get("key") or "").strip(),
+            "value": str(option.get("value") or "").strip(),
+            "label": str(option.get("label") or option.get("value") or "").strip(),
         }
         for option in (lookup_options or [])
-        if str(option.get("key") or "").strip()
+        if str(option.get("value") or "").strip()
     ]
 
 
@@ -42,7 +40,7 @@ def _append_selected_lookup_options(
 
         existing_options = options_by_field.get(field.field_name) or []
         known_values = {
-            str(option.get("value") or option.get("key") or "").strip()
+            str(option.get("value") or "").strip()
             for option in existing_options
             if isinstance(option, dict)
         }

@@ -1,6 +1,14 @@
 import re
 
-from search.choices import QUERY_STRING_FIELD_ALIASES, SEARCH_FIELD_MAPPING, QUERY_STRING_FIELDS
+from search.choices import (
+    QUERY_STRING_FIELD_ALIASES,
+    QUERY_STRING_FIELDS,
+    SEARCH_FIELD_MAPPING,
+)
+
+
+def _escape_wildcard_chars(text):
+    return text.replace("\\", "\\\\").replace("*", "\\*").replace("?", "\\?")
 
 
 def build_exists_clause(field_name):
@@ -77,7 +85,7 @@ def build_lookup_hits_body(
 
     if cleaned_query and search_fields:
         should = []
-        escaped_query = cleaned_query.replace("\\", "\\\\").replace("*", "\\*").replace("?", "\\?")
+        escaped_query = _escape_wildcard_chars(cleaned_query)
         for search_field in search_fields:
             should.append({"match_phrase_prefix": {search_field: cleaned_query}})
             keyword_candidate = search_field if search_field.endswith(".keyword") else f"{search_field}.keyword"
@@ -153,12 +161,8 @@ def build_term_search_body(field_name, query, aggregation_size=20):
     Returns:
         Elasticsearch query body dict.
     """
-    if field_name.endswith(".keyword"):
-        query_field = field_name[:-8]
-        agg_field = field_name
-    else:
-        query_field = field_name
-        agg_field = field_name
+    query_field = field_name[:-8] if field_name.endswith(".keyword") else field_name
+    agg_field = field_name
 
     return {
         "size": 0,
@@ -180,17 +184,9 @@ def build_keyword_contains_search_body(field_name, query, aggregation_size=20):
     """
     cleaned_query = (query or "").strip()
     if not cleaned_query:
-        return {
-            "size": 0,
-            "query": {"match_all": {}},
-            "aggs": {
-                "unique_items": {
-                    "terms": {"field": field_name, "size": aggregation_size}
-                }
-            },
-        }
+        return build_unique_items_aggregation_body(field_name, aggregation_size)
 
-    escaped_query = cleaned_query.replace("\\", "\\\\").replace("*", "\\*").replace("?", "\\?")
+    escaped_query = _escape_wildcard_chars(cleaned_query)
 
     return {
         "size": 0,
@@ -234,7 +230,7 @@ def build_filters_aggs(field_settings, exclude_fields=None):
         fl_name = field_info.get("index_field_name")
         if not fl_name:
             continue
-        
+
         fl_size = field_info.get("filter", {}).get("size", 1)
         fl_order = field_info.get("filter", {}).get("order")
 

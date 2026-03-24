@@ -71,9 +71,9 @@ def build_profile_context(
     profile_year_options = [resolved_publication_year] if resolved_publication_year else []
     profile_category_options = [resolved_category_id] if resolved_category_id else []
     profile_category_level_options = [
-        str((option or {}).get("key") if isinstance(option, dict) else option).strip()
+        str((option or {}).get("value") if isinstance(option, dict) else option).strip()
         for option in (filters_data or {}).get("category_level", [])
-        if str((option or {}).get("key") if isinstance(option, dict) else option).strip()
+        if str((option or {}).get("value") if isinstance(option, dict) else option).strip()
     ]
 
     if profile_data:

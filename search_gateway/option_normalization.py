@@ -3,6 +3,38 @@ from collections import OrderedDict
 from django.utils.translation import gettext
 
 
+TRUE_VALUES = {"true", "1", "yes", "y", "sim", "on"}
+FALSE_VALUES = {"false", "0", "no", "n", "nao"}
+
+SEARCH_RESULT_SORT_VALUES = frozenset({"recent", "oldest", "cited"})
+
+
+def normalize_int(value, default: int) -> int:
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return default
+
+
+def normalize_positive_number(value, default: int) -> int:
+    normalized = normalize_int(value, default)
+    return normalized if normalized > 0 else default
+
+
+def normalize_search_result_sort(value):
+    normalized = str(value or "recent").strip().lower()
+    return normalized if normalized in SEARCH_RESULT_SORT_VALUES else "recent"
+
+
+def normalize_filter_default_value(default_value):
+    if isinstance(default_value, (list, tuple)):
+        values = [str(item) for item in default_value if item not in (None, "")]
+        if not values:
+            return None
+        return values if len(values) > 1 else values[0]
+    return str(default_value)
+
+
 def normalize_selected_values(applied_filters, field_name, default=None):
     applied_filters = applied_filters or {}
     value = applied_filters.get(field_name, default)
@@ -79,3 +111,19 @@ def group_options(options):
         for label, grouped_options in groups.items()
     )
     return option_groups
+
+
+def normalize_boolean(value):
+    if isinstance(value, str):
+        normalized = value.strip().lower()
+        if normalized in TRUE_VALUES:
+            return True
+        if normalized in FALSE_VALUES:
+            return False
+        return None
+
+    if value in (True, 1):
+        return True
+    if value in (False, 0):
+        return False
+    return None
