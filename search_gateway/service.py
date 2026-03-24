@@ -169,63 +169,6 @@ class SearchGatewayService:
             return None, f"Error executing or parsing search: {errors[0]}"
         return [], None
 
-    def _enrich_options_with_lookup_labels(self, field_name, options):
-        normalized_options = []
-        values = []
-        option_map = {}
-
-        for option in options or []:
-            value = str(option.get("value") or "").strip()
-            if not value:
-                continue
-            values.append(value)
-            option_map[value] = dict(option)
-
-        lookup_options, error = self.get_lookup_options_by_values(field_name, values)
-        if error or not lookup_options:
-            return options, error
-
-        lookup_map = {
-            option["value"]: option
-            for option in lookup_options
-            if option.get("value")
-        }
-        for value in values:
-            base_option = dict(option_map.get(value) or {})
-            lookup_option = lookup_map.get(value) or {}
-            base_option["label"] = lookup_option.get("label") or base_option.get("label") or value
-            normalized_options.append(base_option)
-        return normalized_options, None
-
-    def _should_load_lookup_from_data_source(self, field, query_text, filters):
-        return (
-            field.lookup_uses_data_source_values
-            and not str(query_text or "").strip()
-            and bool(filters)
-        )
-
-    def _search_lookup_field_options(self, field, query_text="", filters=None):
-        if self._should_load_lookup_from_data_source(field, query_text, filters):
-            data_source_options, data_source_error = self._search_data_source_field_options(
-                field,
-                query_text=query_text,
-                filters=filters,
-            )
-            if data_source_error:
-                return None, data_source_error
-            return self._enrich_options_with_lookup_labels(field.field_name, data_source_options)
-
-        try:
-            return search_lookup_options(
-                self.client,
-                self.data_source,
-                field,
-                query_text=query_text,
-                request_timeout=self.request_timeout,
-            )
-        except Exception as exc:
-            return None, f"Error retrieving lookup options: {exc}"
-
     def _get_filterable_field_settings(self, *, include_fields=None, exclude_fields=None):
         field_settings = self.data_source.get_field_settings_dict(
             include_fields=include_fields,
