@@ -52,11 +52,11 @@ def apply_search_filters_to_body(body, mapped_filters):
 def get_mapped_filters(filters, field_settings):
     """
     Map form filter names to Elasticsearch field names.
-    
+
     Args:
         filters: Dict of filters with form field names.
         field_settings: Field settings from data source configuration.
-    
+
     Returns:
         Dict with Elasticsearch field names as keys.
     """
@@ -133,11 +133,11 @@ def get_index_field_candidates(index_field_name):
 
     seen = set()
     unique_candidates = []
-    
+
     for candidate in candidates:
         if not candidate or candidate in seen:
             continue
-    
+
         seen.add(candidate)
         unique_candidates.append(candidate)
 

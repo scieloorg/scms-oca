@@ -130,7 +130,7 @@ def _parse_lookup_hits(response, lookup_config):
     return options
 
 
-def search_lookup_options(es, data_source, settings_filter, query_text="", filters=None):
+def search_lookup_options(client, data_source, settings_filter, query_text=""):
     lookup_config = settings_filter.get_lookup_config()
     if not lookup_config:
         return None, "Lookup not configured"
@@ -149,7 +149,7 @@ def search_lookup_options(es, data_source, settings_filter, query_text="", filte
         sort_field=sort_field,
     )
 
-    response = es.search(
+    response = client.search(
         index=lookup_index_name,
         body=body,
         request_timeout=getattr(settings, "OS_REQUEST_TIMEOUT", 40),
@@ -157,7 +157,7 @@ def search_lookup_options(es, data_source, settings_filter, query_text="", filte
     return _parse_lookup_hits(response, lookup_config), None
 
 
-def search_lookup_options_by_values(es, data_source, settings_filter, values):
+def search_lookup_options_by_values(client, data_source, settings_filter, values):
     lookup_config = settings_filter.get_lookup_config()
     if not lookup_config:
         return None, "Lookup not configured"
@@ -196,7 +196,7 @@ def search_lookup_options_by_values(es, data_source, settings_filter, values):
     if source_fields:
         body["_source"] = source_fields
 
-    response = es.search(
+    response = client.search(
         index=lookup_index_name,
         body=body,
         request_timeout=getattr(settings, "OS_REQUEST_TIMEOUT", 40),
