@@ -13,16 +13,6 @@ def _resolve_data_source(data_source):
     return DataSource.resolve(data_source)
 
 
-@lru_cache(maxsize=256)
-def _get_transform_type(data_source, field_name):
-    resolved_data_source = _resolve_data_source(data_source)
-    if not resolved_data_source:
-        return None
-    
-    field = resolved_data_source.get_field(field_name)
-    return field.display_transform if field else None
-
-
 def _get_language_name(code):
     try:
         return _(Lang(code).name)
