@@ -106,20 +106,58 @@
     });
   }
 
+  function buildCleanJournalMetricsQueryParams(form) {
+    const params = new URLSearchParams();
+    if (!form || !window.SearchGatewayFilterForm || typeof window.SearchGatewayFilterForm.serializeForm !== 'function') {
+      return params;
+    }
+
+    const payload = window.SearchGatewayFilterForm.serializeForm(form) || {};
+    Object.entries(payload).forEach(([key, value]) => {
+      if (!key || value === null || value === undefined) return;
+
+      if (Array.isArray(value)) {
+        value.forEach(item => {
+          const normalized = String(item ?? '').trim();
+          if (!normalized) return;
+          params.append(key, normalized);
+        });
+        return;
+      }
+
+      const normalized = String(value).trim();
+      if (!normalized) return;
+      params.append(key, normalized);
+    });
+
+    return params;
+  }
+
+  function submitJournalMetricsFormWithCleanQuery(form) {
+    if (!form) return;
+
+    const action = form.getAttribute('action') || window.location.pathname;
+    const params = buildCleanJournalMetricsQueryParams(form);
+    const queryString = params.toString();
+    const nextUrl = queryString ? `${action}?${queryString}` : action;
+    window.location.assign(nextUrl);
+  }
+
   function initJournalMetricsAppliedFiltersAutoSubmit() {
     const form = document.getElementById('journal-metrics-filter-form');
     if (!form || form.dataset.appliedFiltersAutoSubmitBound === 'true') return;
 
+    form.addEventListener('submit', event => {
+      const method = String(form.getAttribute('method') || 'get').trim().toLowerCase();
+      if (method !== 'get') return;
+      event.preventDefault();
+      submitJournalMetricsFormWithCleanQuery(form);
+    });
+
     form.addEventListener('search-gateway:filters-changed', event => {
       const reason = String(event?.detail?.reason || '').trim();
       if (reason !== 'remove-applied-filter') return;
-
-      if (typeof form.requestSubmit === 'function') {
-        form.requestSubmit();
-        return;
-      }
-
-      form.submit();
+      submitJournalMetricsFormWithCleanQuery(form);
     });
 
     form.dataset.appliedFiltersAutoSubmitBound = 'true';
