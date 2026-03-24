@@ -22,6 +22,21 @@ def _translate_text(value, default=""):
     return value
 
 
+def apply_form_group_expanded_state(grouped_fields):
+    grouped_items = sorted(grouped_fields.values(), key=lambda item: (item["order"], item["label"]))
+    has_active_fields = any(
+        field.get("is_active")
+        for group in grouped_items
+        for field in group.get("fields", [])
+    )
+    for group in grouped_items:
+        group_is_active = any(field.get("is_active") for field in group.get("fields", []))
+        group["expanded"] = group_is_active if has_active_fields else False
+        for field in group.get("fields", []):
+            field["expanded"] = field.get("is_active") if has_active_fields else False
+    return grouped_items
+
+
 def _build_form_groups(fields, form_group_labels=None):
     visible_fields = [field for field in (fields or []) if field.get("has_visible_content")]
     grouped_fields = OrderedDict()
@@ -32,26 +47,13 @@ def _build_form_groups(fields, form_group_labels=None):
         if group_key not in grouped_fields:
             grouped_fields[group_key] = {
                 "key": group_key,
-                "label": group_label,
+                "label": _(group_label),
                 "order": field["group"]["order"],
                 "fields": [],
             }
         grouped_fields[group_key]["fields"].append(field)
 
-    grouped_items = sorted(grouped_fields.values(), key=lambda item: (item["order"], item["label"]))
-    has_active_fields = any(
-        field.get("is_active")
-        for group in grouped_items
-        for field in group.get("fields", [])
-    )
-
-    for group in grouped_items:
-        group_is_active = any(field.get("is_active") for field in group.get("fields", []))
-        group["expanded"] = group_is_active if has_active_fields else True
-        for field in group.get("fields", []):
-            field["expanded"] = field.get("is_active") if has_active_fields else True
-
-    return grouped_items
+    return apply_form_group_expanded_state(grouped_fields)
 
 
 def _field_is_active(*, widget, value="", range_start_value="", range_end_value="", options=None):
