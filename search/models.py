@@ -9,16 +9,18 @@ from wagtail.admin.panels import FieldPanel
 from wagtail.models import Page
 
 from .choices import SEARCHABLE_FIELDS
-from search_gateway.forms import render_filter_sidebar
+from search_gateway.filter_ui import render_filter_sidebar
 from search_gateway.models import DataSource
 from search_gateway.request_filters import extract_applied_filters
 from search_gateway.request_filters import normalize_option_filters
 from search_gateway.service import SearchGatewayService
 
 logger = logging.getLogger(__name__)
+VALID_RESULT_SORTS = frozenset({"recent", "oldest", "cited"})
+EMPTY_RESULTS_DATA = {"search_results": [], "total_results": 0}
 
 
-def get_save_number(item, default: int):
+def _coerce_int(item, default: int):
     try:
         return int(item)
     except (TypeError, ValueError):
@@ -87,11 +89,22 @@ def _collect_source_lookup_values(source_payload):
 
 
 def _normalize_positive_number(value, default):
-    try:
-        normalized = int(value)
-    except (TypeError, ValueError):
-        return default
+    normalized = _coerce_int(value, default)
     return normalized if normalized > 0 else default
+
+
+def _normalize_sort(value):
+    normalized = str(value or "recent").strip().lower()
+    return normalized if normalized in VALID_RESULT_SORTS else "recent"
+
+
+def _build_lookup_label_map(lookup_options):
+    return {
+        key: _normalize_text(option.get("label") or option.get("key"))
+        for option in (lookup_options or [])
+        for key in [_normalize_text(option.get("key"))]
+        if key
+    }
 
 
 class SearchPage(Page):
@@ -122,6 +135,16 @@ class SearchPage(Page):
 
         return clauses if isinstance(clauses, list) else []
 
+    @classmethod
+    def get_search_request_state(cls, request):
+        return {
+            "search_query": request.GET.get("search", ""),
+            "query_clauses": cls.query_clauses(request),
+            "current_page": _normalize_positive_number(request.GET.get("page"), 1),
+            "current_limit": _normalize_positive_number(request.GET.get("limit"), 25),
+            "current_sort": _normalize_sort(request.GET.get("sort", "recent")),
+        }
+
     @staticmethod
     def enrich_results_data_for_display(data_source, results_data):
         if not data_source:
@@ -132,7 +155,7 @@ class SearchPage(Page):
             return results_data
 
         source_field = data_source.get_field("source_name")
-        if not source_field or not source_field.get_lookup_config():
+        if not source_field or not source_field.lookup:
             return results_data
 
         pending_results = []
@@ -161,11 +184,7 @@ class SearchPage(Page):
         if error or not lookup_options:
             return results_data
 
-        label_by_value = {
-            _normalize_text(option.get("key")): _normalize_text(option.get("label") or option.get("key"))
-            for option in lookup_options
-            if _normalize_text(option.get("key"))
-        }
+        label_by_value = _build_lookup_label_map(lookup_options)
 
         for source_payload, source_lookup_values in pending_results:
             for lookup_value in source_lookup_values:
@@ -178,7 +197,7 @@ class SearchPage(Page):
 
     @staticmethod
     def decorate_results_data_for_ui(results_data, *, page=1, page_size=25, sort="recent"):
-        decorated = results_data or {"search_results": [], "total_results": 0}
+        decorated = results_data or dict(EMPTY_RESULTS_DATA)
         search_results = list(decorated.get("search_results") or [])
         total_results = _normalize_positive_number(decorated.get("total_results"), 0)
         current_page = _normalize_positive_number(page, 1)
@@ -189,9 +208,7 @@ class SearchPage(Page):
         end_result = start_result + shown_count - 1 if shown_count else 0
         total_pages = int(math.ceil(total_results / current_limit)) if total_results and current_limit else 0
 
-        current_sort = str(sort or "recent").strip().lower()
-        if current_sort not in {"recent", "oldest", "cited"}:
-            current_sort = "recent"
+        current_sort = _normalize_sort(sort)
 
         page_numbers = []
         if total_pages:
@@ -224,64 +241,62 @@ class SearchPage(Page):
     @classmethod
     def _build_search_context_for_data_source(cls, request, data_source):
         """Return the search-specific context dict for a given data source."""
-        search_query = request.GET.get("search", "")
-        results_data = {"search_results": [], "total_results": 0}
-        index_name = ""
-        query_clauses = cls.query_clauses(request)
-        is_scientific_data_source = False
-        search_sidebar_html = ""
-
-        if data_source:
-            service = SearchGatewayService(index_name=data_source.index_name)
-            applied_filters = extract_applied_filters(request.GET, data_source, form_key="search")
-            selected_filters = normalize_option_filters(applied_filters)
-            current_page = get_save_number(request.GET.get("page"), 1)
-            current_limit = get_save_number(request.GET.get("limit"), 25)
-            current_sort = request.GET.get("sort", "recent")
-            sidebar_payload = render_filter_sidebar(
-                request,
-                data_source=data_source,
-                form_key="search",
-                applied_filters=applied_filters,
-                sidebar_form_id="search-filter-form",
-                sidebar_form_method="get",
-                submit_label=_("APLICAR"),
-                reset_label=_("LIMPAR"),
-                submit_id="search-filter-submit",
-                reset_id="search-filter-reset",
-                reset_type="button",
-            )
-            search_sidebar_html = sidebar_payload["form_html"]
-            results_data = service.search_documents(
-                query_text=search_query if not query_clauses else None,
-                query_clauses=query_clauses,
-                filters=selected_filters,
-                page=current_page,
-                page_size=current_limit,
-                sort_field="publication_year",
-                sort_order="desc",
-            )
-            results_data = cls.enrich_results_data_for_display(data_source, results_data)
-            results_data = cls.decorate_results_data_for_ui(
-                results_data,
-                page=current_page,
-                page_size=current_limit,
-                sort=current_sort,
-            )
-            index_name = data_source.index_name
-            is_scientific_data_source = (
-                index_name == getattr(settings, "OP_INDEX_SCIENTIFIC_PRODUCTION", "scientific_production")
-            )
-        else:
+        request_state = cls.get_search_request_state(request)
+        if not data_source:
             logger.warning("SearchPage context requested without a configured data_source.")
+            return {
+                "index_name": "",
+                "searchable_fields": SEARCHABLE_FIELDS,
+                "search_clauses": request_state["query_clauses"],
+                "is_scientific_data_source": False,
+                "search_query": request_state["search_query"],
+                "search_sidebar_html": "",
+                "results_data": dict(EMPTY_RESULTS_DATA),
+            }
+
+        service = SearchGatewayService(index_name=data_source.index_name)
+        applied_filters = extract_applied_filters(request.GET, data_source, form_key="search")
+        selected_filters = normalize_option_filters(applied_filters)
+        sidebar_payload = render_filter_sidebar(
+            request,
+            data_source=data_source,
+            form_key="search",
+            applied_filters=applied_filters,
+            sidebar_form_id="search-filter-form",
+            sidebar_form_method="get",
+            submit_label=_("APLICAR"),
+            reset_label=_("LIMPAR"),
+            submit_id="search-filter-submit",
+            reset_id="search-filter-reset",
+            reset_type="button",
+        )
+        results_data = service.search_documents(
+            query_text=request_state["search_query"] if not request_state["query_clauses"] else None,
+            query_clauses=request_state["query_clauses"],
+            filters=selected_filters,
+            page=request_state["current_page"],
+            page_size=request_state["current_limit"],
+            sort_field="publication_year",
+            sort_order="desc",
+        )
+        results_data = cls.enrich_results_data_for_display(data_source, results_data)
+        results_data = cls.decorate_results_data_for_ui(
+            results_data,
+            page=request_state["current_page"],
+            page_size=request_state["current_limit"],
+            sort=request_state["current_sort"],
+        )
+        index_name = data_source.index_name
 
         return {
             "index_name": index_name,
             "searchable_fields": SEARCHABLE_FIELDS,
-            "search_clauses": query_clauses,
-            "is_scientific_data_source": is_scientific_data_source,
-            "search_query": search_query,
-            "search_sidebar_html": search_sidebar_html,
+            "search_clauses": request_state["query_clauses"],
+            "is_scientific_data_source": (
+                index_name == getattr(settings, "OP_INDEX_SCIENTIFIC_PRODUCTION", "scientific_production")
+            ),
+            "search_query": request_state["search_query"],
+            "search_sidebar_html": sidebar_payload["form_html"],
             "results_data": results_data,
         }
 
