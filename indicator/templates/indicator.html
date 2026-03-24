@@ -6,7 +6,6 @@
 {% load wagtailsettings_tags %}
 {% load sizify %}
 {% load partition %}
-{% load humanize %}
 {% load translate %}
 
 {% get_settings use_default_site=True %}
@@ -15,36 +14,15 @@
 {% block content %}
 <section id="content">
   <div class="container">
-    <div class="row ml-oca-filter indicator-layout" id="mainContent">
+    <div class="row ml-oca-filter indicator-layout sg-layout" id="mainContent">
       <!-- Add filters menu -->
-      <div class="col-12 col-lg-3 card border-0 mb-2 pt-0 align-self-start indicator-filters-col" id="indicator-filters-col">
+      <div class="col-12 col-lg-3 mb-2 pt-0 align-self-start indicator-filters-col sg-layout__sidebar-col sg-layout__sidebar" id="indicator-filters-col">
         <div id="menu-container">
-          {% if data_source != "social" %}
-            <!-- Add scope selectors -->
-            {% include "scope.html" %}
-          {% endif %}
-
-          <!-- Add filters menu based on data source -->
-          {% if data_source == "journal_metrics" %}
-            {% include "menu_ranking.html" %}
-          {% else %}
-            {% include "menu.html" %}
-          {% endif %}
+          {{ indicator_sidebar_html|safe }}
         </div>
-        <button
-          type="button"
-          id="indicator-filters-toggle"
-          class="indicator-filters-toggle d-none d-lg-inline-flex"
-          data-label-show="{% trans 'Show filters' %}"
-          data-label-hide="{% trans 'Hide filters' %}"
-          aria-expanded="true"
-          aria-controls="indicator-filters-col">
-          <span class="indicator-filters-toggle__icon" aria-hidden="true"></span>
-          <span class="indicator-filters-toggle__text visually-hidden">{% trans "Hide filters" %}</span>
-        </button>
       </div>
 
-      {% if data_source == "journal_metrics" %}
+      {% if is_journal_metrics %}
         <!-- Ranking Area -->
         {% include "ranking.html" %}
       {% else %}
@@ -57,18 +35,26 @@
 {% endblock %}
 
 {% block extra_css %}
+  <link rel="stylesheet" href="{% static 'search_gateway/css/custom.css' %}">
+  <link rel="stylesheet" href="{% static 'search_gateway/css/filter_sidebar.css' %}">
   <link rel="stylesheet" href="{% static 'indicator/css/custom.css' %}">
 {% endblock %}
 
 {% block inline_javascript %}
   <script src="{% static 'js/echarts/echarts.min.js' %}"></script>
-  <script src="{% static 'indicator/js/helpers.js' %}"></script>
+  <script src="{% static 'search_gateway/js/helpers.js' %}"></script>
+  <script src="{% static 'search_gateway/js/filter_form.js' %}"></script>
   <script src="{% static 'indicator/js/charts.js' %}"></script>
   <script src="{% static 'indicator/js/menu.js' %}"></script>
   <script src="{% static 'indicator/js/layout.js' %}"></script>
-  <script src="{% static 'indicator/js/button.js' %}"></script>
-  {% if data_source == "journal_metrics" %}
-    <script src="{% static 'indicator/js/journal_metrics_common.js' %}"></script>
+  {% if is_journal_metrics %}
     <script src="{% static 'indicator/js/journal_metrics_filters.js' %}"></script>
+  {% endif %}
+  {% if not is_journal_metrics %}
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        initIndicatorForm('{{ data_source|escapejs }}', '{{ study_unit|default:"document"|escapejs }}');
+      });
+    </script>
   {% endif %}
 {% endblock %}

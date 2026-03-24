@@ -4,7 +4,12 @@
   }
 
   const chartInstances = {};
-  const journalMetricsCommon = window.JournalMetrics || {};
+  function getConfigAttr(configElement, attrName, fallback = '') {
+    if (!configElement) return fallback;
+    const value = configElement.getAttribute(attrName);
+    if (value === null || value === undefined || value === '') return fallback;
+    return value;
+  }
 
   function resizeAllCharts() {
     Object.values(chartInstances).forEach(chart => {
@@ -404,22 +409,11 @@
 
   function setProfileSelectDisabled(selectElement, disabled) {
     if (!selectElement) return;
-
     selectElement.disabled = Boolean(disabled);
-
-    if (typeof $ !== 'undefined' && $.fn && $.fn.select2 && $(selectElement).hasClass('select2-hidden-accessible')) {
-      $(selectElement).prop('disabled', Boolean(disabled)).trigger('change.select2');
-    }
   }
 
   function bindProfileSelectChange(selectElement, handler) {
     if (!selectElement || typeof handler !== 'function') return;
-
-    if (typeof $ !== 'undefined' && $.fn && $.fn.select2 && $(selectElement).hasClass('select2-hidden-accessible')) {
-      $(selectElement).on('change.journalProfileControls', handler);
-      return;
-    }
-
     selectElement.addEventListener('change', handler);
   }
 
@@ -450,9 +444,6 @@
       selectElement.value = resolvedSelectedValue;
     }
 
-    if (typeof $ !== 'undefined' && $.fn && $.fn.select2 && $(selectElement).hasClass('select2-hidden-accessible')) {
-      $(selectElement).trigger('change.select2');
-    }
   }
 
   function initJournalProfileControls() {
@@ -463,18 +454,6 @@
     let latestCategoryOptionsRequest = 0;
 
     if (!form || !categoryLevelSelect) return;
-
-    if (typeof $ !== 'undefined' && $.fn && $.fn.select2) {
-      [publicationYearSelect, categoryLevelSelect, categorySelect].forEach(selectElement => {
-        if (!selectElement || $(selectElement).hasClass('select2-hidden-accessible')) return;
-
-        $(selectElement).select2({
-          theme: 'bootstrap-5',
-          width: '100%',
-          allowClear: false,
-        }).on('select2:open', journalMetricsCommon.focusSelect2SearchInput);
-      });
-    }
 
     async function refreshProfileCategoryOptions() {
       if (!categorySelect) return;
@@ -528,7 +507,7 @@
 
   document.addEventListener('DOMContentLoaded', function () {
     const configElement = document.getElementById('journal-profile-config');
-    setChartNumberLocale(journalMetricsCommon.getConfigAttr(configElement, 'data-number-locale', ''));
+    setChartNumberLocale(getConfigAttr(configElement, 'data-number-locale', ''));
     initJournalProfileCharts();
     initJournalProfileControls();
   });

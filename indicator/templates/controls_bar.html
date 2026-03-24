@@ -1,0 +1,153 @@
+{% load i18n %}
+{% load indicator_filters %}
+{% trans "Apply" as default_apply_label %}
+{% trans "Selecione uma opção" as default_option_placeholder %}
+
+<div class="indicator-controls-bar">
+  <div class="indicator-controls-bar__main">
+    {% if indicator_has_study_unit_control %}
+      <div
+        id="scope-controls"
+        class="indicator-controls-bar__item indicator-controls-bar__item--study-unit"
+        data-data-source="{{ data_source|default:'scientific_production'|escape }}"
+        data-study-unit="{{ study_unit|default:'document'|escape }}"
+        data-indicator-home-url="{% url 'indicator_home' %}"
+        data-journal-metrics-url="{% url 'indicator_journal_metrics' %}"
+      >
+        <form id="study-unit-form" class="indicator-controls-bar__form" autocomplete="off">
+          <label class="indicator-controls-bar__section-title indicator-controls-bar__section-title--label" for="selectStudyUnit">{% trans "Study unit" %}</label>
+          <select class="form-select indicator-controls-bar__select" id="selectStudyUnit" name="study_unit">
+            <option selected value="document">{% trans "Document" %}</option>
+            <option value="source">{% trans "Source" %}</option>
+            <option value="journal_metrics_by_*">{% trans "Journal Metrics" %}</option>
+          </select>
+        </form>
+      </div>
+    {% endif %}
+
+    {% if indicator_breakdown_field %}
+      <div class="indicator-controls-bar__item indicator-controls-bar__item--breakdown">
+        <label class="indicator-controls-bar__section-title indicator-controls-bar__section-title--label" for="indicator-breakdown-variable">
+          {{ indicator_breakdown_field.label }}
+        </label>
+        <select
+          id="indicator-breakdown-variable"
+          name="{{ indicator_breakdown_field.name }}"
+          class="form-select indicator-controls-bar__select data-source-field{% if indicator_breakdown_field.allow_clear and not indicator_breakdown_field.value %} indicator-controls-bar__select--placeholder{% endif %}"
+          form="indicator-filter-form"
+          data-field-name="{{ indicator_breakdown_field.name }}"
+          data-field-widget="{{ indicator_breakdown_field.widget }}"
+        >
+          {% if indicator_breakdown_field.allow_clear %}
+            <option value="">{{ default_option_placeholder }}</option>
+          {% endif %}
+          {% for option_group in indicator_breakdown_field.option_groups %}
+            {% if option_group.label %}
+              <optgroup label="{{ option_group.label }}">
+            {% endif %}
+            {% for option in option_group.options %}
+              <option value="{{ option.value }}" {% if option.selected %}selected{% endif %}>{{ option.label }}</option>
+            {% endfor %}
+            {% if option_group.label %}
+              </optgroup>
+            {% endif %}
+          {% endfor %}
+        </select>
+      </div>
+    {% endif %}
+
+    <div class="indicator-controls-bar__actions">
+      <button
+        type="button"
+        id="indicator-filters-toggle"
+        class="indicator-filters-toggle d-none d-lg-inline-flex"
+        data-label-show="{% trans 'Show filters' %}"
+        data-label-hide="{% trans 'Hide filters' %}"
+        aria-expanded="true"
+        aria-controls="indicator-filters-col"
+      >
+        <span class="indicator-filters-toggle__icon" aria-hidden="true"></span>
+        <span class="indicator-filters-toggle__text">{% trans "Hide filters" %}</span>
+      </button>
+    </div>
+  </div>
+
+  {% if indicator_config_fields %}
+      <div class="indicator-controls-bar__config" data-journal-metrics-config data-data-source="{{ data_source|default:'journal_metrics_by_*'|escape }}">
+      <div class="indicator-controls-bar__config-head">
+        <div class="indicator-controls-bar__config-intro">
+          <div class="indicator-controls-bar__section-title indicator-controls-bar__config-title">{% trans "Ranking setup" %}</div>
+          <p class="indicator-controls-bar__config-text">
+            {% trans "Configuration values that shape the ranking before the lateral filters refine the result set." %}
+          </p>
+        </div>
+        <button
+          type="submit"
+          form="{{ indicator_config_form_id|default:'journal-metrics-filter-form' }}"
+          class="btn btn-primary indicator-controls-bar__submit indicator-controls-bar__submit--head"
+        >
+          {{ indicator_config_submit_label|default:default_apply_label }}
+        </button>
+      </div>
+
+      <div class="indicator-controls-bar__config-grid">
+        {% for field in indicator_config_fields %}
+          <div class="indicator-controls-bar__config-item{% if field.name == 'category_id' %} indicator-controls-bar__config-item--wide{% endif %}">
+            <label class="indicator-controls-bar__label" for="indicator-config-{{ field.name }}">
+              {{ field.label }}
+            </label>
+
+            {% if field.widget == "number" or field.widget == "text" or field.widget == "year" %}
+              <input
+                id="indicator-config-{{ field.name }}"
+                class="form-control indicator-controls-bar__input data-source-field"
+                name="{{ field.name }}"
+                form="{{ indicator_config_form_id|default:'journal-metrics-filter-form' }}"
+                data-field-name="{{ field.name }}"
+                data-field-widget="{{ field.widget }}"
+                type="{{ field.input_type }}"
+                {% if field.min_value != None %}min="{{ field.min_value }}"{% endif %}
+                {% if field.max_value != None %}max="{{ field.max_value }}"{% endif %}
+                {% if field.step != None %}step="{{ field.step }}"{% endif %}
+                value="{{ field.value }}"
+                placeholder="{{ field.placeholder|default:default_option_placeholder }}"
+              />
+            {% else %}
+              <select
+                id="indicator-config-{{ field.name }}"
+                name="{{ field.name }}"
+                class="form-select indicator-controls-bar__select data-source-field{% if field.allow_clear and not field.value %} indicator-controls-bar__select--placeholder{% endif %}"
+                form="{{ indicator_config_form_id|default:'journal-metrics-filter-form' }}"
+                data-field-name="{{ field.name }}"
+                data-field-widget="{{ field.widget }}"
+                data-dependencies="{{ field.dependencies|join:',' }}"
+                data-allow-clear="{{ field.allow_clear|yesno:'true,false' }}"
+              >
+                {% if field.allow_clear %}
+                  <option value="">{{ field.placeholder|default:default_option_placeholder }}</option>
+                {% endif %}
+                {% for option_group in field.option_groups %}
+                  {% if option_group.label %}
+                    <optgroup label="{{ option_group.label }}">
+                  {% endif %}
+                  {% for option in option_group.options %}
+                    <option value="{{ option.value }}" {% if option.selected %}selected{% endif %}>
+                      {% if field.name == "category_level" %}
+                        {{ option.value|ui_value:"category_level" }}
+                      {% else %}
+                        {{ option.label }}
+                      {% endif %}
+                    </option>
+                  {% endfor %}
+                  {% if option_group.label %}
+                    </optgroup>
+                  {% endif %}
+                {% endfor %}
+              </select>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+</div>

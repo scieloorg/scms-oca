@@ -1,11 +1,12 @@
 {% load i18n static %}
 
 <!-- Graphs -->
-<div class="col-lg-9 mx-0 ps-3 pe-0 indicator-results-col">
+<div class="col-lg-9 mx-0 ps-3 pe-0 indicator-results-col sg-layout__content-col sg-layout__content">
     {% include "partials/warning_banner.html" %}
+    {% include "controls_bar.html" %}
 
     <!-- Applied Filters -->
-    <div class="card mb-3 p-3 d-none shadow-sm indicator-applied-filters" id="applied-filters"></div>
+    <div class="card mb-3 p-3 d-none shadow-sm search-gateway-applied-filters" id="applied-filters"></div>
 
     <div class="row g-3">
         <!-- Periodicals Graph (Journal mode) -->
@@ -26,7 +27,7 @@
             </div>
         </div>
 
-        {% if data_source != "social" %}
+        {% if data_source != "social_production" %}
             <!-- Citations Graph -->
             <div class="col-12 col-lg-6 d-none" id="citations-chart-div">
                 <div class="card shadow-sm h-100 indicator-chart-card">
@@ -89,7 +90,7 @@
                 </div>
             </div>
 
-            {% if data_source != "social" %}
+            {% if data_source != "social_production" %}
                 <div class="col-12 col-lg-6 d-none" id="citations-share-chart-div">
                     <div class="card shadow-sm h-100 indicator-chart-card">
                         <div class="card-body p-3">

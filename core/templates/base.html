@@ -18,10 +18,6 @@
         <link rel="stylesheet" href="{% static 'css/font-icons.css' %}" type="text/css" />
         <link rel="stylesheet" media="screen, print" href="{% static 'css/chzn-chosen/chosen.css' %}">
 
-        <!-- Select2 (a better way to use select boxes) -->
-        <link rel="stylesheet" href="{% static 'css/select2/select2.min.css' %}">
-        <link rel="stylesheet" href="{% static 'css/select2/select2-bootstrap-5-theme.min.css' %}">
-
         <!-- Bootstrap Datepicker -->
         <link rel="stylesheet" href="{% static 'css/bootstrap-datepicker3.min.css' %}">
 
@@ -91,7 +87,6 @@
       <script src="{% static 'js/formplugins/chzn-chosen/chosen.jquery.js' %}"></script>
 
       <!-- Your stuff: Third-party javascript libraries go here -->
-      <script src="{% static 'js/select2/select2.min.js' %}"></script>
       <script src="{% static 'js/datatables/datatables.min.js' %}"></script>
       <script src="{% static 'js/bootstrap-datepicker.min.js' %}"></script>
 
@@ -104,7 +99,6 @@
         <script src="{% static 'js/custom.js' %}"></script>
       {% endcompress %}
       
-      <script src="{% static 'js/bootstrap.min.js' %}" crossorigin="anonymous"></script>
       <script src="{% static 'js/bootstrap.bundle.min.js' %}" crossorigin="anonymous"></script>
 
       {% block inline_javascript %}

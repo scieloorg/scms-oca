@@ -6,7 +6,7 @@ compose = ${COMPOSE_FILE_DEV}
 
 export SCMS_BUILD_DATE=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 export SCMS_VCS_REF=$(strip $(shell git rev-parse --short HEAD))
-export SCMS_WEBAPP_VERSION=$(strip $(shell cat VERSION))
+export SCMS_WEBAPP_VERSION=$(strip $(shell [ -f VERSION ] && cat VERSION || echo unknown))
 
 help: ## Show this help
 	@echo 'Usage: make [target] [argument] ...'
@@ -85,6 +85,9 @@ django_makemigrations: ## Run makemigrations from django container using $(compo
 
 django_migrate: ## Run migrate from django container using $(compose)
 	@docker compose -f $(compose) run --rm django python manage.py migrate
+
+django_sync_datasources: ## Run manage.py sync_datasources from django container using $(compose)
+	@docker compose -f $(compose) run --rm django python manage.py sync_datasources
 
 django_makemessages: ## Run ./manage.py makemessages $(compose)
 	@docker compose -f $(compose) run --rm django python manage.py makemessages --all

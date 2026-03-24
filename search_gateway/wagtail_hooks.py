@@ -12,6 +12,8 @@ class DataSourceSnippetViewSet(SnippetViewSet):
     model = DataSource
     icon = "search"
     menu_label = _("Data Sources")
+    add_to_admin_menu = True
+    menu_order = 200
     list_display = ("index_name", "display_name")
     search_fields = ("index_name", "display_name")
 

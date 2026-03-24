@@ -35,7 +35,7 @@
   }
 
   function isHidden(layout) {
-    return !!(layout && layout.classList.contains('indicator-layout--filters-hidden'));
+    return !!(layout && layout.classList.contains('sg-layout--filters-hidden'));
   }
 
   function resolveToggleLabels(toggleButton) {
@@ -76,7 +76,7 @@
     const { layout, toggleButton, filtersCol, menuContainer } = getLayoutElements();
     if (!layout) return;
 
-    layout.classList.toggle('indicator-layout--filters-hidden', hidden);
+    layout.classList.toggle('sg-layout--filters-hidden', hidden);
 
     if (filtersCol) {
       filtersCol.setAttribute('aria-expanded', hidden ? 'false' : 'true');

@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 def get_education_index_name(index_name=None):
-    return index_name or getattr(settings, "OP_INDEX_SOC_PROD", None)
+    return index_name or getattr(settings, "OP_INDEX_SOCIAL_PRODUCTION", None)
 
 
 def build_education_doc(obj):

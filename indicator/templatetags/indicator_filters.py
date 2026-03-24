@@ -1,6 +1,9 @@
 from django import template
 from django.utils.translation import gettext as _
 
+from indicator.journal_metrics.data_source import JOURNAL_METRICS_DATA_SOURCE
+from search_gateway.transforms import apply_transform
+
 register = template.Library()
 
 
@@ -122,31 +125,10 @@ def ui_value(value, field_key=None):
 
     key = str(field_key).strip()
 
-    if key in ("ranking_metric", "metric"):
-        # Journal Metrics ranking metric codes -> translated labels.
-        metric_key = raw.strip()
-        mapping = {
-            "journal_impact_cohort": _("Cohort Impact (Total)"),
-            "journal_impact_cohort_window_2y": _("Cohort Impact (2 years)"),
-            "journal_impact_cohort_window_3y": _("Cohort Impact (3 years)"),
-            "journal_impact_cohort_window_5y": _("Cohort Impact (5 years)"),
-            "journal_citations_total": _("Total Citations"),
-            "journal_citations_mean": _("Mean Citations"),
-            "journal_citations_mean_window_2y": _("Mean Citations (2 years)"),
-            "journal_citations_mean_window_3y": _("Mean Citations (3 years)"),
-            "journal_citations_mean_window_5y": _("Mean Citations (5 years)"),
-            "journal_publications_count": _("Publication Count"),
-        }
-        if metric_key in mapping:
-            return mapping[metric_key]
-
-    if key in ("category_level", "category_type"):
-        mapping = {
-            "domain": _("Domain"),
-            "field": _("Field"),
-            "subfield": _("Subfield"),
-            "topic": _("Topic"),
-        }
-        return mapping.get(raw.lower(), stz_filter(raw))
+    if key in ("ranking_metric", "metric", "category_level", "category_type"):
+        transform_field = "ranking_metric" if key in ("ranking_metric", "metric") else "category_level"
+        transformed_value = apply_transform(JOURNAL_METRICS_DATA_SOURCE, transform_field, raw)
+        if transformed_value not in (None, "") and transformed_value != raw:
+            return transformed_value
 
     return stz_filter(raw)

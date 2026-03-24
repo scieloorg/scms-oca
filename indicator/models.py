@@ -223,7 +223,7 @@ class Indicator(CommonControlField):
 
     @property
     def permanent_link(self):
-        return "https://ocabr.org/search/indicator/{}/detail/".format(self.slug)
+        return "https://ocabr.org/indicators/"
 
     @property
     def header(self):

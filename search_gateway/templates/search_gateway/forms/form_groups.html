@@ -1,0 +1,19 @@
+{% for group in form_groups %}
+  <div class="filter-group-card filter-group-card--muted filter-group-card--collapsible"{% if not group.expanded %} data-expanded="false"{% endif %}>
+    <div class="filter-group-card__title">{{ group.label }}</div>
+    {% for field in group.fields %}
+      <div
+        class="form-group form-group--collapsible{% if field.operator_mode %} form-group--has-operator form-group--operator-{{ field.operator_mode|slugify }}{% endif %} {% if forloop.last %}mb-0{% else %}mb-2{% endif %}"
+        data-field-name="{{ field.name }}"
+        data-field-kind="{{ field.kind }}"
+        data-field-widget="{{ field.widget }}"
+        {% if not field.expanded %} data-expanded="false"{% endif %}
+      >
+        <label class="form-label" for="{{ field.name }}">{{ field.label }}</label>
+        <div class="form-group__controls">
+          {% include "search_gateway/forms/field.html" with field=field data_source=data_source %}
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% endfor %}

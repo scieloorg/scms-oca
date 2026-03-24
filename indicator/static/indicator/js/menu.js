@@ -20,17 +20,13 @@ function syncScopeFilterIntoForm(menuForm) {
     scopeSelect.add(dynamicOption);
   }
 
-  if (window.jQuery && window.jQuery(scopeSelect).hasClass('select2-hidden-accessible')) {
-    window.jQuery(scopeSelect).val([scopeFromUrl]).trigger('change');
-  } else {
-    scopeSelect.value = scopeFromUrl;
-  }
+  scopeSelect.value = scopeFromUrl;
 }
 
 function normalizeStudyUnit(studyUnit, fallback = 'document') {
   const normalized = String(studyUnit || '').trim().toLowerCase();
   if (normalized === 'journal') return 'source';
-  if (['document', 'source', 'journal_metrics'].includes(normalized)) {
+  if (['document', 'source', 'journal_metrics_by_*'].includes(normalized)) {
     return normalized;
   }
   return fallback;
@@ -113,27 +109,18 @@ function initScopeControls() {
   const scopeControlsRoot = document.getElementById('scope-controls');
   if (!scopeControlsRoot) return;
 
-  const scopeFilterForm = document.getElementById('scope-filter-form');
-  const selectIndexScope = document.getElementById('selectIndexScope');
-  const hasScopeFilterControls = !!(scopeFilterForm && selectIndexScope);
-
   const studyUnitForm = document.getElementById('study-unit-form');
   const selectStudyUnit = document.getElementById('selectStudyUnit');
-  const currentDataSource = String(scopeControlsRoot.dataset.dataSource || 'scientific').trim();
-  const isJournalMetricsPage = currentDataSource === 'journal_metrics';
-  const scopeDataSource = isJournalMetricsPage ? 'world' : currentDataSource;
+  const menuForm = document.getElementById('indicator-filter-form');
+  const currentDataSource = String(scopeControlsRoot.dataset.dataSource || 'scientific_production').trim();
+  const isJournalMetricsPage = currentDataSource === 'journal_metrics_by_*';
   const indicatorHomeUrl = scopeControlsRoot.dataset.indicatorHomeUrl || '/indicators/';
   const journalMetricsUrl = scopeControlsRoot.dataset.journalMetricsUrl || '/indicators/journal-metrics/';
-  const allScopesLabel = scopeControlsRoot.dataset.allScopesLabel || 'All scopes';
   const currentQueryParams = new URLSearchParams(window.location.search);
   const currentScopeFilter = String(currentQueryParams.get('scope') || '').trim();
-  const returnStudyUnitParam = (currentQueryParams.get('return_study_unit') || '').trim().toLowerCase();
-  const returnStudyUnit = ['document', 'source'].includes(returnStudyUnitParam)
-    ? returnStudyUnitParam
-    : 'source';
   const currentStudyUnit = normalizeStudyUnit(
     scopeControlsRoot.dataset.studyUnit,
-    isJournalMetricsPage ? 'journal_metrics' : 'document',
+    isJournalMetricsPage ? 'journal_metrics_by_*' : 'document',
   );
 
   if (selectStudyUnit) {
@@ -143,15 +130,19 @@ function initScopeControls() {
     }
   }
 
+  const getCurrentScopeValue = () => {
+    const scopeSelect = menuForm ? menuForm.querySelector('select[name="scope"]') : null;
+    const scopeValue = scopeSelect ? String(scopeSelect.value || '').trim() : '';
+    return scopeValue || currentScopeFilter;
+  };
+
   if (studyUnitForm && selectStudyUnit) {
     studyUnitForm.addEventListener('submit', event => {
       event.preventDefault();
 
       const selectedStudyUnit = normalizeStudyUnit(selectStudyUnit.value, currentStudyUnit);
-      const selectedScope = hasScopeFilterControls
-        ? String(selectIndexScope.value || '').trim()
-        : currentScopeFilter;
-      const redirectUrl = selectedStudyUnit === 'journal_metrics'
+      const selectedScope = getCurrentScopeValue();
+      const redirectUrl = selectedStudyUnit === 'journal_metrics_by_*'
         ? buildJournalMetricsRedirectUrl({
             journalMetricsUrl,
             currentStudyUnit,
@@ -169,43 +160,204 @@ function initScopeControls() {
       studyUnitForm.requestSubmit();
     });
   }
+}
 
-  if (!hasScopeFilterControls) return;
+function initIndicatorControlBarSelects() {
+  document.querySelectorAll('.indicator-controls-bar__select').forEach(select => {
+    const syncPlaceholderState = () => {
+      const hasValue = Array.from(select.selectedOptions || [])
+        .some(option => String(option.value || '').trim());
+      const hasEmptyOption = Array.from(select.options || [])
+        .some(option => !String(option.value || '').trim());
 
-  scopeFilterForm.addEventListener('submit', event => {
-    event.preventDefault();
+      select.classList.toggle('indicator-controls-bar__select--placeholder', hasEmptyOption && !hasValue);
+    };
 
-    const selectedScope = String(selectIndexScope.value || '').trim();
-    const redirectUrl = isJournalMetricsPage
-      ? buildIndicatorRedirectUrl({
-          indicatorHomeUrl,
-          isJournalMetricsPage,
-          studyUnit: returnStudyUnit,
-          scopeValue: selectedScope,
-        })
-      : buildIndicatorRedirectUrl({
-          indicatorHomeUrl,
-          isJournalMetricsPage,
-          studyUnit: currentStudyUnit,
-          scopeValue: selectedScope,
-        });
-    window.location.assign(redirectUrl);
-  });
+    syncPlaceholderState();
 
-  selectIndexScope.addEventListener('change', () => {
-    scopeFilterForm.requestSubmit();
-  });
-
-  populateScopeSelectOptions(selectIndexScope, {
-    scopeDataSource,
-    currentScopeFilter,
-    allScopesLabel,
+    if (select.dataset.placeholderBound === 'true') return;
+    select.addEventListener('change', syncPlaceholderState);
+    select.dataset.placeholderBound = 'true';
   });
 }
 
-function initIndicatorForm(dataSource, studyUnit) {
-  const menuForm = document.getElementById('menu-form');
+function updateExternalSelectPlaceholderState(select) {
+  if (!select) return;
+
+  const hasValue = Array.from(select.selectedOptions || [])
+    .some(option => String(option.value || '').trim());
+  const hasEmptyOption = Array.from(select.options || [])
+    .some(option => !String(option.value || '').trim());
+
+  select.classList.toggle('indicator-controls-bar__select--placeholder', hasEmptyOption && !hasValue);
+}
+
+function appendFormFieldParams(params, name, value) {
+  if (!name || value === null || value === undefined || value === '') return;
+
+  if (Array.isArray(value)) {
+    value.forEach(item => appendFormFieldParams(params, name, item));
+    return;
+  }
+
+  params.append(name, String(value));
+}
+
+function collectJournalMetricsConfigFilters(form, excludeFieldNames = []) {
+  const params = new URLSearchParams();
+  if (!form) return params;
+
+  const excluded = new Set((excludeFieldNames || []).map(name => String(name || '').trim()).filter(Boolean));
+  const relatedExternalElements = form.id
+    ? Array.from(document.querySelectorAll(`[form="${form.id}"].data-source-field`))
+    : [];
+  const seenElements = new Set();
+
+  Array.from(form.elements || []).concat(relatedExternalElements).forEach(element => {
+    if (!element?.name || seenElements.has(element)) return;
+    seenElements.add(element);
+    if (excluded.has(String(element.name || '').trim())) return;
+    if (element.disabled) return;
+
+    if (element.type === 'checkbox' || element.type === 'radio') {
+      if (element.checked) {
+        appendFormFieldParams(params, element.name, element.value);
+      }
+      return;
+    }
+
+    if (element.tagName === 'SELECT' && element.multiple) {
+      Array.from(element.selectedOptions || []).forEach(option => {
+        appendFormFieldParams(params, element.name, option.value);
+      });
+      return;
+    }
+
+    appendFormFieldParams(params, element.name, element.value);
+  });
+
+  return params;
+}
+
+async function updateJournalMetricsCategoryOptions(configRoot) {
+  const root = configRoot || document.querySelector('[data-journal-metrics-config]');
+  if (!root) return;
+
+  const formId = 'journal-metrics-filter-form';
+  const form = document.getElementById(formId);
+  const categoryLevelSelect = root.querySelector('#indicator-config-category_level');
+  const categorySelect = root.querySelector('#indicator-config-category_id');
+  const dataSource = String(root.dataset.dataSource || '').trim();
+
+  if (!form || !categoryLevelSelect || !categorySelect || !dataSource) return;
+
+  const params = collectJournalMetricsConfigFilters(form, ['category_id']);
+  params.set('data_source', dataSource);
+  params.set('field_name', 'category_id');
+
+  const currentValue = String(categorySelect.value || '').trim();
+  categorySelect.disabled = true;
+
+  try {
+    const response = await fetch(`/search-gateway/search-item/?${params.toString()}`);
+    if (!response.ok) {
+      throw new Error(`Unable to load category options (${response.status})`);
+    }
+
+    const data = await response.json();
+    const results = Array.isArray(data?.results) ? data.results : [];
+    const allowClear = String(categorySelect.dataset.allowClear || '').toLowerCase() === 'true';
+    const placeholderText = window.gettext ? window.gettext('Selecione uma opção') : 'Selecione uma opção';
+
+    categorySelect.innerHTML = '';
+    if (allowClear) {
+      const placeholderOption = new Option(placeholderText, '', false, false);
+      categorySelect.add(placeholderOption);
+    }
+
+    const availableValues = [];
+    results.forEach(option => {
+      const optionValue = String(option?.value ?? option?.key ?? '').trim();
+      if (!optionValue) return;
+      const optionLabel = String(option?.label ?? optionValue).trim();
+      categorySelect.add(new Option(optionLabel, optionValue, false, false));
+      availableValues.push(optionValue);
+    });
+
+    const fallbackValue = availableValues.includes(currentValue)
+      ? currentValue
+      : (availableValues[0] || '');
+    categorySelect.value = fallbackValue;
+    updateExternalSelectPlaceholderState(categorySelect);
+    categorySelect.dispatchEvent(new Event('change', { bubbles: true }));
+  } catch (error) {
+    console.error('Error loading journal metrics category options', error);
+  } finally {
+    categorySelect.disabled = false;
+  }
+}
+
+function initJournalMetricsConfigControls() {
+  const configRoot = document.querySelector('[data-journal-metrics-config]');
+  if (!configRoot) return;
+
+  const categoryLevelSelect = configRoot.querySelector('#indicator-config-category_level');
+  if (categoryLevelSelect && categoryLevelSelect.dataset.categoryRefreshBound !== 'true') {
+    categoryLevelSelect.addEventListener('change', () => {
+      updateJournalMetricsCategoryOptions(configRoot);
+    });
+    categoryLevelSelect.dataset.categoryRefreshBound = 'true';
+  }
+
+  if (categoryLevelSelect && configRoot.dataset.categoryInitialRefreshDone !== 'true') {
+    updateJournalMetricsCategoryOptions(configRoot);
+    configRoot.dataset.categoryInitialRefreshDone = 'true';
+  }
+}
+
+function requestIndicatorRefresh(menuForm, submitButton) {
   if (!menuForm) return;
+
+  if (typeof menuForm.requestSubmit === 'function') {
+    try {
+      if (submitButton && submitButton.form === menuForm) {
+        menuForm.requestSubmit(submitButton);
+        return;
+      }
+      menuForm.requestSubmit();
+      return;
+    } catch (_error) {
+      // Fall through to button click / synthetic submit.
+    }
+  }
+
+  if (submitButton && typeof submitButton.click === 'function' && !submitButton.disabled) {
+    submitButton.click();
+    return;
+  }
+
+  menuForm.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+}
+
+function initBreakdownVariableAutoSubmit(menuForm, submitButton) {
+  if (!menuForm) return;
+
+  const breakdownSelect = document.getElementById('indicator-breakdown-variable')
+    || document.querySelector('[name="breakdown_variable"][form="indicator-filter-form"]');
+  if (!breakdownSelect || breakdownSelect.dataset.autoSubmitBound === 'true') return;
+
+  breakdownSelect.addEventListener('change', () => {
+    if (submitButton?.disabled) return;
+    requestIndicatorRefresh(menuForm, submitButton);
+  });
+  breakdownSelect.dataset.autoSubmitBound = 'true';
+}
+
+function initIndicatorForm(dataSource, studyUnit) {
+  const menuForm = document.getElementById('indicator-filter-form');
+  if (!menuForm) return;
+
+  syncScopeFilterIntoForm(menuForm);
 
   const submitButton = document.getElementById('menu-submit');
   const resetButton = document.getElementById('menu-reset');
@@ -236,14 +388,10 @@ function initIndicatorForm(dataSource, studyUnit) {
   const handleFormSubmit = (event) => {
     event.preventDefault();
     submitButton.disabled = true;
-
-    syncScopeFilterIntoForm(menuForm);
-
-    // Create FormData object from the form
     const formData = new FormData(menuForm);
-
-    // Collect filters from the form data
-    const filters = collectFiltersFromForm(formData);
+    const filters = window.SearchGatewayFilterForm
+      ? window.SearchGatewayFilterForm.serializeForm(menuForm)
+      : {};
     const scopeFromUrl = getScopeFilterFromUrl();
     const existingScope = filters.scope;
     const hasScopeInFilters = Array.isArray(existingScope)
@@ -254,7 +402,9 @@ function initIndicatorForm(dataSource, studyUnit) {
     }
 
     // Extract breakdown variable
-    const breakdownVariable = formData.get('breakdown_variable');
+    const breakdownVariable = Array.isArray(filters.breakdown_variable)
+      ? filters.breakdown_variable[0]
+      : (filters.breakdown_variable || '');
 
     // Prepare payload for the POST request
     const payload = {
@@ -293,8 +443,11 @@ function initIndicatorForm(dataSource, studyUnit) {
       // Standardize series names before rendering
       standardizeIndicatorSeriesNames(data);
 
-      // Update applied filters display
-      updateAppliedFiltersDisplay();
+      if (window.SearchGatewayFilterForm) {
+        window.SearchGatewayFilterForm.commitAppliedFilters(menuForm);
+      }
+
+      clearAppliedFiltersContainer();
 
       // Render charts or tables based on data source
       renderChartsContainer(data, dataSource, studyUnit, formData.get('csrfmiddlewaretoken'));
@@ -313,15 +466,23 @@ function initIndicatorForm(dataSource, studyUnit) {
   // Handler for the reset button
   const handleFormReset = (event) => {
     event.preventDefault();
-    const resetUrl = `${window.location.pathname}${window.location.search}`;
-    window.location.assign(resetUrl);
+    if (window.SearchGatewayFilterForm) {
+      window.SearchGatewayFilterForm.resetForm(menuForm);
+    } else {
+      menuForm.reset();
+    }
   };
 
   // Attach event listeners
   menuForm.addEventListener('submit', handleFormSubmit);
+  menuForm.addEventListener('search-gateway:filters-changed', () => {
+    if (submitButton?.disabled) return;
+    requestIndicatorRefresh(menuForm, submitButton);
+  });
   if (resetButton) {
     resetButton.addEventListener('click', handleFormReset);
   }
+  initBreakdownVariableAutoSubmit(menuForm, submitButton);
 
   let initialRenderTriggered = false;
   const hasVisibleCharts = () => {
@@ -339,26 +500,23 @@ function initIndicatorForm(dataSource, studyUnit) {
     });
   };
 
-  const onFiltersReady = (event) => {
-    const readyDataSource = event?.detail?.dataSource;
-    if (readyDataSource && readyDataSource !== dataSource) return;
-    triggerInitialRender();
-  };
-
   const triggerInitialRender = () => {
     if (initialRenderTriggered || hasVisibleCharts()) return;
     initialRenderTriggered = true;
-    document.removeEventListener('indicator:filters-ready', onFiltersReady);
-    menuForm.requestSubmit();
+    requestIndicatorRefresh(menuForm, submitButton);
   };
 
-  // Prefer waiting for filters/selects initialization; fallback to timeout.
-  document.addEventListener('indicator:filters-ready', onFiltersReady);
-  window.setTimeout(triggerInitialRender, 1800);
+  if (window.SearchGatewayFilterForm) {
+    window.SearchGatewayFilterForm.init(menuForm).then(triggerInitialRender);
+  } else {
+    window.setTimeout(triggerInitialRender, 250);
+  }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  initIndicatorControlBarSelects();
   initScopeControls();
+  initJournalMetricsConfigControls();
 });
 
 // Django JS i18n fallback (jsi18n usually loads this)
@@ -395,7 +553,8 @@ function renderChartsContainer(data, dataSource, studyUnit, csrfMiddlewareToken)
     && relativeMetrics.compared_filters.length > 0;
   const showRelativeMetrics = !!relativeMetrics.enabled && hasComparativeFilters;
 
-  const breakdownSelect = document.querySelector('#menu-form select[name="breakdown_variable"]');
+  const breakdownSelect = document.querySelector('#indicator-filter-form [name="breakdown_variable"]')
+    || document.querySelector('[name="breakdown_variable"][form="indicator-filter-form"]');
   const breakdownText = breakdownSelect && breakdownSelect.value
     ? (breakdownSelect.options[breakdownSelect.selectedIndex]?.textContent || '').trim()
     : '';

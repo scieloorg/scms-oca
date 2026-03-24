@@ -7,69 +7,64 @@
 
 {% get_localized_field doc.source "title" as display_title %}
 
+<div class="result-card__inner">
+    <div class="result-card__header">
+        <div class="result-card__badges">
+            {% if doc.source.type %}
+            <span class="result-card__badge">{{ doc.source.type }}</span>
+            {% endif %}
+        </div>
+    </div>
 
-
-<div class="d-flex justify-content-between align-items-start gap-2">
-    <h5 class="card-title mb-0" style="flex: 1 1 auto; min-width: 0;">
+    <h3 class="result-card__title">
     {% if doc.source.ids.doi %}
-        <a href="{{ doc.source.ids.doi }}" target="_blank" class="text-decoration-none">{{ display_title }}</a>
+        <a href="https://doi.org/{{ doc.source.ids.doi|cut:'https://doi.org/'|cut:'http://doi.org/' }}" target="_blank" rel="noopener noreferrer" class="result-card__title-link">{{ display_title }}</a>
     {% else %}
-        <a href="{{pageurl}}" target="_blank" class="text-decoration-none">{{ display_title }}</a>
+        <a href="{{pageurl}}" target="_blank" rel="noopener noreferrer" class="result-card__title-link">{{ display_title }}</a>
     {% endif %}
-    </h5>
-    {% if doc.source.type %}
-        <span class="badge bg-secondary ms-2 text-muted" style="flex-shrink: 0; white-space: nowrap;">{{ doc.source.type }}</span>
-    {% endif %}
-</div>
+    </h3>
+
 {% if doc.source.authorships %}
-    <p class="card-text">
+    <p class="result-card__authors">
         {% for author in doc.source.authorships %}
-            {{ author.name }}{% if not forloop.last %}, {% endif %}
+            {{ author.name }}{% if not forloop.last %}<span class="result-card__author-separator">;</span>{% endif %}
         {% endfor %}
     </p>
 {% endif %}
 {% if doc.source.monograph.title %}
-<p class="card-text mb-1">
-    <small class="text-muted">
-        <strong>{% trans "Book" %}:</strong> {{ doc.source.monograph.title }}
-    </small>
+<p class="result-card__source-line">
+    <span class="result-card__source-name">{{ doc.source.monograph.title }}</span>
 </p>
 {% endif %}
-{% if doc.source.publishers %}
-<p class="card-text mb-1">
-    <small class="text-muted">
+
+<div class="result-card__meta-list">
+    {% if doc.source.publishers %}
+    <p class="result-card__meta-row">
         <strong>{% trans "Publisher" %}:</strong>
         {% for publisher in doc.source.publishers %}
             {{ publisher.name }}{% if not forloop.last %}, {% endif %}
         {% endfor %}
-    </small>
-</p>
+    </p>
+    {% endif %}
+    {% if doc.source.publication_year %}
+    <p class="result-card__meta-row"><strong>{% trans "Year" %}:</strong> {{ doc.source.publication_year }}</p>
+    {% endif %}
+    {% if doc.source.biblio.first_page or doc.source.biblio.last_page %}
+    <p class="result-card__meta-row">
+        <strong>{% trans "Pages" %}:</strong>
+        {{ doc.source.biblio.first_page|default:"" }}{% if doc.source.biblio.last_page %}-{{ doc.source.biblio.last_page }}{% endif %}
+    </p>
+    {% endif %}
+    {% if doc.source.ids.isbn %}
+    <p class="result-card__meta-row"><strong>{% trans "ISBN" %}:</strong> {{ doc.source.ids.isbn }}</p>
+    {% endif %}
+</div>
+
+{% if doc.source.ids.doi %}
+<div class="result-card__footer">
+    <div class="result-card__actions">
+        <a href="https://doi.org/{{ doc.source.ids.doi|cut:'https://doi.org/'|cut:'http://doi.org/' }}" target="_blank" rel="noopener noreferrer" class="result-card__action">DOI</a>
+    </div>
+</div>
 {% endif %}
-{% if doc.source.publication_year %}
-<p class="card-text mb-1">
-    <small class="text-muted">
-        <strong>{% trans "Year" %}:</strong> {{ doc.source.publication_year }}
-    </small>
-</p>
-{% endif %}
-{% if doc.source.biblio.first_page %}
-<p class="card-text mb-1">
-    <small class="text-muted">
-        <strong>{% trans "First Page" %}:</strong> {{ doc.source.biblio.first_page }}
-    </small>
-</p>
-{% endif %}
-{% if doc.source.biblio.last_page %}
-<p class="card-text mb-1">
-    <small class="text-muted">
-        <strong>{% trans "Last Page" %}:</strong> {{ doc.source.biblio.last_page }}
-    </small>
-</p>
-{% endif %}        
-{% if doc.source.ids.isbn %}
-<p class="card-text mb-0">
-    <small class="text-muted">
-        <strong>{% trans "ISBN" %}:</strong> {{ doc.source.ids.isbn }}
-    </small>
-</p>
-{% endif %}
+</div>

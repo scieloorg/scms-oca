@@ -1,0 +1,49 @@
+
+{% extends "base.html" %}
+{% load humanize %}
+{% load static %}
+{% load i18n %}
+{% load wagtailsettings_tags %}
+{% load sizify %}
+{% load partition %}
+{% load translate %}
+
+{% get_settings use_default_site=True %}
+
+
+{% block content %}
+<section id="content" class="mt-3">
+  <div class="container">
+    <div id="search-header-row" class="row ml-oca-filter sg-layout__header-row">
+      <div class="col-12 pe-0 sg-layout__header">
+        {% block header_content %}
+        {% endblock %}
+      </div>
+    </div>
+    <div class="row ml-oca-filter sg-layout" id="mainContent">
+      <div id="search-sidebar-col" class="col-lg-3 mb-2 pt-0 align-self-start sg-layout__sidebar-col sg-layout__sidebar">
+        <div id="menu-container">
+            {% block search_sidebar %}
+            {% endblock %}
+        </div>
+      </div>
+      
+      <div id="search-content-col" class="col-lg-9 mx-0 ps-3 pe-0 sg-layout__content-col sg-layout__content">
+        {% block search_content %}
+        {% endblock %}
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'search_gateway/css/custom.css' %}">
+  <link rel="stylesheet" href="{% static 'search_gateway/css/filter_sidebar.css' %}">
+{% endblock %}
+
+{% block javascript %}
+  {{ block.super }}
+  <script src="{% static 'search_gateway/js/helpers.js' %}"></script>
+  <script src="{% static 'search_gateway/js/filter_form.js' %}"></script>
+{% endblock %}

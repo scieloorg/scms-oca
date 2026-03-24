@@ -6,7 +6,6 @@ from wagtail.admin.menu import MenuItem
 from wagtail_modeladmin.options import (
     ModelAdmin,
     ModelAdminGroup,
-    modeladmin_register,
 )
 
 from . import views
@@ -107,4 +106,4 @@ class IndicatorAdminGroup(ModelAdminGroup):
         IndicatorFileAdmin,
     )
 
-modeladmin_register(IndicatorAdminGroup)
+# modeladmin_register(IndicatorAdminGroup)
