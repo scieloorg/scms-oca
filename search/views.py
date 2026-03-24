@@ -1,29 +1,20 @@
-import json
 import logging
+
 from django.conf import settings
-from django.http import Http404, JsonResponse
-from django.shortcuts import render
+from django.http import JsonResponse
 from django.template.loader import render_to_string
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_GET
 
 from search_gateway.forms import render_filter_sidebar
-from search_gateway.models import DataSource
-from search_gateway.request_filters import extract_applied_filters
-from search_gateway.request_filters import normalize_option_filters
+from search_gateway.request_filters import (
+    extract_applied_filters,
+    normalize_option_filters,
+)
 from search_gateway.service import SearchGatewayService
 
 from .models import SearchPage
 
-
-@require_GET
-def search_page_by_index(request, index_name):
-    data_source = DataSource.get_by_index_name(index_name=index_name)
-    if not data_source:
-        raise Http404("Search data source does not exist")
-
-    context = SearchPage._build_search_context_for_data_source(request, data_source)
-    return render(request, "search/search_page.html", context)
 
 @require_GET
 def search_view_list(request):
