@@ -8,22 +8,15 @@ def _field_requires_runtime_options(field):
 
 def _append_selected_lookup_options(
     service,
-    data_source,
+    form_fields,
     *,
-    form_key=None,
     applied_filters=None,
     options_by_field=None,
-    include_fields=None,
-    exclude_fields=None,
 ):
     options_by_field = options_by_field if options_by_field is not None else {}
     applied_filters = applied_filters or {}
 
-    for field in data_source.get_ordered_fields(
-        form_key=form_key,
-        include_fields=include_fields,
-        exclude_fields=exclude_fields,
-    ):
+    for field in form_fields:
         if not field.get_lookup_config():
             continue
 
@@ -71,9 +64,8 @@ def _append_selected_lookup_options(
 
 def resolve_form_options(
     service,
-    data_source,
+    form_fields,
     *,
-    form_key=None,
     applied_filters=None,
     include_fields=None,
     exclude_fields=None,
@@ -82,11 +74,6 @@ def resolve_form_options(
     option_filters = normalize_option_filters(
         applied_filters,
         excluded_filter_names=excluded_filter_names,
-    )
-    form_fields = data_source.get_ordered_fields(
-        form_key=form_key,
-        include_fields=include_fields,
-        exclude_fields=exclude_fields,
     )
     index_field_names = [field.field_name for field in form_fields if field.kind == "index"]
 
@@ -123,12 +110,9 @@ def resolve_form_options(
 
     _append_selected_lookup_options(
         service,
-        data_source,
-        form_key=form_key,
+        form_fields,
         applied_filters=applied_filters,
         options_by_field=options_by_field,
-        include_fields=include_fields,
-        exclude_fields=exclude_fields,
     )
 
     errors = []

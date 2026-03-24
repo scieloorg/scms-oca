@@ -315,8 +315,7 @@ def build_data_source_form_payload(
     )
     options_by_field, errors = resolve_form_options(
         service,
-        data_source,
-        form_key=form_key,
+        form_fields=form_fields,
         applied_filters=applied_filters,
         include_fields=include_fields,
         exclude_fields=exclude_fields,
