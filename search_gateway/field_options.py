@@ -2,8 +2,24 @@ from .request_filters import build_option_filters
 from .request_filters import normalize_option_filters
 
 
-def _field_requires_runtime_options(field):
-    return field.requires_runtime_options()
+def _normalize_selected_lookup_values(applied_filters, field_name):
+    selected_values = (applied_filters or {}).get(field_name)
+    if selected_values in (None, "", []):
+        return []
+    if not isinstance(selected_values, (list, tuple)):
+        selected_values = [selected_values]
+    return [str(value).strip() for value in selected_values if str(value).strip()]
+
+
+def _normalize_lookup_options(lookup_options):
+    return [
+        {
+            "value": str(option.get("key") or "").strip(),
+            "label": str(option.get("label") or option.get("key") or "").strip(),
+        }
+        for option in (lookup_options or [])
+        if str(option.get("key") or "").strip()
+    ]
 
 
 def _append_selected_lookup_options(
@@ -24,16 +40,10 @@ def _append_selected_lookup_options(
         include_fields=include_fields,
         exclude_fields=exclude_fields,
     ):
-        if not field.get_lookup_config():
+        if not field.lookup:
             continue
 
-        selected_values = applied_filters.get(field.field_name)
-        if selected_values in (None, "", []):
-            continue
-        if not isinstance(selected_values, (list, tuple)):
-            selected_values = [selected_values]
-
-        selected_values = [str(value).strip() for value in selected_values if str(value).strip()]
+        selected_values = _normalize_selected_lookup_values(applied_filters, field.field_name)
         if not selected_values:
             continue
 
@@ -54,14 +64,7 @@ def _append_selected_lookup_options(
         if not lookup_options:
             continue
 
-        normalized_lookup_options = [
-            {
-                "value": str(option.get("key") or "").strip(),
-                "label": str(option.get("label") or option.get("key") or "").strip(),
-            }
-            for option in lookup_options
-            if str(option.get("key") or "").strip()
-        ]
+        normalized_lookup_options = _normalize_lookup_options(lookup_options)
         if not normalized_lookup_options:
             continue
 
@@ -99,11 +102,11 @@ def resolve_form_options(
     field_errors = []
 
     for field in form_fields:
-        if field.is_hidden_in_form():
+        if field.hidden_in_form:
             continue
         if field.field_name in options_by_field:
             continue
-        if not _field_requires_runtime_options(field):
+        if not field.requires_runtime_options:
             continue
 
         field_option_filters = build_option_filters(
