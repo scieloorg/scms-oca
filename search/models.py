@@ -52,17 +52,42 @@ class SearchPage(Page):
         return clauses if isinstance(clauses, list) else []
 
     @classmethod
-    def get_search_request_state(cls, request):
+    def get_search_request_state(cls, request, *, data_source=None):
+        current_sort = normalize_search_result_sort(
+            request.GET.get("sort", "desc")
+        )
+        sort_field, sort_order = cls._resolve_search_sort(
+            data_source,
+            current_sort,
+        )
         return {
             "search_query": request.GET.get("search", ""),
             "query_clauses": cls.query_clauses(request),
-            "current_sort": normalize_search_result_sort(request.GET.get("sort", "recent")),
+            "current_sort": current_sort,
+            "sort_field": sort_field,
+            "sort_order": sort_order,
             "current_page": normalize_positive_number(request.GET.get("page"), 1),
             "current_limit": normalize_positive_number(request.GET.get("limit"), 25),
         }
 
+    @classmethod
+    def _resolve_search_sort(cls, data_source, current_sort):
+        if current_sort == "cited_by_count":
+            return (
+                data_source.get_index_field_name("cited_by_count")
+                if data_source
+                else "metrics.received_citations.total",
+                "desc",
+            )
+        return (
+            data_source.get_index_field_name("publication_year")
+            if data_source
+            else "publication_year",
+            current_sort,
+        )
+
     @staticmethod
-    def current_pagination(results_data, *, page=1, page_size=25, sort="recent"):
+    def current_pagination(results_data, *, page=1, page_size=25, current_sort="desc"):
         decorated = results_data or dict(EMPTY_RESULTS_DATA)
         search_results = list(decorated.get("search_results") or [])
         total_results = normalize_positive_number(decorated.get("total_results"), 0)
@@ -73,8 +98,6 @@ class SearchPage(Page):
         start_result = ((current_page - 1) * current_limit) + 1 if shown_count else 0
         end_result = start_result + shown_count - 1 if shown_count else 0
         total_pages = int(math.ceil(total_results / current_limit)) if total_results and current_limit else 0
-
-        current_sort = normalize_search_result_sort(sort)
 
         page_numbers = []
         if total_pages:
@@ -148,14 +171,14 @@ class SearchPage(Page):
             filters=selected_filters,
             page=request_state["current_page"],
             page_size=request_state["current_limit"],
-            sort_field="publication_year",
-            sort_order="desc",
+            sort_field=request_state["sort_field"],
+            sort_order=request_state["sort_order"],
         )
 
     def get_context(self, request, *args, **kwargs):
         context = super().get_context(request, *args, **kwargs)
-        request_state = self.get_search_request_state(request)
         data_source = self.data_source
+        request_state = self.get_search_request_state(request, data_source=data_source)
 
         if not data_source:
             logger.warning(f"SearchPage '{self.title}' has no data_source configured.")
@@ -170,7 +193,7 @@ class SearchPage(Page):
             raw_results,
             page=request_state["current_page"],
             page_size=request_state["current_limit"],
-            sort=request_state["current_sort"],
+            current_sort=request_state["current_sort"],
         )
         context.update(
             self.build_search_template_context(

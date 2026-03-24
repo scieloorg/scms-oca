@@ -22,11 +22,11 @@ def search_view_list(request):
         "index_name",
         getattr(settings, "OP_INDEX_SCIENTIFIC_PRODUCTION", "scientific_production"),
     )
-    request_state = SearchPage.get_search_request_state(request)
 
     try:
         service = SearchGatewayService(index_name=index_name)
         data_source = service.data_source
+        request_state = SearchPage.get_search_request_state(request, data_source=data_source)
         applied_filters = extract_applied_filters(request.GET, data_source, form_key="search")
         selected_filters = normalize_option_filters(applied_filters)
         results_data = service.search_documents(
@@ -35,14 +35,14 @@ def search_view_list(request):
             filters=selected_filters,
             page=request_state["current_page"],
             page_size=request_state["current_limit"],
-            sort_field="publication_year",
-            sort_order="desc",
+            sort_field=request_state["sort_field"],
+            sort_order=request_state["sort_order"],
         )
         results_data = SearchPage.current_pagination(
             results_data,
             page=request_state["current_page"],
             page_size=request_state["current_limit"],
-            sort=request_state["current_sort"],
+            current_sort=request_state["current_sort"],
         )
         results_html = render_to_string(
             "search/include/results_list.html",

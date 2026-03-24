@@ -57,9 +57,9 @@
             <span class="results-controls__label">{% trans "Ordenar por:" %}</span>
             <div class="results-controls__select-wrap">
                 <select id="results-sort-select" class="results-controls__select" aria-label="{% trans 'Ordenar resultados' %}">
-                    <option value="recent" {% if results_data.current_sort == "recent" %}selected{% endif %}>{% trans "Mais recentes" %}</option>
-                    <option value="oldest" {% if results_data.current_sort == "oldest" %}selected{% endif %}>{% trans "Mais antigos" %}</option>
-                    <option value="cited" {% if results_data.current_sort == "cited" %}selected{% endif %}>{% trans "Mais citados" %}</option>
+                    <option value="desc" {% if results_data.current_sort == "desc" %}selected{% endif %}>{% trans "Mais recentes" %}</option>
+                    <option value="asc" {% if results_data.current_sort == "asc" %}selected{% endif %}>{% trans "Mais antigos" %}</option>
+                    <option value="cited_by_count" {% if results_data.current_sort == "cited_by_count" %}selected{% endif %}>{% trans "Mais citados" %}</option>
                 </select>
             </div>
         </div>
