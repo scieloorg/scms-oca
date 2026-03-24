@@ -1,53 +1,6 @@
 from .query import build_lookup_hits_body
 
 
-def strip_keyword_suffix(field_name):
-    if not field_name:
-        return ""
-    return field_name[:-8] if str(field_name).endswith(".keyword") else str(field_name)
-
-
-def _resolve_lookup_index_name(lookup_config, data_source):
-    return lookup_config.get("index_name") or data_source.index_name
-
-
-def _resolve_lookup_source_fields(lookup_config):
-    return list(
-        dict.fromkeys((lookup_config["source_value_field"], lookup_config["source_label_field"]))
-    )
-
-
-def _resolve_lookup_search_fields(lookup_config):
-    return list(
-        dict.fromkeys(
-            (
-                lookup_config["search_field"],
-                strip_keyword_suffix(lookup_config["search_field"]),
-            )
-        )
-    )
-
-
-def _read_nested_value(payload, path):
-    if payload in (None, "") or not path:
-        return None
-
-    current = payload
-    for part in str(path).split("."):
-        if isinstance(current, dict):
-            current = current.get(part)
-        else:
-            return None
-
-    if isinstance(current, list):
-        for item in current:
-            if item not in (None, ""):
-                return item
-        return None
-
-    return current
-
-
 def _normalize_option(value, label=None, doc_count=None):
     if value in (None, ""):
         return None
