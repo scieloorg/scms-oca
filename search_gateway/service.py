@@ -195,6 +195,7 @@ class SearchGatewayService:
                 self.client,
                 field,
                 query_text=query_text,
+                request_timeout=self.request_timeout,
             )
 
         if not field.index_field_name:
