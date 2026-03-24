@@ -10,20 +10,14 @@ def _normalize_text(value, lower=False):
 
 
 def get_journal_metrics_data_source():
-    try:
-        return DataSource.get_by_index_name(index_name=JOURNAL_METRICS_DATA_SOURCE)
-    except Exception:
-        return None
+    return DataSource.get_by_index_name(index_name=JOURNAL_METRICS_DATA_SOURCE)
 
 
 def _get_resolved_field(field_name):
     data_source = get_journal_metrics_data_source()
     if not data_source:
         return None
-    try:
-        return data_source.get_field(field_name)
-    except Exception:
-        return None
+    return data_source.get_field(field_name)
 
 
 def _get_default_value(field_name, default=None):
@@ -31,7 +25,7 @@ def _get_default_value(field_name, default=None):
     if not field:
         return default
 
-    value = field.get_default_value(default=None)
+    value = field.default_value
     if value in (None, "", [], {}):
         return default
     return value
@@ -44,7 +38,7 @@ def _get_static_option_values(field_name, *, lower=False):
 
     values = []
     seen = set()
-    for option in field.get_static_options():
+    for option in field.static_options:
         normalized_value = _normalize_text((option or {}).get("value"), lower=lower)
         if not normalized_value or normalized_value in seen:
             continue
