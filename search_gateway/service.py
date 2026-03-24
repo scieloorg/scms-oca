@@ -175,7 +175,7 @@ class SearchGatewayService:
         option_map = {}
 
         for option in options or []:
-            value = str(option.get("key") or option.get("value") or "").strip()
+            value = str(option.get("value") or "").strip()
             if not value:
                 continue
             values.append(value)
@@ -186,9 +186,9 @@ class SearchGatewayService:
             return options, error
 
         lookup_map = {
-            str(option.get("key") or ""): option
+            option["value"]: option
             for option in lookup_options
-            if option.get("key")
+            if option.get("value")
         }
         for value in values:
             base_option = dict(option_map.get(value) or {})
@@ -221,7 +221,7 @@ class SearchGatewayService:
                 self.data_source,
                 field,
                 query_text=query_text,
-                filters=filters,
+                request_timeout=self.request_timeout,
             )
         except Exception as exc:
             return None, f"Error retrieving lookup options: {exc}"
@@ -269,6 +269,7 @@ class SearchGatewayService:
                 self.data_source,
                 field,
                 values,
+                request_timeout=self.request_timeout,
             )
         except Exception as exc:
             return None, f"Error retrieving lookup options: {exc}"
@@ -294,10 +295,6 @@ class SearchGatewayService:
         if error:
             return None, error
 
-        field_settings = data_source.get_field_settings_dict(
-            include_fields=include_fields,
-            exclude_fields=exclude_fields,
-        )
         field_settings = self._get_filterable_field_settings(
             include_fields=include_fields,
             exclude_fields=exclude_fields,

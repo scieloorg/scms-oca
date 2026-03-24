@@ -4,10 +4,12 @@ from django.template.loader import render_to_string
 from django.utils.translation import gettext
 from django.utils.translation import gettext_lazy as _
 
-from .option_normalization import group_options
-from .option_normalization import normalize_options
-from .option_normalization import normalize_selected_values
 from .field_options import resolve_form_options
+from .option_normalization import (
+    group_options,
+    normalize_options,
+    normalize_selected_values,
+)
 from .request_filters import CLEAR_DEFAULTS_INTERNAL_FLAG
 from .service import SearchGatewayService
 
@@ -160,7 +162,7 @@ def _merge_static_and_runtime_options(static_options, runtime_options):
         seen_values.add(value)
 
     for option in (runtime_options or []):
-        value = str((option or {}).get("value") or (option or {}).get("key") or "")
+        value = str((option or {}).get("value") or "")
         if value in seen_values:
             continue
         merged.append(option)

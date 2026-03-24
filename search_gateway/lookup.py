@@ -1,5 +1,3 @@
-from django.conf import settings
-
 from .query import build_lookup_hits_body
 
 
@@ -56,7 +54,7 @@ def _normalize_option(value, label=None, doc_count=None):
 
     normalized_value = str(value)
     normalized_label = str(label if label not in (None, "") else normalized_value)
-    option = {"key": normalized_value, "label": normalized_label}
+    option = {"value": normalized_value, "label": normalized_label}
     if doc_count is not None:
         option["doc_count"] = doc_count
     return option
@@ -76,15 +74,15 @@ def _parse_lookup_hits(response, lookup_config):
         label = _read_nested_value(source_payload, source_label_field)
 
         option = _normalize_option(value=value, label=label)
-        if not option or option["key"] in seen:
+        if not option or option["value"] in seen:
             continue
-        seen.add(option["key"])
+        seen.add(option["value"])
         options.append(option)
 
     return options
 
 
-def search_lookup_options(client, data_source, settings_filter, query_text=""):
+def search_lookup_options(client, data_source, settings_filter, query_text="", request_timeout=40):
     lookup_config = settings_filter.lookup
     if not lookup_config:
         return None, "Lookup not configured"
@@ -106,12 +104,12 @@ def search_lookup_options(client, data_source, settings_filter, query_text=""):
     response = client.search(
         index=lookup_index_name,
         body=body,
-        request_timeout=getattr(settings, "OS_REQUEST_TIMEOUT", 40),
+        request_timeout=request_timeout,
     )
     return _parse_lookup_hits(response, lookup_config), None
 
 
-def search_lookup_options_by_values(client, data_source, settings_filter, values):
+def search_lookup_options_by_values(client, data_source, settings_filter, values, request_timeout=40):
     lookup_config = settings_filter.lookup
     if not lookup_config:
         return None, "Lookup not configured"
@@ -154,12 +152,12 @@ def search_lookup_options_by_values(client, data_source, settings_filter, values
     response = client.search(
         index=lookup_index_name,
         body=body,
-        request_timeout=getattr(settings, "OS_REQUEST_TIMEOUT", 40),
+        request_timeout=request_timeout,
     )
 
     options = _parse_lookup_hits(response, lookup_config)
-    option_map = {str(option.get("key")): option for option in (options or []) if option.get("key")}
+    option_map = {option["value"]: option for option in (options or []) if option.get("value")}
     ordered = []
     for value in normalized_values:
-        ordered.append(option_map.get(value) or {"key": value, "label": value})
+        ordered.append(option_map.get(value) or {"value": value, "label": value})
     return ordered, None
