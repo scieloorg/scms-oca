@@ -7,10 +7,6 @@ from pycountry import countries
 from .models import DataSource
 
 
-TRUE_VALUES = {"true", "1", "yes", "y", "sim"}
-FALSE_VALUES = {"false", "0", "no", "n", "nao"}
-
-
 def _get_language_name(code):
     try:
         return _(Lang(code).name)
@@ -79,22 +75,6 @@ def _get_static_option_label_from_field_settings(field_settings, field_name, val
             return _(option_label)
         return option_label or value
 
-    return None
-
-
-def coerce_boolean(value):
-    if isinstance(value, str):
-        normalized = value.strip().lower()
-        if normalized in TRUE_VALUES:
-            return True
-        if normalized in FALSE_VALUES:
-            return False
-        return None
-
-    if value in (True, 1):
-        return True
-    if value in (False, 0):
-        return False
     return None
 
 
