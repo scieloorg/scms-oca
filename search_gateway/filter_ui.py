@@ -2,7 +2,6 @@ from collections import OrderedDict
 
 from django.template.loader import render_to_string
 from django.utils.translation import gettext
-from django.utils.translation import gettext_lazy as _
 
 from .field_options import resolve_form_options
 from .option_normalization import (
@@ -47,7 +46,7 @@ def _build_form_groups(fields, form_group_labels=None):
         if group_key not in grouped_fields:
             grouped_fields[group_key] = {
                 "key": group_key,
-                "label": _(group_label),
+                "label": _translate_text(group_label),
                 "order": field["group"]["order"],
                 "fields": [],
             }
@@ -440,8 +439,8 @@ def render_filter_sidebar(
     sidebar_form_id="search-gateway-filter-form",
     sidebar_form_method="get",
     sidebar_form_action="",
-    submit_label=_("FILTRAR"),
-    reset_label=_("LIMPAR"),
+    submit_label=gettext("FILTRAR"),
+    reset_label=gettext("LIMPAR"),
     submit_id="search-gateway-filter-submit",
     reset_id="search-gateway-filter-reset",
     reset_type="button",
