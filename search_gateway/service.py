@@ -78,7 +78,7 @@ class SearchGatewayService:
             **kwargs,
         )
 
-    def _resolve_field(self, field_name, *, require_lookup=False):
+    def _resolve_field(self, field_name):
         data_source, error = self._resolve_data_source()
         if error:
             return None, error
@@ -86,8 +86,6 @@ class SearchGatewayService:
         field = data_source.get_field(field_name)
         if not field:
             return None, "Invalid field_name"
-        if require_lookup and not field.lookup:
-            return None, "Lookup not configured"
         return field, None
 
     def _resolve_option_size(self, field, query_text):
@@ -185,11 +183,18 @@ class SearchGatewayService:
         if error:
             return None, error
 
-        if field.lookup:
-            return self._search_lookup_field_options(
+        if field.lookup and field.lookup_uses_data_source_values and field.index_field_name:
+            return self._search_data_source_field_options(
                 field,
                 query_text=query_text,
                 filters=filters,
+            )
+
+        if field.lookup:
+            return search_lookup_options(
+                self.client,
+                field,
+                query_text=query_text,
             )
 
         if not field.index_field_name:
@@ -202,9 +207,12 @@ class SearchGatewayService:
         )
 
     def get_lookup_options_by_values(self, field_name, values):
-        field, error = self._resolve_field(field_name, require_lookup=True)
+        field, error = self._resolve_field(field_name)
         if error:
             return None, error
+
+        if not field.lookup:
+            return None, "Lookup not configured"
 
         try:
             return search_lookup_options_by_values(
