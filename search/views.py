@@ -38,8 +38,7 @@ def search_view_list(request):
             sort_field="publication_year",
             sort_order="desc",
         )
-        results_data = SearchPage.enrich_results_data_for_display(data_source, results_data)
-        results_data = SearchPage.decorate_results_data_for_ui(
+        results_data = SearchPage.current_pagination(
             results_data,
             page=request_state["current_page"],
             page_size=request_state["current_limit"],
