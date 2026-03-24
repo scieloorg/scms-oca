@@ -1,8 +1,10 @@
 from django.conf import settings
 
-from .option_normalization import normalize_filter_default_value
-from .transforms import TRUE_VALUES, normalize_boolean
-
+from .option_normalization import (
+    TRUE_VALUES,
+    normalize_boolean,
+    normalize_filter_default_value,
+)
 
 DEFAULT_FILTER_SUFFIXES = ("_operator", "_bool_not")
 FILTER_SUFFIXES = tuple(getattr(settings, "SEARCH_GATEWAY_FILTER_SUFFIXES", DEFAULT_FILTER_SUFFIXES))
