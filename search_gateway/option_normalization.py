@@ -6,7 +6,7 @@ from django.utils.translation import gettext
 TRUE_VALUES = {"true", "1", "yes", "y", "sim", "on"}
 FALSE_VALUES = {"false", "0", "no", "n", "nao"}
 
-SEARCH_RESULT_SORT_VALUES = frozenset({"recent", "oldest", "cited"})
+SEARCH_RESULT_SORT_VALUES = frozenset({"desc", "asc", "cited_by_count"})
 
 
 def normalize_int(value, default: int) -> int:
@@ -22,8 +22,8 @@ def normalize_positive_number(value, default: int) -> int:
 
 
 def normalize_search_result_sort(value):
-    normalized = str(value or "recent").strip().lower()
-    return normalized if normalized in SEARCH_RESULT_SORT_VALUES else "recent"
+    normalized = str(value or "desc").strip().lower()
+    return normalized if normalized in SEARCH_RESULT_SORT_VALUES else "desc"
 
 
 def normalize_filter_default_value(default_value):
