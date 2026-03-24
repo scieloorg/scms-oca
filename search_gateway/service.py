@@ -172,8 +172,7 @@ class SearchGatewayService:
                     self.client,
                     self.data_source,
                     settings_filter,
-                    query_text=query_text,
-                    filters=filters,
+                    query_text=query_text
                 )
             except Exception as exc:
                 return None, f"Error retrieving lookup options: {exc}"
@@ -291,7 +290,7 @@ class SearchGatewayService:
         if not self.client or not self.data_source:
             return {"search_results": [], "total_results": 0}
 
-        field_settings = self.data_source.field_settings_dict
+        field_settings = self.data_source.get_field_settings_dict()
         mapped_filters = utils.get_mapped_filters(filters, field_settings)
         body = query_builder.build_document_search_body(
             query_text=query_text,

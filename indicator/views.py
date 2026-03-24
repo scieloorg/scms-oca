@@ -150,7 +150,7 @@ def _render_journal_metrics_profile(request, issn=None):
         return JsonResponse({"error": "Invalid data_source"}, status=404)
 
     search_gateway_service = SearchGatewayService(index_name=journal_metrics_data_source.JOURNAL_METRICS_DATA_SOURCE)
-    field_settings = data_source.field_settings_dict
+    field_settings = data_source.get_field_settings_dict()
     filter_fields_to_load = {"category_level"}
     exclude_fields = [name for name in field_settings.keys() if name not in filter_fields_to_load]
 
@@ -206,7 +206,7 @@ def journal_metrics_view(request):
         "is_journal_metrics": True,
     }
 
-    field_settings = data_source.field_settings_dict
+    field_settings = data_source.get_field_settings_dict()
     filter_fields_to_load = {"country", "collection", "category_level", "publication_year"}
 
     exclude_fields = [name for name in field_settings.keys() if name not in filter_fields_to_load]
@@ -326,12 +326,12 @@ def periodical_timeseries_view(request):
 
     if not data_source_name:
         return JsonResponse({"error": "Missing data_source parameter"}, status=400)
-    
+
     if not field_name or not value:
         return JsonResponse({"error": "Missing field_name or value parameter"}, status=400)
 
     filters = {field_name: value}
-    
+
     data, error = search_controller.get_indicator_data(data_source_name, filters)
     if error:
         status_code = 503 if error == "Service unavailable" else 400 if error == "Invalid data_source" else 500

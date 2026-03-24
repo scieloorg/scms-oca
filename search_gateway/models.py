@@ -379,14 +379,6 @@ class DataSource(models.Model):
     def get_field_settings_schema(self):
         return self._normalize_schema(self.field_settings or {})
 
-    @property
-    def field_settings_schema(self):
-        return self.get_field_settings_schema()
-
-    @property
-    def field_settings_dict(self):
-        return self.get_field_settings_dict()
-
     def get_field_settings_dict(self, include_fields=None, exclude_fields=None):
         include_fields = set(include_fields or [])
         exclude_fields = set(exclude_fields or [])

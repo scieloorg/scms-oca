@@ -109,7 +109,7 @@ def _append_must_clause(query, clause):
 def _build_journal_metrics_filter_clauses(form_filters, selected_category_level):
     data_source_name = JOURNAL_METRICS_DATA_SOURCE
     data_source = get_journal_metrics_data_source()
-    field_settings = data_source.field_settings_dict if data_source else {}
+    field_settings = data_source.get_field_settings_dict() if data_source else {}
 
     cleaned_filters = utils.clean_form_filters(dict(form_filters or {}))
     control_filter_keys = set(TRANSPORT_FILTER_KEYS)
@@ -275,7 +275,7 @@ def get_journal_metrics_data(form_filters):
     if not data_source:
         return None, "Invalid data_source"
     index_name = data_source.index_name
-    field_settings = data_source.field_settings_dict
+    field_settings = data_source.get_field_settings_dict()
 
     payload_filters = dict(form_filters)
     has_explicit_category_level = str(payload_filters.get("category_level") or "").strip() != ""
@@ -507,7 +507,7 @@ def get_indicator_data(data_source_name, filters, study_unit="document"):
 
     breakdown_variable = filters.get("breakdown_variable")
 
-    field_settings = data_source.field_settings_dict
+    field_settings = data_source.get_field_settings_dict()
 
     query = indicator_query.build_query(
         filters,
