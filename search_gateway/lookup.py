@@ -1,6 +1,6 @@
 from django.conf import settings
 
-from . import query as query_builder
+from .query import build_lookup_hits_body
 
 
 def strip_keyword_suffix(field_name):
@@ -15,48 +15,17 @@ def _resolve_lookup_index_name(lookup_config, data_source):
 
 def _resolve_lookup_source_fields(lookup_config):
     return list(
-        dict.fromkeys(
-            field_name
-            for field_name in (
-                lookup_config.get("source_value_field"),
-                lookup_config.get("source_label_field"),
-            )
-            if field_name
-        )
-    ) or None
-
-
-def _resolve_lookup_value_field(lookup_config):
-    source_value_field = (
-        lookup_config.get("source_value_field")
-        or strip_keyword_suffix(lookup_config.get("value_field"))
-        or "value"
+        dict.fromkeys((lookup_config["source_value_field"], lookup_config["source_label_field"]))
     )
-    value_field = lookup_config.get("value_field") or source_value_field
-    return value_field, source_value_field
 
 
 def _resolve_lookup_search_fields(lookup_config):
-    configured_search_field = lookup_config.get("search_field")
-    if configured_search_field:
-        return list(
-            dict.fromkeys(
-                field_name
-                for field_name in (
-                    configured_search_field,
-                    strip_keyword_suffix(configured_search_field),
-                )
-                if field_name
-            )
-        )
     return list(
         dict.fromkeys(
-            field_name
-            for field_name in (
-                strip_keyword_suffix(lookup_config.get("label_field")),
-                strip_keyword_suffix(lookup_config.get("value_field")),
+            (
+                lookup_config["search_field"],
+                strip_keyword_suffix(lookup_config["search_field"]),
             )
-            if field_name
         )
     )
 
@@ -98,28 +67,13 @@ def _parse_lookup_hits(response, lookup_config):
     options = []
     seen = set()
 
-    source_value_field = (
-        lookup_config.get("source_value_field")
-        or strip_keyword_suffix(lookup_config.get("value_field"))
-        or "value"
-    )
-    source_label_field = (
-        lookup_config.get("source_label_field")
-        or strip_keyword_suffix(lookup_config.get("label_field"))
-        or source_value_field
-    )
+    source_value_field = lookup_config["source_value_field"]
+    source_label_field = lookup_config["source_label_field"]
 
     for hit in hits:
         source_payload = hit.get("_source", {}) or {}
-        fields_payload = hit.get("fields", {}) or {}
-
         value = _read_nested_value(source_payload, source_value_field)
-        if value in (None, "") and lookup_config.get("value_field"):
-            value = _read_nested_value(fields_payload, lookup_config.get("value_field"))
-
         label = _read_nested_value(source_payload, source_label_field)
-        if label in (None, "") and lookup_config.get("label_field"):
-            label = _read_nested_value(fields_payload, lookup_config.get("label_field"))
 
         option = _normalize_option(value=value, label=label)
         if not option or option["key"] in seen:
@@ -131,17 +85,17 @@ def _parse_lookup_hits(response, lookup_config):
 
 
 def search_lookup_options(client, data_source, settings_filter, query_text=""):
-    lookup_config = settings_filter.get_lookup_config()
+    lookup_config = settings_filter.lookup
     if not lookup_config:
         return None, "Lookup not configured"
 
     lookup_index_name = _resolve_lookup_index_name(lookup_config, data_source)
     search_fields = _resolve_lookup_search_fields(lookup_config)
-    sort_field = lookup_config.get("sort_field") or lookup_config.get("label_field") or lookup_config.get("value_field")
+    sort_field = lookup_config.get("sort_field") or lookup_config["source_label_field"]
     source_fields = _resolve_lookup_source_fields(lookup_config)
     size = settings_filter.get_option_limit(default=100)
 
-    body = query_builder.build_lookup_hits_body(
+    body = build_lookup_hits_body(
         query_text=query_text,
         search_fields=search_fields,
         size=size,
@@ -158,7 +112,7 @@ def search_lookup_options(client, data_source, settings_filter, query_text=""):
 
 
 def search_lookup_options_by_values(client, data_source, settings_filter, values):
-    lookup_config = settings_filter.get_lookup_config()
+    lookup_config = settings_filter.lookup
     if not lookup_config:
         return None, "Lookup not configured"
 
@@ -167,7 +121,8 @@ def search_lookup_options_by_values(client, data_source, settings_filter, values
         return [], None
 
     lookup_index_name = _resolve_lookup_index_name(lookup_config, data_source)
-    value_field, source_value_field = _resolve_lookup_value_field(lookup_config)
+    source_value_field = lookup_config["source_value_field"]
+    value_field = lookup_config.get("value_field") or source_value_field
     candidate_fields = list(
         dict.fromkeys(
             field_name

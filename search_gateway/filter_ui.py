@@ -1,14 +1,55 @@
+from collections import OrderedDict
+
 from django.template.loader import render_to_string
 from django.utils.translation import gettext
 from django.utils.translation import gettext_lazy as _
 
-from .normalization import group_options
-from .normalization import normalize_options
-from .normalization import normalize_selected_values
-from .form_options import resolve_form_options
+from .option_normalization import group_options
+from .option_normalization import normalize_options
+from .option_normalization import normalize_selected_values
+from .field_options import resolve_form_options
 from .request_filters import CLEAR_DEFAULTS_INTERNAL_FLAG
 from .service import SearchGatewayService
-from .ui import build_form_groups
+
+
+def _translate_text(value, default=""):
+    if value in (None, ""):
+        return default
+    if isinstance(value, str):
+        return gettext(value)
+    return value
+
+
+def _build_form_groups(fields, form_group_labels=None):
+    visible_fields = [field for field in (fields or []) if field.get("has_visible_content")]
+    grouped_fields = OrderedDict()
+
+    for field in visible_fields:
+        group_key = field["group"]["key"]
+        group_label = (form_group_labels or {}).get(group_key, field["group"]["label"])
+        if group_key not in grouped_fields:
+            grouped_fields[group_key] = {
+                "key": group_key,
+                "label": group_label,
+                "order": field["group"]["order"],
+                "fields": [],
+            }
+        grouped_fields[group_key]["fields"].append(field)
+
+    grouped_items = sorted(grouped_fields.values(), key=lambda item: (item["order"], item["label"]))
+    has_active_fields = any(
+        field.get("is_active")
+        for group in grouped_items
+        for field in group.get("fields", [])
+    )
+
+    for group in grouped_items:
+        group_is_active = any(field.get("is_active") for field in group.get("fields", []))
+        group["expanded"] = group_is_active if has_active_fields else True
+        for field in group.get("fields", []):
+            field["expanded"] = field.get("is_active") if has_active_fields else True
+
+    return grouped_items
 
 
 def _field_is_active(*, widget, value="", range_start_value="", range_end_value="", options=None):
@@ -151,68 +192,31 @@ def _resolve_range_value(applied_filters, source_name, default_value, clear_defa
     return default_value
 
 
-def build_form_field_definition(field, applied_filters=None, options_by_field=None):
-    ui_metadata = field.get_ui_metadata()
-    widget = ui_metadata.get("widget") or field.get_widget_name()
-    group_meta = dict(ui_metadata.get("group") or field.get_group_meta())
-    group_label = group_meta.get("label")
-    if isinstance(group_label, str) and group_label:
-        group_meta["label"] = gettext(group_label)
+def _resolve_search_placeholder(widget, configured_placeholder, field_label):
+    if widget not in {"select", "lookup"}:
+        return configured_placeholder
+    if configured_placeholder and configured_placeholder != field_label:
+        return configured_placeholder
 
-    field_label = ui_metadata.get("label") or field.field_name
-    if isinstance(field_label, str) and field_label:
-        field_label = gettext(field_label)
-
-    help_text = ui_metadata.get("help_text") or ""
-    if isinstance(help_text, str) and help_text:
-        help_text = gettext(help_text)
-
-    configured_placeholder = ui_metadata.get("placeholder") or ""
-    if isinstance(configured_placeholder, str) and configured_placeholder:
-        configured_placeholder = gettext(configured_placeholder)
-
-    default_value = ui_metadata.get("default_value", {})
-    default_range_value = default_value if isinstance(default_value, dict) else {}
-    multiple_selection = bool(ui_metadata.get("multiple_selection"))
-    support_query_operator = bool(ui_metadata.get("support_query_operator"))
-    searchable = bool(ui_metadata.get("searchable"))
-    async_endpoint = str(ui_metadata.get("async_endpoint") or "")
-    preload_options = bool(ui_metadata.get("preload_options"))
-    dependencies = list(ui_metadata.get("dependencies") or [])
-    range_sources = list(ui_metadata.get("transform_sources") or [])
-
-    clear_defaults = bool((applied_filters or {}).get(CLEAR_DEFAULTS_INTERNAL_FLAG))
     default_search_placeholder = gettext("Search...")
     if default_search_placeholder == "Search...":
-        default_search_placeholder = "Buscar..."
+        return "Buscar..."
+    return default_search_placeholder
 
-    selected_values = _resolve_selected_values(
-        applied_filters,
-        field.field_name,
-        default_value,
-        clear_defaults,
-    )
 
-    static_options = [
-        {
-            "value": option["value"],
-            "label": option["label"],
-            "group": option["group"],
-        }
-        for option in normalize_options(ui_metadata.get("static_options") or [], [])
-    ]
-    raw_runtime_options = (options_by_field or {}).get(field.field_name) or []
-    raw_option_source = _merge_static_and_runtime_options(static_options, raw_runtime_options)
-    options = normalize_options(raw_option_source, selected_values)
-    options = _sort_options_for_display(field, widget, field_label, options)
+def _resolve_field_texts(field):
+    group_meta = dict(field.group_meta)
+    group_meta["label"] = _translate_text(group_meta.get("label"), group_meta.get("label"))
 
-    if widget in {"select", "lookup"} and (
-        not configured_placeholder or configured_placeholder == field_label
-    ):
-        resolved_placeholder = default_search_placeholder
-    else:
-        resolved_placeholder = configured_placeholder
+    return {
+        "group": group_meta,
+        "label": _translate_text(field.label, field.field_name),
+        "help_text": _translate_text(field.help_text),
+        "placeholder": _translate_text(field.placeholder),
+    }
 
+
+def _build_range_state(applied_filters, range_sources, default_range_value, clear_defaults):
     range_start_name = range_sources[0] if len(range_sources) >= 1 else ""
     range_end_name = range_sources[1] if len(range_sources) >= 2 else ""
     range_start_value = _resolve_range_value(
@@ -228,20 +232,105 @@ def build_form_field_definition(field, applied_filters=None, options_by_field=No
         clear_defaults,
     )
 
-    is_active = _field_is_active(
-        widget=widget,
-        value=selected_values[0] if selected_values else "",
-        range_start_value=range_start_value,
-        range_end_value=range_end_value,
-        options=options,
-    )
+    return {
+        "range_sources": range_sources,
+        "range_start_name": range_start_name,
+        "range_end_name": range_end_name,
+        "range_start_value": range_start_value,
+        "range_end_value": range_end_value,
+        "range_values": {
+            source_name: (applied_filters or {}).get(source_name, "")
+            for source_name in range_sources
+        },
+    }
+
+
+def _build_field_options_state(field, selected_values, options_by_field, widget, field_label, multiple_selection):
+    static_options = [
+        {
+            "value": option["value"],
+            "label": option["label"],
+            "group": option["group"],
+        }
+        for option in normalize_options(field.static_options, [])
+    ]
+    raw_runtime_options = (options_by_field or {}).get(field.field_name) or []
+    raw_option_source = _merge_static_and_runtime_options(static_options, raw_runtime_options)
+    options = normalize_options(raw_option_source, selected_values)
+    options = _sort_options_for_display(field, widget, field_label, options)
 
     boolean_toggle_options = []
     if widget == "select" and not multiple_selection:
         boolean_toggle_options = _build_boolean_toggle_options(static_options or options, selected_values)
 
-    bool_not_key = field.get_bool_not_field_name()
-    operator_key = field.get_operator_field_name()
+    return {
+        "options": options,
+        "option_groups": group_options(options),
+        "boolean_toggle_options": boolean_toggle_options,
+        "boolean_toggle_clear_selected": not any(
+            option.get("selected") for option in boolean_toggle_options
+        ),
+    }
+
+
+def build_form_field_definition(field, applied_filters=None, options_by_field=None):
+    widget = field.widget_name
+    text_state = _resolve_field_texts(field)
+    group_meta = text_state["group"]
+    field_label = text_state["label"]
+    help_text = text_state["help_text"]
+    configured_placeholder = text_state["placeholder"]
+
+    default_value = field.default_value
+    default_range_value = default_value if isinstance(default_value, dict) else {}
+    multiple_selection = field.allows_multiple_selection
+    support_query_operator = field.supports_query_operator
+    searchable = field.searchable
+    async_endpoint = field.async_endpoint
+    preload_options = field.preload_options
+    dependencies = list(field.dependencies)
+    range_sources = list(field.transform_sources)
+
+    clear_defaults = bool((applied_filters or {}).get(CLEAR_DEFAULTS_INTERNAL_FLAG))
+
+    selected_values = _resolve_selected_values(
+        applied_filters,
+        field.field_name,
+        default_value,
+        clear_defaults,
+    )
+    options_state = _build_field_options_state(
+        field,
+        selected_values,
+        options_by_field,
+        widget,
+        field_label,
+        multiple_selection,
+    )
+    options = options_state["options"]
+
+    resolved_placeholder = _resolve_search_placeholder(
+        widget,
+        configured_placeholder,
+        field_label,
+    )
+    range_state = _build_range_state(
+        applied_filters,
+        range_sources,
+        default_range_value,
+        clear_defaults,
+    )
+
+    is_active = _field_is_active(
+        widget=widget,
+        value=selected_values[0] if selected_values else "",
+        range_start_value=range_state["range_start_value"],
+        range_end_value=range_state["range_end_value"],
+        options=options,
+    )
+
+    bool_not_key = field.bool_not_field_name
+    operator_key = field.operator_field_name
     return {
         "name": field.field_name,
         "kind": field.kind,
@@ -258,21 +347,8 @@ def build_form_field_definition(field, applied_filters=None, options_by_field=No
         "placeholder": resolved_placeholder,
         "value": selected_values[0] if selected_values else "",
         "values": selected_values,
-        "range_sources": range_sources,
-        "range_start_name": range_start_name,
-        "range_end_name": range_end_name,
-        "range_start_value": range_start_value,
-        "range_end_value": range_end_value,
-        "range_values": {
-            source_name: (applied_filters or {}).get(source_name, "")
-            for source_name in range_sources
-        },
-        "options": options,
-        "option_groups": group_options(options),
-        "boolean_toggle_options": boolean_toggle_options,
-        "boolean_toggle_clear_selected": not any(
-            option.get("selected") for option in boolean_toggle_options
-        ),
+        **range_state,
+        **options_state,
         "is_active": is_active,
         "has_visible_content": _field_has_visible_content(
             widget=widget,
@@ -290,11 +366,11 @@ def build_form_field_definition(field, applied_filters=None, options_by_field=No
         ),
         "bool_not_active": str((applied_filters or {}).get(bool_not_key) or "").lower() == "true",
         "query_operator_value": str((applied_filters or {}).get(operator_key) or "and").lower(),
-        "input_type": ui_metadata.get("input_type", "text"),
-        "min_value": ui_metadata.get("min_value"),
-        "max_value": ui_metadata.get("max_value"),
-        "step": ui_metadata.get("step"),
-        "allow_clear": ui_metadata.get("allow_clear", True),
+        "input_type": field.input_type,
+        "min_value": field.min_value,
+        "max_value": field.max_value,
+        "step": field.step,
+        "allow_clear": field.allow_clear,
     }
 
 
@@ -330,9 +406,9 @@ def build_data_source_form_payload(
             options_by_field=options_by_field,
         )
         for field in form_fields
-        if not field.is_hidden_in_form()
+        if not field.hidden_in_form
     ]
-    form_groups = build_form_groups(field_definitions, form_group_labels=form_group_labels)
+    form_groups = _build_form_groups(field_definitions, form_group_labels=form_group_labels)
 
     metadata_fields = {field_definition["name"]: [] for field_definition in field_definitions}
 

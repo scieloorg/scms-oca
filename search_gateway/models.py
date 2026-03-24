@@ -1,22 +1,34 @@
-from copy import deepcopy
-
 from django.db import models
 from django.utils.text import capfirst
-from django.utils.translation import gettext, gettext_lazy as _
+from django.utils.translation import gettext
+from django.utils.translation import gettext_lazy as _
 from wagtail.admin.panels import FieldPanel
 from wagtail_json_widget.widgets import JSONEditorWidget
 
-from .normalization import normalize_group_key
-from .normalization import normalize_widget_name
+
+def _merge_field_section(base_section, override_section, *, nested_keys=()):
+    if not isinstance(base_section, dict) or not isinstance(override_section, dict):
+        return override_section
+
+    merged = {**base_section, **override_section}
+    for nested_key in nested_keys:
+        base_nested = base_section.get(nested_key)
+        override_nested = override_section.get(nested_key)
+        if isinstance(base_nested, dict) and isinstance(override_nested, dict):
+            merged[nested_key] = {**base_nested, **override_nested}
+    return merged
 
 
-def _deep_merge_dict(base, override):
-    merged = deepcopy(base or {})
-    for key, value in (override or {}).items():
-        if isinstance(value, dict) and isinstance(merged.get(key), dict):
-            merged[key] = _deep_merge_dict(merged[key], value)
-        else:
-            merged[key] = deepcopy(value)
+def _merge_field_config(base_config, override_config):
+    merged = dict(base_config or {})
+    for key, value in (override_config or {}).items():
+        if key == "filter":
+            merged[key] = _merge_field_section(merged.get(key), value, nested_keys=("transform",))
+            continue
+        if key in {"lookup", "settings"}:
+            merged[key] = _merge_field_section(merged.get(key), value)
+            continue
+        merged[key] = value
     return merged
 
 
@@ -31,172 +43,205 @@ class ResolvedField:
     QUERY_OPERATOR_SUFFIX = "_operator"
     QUERY_BOOL_NOT_SUFFIX = "_bool_not"
 
-    def __init__(self, data_source, field_name, config):
-        self.data_source = data_source
+    def __init__(self, field_name, config):
         self.field_name = field_name
-        self.config = deepcopy(config or {})
+        self.config = config or {}
+        self.ui_settings = self.config.get("settings") or {}
+        self.filter_config = self.config.get("filter") or {}
+        self.lookup_config = self.config.get("lookup") or {}
+        self.transform_config = self.filter_config.get("transform") or {}
         self.kind = str(self.config.get("kind") or "index").strip().lower() or "index"
         self.index_field_name = str(self.config.get("index_field_name") or "").strip()
 
-    def get_ui_settings(self):
-        return dict(self.config.get("settings") or {})
+    @property
+    def lookup(self):
+        return self.lookup_config
 
-    def get_ui_setting(self, key, default=None):
-        return self.get_ui_settings().get(key, default)
+    @property
+    def transform_sources(self):
+        return self.transform_config.get("sources") or []
 
-    def get_filter_config(self):
-        return dict(self.config.get("filter") or {})
-
-    def get_filter_setting(self, key, default=None):
-        return self.get_filter_config().get(key, default)
-
-    def get_lookup_config(self):
-        return dict(self.config.get("lookup") or {})
-
-    def get_transform_config(self):
-        transform = self.get_filter_setting("transform") or {}
-        return dict(transform) if isinstance(transform, dict) else {}
-
-    def get_transform_type(self):
-        return self.get_transform_config().get("type")
-
-    def get_transform_sources(self):
-        return list(self.get_transform_config().get("sources") or [])
-
-    def get_group_key(self):
-        raw_group = self.get_ui_setting("group")
-        return normalize_group_key(raw_group, default="default")
-
-    def get_group_meta(self):
-        group_key = self.get_group_key()
-        explicit_label = self.get_ui_setting("group_label")
-        explicit_order = self.get_ui_setting("group_order")
+    @property
+    def group_meta(self):
+        group_key = self.ui_settings.get("group") or "default"
+        explicit_label = self.ui_settings.get("group_label")
+        explicit_order = self.ui_settings.get("group_order")
         label = explicit_label or capfirst(str(group_key).replace("_", " "))
         order = explicit_order if explicit_order is not None else 999
         return {
             "key": group_key,
             "label": label,
             "order": order,
-            "icon": self.get_ui_setting("group_icon"),
+            "icon": self.ui_settings.get("group_icon"),
         }
 
-    def get_label(self, default=None):
-        label = self.get_ui_setting("label")
+    @property
+    def label(self):
+        label = self.ui_settings.get("label")
         if label not in (None, ""):
             return label
-        return default if default is not None else self.field_name
+        return self.field_name
 
-    def get_help_text(self, default=""):
-        return self.get_ui_setting("help_text", default)
-
-    def get_placeholder(self, default=""):
-        return self.get_ui_setting("placeholder", default)
-
-    def get_default_value(self, default=None):
-        default = {} if default is None else default
-        configured_default = self.get_ui_setting("default_value")
+    @property
+    def default_value(self):
+        configured_default = self.ui_settings.get("default_value")
         if configured_default in (None, ""):
-            return default
+            return {}
         return configured_default
 
-    def get_static_options(self):
-        configured_options = list(self.get_ui_setting("static_options") or [])
+    @property
+    def static_options(self):
+        configured_options = self.ui_settings.get("static_options") or []
         if configured_options:
             return configured_options
 
         if (
-            self.get_transform_type() == "boolean"
-            or self.get_ui_setting("display_transform") == "boolean"
+            self.transform_config.get("type") == "boolean"
+            or self.display_transform == "boolean"
         ):
             return _build_default_boolean_options()
 
         return []
 
-    def get_dependencies(self):
-        return list(self.get_ui_setting("dependencies") or [])
-
+    @property
     def supports_query_operator(self):
-        return bool(self.get_ui_setting("support_query_operator"))
+        return bool(self.ui_settings.get("support_query_operator"))
 
-    def get_operator_field_name(self):
+    @property
+    def operator_field_name(self):
         return f"{self.field_name}{self.QUERY_OPERATOR_SUFFIX}"
 
-    def get_bool_not_field_name(self):
+    @property
+    def bool_not_field_name(self):
         return f"{self.field_name}{self.QUERY_BOOL_NOT_SUFFIX}"
 
-    def get_widget_name(self):
-        settings = self.get_ui_settings()
-        return normalize_widget_name(
-            settings.get("widget"),
-            transform_type=self.get_transform_type(),
-            has_lookup=bool(self.get_lookup_config()),
-        )
+    @property
+    def widget_name(self):
+        return self.ui_settings.get("widget") or ("lookup" if self.lookup else "")
 
+    @property
     def allows_multiple_selection(self):
-        default = self.get_widget_name() not in {"range", "text", "number", "year"}
-        return self.get_ui_setting("multiple_selection", default)
+        default = self.widget_name not in {"range", "text", "number", "year"}
+        return self.ui_settings.get("multiple_selection", default)
 
-    def is_preload_options(self):
-        return bool(self.get_ui_setting("preload_options"))
+    @property
+    def preload_options(self):
+        return bool(self.ui_settings.get("preload_options"))
 
-    def is_hidden_in_form(self):
-        return bool(self.get_ui_setting("hidden_in_form"))
+    @property
+    def hidden_in_form(self):
+        return bool(self.ui_settings.get("hidden_in_form"))
 
-    def get_async_endpoint(self):
-        async_endpoint = self.get_ui_setting("async_endpoint")
-        if async_endpoint in (None, "") and self.get_lookup_config():
+    @property
+    def async_endpoint(self):
+        async_endpoint = self.ui_settings.get("async_endpoint")
+        if async_endpoint in (None, "") and self.lookup:
             return "search_item"
         return async_endpoint or ""
 
-    def is_searchable(self):
-        return self.get_widget_name() == "lookup" or bool(self.get_async_endpoint())
+    @property
+    def searchable(self):
+        return self.widget_name == "lookup" or bool(self.async_endpoint)
 
+    @property
+    def help_text(self):
+        return self.ui_settings.get("help_text", "")
+
+    @property
+    def placeholder(self):
+        return self.ui_settings.get("placeholder", "")
+
+    @property
+    def dependencies(self):
+        return self.ui_settings.get("dependencies") or []
+
+    @property
+    def input_type(self):
+        return self.ui_settings.get("input_type", "text")
+
+    @property
+    def min_value(self):
+        return self.ui_settings.get("min")
+
+    @property
+    def max_value(self):
+        return self.ui_settings.get("max")
+
+    @property
+    def step(self):
+        return self.ui_settings.get("step")
+
+    @property
+    def allow_clear(self):
+        return self.ui_settings.get("allow_clear", True)
+
+    @property
+    def display_transform(self):
+        return self.ui_settings.get("display_transform")
+
+    @property
+    def lookup_uses_data_source_values(self):
+        return bool(self.ui_settings.get("lookup_use_data_source_values"))
+
+    @property
+    def filter_size(self):
+        return self.filter_config.get("size")
+
+    @property
+    def filter_order(self):
+        return self.filter_config.get("order")
+
+    @property
     def requires_runtime_options(self):
-        widget = self.get_widget_name()
+        widget = self.widget_name
         if widget in {"text", "number", "year", "range"}:
             return False
-        if self.get_static_options():
+        if self.static_options:
             return False
         if self.kind != "index" and widget != "lookup":
             return False
-        if widget == "lookup" and not self.is_preload_options():
+        if widget == "lookup" and not self.preload_options:
             return False
         return True
 
-    def get_ui_metadata(self):
-        transform_config = self.get_transform_config()
-        return {
-            "widget": self.get_widget_name(),
-            "group": self.get_group_meta(),
-            "searchable": self.is_searchable(),
-            "async_endpoint": self.get_async_endpoint(),
-            "preload_options": self.is_preload_options(),
-            "dependencies": self.get_dependencies(),
-            "multiple_selection": self.allows_multiple_selection(),
-            "support_query_operator": self.supports_query_operator(),
-            "input_type": self.get_ui_setting("input_type", "text"),
-            "min_value": self.get_ui_setting("min"),
-            "max_value": self.get_ui_setting("max"),
-            "step": self.get_ui_setting("step"),
-            "allow_clear": self.get_ui_setting("allow_clear", True),
-            "label": self.get_label(default=""),
-            "help_text": self.get_help_text(default=""),
-            "placeholder": self.get_placeholder(default=""),
-            "default_value": self.get_default_value(default={}),
-            "static_options": self.get_static_options(),
-            "transform_type": transform_config.get("type"),
-            "transform_sources": self.get_transform_sources(),
-        }
+    def build_filter_metadata(self, *, order=0, group_label_override=None):
+        field_metadata = dict(self.ui_settings)
+
+        field_label = field_metadata.get("label")
+        if isinstance(field_label, str) and field_label:
+            field_metadata["label"] = gettext(field_label)
+
+        group_meta = self.group_meta
+        group_key = group_meta.get("key", "default")
+        group_label = group_label_override or group_meta.get("label")
+        if isinstance(group_label, str) and group_label:
+            group_label = gettext(group_label)
+
+        field_metadata.update(
+            {
+                "kind": self.kind,
+                "group": group_key,
+                "group_label": group_label,
+                "group_order": group_meta.get("order", 999),
+                "resolved_widget": self.widget_name,
+                "searchable": self.searchable,
+                "async_endpoint": self.async_endpoint,
+                "preload_options": self.preload_options,
+                "dependencies": list(self.dependencies),
+                "order": order,
+            }
+        )
+        return field_metadata
 
     def get_option_limit(self, default=100):
-        lookup_config = self.get_lookup_config()
+        lookup_config = self.lookup
         if lookup_config.get("size") not in (None, ""):
             try:
                 return max(int(lookup_config.get("size")), 1)
             except (TypeError, ValueError):
                 pass
 
-        configured_size = self.get_filter_setting("size")
+        configured_size = self.filter_size
         if configured_size not in (None, ""):
             try:
                 configured_size = int(configured_size)
@@ -210,19 +255,7 @@ class ResolvedField:
     def should_build_filter_aggregation(self):
         if self.kind != "index" or not self.index_field_name:
             return False
-        return self.get_filter_setting("use", True) is not False
-
-    def to_dict(self):
-        result = {"kind": self.kind}
-        if self.index_field_name:
-            result["index_field_name"] = self.index_field_name
-        if self.config.get("lookup"):
-            result["lookup"] = deepcopy(self.config["lookup"])
-        if self.config.get("filter"):
-            result["filter"] = deepcopy(self.config["filter"])
-        if self.config.get("settings"):
-            result["settings"] = deepcopy(self.config["settings"])
-        return result
+        return self.filter_config.get("use", True) is not False
 
 
 class DataSource(models.Model):
@@ -277,235 +310,117 @@ class DataSource(models.Model):
             "index_name": self.index_name,
             "display_name": self.display_name,
             "source_fields": self.source_fields or [],
-            "field_settings": self.get_field_settings_schema(),
+            "field_settings": self.field_settings_schema,
         }
+
+    @property
+    def field_settings_schema(self):
+        return self.field_settings or {"fields": {}, "forms": {}}
+
+    @property
+    def fields_schema(self):
+        return self.field_settings_schema.get("fields") or {}
+
+    @property
+    def forms_schema(self):
+        return self.field_settings_schema.get("forms") or {}
+
+    @property
+    def field_settings_dict(self):
+        return self.fields_schema
 
     @staticmethod
-    def _normalize_field_config(field_name, config):
-        config = deepcopy(config or {})
-        settings = dict(config.get("settings") or {})
-        filter_config = dict(config.get("filter") or {})
+    def _normalize_form_field_item(item):
+        if isinstance(item, str):
+            return item, {}
+        return str(item.get("name") or "").strip(), item.get("overrides") or {}
 
-        if config.get("transform") == "year_range":
-            filter_config["transform"] = {
-                "type": "year_range",
-                "sources": list(config.get("source_fields") or []),
-            }
-        elif config.get("source_fields") and "transform" not in filter_config:
-            filter_config["transform"] = {
-                "type": "year_range",
-                "sources": list(config.get("source_fields") or []),
-            }
+    def _form_spec(self, form_key):
+        return self.forms_schema.get(form_key) or {}
 
-        lookup_config = dict(config.get("lookup") or {})
+    def _get_ordered_field_items(self, form_key=None):
+        base_fields = self.fields_schema
+        if not form_key:
+            return list(base_fields.items())
 
-        transform_type = (filter_config.get("transform") or {}).get("type")
-        widget = normalize_widget_name(
-            settings.get("widget"),
-            transform_type=transform_type,
-            has_lookup=bool(lookup_config),
-        )
-        settings["widget"] = widget
+        form_fields = list(self._form_spec(form_key).get("fields") or [])
+        if not form_fields:
+            return list(base_fields.items())
 
-        group_key = settings.get("group")
-        if group_key:
-            normalized_group_key = normalize_group_key(group_key)
-            settings["group"] = normalized_group_key
-
-        if "multiple_selection" not in settings:
-            settings["multiple_selection"] = widget not in {"range", "text", "number", "year"}
-        if lookup_config and "async_endpoint" not in settings:
-            settings["async_endpoint"] = "search_item"
-
-        kind = str(config.get("kind") or "index").strip().lower() or "index"
-        index_field_name = str(config.get("index_field_name") or "").strip()
-
-        normalized = {
-            "kind": kind,
-            "index_field_name": index_field_name,
-            "filter": filter_config,
-            "settings": settings,
-        }
-        if lookup_config:
-            normalized["lookup"] = lookup_config
-        return normalized
-
-    @classmethod
-    def _normalize_schema(cls, raw_field_settings):
-        if not isinstance(raw_field_settings, dict):
-            return {"fields": {}, "forms": {}}
-
-        raw_fields = raw_field_settings.get("fields")
-        raw_forms = raw_field_settings.get("forms")
-
-        if not isinstance(raw_fields, dict):
-            return {"fields": {}, "forms": {}}
-
-        fields = {
-            field_name: cls._normalize_field_config(field_name, field_config)
-            for field_name, field_config in raw_fields.items()
-            if isinstance(field_name, str)
-        }
-        forms = {}
-        if isinstance(raw_forms, dict):
-            for form_key, form_config in raw_forms.items():
-                if not isinstance(form_key, str):
-                    continue
-                normalized_form = {
-                    key: deepcopy(value)
-                    for key, value in (form_config or {}).items()
-                    if key != "fields"
-                }
-                form_fields = []
-                for item in list((form_config or {}).get("fields") or []):
-                    if isinstance(item, str):
-                        form_fields.append(item)
-                        continue
-                    if not isinstance(item, dict):
-                        continue
-                    item_name = str(item.get("name") or "").strip()
-                    if not item_name:
-                        continue
-                    form_fields.append(
-                        {
-                            "name": item_name,
-                            "overrides": deepcopy(item.get("overrides") or {}),
-                        }
-                    )
-                normalized_form["fields"] = form_fields
-                forms[form_key] = normalized_form
-        return {"fields": fields, "forms": forms}
-
-    def get_field_settings_schema(self):
-        return self._normalize_schema(self.field_settings or {})
+        ordered_items = []
+        for item in form_fields:
+            field_name, overrides = self._normalize_form_field_item(item)
+            if not field_name or field_name not in base_fields:
+                continue
+            ordered_items.append((field_name, _merge_field_config(base_fields[field_name], overrides)))
+        return ordered_items
 
     def get_field_settings_dict(self, include_fields=None, exclude_fields=None):
         include_fields = set(include_fields or [])
         exclude_fields = set(exclude_fields or [])
+        if not include_fields and not exclude_fields:
+            return self.fields_schema
+
         field_settings = {}
-        for field_name, field_config in self.get_field_settings_schema().get("fields", {}).items():
+        for field_name, field_config in self.fields_schema.items():
             if include_fields and field_name not in include_fields:
                 continue
             if field_name in exclude_fields:
                 continue
-            field_settings[field_name] = deepcopy(field_config)
+            field_settings[field_name] = field_config
         return field_settings
 
-    def get_form_names(self):
-        return list(self.get_field_settings_schema().get("forms", {}).keys())
-
-    def get_form_spec(self, form_key):
-        forms = self.get_field_settings_schema().get("forms", {})
-        return deepcopy(forms.get(form_key) or {})
-
     def get_form_group_labels(self, form_key):
-        group_labels = {}
-        for group_key, label in (self.get_form_spec(form_key).get("group_labels") or {}).items():
-            normalized_key = normalize_group_key(group_key)
-            normalized_label = str(label or "").strip()
-            if normalized_key and normalized_label:
-                group_labels[normalized_key] = normalized_label
-        return group_labels
+        return {
+            group_key: normalized_label
+            for group_key, label in (self._form_spec(form_key).get("group_labels") or {}).items()
+            if group_key and (normalized_label := str(label or "").strip())
+        }
 
     def get_form_panel_groups(self, form_key):
         normalized_groups = []
-        for group_key in self.get_form_spec(form_key).get("panel_groups") or []:
-            normalized_key = normalize_group_key(group_key)
-            if normalized_key and normalized_key not in normalized_groups:
-                normalized_groups.append(normalized_key)
+        for group_key in self._form_spec(form_key).get("panel_groups") or []:
+            if group_key and group_key not in normalized_groups:
+                normalized_groups.append(group_key)
         return normalized_groups
 
     def get_form_control_field_names(self, form_key):
-        return [
-            field.field_name
-            for field in self.get_ordered_fields(form_key=form_key)
-            if field.kind == "control"
-        ]
+        return self._get_form_field_names_by_kind(form_key, "control")
 
-    def get_form_index_field_names(self, form_key):
+    def _get_form_field_names_by_kind(self, form_key, kind):
         return [
             field.field_name
             for field in self.get_ordered_fields(form_key=form_key)
-            if field.kind == "index"
+            if field.kind == kind
         ]
 
     def get_ordered_fields(self, form_key=None, include_fields=None, exclude_fields=None):
         include_fields = set(include_fields or [])
         exclude_fields = set(exclude_fields or [])
-        schema = self.get_field_settings_schema()
-        base_fields = schema.get("fields", {})
-        ordered_items = []
-
-        form_spec = self.get_form_spec(form_key) if form_key else {}
-        form_fields = list(form_spec.get("fields") or [])
-        if form_fields:
-            for item in form_fields:
-                if isinstance(item, str):
-                    field_name = item
-                    overrides = {}
-                else:
-                    field_name = str(item.get("name") or "").strip()
-                    overrides = dict(item.get("overrides") or {})
-                if not field_name or field_name not in base_fields:
-                    continue
-                merged_config = _deep_merge_dict(base_fields[field_name], overrides)
-                ordered_items.append((field_name, merged_config))
-        else:
-            ordered_items = list(base_fields.items())
-
         resolved_fields = []
-        for field_name, field_config in ordered_items:
+        for field_name, field_config in self._get_ordered_field_items(form_key=form_key):
             if include_fields and field_name not in include_fields:
                 continue
             if field_name in exclude_fields:
                 continue
-            resolved_fields.append(ResolvedField(self, field_name, field_config))
+            resolved_fields.append(ResolvedField(field_name, field_config))
         return resolved_fields
 
     def get_field(self, field_name, form_key=None):
-        for field in self.get_ordered_fields(form_key=form_key):
-            if field.field_name == field_name:
-                return field
-        base_config = self.get_field_settings_dict().get(field_name)
+        for candidate_name, field_config in self._get_ordered_field_items(form_key=form_key):
+            if candidate_name == field_name:
+                return ResolvedField(field_name, field_config)
+
+        base_config = self.fields_schema.get(field_name)
         if not base_config:
             return None
-        return ResolvedField(self, field_name, base_config)
-
-    def get_field_config(self, field_name):
-        field = self.get_field(field_name)
-        return field.to_dict() if field else {}
+        return ResolvedField(field_name, base_config)
 
     def get_index_field_name(self, field_name):
         field = self.get_field(field_name)
-        return field.index_field_name if field else field_name
-
-    def get_field_aggregation_size(self, field_name, default=20):
-        field = self.get_field(field_name)
-        return field.get_option_limit(default=default) if field else default
-
-    def get_field_label(self, field_name):
-        field = self.get_field(field_name)
-        return field.get_label(default=field_name) if field else field_name
-
-    def field_allows_multiple_selection(self, field_name, form_key=None):
-        field = self.get_field(field_name, form_key=form_key)
-        return field.allows_multiple_selection() if field else True
-
-    def field_supports_search_as_you_type(self, field_name):
-        field = self.get_field(field_name)
-        return bool(field and field.get_lookup_config())
-
-    @property
-    def build_filters_query(self):
-        aggs = {}
-        for field in self.get_ordered_fields():
-            if not field.should_build_filter_aggregation:
-                continue
-            terms = {"field": field.index_field_name, "size": field.get_filter_setting("size", 1)}
-            if field.get_filter_setting("order"):
-                terms["order"] = field.get_filter_setting("order")
-            aggs[field.field_name] = {"terms": terms}
-        return {"size": 0, "aggs": aggs}
+        if not field or not field.index_field_name:
+            return field_name
+        return field.index_field_name
 
     def get_filter_metadata(self, filters, form_key=None, include_fields=None, exclude_fields=None):
         requested = set((filters or {}).keys())
@@ -520,60 +435,30 @@ class DataSource(models.Model):
         ):
             if requested and field.field_name not in requested:
                 continue
-            field_metadata = dict(field.get_ui_settings())
-            ui_metadata = field.get_ui_metadata()
-            field_label = field_metadata.get("label")
-            if isinstance(field_label, str) and field_label:
-                field_metadata["label"] = gettext(field_label)
-            group_key = ui_metadata.get("group", {}).get("key", "default")
-            group_label = ui_metadata.get("group", {}).get("label")
-            group_label = form_group_labels.get(group_key, group_label)
-            if isinstance(group_label, str) and group_label:
-                group_label = gettext(group_label)
-            field_metadata["kind"] = field.kind
-            field_metadata["group"] = group_key
-            field_metadata["group_label"] = group_label
-            field_metadata["group_order"] = ui_metadata.get("group", {}).get("order", 999)
-            field_metadata["resolved_widget"] = ui_metadata.get("widget")
-            field_metadata["searchable"] = bool(ui_metadata.get("searchable"))
-            field_metadata["async_endpoint"] = ui_metadata.get("async_endpoint", "")
-            field_metadata["preload_options"] = bool(ui_metadata.get("preload_options"))
-            field_metadata["dependencies"] = list(ui_metadata.get("dependencies") or [])
-            field_metadata["order"] = position
-            metadata[field.field_name] = field_metadata
+            group_key = field.group_meta.get("key", "default")
+            metadata[field.field_name] = field.build_filter_metadata(
+                order=position,
+                group_label_override=form_group_labels.get(group_key),
+            )
         return metadata
 
     def get_fields_with_transforms(self):
-        fields = {}
-        for field_name, cfg in self.get_field_settings_dict().items():
-            flt = (cfg.get("filter") or {}).get("transform")
-            disp = (cfg.get("settings") or {}).get("display_transform")
-            if flt or disp:
-                fields[field_name] = {
-                    "filter_transform": flt,
-                    "display_transform": disp,
-                }
-        return fields
-
-    def get_query_operator_fields(self, form_key=None):
         return {
-            field.field_name: field.index_field_name
-            for field in self.get_ordered_fields(form_key=form_key)
-            if field.supports_query_operator() and field.index_field_name
+            field_name: {
+                "filter_transform": (cfg.get("filter") or {}).get("transform"),
+                "display_transform": (cfg.get("settings") or {}).get("display_transform"),
+            }
+            for field_name, cfg in self.fields_schema.items()
+            if (cfg.get("filter") or {}).get("transform")
+            or (cfg.get("settings") or {}).get("display_transform")
         }
 
     def get_index_field_name_to_filter_name_map(self, form_key=None):
-        mapping = {}
-        for field in self.get_ordered_fields(form_key=form_key):
-            if field.index_field_name:
-                mapping[field.index_field_name] = field.field_name
-        return mapping
-
-    def get_display_transform_by_field_name(self, field_name):
-        field = self.get_field(field_name)
-        if not field:
-            return None
-        return field.get_ui_setting("display_transform")
+        return {
+            field.index_field_name: field.field_name
+            for field in self.get_ordered_fields(form_key=form_key)
+            if field.index_field_name
+        }
 
     @classmethod
     def get_by_index_name(cls, index_name):

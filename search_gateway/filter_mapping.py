@@ -1,9 +1,9 @@
-from . import query as query_builder
-from . import transforms
+from .query import query_filters
+from .transforms import coerce_boolean
 
 
 def _normalize_boolean_value(value):
-    return transforms.coerce_boolean(value)
+    return coerce_boolean(value)
 
 
 def _build_year_range_values(start_value, end_value):
@@ -31,6 +31,47 @@ def _build_year_range_values(start_value, end_value):
     return list(range(start_year, end_year + 1))
 
 
+def _map_transformed_filter(field_name, field_info, filters):
+    transform = field_info.get("filter", {}).get("transform", {}) or {}
+    transform_type = transform.get("type")
+    real_field_name = field_info.get("index_field_name")
+    if not transform_type or not real_field_name:
+        return None, set()
+
+    if transform_type == "boolean":
+        raw_value = filters.get(field_name)
+        handled_fields = {field_name}
+        if isinstance(raw_value, list):
+            normalized_values = [_normalize_boolean_value(value) for value in raw_value]
+            normalized_values = [value for value in normalized_values if value is not None]
+            if normalized_values:
+                return (real_field_name, normalized_values), handled_fields
+            return None, handled_fields
+
+        normalized_value = _normalize_boolean_value(raw_value)
+        if normalized_value is not None:
+            return (real_field_name, normalized_value), handled_fields
+        return None, handled_fields
+
+    if transform_type != "year_range":
+        return None, set()
+
+    source_names = list(transform.get("sources") or [])
+    handled_fields = set(source_names)
+    if field_name in filters:
+        handled_fields.add(field_name)
+    if len(source_names) != 2:
+        return None, handled_fields
+
+    year_values = _build_year_range_values(
+        filters.get(source_names[0]),
+        filters.get(source_names[1]),
+    )
+    if year_values:
+        return (real_field_name, year_values), handled_fields
+    return None, handled_fields
+
+
 def apply_search_filters_to_body(body, mapped_filters):
     if not mapped_filters:
         return body
@@ -42,7 +83,7 @@ def apply_search_filters_to_body(body, mapped_filters):
     body_with_filters["query"] = {
         "bool": {
             "must": [original_query],
-            "filter": query_builder.query_filters(mapped_filters),
+                "filter": query_filters(mapped_filters),
         }
     }
 
@@ -69,42 +110,11 @@ def get_mapped_filters(filters, field_settings):
     for field_name, field_info in field_settings.items():
         if field_info.get("kind") == "control":
             continue
-        transform = field_info.get("filter", {}).get("transform", {}) or {}
-        transform_type = transform.get("type")
-        real_field_name = field_info.get("index_field_name")
-        if not transform_type or not real_field_name:
-            continue
-
-        if transform_type == "boolean":
-            raw_value = filters.get(field_name)
-            handled_fields.add(field_name)
-            if isinstance(raw_value, list):
-                normalized_values = [
-                    _normalize_boolean_value(value)
-                    for value in raw_value
-                ]
-                normalized_values = [value for value in normalized_values if value is not None]
-                if normalized_values:
-                    mapped_filters[real_field_name] = normalized_values
-            else:
-                normalized_value = _normalize_boolean_value(raw_value)
-                if normalized_value is not None:
-                    mapped_filters[real_field_name] = normalized_value
-            continue
-
-        if transform_type == "year_range":
-            source_names = list(transform.get("sources") or [])
-            handled_fields.update(source_names)
-            if field_name in filters:
-                handled_fields.add(field_name)
-            if len(source_names) != 2:
-                continue
-            year_values = _build_year_range_values(
-                filters.get(source_names[0]),
-                filters.get(source_names[1]),
-            )
-            if year_values:
-                mapped_filters[real_field_name] = year_values
+        mapped_filter, transformed_fields = _map_transformed_filter(field_name, field_info, filters)
+        handled_fields.update(transformed_fields)
+        if mapped_filter:
+            real_field_name, value = mapped_filter
+            mapped_filters[real_field_name] = value
 
     for key, value in filters.items():
         if key in handled_fields:
@@ -148,6 +158,6 @@ def build_filters_body(aggs, mapped_filters=None):
     body = {"size": 0, "aggs": aggs}
 
     if mapped_filters:
-        body["query"] = {"bool": {"filter": query_builder.query_filters(mapped_filters)}}
+        body["query"] = {"bool": {"filter": query_filters(mapped_filters)}}
 
     return body

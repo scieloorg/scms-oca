@@ -1,7 +1,7 @@
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET
 
-from .forms import render_filter_sidebar
+from .filter_ui import render_filter_sidebar
 from .models import DataSource
 from .request_filters import extract_applied_filters
 from .request_filters import extract_requested_filters

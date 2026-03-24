@@ -1,16 +1,10 @@
 from functools import lru_cache
 
 from django.utils.translation import gettext as _
+from iso639 import Lang
+from pycountry import countries
 
-try:
-    from iso639 import Lang
-except ImportError:  # pragma: no cover
-    Lang = None
-
-try:
-    from pycountry import countries
-except ImportError:  # pragma: no cover
-    countries = None
+from .models import DataSource
 
 
 TRUE_VALUES = {"true", "1", "yes", "y", "sim"}
@@ -19,8 +13,6 @@ FALSE_VALUES = {"false", "0", "no", "n", "nao"}
 
 def _get_language_name(code):
     try:
-        if Lang is None:
-            return code
         return _(Lang(code).name)
     except Exception:
         return code
@@ -29,7 +21,7 @@ def _get_language_name(code):
 @lru_cache(maxsize=512)
 def _get_country_name(code):
     try:
-        if code and countries is not None:
+        if code:
             country = countries.get(alpha_2=code.upper())
             if country:
                 return _(country.name)
@@ -60,22 +52,10 @@ TRANSFORMS = {
 }
 
 
-def _get_field_settings_dict(data_source):
-    if hasattr(data_source, "get_field_settings_dict"):
-        try:
-            return data_source.get_field_settings_dict()
-        except Exception:
-            return {}
-
-    try:
-        from .models import DataSource
-    except Exception:
-        return {}
-
-    resolved_data_source = DataSource.resolve(data_source)
-    if not resolved_data_source:
-        return {}
-    return resolved_data_source.get_field_settings_dict()
+def _resolve_data_source(data_source):
+    if hasattr(data_source, "field_settings_dict") and hasattr(data_source, "get_field"):
+        return data_source
+    return DataSource.resolve(data_source)
 
 
 def _get_static_option_label_from_field_settings(field_settings, field_name, value):
@@ -120,21 +100,11 @@ def coerce_boolean(value):
 
 @lru_cache(maxsize=256)
 def _get_transform_type(data_source, field_name):
-    if hasattr(data_source, "get_display_transform_by_field_name"):
-        try:
-            return data_source.get_display_transform_by_field_name(field_name)
-        except Exception:
-            return None
-
-    try:
-        from .models import DataSource
-    except Exception:
-        return None
-
-    resolved_data_source = DataSource.resolve(data_source)
+    resolved_data_source = _resolve_data_source(data_source)
     if not resolved_data_source:
         return None
-    return resolved_data_source.get_display_transform_by_field_name(field_name)
+    field = resolved_data_source.get_field(field_name)
+    return field.display_transform if field else None
 
 
 def apply_display_transform(transform_type, value):
@@ -148,7 +118,8 @@ def apply_display_transform(transform_type, value):
 
 
 def apply_transform(data_source, field_name, code):
-    field_settings = _get_field_settings_dict(data_source)
+    resolved_data_source = _resolve_data_source(data_source)
+    field_settings = resolved_data_source.field_settings_dict if resolved_data_source else {}
     static_option_label = _get_static_option_label_from_field_settings(field_settings, field_name, code)
     if static_option_label is not None:
         return static_option_label

@@ -1,6 +1,6 @@
 from django.conf import settings
 
-from . import transforms
+from .transforms import coerce_boolean
 
 
 DEFAULT_FILTER_SUFFIXES = ("_operator", "_bool_not")
@@ -33,21 +33,38 @@ TRUTHY_FLAG_VALUES = {"1", "true", "yes", "y", "sim", "on"}
 
 
 def _should_skip_default_filters(source):
-    if not source:
-        return False
-    value = str(source.get(CLEAR_DEFAULTS_QUERY_PARAM) or "").strip().lower()
+    value = str((source or {}).get(CLEAR_DEFAULTS_QUERY_PARAM) or "").strip().lower()
     return value in TRUTHY_FLAG_VALUES
+
+
+def _normalize_default_values(default_value):
+    if isinstance(default_value, (list, tuple)):
+        values = [str(value) for value in default_value if value not in (None, "")]
+        if not values:
+            return None
+        return values if len(values) > 1 else values[0]
+    return str(default_value)
+
+
+def _extract_non_empty_values(source, key):
+    values = [value for value in source.getlist(key) if value not in (None, "")]
+    return values if values else []
+
+
+def _coerce_boolean_values(values):
+    coerced_values = [coerce_boolean(value) for value in values]
+    return [value for value in coerced_values if value is not None]
 
 
 def _apply_default_filters(applied_filters, data_source, form_key=None):
     resolved_filters = dict(applied_filters or {})
 
     for field in data_source.get_ordered_fields(form_key=form_key):
-        default_value = field.get_default_value(default=None)
+        default_value = field.default_value
         if default_value in (None, "", {}, []):
             continue
 
-        source_names = field.get_transform_sources()
+        source_names = field.transform_sources
         if source_names:
             if any(resolved_filters.get(source_name) not in (None, "", []) for source_name in source_names):
                 continue
@@ -63,14 +80,9 @@ def _apply_default_filters(applied_filters, data_source, form_key=None):
         if field.field_name in resolved_filters:
             continue
 
-        if isinstance(default_value, (list, tuple)):
-            values = [str(value) for value in default_value if value not in (None, "")]
-            if not values:
-                continue
-            resolved_filters[field.field_name] = values if len(values) > 1 else values[0]
-            continue
-
-        resolved_filters[field.field_name] = str(default_value)
+        normalized_default_value = _normalize_default_values(default_value)
+        if normalized_default_value is not None:
+            resolved_filters[field.field_name] = normalized_default_value
 
     return resolved_filters
 
@@ -95,17 +107,13 @@ def _extract_filters_from_source(source, excluded_keys=None, allowed_keys=None):
 
 
 def _build_allowed_applied_filter_keys(data_source, form_key=None):
-    field_names = set()
-    transform_source_names = set()
-
+    allowed_keys = set()
     for field in data_source.get_ordered_fields(form_key=form_key):
-        field_names.add(field.field_name)
-        transform_source_names.update(field.get_transform_sources())
-        if field.supports_query_operator():
-            field_names.add(field.get_operator_field_name())
-            field_names.add(field.get_bool_not_field_name())
-
-    return field_names | transform_source_names
+        allowed_keys.add(field.field_name)
+        allowed_keys.update(field.transform_sources)
+        if field.supports_query_operator:
+            allowed_keys.update({field.operator_field_name, field.bool_not_field_name})
+    return allowed_keys
 
 
 def extract_applied_filters_from_source(source, data_source, form_key=None, extra_excluded_keys=None):
@@ -137,23 +145,18 @@ def extract_requested_filters(source, excluded_keys=None, allowed_keys=None):
 
 def extract_selected_filters(source, data_source, available_filters=None):
     selected_filters = {}
-    field_settings = data_source.get_field_settings_dict()
+    field_settings = data_source.field_settings_dict
     filter_keys = available_filters.keys() if available_filters else field_settings.keys()
 
     for filter_key in filter_keys:
-        values = source.getlist(filter_key)
-        if not values:
-            continue
-
-        cleaned_values = [value for value in values if value]
+        cleaned_values = _extract_non_empty_values(source, filter_key)
         if not cleaned_values:
             continue
 
         field_config = field_settings.get(filter_key, {})
         transform_type = (field_config.get("filter") or {}).get("transform", {}).get("type")
         if transform_type == "boolean":
-            transformed_value = [transforms.coerce_boolean(value) for value in cleaned_values]
-            transformed_value = [value for value in transformed_value if value is not None]
+            transformed_value = _coerce_boolean_values(cleaned_values)
             if transformed_value:
                 selected_filters[filter_key] = transformed_value
             continue
@@ -180,15 +183,7 @@ def extract_applied_filters(source, data_source, form_key=None, extra_excluded_k
 
 def build_option_filters(applied_filters, field, excluded_filter_names=None):
     excluded_names = set(excluded_filter_names or [])
-    excluded_names.add(field.field_name)
-
-    operator_field_name = field.get_operator_field_name()
-    if operator_field_name:
-        excluded_names.add(operator_field_name)
-
-    bool_not_field_name = field.get_bool_not_field_name()
-    if bool_not_field_name:
-        excluded_names.add(bool_not_field_name)
+    excluded_names.update({field.field_name, field.operator_field_name, field.bool_not_field_name})
 
     return normalize_option_filters(
         applied_filters,
@@ -198,17 +193,11 @@ def build_option_filters(applied_filters, field, excluded_filter_names=None):
 
 def normalize_option_filters(applied_filters, excluded_filter_names=None):
     excluded_filter_names = set(excluded_filter_names or [])
-    normalized = {}
-
-    for key, value in (applied_filters or {}).items():
-        if str(key).startswith("__"):
-            continue
-        if key in excluded_filter_names:
-            continue
-        if key.endswith(FILTER_SUFFIXES):
-            continue
-        if value in (None, "", []):
-            continue
-        normalized[key] = value
-
-    return normalized
+    return {
+        key: value
+        for key, value in (applied_filters or {}).items()
+        if not str(key).startswith("__")
+        and key not in excluded_filter_names
+        and not key.endswith(FILTER_SUFFIXES)
+        and value not in (None, "", [])
+    }

@@ -6,7 +6,7 @@ from django.template.loader import render_to_string
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_GET
 
-from search_gateway.forms import render_filter_sidebar
+from search_gateway.filter_ui import render_filter_sidebar
 from search_gateway.request_filters import (
     extract_applied_filters,
     normalize_option_filters,
@@ -22,11 +22,7 @@ def search_view_list(request):
         "index_name",
         getattr(settings, "OP_INDEX_SCIENTIFIC_PRODUCTION", "scientific_production"),
     )
-    page = int(request.GET.get("page", 1))
-    page_size = int(request.GET.get("limit", 25))
-    current_sort = request.GET.get("sort", "recent")
-    text_search = request.GET.get("search", "")
-    query_clauses = SearchPage.query_clauses(request)
+    request_state = SearchPage.get_search_request_state(request)
 
     try:
         service = SearchGatewayService(index_name=index_name)
@@ -34,20 +30,20 @@ def search_view_list(request):
         applied_filters = extract_applied_filters(request.GET, data_source, form_key="search")
         selected_filters = normalize_option_filters(applied_filters)
         results_data = service.search_documents(
-            query_text=text_search if not query_clauses else None,
-            query_clauses=query_clauses,
+            query_text=request_state["search_query"] if not request_state["query_clauses"] else None,
+            query_clauses=request_state["query_clauses"],
             filters=selected_filters,
-            page=page,
-            page_size=page_size,
+            page=request_state["current_page"],
+            page_size=request_state["current_limit"],
             sort_field="publication_year",
             sort_order="desc",
         )
         results_data = SearchPage.enrich_results_data_for_display(data_source, results_data)
         results_data = SearchPage.decorate_results_data_for_ui(
             results_data,
-            page=page,
-            page_size=page_size,
-            sort=current_sort,
+            page=request_state["current_page"],
+            page_size=request_state["current_limit"],
+            sort=request_state["current_sort"],
         )
         results_html = render_to_string(
             "search/include/results_list.html",
