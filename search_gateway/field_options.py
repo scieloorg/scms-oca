@@ -4,9 +4,10 @@ from .request_filters import normalize_option_filters
 
 
 def _normalize_lookup_option(option):
+    key = str(option.get("key") or "")
     return {
-        "value": str(option["key"]),
-        "label": str(option.get("label") or option["key"]),
+        "value": key,
+        "label": str(option.get("label") or key),
     }
 
 

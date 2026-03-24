@@ -6,7 +6,7 @@ def _get_agg_buckets(response, agg_name):
 
 
 def _transform_bucket(field_settings, field_name, bucket):
-    value = bucket["key"]
+    value = bucket.get("key")
     return {
         "key": value,
         "label": apply_display_transform_from_field_settings(
@@ -14,7 +14,7 @@ def _transform_bucket(field_settings, field_name, bucket):
             field_name,
             value,
         ),
-        "doc_count": bucket["doc_count"],
+        "doc_count": bucket.get("doc_count"),
     }
 
 

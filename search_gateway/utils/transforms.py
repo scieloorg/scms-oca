@@ -59,7 +59,9 @@ def _resolve_data_source(data_source):
 
 
 def _get_static_option_label_from_field_settings(field_settings, field_name, value):
-    normalized_value = str(value or "")
+    if value is None:
+        return None
+    normalized_value = str(value)
     if not normalized_value:
         return None
 
