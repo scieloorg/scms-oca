@@ -54,9 +54,7 @@ def _normalize_option(value, label=None, doc_count=None):
     if value in (None, ""):
         return None
 
-    normalized_value = str(value)
-    normalized_label = str(label if label not in (None, "") else normalized_value)
-    option = {"key": normalized_value, "label": normalized_label}
+    option = {"key": str(value), "label": str(label) if label else str(value)}
     if doc_count is not None:
         option["doc_count"] = doc_count
     return option

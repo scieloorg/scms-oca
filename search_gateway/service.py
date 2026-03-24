@@ -9,8 +9,8 @@ from .filter_mapping import apply_search_filters_to_body
 from .filter_mapping import build_filters_body
 from .filter_mapping import get_index_field_candidates
 from .filter_mapping import get_mapped_filters
-from .filters_cache import build_filters_cache_key
-from .filters_cache import get_cached_filters
+from .utils.cache import build_filters_cache_key
+from .utils.cache import get_cached_filters
 from .models import DataSource
 from .lookup import search_lookup_options
 from .lookup import search_lookup_options_by_values
@@ -22,7 +22,7 @@ from .query import build_unique_items_aggregation_body
 from .response_parser import parse_document_search_response
 from .response_parser import parse_filters_response
 from .response_parser import parse_search_item_response
-from .filters_cache import store_filters_cache
+from .utils.cache import store_filters_cache
 
 logger = logging.getLogger(__name__)
 
@@ -54,7 +54,7 @@ class SearchGatewayService:
 
     @property
     def request_timeout(self):
-        return getattr(settings, "OPENSEARCH_REQUEST_TIMEOUT", 40)
+        return getattr(settings, "OS_REQUEST_TIMEOUT", 40)
 
     def _resolve_data_source(self):
         if not self.client:
@@ -89,15 +89,11 @@ class SearchGatewayService:
         if not cleaned_query:
             return size
 
-        max_size_with_query = getattr(settings, "SEARCH_GATEWAY_SEARCH_ITEM_MAX_SIZE", 20)
-        try:
-            max_size_with_query = max(1, int(max_size_with_query))
-        except (TypeError, ValueError):
-            max_size_with_query = 20
-        return min(size, max_size_with_query)
+        max_size_with_query = int(getattr(settings, "SEARCH_GATEWAY_SEARCH_ITEM_MAX_SIZE", 20))
+        return min(size, max(1, max_size_with_query))
 
     def _build_field_option_bodies(self, index_field_name, query_text, size):
-        candidates = get_index_field_candidates(index_field_name) or [index_field_name]
+        candidates = get_index_field_candidates(index_field_name)
         cleaned_query = str(query_text or "").strip()
         bodies = []
 
@@ -287,10 +283,6 @@ class SearchGatewayService:
         if error:
             return None, error
 
-        field_settings = data_source.get_field_settings_dict(
-            include_fields=include_fields,
-            exclude_fields=exclude_fields,
-        )
         field_settings = self._get_filterable_field_settings(
             include_fields=include_fields,
             exclude_fields=exclude_fields,

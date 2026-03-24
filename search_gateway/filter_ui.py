@@ -4,20 +4,12 @@ from django.template.loader import render_to_string
 from django.utils.translation import gettext
 from django.utils.translation import gettext_lazy as _
 
-from .option_normalization import group_options
-from .option_normalization import normalize_options
-from .option_normalization import normalize_selected_values
+from .utils.normalization import group_options
+from .utils.normalization import normalize_options
+from .utils.normalization import normalize_selected_values
 from .field_options import resolve_form_options
 from .request_filters import CLEAR_DEFAULTS_INTERNAL_FLAG
 from .service import SearchGatewayService
-
-
-def _translate_text(value, default=""):
-    if value in (None, ""):
-        return default
-    if isinstance(value, str):
-        return gettext(value)
-    return value
 
 
 def _build_form_groups(fields, form_group_labels=None):
@@ -206,13 +198,13 @@ def _resolve_search_placeholder(widget, configured_placeholder, field_label):
 
 def _resolve_field_texts(field):
     group_meta = dict(field.group_meta)
-    group_meta["label"] = _translate_text(group_meta.get("label"), group_meta.get("label"))
+    group_meta["label"] = gettext(group_meta["label"])
 
     return {
         "group": group_meta,
-        "label": _translate_text(field.label, field.field_name),
-        "help_text": _translate_text(field.help_text),
-        "placeholder": _translate_text(field.placeholder),
+        "label": gettext(field.label),
+        "help_text": gettext(field.help_text) if field.help_text else "",
+        "placeholder": gettext(field.placeholder) if field.placeholder else "",
     }
 
 

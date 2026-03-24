@@ -1,6 +1,6 @@
 from django.conf import settings
 
-from .transforms import coerce_boolean
+from .utils.transforms import coerce_boolean
 
 
 DEFAULT_FILTER_SUFFIXES = ("_operator", "_bool_not")

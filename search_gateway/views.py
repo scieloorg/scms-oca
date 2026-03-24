@@ -6,12 +6,7 @@ from .models import DataSource
 from .request_filters import extract_applied_filters
 from .request_filters import extract_requested_filters
 from .service import SearchGatewayService
-
-
-def _parse_bool_param(value):
-    if value is None:
-        return False
-    return str(value).strip().lower() in {"1", "true", "yes", "y", "on"}
+from .utils.transforms import coerce_boolean
 
 
 def _status_code_for_error(error):
@@ -28,8 +23,7 @@ def filters_view(request):
     if not data_source_name:
         return JsonResponse({"error": "Missing data_source parameter"}, status=400)
 
-    include_form = _parse_bool_param(request.GET.get("include_form"))
-    if include_form:
+    if coerce_boolean(request.GET.get("include_form")):
         form_key = str(request.GET.get("form") or "").strip()
         if not form_key:
             return JsonResponse({"error": "Missing form parameter"}, status=400)
@@ -58,7 +52,7 @@ def filters_view(request):
 
     fields_param = request.GET.get("fields", "")
     include_fields = [item.strip() for item in fields_param.split(",") if item.strip()]
-    refresh = _parse_bool_param(request.GET.get("refresh"))
+    refresh = coerce_boolean(request.GET.get("refresh"))
     requested_filters = extract_requested_filters(
         request.GET,
         excluded_keys={"data_source", "fields", "refresh", "include_form", "form"},

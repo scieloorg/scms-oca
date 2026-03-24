@@ -44,13 +44,13 @@ class ResolvedField:
 
     def __init__(self, field_name, config):
         self.field_name = field_name
-        self.config = config or {}
-        self.ui_settings = self.config.get("settings") or {}
-        self.filter_config = self.config.get("filter") or {}
-        self.lookup_config = self.config.get("lookup") or {}
+        self.config = config
+        self.ui_settings = config.get("settings") or {}
+        self.filter_config = config.get("filter") or {}
+        self.lookup_config = config.get("lookup") or {}
         self.transform_config = self.filter_config.get("transform") or {}
-        self.kind = str(self.config.get("kind") or "index").strip().lower() or "index"
-        self.index_field_name = str(self.config.get("index_field_name") or "").strip()
+        self.kind = config.get("kind", "index")
+        self.index_field_name = config.get("index_field_name", "")
 
     @property
     def lookup(self):
@@ -76,17 +76,11 @@ class ResolvedField:
 
     @property
     def label(self):
-        label = self.ui_settings.get("label")
-        if label not in (None, ""):
-            return label
-        return self.field_name
+        return self.ui_settings.get("label") or self.field_name
 
     @property
     def default_value(self):
-        configured_default = self.ui_settings.get("default_value")
-        if configured_default in (None, ""):
-            return {}
-        return configured_default
+        return self.ui_settings.get("default_value") or {}
 
     @property
     def static_options(self):
@@ -133,10 +127,10 @@ class ResolvedField:
 
     @property
     def async_endpoint(self):
-        async_endpoint = self.ui_settings.get("async_endpoint")
-        if async_endpoint in (None, "") and self.lookup:
-            return "search_item"
-        return async_endpoint or ""
+        endpoint = self.ui_settings.get("async_endpoint")
+        if endpoint:
+            return endpoint
+        return "search_item" if self.lookup else ""
 
     @property
     def searchable(self):
@@ -207,13 +201,13 @@ class ResolvedField:
         field_metadata = dict(self.ui_settings)
 
         field_label = field_metadata.get("label")
-        if isinstance(field_label, str) and field_label:
+        if field_label:
             field_metadata["label"] = gettext(field_label)
 
         group_meta = self.group_meta
-        group_key = group_meta.get("key", "default")
-        group_label = group_label_override or group_meta.get("label")
-        if isinstance(group_label, str) and group_label:
+        group_key = group_meta["key"]
+        group_label = group_label_override or group_meta["label"]
+        if group_label:
             group_label = gettext(group_label)
 
         field_metadata.update(
@@ -221,7 +215,7 @@ class ResolvedField:
                 "kind": self.kind,
                 "group": group_key,
                 "group_label": group_label,
-                "group_order": group_meta.get("order", 999),
+                "group_order": group_meta["order"],
                 "resolved_widget": self.widget_name,
                 "searchable": self.searchable,
                 "async_endpoint": self.async_endpoint,
@@ -233,21 +227,13 @@ class ResolvedField:
         return field_metadata
 
     def get_option_limit(self, default=100):
-        lookup_config = self.lookup
-        if lookup_config.get("size") not in (None, ""):
-            try:
-                return max(int(lookup_config.get("size")), 1)
-            except (TypeError, ValueError):
-                pass
+        lookup_size = self.lookup.get("size")
+        if lookup_size is not None:
+            return max(int(lookup_size), 1)
 
         configured_size = self.filter_size
-        if configured_size not in (None, ""):
-            try:
-                configured_size = int(configured_size)
-            except (TypeError, ValueError):
-                configured_size = None
-        if configured_size:
-            return max(configured_size, 1 if self.should_build_filter_aggregation else default)
+        if configured_size is not None:
+            return max(int(configured_size), 1 if self.should_build_filter_aggregation else default)
         return default
 
     @property
@@ -332,7 +318,7 @@ class DataSource(models.Model):
     def _normalize_form_field_item(item):
         if isinstance(item, str):
             return item, {}
-        return str(item.get("name") or "").strip(), item.get("overrides") or {}
+        return item["name"], item.get("overrides") or {}
 
     def _form_spec(self, form_key):
         return self.forms_schema.get(form_key) or {}
@@ -370,18 +356,10 @@ class DataSource(models.Model):
         return field_settings
 
     def get_form_group_labels(self, form_key):
-        return {
-            group_key: normalized_label
-            for group_key, label in (self._form_spec(form_key).get("group_labels") or {}).items()
-            if group_key and (normalized_label := str(label or "").strip())
-        }
+        return dict((self._form_spec(form_key).get("group_labels") or {}))
 
     def get_form_panel_groups(self, form_key):
-        normalized_groups = []
-        for group_key in self._form_spec(form_key).get("panel_groups") or []:
-            if group_key and group_key not in normalized_groups:
-                normalized_groups.append(group_key)
-        return normalized_groups
+        return list(dict.fromkeys(self._form_spec(form_key).get("panel_groups") or []))
 
     def get_form_control_field_names(self, form_key):
         return self._get_form_field_names_by_kind(form_key, "control")
@@ -434,7 +412,7 @@ class DataSource(models.Model):
         ):
             if requested and field.field_name not in requested:
                 continue
-            group_key = field.group_meta.get("key", "default")
+            group_key = field.group_meta["key"]
             metadata[field.field_name] = field.build_filter_metadata(
                 order=position,
                 group_label_override=form_group_labels.get(group_key),
