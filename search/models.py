@@ -22,7 +22,6 @@ from .choices import SEARCHABLE_FIELDS
 
 
 logger = logging.getLogger(__name__)
-EMPTY_RESULTS_DATA = {"search_results": [], "total_results": 0}
 
 
 class SearchPage(Page):
@@ -65,7 +64,7 @@ class SearchPage(Page):
 
     @staticmethod
     def current_pagination(results_data, *, page=1, page_size=25, sort="recent"):
-        decorated = results_data or dict(EMPTY_RESULTS_DATA)
+        decorated = results_data or {"search_results": [], "total_results": 0}
         search_results = list(decorated.get("search_results") or [])
         total_results = normalize_positive_number(decorated.get("total_results"), 0)
         current_page = page
@@ -115,7 +114,7 @@ class SearchPage(Page):
         results_data=None,
     ):
         scientific_index = getattr(settings, "OP_INDEX_SCIENTIFIC_PRODUCTION", "scientific_production")
-        payload = dict(EMPTY_RESULTS_DATA) if results_data is None else results_data
+        payload = {"search_results": [], "total_results": 0} if results_data is None else results_data
         return {
             "index_name": index_name,
             "searchable_fields": SEARCHABLE_FIELDS,
