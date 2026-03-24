@@ -10,8 +10,10 @@ from wagtail_modeladmin.views import CreateView, EditView
 
 from core import tasks
 from core_settings.models import Moderation
-from search_gateway.filter_ui import build_data_source_form_payload
-from search_gateway.filter_ui import render_filter_sidebar
+from search_gateway.filter_ui import (
+    build_data_source_form_payload,
+    render_filter_sidebar,
+)
 from search_gateway.models import DataSource
 from search_gateway.request_filters import extract_applied_filters
 from search_gateway.service import SearchGatewayService
@@ -19,8 +21,12 @@ from search_gateway.service import SearchGatewayService
 from .journal_metrics import data_source as journal_metrics_data_source
 from .journal_metrics import params as journal_metrics_params
 from .journal_metrics import presentation as journal_metrics_presentation
-from .search import controller as search_controller, utils
 from .permission_helper import IndicatorPermissionHelper
+from .search import controller as search_controller
+
+from .permission_helper import IndicatorPermissionHelper
+from .search import controller as search_controller
+
 
 def _collect_form_group_fields(payload, group_keys):
     selected_fields = []
