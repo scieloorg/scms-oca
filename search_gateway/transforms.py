@@ -1,16 +1,10 @@
 from functools import lru_cache
 
 from django.utils.translation import gettext as _
+from iso639 import Lang
+from pycountry import countries
 
-try:
-    from iso639 import Lang
-except ImportError:  # pragma: no cover
-    Lang = None
-
-try:
-    from pycountry import countries
-except ImportError:  # pragma: no cover
-    countries = None
+from .models import DataSource
 
 
 TRUE_VALUES = {"true", "1", "yes", "y", "sim"}
