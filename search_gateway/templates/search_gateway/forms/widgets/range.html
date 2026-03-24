@@ -1,0 +1,29 @@
+{% load i18n %}
+<div class="year-range-field">
+  <div class="year-range-field__group">
+    <label class="year-range-field__label" for="{{ field.range_start_name }}">{% trans "De" %}</label>
+    <input
+      id="{{ field.range_start_name }}"
+      name="{{ field.range_start_name }}"
+      type="text"
+      inputmode="numeric"
+      autocomplete="off"
+      class="form-control data-source-field year-range-field__input"
+      value="{{ field.range_start_value }}"
+      placeholder="{% trans 'Ano inicial' %}"
+    />
+  </div>
+  <div class="year-range-field__group">
+    <label class="year-range-field__label" for="{{ field.range_end_name }}">{% trans "Até" %}</label>
+    <input
+      id="{{ field.range_end_name }}"
+      name="{{ field.range_end_name }}"
+      type="text"
+      inputmode="numeric"
+      autocomplete="off"
+      class="form-control data-source-field year-range-field__input"
+      value="{{ field.range_end_value }}"
+      placeholder="{% trans 'Ano final' %}"
+    />
+  </div>
+</div>

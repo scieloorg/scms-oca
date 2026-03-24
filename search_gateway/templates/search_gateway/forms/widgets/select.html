@@ -1,0 +1,24 @@
+<select
+  id="{{ field.name }}"
+  name="{{ field.name }}"
+  class="form-control data-source-field data-source-field--select{% if field.allow_clear and not field.value %} data-source-field--placeholder{% endif %}"
+  data-field-name="{{ field.name }}"
+  data-field-widget="{{ field.widget }}"
+  data-placeholder="{{ field.placeholder|default:default_option_placeholder }}"
+  data-allow-clear="{{ field.allow_clear|yesno:'true,false' }}"
+>
+  {% if field.allow_clear %}
+    <option value="">{{ default_option_placeholder }}</option>
+  {% endif %}
+  {% for option_group in field.option_groups %}
+    {% if option_group.label %}
+      <optgroup label="{{ option_group.label }}">
+    {% endif %}
+    {% for option in option_group.options %}
+      <option value="{{ option.value }}" {% if option.selected %}selected{% endif %}>{{ option.label }}</option>
+    {% endfor %}
+    {% if option_group.label %}
+      </optgroup>
+    {% endif %}
+  {% endfor %}
+</select>

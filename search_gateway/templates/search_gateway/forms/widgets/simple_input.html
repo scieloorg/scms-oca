@@ -1,0 +1,11 @@
+<input
+  id="{{ field.name }}"
+  class="form-control data-source-field"
+  name="{{ field.name }}"
+  type="{{ field.input_type }}"
+  {% if field.min_value != None %}min="{{ field.min_value }}"{% endif %}
+  {% if field.max_value != None %}max="{{ field.max_value }}"{% endif %}
+  {% if field.step != None %}step="{{ field.step }}"{% endif %}
+  value="{{ field.value }}"
+  {% if field.placeholder %}placeholder="{{ field.placeholder }}"{% endif %}
+/>

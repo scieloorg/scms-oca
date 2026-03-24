@@ -1,0 +1,42 @@
+<div
+  class="lookup-checkbox-field"
+  id="lookup-{{ field.name }}"
+  data-field-name="{{ field.name }}"
+  data-field-widget="{{ field.widget }}"
+  data-async-endpoint="{{ field.async_endpoint }}"
+  data-data-source="{{ data_source }}"
+  data-preload-options="{{ field.preload_options|yesno:'true,false' }}"
+  data-dependencies="{{ field.dependencies|join:',' }}"
+  data-multiple-selection="{{ field.multiple_selection|yesno:'true,false' }}"
+>
+  <input
+    id="{{ field.name }}_search"
+    type="text"
+    class="form-control lookup-checkbox-field__search"
+    placeholder="{{ field.placeholder|default:field.label }}"
+    autocomplete="off"
+  />
+  <div class="lookup-checkbox-field__options" id="{{ field.name }}_options">
+    {% for option_group in field.option_groups %}
+      {% if option_group.label %}
+        <div class="lookup-checkbox-field__group-label">{{ option_group.label }}</div>
+      {% endif %}
+      {% for option in option_group.options %}
+        <label class="lookup-checkbox-field__item" for="{{ field.name }}_{{ forloop.parentloop.counter0 }}_{{ forloop.counter0 }}">
+          <input
+            id="{{ field.name }}_{{ forloop.parentloop.counter0 }}_{{ forloop.counter0 }}"
+            type="checkbox"
+            name="{{ field.name }}"
+            value="{{ option.value }}"
+            class="data-source-field data-source-field--checkbox"
+            data-field-name="{{ field.name }}"
+            data-field-widget="checkbox"
+            data-multiple-selection="{{ field.multiple_selection|yesno:'true,false' }}"
+            {% if option.selected %}checked{% endif %}
+          />
+          <span>{{ option.label }}</span>
+        </label>
+      {% endfor %}
+    {% endfor %}
+  </div>
+</div>
