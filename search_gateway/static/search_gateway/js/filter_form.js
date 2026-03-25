@@ -801,11 +801,18 @@
     const form = getFormFromNode(wrapper);
     const relatedFilters = collectRelatedFiltersFromForm(form, fieldName);
     Object.entries(relatedFilters).forEach(([key, value]) => {
-      if (Array.isArray(value)) {
-        value.forEach(item => params.append(key, item));
+      if (value === null || value === undefined) {
         return;
       }
-      params.append(key, value);
+      if (Array.isArray(value)) {
+        value.forEach(item => {
+          if (item !== null && item !== undefined) {
+            params.append(key, item);
+          }
+        });
+      } else {
+        params.append(key, value);
+      }
     });
 
     try {

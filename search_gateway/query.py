@@ -114,41 +114,6 @@ def build_lookup_hits_body(
     return body
 
 
-def build_search_as_you_type_body(field_name, field_autocomplete, query, agg_size=20, add_keyword_term=False):
-    """
-    Builds the body for a search-as-you-type query.
-
-    Args:
-        field_name: The Elasticsearch field name to search in.
-        query: The search query text.
-        agg_size: Maximum number of aggregation results.
-
-    Returns:
-        Elasticsearch query body dict.
-    """
-
-    body = {
-        "size": 0,
-        "query": {
-            "multi_match": {
-                "query": query,
-                "type": "bool_prefix",
-                "fields": [
-                    f"{field_autocomplete}",
-                    f"{field_autocomplete}._2gram",
-                    f"{field_autocomplete}._3gram",
-                ],
-            }
-        },
-        "aggs": {
-            "unique_items": {
-                "terms": {"field": field_name, "size": agg_size}
-            }
-        },
-    }
-    return body
-
-
 def build_term_search_body(field_name, query, aggregation_size=20):
     """
     Builds the body for a term-based search query.
@@ -241,7 +206,6 @@ def build_filters_aggs(field_settings, exclude_fields=None):
         aggs[form_field_name] = {"terms": terms}
 
     return aggs
-
 
 
 def _is_advanced_query(text):

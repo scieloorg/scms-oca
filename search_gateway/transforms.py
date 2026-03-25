@@ -7,6 +7,12 @@ from pycountry import countries
 from .models import DataSource
 
 
+def _resolve_data_source(data_source):
+    if hasattr(data_source, "field_settings_dict") and hasattr(data_source, "get_field"):
+        return data_source
+    return DataSource.resolve(data_source)
+
+
 def _get_language_name(code):
     try:
         return _(Lang(code).name)
@@ -35,27 +41,25 @@ def _get_boolean_display(code):
     return code
 
 
-TRANSFORMS = {
-    "language": _get_language_name,
-    "country": _get_country_name,
-    "boolean": _get_boolean_display,
-    "category_level": lambda value: {
+def _get_category_level_display(value):
+    return {
         "domain": _("Domain"),
         "field": _("Area"),
         "subfield": _("Subarea"),
         "topic": _("Topic"),
-    }.get(str(value or "").strip().lower(), value),
+    }.get(str(value or "").strip().lower(), value)
+
+
+TRANSFORMS = {
+    "language": _get_language_name,
+    "country": _get_country_name,
+    "boolean": _get_boolean_display,
+    "category_level": _get_category_level_display,
 }
 
 
-def _resolve_data_source(data_source):
-    if hasattr(data_source, "field_settings_dict") and hasattr(data_source, "get_field"):
-        return data_source
-    return DataSource.resolve(data_source)
-
-
 def _get_static_option_label_from_field_settings(field_settings, field_name, value):
-    normalized_value = str(value or "").strip()
+    normalized_value = str(value or "").strip().lower()
     if normalized_value == "":
         return None
 
@@ -66,7 +70,7 @@ def _get_static_option_label_from_field_settings(field_settings, field_name, val
     ) or []
 
     for option in static_options:
-        option_value = str((option or {}).get("value") or "").strip()
+        option_value = str((option or {}).get("value") or "").strip().lower()
         if option_value != normalized_value:
             continue
 

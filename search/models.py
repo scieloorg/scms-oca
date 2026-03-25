@@ -8,7 +8,6 @@ from django.utils.translation import gettext_lazy as _
 from wagtail.admin.panels import FieldPanel
 from wagtail.models import Page
 
-from .choices import SEARCHABLE_FIELDS
 from search_gateway.filter_ui import render_filter_sidebar
 from search_gateway.models import DataSource
 from search_gateway.option_normalization import (
@@ -19,8 +18,10 @@ from search_gateway.request_filters import extract_applied_filters
 from search_gateway.request_filters import normalize_option_filters
 from search_gateway.service import SearchGatewayService
 
+from .choices import SEARCHABLE_FIELDS
+
+
 logger = logging.getLogger(__name__)
-EMPTY_RESULTS_DATA = {"search_results": [], "total_results": 0}
 
 
 class SearchPage(Page):
@@ -136,7 +137,7 @@ class SearchPage(Page):
         results_data=None,
     ):
         scientific_index = getattr(settings, "OP_INDEX_SCIENTIFIC_PRODUCTION", "scientific_production")
-        payload = dict(EMPTY_RESULTS_DATA) if results_data is None else results_data
+        payload = {"search_results": [], "total_results": 0} if results_data is None else results_data
         return {
             "index_name": index_name,
             "searchable_fields": SEARCHABLE_FIELDS,

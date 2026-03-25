@@ -55,7 +55,9 @@
     data-data-source="{{ data_source }}"
     data-form-key="{{ form_key }}"
   >
-    {% csrf_token %}
+    {% if sidebar_form_method|default:'get'|lower != 'get' %}
+      {% csrf_token %}
+    {% endif %}
     {% include "search_gateway/forms/form_groups.html" with form_groups=form_groups %}
   </form>
 </aside>
