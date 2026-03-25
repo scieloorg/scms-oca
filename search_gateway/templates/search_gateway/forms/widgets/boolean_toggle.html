@@ -1,0 +1,33 @@
+<fieldset class="sg-radio-group sg-radio-group--boolean">
+  <legend class="visually-hidden">{{ field.label }}</legend>
+  {% for option in field.boolean_toggle_options %}
+    <label class="sg-radio-option" for="{{ field.name }}_{{ forloop.counter0 }}">
+      <input
+        id="{{ field.name }}_{{ forloop.counter0 }}"
+        type="radio"
+        name="{{ field.name }}"
+        value="{{ option.value }}"
+        class="data-source-field data-source-field--radio"
+        data-field-name="{{ field.name }}"
+        data-field-widget="radio"
+        {% if option.selected %}checked{% endif %}
+      />
+      <span class="sg-radio-option__text">{{ option.label }}</span>
+    </label>
+  {% endfor %}
+  {% if field.allow_clear %}
+    <label class="sg-radio-option" for="{{ field.name }}_all">
+      <input
+        id="{{ field.name }}_all"
+        type="radio"
+        name="{{ field.name }}"
+        value=""
+        class="data-source-field data-source-field--radio"
+        data-field-name="{{ field.name }}"
+        data-field-widget="radio"
+        {% if field.boolean_toggle_clear_selected %}checked{% endif %}
+      />
+      <span class="sg-radio-option__text">{{ boolean_toggle_all_label }}</span>
+    </label>
+  {% endif %}
+</fieldset>

@@ -2,7 +2,6 @@ from collections import OrderedDict
 
 from django.template.loader import render_to_string
 from django.utils.translation import gettext
-from django.utils.translation import gettext_lazy as _
 
 from .field_options import resolve_form_options
 from .option_normalization import (
@@ -12,6 +11,29 @@ from .option_normalization import (
 )
 from .request_filters import CLEAR_DEFAULTS_INTERNAL_FLAG
 from .service import SearchGatewayService
+
+
+def _translate_text(value, default=""):
+    if value in (None, ""):
+        return default
+    if isinstance(value, str):
+        return gettext(value)
+    return value
+
+
+def _apply_form_group_expanded_state(grouped_fields):
+    grouped_items = sorted(grouped_fields.values(), key=lambda item: (item["order"], item["label"]))
+    has_active_fields = any(
+        field.get("is_active")
+        for group in grouped_items
+        for field in group.get("fields", [])
+    )
+    for group in grouped_items:
+        group_is_active = any(field.get("is_active") for field in group.get("fields", []))
+        group["expanded"] = group_is_active if has_active_fields else False
+        for field in group.get("fields", []):
+            field["expanded"] = field.get("is_active") if has_active_fields else False
+    return grouped_items
 
 
 def _build_form_groups(fields, form_group_labels=None):
@@ -24,26 +46,13 @@ def _build_form_groups(fields, form_group_labels=None):
         if group_key not in grouped_fields:
             grouped_fields[group_key] = {
                 "key": group_key,
-                "label": group_label,
+                "label": _translate_text(group_label),
                 "order": field["group"]["order"],
                 "fields": [],
             }
         grouped_fields[group_key]["fields"].append(field)
 
-    grouped_items = sorted(grouped_fields.values(), key=lambda item: (item["order"], item["label"]))
-    has_active_fields = any(
-        field.get("is_active")
-        for group in grouped_items
-        for field in group.get("fields", [])
-    )
-
-    for group in grouped_items:
-        group_is_active = any(field.get("is_active") for field in group.get("fields", []))
-        group["expanded"] = group_is_active if has_active_fields else True
-        for field in group.get("fields", []):
-            field["expanded"] = field.get("is_active") if has_active_fields else True
-
-    return grouped_items
+    return _apply_form_group_expanded_state(grouped_fields)
 
 
 def _field_is_active(*, widget, value="", range_start_value="", range_end_value="", options=None):
@@ -192,10 +201,7 @@ def _resolve_search_placeholder(widget, configured_placeholder, field_label):
     if configured_placeholder and configured_placeholder != field_label:
         return configured_placeholder
 
-    default_search_placeholder = gettext("Search...")
-    if default_search_placeholder == "Search...":
-        return "Buscar..."
-    return default_search_placeholder
+    return gettext("Search...")
 
 
 def _resolve_field_texts(field):
@@ -430,8 +436,8 @@ def render_filter_sidebar(
     sidebar_form_id="search-gateway-filter-form",
     sidebar_form_method="get",
     sidebar_form_action="",
-    submit_label=_("FILTRAR"),
-    reset_label=_("LIMPAR"),
+    submit_label=gettext("FILTRAR"),
+    reset_label=gettext("LIMPAR"),
     submit_id="search-gateway-filter-submit",
     reset_id="search-gateway-filter-reset",
     reset_type="button",

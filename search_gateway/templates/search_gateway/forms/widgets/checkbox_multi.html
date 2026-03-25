@@ -1,0 +1,36 @@
+<div
+  class="checkbox-field"
+  id="checkbox-{{ field.name }}"
+  data-field-name="{{ field.name }}"
+>
+  <input
+    id="{{ field.name }}_search"
+    type="text"
+    class="form-control checkbox-field__search"
+    placeholder="{{ field.placeholder|default:field.label }}"
+    autocomplete="off"
+  />
+  <div class="checkbox-field__options" id="{{ field.name }}_options">
+    {% for option_group in field.option_groups %}
+      {% if option_group.label %}
+        <div class="checkbox-field__group-label">{{ option_group.label }}</div>
+      {% endif %}
+      {% for option in option_group.options %}
+        <label class="checkbox-field__item" for="{{ field.name }}_{{ forloop.parentloop.counter0 }}_{{ forloop.counter0 }}">
+          <input
+            id="{{ field.name }}_{{ forloop.parentloop.counter0 }}_{{ forloop.counter0 }}"
+            type="checkbox"
+            name="{{ field.name }}"
+            value="{{ option.value }}"
+            class="data-source-field data-source-field--checkbox"
+            data-field-name="{{ field.name }}"
+            data-field-widget="checkbox"
+            data-multiple-selection="true"
+            {% if option.selected %}checked{% endif %}
+          />
+          <span>{{ option.label }}</span>
+        </label>
+      {% endfor %}
+    {% endfor %}
+  </div>
+</div>
