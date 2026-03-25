@@ -206,13 +206,13 @@ def _resolve_search_placeholder(widget, configured_placeholder, field_label):
 
 def _resolve_field_texts(field):
     group_meta = dict(field.group_meta)
-    group_meta["label"] = _translate_text(group_meta.get("label"), group_meta.get("label"))
+    group_meta["label"] = gettext(group_meta.get("label"))
 
     return {
         "group": group_meta,
-        "label": _translate_text(field.label, field.field_name),
-        "help_text": _translate_text(field.help_text),
-        "placeholder": _translate_text(field.placeholder),
+        "label": gettext(field.label),
+        "help_text": gettext(field.help_text),
+        "placeholder": gettext(field.placeholder),
     }
 
 

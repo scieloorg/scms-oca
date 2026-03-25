@@ -57,9 +57,9 @@
             <span class="results-controls__label">{% trans "Ordenar por:" %}</span>
             <div class="results-controls__select-wrap">
                 <select id="results-sort-select" class="results-controls__select" aria-label="{% trans 'Ordenar resultados' %}">
-                    <option value="recent" {% if results_data.current_sort == "recent" %}selected{% endif %}>{% trans "Mais recentes" %}</option>
-                    <option value="oldest" {% if results_data.current_sort == "oldest" %}selected{% endif %}>{% trans "Mais antigos" %}</option>
-                    <option value="cited" {% if results_data.current_sort == "cited" %}selected{% endif %}>{% trans "Mais citados" %}</option>
+                    <option value="desc" {% if results_data.current_sort == "desc" %}selected{% endif %}>{% trans "Mais recentes" %}</option>
+                    <option value="asc" {% if results_data.current_sort == "asc" %}selected{% endif %}>{% trans "Mais antigos" %}</option>
+                    <option value="cited_by_count" {% if results_data.current_sort == "cited_by_count" %}selected{% endif %}>{% trans "Mais citados" %}</option>
                 </select>
             </div>
         </div>
@@ -102,23 +102,23 @@
         </label>
         <article class="card result-item">
         <div class="card-body result-item__body">
-        {% with item_type=doc.source.type|default_if_none:"" item_type_source=doc.source.sources.type|default_if_none:"" item_scope=doc.source.oca_data.scope|default_if_none:"" %}
+        {% with item_type=doc.source.type|default_if_none:"" item_type_source=doc.source.sources.type|default_if_none:"" item_scope=doc.source.oca_data.scope|default_if_none:"" result_number=results_data.start_result|add:forloop.counter0 %}
             {% if item_scope == "openalex_works" %}
-                {% include "search/include/result_items/openalex_works.html" with doc=doc result_number=forloop.counter %}
+                {% include "search/include/result_items/openalex_works.html" with doc=doc result_number=result_number %}
             {% elif item_type == "dataset" %}
-                {% include "search/include/result_items/dataset.html" with doc=doc result_number=forloop.counter %}
+                {% include "search/include/result_items/dataset.html" with doc=doc result_number=result_number %}
             {% elif item_type == "book" %}
-                {% include "search/include/result_items/book.html" with doc=doc result_number=forloop.counter %}
+                {% include "search/include/result_items/book.html" with doc=doc result_number=result_number %}
             {% elif item_type == "book-chapter" %}
-                {% include "search/include/result_items/book-chapter.html" with doc=doc result_number=forloop.counter %}
+                {% include "search/include/result_items/book-chapter.html" with doc=doc result_number=result_number %}
             {% elif item_type_source == "journals" %}
-                {% include "search/include/result_items/journals.html" with doc=doc result_number=forloop.counter %}
+                {% include "search/include/result_items/journals.html" with doc=doc result_number=result_number %}
             {% elif item_type == "preprint" %}
-                {% include "search/include/result_items/preprint.html" with doc=doc result_number=forloop.counter %}
+                {% include "search/include/result_items/preprint.html" with doc=doc result_number=result_number %}
             {% elif item_type == "directory" %}
-                {% include "search/include/result_items/social_production.html" with doc=doc result_number=forloop.counter %}
+                {% include "search/include/result_items/social_production.html" with doc=doc result_number=result_number %}
             {% else %}
-                {% include "search/include/result_items/openalex_works.html" with doc=doc result_number=forloop.counter %}
+                {% include "search/include/result_items/openalex_works.html" with doc=doc result_number=result_number %}
             {% endif %}
         {% endwith %}
             {% if doc.source.oca_data.scope %}
@@ -136,7 +136,7 @@
 
 {% if results_data.total_pages > 1 %}
 <div class="results-pagination" aria-label="{% trans 'Paginação dos resultados' %}">
-    <button type="button" class="results-pagination__nav{% if not results_data.has_previous %} results-pagination__nav--disabled{% endif %}" {% if not results_data.has_previous %}disabled{% endif %}>
+    <button type="button" data-page="{{ results_data.previous_page }}" class="results-pagination__nav{% if not results_data.has_previous %} results-pagination__nav--disabled{% endif %}" {% if not results_data.has_previous %}disabled{% endif %}>
         <span class="results-pagination__nav-arrow" aria-hidden="true">&lsaquo;</span>
         <span>{% trans "Anterior" %}</span>
     </button>
@@ -144,7 +144,7 @@
     <div class="results-pagination__center">
         <div class="results-pagination__pages">
             {% for page_number in results_data.page_numbers %}
-            <button type="button" class="results-pagination__page{% if page_number == results_data.current_page %} results-pagination__page--active{% endif %}">
+            <button type="button" data-page="{{ page_number }}" class="results-pagination__page{% if page_number == results_data.current_page %} results-pagination__page--active{% endif %}">
                 {{ page_number }}
             </button>
             {% endfor %}
@@ -154,7 +154,7 @@
         </div>
     </div>
 
-    <button type="button" class="results-pagination__nav{% if not results_data.has_next %} results-pagination__nav--disabled{% endif %}" {% if not results_data.has_next %}disabled{% endif %}>
+    <button type="button" data-page="{{ results_data.next_page }}" class="results-pagination__nav{% if not results_data.has_next %} results-pagination__nav--disabled{% endif %}" {% if not results_data.has_next %}disabled{% endif %}>
         <span>{% trans "Próxima" %}</span>
         <span class="results-pagination__nav-arrow" aria-hidden="true">&rsaquo;</span>
     </button>

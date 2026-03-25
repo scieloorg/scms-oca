@@ -1,8 +1,24 @@
+from search_gateway.option_normalization import normalize_boolean
+
+
+def _is_empty_filter_value(value):
+    if value is None:
+        return True
+    
+    if isinstance(value, str):
+        return value.strip() == ""
+    
+    if isinstance(value, (list, tuple, set)):
+        return all(_is_empty_filter_value(item) for item in value)
+    
+    return False
+
+
 def clean_form_filters(filters_dict):
     """
     Removes empty filters and the CSRF token from a dictionary of form filters.
     """
-    cleaned = {k: v for k, v in filters_dict.items() if v}
+    cleaned = {k: v for k, v in filters_dict.items() if not _is_empty_filter_value(v)}
     cleaned.pop("csrfmiddlewaretoken", None)
     return cleaned
 
@@ -32,7 +48,13 @@ def standardize_breakdown_keys(keys, series):
 
 
 def standardize_values(values: list, sort=True):
-    vals = list(set(str(item).strip() for item in values if item))
+    vals = list(
+        set(
+            str(item).strip()
+            for item in (values or [])
+            if item is not None and str(item).strip() != ""
+        )
+    )
 
     if sort:
         return sorted(vals)
@@ -64,7 +86,7 @@ def translate_fields(filters, field_settings):
 
         value = None
         if transform_type == "boolean":
-            value = transform_boolean_yes_no(filters.get(fl_name))
+            value = normalize_boolean(filters.get(fl_name))
             handled_by_transform.add(fl_name)
 
         elif transform_type == "year_range":
@@ -87,7 +109,7 @@ def translate_fields(filters, field_settings):
         fl_settings = field_settings.get(fl_name, {})
         index_field_name = fl_settings.get("index_field_name")
 
-        if index_field_name and value:
+        if index_field_name and not _is_empty_filter_value(value):
             translated[fl_name] = {
                 "filter_name": fl_name,
                 "value": value,
@@ -111,17 +133,6 @@ def _apply_mapping(keys, series, mapping):
 
     # Also map the keys themselves for consistency
     return [mapping.get(str(k), k) for k in keys]
-
-
-def transform_boolean_yes_no(value):
-    """
-    Transforms a 'Yes'/'No' string to a boolean.
-    """
-    if value == "Yes":
-        return True
-    if value == "No":
-        return False
-    return None
 
 
 def transform_year_range(filters, settings):

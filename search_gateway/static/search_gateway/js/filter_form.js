@@ -1,4 +1,6 @@
 (function () {
+  const lookupInitialOptionsCache = new Map();
+
   function translateText(msgid) {
     if (typeof window !== 'undefined' && typeof window.gettext === 'function') {
       return window.gettext(msgid);
@@ -799,11 +801,18 @@
     const form = getFormFromNode(wrapper);
     const relatedFilters = collectRelatedFiltersFromForm(form, fieldName);
     Object.entries(relatedFilters).forEach(([key, value]) => {
-      if (Array.isArray(value)) {
-        value.forEach(item => params.append(key, item));
+      if (value === null || value === undefined) {
         return;
       }
-      params.append(key, value);
+      if (Array.isArray(value)) {
+        value.forEach(item => {
+          if (item !== null && item !== undefined) {
+            params.append(key, item);
+          }
+        });
+      } else {
+        params.append(key, value);
+      }
     });
 
     try {
@@ -815,6 +824,25 @@
       console.error('Error loading lookup options', error);
       return [];
     }
+  }
+
+  function buildLookupInitialOptionsCacheKey(wrapper) {
+    const dataSource = String(wrapper?.dataset?.dataSource || '').trim();
+    const fieldName = String(wrapper?.dataset?.fieldName || '').trim();
+    if (!dataSource || !fieldName) return '';
+    return `${dataSource}::${fieldName}`;
+  }
+
+  function getCachedLookupInitialOptions(wrapper) {
+    const cacheKey = buildLookupInitialOptionsCacheKey(wrapper);
+    if (!cacheKey || !lookupInitialOptionsCache.has(cacheKey)) return [];
+    return normalizeOptionList(lookupInitialOptionsCache.get(cacheKey));
+  }
+
+  function setCachedLookupInitialOptions(wrapper, options) {
+    const cacheKey = buildLookupInitialOptionsCacheKey(wrapper);
+    if (!cacheKey) return;
+    lookupInitialOptionsCache.set(cacheKey, normalizeOptionList(options));
   }
 
   function debounce(callback, waitMs = 250) {
@@ -911,14 +939,30 @@
 
       const preload = String(wrapper.dataset.preloadOptions || 'false') === 'true';
       const initTask = async () => {
-        if (!preload && state.baseOptions.length) {
+        // When the sidebar HTML already includes lookup options from the server,
+        // reuse them instead of issuing another preload request on init.
+        if (state.baseOptions.length) {
+          setCachedLookupInitialOptions(wrapper, state.baseOptions);
           render();
           return;
         }
+
+        const cachedInitialOptions = getCachedLookupInitialOptions(wrapper);
+        if (cachedInitialOptions.length) {
+          state.allOptions = cachedInitialOptions;
+          state.baseOptions = cachedInitialOptions.slice();
+          state.baseValues = new Set(state.baseOptions.map(item => item.value));
+          render();
+          return;
+        }
+
         const firstBatch = await fetchLookupOptions(wrapper, '');
         state.allOptions = firstBatch;
         state.baseOptions = firstBatch.slice();
         state.baseValues = new Set(state.baseOptions.map(item => item.value));
+        if (preload || firstBatch.length) {
+          setCachedLookupInitialOptions(wrapper, firstBatch);
+        }
         render();
       };
 

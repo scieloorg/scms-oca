@@ -1,10 +1,15 @@
 class SearchPageManager {
   constructor(config) {
+    const urlParams = new URLSearchParams(window.location.search);
+
     this.searchQuery = config.initialSearchQuery || '';
     this.searchClauses = config.initialSearchClauses || [];
     this.dataSourceName = config.dataSourceName || '';
     this.apiEndpoint = config.apiEndpoint || '/search/api/search-results-list/';
     this.searchableFields = config.searchableFields || [];
+    this.currentSort = urlParams.get('sort') || 'desc';
+    this.currentLimit = urlParams.get('limit') || '25';
+    this.currentPage = parseInt(urlParams.get('page'), 10) || 1;
     this.searchForm = document.getElementById('search-form');
     this.sidebarRoot = document.getElementById('search-sidebar-root');
     this.resultsContainer = document.getElementById('results-container');
@@ -19,6 +24,7 @@ class SearchPageManager {
     this.setupSearchForm();
     this.setupAdvancedSearchUI();
     this.setupSidebarToggle();
+    this.setupGlobalResultsControlEvents();
     this.restoreSearchClauses();
     await this.initSidebar();
     this.setupResultsUi();
@@ -233,6 +239,22 @@ class SearchPageManager {
       params.append(key, value);
     });
 
+    const sortSelect = document.getElementById('results-sort-select');
+    const sortValue = sortSelect?.value || this.currentSort;
+    if (sortValue) {
+      params.set('sort', sortValue);
+    }
+
+    const activeLimitButton = document.querySelector(
+      '[data-results-limit-option].results-controls__limit-option--active',
+    );
+    const limitValue = activeLimitButton?.textContent?.trim() || this.currentLimit;
+    if (limitValue) {
+      params.set('limit', limitValue);
+    }
+
+    params.set('page', this.currentPage);
+
     return params;
   }
 
@@ -242,7 +264,8 @@ class SearchPageManager {
     }
   }
 
-  async applyFiltersAjax() {
+  async applyFiltersAjax(page = 1) {
+    this.currentPage = page;
     this.showLoading();
     const params = this.buildSearchParams();
 
@@ -298,9 +321,51 @@ class SearchPageManager {
     this.applyFiltersAjax();
   }
 
+  setupGlobalResultsControlEvents() {
+    if (document.body.dataset.searchPageControlsBound === 'true') return;
+
+    document.addEventListener('change', event => {
+      const sortSelect = event.target.closest('#results-sort-select');
+      if (!sortSelect) return;
+      this.currentSort = sortSelect.value || 'desc';
+      this.applyFiltersAjax();
+    });
+
+    document.addEventListener('click', event => {
+      const limitButton = event.target.closest('[data-results-limit-option]');
+      if (!limitButton) return;
+
+      document.querySelectorAll('[data-results-limit-option]').forEach(option => {
+        option.classList.remove('results-controls__limit-option--active');
+      });
+
+      limitButton.classList.add('results-controls__limit-option--active');
+      this.currentLimit = limitButton.textContent.trim() || '25';
+      this.applyFiltersAjax();
+    });
+
+    document.addEventListener('click', event => {
+      const pageButton = event.target.closest('[data-page]');
+      if (!pageButton || pageButton.disabled) return;
+      const page = parseInt(pageButton.dataset.page, 10);
+      if (page) this.applyFiltersAjax(page);
+    });
+
+    document.body.dataset.searchPageControlsBound = 'true';
+  }
+
   setupResultsUi() {
+    const sortSelect = document.getElementById('results-sort-select');
+    if (sortSelect) {
+      sortSelect.value = this.currentSort;
+    }
+
+    document.querySelectorAll('[data-results-limit-option]').forEach(option => {
+      const isActive = option.textContent.trim() === this.currentLimit;
+      option.classList.toggle('results-controls__limit-option--active', isActive);
+    });
+
     this.bindResultsSelectionControls();
-    this.bindResultsDecorativeControls();
   }
 
   bindResultsSelectionControls() {
@@ -354,20 +419,6 @@ class SearchPageManager {
     updateSelectionState();
   }
 
-  bindResultsDecorativeControls() {
-    document.querySelectorAll('[data-results-limit-option]').forEach(button => {
-      if (button.dataset.bound === 'true') return;
-
-      button.addEventListener('click', () => {
-        document.querySelectorAll('[data-results-limit-option]').forEach(option => {
-          option.classList.remove('results-controls__limit-option--active');
-        });
-        button.classList.add('results-controls__limit-option--active');
-      });
-
-      button.dataset.bound = 'true';
-    });
-  }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
