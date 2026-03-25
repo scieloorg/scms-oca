@@ -9,6 +9,7 @@ class SearchPageManager {
     this.searchableFields = config.searchableFields || [];
     this.currentSort = urlParams.get('sort') || 'desc';
     this.currentLimit = urlParams.get('limit') || '25';
+    this.currentPage = parseInt(urlParams.get('page'), 10) || 1;
     this.searchForm = document.getElementById('search-form');
     this.sidebarRoot = document.getElementById('search-sidebar-root');
     this.resultsContainer = document.getElementById('results-container');
@@ -252,6 +253,8 @@ class SearchPageManager {
       params.set('limit', limitValue);
     }
 
+    params.set('page', this.currentPage);
+
     return params;
   }
 
@@ -261,7 +264,8 @@ class SearchPageManager {
     }
   }
 
-  async applyFiltersAjax() {
+  async applyFiltersAjax(page = 1) {
+    this.currentPage = page;
     this.showLoading();
     const params = this.buildSearchParams();
 
@@ -338,6 +342,13 @@ class SearchPageManager {
       limitButton.classList.add('results-controls__limit-option--active');
       this.currentLimit = limitButton.textContent.trim() || '25';
       this.applyFiltersAjax();
+    });
+
+    document.addEventListener('click', event => {
+      const pageButton = event.target.closest('[data-page]');
+      if (!pageButton || pageButton.disabled) return;
+      const page = parseInt(pageButton.dataset.page, 10);
+      if (page) this.applyFiltersAjax(page);
     });
 
     document.body.dataset.searchPageControlsBound = 'true';
