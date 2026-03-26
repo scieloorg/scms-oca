@@ -2,15 +2,13 @@ import json
 import logging
 
 from django.contrib.auth import get_user_model
-from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import gettext as _
 from pyalex import Works
 
 from config import celery_app
-# from indicator import directory, sciprod
+
 from core.models import Source
 from indicator import indicator, indicatorOA, models
-from core.utils import utils
 
 User = get_user_model()
 
@@ -145,7 +143,7 @@ def task_generate_article_indicators(
                         ind_file.save()
 
                         indicator_model.indicator_file.add(ind_file)
-                    except TypeError as e:
+                    except TypeError:
                         logging.info(
                             "Error on save file to indicator: %s, %s"
                             % (file_name, file_path)
@@ -282,7 +280,7 @@ def task_generate_indicators_by_oa_api_countries(
     This task process the data from OpenAlex.
 
     Stored the data on IndicatorData with data_type: countries_count and raw data with something like:
-  
+
         { 'us': { '2023': 449364, '2022': 454245, '2021': 514552, '2020': 504690, '2019': 431683, '2018': 399696, '2015': 332322, '2014': 280477, '2017': 370061, '2016': 335551}, 'ch': { '2023': 2504273, '2022': 2367105, '2021': 2161980, '2020': 1944761, '2019': 1670192, '2018': 1482810, '2016': 1181621, '2017': 1310592, '2014': 1260167, '2015': 1217707} } }
     """
 
