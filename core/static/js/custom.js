@@ -1,9 +1,14 @@
 /* your custom js go here */
 
 $('.lang-select').change(function(){
-    let url = $(this).find(':selected').attr('data-url');
-    $('#language').val($(this).val());
-    $('#form_lang').submit();
+    const form = $(this).closest('form');
+    const url = $(this).find(':selected').attr('data-url');
+
+    if (url) {
+        form.find('input[name="next"]').val(url);
+    }
+
+    form.submit();
 });
 
 // Oculta o header quando o usuário rola para baixo e mostra ao rolar para cima.
@@ -114,3 +119,63 @@ $('.lang-select').change(function(){
         }, menuSyncDelay);
     });
 })();
+
+// Menu analytics: abre e fecha dropdowns no clique do item pai, sem setas visíveis.
+(function ($) {
+    const desktopRootSelector = '#header.analytics-site-header .analytics-nav-list';
+    const mobileRootSelector = '#header.analytics-site-header .analytics-mobile-menu-list';
+    const rootSelector = `${desktopRootSelector}, ${mobileRootSelector}`;
+    const itemSelector = '.menu-item.sub-menu';
+    const toggleSelector = `${desktopRootSelector} ${itemSelector} > .menu-link, ${mobileRootSelector} ${itemSelector} > .menu-link`;
+    const submenuSelector = `${desktopRootSelector} .sub-menu-container, ${mobileRootSelector} .sub-menu-container`;
+
+    function closeBranch(branch) {
+        branch.removeClass('analytics-menu-open');
+        branch.children('.analytics-nav-toggle').attr('aria-expanded', 'false');
+        branch.find('.menu-item.sub-menu').removeClass('analytics-menu-open');
+        branch.find('.menu-item.sub-menu > .analytics-nav-toggle').attr('aria-expanded', 'false');
+    }
+
+    function closeAllMenus() {
+        $(rootSelector).find('.menu-item.sub-menu').removeClass('analytics-menu-open');
+    }
+
+    $(document).off('click.analyticsMenu').on('click.analyticsMenu', toggleSelector, function (event) {
+        const menuItem = $(this).parent('.menu-item.sub-menu');
+        if (!menuItem.length) {
+            return;
+        }
+
+        const isOpen = menuItem.hasClass('analytics-menu-open');
+        const siblingMenus = menuItem.siblings('.menu-item.sub-menu');
+
+        siblingMenus.each(function () {
+            closeBranch($(this));
+        });
+
+        if (isOpen) {
+            closeBranch(menuItem);
+        } else {
+            menuItem.children('.sub-menu-container').find('.menu-item.sub-menu').each(function () {
+                closeBranch($(this));
+            });
+            menuItem.addClass('analytics-menu-open');
+            menuItem.children('.analytics-nav-toggle').attr('aria-expanded', 'true');
+        }
+
+        event.preventDefault();
+        event.stopPropagation();
+    });
+
+    $(document).on('click.analyticsMenu', submenuSelector, function (event) {
+        event.stopPropagation();
+    });
+
+    $(document).on('click.analyticsMenu', function (event) {
+        if ($(event.target).closest('#header.analytics-site-header').length) {
+            return;
+        }
+
+        closeAllMenus();
+    });
+})(jQuery);
