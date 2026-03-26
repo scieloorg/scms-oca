@@ -445,29 +445,7 @@ WAGTAILSEARCH_BACKENDS = {
         "SEARCH_CONFIG": "english",
     }
 }
-HAYSTACK_CONNECTIONS = {
-    "default": {
-        "ENGINE": "haystack.backends.solr_backend.SolrEngine",
-        "URL": env("SOLR_URL", default="http://solr:8983/solr/ocabr/"),
-        "SILENTLY_FAIL": False,
-        "SOLR_TIMEOUT": 10,
-    },
-    "es": {
-        "ENGINE": "haystack.backends.elasticsearch7_backend.Elasticsearch7SearchEngine",
-        "URL": env("ES_URL", default="https://admin:pass@localhost:9200/"),
-        "INDEX_NAME": env("INDEX_NAME", default="raw_openalex_works"),
-        "SOLR_TIMEOUT": 10,
-        "KWARGS": {
-            "verify_certs": env.bool("ES_VERIFY_CERTS", default=False),
-            "ca_certs": env("ES_CA_CERTS", default=None),
-        }
-    },
-}
 
-USE_SOLR = env.str("USE_SOLR", "False") == "True"
-
-if USE_SOLR:
-    HAYSTACK_SIGNAL_PROCESSOR = "haystack.signals.RealtimeSignalProcessor"
 
 SEARCH_PAGINATION_ITEMS_PER_PAGE = 10
 
