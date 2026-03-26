@@ -10,6 +10,7 @@ class SearchPageManager {
     this.currentSort = urlParams.get('sort') || 'desc';
     this.currentLimit = urlParams.get('limit') || '25';
     this.currentPage = parseInt(urlParams.get('page'), 10) || 1;
+    this.currentDisplayMode = window.localStorage.getItem('searchPageDisplayMode') || 'grid';
     this.searchForm = document.getElementById('search-form');
     this.sidebarRoot = document.getElementById('search-sidebar-root');
     this.resultsContainer = document.getElementById('results-container');
@@ -253,6 +254,10 @@ class SearchPageManager {
       params.set('limit', limitValue);
     }
 
+    if (this.currentDisplayMode) {
+      params.set('display_mode', this.currentDisplayMode);
+    }
+
     params.set('page', this.currentPage);
 
     return params;
@@ -351,6 +356,20 @@ class SearchPageManager {
       if (page) this.applyFiltersAjax(page);
     });
 
+    document.addEventListener('click', event => {
+      const modeButton = event.target.closest('[data-display-mode]');
+      if (!modeButton) return;
+
+      const mode = modeButton.dataset.displayMode;
+      if (this.currentDisplayMode === mode) return;
+
+      this.currentDisplayMode = mode;
+      window.localStorage.setItem('searchPageDisplayMode', mode);
+      this.applyDisplayMode();
+      this.setupResultsUi();
+      this.syncDisplayModeInUrl();
+    });
+
     document.body.dataset.searchPageControlsBound = 'true';
   }
 
@@ -365,7 +384,32 @@ class SearchPageManager {
       option.classList.toggle('results-controls__limit-option--active', isActive);
     });
 
+    document.querySelectorAll('[data-display-mode]').forEach(btn => {
+      const isActive = btn.dataset.displayMode === this.currentDisplayMode;
+      btn.classList.toggle('results-toolbar__icon-btn--active', isActive);
+      btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+    });
+
+    this.applyDisplayMode();
     this.bindResultsSelectionControls();
+  }
+
+  applyDisplayMode() {
+    const resultsList = document.getElementById('results-list');
+    if (!resultsList) return;
+
+    resultsList.classList.toggle('results-list--lean', this.currentDisplayMode === 'list');
+  }
+
+  syncDisplayModeInUrl() {
+    const url = new URL(window.location.href);
+    if (this.currentDisplayMode) {
+      url.searchParams.set('display_mode', this.currentDisplayMode);
+    } else {
+      url.searchParams.delete('display_mode');
+    }
+
+    window.history.replaceState({}, '', url.toString());
   }
 
   bindResultsSelectionControls() {
