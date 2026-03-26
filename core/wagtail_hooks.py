@@ -2,7 +2,7 @@
 
 from django.templatetags.static import static
 from django.utils.html import format_html
-from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy as _
 from wagtail import hooks
 from wagtail.snippets.models import register_snippet
 from wagtail.snippets.views.snippets import SnippetViewSet
