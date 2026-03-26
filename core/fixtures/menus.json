@@ -1,0 +1,332 @@
+{
+  "pt-br": [
+    {
+      "type": "page",
+      "link_page_slug": "busca",
+      "text": "Busca",
+      "icon_key": "search",
+      "allow_subnav": true,
+      "children": [
+        {
+          "type": "page",
+          "link_page_slug": "producao-cientifica",
+          "text": "Produção Científica",
+          "icon_key": "search"
+        },
+        {
+          "type": "page",
+          "link_page_slug": "producao-social",
+          "text": "Produção Social",
+          "icon_key": "search"
+        }
+      ]
+    },
+    {
+      "type": "page",
+      "link_page_slug": "indicadores",
+      "text": "Indicadores",
+      "icon_key": "indicadores",
+      "allow_subnav": true,
+      "children": [
+        {
+          "type": "url",
+          "url_name": "indicator",
+          "url_kwargs": {
+            "data_source_name": "scientific_production"
+          },
+          "text": "Produção Científica",
+          "icon_key": "indicadores"
+        },
+        {
+          "type": "url",
+          "url_name": "indicator",
+          "url_kwargs": {
+            "data_source_name": "social_production"
+          },
+          "text": "Produção Social",
+          "icon_key": "indicadores"
+        }
+      ]
+    },
+    {
+      "type": "url",
+      "link_url": "/pt-br/chart/?menu_scope=evolucao-producao-mundo-pais-documentos",
+      "text": "Observação",
+      "icon_key": "observacao"
+    },
+    {
+      "type": "page",
+      "link_page_slug": "ajuda",
+      "text": "Ajuda",
+      "icon_key": "help",
+      "allow_subnav": true,
+      "children": [
+        {
+          "type": "page",
+          "link_page_slug": "bibliometria",
+          "text": "Bibliometria",
+          "icon_key": "bibliometry"
+        },
+        {
+          "type": "page",
+          "link_page_slug": "comite-consultivo",
+          "text": "Comitê Consultivo",
+          "icon_key": "committee"
+        },
+        {
+          "type": "page",
+          "link_page_slug": "dados",
+          "text": "Dicionário de Dados",
+          "icon_key": "dictionary",
+          "allow_subnav": true,
+          "children": [
+            {
+              "type": "page",
+              "link_page_slug": "producao-cientifica",
+              "text": "Produção Científica",
+              "icon_key": "dictionary"
+            },
+            {
+              "type": "page",
+              "link_page_slug": "producao-social",
+              "text": "Produção Social",
+              "icon_key": "dictionary"
+            }
+          ]
+        },
+        {
+          "type": "page",
+          "link_page_slug": "equipe",
+          "text": "Equipe",
+          "icon_key": "team"
+        }
+      ]
+    },
+    {
+      "type": "page",
+      "link_page_slug": "contato",
+      "text": "Contato",
+      "icon_key": "contact"
+    }
+  ],
+  "en": [
+    {
+      "type": "page",
+      "link_page_slug": "search",
+      "text": "Search",
+      "icon_key": "search",
+      "allow_subnav": true,
+      "children": [
+        {
+          "type": "page",
+          "link_page_slug": "scientific-production",
+          "text": "Scientific Production",
+          "icon_key": "search"
+        },
+        {
+          "type": "page",
+          "link_page_slug": "social-production",
+          "text": "Social Production",
+          "icon_key": "search"
+        }
+      ]
+    },
+    {
+      "type": "page",
+      "link_page_slug": "indicators",
+      "text": "Indicators",
+      "icon_key": "indicators",
+      "allow_subnav": true,
+      "children": [
+        {
+          "type": "url",
+          "url_name": "indicator",
+          "url_kwargs": {
+            "data_source_name": "scientific_production"
+          },
+          "text": "Scientific Production",
+          "icon_key": "indicators"
+        },
+        {
+          "type": "url",
+          "url_name": "indicator",
+          "url_kwargs": {
+            "data_source_name": "social_production"
+          },
+          "text": "Social Production",
+          "icon_key": "indicators"
+        }
+      ]
+    },
+    {
+      "type": "url",
+      "link_url": "/en/chart/?menu_scope=evolucao-producao-mundo-pais-documentos",
+      "text": "Observation",
+      "icon_key": "observation"
+    },
+    {
+      "type": "page",
+      "link_page_slug": "help",
+      "text": "Help",
+      "icon_key": "help",
+      "allow_subnav": true,
+      "children": [
+        {
+          "type": "page",
+          "link_page_slug": "bibliometry",
+          "text": "Bibliometry",
+          "icon_key": "bibliometry"
+        },
+        {
+          "type": "page",
+          "link_page_slug": "committee",
+          "text": "Committee",
+          "icon_key": "committee"
+        },
+        {
+          "type": "page",
+          "link_page_slug": "data-dictionary",
+          "text": "Data Dictionary",
+          "icon_key": "dictionary",
+          "allow_subnav": true,
+          "children": [
+            {
+              "type": "page",
+              "link_page_slug": "scientific-production",
+              "text": "Scientific Production",
+              "icon_key": "dictionary"
+            },
+            {
+              "type": "page",
+              "link_page_slug": "social-production",
+              "text": "Social Production",
+              "icon_key": "dictionary"
+            }
+          ]
+        },
+        {
+          "type": "page",
+          "link_page_slug": "team",
+          "text": "Team",
+          "icon_key": "team"
+        }
+      ]
+    },
+    {
+      "type": "page",
+      "link_page_slug": "contact",
+      "text": "Contact",
+      "icon_key": "contact"
+    }
+  ],
+  "es": [
+    {
+      "type": "page",
+      "link_page_slug": "busqueda",
+      "text": "Búsqueda",
+      "icon_key": "search",
+      "allow_subnav": true,
+      "children": [
+        {
+          "type": "page",
+          "link_page_slug": "produccion-cientifica",
+          "text": "Producción Científica",
+          "icon_key": "search"
+        },
+        {
+          "type": "page",
+          "link_page_slug": "produccion-social",
+          "text": "Producción Social",
+          "icon_key": "search"
+        }
+      ]
+    },
+    {
+      "type": "page",
+      "link_page_slug": "indicadores",
+      "text": "Indicadores",
+      "icon_key": "indicadores",
+      "allow_subnav": true,
+      "children": [
+        {
+          "type": "url",
+          "url_name": "indicator",
+          "url_kwargs": {
+            "data_source_name": "scientific_production"
+          },
+          "text": "Producción Científica",
+          "icon_key": "indicadores"
+        },
+        {
+          "type": "url",
+          "url_name": "indicator",
+          "url_kwargs": {
+            "data_source_name": "social_production"
+          },
+          "text": "Producción Social",
+          "icon_key": "indicadores"
+        }
+      ]
+    },
+    {
+      "type": "url",
+      "link_url": "/es/chart/?menu_scope=evolucao-producao-mundo-pais-documentos",
+      "text": "Observación",
+      "icon_key": "observacion"
+    },
+    {
+      "type": "page",
+      "link_page_slug": "ayuda",
+      "text": "Ayuda",
+      "icon_key": "help",
+      "allow_subnav": true,
+      "children": [
+        {
+          "type": "page",
+          "link_page_slug": "bibliometria",
+          "text": "Bibliometría",
+          "icon_key": "bibliometry"
+        },
+        {
+          "type": "page",
+          "link_page_slug": "comite-consultivo",
+          "text": "Comité Consultivo",
+          "icon_key": "committee"
+        },
+        {
+          "type": "page",
+          "link_page_slug": "diccionario-datos",
+          "text": "Diccionario de Datos",
+          "icon_key": "dictionary",
+          "allow_subnav": true,
+          "children": [
+            {
+              "type": "page",
+              "link_page_slug": "produccion-cientifica",
+              "text": "Producción Científica",
+              "icon_key": "dictionary"
+            },
+            {
+              "type": "page",
+              "link_page_slug": "produccion-social",
+              "text": "Producción Social",
+              "icon_key": "dictionary"
+            }
+          ]
+        },
+        {
+          "type": "page",
+          "link_page_slug": "equipo",
+          "text": "Equipo",
+          "icon_key": "team"
+        }
+      ]
+    },
+    {
+      "type": "page",
+      "link_page_slug": "contacto",
+      "text": "Contacto",
+      "icon_key": "contact"
+    }
+  ]
+}
