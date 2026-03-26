@@ -62,11 +62,11 @@ rm:  ## Remove all containers using $(compose)
 django_shell:  ## Open python terminal from django $(compose)
 	@docker compose -f $(compose) run --rm django python manage.py shell
 
-wagtail_sync: ## Wagtail sync Page fields (repeat every time you add a new language and to update the wagtailcore_page translations) $(compose)
-	@docker compose -f $(compose) run --rm django python manage.py sync_page_translation_fields
+wagtail_sync: ## Sync locale trees for Wagtail translations after enabling/changing languages $(compose)
+	@docker compose -f $(compose) run --rm django python manage.py sync_locale_trees
 
-wagtail_update_translation_field: ## Wagtail update translation fields, user this command first $(compose)
-	@docker compose -f $(compose) run --rm django python manage.py update_translation_fields
+wagtail_update_translation_field: ## Backward-compatible alias for Wagtail locale tree sync $(compose)
+	@docker compose -f $(compose) run --rm django python manage.py sync_locale_trees
 
 django_createsuperuser: ## Create a super user from django $(compose)
 	@docker compose -f $(compose) run --rm django python manage.py createsuperuser
