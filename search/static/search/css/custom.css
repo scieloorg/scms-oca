@@ -381,6 +381,14 @@
   gap: 0.3rem;
 }
 
+.results-toolbar__view-group {
+  padding: 0.22rem;
+  border: 1px solid #e1e7f0;
+  border-radius: 0.35rem;
+  background: linear-gradient(180deg, #f8fafc 0%, #eff3f8 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.92);
+}
+
 .results-toolbar__divider {
   width: 1px;
   height: 2rem;
@@ -395,16 +403,18 @@
   height: 2.45rem;
   padding: 0;
   border: 1px solid transparent;
-  border-radius: 4px;
+  border-radius: 0.28rem;
   background: transparent;
   color: #9aabbe;
   box-shadow: none;
+  transition: background-color 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease, color 0.16s ease;
 }
 
 .results-toolbar__icon-btn--active {
-  border-color: #6fc0ff;
-  color: #2f5ac2;
-  box-shadow: inset 0 0 0 1px #6fc0ff;
+  border-color: #1f1f24;
+  background: #29438f;
+  color: #ffffff;
+  box-shadow: 0 0 0 1px #1f1f24, 0 5px 12px rgba(24, 41, 84, 0.22);
 }
 
 .results-toolbar__icon {
@@ -438,6 +448,14 @@
 
 .results-toolbar__icon--grid {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 18 18' fill='none'%3E%3Crect x='3.5' y='3.5' width='4.25' height='4.25' rx='0.75' stroke='%232F5AC2' stroke-width='1.4'/%3E%3Crect x='10.25' y='3.5' width='4.25' height='4.25' rx='0.75' stroke='%232F5AC2' stroke-width='1.4'/%3E%3Crect x='3.5' y='10.25' width='4.25' height='4.25' rx='0.75' stroke='%232F5AC2' stroke-width='1.4'/%3E%3Crect x='10.25' y='10.25' width='4.25' height='4.25' rx='0.75' stroke='%232F5AC2' stroke-width='1.4'/%3E%3C/svg%3E");
+}
+
+.results-toolbar__icon-btn--active .results-toolbar__icon--list {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 18 18' fill='none'%3E%3Cpath d='M5.25 5.25H13.5' stroke='%23FFFFFF' stroke-width='1.6' stroke-linecap='round'/%3E%3Cpath d='M5.25 9H13.5' stroke='%23FFFFFF' stroke-width='1.6' stroke-linecap='round'/%3E%3Cpath d='M5.25 12.75H13.5' stroke='%23FFFFFF' stroke-width='1.6' stroke-linecap='round'/%3E%3Cpath d='M3.75 5.25H3.7575' stroke='%23FFFFFF' stroke-width='2' stroke-linecap='round'/%3E%3Cpath d='M3.75 9H3.7575' stroke='%23FFFFFF' stroke-width='2' stroke-linecap='round'/%3E%3Cpath d='M3.75 12.75H3.7575' stroke='%23FFFFFF' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+}
+
+.results-toolbar__icon-btn--active .results-toolbar__icon--grid {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 18 18' fill='none'%3E%3Crect x='3.5' y='3.5' width='4.25' height='4.25' rx='0.75' stroke='%23FFFFFF' stroke-width='1.4'/%3E%3Crect x='10.25' y='3.5' width='4.25' height='4.25' rx='0.75' stroke='%23FFFFFF' stroke-width='1.4'/%3E%3Crect x='3.5' y='10.25' width='4.25' height='4.25' rx='0.75' stroke='%23FFFFFF' stroke-width='1.4'/%3E%3Crect x='10.25' y='10.25' width='4.25' height='4.25' rx='0.75' stroke='%23FFFFFF' stroke-width='1.4'/%3E%3C/svg%3E");
 }
 
 .results-controls {
@@ -675,7 +693,7 @@
 .results-list {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 0.45rem;
 }
 
 .result-item-row {
@@ -986,26 +1004,34 @@
   gap: 0.52rem;
 }
 
-.result-card__meta-list--chips {
-  flex-direction: row;
-  flex-wrap: wrap;
-  gap: 0.55rem;
-}
-
-.result-card__meta-list--chips .result-card__meta-row {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  margin: 0;
-  padding: 0.32rem 0.5rem;
-  border: 1px solid #e5ebf5;
-  border-radius: 4px;
-  background: #f8fbff;
-  color: #61728e;
-}
-
 .result-card__meta-list--trailing {
-  margin-top: 0.72rem;
+  margin-top: 0.64rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid #edf2f8;
+}
+
+.result-card__meta-row--topic-inline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.32rem;
+  margin-top: -0.06rem;
+  color: #73839b;
+}
+
+.result-card__topic-inline-text {
+  display: -webkit-box;
+  min-width: 0;
+  max-width: min(100%, 46rem);
+  overflow: hidden;
+  color: #73839b;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+
+.result-card__source-meta--accent {
+  color: #2f4ea1;
+  font-weight: 800;
 }
 
 .result-card__meta-list--social {
@@ -1293,4 +1319,82 @@
   .result-card__meta-list--social {
     grid-template-columns: 1fr;
   }
+}
+
+.results-list--lean .result-item {
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  overflow: visible;
+}
+
+.results-list--lean .result-item__body {
+  padding: 0.2rem 0 0.35rem;
+}
+
+.results-list--lean .result-item-row {
+  gap: 1rem;
+  padding: 0.16rem 0 0.38rem;
+  border-bottom: 1px solid #dfe7f0;
+}
+
+.results-list--lean .result-item__selector {
+  margin-top: 0.78rem;
+}
+
+.results-list--lean .result-card__inner {
+  gap: 0.24rem;
+}
+
+.results-list--lean .result-card__header {
+  gap: 0.3rem;
+}
+
+.results-list--lean .result-card__header,
+.results-list--lean .result-card__header--work {
+  align-items: center;
+}
+
+.results-list--lean .result-card__eyebrow,
+.results-list--lean .result-card__badges {
+  gap: 0.28rem;
+}
+
+.results-list--lean .result-card__flag,
+.results-list--lean .result-card__badge,
+.results-list--lean .result-card__language {
+  min-height: 1.2rem;
+  padding: 0.08rem 0.36rem;
+  font-size: 0.64rem;
+}
+
+.results-list--lean .result-card__title,
+.results-list--lean .result-card__inner--work .result-card__title {
+  font-size: 0.84rem;
+  line-height: 1.16;
+}
+
+.results-list--lean .result-card__authors,
+.results-list--lean .result-card__source-line,
+.results-list--lean .result-card__meta-row {
+  font-size: 0.74rem;
+  line-height: 1.32;
+}
+
+.results-list--lean .result-card__source-name {
+  font-size: 0.74rem;
+}
+
+.results-list--lean .result-card__abstract,
+.results-list--lean .result-card__meta-list--chips,
+.results-list--lean .result-card__meta-list--trailing,
+.results-list--lean .result-card__footer,
+.results-list--lean .result-card__footer-side .result-card__identifier,
+.results-list--lean .result-card__action--static {
+  display: none;
+}
+
+.results-list--lean .result-card__meta-list {
+  gap: 0.14rem;
 }

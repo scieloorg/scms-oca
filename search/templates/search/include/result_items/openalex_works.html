@@ -65,7 +65,7 @@
     </p>
     {% endif %}
 
-    {% if display_source_name or doc.source.biblio.volume or doc.source.biblio.issue or doc.source.publication_year or doc.source.biblio.pages or doc.source.biblio.first_page or doc.source.biblio.last_page %}
+    {% if display_source_name or doc.source.biblio.volume or doc.source.biblio.issue or doc.source.publication_year or doc.source.biblio.pages or doc.source.biblio.first_page or doc.source.biblio.last_page or doc.source.metrics.received_citations.total %}
     <p class="result-card__source-line">
         {% if display_source_name %}
         <span class="result-card__source-name">{{ display_source_name }}</span>
@@ -84,6 +84,9 @@
         {% elif doc.source.biblio.first_page or doc.source.biblio.last_page %}
         <span class="result-card__source-meta">{% trans "Pages" %} {{ doc.source.biblio.first_page|default:"" }}{% if doc.source.biblio.last_page %}-{{ doc.source.biblio.last_page }}{% endif %}</span>
         {% endif %}
+        {% if doc.source.metrics.received_citations.total %}
+        <span class="result-card__source-meta result-card__source-meta--accent">{% trans "Citations" %}: {{ doc.source.metrics.received_citations.total }}</span>
+        {% endif %}
     </p>
     {% endif %}
 
@@ -93,11 +96,9 @@
     </div>
     {% endif %}
 
-    {% if doc.source.primary_topic_name or doc.source.primary_topic_field or doc.source.primary_topic_domain or doc.source.metrics.received_citations.total %}
-    <div class="result-card__meta-list result-card__meta-list--chips">
-        {% if doc.source.primary_topic_name or doc.source.primary_topic_field or doc.source.primary_topic_domain %}
-        <p class="result-card__meta-row">
-            <strong>{% trans "Primary Topic" %}:</strong>
+    {% if doc.source.primary_topic_name or doc.source.primary_topic_field or doc.source.primary_topic_domain %}
+    <p class="result-card__meta-row result-card__meta-row--topic-inline">
+        <span class="result-card__topic-inline-text">
             {{ doc.source.primary_topic_name|default:"" }}
             {% if doc.source.primary_topic_name and doc.source.primary_topic_field %} - {% endif %}
             {{ doc.source.primary_topic_field|default:"" }}
@@ -106,14 +107,8 @@
                 {{ doc.source.primary_topic_domain }}
                 {% if doc.source.primary_topic_name or doc.source.primary_topic_field %}){% endif %}
             {% endif %}
-        </p>
-        {% endif %}
-        {% if doc.source.metrics.received_citations.total %}
-        <p class="result-card__meta-row">
-            <strong>{% trans "Citations" %}:</strong> {{ doc.source.metrics.received_citations.total }}
-        </p>
-        {% endif %}
-    </div>
+        </span>
+    </p>
     {% endif %}
 
     {% if doc.source.content_url or doc.source.ids.doi or doc.source.ids.openalex %}
