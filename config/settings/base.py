@@ -104,7 +104,6 @@ THIRD_PARTY_APPS = [
     "wagtailmenus",
     "rest_framework",
     "django_celery_results",
-    "haystack",
     "drf_yasg",
 ]
 
