@@ -222,7 +222,7 @@ class SAMenuItem(Orderable):
         verbose_name_plural = _("SciELO Analytics menu items")
         constraints = [
             models.CheckConstraint(
-                check=~Q(parent=models.F("pk")),
+                condition=~Q(parent=models.F("pk")),
                 name="core_samenuitem_parent_not_self",
             ),
         ]
