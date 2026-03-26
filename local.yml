@@ -119,7 +119,7 @@ services:
       - "8025:8025"
 
   redis:
-    image: redis:6
+    image: redis:8.6
     container_name: oca_local_redis
     ports:
       - "6379:6379"
