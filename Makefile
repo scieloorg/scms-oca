@@ -86,6 +86,12 @@ django_makemigrations: ## Run makemigrations from django container using $(compo
 django_migrate: ## Run migrate from django container using $(compose)
 	@docker compose -f $(compose) run --rm django python manage.py migrate
 
+django_add_pages: ## Run manage.py add_pages with core/fixtures/pages.json using $(compose)
+	@docker compose -f $(compose) run --rm django python manage.py add_pages --data core/fixtures/pages.json
+
+django_add_menus: ## Run manage.py add_menus with core fixtures using $(compose)
+	@docker compose -f $(compose) run --rm django python manage.py add_menus --data core/fixtures/menus.json --icons-data core/fixtures/icons.json
+
 django_sync_datasources: ## Run manage.py sync_datasources from django container using $(compose)
 	@docker compose -f $(compose) run --rm django python manage.py sync_datasources
 
