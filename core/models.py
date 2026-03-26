@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.db.models import Q
-from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy as _
 from modelcluster.fields import ParentalKey
 from modelcluster.models import ClusterableModel
 from wagtail.admin.panels import FieldPanel, InlinePanel
@@ -133,8 +133,8 @@ class SAMenu(TranslatableMixin, ClusterableModel):
     ]
 
     class Meta(TranslatableMixin.Meta):
-        verbose_name = "SciELO Analytics menu"
-        verbose_name_plural = "SciELO Analytics menus"
+        verbose_name = _("SciELO Analytics menu")
+        verbose_name_plural = _("SciELO Analytics menus")
         constraints = [
             models.UniqueConstraint(
                 fields=["locale", "handle"],
@@ -172,9 +172,9 @@ class SAMenu(TranslatableMixin, ClusterableModel):
 
 class SAMenuItem(Orderable):
     class ItemType(models.TextChoices):
-        PAGE = "page", "Page"
-        URL = "url", "URL"
-        ANCHOR = "anchor", "Anchor"
+        PAGE = "page", _("Page")
+        URL = "url", _("URL")
+        ANCHOR = "anchor", _("Anchor")
 
     menu = ParentalKey("core.SAMenu", on_delete=models.CASCADE, related_name="menu_items")
     parent = models.ForeignKey(
@@ -218,8 +218,8 @@ class SAMenuItem(Orderable):
     ]
 
     class Meta:
-        verbose_name = "SciELO Analytics menu item"
-        verbose_name_plural = "SciELO Analytics menu items"
+        verbose_name = _("SciELO Analytics menu item")
+        verbose_name_plural = _("SciELO Analytics menu items")
         constraints = [
             models.CheckConstraint(
                 check=~Q(parent=models.F("pk")),
