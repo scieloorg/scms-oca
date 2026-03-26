@@ -1,0 +1,338 @@
+{
+  "pt-br": [
+    {
+      "key": "search_root",
+      "title": "Busca",
+      "type": "FreePage",
+      "children": [
+        {
+          "key": "search_scientific_production",
+          "title": "Produção Científica",
+          "type": "SearchPage",
+          "slug": "producao-cientifica",
+          "data_source": "scientific_production"
+        },
+        {
+          "key": "search_social_production",
+          "title": "Produção Social",
+          "type": "SearchPage",
+          "slug": "producao-social",
+          "data_source": "social_production"
+        }
+      ]
+    },
+    {
+      "key": "indicators_root",
+      "title": "Indicadores",
+      "type": "FreePage",
+      "children": [
+        {
+          "key": "indicators_scientific_production",
+          "title": "Produção Científica",
+          "type": "FreePage",
+          "slug": "producao-cientifica"
+        },
+        {
+          "key": "indicators_social_production",
+          "title": "Produção Social",
+          "type": "FreePage",
+          "slug": "producao-social"
+        }
+      ]
+    },
+    {
+      "key": "observation_root",
+      "title": "Observação",
+      "type": "FreePage",
+      "children": [
+        {
+          "key": "observation_scientific_production",
+          "title": "Produção Científica",
+          "type": "FreePage",
+          "slug": "producao-cientifica"
+        },
+        {
+          "key": "observation_social_production",
+          "title": "Produção Social",
+          "type": "FreePage",
+          "slug": "producao-social"
+        }
+      ]
+    },
+    {
+      "key": "help_root",
+      "title": "Ajuda",
+      "type": "FreePage",
+      "children": [
+        {
+          "key": "bibliometry_page",
+          "title": "Bibliometria",
+          "type": "FreePage",
+          "slug": "bibliometria"
+        },
+        {
+          "key": "advisory_committee_page",
+          "title": "Comitê Consultivo",
+          "type": "FreePage",
+          "slug": "comite-consultivo"
+        },
+        {
+          "key": "data_dictionary_root",
+          "title": "Dicionário de Dados",
+          "type": "FreePage",
+          "slug": "dados",
+          "children": [
+            {
+              "key": "data_dictionary_scientific_production",
+              "title": "Produção Científica",
+              "type": "FreePage",
+              "slug": "producao-cientifica"
+            },
+            {
+              "key": "data_dictionary_social_production",
+              "title": "Produção Social",
+              "type": "FreePage",
+              "slug": "producao-social"
+            }
+          ]
+        },
+        {
+          "key": "team_page",
+          "title": "Equipe",
+          "type": "FreePage",
+          "slug": "equipe"
+        }
+      ]
+    },
+    {
+      "key": "contact_page",
+      "title": "Contato",
+      "type": "FreePage",
+      "slug": "contato"
+    }
+  ],
+  "en": [
+    {
+      "key": "search_root",
+      "title": "Search",
+      "type": "FreePage",
+      "children": [
+        {
+          "key": "search_scientific_production",
+          "title": "Scientific Production",
+          "type": "SearchPage",
+          "slug": "scientific-production",
+          "data_source": "scientific_production"
+        },
+        {
+          "key": "search_social_production",
+          "title": "Social Production",
+          "type": "SearchPage",
+          "slug": "social-production",
+          "data_source": "social_production"
+        }
+      ]
+    },
+    {
+      "key": "indicators_root",
+      "title": "Indicators",
+      "type": "FreePage",
+      "children": [
+        {
+          "key": "indicators_scientific_production",
+          "title": "Scientific Production",
+          "type": "FreePage",
+          "slug": "scientific-production"
+        },
+        {
+          "key": "indicators_social_production",
+          "title": "Social Production",
+          "type": "FreePage",
+          "slug": "social-production"
+        }
+      ]
+    },
+    {
+      "key": "observation_root",
+      "title": "Observation",
+      "type": "FreePage",
+      "children": [
+        {
+          "key": "observation_scientific_production",
+          "title": "Scientific Production",
+          "type": "FreePage",
+          "slug": "scientific-production"
+        },
+        {
+          "key": "observation_social_production",
+          "title": "Social Production",
+          "type": "FreePage",
+          "slug": "social-production"
+        }
+      ]
+    },
+    {
+      "key": "help_root",
+      "title": "Help",
+      "type": "FreePage",
+      "children": [
+        {
+          "key": "bibliometry_page",
+          "title": "Bibliometry",
+          "type": "FreePage",
+          "slug": "bibliometry"
+        },
+        {
+          "key": "advisory_committee_page",
+          "title": "Committee",
+          "type": "FreePage",
+          "slug": "committee"
+        },
+        {
+          "key": "data_dictionary_root",
+          "title": "Data Dictionary",
+          "type": "FreePage",
+          "slug": "data-dictionary",
+          "children": [
+            {
+              "key": "data_dictionary_scientific_production",
+              "title": "Scientific Production",
+              "type": "FreePage",
+              "slug": "scientific-production"
+            },
+            {
+              "key": "data_dictionary_social_production",
+              "title": "Social Production",
+              "type": "FreePage",
+              "slug": "social-production"
+            }
+          ]
+        },
+        {
+          "key": "team_page",
+          "title": "Team",
+          "type": "FreePage",
+          "slug": "team"
+        }
+      ]
+    },
+    {
+      "key": "contact_page",
+      "title": "Contact",
+      "type": "FreePage",
+      "slug": "contact"
+    }
+  ],
+  "es": [
+    {
+      "key": "search_root",
+      "title": "Búsqueda",
+      "type": "FreePage",
+      "children": [
+        {
+          "key": "search_scientific_production",
+          "title": "Producción Científica",
+          "type": "SearchPage",
+          "slug": "produccion-cientifica",
+          "data_source": "scientific_production"
+        },
+        {
+          "key": "search_social_production",
+          "title": "Producción Social",
+          "type": "SearchPage",
+          "slug": "produccion-social",
+          "data_source": "social_production"
+        }
+      ]
+    },
+    {
+      "key": "indicators_root",
+      "title": "Indicadores",
+      "type": "FreePage",
+      "children": [
+        {
+          "key": "indicators_scientific_production",
+          "title": "Producción Científica",
+          "type": "FreePage",
+          "slug": "produccion-cientifica"
+        },
+        {
+          "key": "indicators_social_production",
+          "title": "Producción Social",
+          "type": "FreePage",
+          "slug": "produccion-social"
+        }
+      ]
+    },
+    {
+      "key": "observation_root",
+      "title": "Observación",
+      "type": "FreePage",
+      "children": [
+        {
+          "key": "observation_scientific_production",
+          "title": "Producción Científica",
+          "type": "FreePage",
+          "slug": "produccion-cientifica"
+        },
+        {
+          "key": "observation_social_production",
+          "title": "Producción Social",
+          "type": "FreePage",
+          "slug": "produccion-social"
+        }
+      ]
+    },
+    {
+      "key": "help_root",
+      "title": "Ayuda",
+      "type": "FreePage",
+      "children": [
+        {
+          "key": "bibliometry_page",
+          "title": "Bibliometría",
+          "type": "FreePage",
+          "slug": "bibliometria"
+        },
+        {
+          "key": "advisory_committee_page",
+          "title": "Comité Consultivo",
+          "type": "FreePage",
+          "slug": "comite-consultivo"
+        },
+        {
+          "key": "data_dictionary_root",
+          "title": "Diccionario de Datos",
+          "type": "FreePage",
+          "slug": "diccionario-datos",
+          "children": [
+            {
+              "key": "data_dictionary_scientific_production",
+              "title": "Producción Científica",
+              "type": "FreePage",
+              "slug": "produccion-cientifica"
+            },
+            {
+              "key": "data_dictionary_social_production",
+              "title": "Producción Social",
+              "type": "FreePage",
+              "slug": "produccion-social"
+            }
+          ]
+        },
+        {
+          "key": "team_page",
+          "title": "Equipo",
+          "type": "FreePage",
+          "slug": "equipo"
+        }
+      ]
+    },
+    {
+      "key": "contact_page",
+      "title": "Contacto",
+      "type": "FreePage",
+      "slug": "contacto"
+    }
+  ]
+}

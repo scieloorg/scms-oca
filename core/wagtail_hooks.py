@@ -4,9 +4,11 @@ from django.templatetags.static import static
 from django.utils.html import format_html
 from django.utils.translation import gettext as _
 from wagtail import hooks
+from wagtail.snippets.models import register_snippet
+from wagtail.snippets.views.snippets import SnippetViewSet
 from wagtail_modeladmin.options import ModelAdmin, modeladmin_register
 
-from core.models import Source
+from core.models import SAMenu, Source
 
 
 @hooks.register("insert_global_admin_css", order=100)
@@ -41,3 +43,17 @@ class SourceAdmin(ModelAdmin):
 
 
 modeladmin_register(SourceAdmin)
+
+
+class SAMenuSnippetViewSet(SnippetViewSet):
+    model = SAMenu
+    icon = "list-ul"
+    menu_label = _("SciELO Analytics Menus")
+    add_to_admin_menu = True
+    menu_order = 250
+    list_display = ("title", "handle", "locale", "is_active")
+    list_filter = ("is_active", "locale")
+    search_fields = ("title", "handle", "short_name")
+
+
+register_snippet(SAMenuSnippetViewSet)

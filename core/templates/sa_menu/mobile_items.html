@@ -1,0 +1,22 @@
+{% for item in items %}
+    <li class="menu-item{% if item.render_children %} sub-menu{% endif %}{% if item.active %} active{% endif %}">
+        {% if item.render_children %}
+            <button class="menu-link analytics-nav-toggle" type="button" aria-haspopup="true" aria-expanded="false">
+                <span class="analytics-inline-icon" aria-hidden="true">
+                    {{ item.icon_svg|safe }}
+                </span>
+                <div>{{ item.resolved_label }}</div>
+            </button>
+            <ul class="sub-menu-container analytics-dropdown{% if is_nested %} analytics-dropdown-nested{% endif %} menu-container">
+                {% include 'sa_menu/mobile_items.html' with items=item.render_children is_nested=True %}
+            </ul>
+        {% else %}
+            <a class="menu-link" href="{{ item.resolved_url }}"{% if item.open_in_new_tab %} target="_blank" rel="noopener noreferrer"{% endif %}>
+                <span class="analytics-inline-icon" aria-hidden="true">
+                    {{ item.icon_svg|safe }}
+                </span>
+                <div>{{ item.resolved_label }}</div>
+            </a>
+        {% endif %}
+    </li>
+{% endfor %}

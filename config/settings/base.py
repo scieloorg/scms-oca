@@ -414,27 +414,14 @@ WAGTAIL_I18N_ENABLED = True
 
 WAGTAIL_CONTENT_LANGUAGES = [
     ("pt-BR", "Portuguese"),
-    # ('en', "English"),
-    # ('es', "Spanish"),
+    ("en", "English"),
+    ("es", "Spanish"),
 ]
 
 NOCAPTCHA = True
 
 RECAPTCHA_PUBLIC_KEY = env.str("RECAPTCHA_PUBLIC_KEY", default="")
 RECAPTCHA_PRIVATE_KEY = env.str("RECAPTCHA_PRIVATE_KEY", default="")
-
-WAGTAILMENUS_FLAT_MENUS_HANDLE_CHOICES = [
-    ("busca", _("Busca")),
-    ("graficos", _("Gráficos")),
-    ("oca", "OCABr"),
-    ("contato", "Contato"),
-    ("comite", _("Comitê")),
-    ("faq", "FAQ"),
-    ("noticias", _("Notícias")),
-    ("secundario", _("Menu Secundário")),
-    ("about", _("About")),
-    ("sobre_oca", _("Sobre o OCABr")),
-]
 
 PAGINATION_PER_PAGE = 10
 

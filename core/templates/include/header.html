@@ -1,77 +1,18 @@
-{% load static i18n %}
-{% load menu_tags %}
-{% load wagtailcore_tags wagtailimages_tags %}
-
+{% load navigation %}
 {% load wagtailsettings_tags %}
 
 {% get_settings use_default_site=True %}
+{% get_sa_menu as sa_menu %}
 
 <!-- header -->
-<header id="header" class="">
+<header id="header" class="analytics-site-header">
   <div id="header-wrap" class="">
-    <div class="top-menu-wrapper">
+    <div class="top-menu-wrapper analytics-top-bar">
       <div class="container">
-      <div class="header-row top-search-parent">
-
-        <div class="d-flex flex-column header-left-menus">
-          <div id="logo" class="me-lg-5">
-            {% image settings.core_settings.CustomSettings.site_logo max-80x80 as logo %}
-            <a href="/" class="standard-logo" data-dark-logo="{{ logo.url }}"><img src="{% static 'img/logo-ocabr.png'%}" width="80px"
-                alt="Logotipo do OCABr"></a>
-          </div>
-          {% include 'menus/menu.html' %}
-        </div>
-
-        <nav class="navbar navbar-expand-lg navbar-light primary-menu flex-grow-1 justify-content-end ms-auto d-lg-none">
-          <div id="primary-menu-trigger">
-            <svg class="svg-trigger" viewBox="0 0 100 100">
-              <path
-                d="m 30,33 h 40 c 3.722839,0 7.5,3.126468 7.5,8.578427 0,5.451959 -2.727029,8.421573 -7.5,8.421573 h -20">
-              </path>
-              <path d="m 30,50 h 40"></path>
-              <path d="m 70,67 h -40 c 0,0 -7.5,-0.802118 -7.5,-8.365747 0,-7.563629 7.5,-8.634253 7.5,-8.634253 h 20">
-              </path>
-            </svg>
-          </div>
-
-          <div class="mobile-primary-menu">
-            <div class="mobile-menu-section mobile-menu-top">
-              <ul class="menu-container mobile-menu-list mobile-menu-list-top">
-                {% include 'menus/menu_items_top.html' %}
-              </ul>
-            </div>
-
-            <div class="mobile-menu-section mobile-menu-bottom">
-              <ul class="menu-container mobile-menu-list mobile-menu-list-bottom menu-container-secondary">
-                {% include 'menus/menu_items_bottom.html' %}
-              </ul>
-            </div>
-
-            <div class="mobile-menu-section mobile-menu-right">
-              <ul class="menu-container mobile-menu-list mobile-menu-list-right">
-                {% for handle in config.WAGTAILMENUS_FLAT_MENUS_HANDLE_CHOICES %}
-                  <li class="menu-item mobile-flat-menu">
-                    {% flat_menu handle.0 max_levels=4 show_menu_heading=True fall_back_to_default_site_menus=False template='menus/flat_menu.html' sub_menu_template='menus/flat_menu_sub_menu.html' %}
-                  </li>
-                {% endfor %}
-              </ul>
-            </div>
-          </div>
-        </nav>
-        
-        <div class="primary-menu d-none d-lg-flex align-items-center ms-auto">
-          {% for handle in config.WAGTAILMENUS_FLAT_MENUS_HANDLE_CHOICES %}
-              {% flat_menu handle.0 max_levels=4 show_menu_heading=True fall_back_to_default_site_menus=False template='menus/flat_menu.html' sub_menu_template='menus/flat_menu_sub_menu.html' %}
-          {% endfor %}
-          <span class="mx-2">{% include 'include/language.html' %}</span>
-          
-        </div>
-      </div>
-    </div>
-    </div>
-    <div class="secondary-menu-bar d-none d-lg-block">
-      <div class="container">
-        {% include 'menus/menu_bottom.html' %}
+      <div class="header-row top-search-parent analytics-header-row">
+        {% include 'include/header_brand.html' %}
+        {% include 'include/header_desktop_nav.html' %}
+        {% include 'include/header_mobile_nav.html' %}
       </div>
     </div>
   </div>
