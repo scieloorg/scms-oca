@@ -1,0 +1,11 @@
+<div class="analytics-desktop-nav d-none d-lg-flex">
+  <ul class="analytics-nav-list menu-container">
+    {% if sa_menu %}
+      {% include 'sa_menu/desktop_items.html' with items=sa_menu.render_items is_dropdown=False %}
+    {% endif %}
+  </ul>
+
+  <div class="analytics-utilities">
+    {% include 'include/header_language_switcher.html' with switcher_classes='analytics-language-switcher' %}
+  </div>
+</div>
