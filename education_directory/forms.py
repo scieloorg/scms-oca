@@ -1,7 +1,5 @@
 from wagtail.admin.forms import WagtailAdminModelForm
 
-from education_directory.search_indexes import EducationIndex
-
 
 class EducationDirectoryForm(WagtailAdminModelForm):
     def save_all(self, user):
@@ -15,8 +13,6 @@ class EducationDirectoryForm(WagtailAdminModelForm):
         self.save()
         self.save_m2m()
 
-        # Update de index.
-        EducationIndex().update_object(instance=education_directory)
 
         return education_directory
 
