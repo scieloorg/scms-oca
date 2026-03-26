@@ -1,0 +1,14 @@
+{% load static i18n %}
+{% load wagtailimages_tags %}
+
+<div class="analytics-brand-wrap">
+  <div id="logo" class="analytics-brand-logo">
+    {% image settings.core_settings.CustomSettings.site_logo max-80x80 as logo %}
+    <a href="/" class="standard-logo analytics-brand-link" data-dark-logo="{{ logo.url }}"><img src="{% static 'img/logo-ocabr.png'%}" width="80px"
+        alt="Logotipo do OCABr"></a>
+  </div>
+  <div class="analytics-brand-copy d-none d-lg-flex">
+    <span class="analytics-brand-title">SciELO Analytics</span>
+    <span class="analytics-brand-subtitle">{% trans "Observatório de Ciência Aberta" %}</span>
+  </div>
+</div>
