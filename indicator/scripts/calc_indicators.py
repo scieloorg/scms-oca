@@ -1,7 +1,6 @@
 import logging
 
 from django.contrib.auth import get_user_model
-from django.utils.translation import gettext as _
 
 from indicator.tasks import task_generate_indicators_by_oa_api
 
@@ -14,7 +13,6 @@ def run(user_id=1):
     """
     This will loop up to all itens on index and generate the graph.
     """
-    user = User.objects.get(id=user_id)
 
     indicators = [
         # Por tipo de documento (Mundo)
@@ -95,5 +93,5 @@ def run(user_id=1):
             "stacked": True,
         }
     ]
-    
+
     task_generate_indicators_by_oa_api(int(user_id), indicators)

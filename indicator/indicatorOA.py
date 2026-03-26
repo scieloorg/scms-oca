@@ -1,6 +1,5 @@
 import logging
 
-from django.conf import settings
 from pyalex import Works
 
 from search import choices
@@ -141,7 +140,7 @@ class Indicator:
         """
 
         # Loop to all regions
-        ret = {} 
+        ret = {}
         if target_key:
             if target_key in regions:
                 regions =  {target_key: regions[target_key]}
@@ -184,9 +183,9 @@ class Indicator:
                         ret.setdefault(region, {re.get("key"): count})
 
         if indicator_list:
-            return self.convert_to_indicator_list(ret) 
+            return self.convert_to_indicator_list(ret)
         elif indicator_dict:
-            return self.convert_to_indicator_dict(ret) 
+            return self.convert_to_indicator_dict(ret)
         else:
             ret
 
@@ -231,7 +230,7 @@ class Indicator:
         """
 
         # Loop to all countries
-        ret = {} 
+        ret = {}
 
         for country, key in countries:
 
@@ -269,10 +268,10 @@ class Indicator:
                     ret.setdefault(country, {re.get("key"): count})
 
         if indicator_list:
-            return self.convert_to_indicator_list(ret) 
+            return self.convert_to_indicator_list(ret)
         elif indicator_dict:
             print(self.convert_to_indicator_dict(ret))
-            return self.convert_to_indicator_dict(ret) 
+            return self.convert_to_indicator_dict(ret)
         else:
             ret
 

@@ -1,7 +1,5 @@
 from wagtail.admin.forms import WagtailAdminModelForm
 
-from event_directory.search_indexes import EventIndex
-
 
 class EventDirectoryForm(WagtailAdminModelForm):
     def save_all(self, user):
@@ -14,8 +12,6 @@ class EventDirectoryForm(WagtailAdminModelForm):
 
         self.save()
 
-        # Update de index.
-        EventIndex().update_object(instance=event_directory)
 
         return event_directory
 

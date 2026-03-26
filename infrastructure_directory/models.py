@@ -1,21 +1,21 @@
 import os
 
-from django.db import models
 from django.conf import settings
-from django.utils.translation import gettext as _
+from django.db import models
 from django.db.models import Count
-from .permission_helper import MUST_BE_MODERATE
+from django.utils.translation import gettext as _
 from taggit.managers import TaggableManager
 from wagtail.admin.panels import FieldPanel, HelpPanel
 from wagtailautocomplete.edit_handlers import AutocompletePanel
 
+from core import help_fields
 from core.models import CommonControlField
 from institution.models import Institution
-from usefulmodels.models import Action, Practice, ThematicArea, State
+from usefulmodels.models import Action, Practice, State, ThematicArea
 
 from . import choices
 from .forms import InfrastructureDirectoryFileForm, InfrastructureDirectoryForm
-from core import help_fields
+from .permission_helper import MUST_BE_MODERATE
 
 
 def get_default_action():

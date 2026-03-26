@@ -12,11 +12,9 @@ services:
       - postgres
       - mailhog
       - pgbouncer
-      - solr
       - opensearch
     links:
       - pgbouncer
-      - solr
       - opensearch
     volumes:
       - .:/app:z
@@ -50,23 +48,12 @@ services:
     image: oca_local_postgres
     container_name: oca_local_postgres
     volumes:
-      - ../scms_data/data_dev:/var/lib/postgresql/data:Z
+      - ../scms_data/data_dev:/var/lib/postgresql:Z
       - ../scms_data/data_dev_backup:/backups:z
     ports:
       - "5432:5432"
     env_file:
       - ./.envs/.local/.postgres
-
-  solr:
-      image: solr:7.7.1
-      restart: always
-      ports:
-         - "8983:8983"
-      volumes:
-         - ./index/ocabr:/opt/solr/server/solr/ocabr
-      environment:
-          - SOLR_JAVA_MEM=-Xms512m -Xmx512m
-          - SOLR_HEAP=512m
 
   opensearch:
     image: opensearchproject/opensearch:3.3.2 

@@ -14,12 +14,13 @@ from search_gateway.option_normalization import (
     normalize_positive_number,
     normalize_search_result_sort,
 )
-from search_gateway.request_filters import extract_applied_filters
-from search_gateway.request_filters import normalize_option_filters
+from search_gateway.request_filters import (
+    extract_applied_filters,
+    normalize_option_filters,
+)
 from search_gateway.service import SearchGatewayService
 
 from .choices import SEARCHABLE_FIELDS
-
 
 logger = logging.getLogger(__name__)
 
@@ -89,7 +90,7 @@ class SearchPage(Page):
 
     @staticmethod
     def current_pagination(results_data, *, page=1, page_size=25, current_sort="desc"):
-        decorated = results_data or dict(EMPTY_RESULTS_DATA)
+        decorated = results_data
         search_results = list(decorated.get("search_results") or [])
         total_results = normalize_positive_number(decorated.get("total_results"), 0)
         current_page = page
