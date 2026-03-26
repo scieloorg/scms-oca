@@ -1,6 +1,31 @@
-{% load wagtailcore_tags %}
+{% load i18n %}
+{% load navigation %}
 
-<section class="mt-2 bg-white">
+{% get_sa_breadcrumb as breadcrumb_ctx %}
+
+{% if breadcrumb_ctx.items or breadcrumb_ctx.is_home %}
+<section class="analytics-breadcrumb-bar">
     <div class="container clearfix">
+        <nav class="analytics-breadcrumb-nav" aria-label="{% trans 'Breadcrumb' %}">
+            <ol class="analytics-breadcrumb-list mb-0">
+                <li class="analytics-breadcrumb-item analytics-breadcrumb-home {% if breadcrumb_ctx.is_home and not breadcrumb_ctx.items %}active{% endif %}" {% if breadcrumb_ctx.is_home and not breadcrumb_ctx.items %}aria-current="page"{% endif %}>
+                    <a href="{{ breadcrumb_ctx.home_url }}" aria-label="{% trans 'Início' %}">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M12 4.5 4 11v8h5.5v-5h5v5H20v-8l-8-6.5Zm0-1.9 10 8.1V21h-9.3v-5H11.3v5H2V10.7l10-8.1Z"></path>
+                        </svg>
+                    </a>
+                </li>
+                {% for item in breadcrumb_ctx.items %}
+                    <li class="analytics-breadcrumb-item {% if not item.url %}active{% endif %}" {% if not item.url %}aria-current="page"{% endif %}>
+                        {% if item.url %}
+                            <a href="{{ item.url }}">{{ item.label }}</a>
+                        {% else %}
+                            <span>{{ item.label }}</span>
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </ol>
+        </nav>
     </div>
 </section>
+{% endif %}
