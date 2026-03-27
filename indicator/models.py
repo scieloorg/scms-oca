@@ -11,7 +11,7 @@ from django.db import models
 from django.db.models import Q
 from django.dispatch.dispatcher import receiver
 from django.utils.text import slugify
-from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy as _
 from taggit.managers import TaggableManager
 from wagtail.admin.panels import FieldPanel
 from wagtailautocomplete.edit_handlers import AutocompletePanel
@@ -559,7 +559,7 @@ class Indicator(CommonControlField):
         # por área temática | por instit | por UF
         by_category = ""
         if self.category:
-            by_category = " " + _("por") + " " + _(self.category)
+            by_category = " " + str(_("por")) + " " + str(_(self.category))
 
         # ano ou intervalo de anos
         years = ""

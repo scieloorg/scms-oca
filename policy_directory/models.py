@@ -2,7 +2,7 @@ import os
 
 from django.db import models
 from django.conf import settings
-from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy as _
 from django.db.models import Count
 from taggit.managers import TaggableManager
 from wagtail.admin.panels import FieldPanel, HelpPanel
