@@ -66,7 +66,7 @@ class Source(models.Model):
 
     def __str__(self):
         return self.name or ""
-    
+
 
 class Language(models.Model):
     """
@@ -79,12 +79,12 @@ class Language(models.Model):
 
     name = models.TextField(_("Language Name"), blank=True, null=True)
     code2 = models.TextField(_("Language code 2"), blank=True, null=True)
-    
+
     autocomplete_search_field = "code2"
-    
+
     def autocomplete_label(self):
         return str(self)
-    
+
     class Meta:
         verbose_name = _("Language")
         verbose_name_plural = _("Languages")
