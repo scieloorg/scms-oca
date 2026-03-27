@@ -11,6 +11,11 @@ from search_gateway.models import DataSource
 
 PAGE_TYPE_FREE_PAGE = "FreePage"
 PAGE_TYPE_SEARCH_PAGE = "SearchPage"
+HOME_PAGE_TITLES = {
+    "pt-BR": "Início",
+    "en": "Home",
+    "es": "Inicio",
+}
 
 
 class Command(BaseCommand):
@@ -53,6 +58,27 @@ class Command(BaseCommand):
         translated = root_page.get_translation_or_none(locale)
         return translated.specific if translated else None
 
+    def get_or_create_locale(self, language_code):
+        existing = Locale.objects.filter(language_code__iexact=language_code).first()
+        if existing:
+            return existing, False
+
+        return Locale.objects.get_or_create(language_code=language_code)
+
+    def ensure_home_for_locale(self, site, locale):
+        home = self.get_home_for_locale(site, locale)
+        if home:
+            return home
+
+        source_home = site.root_page.specific
+        translated_home = source_home.copy_for_translation(locale)
+        translated_home.title = HOME_PAGE_TITLES.get(
+            locale.language_code,
+            source_home.title,
+        )
+        translated_home.save_revision().publish()
+        return translated_home.specific
+
     def handle(self, *args, **options):
         data = self.load_data(options["data"])
         if data is None:
@@ -65,13 +91,10 @@ class Command(BaseCommand):
         self.pages_by_key = {}
 
         for lang, pages in data.items():
-            locale, _ = Locale.objects.get_or_create(language_code=lang)
+            locale, _ = self.get_or_create_locale(lang)
             self.stdout.write(f"\nAdicionando páginas para idioma {locale.language_code}")
 
-            home = self.get_home_for_locale(site, locale)
-            if not home:
-                self.stdout.write(self.style.ERROR(f"HomePage não encontrada para {lang}"))
-                continue
+            home = self.ensure_home_for_locale(site, locale)
 
             self.add_pages(parent=home, locale=locale, pages=pages)
 

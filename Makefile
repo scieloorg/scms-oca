@@ -92,8 +92,8 @@ django_add_pages: ## Run manage.py add_pages with core/fixtures/pages.json using
 django_add_menus: ## Run manage.py add_menus with core fixtures using $(compose)
 	@docker compose -f $(compose) run --rm django python manage.py add_menus --data core/fixtures/menus.json --icons-data core/fixtures/icons.json
 
-django_sync_datasources: ## Run manage.py sync_datasources from django container using $(compose)
-	@docker compose -f $(compose) run --rm django python manage.py sync_datasources
+django_add_sources: ## Run manage.py add_sources from django container using $(compose)
+	@docker compose -f $(compose) run --rm django python manage.py add_sources
 
 django_makemessages: ## Run ./manage.py makemessages $(compose)
 	@docker compose -f $(compose) run --rm django python manage.py makemessages --all

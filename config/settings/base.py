@@ -71,6 +71,7 @@ WAGTAIL = [
     "wagtail.documents",
     "wagtail.images",
     "wagtail.search",
+    "wagtail.contrib.search_promotions",
     "wagtail.admin",
     "wagtail",
     "wagtail_localize.locales",
