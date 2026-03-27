@@ -42,6 +42,9 @@ Type inside de project ```make help```:
         django_fast                        Run tests fast from django container using $(COMPOSE_FILE_DEV)
         django_makemigrations              Run makemigrations from django container using $(COMPOSE_FILE_DEV)
         django_migrate                     Run migrate from django container using $(COMPOSE_FILE_DEV)
+        django_add_pages                   Run manage.py add_pages with core/fixtures/pages.json using $(COMPOSE_FILE_DEV)
+        django_add_menus                   Run manage.py add_menus with core fixtures using $(COMPOSE_FILE_DEV)
+        django_add_sources                 Run manage.py add_sources from django container using $(COMPOSE_FILE_DEV)
         django_makemessages                Run ./manage.py makemessages $(COMPOSE_FILE_DEV)
         django_compilemessages             Run ./manage.py compilemessages $(COMPOSE_FILE_DEV)
         django_dump_auth                   Run manage.py dumpdata auth --indent=2 $(COMPOSE_FILE_DEV)
@@ -80,6 +83,34 @@ If you want to build, run, wherever with other params on .yml or from production
 Note that the stack is configured with 2 files docker-compose environment development=local.yml and production=production.yml.
 
 Below are some actions you must follow for properly running applications.
+
+## Big Bang local bootstrap
+
+For a fresh local environment, use this order:
+
+```bash
+make build
+make up
+make django_migrate
+make django_add_sources
+make django_add_pages
+make django_add_menus
+make django_createsuperuser
+```
+
+What each step does:
+
+- `make django_add_sources`: creates or updates the data sources used by search pages
+- `make django_add_pages`: creates the page tree from [`core/fixtures/pages.json`](/home/rafaeljpd/Repos/pitanga/scl/scms-oca/core/fixtures/pages.json), including translated homes when needed
+- `make django_add_menus`: creates the menus from the fixtures in `core/fixtures`
+
+If you add or change languages later, run:
+
+```bash
+make wagtail_sync
+make django_add_pages
+make django_add_menus
+```
 
 ## Clean migrations
 
