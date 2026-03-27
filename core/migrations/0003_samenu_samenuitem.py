@@ -8,7 +8,6 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("core", "0002_language"),
-        ("wagtailcore", "0096_referenceindex_referenceindex_source_object_and_more"),
     ]
 
     operations = [
