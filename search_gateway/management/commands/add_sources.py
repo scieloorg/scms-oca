@@ -7,7 +7,7 @@ from search_gateway.models import DataSource
 
 
 class Command(BaseCommand):
-    help = "Sync canonical DataSource records from the bundled fixture."
+    help = "Add or update canonical DataSource records from the bundled fixture."
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -55,7 +55,7 @@ class Command(BaseCommand):
 
         self.stdout.write(
             self.style.SUCCESS(
-                f"Synced {len(synced_index_names)} DataSource record(s) from {fixture_path}"
+                f"Processed {len(synced_index_names)} DataSource record(s) from {fixture_path}"
             )
         )
 
