@@ -59,6 +59,7 @@ urlpatterns += i18n_patterns(
     # API V2 endpoint wagtail models
     path("api/v2/", api_router.urls),
     path("users/", include("core.users.urls", namespace="users")),
+    path("observation/", include("observation.urls", namespace="observation")),
     path("i18n/", include("django.conf.urls.i18n")),
     path("", include("allauth.urls")),
     path("", include(wagtail_urls)),

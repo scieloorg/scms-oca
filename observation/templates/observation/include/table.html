@@ -1,0 +1,103 @@
+{% load static %}
+{% load i18n %}
+{# Table card fragment - included in search_page search_content #}
+<div class="observation-card">
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-2">
+    <div>
+      <h2 class="observation-title">{% trans "Evolution of Scientific Production – World – number of documents by Year" %}</h2>
+    </div>
+    <div class="observation-kpis mt-2 mt-md-0">
+      <span class="observation-kpi">
+        <span class="observation-kpi-label">{% trans "Documents" %}</span>
+        <span class="observation-kpi-value" id="observation-kpi-total">-</span>
+      </span>
+    </div>
+  </div>
+
+  <p class="text-muted small mb-2">{% trans "Use the detail icon next to country name. Use row checkboxes and then Compare selected." %}</p>
+  <div class="observation-chart-meta">{% trans "Processing date" %}: 2026-03-17 | {% trans "Source" %}: OpenAlex</div>
+
+  <div id="observation-top-toolbar" class="observation-top-toolbar">
+    <div class="observation-actions">
+      <select id="actions-listbox" class="form-select observation-action-listbox" aria-label="Actions">
+        <option value="" selected>{% trans "Action" %}</option>
+        <option value="compare">{% trans "Compare selected" %}</option>
+        <option value="csv">{% trans "Download CSV (.csv)" %}</option>
+      </select>
+    </div>
+    <div class="observation-page-length-wrap">
+      <select id="observation-page-length" class="observation-page-length-select" aria-label="{% trans 'Rows per page' %}">
+        <option value="5">5</option>
+        <option value="10">10</option>
+        <option value="25">25</option>
+        <option value="50" selected>50</option>
+        <option value="100">100</option>
+        <option value="200">200</option>
+        <option value="300">300</option>
+        <option value="400">400</option>
+        <option value="500">500</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="observation-table-wrap">
+    <div id="observation-table-loading" class="text-center py-4 text-muted">
+      <i class="icon-spinner icon-spin"></i> {% trans "Loading table data..." %}
+    </div>
+    <table id="observation-table" class="table table-striped table-bordered align-middle" style="display:none;">
+      <thead class="table-light">
+        <tr>
+          <th class="observation-select-col">
+            <label class="observation-select-header" for="select-all-checkbox" title="{% trans 'Select or deselect all rows' %}">
+              <input id="select-all-checkbox" class="form-check-input observation-select-all-checkbox" type="checkbox" aria-label="{% trans 'Select or deselect all rows' %}">
+              <span>{% trans "Select" %}</span>
+            </label>
+          </th>
+          <th>{% trans "Country" %}</th>
+          <th class="observation-year-col" data-placeholder="{% trans 'Year' %}"><!-- populated by JS --></th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- populated by JS from API -->
+      </tbody>
+      <tfoot>
+        <tr>
+          <th class="observation-select-col">-</th>
+          <th>{% trans "Totals" %}</th>
+          <th class="observation-total-col"><!-- populated by JS --></th>
+        </tr>
+      </tfoot>
+    </table>
+    <div id="observation-table-error" class="alert alert-danger mt-2" style="display:none;" role="alert"></div>
+  </div>
+</div>
+
+<div class="modal fade" id="country-detail-modal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="country-detail-title">{% trans "Country details" %}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="country-detail-body"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Close" %}</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="country-compare-modal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="country-compare-title">{% trans "Country comparison" %}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="country-compare-body"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Close" %}</button>
+      </div>
+    </div>
+  </div>
+</div>
