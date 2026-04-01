@@ -869,6 +869,19 @@
   color: #f28c35;
 }
 
+.result-card__source-logo {
+  display: block;
+  height: 1.15rem;
+  width: auto;
+  max-width: 1.35rem;
+  flex-shrink: 0;
+  object-fit: contain;
+}
+
+.result-card__source-logo--scielo {
+  max-width: 1.15rem;
+}
+
 .result-card__language {
   display: inline-flex;
   align-items: center;

@@ -27,6 +27,7 @@
                 <span class="result-card__flag-text">{{ doc.source.type }}</span>
             </span>
             {% endif %}
+            {% include "search/include/result_items/source_logo.html" with item_scope=item_scope %}
         </div>
         {% if doc.source.language %}
         <span class="result-card__language">{{ doc.source.language }}</span>
