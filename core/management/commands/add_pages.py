@@ -5,12 +5,14 @@ from django.core.management.base import BaseCommand
 from wagtail.models import Site, Locale
 
 from freepage.models import FreePage
+from observation.models import ObservationPage
 from search.models import SearchPage
 from search_gateway.models import DataSource
 
 
 PAGE_TYPE_FREE_PAGE = "FreePage"
 PAGE_TYPE_SEARCH_PAGE = "SearchPage"
+PAGE_TYPE_OBSERVATION_PAGE = "ObservationPage"
 HOME_PAGE_TITLES = {
     "pt-BR": "Início",
     "en": "Home",
@@ -151,6 +153,16 @@ class Command(BaseCommand):
                 page_key=p_key,
             )
 
+        if p_type == PAGE_TYPE_OBSERVATION_PAGE:
+            return self.create_observationpage(
+                parent=parent,
+                title=p_title,
+                slug=p_slug,
+                locale=locale,
+                data_source_name=p_datasource,
+                page_key=p_key,
+            )
+
         self.stdout.write(self.style.ERROR(f"Tipo de página inválido: {p_type}"))
         return None
 
@@ -241,6 +253,54 @@ class Command(BaseCommand):
             return sibling
 
         p_obj = SearchPage(
+            title=title,
+            slug=slug,
+            data_source=ds,
+            locale=locale,
+        )
+        parent.add_child(instance=p_obj)
+        p_obj.save_revision().publish()
+
+        self.remember_page(page_key, locale, p_obj)
+        return p_obj
+
+    def create_observationpage(self, parent, title, slug, locale, data_source_name, page_key):
+        existing = self.get_page_from_memory(page_key, locale)
+        if existing:
+            return existing
+
+        ds = None
+        if data_source_name:
+            ds = DataSource.objects.filter(index_name=data_source_name).first()
+            if not ds:
+                self.stdout.write(self.style.ERROR(
+                    f"DataSource não encontrado para {page_key}: {data_source_name}"
+                ))
+                return None
+
+        base_page = self.get_page_from_memory(page_key)
+
+        if base_page:
+            translated = base_page.get_translation_or_none(locale)
+            if translated:
+                self.remember_page(page_key, locale, translated)
+                return translated
+
+            p_obj = base_page.copy_for_translation(locale)
+            p_obj.title = title
+            p_obj.slug = slug
+            p_obj.data_source = ds
+            p_obj.save_revision().publish()
+
+            self.remember_page(page_key, locale, p_obj)
+            return p_obj
+
+        sibling = parent.get_children().specific().filter(locale=locale, slug=slug).first()
+        if sibling:
+            self.remember_page(page_key, locale, sibling)
+            return sibling
+
+        p_obj = ObservationPage(
             title=title,
             slug=slug,
             data_source=ds,

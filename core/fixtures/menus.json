@@ -49,10 +49,25 @@
       ]
     },
     {
-      "type": "url",
-      "link_url": "/pt-br/chart/?menu_scope=evolucao-producao-mundo-pais-documentos",
+      "type": "page",
+      "link_page_slug": "observacao",
       "text": "Observação",
-      "icon_key": "observacao"
+      "icon_key": "observacao",
+      "allow_subnav": true,
+      "children": [
+        {
+          "type": "page",
+          "link_page_slug": "producao-cientifica",
+          "text": "Produção Científica",
+          "icon_key": "observacao"
+        },
+        {
+          "type": "page",
+          "link_page_slug": "producao-social",
+          "text": "Produção Social",
+          "icon_key": "observacao"
+        }
+      ]
     },
     {
       "type": "page",
@@ -159,10 +174,25 @@
       ]
     },
     {
-      "type": "url",
-      "link_url": "/en/chart/?menu_scope=evolucao-producao-mundo-pais-documentos",
+      "type": "page",
+      "link_page_slug": "observation",
       "text": "Observation",
-      "icon_key": "observation"
+      "icon_key": "observation",
+      "allow_subnav": true,
+      "children": [
+        {
+          "type": "page",
+          "link_page_slug": "scientific-production",
+          "text": "Scientific Production",
+          "icon_key": "observation"
+        },
+        {
+          "type": "page",
+          "link_page_slug": "social-production",
+          "text": "Social Production",
+          "icon_key": "observation"
+        }
+      ]
     },
     {
       "type": "page",
@@ -269,10 +299,25 @@
       ]
     },
     {
-      "type": "url",
-      "link_url": "/es/chart/?menu_scope=evolucao-producao-mundo-pais-documentos",
+      "type": "page",
+      "link_page_slug": "observacion",
       "text": "Observación",
-      "icon_key": "observacion"
+      "icon_key": "observacion",
+      "allow_subnav": true,
+      "children": [
+        {
+          "type": "page",
+          "link_page_slug": "produccion-cientifica",
+          "text": "Producción Científica",
+          "icon_key": "observacion"
+        },
+        {
+          "type": "page",
+          "link_page_slug": "produccion-social",
+          "text": "Producción Social",
+          "icon_key": "observacion"
+        }
+      ]
     },
     {
       "type": "page",

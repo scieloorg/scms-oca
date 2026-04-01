@@ -43,18 +43,18 @@
     {
       "key": "observation_root",
       "title": "Observação",
-      "type": "FreePage",
+      "type": "ObservationPage",
       "children": [
         {
           "key": "observation_scientific_production",
           "title": "Produção Científica",
-          "type": "FreePage",
+          "type": "ObservationPage",
           "slug": "producao-cientifica"
         },
         {
           "key": "observation_social_production",
           "title": "Produção Social",
-          "type": "FreePage",
+          "type": "ObservationPage",
           "slug": "producao-social"
         }
       ]
@@ -155,18 +155,18 @@
     {
       "key": "observation_root",
       "title": "Observation",
-      "type": "FreePage",
+      "type": "ObservationPage",
       "children": [
         {
           "key": "observation_scientific_production",
           "title": "Scientific Production",
-          "type": "FreePage",
+          "type": "ObservationPage",
           "slug": "scientific-production"
         },
         {
           "key": "observation_social_production",
           "title": "Social Production",
-          "type": "FreePage",
+          "type": "ObservationPage",
           "slug": "social-production"
         }
       ]
@@ -267,18 +267,18 @@
     {
       "key": "observation_root",
       "title": "Observación",
-      "type": "FreePage",
+      "type": "ObservationPage",
       "children": [
         {
           "key": "observation_scientific_production",
           "title": "Producción Científica",
-          "type": "FreePage",
+          "type": "ObservationPage",
           "slug": "produccion-cientifica"
         },
         {
           "key": "observation_social_production",
           "title": "Producción Social",
-          "type": "FreePage",
+          "type": "ObservationPage",
           "slug": "produccion-social"
         }
       ]

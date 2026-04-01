@@ -393,25 +393,11 @@ def build_document_search_body(
     Returns:
         Elasticsearch query body dict.
     """
-    if query_clauses:
-        bool_query = build_bool_from_clauses(query_clauses)
-    else:
-        bool_query = {"must": []}
-        if query_text:
-            bool_query["must"].append(
-                {
-                    "simple_query_string": {
-                        "query": query_text,
-                        "default_operator": "AND",
-                        "fields": ["title_search", "ids_search"],
-                    }
-                }
-            )
-        else:
-            bool_query["must"].append({"match_all": {}})
-
-    if filters:
-        bool_query["filter"] = query_filters(filters)
+    bool_query = build_bool_query_from_search_params(
+        query_text=query_text,
+        query_clauses=query_clauses,
+        filters=filters,
+    )
 
     start = (page - 1) * page_size
 
@@ -429,3 +415,44 @@ def build_document_search_body(
         body["sort"] = [{sort_field: {"order": sort_order}}]
 
     return body
+
+
+def build_bool_query_from_search_params(
+    query_text=None,
+    query_clauses=None,
+    filters=None,
+):
+    """
+    Bool query fragment (must / must_not / filter) shared by document search and
+    aggregations. ``filters`` must already use OpenSearch index field names.
+    """
+    if query_clauses:
+        bool_query = build_bool_from_clauses(query_clauses)
+    else:
+        bool_query = {"must": []}
+        if query_text:
+            bool_query["must"].append(
+                {
+                    "simple_query_string": {
+                        "query": query_text,
+                        "default_operator": "AND",
+                        "fields": ["title_search", "ids_search"],
+                    },
+                }
+            )
+        else:
+            bool_query["must"].append({"match_all": {}})
+
+    if filters:
+        bool_query["filter"] = query_filters(filters)
+
+    return bool_query
+
+
+def build_aggregation_body(*, query, aggs, size=0, track_total_hits=True):
+    return {
+        "size": size,
+        "track_total_hits": track_total_hits,
+        "query": query,
+        "aggs": aggs,
+    }
