@@ -111,16 +111,13 @@
     </p>
     {% endif %}
 
-    {% if doc.source.content_url or doc.source.ids.doi or doc.source.ids.openalex %}
+    {% if doc.source.ids.doi or doc.source.ids.openalex %}
     <div class="result-card__footer">
+        {% if doc.source.ids.openalex %}
         <div class="result-card__actions">
-            {% if doc.source.content_url %}
-            <a href="{{ doc.source.content_url.0 }}" target="_blank" rel="noopener noreferrer" class="result-card__action">{% trans "Acessar" %}</a>
-            {% endif %}
-            {% if doc.source.ids.openalex %}
             <a href="{{ doc.source.ids.openalex }}" target="_blank" rel="noopener noreferrer" class="result-card__action result-card__action--ghost">OpenAlex</a>
-            {% endif %}
         </div>
+        {% endif %}
         <div class="result-card__footer-side">
             {% if doc.source.ids.doi %}
             <div class="result-card__identifier">

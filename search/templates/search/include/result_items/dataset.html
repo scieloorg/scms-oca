@@ -86,17 +86,12 @@
     {% endif %}
 </div>
 
-{% if doc.source.files or doc.source.content_url %}
+{% if doc.source.files %}
 <div class="result-card__footer">
     <div class="result-card__actions">
-        {% if doc.source.files %}
-            {% for file in doc.source.files %}
-            <a href="{{ file.pid_url }}" target="_blank" rel="noopener noreferrer" class="result-card__action">{{ file.label }}</a>
-            {% endfor %}
-        {% endif %}
-        {% if doc.source.content_url %}
-        <a href="{{ doc.source.content_url }}" target="_blank" rel="noopener noreferrer" class="result-card__action result-card__action--ghost">{% trans "Acessar" %}</a>
-        {% endif %}
+        {% for file in doc.source.files %}
+        <a href="{{ file.pid_url }}" target="_blank" rel="noopener noreferrer" class="result-card__action">{{ file.label }}</a>
+        {% endfor %}
     </div>
 </div>
 {% endif %}
