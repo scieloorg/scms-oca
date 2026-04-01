@@ -1,0 +1,6 @@
+{% load static %}
+{% if item_scope == "openalex_works" %}
+<img src="{% static 'search/img/OpenAlex_2025_favicon.svg' %}" alt="" class="result-card__source-logo" width="20" height="20" decoding="async">
+{% else %}
+<img src="{% static 'img/logo-scielo-no-label.svg' %}" alt="" class="result-card__source-logo result-card__source-logo--scielo" width="20" height="20" decoding="async">
+{% endif %}

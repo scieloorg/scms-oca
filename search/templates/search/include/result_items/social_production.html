@@ -20,6 +20,7 @@
             {% if doc.source.directory_type %}
             <span class="result-card__badge">{{ doc.source.directory_type }}</span>
             {% endif %}
+            {% include "search/include/result_items/source_logo.html" with item_scope=item_scope %}
         </div>
     </div>
 
