@@ -370,6 +370,13 @@ class SearchPageManager {
       this.syncDisplayModeInUrl();
     });
 
+    document.addEventListener('click', event => {
+      if (!event.target.closest('[data-results-print-selected]')) return;
+      if (window.SearchResultsPrint && typeof window.SearchResultsPrint.printSelectedCards === 'function') {
+        window.SearchResultsPrint.printSelectedCards();
+      }
+    });
+
     document.body.dataset.searchPageControlsBound = 'true';
   }
 
