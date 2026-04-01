@@ -21,6 +21,8 @@
 {{ search_clauses|json_script:"search-clauses-data" }}
 {{ filters|json_script:"filters-data" }}
 {{ filter_metadata|json_script:"filter-metadata-data" }}
+{{ observation_dimensions|json_script:"observation-dimensions-data" }}
+{{ observation_default_dimension|json_script:"observation-default-dimension-data" }}
 <script src="{% static 'observation/js/search_page.js' %}"></script>
 <script src="{% static 'observation/js/table.js' %}"></script>
 <link href="{% static 'search/css/custom.css' %}" rel="stylesheet">
@@ -34,6 +36,9 @@
         tableApiEndpoint: '{% url "observation:table" %}',
         filters: JSON.parse(document.getElementById('filters-data').textContent),
         filterMetadata: JSON.parse(document.getElementById('filter-metadata-data').textContent),
+        observationPageId: '{{ observation_page_id|default_if_none:""|escapejs }}',
+        dimensions: JSON.parse(document.getElementById('observation-dimensions-data').textContent),
+        defaultDimension: JSON.parse(document.getElementById('observation-default-dimension-data').textContent),
         searchableFields: [
             {% for value, label in searchable_fields %}
             { value: '{{ value|escapejs }}', label: '{{ label|escapejs }}' }{% if not forloop.last %},{% endif %}

@@ -221,7 +221,6 @@ class SearchGatewayService:
         try:
             return search_lookup_options_by_values(
                 self.client,
-                self.data_source,
                 field,
                 values,
                 request_timeout=self.request_timeout,

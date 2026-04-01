@@ -179,8 +179,41 @@
 }
 
 #observation-table {
-  width: 100% !important;
+  width: auto !important;
+  min-width: 100%;
   table-layout: fixed;
+}
+
+/* Keep dimension label column readable (e.g. "Type of Access"). */
+#observation-table thead th:nth-child(2),
+#observation-table tbody td:nth-child(2),
+#observation-table tfoot th:nth-child(2) {
+  width: 220px;
+  min-width: 220px;
+}
+
+/* Column 2 header: keep label away from sort/menu controls. */
+#observation-table thead th:nth-child(2) .observation-col-head {
+  display: flex;
+  align-items: center;
+  padding-right: 0;
+}
+
+#observation-table thead th:nth-child(2) .observation-col-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding-left: 0;
+  padding-right: 34px;
+  overflow: visible;
+  text-overflow: clip;
+}
+
+#observation-table thead th:nth-child(2) .observation-col-sort-toggle {
+  right: 16px;
+}
+
+#observation-table thead th:nth-child(2) .observation-col-menu-toggle {
+  right: 2px;
 }
 
 #observation-table thead th {
@@ -244,6 +277,9 @@
 .observation-col-label {
   font-size: 13px;
   line-height: 1.1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .observation-col-menu-toggle {
@@ -382,6 +418,8 @@
 
 #observation-table tbody td:nth-child(2) {
   overflow: visible;
+  white-space: normal;
+  text-overflow: clip;
 }
 
 #observation-table tfoot th {

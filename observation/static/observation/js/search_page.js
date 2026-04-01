@@ -1,5 +1,5 @@
 /**
- * Observation search page JS - duplicated from search.
+ * Observation search page JS 
  * Uses config.apiEndpoint and config.filtersApiEndpoint for observation APIs.
  */
 class SearchPageManager {

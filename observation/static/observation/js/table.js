@@ -2,10 +2,59 @@
 (function () {
   "use strict";
 
+  function getDimensions() {
+    const config = window.searchPageConfig || {};
+    return Array.isArray(config.dimensions) ? config.dimensions : [];
+  }
+
+  function getDefaultDimension() {
+    const config = window.searchPageConfig || {};
+    return config.defaultDimension || getDimensions()[0] || {};
+  }
+
+  function getActiveDimension() {
+    const config = window.searchPageConfig || {};
+    const dimensions = getDimensions();
+    const slug = config.activeDimensionSlug || (getDefaultDimension().slug || "");
+    return dimensions.find(function (item) { return item.slug === slug; }) || getDefaultDimension();
+  }
+
+  function setActiveDimension(slug) {
+    const config = window.searchPageConfig || {};
+    config.activeDimensionSlug = slug;
+  }
+
+  function applyDimensionLabels() {
+    const dimension = getActiveDimension();
+    const rowLabel = getDisplayRowLabel(dimension.row_label || "Country");
+    const colLabel = dimension.col_label || "Year";
+    const tableTitle = dimension.table_title || "";
+    const kpiLabel = dimension.kpi_label || "Documents";
+
+    var titleEl = document.getElementById("observation-table-title");
+    if (titleEl && tableTitle) titleEl.textContent = tableTitle;
+    var kpiEl = document.getElementById("observation-kpi-label");
+    if (kpiEl) kpiEl.textContent = kpiLabel;
+    var rowHeader = document.getElementById("observation-row-header");
+    if (rowHeader) rowHeader.textContent = rowLabel;
+    var colHeader = document.getElementById("observation-col-header");
+    if (colHeader) colHeader.setAttribute("data-placeholder", colLabel);
+  }
+
+  function getDisplayRowLabel(label) {
+    const raw = String(label || "").trim();
+    if (!raw) return "Country";
+    const parts = raw.split(/\s+and\s+/i);
+    return (parts[0] || raw).trim();
+  }
+
   function buildTableParams() {
     const config = window.searchPageConfig || {};
+    const dimension = getActiveDimension();
     const params = new URLSearchParams();
     if (config.dataSourceName) params.append("index_name", config.dataSourceName);
+    if (config.observationPageId) params.append("page_id", config.observationPageId);
+    if (dimension && dimension.slug) params.append("dimension_slug", dimension.slug);
 
     const searchInput = document.querySelector('.advanced-search-row[data-row-index="0"] .search-text-input');
     const fallbackSearch = searchInput ? String(searchInput.value || "").trim() : "";
@@ -60,6 +109,7 @@
     $table.hide();
     $error.hide();
 
+    applyDimensionLabels();
     const params = buildTableParams();
     fetch(tableApiEndpoint + "?" + params.toString())
       .then(function (r) { if (!r.ok) throw new Error("Network error"); return r.json(); })
@@ -121,6 +171,11 @@
   }
 
   function initObservationTableDataTable(numberColumns, yearColumns) {
+    const activeDimension = getActiveDimension() || {};
+    const rowLabel = getDisplayRowLabel(activeDimension.row_label || "Country");
+    const colLabel = activeDimension.col_label || "Year";
+    const valueLabel = activeDimension.value_label || "Documents";
+    const rowLabelLower = String(rowLabel).toLowerCase();
 
     function parseDisplayNumber(value) {
       const normalized = String(value || "")
@@ -156,7 +211,7 @@
     function copyRowDataToClipboard($row) {
       const values = getRowValues($row);
       if (!values.length) return;
-      const parts = ["Country: " + values[0]];
+      const parts = [rowLabel + ": " + values[0]];
       yearColumns.forEach(function (y, i) { parts.push(y + ": " + (values[i + 1] || "-")); });
       const line = parts.join(" | ");
       if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -207,8 +262,14 @@
     injectCountryActions();
 
     const pageLength = 50;
+    const columnDefs = [{ targets: 0, orderable: false, width: "48px" }, { targets: 1, width: "220px" }];
+    numberColumns.forEach(function (idx) {
+      columnDefs.push({ targets: idx, width: "92px" });
+    });
+
     const table = $("#observation-table").DataTable({
       pageLength: pageLength,
+      autoWidth: false,
       lengthChange: false,
       bLengthChange: false,
       layout: {
@@ -221,10 +282,10 @@
       orderMulti: true,
       paging: true,
       info: true,
-      columnDefs: [{ targets: 0, orderable: false }],
+      columnDefs: columnDefs,
       language: {
         search: "",
-        searchPlaceholder: "Type to search countries...",
+        searchPlaceholder: "Type to search " + rowLabelLower + "...",
         lengthMenu: "_MENU_",
         info: "Showing _START_ to _END_ of _TOTAL_",
         paginate: { first: "First", previous: "Previous", next: "Next", last: "Last" }
@@ -284,8 +345,8 @@
         const $th = $(this);
         if ($th.find(".observation-col-menu-toggle").length) return;
         const title = $th.text().trim();
-        const isCountryCol = index === 1;
-        const menuSearchBlock = isCountryCol
+      const isRowLabelCol = index === 1;
+      const menuSearchBlock = isRowLabelCol
           ? '<div class="observation-col-menu-row"><span class="observation-col-menu-icon" aria-hidden="true">&#8645;</span><select class="observation-col-menu-select"><option value="contains">Contains</option><option value="starts">Starts with</option><option value="equals">Equals</option></select></div><div class="observation-col-menu-row"><span class="observation-col-menu-icon" aria-hidden="true">&#128269;</span><input type="text" class="observation-col-menu-input" placeholder="Search..."></div>'
           : '';
         $th.html(
@@ -463,11 +524,11 @@
       ctx.fillStyle = "#475569";
       ctx.font = "10px Arial";
       ctx.textAlign = "center";
-      ctx.fillText("Year", (left + right) / 2, cssHeight - 4);
+      ctx.fillText(colLabel, (left + right) / 2, cssHeight - 4);
       ctx.save();
       ctx.translate(10, (top + bottom) / 2);
       ctx.rotate(-Math.PI / 2);
-      ctx.fillText("Documents", 0, 0);
+      ctx.fillText(valueLabel, 0, 0);
       ctx.restore();
 
       ctx.fillStyle = "rgba(13, 110, 253, 0.10)";
@@ -729,11 +790,11 @@
       ctx.fillStyle = "#475569";
       ctx.font = "10px Arial";
       ctx.textAlign = "center";
-      ctx.fillText("Year", (left + right) / 2, cssHeight - 8);
+      ctx.fillText(colLabel, (left + right) / 2, cssHeight - 8);
       ctx.save();
       ctx.translate(10, (top + bottom) / 2);
       ctx.rotate(-Math.PI / 2);
-      ctx.fillText("Documents", 0, 0);
+      ctx.fillText(valueLabel, 0, 0);
       ctx.restore();
 
       ctx.textAlign = "left";
@@ -934,7 +995,7 @@
     function openComparisonModal() {
       const selected = getCheckedRowsForComparison();
       if (selected.length < 2) {
-        window.alert("Select at least 2 countries using the row checkboxes.");
+        window.alert("Select at least 2 rows using the row checkboxes.");
         return;
       }
       const labels = yearColumns.slice();
@@ -951,7 +1012,7 @@
       $("#country-compare-body").html(
         '<div class="table-responsive mb-3">' +
           '<table class="table table-sm table-bordered align-middle">' +
-          '<thead class="table-light"><tr><th>Country</th>' + thCells + '</tr></thead>' +
+          '<thead class="table-light"><tr><th>' + rowLabel + '</th>' + thCells + '</tr></thead>' +
           '<tbody>' + rowsHtml + '</tbody></table></div>' +
         '<div class="observation-detail-chart-wrap">' +
           '<div class="observation-chart-meta">Processing date: 2026-03-17 | Source: OpenAlex</div>' +
@@ -984,7 +1045,7 @@
         window.alert("Select at least one row using the checkbox in the first column.");
         return;
       }
-      const headers = ["Country"].concat(yearColumns || []);
+      const headers = [rowLabel].concat(yearColumns || []);
       const rows = [];
       rows.push(headers.map(function (header) { return "\"" + String(header || "").replace(/"/g, "\"\"") + "\""; }).join(","));
       rowsToExport.forEach(function (row) {
@@ -995,7 +1056,16 @@
       const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
-      link.download = "evolution_scientific_production_world.csv";
+      const selectedDimensionText = $("#observation-dimension-select option:selected").text().trim();
+      const dimensionLabel = String(selectedDimensionText || activeDimension.menu_label || activeDimension.table_title || activeDimension.slug || "observation")
+        .trim()
+        .normalize("NFD")
+        .toLowerCase()
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9]+/g, "_")
+        .replace(/_+/g, "_")
+        .replace(/^_+|_+$/g, "");
+      link.download = (dimensionLabel || "observation") + ".csv";
       link.click();
       URL.revokeObjectURL(link.href);
     }
@@ -1047,7 +1117,7 @@
           '<div class="col-12">' +
             '<div class="observation-detail-chart-wrap">' +
               '<div class="observation-chart-meta">Processing date: 2026-03-17 | Source: OpenAlex</div>' +
-              '<div class="observation-detail-chart-head"><strong>Evolution by year</strong>' +
+              '<div class="observation-detail-chart-head"><strong>Evolution by ' + colLabel + '</strong>' +
               '<button type="button" id="download-detail-chart-btn" class="btn btn-outline-secondary btn-sm observation-chart-download-btn">Download chart</button></div>' +
               '<canvas id="country-detail-chart" width="560" height="220"></canvas>' +
               '<div class="observation-detail-insights">' +
@@ -1068,6 +1138,18 @@
   if (typeof jQuery !== "undefined" && typeof jQuery.fn.DataTable !== "undefined") {
     window.loadAndInitObservationTable = loadAndInitObservationTable;
     jQuery(function () {
+      const defaultDimension = getDefaultDimension();
+      if (defaultDimension && defaultDimension.slug) {
+        setActiveDimension(defaultDimension.slug);
+      }
+      const $dimensionSelect = $("#observation-dimension-select");
+      if ($dimensionSelect.length) {
+        $dimensionSelect.off("change.observationDimension").on("change.observationDimension", function () {
+          const selectedSlug = String($(this).val() || "").trim();
+          setActiveDimension(selectedSlug);
+          loadAndInitObservationTable();
+        });
+      }
       loadAndInitObservationTable();
     });
   }
