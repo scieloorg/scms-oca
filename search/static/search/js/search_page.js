@@ -17,6 +17,7 @@ class SearchPageManager {
     this.layoutRoot = document.getElementById('mainContent');
     this.headerRow = document.getElementById('search-header-row');
     this.sidebarToggleButton = document.getElementById('search-sidebar-toggle');
+    this._filtersFetchAbortController = null;
 
     this.init();
   }
@@ -26,6 +27,7 @@ class SearchPageManager {
     this.setupAdvancedSearchUI();
     this.setupSidebarToggle();
     this.setupGlobalResultsControlEvents();
+    this.setupResultsSelectionDelegation();
     this.restoreSearchClauses();
     await this.initSidebar();
     this.setupResultsUi();
@@ -271,11 +273,17 @@ class SearchPageManager {
 
   async applyFiltersAjax(page = 1) {
     this.currentPage = page;
+    if (this._filtersFetchAbortController) {
+      this._filtersFetchAbortController.abort();
+    }
+    this._filtersFetchAbortController = new AbortController();
+    const { signal } = this._filtersFetchAbortController;
+
     this.showLoading();
     const params = this.buildSearchParams();
 
     try {
-      const response = await fetch(`${this.apiEndpoint}?${params.toString()}`);
+      const response = await fetch(`${this.apiEndpoint}?${params.toString()}`, { signal });
       if (!response.ok) throw new Error('Network response was not ok');
       const data = await response.json();
 
@@ -288,15 +296,18 @@ class SearchPageManager {
         this.setupResultsUi();
       }
 
-      if (this.sidebarRoot && data.sidebar_html) {
-        this.sidebarRoot.innerHTML = data.sidebar_html;
-        await this.initSidebar();
+      const sidebarForm = this.sidebarForm;
+      if (sidebarForm && window.SearchGatewayFilterForm?.commitAppliedFilters) {
+        window.SearchGatewayFilterForm.commitAppliedFilters(sidebarForm);
       }
 
       const url = new URL(window.location.href);
       url.search = params.toString();
       window.history.replaceState({}, '', url.toString());
     } catch (error) {
+      if (error.name === 'AbortError') {
+        return;
+      }
       console.error('Error applying filters:', error);
       if (this.resultsContainer) {
         this.resultsContainer.innerHTML = `
@@ -370,6 +381,13 @@ class SearchPageManager {
       this.syncDisplayModeInUrl();
     });
 
+    document.addEventListener('click', event => {
+      if (!event.target.closest('[data-results-print-selected]')) return;
+      if (window.SearchResultsPrint && typeof window.SearchResultsPrint.printSelectedCards === 'function') {
+        window.SearchResultsPrint.printSelectedCards();
+      }
+    });
+
     document.body.dataset.searchPageControlsBound = 'true';
   }
 
@@ -391,7 +409,7 @@ class SearchPageManager {
     });
 
     this.applyDisplayMode();
-    this.bindResultsSelectionControls();
+    this.updateResultsSelectionCounter();
   }
 
   applyDisplayMode() {
@@ -412,55 +430,66 @@ class SearchPageManager {
     window.history.replaceState({}, '', url.toString());
   }
 
-  bindResultsSelectionControls() {
-    const selectPage = document.getElementById('results-select-page');
-    const itemCheckboxes = Array.from(document.querySelectorAll('.result-item__select-input'));
-    const selectedCounter = document.getElementById('results-selected-counter');
+  setupResultsSelectionDelegation() {
+    if (!this.resultsContainer || this.resultsContainer.dataset.searchPageSelectionBound === 'true') {
+      return;
+    }
+
+    this.resultsContainer.addEventListener('change', event => {
+      const { target } = event;
+
+      if (target.id === 'results-select-page') {
+        this.resultsContainer.querySelectorAll('.result-item__select-input').forEach(input => {
+          input.checked = target.checked;
+        });
+        this.updateResultsSelectionCounter();
+        return;
+      }
+
+      if (target.classList.contains('result-item__select-input')) {
+        this.updateResultsSelectionCounter();
+      }
+    });
+
+    this.resultsContainer.dataset.searchPageSelectionBound = 'true';
+  }
+
+  updateResultsSelectionCounter() {
+    if (!this.resultsContainer) return;
+
+    const selectPage = this.resultsContainer.querySelector('#results-select-page');
+    const selectedCounter = this.resultsContainer.querySelector('#results-selected-counter');
+    const itemCheckboxes = this.resultsContainer.querySelectorAll('.result-item__select-input');
 
     if (!selectPage || !selectedCounter) return;
 
     const singularLabel = selectedCounter.dataset.labelSingular || gettext('selecionado');
     const pluralLabel = selectedCounter.dataset.labelPlural || gettext('selecionados');
 
-    const updateSelectionState = () => {
-      const selectedCount = itemCheckboxes.filter(input => input.checked).length;
-      const label = selectedCount === 1 ? singularLabel : pluralLabel;
-      selectedCounter.textContent = `${selectedCount} ${label}`;
+    const selectedCount = Array.from(itemCheckboxes).filter(input => input.checked).length;
+    const label = selectedCount === 1 ? singularLabel : pluralLabel;
+    selectedCounter.textContent = `${selectedCount} ${label}`;
 
-      if (!itemCheckboxes.length) {
-        selectPage.checked = false;
-        selectPage.indeterminate = false;
-        return;
-      }
-
-      if (selectedCount === 0) {
-        selectPage.checked = false;
-        selectPage.indeterminate = false;
-        return;
-      }
-
-      if (selectedCount === itemCheckboxes.length) {
-        selectPage.checked = true;
-        selectPage.indeterminate = false;
-        return;
-      }
-
+    if (!itemCheckboxes.length) {
       selectPage.checked = false;
-      selectPage.indeterminate = true;
-    };
+      selectPage.indeterminate = false;
+      return;
+    }
 
-    selectPage.addEventListener('change', () => {
-      itemCheckboxes.forEach(input => {
-        input.checked = selectPage.checked;
-      });
-      updateSelectionState();
-    });
+    if (selectedCount === 0) {
+      selectPage.checked = false;
+      selectPage.indeterminate = false;
+      return;
+    }
 
-    itemCheckboxes.forEach(input => {
-      input.addEventListener('change', updateSelectionState);
-    });
+    if (selectedCount === itemCheckboxes.length) {
+      selectPage.checked = true;
+      selectPage.indeterminate = false;
+      return;
+    }
 
-    updateSelectionState();
+    selectPage.checked = false;
+    selectPage.indeterminate = true;
   }
 
 }
