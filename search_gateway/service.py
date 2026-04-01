@@ -19,6 +19,8 @@ from .filters_cache import (
 from .lookup import search_lookup_options, search_lookup_options_by_values
 from .models import DataSource
 from .query import (
+    build_aggregation_body,
+    build_bool_query_from_search_params,
     build_document_search_body,
     build_filters_aggs,
     build_keyword_contains_search_body,
@@ -26,6 +28,7 @@ from .query import (
     build_unique_items_aggregation_body,
 )
 from .response_parser import (
+    parse_aggregation_response,
     parse_document_search_response,
     parse_filters_response,
     parse_search_item_response,
@@ -218,7 +221,6 @@ class SearchGatewayService:
         try:
             return search_lookup_options_by_values(
                 self.client,
-                self.data_source,
                 field,
                 values,
                 request_timeout=self.request_timeout,
@@ -314,3 +316,55 @@ class SearchGatewayService:
         except OpenSearchConnectionError:
             logger.warning("OpenSearch unavailable while searching documents", exc_info=True)
             return {"search_results": [], "total_results": 0}
+
+
+    def search_aggregation(
+        self,
+        aggs,
+        query_text=None,
+        query_clauses=None,
+        filters=None,
+        parse_config=None,
+    ):
+        """
+        Runs an aggregation with the same query/filter context as search_documents.
+
+        Args:
+            aggs: Aggregation definition dict (e.g. {"by_country": {...}}).
+            query_text: Text search (same as search_documents).
+            query_clauses: Advanced search clauses (same as search_documents).
+            filters: Selected filters, form field names (same as search_documents).
+            parse_config: Optional dict for parse_aggregation_response.
+
+        Returns:
+            If parse_config: parsed dict {columns, rows, grand_total}.
+            Else: raw response["aggregations"].
+        """
+        field_settings = self.data_source.field_settings_dict
+        mapped_filters = get_mapped_filters(filters or {}, field_settings)
+        bool_query = build_bool_query_from_search_params(
+            query_text=query_text,
+            query_clauses=query_clauses,
+            filters=mapped_filters,
+        )
+        body = build_aggregation_body(
+            query={"bool": bool_query},
+            aggs=aggs,
+        )
+        try:
+            res = self.client.search(
+                index=self.index_name,
+                body=body,
+                request_cache=True,
+            )
+            if parse_config is not None:
+                parse_config = dict(parse_config)
+                if "data_source" not in parse_config:
+                    parse_config["data_source"] = self.data_source
+                return parse_aggregation_response(res, parse_config)
+            return res.get("aggregations", {})
+        except OpenSearchConnectionError:
+            logger.warning("OpenSearch unavailable while running aggregation", exc_info=True)
+            if parse_config is not None:
+                return {"columns": [], "rows": [], "grand_total": 0}
+            return {}

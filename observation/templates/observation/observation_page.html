@@ -1,0 +1,50 @@
+{% extends "search_gateway/search_gateway.html" %}
+{% load custom_filters %}
+{% load static %}
+{% load i18n %}
+
+{% block search_sidebar %}
+    {{ search_sidebar_html|safe }}
+{% endblock %}
+
+{% block search_content %}
+    {% include "observation/include/table.html" %}
+{% endblock %}
+
+{% block extra_css %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'observation/css/table.css' %}">
+{% endblock %}
+
+{% block javascript %}
+{{ block.super }}
+{{ search_clauses|json_script:"search-clauses-data" }}
+{{ filters|json_script:"filters-data" }}
+{{ filter_metadata|json_script:"filter-metadata-data" }}
+{{ observation_dimensions|json_script:"observation-dimensions-data" }}
+{{ observation_default_dimension|json_script:"observation-default-dimension-data" }}
+<script src="{% static 'observation/js/search_page.js' %}"></script>
+<script src="{% static 'observation/js/table.js' %}"></script>
+<link href="{% static 'search/css/custom.css' %}" rel="stylesheet">
+<script>
+    window.searchPageConfig = {
+        initialSearchQuery: '{{ search_query|escapejs }}',
+        initialSearchClauses: JSON.parse(document.getElementById('search-clauses-data').textContent),
+        dataSourceName: '{{ index_name|escapejs }}',
+        apiEndpoint: '{% url "observation:list" %}',
+        filtersApiEndpoint: '{% url "observation:filters" %}',
+        tableApiEndpoint: '{% url "observation:table" %}',
+        filters: JSON.parse(document.getElementById('filters-data').textContent),
+        filterMetadata: JSON.parse(document.getElementById('filter-metadata-data').textContent),
+        observationPageId: '{{ observation_page_id|default_if_none:""|escapejs }}',
+        dimensions: JSON.parse(document.getElementById('observation-dimensions-data').textContent),
+        defaultDimension: JSON.parse(document.getElementById('observation-default-dimension-data').textContent),
+        searchableFields: [
+            {% for value, label in searchable_fields %}
+            { value: '{{ value|escapejs }}', label: '{{ label|escapejs }}' }{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ],
+    };
+</script>
+{% endblock %}
+

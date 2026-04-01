@@ -1,0 +1,581 @@
+/* Observation table styles - from observation/table.html */
+.observation-card {
+  background: #fff;
+  border: 1px solid #e5e7ef;
+  border-radius: 10px;
+  padding: 14px;
+}
+
+.observation-title {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.08;
+  color: #0f172a;
+  margin: 0 0 8px;
+}
+
+.observation-kpis {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.observation-kpi {
+  border: 1px solid #dbe2ea;
+  border-radius: 10px;
+  background: #f8fafc;
+  padding: 6px 14px;
+  min-width: 130px;
+  text-align: right;
+}
+
+.observation-kpi-label {
+  display: block;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: #64748b;
+  line-height: 1;
+}
+
+.observation-kpi-value {
+  display: block;
+  font-size: 30px;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.1;
+}
+
+.observation-chart-meta {
+  font-size: 12px;
+  color: #64748b;
+  margin-bottom: 8px;
+}
+
+.observation-top-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  margin: 8px 0 10px;
+}
+
+.observation-actions {
+  margin: 0;
+  flex: 0 0 auto;
+}
+
+.observation-action-listbox {
+  width: 220px;
+  max-width: 220px;
+  height: 38px;
+  font-size: 14px;
+  border-radius: 6px;
+}
+
+/* Manual page-length control (DataTables lengthChange is off) — match action + legacy dt-length look */
+.observation-page-length-wrap {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 0 0 auto;
+}
+
+.observation-page-length-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748b;
+  white-space: nowrap;
+}
+
+.observation-page-length-select {
+  width: auto;
+  min-width: 4.5rem;
+  height: 38px;
+  margin: 0;
+  padding: 0.375rem 2rem 0.375rem 0.75rem;
+  font-size: 14px;
+  line-height: 1.25;
+  color: #212529;
+  background-color: #fff;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1.5 1.75L6 6.25L10.5 1.75' stroke='%2364748b' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.65rem center;
+  background-size: 0.65rem 0.4rem;
+}
+
+.observation-page-length-select:focus {
+  border-color: #86b7fe;
+  outline: 0;
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.2);
+}
+
+.observation-search-wrap {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.observation-search-wrap input[type="search"] {
+  width: 100% !important;
+  min-width: 0;
+  height: 38px;
+  font-size: 14px;
+  border: 1px solid #ced4da;
+  border-radius: .375rem;
+  padding: .375rem .75rem;
+  background: #fff;
+  color: #212529;
+}
+
+.observation-top-toolbar .dt-length,
+.observation-top-toolbar .dataTables_length {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+}
+
+.observation-top-toolbar .dt-length label,
+.observation-top-toolbar .dataTables_length label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  white-space: nowrap;
+}
+
+.observation-top-toolbar .dt-length select,
+.observation-top-toolbar .dataTables_length select {
+  height: 38px;
+  border: 1px solid #ced4da;
+  border-radius: .375rem;
+  padding: .375rem 2rem .375rem .75rem;
+  background-color: #fff;
+  font-size: 14px;
+  color: #212529;
+  min-width: 72px;
+  margin: 0 !important;
+}
+
+.observation-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+/* DataTables 2: bottom row (info + paging) must stay visible; do not rely on empty cells */
+#observation-table_wrapper.dt-container .dt-layout-row:not(.dt-layout-table) .dt-paging {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.25rem;
+}
+
+#observation-table {
+  width: auto !important;
+  min-width: 100%;
+  table-layout: fixed;
+}
+
+/* Keep dimension label column readable (e.g. "Type of Access"). */
+#observation-table thead th:nth-child(2),
+#observation-table tbody td:nth-child(2),
+#observation-table tfoot th:nth-child(2) {
+  width: 220px;
+  min-width: 220px;
+}
+
+/* Column 2 header: keep label away from sort/menu controls. */
+#observation-table thead th:nth-child(2) .observation-col-head {
+  display: flex;
+  align-items: center;
+  padding-right: 0;
+}
+
+#observation-table thead th:nth-child(2) .observation-col-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding-left: 0;
+  padding-right: 34px;
+  overflow: visible;
+  text-overflow: clip;
+}
+
+#observation-table thead th:nth-child(2) .observation-col-sort-toggle {
+  right: 16px;
+}
+
+#observation-table thead th:nth-child(2) .observation-col-menu-toggle {
+  right: 2px;
+}
+
+#observation-table thead th {
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  position: relative;
+  padding: 2px 3px;
+  background-image: none !important;
+  background: #f8fafc !important;
+}
+
+#observation-table thead th.sorting,
+#observation-table thead th.sorting_asc,
+#observation-table thead th.sorting_desc,
+#observation-table thead th.dt-orderable-asc,
+#observation-table thead th.dt-orderable-desc {
+  padding-right: 3px !important;
+}
+
+#observation-table thead th:nth-child(n + 3),
+#observation-table tbody td:nth-child(n + 3),
+#observation-table tfoot th:nth-child(n + 3) {
+  min-width: 54px;
+}
+
+.observation-select-col {
+  width: 40px;
+  text-align: center;
+}
+
+#observation-table thead th.observation-select-col {
+  text-align: center !important;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.observation-select-header {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  justify-content: center;
+}
+
+.observation-select-header span {
+  font-weight: 700;
+}
+
+.observation-select-all-checkbox {
+  width: 14px;
+  height: 14px;
+  cursor: pointer;
+}
+
+.observation-col-head {
+  display: block;
+  position: relative;
+  padding-right: 20px;
+}
+
+.observation-col-label {
+  font-size: 13px;
+  line-height: 1.1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.observation-col-menu-toggle {
+  border: 0;
+  background: transparent;
+  color: #6b7280;
+  font-size: 11px;
+  line-height: 1;
+  padding: 0;
+  width: 12px;
+  height: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.observation-col-sort-toggle {
+  border: 0;
+  background: transparent;
+  color: #6b7280;
+  width: 12px;
+  height: 12px;
+  padding: 0;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.observation-col-sort-toggle svg {
+  width: 9px;
+  height: 9px;
+  display: block;
+}
+
+.observation-col-sort-toggle.is-active-asc,
+.observation-col-sort-toggle.is-active-desc {
+  color: #0d6efd;
+}
+
+.observation-col-menu {
+  display: none;
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 25;
+  min-width: 220px;
+  background: #fff;
+  border: 1px solid #dbe2ea;
+  border-radius: 8px;
+  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.14);
+  padding: 8px;
+}
+
+.observation-col-menu.show {
+  display: block;
+}
+
+.observation-col-menu-row {
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.observation-col-menu-icon {
+  width: 16px;
+  height: 16px;
+  color: #374151;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 16px;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.observation-col-menu-select,
+.observation-col-menu-input {
+  width: 100%;
+  height: 34px;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  font-size: 14px;
+  padding: .25rem .5rem;
+}
+
+.observation-col-menu-action {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  color: #1f2937;
+  font-size: 14px;
+  border-radius: 6px;
+  padding: 6px 8px;
+  margin-top: 2px;
+  cursor: pointer;
+}
+
+.observation-col-menu-action:hover {
+  background: #f1f5f9;
+}
+
+.observation-col-menu-action:disabled,
+.observation-col-menu-action.is-disabled {
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.observation-row-checkbox {
+  width: 14px;
+  height: 14px;
+  cursor: pointer;
+}
+
+#observation-table tbody td {
+  font-size: 14px;
+  padding: 4px 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#observation-table tbody td:nth-child(2) {
+  overflow: visible;
+  white-space: normal;
+  text-overflow: clip;
+}
+
+#observation-table tfoot th {
+  font-size: 13px;
+  font-weight: 700;
+  background: #f8fafc;
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  padding: 4px 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.country-name {
+  color: #1f2937;
+}
+
+.observation-country-cell {
+  position: relative;
+}
+
+.observation-copied-tooltip {
+  position: absolute;
+  top: -6px;
+  right: 0;
+  transform: translateY(-100%);
+  background: rgba(15, 23, 42, 0.92);
+  color: #fff;
+  font-size: 11px;
+  padding: 4px 6px;
+  border-radius: 6px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 140ms ease, transform 140ms ease;
+  z-index: 10;
+}
+
+.observation-copied-tooltip.show {
+  opacity: 1;
+  transform: translateY(-110%);
+}
+
+.observation-detail-icon-btn,
+.observation-copy-icon-btn {
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  line-height: 1;
+  padding-left: 6px;
+}
+
+.observation-detail-icon-btn {
+  color: #0d6efd;
+}
+
+.observation-copy-icon-btn {
+  color: #64748b;
+}
+
+.observation-copy-icon-btn svg {
+  width: 13px;
+  height: 13px;
+}
+
+.observation-detail-chart-wrap {
+  margin-top: 14px;
+  border: 1px solid #e5e7ef;
+  border-radius: 8px;
+  padding: 10px;
+  background: #f8fafc;
+}
+
+.observation-detail-insights {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 8px;
+}
+
+.observation-detail-insight {
+  border: 1px solid #dbe2ea;
+  border-radius: 8px;
+  background: #fff;
+  padding: 8px 10px;
+  font-size: 12px;
+  color: #334155;
+}
+
+.observation-detail-insight strong {
+  display: block;
+  font-size: 12px;
+  color: #0f172a;
+  margin-bottom: 4px;
+}
+
+.observation-detail-chart-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.observation-chart-download-btn {
+  white-space: nowrap;
+}
+
+#country-detail-chart {
+  width: 100%;
+  height: 220px;
+  display: block;
+}
+
+#comparison-chart {
+  width: 100%;
+  height: 260px;
+  display: block;
+}
+
+.observation-comparison-insights {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 8px;
+}
+
+.observation-comparison-insight {
+  border: 1px solid #dbe2ea;
+  border-radius: 8px;
+  background: #fff;
+  padding: 8px 10px;
+  font-size: 12px;
+  color: #334155;
+}
+
+.observation-comparison-insight strong {
+  display: block;
+  font-size: 12px;
+  color: #0f172a;
+  margin-bottom: 4px;
+}
+
+@media (max-width: 991px) {
+  .observation-title {
+    font-size: 32px;
+  }
+
+  .observation-top-toolbar {
+    flex-wrap: wrap;
+  }
+
+  .observation-page-length-wrap {
+    margin-left: 0;
+    width: 100%;
+    justify-content: flex-end;
+  }
+}
