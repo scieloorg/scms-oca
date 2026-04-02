@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 from django.urls import reverse
 from wagtail.models import Locale, Site
@@ -80,6 +80,8 @@ class Command(BaseCommand):
 
         for language_code, items in data.items():
             locale = self.resolve_locale(language_code)
+            if locale is None:
+                raise CommandError(f"Locale não encontrado para o idioma: {language_code}")
             home = self.get_home_for_locale(site, locale)
 
             with transaction.atomic():
