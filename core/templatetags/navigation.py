@@ -1,14 +1,8 @@
 from django.conf import settings
 from django import template
+from wagtail.models import Locale, Site
 
-from core.utils.sa_menu_utils import (
-    build_menu,
-    find_active_menu_path,
-    get_home_url,
-    get_page_translation_urls,
-    get_page_url_for_language,
-    resolve_locale,
-)
+from core.models import SAMenu
 
 register = template.Library()
 
