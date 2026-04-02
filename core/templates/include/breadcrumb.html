@@ -16,7 +16,7 @@
                     </a>
                 </li>
                 {% for item in breadcrumb_ctx.items %}
-                    <li class="analytics-breadcrumb-item {% if not item.url %}active{% endif %}" {% if not item.url %}aria-current="page"{% endif %}>
+                    <li class="analytics-breadcrumb-item {% if item.is_current %}active{% endif %}" {% if item.is_current %}aria-current="page"{% endif %}>
                         {% if item.url %}
                             <a href="{{ item.url }}">{{ item.label }}</a>
                         {% else %}
