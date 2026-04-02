@@ -68,10 +68,7 @@ class Command(BaseCommand):
         return root_page.get_translation(locale).specific
 
     def resolve_locale(self, language_code):
-        return (
-            Locale.objects.filter(language_code=language_code).first()
-            or Locale.objects.filter(language_code__iexact=language_code).first()
-        )
+        return Locale.objects.filter(language_code__iexact=language_code).first()
 
     def handle(self, *args, **options):
         data = self.load_data(options["data"])
