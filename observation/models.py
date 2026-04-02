@@ -168,8 +168,6 @@ class ObservationPage(Page):
                 applied_filters=applied_filters,
                 sidebar_form_id="observation-filter-form",
                 sidebar_form_method="get",
-                submit_label=_("APLICAR"),
-                reset_label=_("LIMPAR"),
                 submit_id="observation-filter-generate",
                 reset_id="observation-filter-reset",
                 reset_type="button",

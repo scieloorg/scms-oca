@@ -3,7 +3,6 @@ import logging
 from django.conf import settings
 from django.http import JsonResponse
 from django.template.loader import render_to_string
-from django.utils.translation import gettext as _
 from django.views.decorators.http import require_GET
 
 from search_gateway.filter_ui import render_filter_sidebar
@@ -56,8 +55,6 @@ def search_view_list(request):
             applied_filters=applied_filters,
             sidebar_form_id="search-filter-form",
             sidebar_form_method="get",
-            submit_label=_("APLICAR"),
-            reset_label=_("LIMPAR"),
             submit_id="search-filter-submit",
             reset_id="search-filter-reset",
             reset_type="button",
