@@ -1,3 +1,5 @@
+from urllib.parse import parse_qs, urlparse
+
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.db.models import Q
@@ -151,6 +153,24 @@ class SAMenu(TranslatableMixin, ClusterableModel):
     def visible_items(self):
         return self.root_items().filter(is_visible=True)
 
+    def build_render_tree(self, request):
+        """Attach render metadata used by templates."""
+        self.render_items = list(self.visible_items())
+        self._attach_active_state(self.render_items, request)
+        return self
+
+    def _attach_active_state(self, items, request):
+        has_active_item = False
+
+        for item in items:
+            children = list(item.get_children())
+            item.render_children = children
+            child_active = self._attach_active_state(children, request)
+            item.active = item.is_active_for_request(request) or child_active
+            has_active_item = has_active_item or item.active
+
+        return has_active_item
+
     @classmethod
     def for_request(cls, request, handle="analytics"):
         queryset = cls.objects.filter(handle=handle, is_active=True)
@@ -158,11 +178,7 @@ class SAMenu(TranslatableMixin, ClusterableModel):
             return queryset.first()
 
         language_code = getattr(request, "LANGUAGE_CODE", None)
-        locale = (
-            Locale.objects.filter(language_code__iexact=language_code).first()
-            if language_code
-            else None
-        )
+        locale = Locale.objects.filter(language_code__iexact=language_code).first() if language_code else None
 
         if locale is not None:
             return queryset.filter(locale=locale).first() or queryset.first()
@@ -255,7 +271,8 @@ class SAMenuItem(Orderable):
     def resolved_url(self):
         if self.item_type == self.ItemType.PAGE and self.link_page:
             try:
-                return self.link_page.url or self.link_page.get_url()
+                page_url = self.link_page.url
+                return page_url or self.link_page.get_url() or ""
             except Exception:
                 return getattr(self.link_page, "url", "")
 
@@ -267,3 +284,28 @@ class SAMenuItem(Orderable):
             return ""
 
         return anchor if anchor.startswith("#") else f"#{anchor.lstrip('#')}"
+
+    def is_active_for_request(self, request):
+        """Return True when this item points to the current request URL."""
+        if self.item_type == self.ItemType.ANCHOR:
+            return False
+
+        url = self.resolved_url
+        if not request or not url:
+            return False
+
+        parsed = urlparse(url)
+        target_path = parsed.path.rstrip("/") or "/"
+        request_path = request.path.rstrip("/") or "/"
+        if request_path != target_path and not request_path.startswith(f"{target_path}/"):
+            return False
+
+        target_query = parse_qs(parsed.query, keep_blank_values=True)
+        if not target_query:
+            return True
+
+        for key, values in target_query.items():
+            if sorted(request.GET.getlist(key)) != sorted(values):
+                return False
+
+        return True
