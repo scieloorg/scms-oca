@@ -271,7 +271,8 @@ class SAMenuItem(Orderable):
     def resolved_url(self):
         if self.item_type == self.ItemType.PAGE and self.link_page:
             try:
-                return self.link_page.url or self.link_page.get_url()
+                page_url = self.link_page.url
+                return page_url or self.link_page.get_url() or ""
             except Exception:
                 return getattr(self.link_page, "url", "")
 
