@@ -2548,6 +2548,10 @@ msgstr "Hide filters"
 msgid "Mostrar filtros"
 msgstr "Show filters"
 
+#: search_gateway/templates/search_gateway/includes/filter_sidebar.html:25
+msgid "FILTRAR"
+msgstr "Filter"
+
 #: search/templates/search/include/result_items/dataset.html:98
 #: search/templates/search/include/result_items/journals.html:79
 #: search/templates/search/include/result_items/openalex_works.html:118
