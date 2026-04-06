@@ -2460,8 +2460,8 @@ msgid "Mais recentes"
 msgstr "Más recientes"
 
 #: search/templates/search/include/results_list.html:61
-msgid "Menos recentes"
-msgstr "Menos recientes"
+msgid "Mais antigos"
+msgstr "Más antiguos"
 
 #: search/templates/search/include/results_list.html:62
 msgid "Mais citados"

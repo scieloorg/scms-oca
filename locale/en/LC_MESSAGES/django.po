@@ -2489,7 +2489,7 @@ msgid "Mais recentes"
 msgstr "Newest first"
 
 #: search/templates/search/include/results_list.html:61
-msgid "Menos recentes"
+msgid "Mais antigos"
 msgstr "Oldest first"
 
 #: search/templates/search/include/results_list.html:62

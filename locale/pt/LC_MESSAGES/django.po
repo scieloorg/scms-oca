@@ -4402,8 +4402,8 @@ msgstr "Ocultar filtros"
 msgid "Mais recentes"
 msgstr "Mais recentes"
 
-msgid "Menos recentes"
-msgstr "Menos recentes"
+msgid "Mais antigos"
+msgstr "Mais antigos"
 
 msgid "Mais citados"
 msgstr "Mais citados"
