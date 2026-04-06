@@ -7,7 +7,6 @@
     });
 
     if (!rows.length) {
-      window.alert(gettext('Select at least one result to print.'));
       return;
     }
 
@@ -35,7 +34,6 @@
     const doc = frame.contentDocument;
     if (!printWin || !doc) {
       frame.remove();
-      window.alert(gettext('Could not open the print window. Check your browser popup settings.'));
       return;
     }
 

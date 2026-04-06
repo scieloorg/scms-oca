@@ -6,10 +6,9 @@ class SearchPageManager {
     this.searchClauses = config.initialSearchClauses || [];
     this.dataSourceName = config.dataSourceName || '';
     this.apiEndpoint = config.apiEndpoint || '/search/api/search-results-list/';
-    this.searchableFields = config.searchableFields || [];
     this.currentSort = urlParams.get('sort') || 'desc';
     this.currentLimit = urlParams.get('limit') || '25';
-    this.currentPage = parseInt(urlParams.get('page'), 10) || 1;
+    this.currentPage = 1;
     this.currentDisplayMode = window.localStorage.getItem('searchPageDisplayMode') || 'grid';
     this.searchForm = document.getElementById('search-form');
     this.sidebarRoot = document.getElementById('search-sidebar-root');
@@ -242,22 +241,12 @@ class SearchPageManager {
       params.append(key, value);
     });
 
-    const sortSelect = document.getElementById('results-sort-select');
-    const sortValue = sortSelect?.value || this.currentSort;
-    if (sortValue) {
-      params.set('sort', sortValue);
+    if (this.currentSort) {
+      params.set('sort', this.currentSort);
     }
 
-    const activeLimitButton = document.querySelector(
-      '[data-results-limit-option].results-controls__limit-option--active',
-    );
-    const limitValue = activeLimitButton?.textContent?.trim() || this.currentLimit;
-    if (limitValue) {
-      params.set('limit', limitValue);
-    }
-
-    if (this.currentDisplayMode) {
-      params.set('display_mode', this.currentDisplayMode);
+    if (this.currentLimit) {
+      params.set('limit', this.currentLimit);
     }
 
     params.set('page', this.currentPage);
@@ -378,11 +367,11 @@ class SearchPageManager {
       window.localStorage.setItem('searchPageDisplayMode', mode);
       this.applyDisplayMode();
       this.setupResultsUi();
-      this.syncDisplayModeInUrl();
     });
 
     document.addEventListener('click', event => {
-      if (!event.target.closest('[data-results-print-selected]')) return;
+      const printBtn = event.target.closest('[data-results-print-selected]');
+      if (!printBtn || printBtn.disabled) return;
       if (window.SearchResultsPrint && typeof window.SearchResultsPrint.printSelectedCards === 'function') {
         window.SearchResultsPrint.printSelectedCards();
       }
@@ -419,17 +408,6 @@ class SearchPageManager {
     resultsList.classList.toggle('results-list--lean', this.currentDisplayMode === 'list');
   }
 
-  syncDisplayModeInUrl() {
-    const url = new URL(window.location.href);
-    if (this.currentDisplayMode) {
-      url.searchParams.set('display_mode', this.currentDisplayMode);
-    } else {
-      url.searchParams.delete('display_mode');
-    }
-
-    window.history.replaceState({}, '', url.toString());
-  }
-
   setupResultsSelectionDelegation() {
     if (!this.resultsContainer || this.resultsContainer.dataset.searchPageSelectionBound === 'true') {
       return;
@@ -460,36 +438,32 @@ class SearchPageManager {
     const selectPage = this.resultsContainer.querySelector('#results-select-page');
     const selectedCounter = this.resultsContainer.querySelector('#results-selected-counter');
     const itemCheckboxes = this.resultsContainer.querySelectorAll('.result-item__select-input');
-
-    if (!selectPage || !selectedCounter) return;
-
-    const singularLabel = selectedCounter.dataset.labelSingular || gettext('selecionado');
-    const pluralLabel = selectedCounter.dataset.labelPlural || gettext('selecionados');
-
     const selectedCount = Array.from(itemCheckboxes).filter(input => input.checked).length;
-    const label = selectedCount === 1 ? singularLabel : pluralLabel;
-    selectedCounter.textContent = `${selectedCount} ${label}`;
 
-    if (!itemCheckboxes.length) {
-      selectPage.checked = false;
-      selectPage.indeterminate = false;
-      return;
+    if (selectPage && selectedCounter) {
+      const singularLabel = selectedCounter.dataset.labelSingular || gettext('selecionado');
+      const pluralLabel = selectedCounter.dataset.labelPlural || gettext('selecionados');
+      const label = selectedCount === 1 ? singularLabel : pluralLabel;
+      selectedCounter.textContent = `${selectedCount} ${label}`;
+
+      if (!itemCheckboxes.length || selectedCount === 0) {
+        selectPage.checked = false;
+        selectPage.indeterminate = false;
+      } else if (selectedCount === itemCheckboxes.length) {
+        selectPage.checked = true;
+        selectPage.indeterminate = false;
+      } else {
+        selectPage.checked = false;
+        selectPage.indeterminate = true;
+      }
     }
 
-    if (selectedCount === 0) {
-      selectPage.checked = false;
-      selectPage.indeterminate = false;
-      return;
+    const printBtn = this.resultsContainer.querySelector('[data-results-print-selected]');
+    if (printBtn) {
+      const hasSelection = selectedCount > 0;
+      printBtn.disabled = !hasSelection;
+      printBtn.classList.toggle('results-toolbar__icon-btn--print-ready', hasSelection);
     }
-
-    if (selectedCount === itemCheckboxes.length) {
-      selectPage.checked = true;
-      selectPage.indeterminate = false;
-      return;
-    }
-
-    selectPage.checked = false;
-    selectPage.indeterminate = true;
   }
 
 }
