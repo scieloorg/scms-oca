@@ -64,10 +64,7 @@ def search_view_list(request):
             request=request,
         )
         return JsonResponse({
-            "total_results": results_data.get("total_results", 0),
             "results_html": results_html,
-            "applied_filters": _applied_filters_for_json(applied_filters),
-            "selected_filters": selected_filters,
         })
     except Exception as e:
         logging.exception(f"Error getting filters for index {index_name}. {e}")
