@@ -7,7 +7,7 @@
 
 {% get_localized_field doc.source "title" as display_title %}
 {% get_localized_field doc.source "abstract" "text" as display_abstract %}
-{% firstof doc.source.resolved_source_name doc.source.primary_source_title doc.source.primary_location.source.display_name doc.source.primary_location.source.title doc.source.source_name as display_source_name %}
+{% firstof doc.source.primary_source_title doc.source.primary_location.source.display_name doc.source.primary_location.source.title doc.source.source_name as display_source_name %}
 
 <div class="result-card__inner result-card__inner--work">
     <div class="result-card__header result-card__header--work">
@@ -128,10 +128,10 @@
                 <a href="https://doi.org/{{ doc.source.ids.doi|cut:'https://doi.org/'|cut:'http://doi.org/' }}" target="_blank" rel="noopener noreferrer" class="result-card__identifier-link">{{ doc.source.ids.doi|cut:'https://doi.org/'|cut:'http://doi.org/' }}</a>
             </div>
             {% endif %}
-            <span class="result-card__action result-card__action--ghost result-card__action--static">
+            <button type="button" class="result-card__action result-card__action--ghost js-open-citation-modal" data-citation-doc-id="{{ citation_doc_id }}">
                 <span class="result-card__action-icon result-card__action-icon--quotes" aria-hidden="true"></span>
                 {% trans "Citar" %}
-            </span>
+            </button>
         </div>
     </div>
     {% endif %}
