@@ -51,12 +51,12 @@ def harvest_scielo_data_in_endpoint_dataverse(
     start=0,
 ):
     user = User.objects.get(username=username)
-    
+
     harvest_data(user=user, type="dataverse")
     if start is None:
         total_in_db = HarvestedSciELOData.objects.count()
-        start = (total_in_db // per_page) * per_page    
-    
+        start = (total_in_db // per_page) * per_page
+
     harvest_data(user=user, per_page=per_page, start=start, type="dataset")
 
 
@@ -167,7 +167,7 @@ def retry_failed_books(username, user_id=None, db_name="scielobooks_1a", headers
     ).values_list("identifier", flat=True)
     if not failed_books:
         logging.info("Sem books com falha para reprocessar.")
-        return        
+        return
     for identifier in failed_books.iterator():
         harvest_single_book_in_couchdb.delay(
             username=username,
