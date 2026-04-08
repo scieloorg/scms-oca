@@ -48,7 +48,7 @@ def run(*args):
             "Uso: python manage.py runscript index_opensearch --script-args <index_name> [batch_size] [refresh_true_false]"
         )
         return
-    objects = InfrastructureDirectory.objects.all()
+    objects = InfrastructureDirectory.objects.filter(record_status="PUBLISHED")
     index_queryset_to_opensearch(
         objects=objects,
         index_name=index_name,

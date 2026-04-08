@@ -2,31 +2,55 @@ from django.db.models.signals import post_delete, post_save, pre_delete
 from django.dispatch import receiver
 
 from education_directory.models import EducationDirectory
-from education_directory.scripts.index_opensearch import index_education_instance
+from education_directory.scripts.index_opensearch import (
+    delete_education_instance,
+    index_education_instance,
+)
 from event_directory.models import EventDirectory
-from event_directory.scripts.index_opensearch import index_event_instance
+from event_directory.scripts.index_opensearch import (
+    delete_event_instance,
+    index_event_instance,
+)
 from infrastructure_directory.models import InfrastructureDirectory
-from infrastructure_directory.scripts.index_opensearch import index_infrastructure_instance
+from infrastructure_directory.scripts.index_opensearch import (
+    delete_infrastructure_instance,
+    index_infrastructure_instance,
+)
 from policy_directory.models import PolicyDirectory
-from policy_directory.scripts.index_opensearch import index_policy_instance
+from policy_directory.scripts.index_opensearch import (
+    delete_policy_instance,
+    index_policy_instance,
+)
 
 from .models import ThematicArea
 
 
 def _reindex_related_directories(*, policy_ids, event_ids, education_ids, infrastructure_ids):
     for policy in PolicyDirectory.objects.filter(id__in=policy_ids).iterator():
-        index_policy_instance(instance=policy)
+        if policy.record_status == "PUBLISHED":
+            index_policy_instance(instance=policy)
+        else:
+            delete_policy_instance(instance_id=policy.id)
 
     for event in EventDirectory.objects.filter(id__in=event_ids).iterator():
-        index_event_instance(instance=event)
+        if event.record_status == "PUBLISHED":
+            index_event_instance(instance=event)
+        else:
+            delete_event_instance(instance_id=event.id)
 
     for education in EducationDirectory.objects.filter(id__in=education_ids).iterator():
-        index_education_instance(instance=education)
+        if education.record_status == "PUBLISHED":
+            index_education_instance(instance=education)
+        else:
+            delete_education_instance(instance_id=education.id)
 
     for infrastructure in InfrastructureDirectory.objects.filter(
         id__in=infrastructure_ids
     ).iterator():
-        index_infrastructure_instance(instance=infrastructure)
+        if infrastructure.record_status == "PUBLISHED":
+            index_infrastructure_instance(instance=infrastructure)
+        else:
+            delete_infrastructure_instance(instance_id=infrastructure.id)
 
 
 @receiver(post_save, sender=ThematicArea)
