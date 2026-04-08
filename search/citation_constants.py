@@ -5,4 +5,7 @@ CITATION_EXPORT_FORMATS = {
     "ris": _("Reference Manager"),
 }
 
-CITATION_EXPORT_MAX_DOCUMENTS = 100
+CITATION_PRESET_STYLES = {
+    "vancouver": _("Vancouver"),
+    "apa": _("American Psychological Association"),
+}
