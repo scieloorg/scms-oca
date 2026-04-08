@@ -1,32 +1,51 @@
-"""
-Map OpenSearch document ``source`` dicts (OpenAlex-shaped and similar) to CSL-JSON items.
-"""
-
 from django.conf import settings
+
 from .templatetags.custom_filters import _normalize_lang_code
 
+_DOI_PREFIXES = (
+    "https://doi.org/",
+    "http://doi.org/",
+    "https://dx.doi.org/",
+    "http://dx.doi.org/",
+)
 
-def _get(d, *keys, default=None):
-    cur = d
-    for k in keys:
-        if not isinstance(cur, dict):
+_WORK_TYPE_MAP = {
+    "article": "article-journal",
+    "book": "book",
+    "book-chapter": "chapter",
+    "chapter": "chapter",
+    "dataset": "dataset",
+    "preprint": "article",
+    "review": "article-journal",
+    "editorial": "article-journal",
+    "letter": "article-journal",
+    "paratext": "article-journal",
+    "other": "article-journal",
+    "journal": "article-journal",
+}
+
+_CONTAINER_TITLE_TYPES = frozenset({"article-journal", "article", "chapter", "review"})
+_PUBLISHER_TYPES = frozenset({"book", "chapter", "dataset"})
+
+
+def _deep_get(data, *keys, default=None):
+    """Safely traverse nested dicts: ``_deep_get(d, "a", "b")`` → ``d["a"]["b"]``."""
+    for key in keys:
+        if not isinstance(data, dict):
             return default
-        cur = cur.get(k)
-        if cur is None:
+        data = data.get(key)
+        if data is None:
             return default
-    return cur if cur is not None else default
+    return data
+
+def _str_or_none(value):
+    if value in (None, ""):
+        return None
+    return str(value).strip() or None
 
 
-def _split_matches_by_lang(
-    items,
-    field_name,
-    lang_code,
-    *,
-    value_key=None,
-):
-    """
-        Separa valores de listas *_with_lang em “match exato” vs “mesmo idioma base” (ex. pt vs pt-BR).
-    """
+def _split_matches_by_lang(items, field_name, lang_code, *, value_key=None):
+    """Split ``*_with_lang`` entries into exact-match vs base-language-match lists."""
     if not isinstance(items, list):
         return [], []
 
@@ -34,9 +53,8 @@ def _split_matches_by_lang(
     if not requested:
         return [], []
 
-    key = value_key if value_key else field_name
-    exact_matches = []
-    base_matches = []
+    key = value_key or field_name
+    exact, base = [], []
 
     for item in items:
         if not isinstance(item, dict):
@@ -45,262 +63,192 @@ def _split_matches_by_lang(
         if value in (None, ""):
             continue
 
-        item_lang = item.get("language")
-        item_lang_norm, item_lang_base = _normalize_lang_code(
-            str(item_lang) if item_lang is not None else ""
-        )
-        if not item_lang_norm:
+        item_norm, item_base = _normalize_lang_code(str(item.get("language") or ""))
+        if not item_norm:
             continue
 
-        if item_lang_norm == requested:
-            exact_matches.append(value)
-        elif item_lang_base == requested_base:
-            base_matches.append(value)
+        if item_norm == requested:
+            exact.append(value)
+        elif item_base == requested_base:
+            base.append(value)
 
-    return exact_matches, base_matches
+    return exact, base
 
 
-def _pick_localized_scalar(
-    source,
-    field_name,
-    language_code,
-    *,
-    value_key=None,
-):
+def _pick_localized(source, field_name, lang_code, *, value_key=None):
+    """Pick a localised scalar: try ``<field>_with_lang`` first, fall back to ``<field>``."""
     items = source.get(f"{field_name}_with_lang")
-    exact, base = _split_matches_by_lang(
-        items, field_name, language_code, value_key=value_key
+    exact, base = _split_matches_by_lang(items, field_name, lang_code, value_key=value_key)
+    return _str_or_none(exact[0] if exact else base[0] if base else source.get(field_name))
+
+
+def _resolve_title(source, lang):
+    return (
+        _pick_localized(source, "title", lang, value_key="text")
+        or _pick_localized(source, "title", lang)
+        or "Untitled"
     )
-    if exact:
-        return str(exact[0])
-    if base:
-        return str(base[0])
-    base_value = source.get(field_name)
-    if base_value in (None, ""):
-        return None
-    return str(base_value)
 
 
 def normalize_doi(doi):
-    if doi is None:
-        return None
-    s = str(doi).strip()
+    s = _str_or_none(doi)
     if not s:
         return None
-    for prefix in (
-        "https://doi.org/",
-        "http://doi.org/",
-        "https://dx.doi.org/",
-        "http://dx.doi.org/",
-    ):
+    for prefix in _DOI_PREFIXES:
         if s.lower().startswith(prefix.lower()):
-            return s[len(prefix) :]
+            return s[len(prefix):]
     return s
 
 
-def _container_title(source):
-    for key in ("resolved_source_name", "primary_source_title"):
-        v = source.get(key)
-        if v:
-            return str(v)
-    pl = source.get("primary_location") or {}
-    if isinstance(pl, dict):
-        src = pl.get("source") or {}
-        if isinstance(src, dict):
-            for key in ("display_name", "title"):
-                v = src.get(key)
-                if v:
-                    return str(v)
-    v = source.get("source_name")
-    return str(v) if v else ""
+def _resolve_csl_type(type):
+    if not type:
+        return "article-journal"
+    #normalized type
+    key = str(type).strip().lower().replace(" ", "-")
+    return _WORK_TYPE_MAP.get(key, "article-journal")
 
 
-def _content_url(source):
-    u = source.get("content_url")
-    if isinstance(u, list) and u:
-        u = u[0]
-    if isinstance(u, str) and u.strip():
-        return u.strip()
-    su = _get(source, "sources", "url")
-    if isinstance(su, str) and su.strip():
-        return su.strip()
-    return None
-
-
-def _pages(source):
-    bib = source.get("biblio") or {}
-    if not isinstance(bib, dict):
-        return ""
-    if bib.get("pages"):
-        return str(bib["pages"])
-    fp, lp = bib.get("first_page"), bib.get("last_page")
-    if fp is not None or lp is not None:
-        a, b = fp or "", lp or ""
-        if a and b:
-            return f"{a}-{b}"
-        return str(a or b)
-    return ""
-
-
-def _issued_date_parts(source):
-    y = source.get("publication_year")
-    if y is None or y == "":
+def _resolve_issued(source):
+    year = source.get("publication_year")
+    if year in (None, ""):
         return None
     try:
-        yi = int(str(y)[:4])
-        return [[yi]]
+        return {"date-parts": [[int(str(year)[:4])]]}
     except (TypeError, ValueError):
         return None
 
 
-def _map_work_type(raw):
-    if not raw:
-        return "article-journal"
-    t = str(raw).strip().lower().replace(" ", "-")
-    mapping = {
-        "article": "article-journal",
-        "book": "book",
-        "book-chapter": "chapter",
-        "chapter": "chapter",
-        "dataset": "dataset",
-        "preprint": "article",
-        "review": "article-journal",
-        "editorial": "article-journal",
-        "letter": "article-journal",
-        "paratext": "article-journal",
-        "other": "article-journal",
-        "journal": "article-journal",
-    }
-    return mapping.get(t, "article-journal")
+def _resolve_container_title(source):
+    sources_list = source.get("sources")
+    if isinstance(sources_list, list) and sources_list:
+        title = _deep_get(sources_list[0], "title")
+        if title:
+            return str(title)
+    return ""
 
 
-def _author_from_authorship(auth):
-    if not isinstance(auth, dict):
+def _resolve_url(source):
+    url = source.get("content_url")
+    if isinstance(url, list) and url:
+        url = url[0]
+    return _str_or_none(url) or _str_or_none(_deep_get(source, "sources", "url"))
+
+
+def _resolve_pages(source):
+    bib = source.get("biblio") or {}
+    if not isinstance(bib, dict):
         return None
-    author = auth.get("author")
+
+    if bib.get("pages"):
+        return str(bib["pages"])
+
+    first, last = _str_or_none(bib.get("first_page")), _str_or_none(bib.get("last_page"))
+    if first and last:
+        return f"{first}-{last}"
+    return first or last
+
+
+def _resolve_biblio(source):
+    bib = source.get("biblio") or {}
+    if not isinstance(bib, dict):
+        return None, None
+    return _str_or_none(bib.get("volume")), _str_or_none(bib.get("issue"))
+
+
+def _parse_display_name(display_name):
+    name = str(display_name).strip()
+    if not name:
+        return None
+
+    if "," in name:
+        family, _, given = name.partition(",")
+        return {"family": family.strip(), "given": given.strip() or None}
+
+    parts = name.split()
+    if len(parts) >= 2:
+        return {"family": parts[-1], "given": " ".join(parts[:-1])}
+
+    return {"literal": name}
+
+
+def _parse_author(authorship):
+    if not isinstance(authorship, dict):
+        return None
+
+    author = authorship.get("author")
     if isinstance(author, dict):
         display = author.get("display_name")
         if display:
-            display = str(display).strip()
-            if "," in display:
-                fam, _, given = display.partition(",")
-                return {
-                    "family": fam.strip(),
-                    "given": given.strip() or None,
-                }
-            parts = display.split()
-            if len(parts) >= 2:
-                return {
-                    "family": parts[-1],
-                    "given": " ".join(parts[:-1]),
-                }
-            return {"literal": display}
-        family = author.get("family")
-        given = author.get("given")
+            return _parse_display_name(display)
+
+        family, given = _str_or_none(author.get("family")), _str_or_none(author.get("given"))
         if family or given:
-            out = {}
+            result = {}
             if family:
-                out["family"] = str(family)
+                result["family"] = family
             if given:
-                out["given"] = str(given)
-            return out or None
-    name = auth.get("name")
-    if name and str(name).strip():
-        return {"literal": str(name).strip()}
-    return None
+                result["given"] = given
+            return result
+
+    literal = _str_or_none(authorship.get("name"))
+    return {"literal": literal} if literal else None
 
 
 def _collect_authors(source):
-    authors = []
-    for auth in source.get("authorships") or []:
-        if isinstance(auth, dict):
-            item = _author_from_authorship(auth)
-            if item:
-                authors.append(item)
-    return authors
+    return [
+        author
+        for auth in (source.get("authorships") or [])
+        if (author := _parse_author(auth)) is not None
+    ]
 
 
-def document_source_to_csl_item(
-    source,
-    *,
-    doc_id,
-    language_code=None,
-):
+def _add_if(item, key, value):
+    """Set ``item[key] = value`` only when value is truthy."""
+    if value:
+        item[key] = value
+
+
+def document_source_to_csl_item(source, *, doc_id, language_code=None):
     """Build one CSL-JSON object from an indexed document ``_source`` dict."""
     if not isinstance(source, dict):
-        source = dict()
+        source = {}
 
     lang = language_code or getattr(settings, "LANGUAGE_CODE", None) or "en"
-
-    title = _pick_localized_scalar(source, "title", lang, value_key="text")
-    if not title:
-        title = _pick_localized_scalar(source, "title", lang)
-    if not title:
-        title = "Untitled"
-
-    issued = _issued_date_parts(source)
-    ctype = _map_work_type(source.get("type"))
+    csl_type = _resolve_csl_type(source.get("type"))
+    volume, issue = _resolve_biblio(source)
 
     item = {
         "id": str(doc_id),
-        "type": ctype,
-        "title": title,
+        "type": csl_type,
+        "title": _resolve_title(source, lang),
     }
 
-    if issued:
-        item["issued"] = {"date-parts": issued}
+    _add_if(item, "issued", _resolve_issued(source))
+    _add_if(item, "author", _collect_authors(source))
+    _add_if(item, "DOI", normalize_doi(_deep_get(source, "ids", "doi")))
+    url = (f"https://doi.org/{item['DOI']}" if item.get("DOI") else None) or _resolve_url(source)
 
-    authors = _collect_authors(source)
-    if authors:
-        item["author"] = authors
+    _add_if(item, "URL", url)
 
-    doi = normalize_doi(_get(source, "ids", "doi"))
-    if doi:
-        item["DOI"] = doi
+    if csl_type in _CONTAINER_TITLE_TYPES:
+        _add_if(item, "container-title", _resolve_container_title(source))
 
-    url = _content_url(source)
-    if not url and doi:
-        url = f"https://doi.org/{doi}"
-    if url:
-        item["URL"] = url
+    _add_if(item, "volume", volume)
+    _add_if(item, "issue", issue)
+    _add_if(item, "page", _resolve_pages(source))
 
-    ct = _container_title(source)
-    if ct and ctype in (
-        "article-journal",
-        "article",
-        "chapter",
-        "review",
-    ):
-        item["container-title"] = ct
+    if csl_type in _PUBLISHER_TYPES:
+        _add_if(item, "publisher", _str_or_none(
+            _deep_get(source, "primary_location", "source", "host_organization_name"),
+        ))
 
-    bib = source.get("biblio") or {}
-    if isinstance(bib, dict):
-        if bib.get("volume"):
-            item["volume"] = str(bib["volume"])
-        if bib.get("issue"):
-            item["issue"] = str(bib["issue"])
-
-    pages = _pages(source)
-    if pages:
-        item["page"] = pages
-
-    publisher = _get(source, "primary_location", "source", "host_organization_name")
-    if publisher and ctype in ("book", "chapter", "dataset"):
-        item["publisher"] = str(publisher)
-
-    lang_code = source.get("language")
-    if isinstance(lang_code, str) and lang_code.strip():
-        item["language"] = lang_code.strip()
+    _add_if(item, "language", _str_or_none(source.get("language")))
 
     return item
 
 
-def documents_payload_to_csl_json(
-    documents,
-    *,
-    language_code=None,
-):
-    out = []
+def documents_payload_to_csl_json(documents, *, language_code=None):
+    items = []
     for entry in documents:
         if not isinstance(entry, dict):
             continue
@@ -308,11 +256,5 @@ def documents_payload_to_csl_json(
         source = entry.get("source")
         if doc_id is None or not isinstance(source, dict):
             continue
-        out.append(
-            document_source_to_csl_item(
-                source,
-                doc_id=str(doc_id),
-                language_code=language_code,
-            )
-        )
-    return out
+        items.append(document_source_to_csl_item(source, doc_id=str(doc_id), language_code=language_code))
+    return items
