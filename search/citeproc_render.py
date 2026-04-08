@@ -1,7 +1,8 @@
-from __future__ import annotations
-
+import functools
+import re
 from pathlib import Path
 
+import citeproc_styles
 from citeproc import (
     Citation,
     CitationItem,
@@ -11,24 +12,50 @@ from citeproc import (
 )
 from citeproc.source.json import CiteProcJSON
 
-import citeproc_styles
+
+def _styles_dir():
+    return Path(citeproc_styles.__file__).resolve().parent / "styles"
 
 
-def get_style_filepath(style: str) -> str:
-    base = Path(citeproc_styles.__file__).resolve().parent / "styles"
-    path = base / f"{style}.csl"
+def get_style_filepath(style):
+    path = _styles_dir() / f"{style}.csl"
     if not path.is_file():
         raise FileNotFoundError(f"CSL style not found: {style} ({path})")
     return str(path)
 
 
+def _csl_info_title(path):
+    try:
+        chunk = path.read_text(encoding="utf-8", errors="ignore")[:98304]
+    except OSError:
+        return None
+    info = re.search(r"<info>\s*([\s\S]*?)</info>", chunk, re.IGNORECASE)
+    block = info.group(1) if info else chunk
+    title = re.search(r"<title>([^<]+)</title>", block)
+    return title.group(1).strip() if title else None
+
+
+@functools.lru_cache(maxsize=1)
+def list_installed_csl_styles():
+    base = _styles_dir()
+    if not base.is_dir():
+        return []
+    rows = []
+    for path in sorted(base.glob("*.csl"), key=lambda p: p.stem.lower()):
+        stem = path.stem
+        label = _csl_info_title(path) or stem.replace("-", " ").title()
+        rows.append({"id": stem, "label": label})
+    rows.sort(key=lambda r: (r["label"].lower(), r["id"]))
+    return rows
+
+
 def render_citation(
-    csl_json: list[dict],
+    csl_json,
     *,
-    style: str = "apa",
+    style="apa",
     fmt=formatter.plain,
-    validate: bool = False,
-) -> list[str]:
+    validate=False,
+):
     """
     Render bibliography strings for each CSL-JSON item using citeproc-py.
 
@@ -56,6 +83,6 @@ def render_citation(
     return [str(item) for item in bibliography.bibliography()]
 
 
-def render_bibtex(csl_json: list[dict]) -> str:
+def render_bibtex(csl_json):
     parts = render_citation(csl_json, style="bibtex", fmt=formatter.plain, validate=False)
     return "\n\n".join(p.strip() for p in parts if p and str(p).strip())
