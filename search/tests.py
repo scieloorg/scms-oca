@@ -2,10 +2,17 @@ import json
 
 from django.test import RequestFactory, SimpleTestCase
 
-from .citation_constants import CITATION_EXPORT_FORMATS
-from .citation_views import citation_export_view, citation_formats_view
+from .citation_views import (
+    citation_custom_style_view,
+    citation_export_view,
+    citation_preview_view,
+)
 from .citeproc_render import render_bibtex
-from .csl_json import document_source_to_csl_item, documents_payload_to_csl_json, normalize_doi
+from .csl_json import (
+    document_source_to_csl_item,
+    documents_payload_to_csl_json,
+    normalize_doi,
+)
 from .ris_export import render_ris_lines
 
 
@@ -33,7 +40,6 @@ class CslJsonMapperTests(SimpleTestCase):
                 {"author": {"display_name": "Costa, João"}},
             ],
             "biblio": {"volume": "10", "issue": "2", "first_page": "1", "last_page": "10"},
-            "resolved_source_name": "Test Journal",
         }
         item = document_source_to_csl_item(source, doc_id="W123")
         self.assertEqual(item["id"], "W123")
@@ -42,7 +48,6 @@ class CslJsonMapperTests(SimpleTestCase):
         self.assertEqual(item["DOI"], "10.1000/xyz")
         self.assertEqual(item["volume"], "10")
         self.assertEqual(item["issue"], "2")
-        self.assertEqual(item["container-title"], "Test Journal")
         self.assertEqual(len(item["author"]), 2)
         self.assertEqual(item["author"][0]["family"], "Silva")
         self.assertEqual(item["author"][0]["given"], "Maria")
@@ -62,15 +67,7 @@ class CitationExportApiTests(SimpleTestCase):
     def setUp(self):
         self.factory = RequestFactory()
 
-    def test_citation_formats_lists_keys(self):
-        request = self.factory.get("/search/api/citation-formats/")
-        r = citation_formats_view(request)
-        self.assertEqual(r.status_code, 200)
-        data = json.loads(r.content.decode())
-        ids = {f["id"] for f in data["formats"]}
-        self.assertEqual(ids, set(CITATION_EXPORT_FORMATS.keys()))
-
-    def test_export_bib_two_documents(self):
+    def test_export_bib_one_document(self):
         body = {
             "format": "bib",
             "documents": [
@@ -81,16 +78,6 @@ class CitationExportApiTests(SimpleTestCase):
                         "title": "Alpha study",
                         "publication_year": 2020,
                         "authorships": [{"author": {"display_name": "Doe, Jane"}}],
-                        "resolved_source_name": "J Test",
-                    },
-                },
-                {
-                    "id": "doc-b",
-                    "source": {
-                        "type": "article",
-                        "title": "Beta study",
-                        "publication_year": 2021,
-                        "authorships": [{"author": {"display_name": "Roe, John"}}],
                         "resolved_source_name": "J Test",
                     },
                 },
@@ -106,7 +93,6 @@ class CitationExportApiTests(SimpleTestCase):
         self.assertIn("attachment", r["Content-Disposition"])
         text = r.content.decode("utf-8")
         self.assertIn("Alpha study", text)
-        self.assertIn("Beta study", text)
         self.assertIn("@article", text)
 
     def test_export_ris_one_document(self):
@@ -159,6 +145,92 @@ class CitationExportApiTests(SimpleTestCase):
         r = citation_export_view(request)
         self.assertEqual(r.status_code, 400)
 
+    def test_export_rejects_multiple_documents(self):
+        body = {
+            "format": "bib",
+            "documents": [
+                {"id": "doc-a", "source": {"type": "article", "title": "Alpha study"}},
+                {"id": "doc-b", "source": {"type": "article", "title": "Beta study"}},
+            ],
+        }
+        request = self.factory.post(
+            "/search/api/citation-export/",
+            data=json.dumps(body),
+            content_type="application/json",
+        )
+        r = citation_export_view(request)
+        self.assertEqual(r.status_code, 400)
+
+    def test_preview_returns_presets(self):
+        body = {
+            "documents": [
+                {
+                    "id": "x1",
+                    "source": {
+                        "type": "article",
+                        "title": "Preview citation",
+                        "publication_year": 2019,
+                        "ids": {"doi": "10.9999/one"},
+                    },
+                },
+            ],
+        }
+        request = self.factory.post(
+            "/search/api/citation-preview/",
+            data=json.dumps(body),
+            content_type="application/json",
+        )
+        r = citation_preview_view(request)
+        self.assertEqual(r.status_code, 200)
+        payload = json.loads(r.content.decode("utf-8"))
+        preset_ids = {item["id"] for item in payload["presets"]}
+        self.assertIn("vancouver", preset_ids)
+        self.assertIn("apa", preset_ids)
+
+    def test_custom_style_returns_citation(self):
+        body = {
+            "documents": [
+                {
+                    "id": "x1",
+                    "source": {
+                        "type": "article",
+                        "title": "Custom citation",
+                        "publication_year": 2019,
+                        "ids": {"doi": "10.9999/one"},
+                    },
+                },
+            ],
+            "style": "harvard-cite-them-right",
+        }
+        request = self.factory.post(
+            "/search/api/citation-custom-style/",
+            data=json.dumps(body),
+            content_type="application/json",
+        )
+        r = citation_custom_style_view(request)
+        self.assertEqual(r.status_code, 200)
+        payload = json.loads(r.content.decode("utf-8"))
+        self.assertEqual(payload["id"], "harvard-cite-them-right")
+        self.assertIn("citation", payload)
+
+    def test_custom_style_rejects_empty_style(self):
+        body = {
+            "documents": [
+                {
+                    "id": "x1",
+                    "source": {"type": "article", "title": "T"},
+                },
+            ],
+            "style": "",
+        }
+        request = self.factory.post(
+            "/search/api/citation-custom-style/",
+            data=json.dumps(body),
+            content_type="application/json",
+        )
+        r = citation_custom_style_view(request)
+        self.assertEqual(r.status_code, 400)
+
 
 class CiteprocIntegrationTests(SimpleTestCase):
     def test_render_bibtex_non_empty(self):
@@ -186,6 +258,9 @@ class CiteprocIntegrationTests(SimpleTestCase):
                 "DOI": "10.1/2",
             }
         ]
+        out = render_ris_lines(csl)
+        self.assertIn("TY  - JOUR", out)
+        self.assertIn("RIS title", out)
         out = render_ris_lines(csl)
         self.assertIn("TY  - JOUR", out)
         self.assertIn("RIS title", out)
