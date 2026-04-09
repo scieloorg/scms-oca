@@ -8,9 +8,16 @@ from infrastructure_directory.scripts.index_opensearch import (
 )
 
 
+def _sync_infrastructure_instance(instance):
+    if instance.record_status == "PUBLISHED":
+        index_infrastructure_instance(instance=instance)
+        return
+    delete_infrastructure_instance(instance_id=instance.id)
+
+
 @receiver(post_save, sender=InfrastructureDirectory)
 def sync_infrastructure_on_save(sender, instance, **kwargs):
-    index_infrastructure_instance(instance=instance)
+    _sync_infrastructure_instance(instance)
 
 
 @receiver(post_delete, sender=InfrastructureDirectory)
@@ -21,10 +28,10 @@ def delete_infrastructure_on_delete(sender, instance, **kwargs):
 @receiver(m2m_changed, sender=InfrastructureDirectory.institutions.through)
 def sync_infrastructure_on_institutions_changed(sender, instance, action, **kwargs):
     if action in ("post_add", "post_remove", "post_clear"):
-        index_infrastructure_instance(instance=instance)
+        _sync_infrastructure_instance(instance)
 
 
 @receiver(m2m_changed, sender=InfrastructureDirectory.thematic_areas.through)
 def sync_infrastructure_on_thematic_areas_changed(sender, instance, action, **kwargs):
     if action in ("post_add", "post_remove", "post_clear"):
-        index_infrastructure_instance(instance=instance)
+        _sync_infrastructure_instance(instance)

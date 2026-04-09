@@ -1,6 +1,7 @@
 import logging
 
 from django.conf import settings
+
 from core.scripts.opensearch_directory_indexer import (
     build_common_directory_doc,
     delete_directory_instance,
@@ -10,8 +11,6 @@ from core.scripts.opensearch_directory_indexer import (
     to_iso,
 )
 from education_directory.models import EducationDirectory
-from search_gateway.client import get_opensearch_client
-
 
 logger = logging.getLogger(__name__)
 
