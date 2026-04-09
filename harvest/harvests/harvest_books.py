@@ -58,11 +58,12 @@ def fetch_doc(base_url, db_name, doc_id, headers, user):
 
 
 def fetch_changes_page(base_url, db_name, since, limit, headers):
+    params = {"since": since}
+    if limit is not None:
+        params["limit"] = limit
     url = _build_url(
         f"{base_url}/{db_name}/_changes",
-        {
-            "since": since,
-        },
+        params,
     )
     payload = fetch_data(url, headers=headers, json=True, timeout=60, verify=False)
     return payload if isinstance(payload, dict) else {}
@@ -75,8 +76,14 @@ def _extract_changes(payload):
 
 
 def _extract_last_seq(payload):
-    if isinstance(payload, dict):
-        return payload.get("seq")
+    """Último seq da página: last_seq/seq no JSON ou seq do último item de results."""
+    if not isinstance(payload, dict):
+        return None
+    results = payload.get("results")
+    if isinstance(results, list) and results:
+        last = results[-1]
+        if isinstance(last, dict):
+            return last.get("last_seq")
     return None
 
 
@@ -247,7 +254,6 @@ def harvest_books(
             payload=change,
             headers=headers,
             user=user,
-            last_seq=change.get("seq"),
         )
 
 
@@ -257,10 +263,10 @@ def harvest_single_book(
     payload,
     headers,
     user,
-    last_seq=None,
 ):
 
     doc_id = payload.get("id")
+    last_seq = payload.get("seq")
     if not doc_id:
         return
     if payload.get("deleted"):

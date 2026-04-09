@@ -3,7 +3,7 @@ import logging
 from django.conf import settings
 from django.utils.translation import gettext as _
 from opensearchpy.helpers import bulk
-
+import opensearchpy
 from search_gateway.client import get_opensearch_client
 
 logger = logging.getLogger(__name__)

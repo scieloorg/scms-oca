@@ -4776,7 +4776,7 @@ msgid "Mais recentes"
 msgstr "Mais recentes"
 
 msgid "Mais antigos"
-msgstr "Mais antigos"
+msgstr ""
 
 msgid "Mais citados"
 msgstr "Mais citados"

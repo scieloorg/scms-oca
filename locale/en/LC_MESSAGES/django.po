@@ -2468,6 +2468,102 @@ msgstr "Number of results"
 msgid "Filters"
 msgstr "Filters"
 
+#: search_gateway/templates/search_gateway/includes/filter_sidebar.html:10
+msgid "Refinar busca"
+msgstr "Refine search"
+
+#: search/templates/search/include/results_list.html:8
+msgid "Mostrando"
+msgstr "Showing"
+
+#: search/templates/search/include/results_list.html:53
+msgid "Selecionar página"
+msgstr "Select page"
+
+#: search/templates/search/include/results_list.html:57
+msgid "Ordenar por:"
+msgstr "Sort by:"
+
+#: search/templates/search/include/results_list.html:60
+msgid "Mais recentes"
+msgstr "Newest first"
+
+#: search/templates/search/include/results_list.html:61
+msgid "Mais antigos"
+msgstr "Oldest first"
+
+#: search/templates/search/include/results_list.html:62
+msgid "Mais citados"
+msgstr "Most cited"
+
+#: search/templates/search/include/results_list.html:70
+msgid "Exibir:"
+msgstr "Show:"
+
+#: search/templates/search/include/results_list.html:82
+msgid "selecionado"
+msgstr "selected"
+
+#: search/templates/search/include/results_list.html:83
+#: search/templates/search/include/results_list.html:85
+msgid "selecionados"
+msgstr "selected"
+
+#: search/templates/search/include/results_list.html:22
+#: search/templates/search/include/result_items/openalex_works.html:133
+msgid "Citar"
+msgstr "Cite"
+
+#: search/templates/search/search_page.html:51
+msgid "Adicionar campo"
+msgstr "Add field"
+
+#: search/templates/search/search_page.html:53
+msgid "Limpar"
+msgstr "Clear"
+
+#: search/templates/search/search_page.html:39
+#: search/templates/search/search_page.html:73
+msgid "Termos de pesquisa..."
+msgstr "Search terms..."
+
+#: search/choices.py:124
+msgid "Todos os campos"
+msgstr "All fields"
+
+#: search/templates/search/search_page.html:10
+msgid "Busca avançada"
+msgstr "Advanced search"
+
+#: search/templates/search/search_page.html:56
+msgid "Pesquisar"
+msgstr "Search"
+
+#: search/templates/search/search_page.html:18
+#: search/templates/search/search_page.html:23
+msgid "Ocultar filtros"
+msgstr "Hide filters"
+
+#: search/templates/search/search_page.html:17
+msgid "Mostrar filtros"
+msgstr "Show filters"
+
+#: search_gateway/templates/search_gateway/includes/filter_sidebar.html:25
+msgid "FILTRAR"
+msgstr "Filter"
+
+#: search/templates/search/include/result_items/dataset.html:98
+#: search/templates/search/include/result_items/journals.html:79
+#: search/templates/search/include/result_items/openalex_works.html:118
+#: search/templates/search/include/result_items/preprint.html:102
+#: search/templates/search/include/result_items/social_production.html:112
+msgid "Acessar"
+msgstr "Access"
+
+#: observation/models.py:171 search/models.py:160 search/views.py:59
+msgid "Aplicar"
+msgstr "Apply"
+
 #: indicator/templates/filters/sci_prod_journal.html:64
 #, fuzzy
 #| msgid "Journal title"
