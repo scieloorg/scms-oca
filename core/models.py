@@ -7,7 +7,7 @@ from django.utils.translation import gettext_lazy as _
 from modelcluster.fields import ParentalKey
 from modelcluster.models import ClusterableModel
 from wagtail.admin.panels import FieldPanel, InlinePanel
-from wagtail.models import Locale, Orderable, Page, TranslatableMixin
+from wagtail.models import Orderable, Page, TranslatableMixin
 
 from core.utils import utils
 
@@ -172,14 +172,8 @@ class SAMenu(TranslatableMixin, ClusterableModel):
         return has_active_item
 
     @classmethod
-    def for_request(cls, request, handle="analytics"):
+    def for_locale(cls, locale, handle="analytics"):
         queryset = cls.objects.filter(handle=handle, is_active=True)
-        if request is None:
-            return queryset.first()
-
-        language_code = getattr(request, "LANGUAGE_CODE", None)
-        locale = Locale.objects.filter(language_code__iexact=language_code).first() if language_code else None
-
         if locale is not None:
             return queryset.filter(locale=locale).first() or queryset.first()
 

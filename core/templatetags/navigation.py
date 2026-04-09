@@ -17,7 +17,8 @@ def _get_request_locale(request):
 
 
 def _get_rendered_menu(request, handle="analytics"):
-    menu = SAMenu.for_request(request, handle=handle)
+    locale = _get_request_locale(request)
+    menu = SAMenu.for_locale(locale, handle=handle)
     return menu.build_render_tree(request) if menu else None
 
 
