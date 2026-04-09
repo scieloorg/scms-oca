@@ -3,7 +3,7 @@ import logging
 from django.conf import settings
 from django.utils.translation import gettext as _
 from opensearchpy.helpers import bulk
-
+import opensearchpy
 from search_gateway.client import get_opensearch_client
 
 logger = logging.getLogger(__name__)
@@ -226,9 +226,12 @@ def index_directory_instance(
         return
 
     if getattr(instance, "record_status", None) != "PUBLISHED":
-        delete_directory_instance(
-            instance_id=instance.id, index_name=index_name, refresh=refresh
-        )
+        try:
+            delete_directory_instance(
+                instance_id=instance.id, index_name=index_name, refresh=refresh
+            )
+        except opensearchpy.exceptions.NotFoundError:
+            logging.warning(f"{instance.__class__.__name__} {instance.id} in opensearch not found")
         return
 
     try:
