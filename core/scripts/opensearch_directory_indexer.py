@@ -225,15 +225,6 @@ def index_directory_instance(
         logger.warning(f"Index name nao configurado para {instance.__class__.__name__}.")
         return
 
-    if getattr(instance, "record_status", None) != "PUBLISHED":
-        try:
-            delete_directory_instance(
-                instance_id=instance.id, index_name=index_name, refresh=refresh
-            )
-        except opensearchpy.exceptions.NotFoundError:
-            logging.warning(f"{instance.__class__.__name__} {instance.id} in opensearch not found")
-        return
-
     try:
         doc = build_doc_fn(instance)
         client.index(index=index_name, id=instance.id, body=doc, refresh=refresh)
