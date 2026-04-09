@@ -1,6 +1,4 @@
 {% load i18n %}
-{% trans "LIMPAR" as default_reset_label %}
-{% trans "FILTRAR" as default_submit_label %}
 
 <aside
   class="sg-filter-sidebar sg-filter-sidebar--{{ form_key|default:'default' }}"
@@ -16,7 +14,7 @@
           class="sg-filter-sidebar__btn sg-filter-sidebar__btn--clear"
           {% if sidebar_form_id %}data-form-id="{{ sidebar_form_id }}"{% endif %}
         >
-          <span class="sg-filter-sidebar__btn-label">{{ reset_label|default:default_reset_label }}</span>
+          <span class="sg-filter-sidebar__btn-label">{% trans "LIMPAR" %}</span>
         </button>
         <button
           id="{{ submit_id|default:'search-gateway-filter-submit' }}"
@@ -24,7 +22,7 @@
           {% if sidebar_form_id %}form="{{ sidebar_form_id }}"{% endif %}
           class="sg-filter-sidebar__btn sg-filter-sidebar__btn--submit"
         >
-          <span class="sg-filter-sidebar__btn-label">{{ submit_label|default:default_submit_label }}</span>
+          <span class="sg-filter-sidebar__btn-label">{% trans "FILTRAR" %}</span>
         </button>
       </div>
     </div>
