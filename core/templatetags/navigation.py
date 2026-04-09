@@ -11,6 +11,11 @@ def _get_locale(language_code):
     return Locale.objects.filter(language_code__iexact=language_code).first()
 
 
+def _get_request_locale(request):
+    language_code = getattr(request, "LANGUAGE_CODE", None) if request else None
+    return _get_locale(language_code)
+
+
 def _get_rendered_menu(request, handle="analytics"):
     menu = SAMenu.for_request(request, handle=handle)
     return menu.build_render_tree(request) if menu else None
