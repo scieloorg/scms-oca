@@ -5,7 +5,6 @@ from django.http import JsonResponse
 from django.template.loader import render_to_string
 from django.views.decorators.http import require_GET
 
-from search_gateway.filter_ui import render_filter_sidebar
 from search_gateway.request_filters import (
     extract_applied_filters,
     normalize_option_filters,
@@ -13,6 +12,22 @@ from search_gateway.request_filters import (
 from search_gateway.service import SearchGatewayService
 
 from .models import SearchPage
+
+
+def _applied_filters_for_json(applied_filters):
+    """Expose server-side applied filters (incl. operators) for the client without re-rendering the sidebar."""
+    result = {}
+    for key, value in (applied_filters or {}).items():
+        if str(key).startswith("__"):
+            continue
+        if isinstance(value, (list, tuple)):
+            cleaned = [str(item) for item in value if item not in (None, "")]
+            if not cleaned:
+                continue
+            result[key] = cleaned if len(cleaned) > 1 else cleaned[0]
+        elif value not in (None, ""):
+            result[key] = str(value)
+    return result
 
 
 @require_GET
@@ -48,22 +63,8 @@ def search_view_list(request):
             {"results_data": results_data},
             request=request,
         )
-        sidebar_payload = render_filter_sidebar(
-            request,
-            data_source=data_source,
-            form_key="search",
-            applied_filters=applied_filters,
-            sidebar_form_id="search-filter-form",
-            sidebar_form_method="get",
-            submit_id="search-filter-submit",
-            reset_id="search-filter-reset",
-            reset_type="button",
-        )
         return JsonResponse({
-            "total_results": results_data.get("total_results", 0),
             "results_html": results_html,
-            "sidebar_html": sidebar_payload["form_html"],
-            "selected_filters": selected_filters,
         })
     except Exception as e:
         logging.exception(f"Error getting filters for index {index_name}. {e}")
