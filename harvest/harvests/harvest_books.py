@@ -83,7 +83,7 @@ def _extract_last_seq(payload):
     if isinstance(results, list) and results:
         last = results[-1]
         if isinstance(last, dict):
-            return last.get("seq")
+            return last.get("last_seq")
     return None
 
 
@@ -107,7 +107,6 @@ def _persist_harvested_books(
         fk_field="book",
     )
     try:
-        print(last_seq)
         harvested_obj.source_url = source_url
         harvested_obj.type_data = type_data
         harvested_obj.parent = parent
