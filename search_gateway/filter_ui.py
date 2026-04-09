@@ -30,7 +30,7 @@ def _apply_form_group_expanded_state(grouped_fields):
     )
     for group in grouped_items:
         group_is_active = any(field.get("is_active") for field in group.get("fields", []))
-        group["expanded"] = group_is_active if has_active_fields else False
+        group["expanded"] = group_is_active if has_active_fields else True
         for field in group.get("fields", []):
             field["expanded"] = field.get("is_active") if has_active_fields else False
     return grouped_items
