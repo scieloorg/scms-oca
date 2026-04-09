@@ -119,6 +119,7 @@ class Command(BaseCommand):
         p_slug = page.get("slug") or slugify.slugify(p_title)
         p_type = page.get("type", PAGE_TYPE_FREE_PAGE)
         p_datasource = page.get("data_source", "")
+        p_publish = page.get("publish", True)
 
         self.stdout.write(
             "\t" * level + ",".join([
@@ -141,6 +142,7 @@ class Command(BaseCommand):
                 slug=p_slug,
                 locale=locale,
                 page_key=p_key,
+                publish=p_publish,
             )
 
         if p_type == PAGE_TYPE_SEARCH_PAGE:
@@ -151,6 +153,7 @@ class Command(BaseCommand):
                 locale=locale,
                 data_source_name=p_datasource,
                 page_key=p_key,
+                publish=p_publish,
             )
 
         if p_type == PAGE_TYPE_OBSERVATION_PAGE:
@@ -161,6 +164,7 @@ class Command(BaseCommand):
                 locale=locale,
                 data_source_name=p_datasource,
                 page_key=p_key,
+                publish=p_publish,
             )
 
         self.stdout.write(self.style.ERROR(f"Tipo de página inválido: {p_type}"))
@@ -179,10 +183,23 @@ class Command(BaseCommand):
     def remember_page(self, page_key, locale, page):
         self.pages_by_key[(page_key, locale.language_code)] = page
 
-    def create_freepage(self, parent, title, slug, locale, page_key):
+    def apply_publish_state(self, page, publish):
+        if publish:
+            if not page.live:
+                page.save_revision().publish()
+            return page
+
+        if page.live:
+            page.unpublish()
+        else:
+            page.save_revision()
+
+        return page
+
+    def create_freepage(self, parent, title, slug, locale, page_key, publish=True):
         existing = self.get_page_from_memory(page_key, locale)
         if existing:
-            return existing
+            return self.apply_publish_state(existing, publish)
 
         base_page = self.get_page_from_memory(page_key)
 
@@ -190,13 +207,13 @@ class Command(BaseCommand):
             translated = base_page.get_translation_or_none(locale)
             if translated:
                 self.remember_page(page_key, locale, translated)
-                return translated
+                return self.apply_publish_state(translated, publish)
 
             p_obj = base_page.copy_for_translation(locale)
             p_obj.title = title
             p_obj.slug = slug
             p_obj.body = f"<p>{title}</p>"
-            p_obj.save_revision().publish()
+            self.apply_publish_state(p_obj, publish)
 
             self.remember_page(page_key, locale, p_obj)
             return p_obj
@@ -204,7 +221,7 @@ class Command(BaseCommand):
         sibling = parent.get_children().specific().filter(locale=locale, slug=slug).first()
         if sibling:
             self.remember_page(page_key, locale, sibling)
-            return sibling
+            return self.apply_publish_state(sibling, publish)
 
         p_obj = FreePage(
             title=title,
@@ -213,15 +230,15 @@ class Command(BaseCommand):
             locale=locale,
         )
         parent.add_child(instance=p_obj)
-        p_obj.save_revision().publish()
+        self.apply_publish_state(p_obj, publish)
 
         self.remember_page(page_key, locale, p_obj)
         return p_obj
 
-    def create_searchpage(self, parent, title, slug, locale, data_source_name, page_key):
+    def create_searchpage(self, parent, title, slug, locale, data_source_name, page_key, publish=True):
         existing = self.get_page_from_memory(page_key, locale)
         if existing:
-            return existing
+            return self.apply_publish_state(existing, publish)
 
         ds = DataSource.objects.filter(index_name=data_source_name).first()
         if not ds:
@@ -236,13 +253,13 @@ class Command(BaseCommand):
             translated = base_page.get_translation_or_none(locale)
             if translated:
                 self.remember_page(page_key, locale, translated)
-                return translated
+                return self.apply_publish_state(translated, publish)
 
             p_obj = base_page.copy_for_translation(locale)
             p_obj.title = title
             p_obj.slug = slug
             p_obj.data_source = ds
-            p_obj.save_revision().publish()
+            self.apply_publish_state(p_obj, publish)
 
             self.remember_page(page_key, locale, p_obj)
             return p_obj
@@ -250,7 +267,7 @@ class Command(BaseCommand):
         sibling = parent.get_children().specific().filter(locale=locale, slug=slug).first()
         if sibling:
             self.remember_page(page_key, locale, sibling)
-            return sibling
+            return self.apply_publish_state(sibling, publish)
 
         p_obj = SearchPage(
             title=title,
@@ -259,15 +276,15 @@ class Command(BaseCommand):
             locale=locale,
         )
         parent.add_child(instance=p_obj)
-        p_obj.save_revision().publish()
+        self.apply_publish_state(p_obj, publish)
 
         self.remember_page(page_key, locale, p_obj)
         return p_obj
 
-    def create_observationpage(self, parent, title, slug, locale, data_source_name, page_key):
+    def create_observationpage(self, parent, title, slug, locale, data_source_name, page_key, publish=True):
         existing = self.get_page_from_memory(page_key, locale)
         if existing:
-            return existing
+            return self.apply_publish_state(existing, publish)
 
         ds = None
         if data_source_name:
@@ -284,13 +301,13 @@ class Command(BaseCommand):
             translated = base_page.get_translation_or_none(locale)
             if translated:
                 self.remember_page(page_key, locale, translated)
-                return translated
+                return self.apply_publish_state(translated, publish)
 
             p_obj = base_page.copy_for_translation(locale)
             p_obj.title = title
             p_obj.slug = slug
             p_obj.data_source = ds
-            p_obj.save_revision().publish()
+            self.apply_publish_state(p_obj, publish)
 
             self.remember_page(page_key, locale, p_obj)
             return p_obj
@@ -298,7 +315,7 @@ class Command(BaseCommand):
         sibling = parent.get_children().specific().filter(locale=locale, slug=slug).first()
         if sibling:
             self.remember_page(page_key, locale, sibling)
-            return sibling
+            return self.apply_publish_state(sibling, publish)
 
         p_obj = ObservationPage(
             title=title,
@@ -307,7 +324,7 @@ class Command(BaseCommand):
             locale=locale,
         )
         parent.add_child(instance=p_obj)
-        p_obj.save_revision().publish()
+        self.apply_publish_state(p_obj, publish)
 
         self.remember_page(page_key, locale, p_obj)
         return p_obj
