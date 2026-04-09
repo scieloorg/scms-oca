@@ -1,7 +1,7 @@
 <div class="analytics-desktop-nav d-none d-lg-flex">
   <ul class="analytics-nav-list menu-container">
     {% if sa_menu %}
-      {% include 'sa_menu/desktop_items.html' with items=sa_menu.render_items is_dropdown=False %}
+      {% include 'sa_menu/desktop_items.html' with items=sa_menu.nodes is_dropdown=False %}
     {% endif %}
   </ul>
 

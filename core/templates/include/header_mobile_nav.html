@@ -14,7 +14,7 @@
     <div class="mobile-menu-section analytics-mobile-main-links">
       <ul class="menu-container mobile-menu-list analytics-mobile-menu-list">
         {% if sa_menu %}
-          {% include 'sa_menu/mobile_items.html' with items=sa_menu.render_items is_nested=False %}
+          {% include 'sa_menu/mobile_items.html' with items=sa_menu.nodes is_nested=False %}
         {% endif %}
       </ul>
     </div>
