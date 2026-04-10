@@ -20,3 +20,13 @@ def _infer_lang_codes(source):
                     codes.append(base)
 
     return codes
+
+
+@register.filter
+def language_codes(value):
+    codes = []
+    for code in as_list(normalize_language_field(value)):
+        _, base = split_lang_code(code)
+        if base:
+            codes.append(base)
+    return unique(codes)
