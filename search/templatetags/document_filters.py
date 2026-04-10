@@ -53,3 +53,29 @@ def preferred_language(context, source):
             return lang
 
     return available[0]
+
+
+@register.filter
+def first(value):
+    items = as_list(value)
+    return items[0] if items else ""
+
+
+@register.filter
+def normalize_doi(value):
+    doi = first(value)
+    if not doi:
+        return ""
+    return (
+        str(doi)
+        .strip()
+        .replace("https://doi.org/", "")
+        .replace("http://doi.org/", "")
+        .replace("doi.org/", "")
+    )
+
+
+@register.filter
+def doi_url(value):
+    doi = normalize_doi(value)
+    return f"https://doi.org/{doi}" if doi else ""
