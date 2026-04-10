@@ -25,22 +25,22 @@
         {% endif %}
         {% block item_header_flags %}{% endblock %}
     </div>
-    {% with language_codes=doc.source|document_language_codes %}
-        {% if language_codes %}
-        <span class="result-card__languages">
-            {% for language_code in language_codes %}
+    <span class="result-card__languages">
+        {% if title_variants|length > 1 %}
+            {% for title_variant in title_variants %}
                 <button
                     type="button"
-                    class="result-card__language{% if language_code == active_language_code %} result-card__language--active{% endif %}"
-                    data-result-language="{{ language_code }}"
-                    aria-pressed="{% if language_code == active_language_code %}true{% else %}false{% endif %}"
+                    class="result-card__language{% if title_variant.language == active_language_code %} result-card__language--active{% endif %}"
+                    data-result-language="{{ title_variant.language }}"
+                    aria-pressed="{% if title_variant.language == active_language_code %}true{% else %}false{% endif %}"
                 >
-                    {{ language_code }}
+                    {{ title_variant.language }}
                 </button>
             {% endfor %}
-        </span>
+        {% elif active_language_code %}
+            <span class="result-card__language result-card__language--active">{{ active_language_code }}</span>
         {% endif %}
-    {% endwith %}
+    </span>
 </div>
 {% endblock %}
 

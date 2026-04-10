@@ -450,8 +450,17 @@ class SearchPageManager {
       button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
     });
 
+    const groups = new Map();
     card.querySelectorAll('[data-result-lang-variant]').forEach(node => {
-      node.hidden = node.dataset.resultLangVariant !== languageCode;
+      const key = node.parentElement;
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(node);
+    });
+
+    groups.forEach(nodes => {
+      const hasMatch = nodes.some(n => n.dataset.resultLangVariant === languageCode);
+      if (!hasMatch) return;
+      nodes.forEach(n => { n.hidden = n.dataset.resultLangVariant !== languageCode; });
     });
   }
 
