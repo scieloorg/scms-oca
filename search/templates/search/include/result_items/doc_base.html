@@ -47,7 +47,7 @@
 {% block item_body %}
     {% block item_title %}
     <h3 class="result-card__title">
-        <a href="{% block item_title_href %}{% if doc.source.content_url|first %}{{ doc.source.content_url|first }}{% elif doc.source.ids.doi %}{{ doc.source.ids.doi|doi_url }}{% else %}{{ pageurl }}{% endif %}{% endblock %}" target="_blank" rel="noopener noreferrer" class="result-card__title-link">
+        <a href="{% spaceless %}{% block item_title_href %}{% if doc.source.content_url|first %}{{ doc.source.content_url|first }}{% elif doc.source.ids.doi %}{{ doc.source.ids.doi|doi_url }}{% else %}{{ pageurl }}{% endif %}{% endblock %}{% endspaceless %}" target="_blank" rel="noopener noreferrer" class="result-card__title-link">
             {% if title_variants|length > 1 %}
                 {% for title_variant in title_variants %}
                 <span{% if title_variant.language != active_language_code %} hidden{% endif %} data-result-lang-variant="{{ title_variant.language }}">{{ title_variant.value }}</span>
