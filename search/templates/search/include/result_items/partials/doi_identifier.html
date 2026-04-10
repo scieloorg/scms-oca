@@ -1,0 +1,8 @@
+{% load result_item_filters %}
+
+{% if doi %}
+<div class="result-card__identifier">
+    <span class="result-card__identifier-label">DOI</span>
+    <a href="{{ doi|doi_url }}" target="_blank" rel="noopener noreferrer" class="result-card__identifier-link">{{ doi|normalize_doi }}</a>
+</div>
+{% endif %}
