@@ -1,11 +1,11 @@
 {% extends "search/include/result_items/doc_base.html" %}
 {% load i18n %}
-{% load custom_filters %}
-{% load result_item_filters %}
+{% load i18n_filters %}
+{% load document_filters %}
 
 {% block item_title_href %}
-    {% if doc.source.content_url|first_item %}
-        {{ doc.source.content_url|first_item }}
+    {% if doc.source.content_url|first %}
+        {{ doc.source.content_url|first }}
     {% elif doc.source.sources.url %}
         {{ doc.source.sources.url }}
     {% else %}
@@ -20,7 +20,7 @@
         {% if doc.source.publication_year %}
         <span class="result-card__source-meta">{{ doc.source.publication_year }}</span>
         {% endif %}
-        {% with language_codes=doc.source.language|language_codes %}
+        {% with language_codes=doc.source|document_language_codes %}
             {% if language_codes %}
             <span class="result-card__source-meta">
                 {% for language_code in language_codes %}
@@ -34,8 +34,8 @@
 {% endblock %}
 
 {% block item_summary %}
-    {% get_localized_field doc.source "abstract" as display_abstract %}
-    {% get_field_language_variants doc.source "abstract" as abstract_variants %}
+    {% localized_field doc.source "abstract" as display_abstract %}
+    {% field_variants doc.source "abstract" as abstract_variants %}
     {% if display_abstract %}
         {% if abstract_variants|length > 1 %}
             {% for abstract_variant in abstract_variants %}
@@ -77,8 +77,8 @@
                 <a href="{{ file.pid_url }}" target="_blank" rel="noopener noreferrer" class="result-card__action">{{ file.label }}</a>
                 {% endfor %}
             {% endif %}
-            {% if doc.source.content_url|first_item %}
-            <a href="{{ doc.source.content_url|first_item }}" target="_blank" rel="noopener noreferrer" class="result-card__action result-card__action--ghost">{% trans "Acessar" %}</a>
+            {% if doc.source.content_url|first %}
+            <a href="{{ doc.source.content_url|first }}" target="_blank" rel="noopener noreferrer" class="result-card__action result-card__action--ghost">{% trans "Acessar" %}</a>
             {% endif %}
             {% if doc.source.ids.openalex %}
             <a href="{{ doc.source.ids.openalex }}" target="_blank" rel="noopener noreferrer" class="result-card__action result-card__action--ghost">OpenAlex</a>

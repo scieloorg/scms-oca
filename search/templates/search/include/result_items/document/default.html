@@ -1,10 +1,10 @@
 {% extends "search/include/result_items/doc_base.html" %}
 {% load i18n %}
-{% load result_item_filters %}
+{% load document_filters %}
 
 {% block item_title_href %}
-    {% if doc.source.content_url|first_item %}
-        {{ doc.source.content_url|first_item }}
+    {% if doc.source.content_url|first %}
+        {{ doc.source.content_url|first }}
     {% elif doc.source.locations and doc.source.locations.0.landing_page_url %}
         {{ doc.source.locations.0.landing_page_url }}
     {% else %}
@@ -14,7 +14,7 @@
 
 {% block item_footer %}
     {% firstof doc.source.ids.doi doc.source.primary_location.doi as display_doi %}
-    {% with primary_content_url=doc.source.content_url|first_item %}
+    {% with primary_content_url=doc.source.content_url|first %}
     {% firstof primary_content_url doc.source.locations.0.landing_page_url as display_access_url %}
     {% if display_access_url or doc.source.ids.openalex or display_doi or doc.id %}
     <div class="result-card__footer">

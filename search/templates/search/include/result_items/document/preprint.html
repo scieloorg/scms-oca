@@ -1,21 +1,21 @@
 {% extends "search/include/result_items/doc_base.html" %}
 {% load i18n %}
-{% load custom_filters %}
-{% load result_item_filters %}
+{% load i18n_filters %}
+{% load document_filters %}
 {% load license_filter %}
 
 {% block item_title_href %}
     {% if doc.source.ids.doi %}
         {{ doc.source.ids.doi|doi_url }}
-    {% elif doc.source.content_url|first_item %}
-        {{ doc.source.content_url|first_item }}
+    {% elif doc.source.content_url|first %}
+        {{ doc.source.content_url|first }}
     {% else %}
         {{ pageurl }}
     {% endif %}
 {% endblock %}
 
 {% block item_header_flags %}
-    {% get_localized_field doc.source "rights" "list" as display_rights %}
+    {% localized_field doc.source "rights" output="list" as display_rights %}
     {% get_license_badge display_rights as license_badges %}
     {% for license_badge in license_badges %}
     <span class="result-card__flag result-card__flag--license result-card__flag--{{ license_badge.slug }}">
@@ -49,8 +49,8 @@
 {% endblock %}
 
 {% block item_summary %}
-    {% get_localized_field doc.source "abstract" as display_abstract %}
-    {% get_field_language_variants doc.source "abstract" as abstract_variants %}
+    {% localized_field doc.source "abstract" as display_abstract %}
+    {% field_variants doc.source "abstract" as abstract_variants %}
     {% if display_abstract %}
         {% if abstract_variants|length > 1 %}
             {% for abstract_variant in abstract_variants %}
@@ -69,7 +69,7 @@
 {% block item_meta %}{% endblock %}
 
 {% block item_extra %}
-    {% get_localized_field doc.source "subjects" "list" as display_subjects %}
+    {% localized_field doc.source "subjects" output="list" as display_subjects %}
     {% if display_subjects %}
     <p class="result-card__meta-row result-card__meta-row--topic-inline">
         <span class="result-card__topic-inline-text">
@@ -83,7 +83,7 @@
 {% endblock %}
 
 {% block item_footer_actions %}
-    {% if doc.source.content_url|first_item %}
-    <a href="{{ doc.source.content_url|first_item }}" target="_blank" rel="noopener noreferrer" class="result-card__action">{% trans "Acessar" %}</a>
+    {% if doc.source.content_url|first %}
+    <a href="{{ doc.source.content_url|first }}" target="_blank" rel="noopener noreferrer" class="result-card__action">{% trans "Acessar" %}</a>
     {% endif %}
 {% endblock %}

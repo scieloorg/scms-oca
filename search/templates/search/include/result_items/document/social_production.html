@@ -1,6 +1,6 @@
 {% extends "search/include/result_items/item_base.html" %}
 {% load i18n %}
-{% load custom_filters %}
+{% load i18n_filters %}
 
 {% block item_root_class %}result-card__inner--social{% endblock %}
 
@@ -27,7 +27,7 @@
 {% endblock %}
 
 {% block item_body %}
-    {% get_localized_field doc.source "description" as display_description %}
+    {% localized_field doc.source "description" as display_description %}
 
     <h3 class="result-card__title">
         {% if doc.source.link %}

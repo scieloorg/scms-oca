@@ -1,7 +1,7 @@
 {% extends "search/include/result_items/doc_base.html" %}
 {% load i18n %}
-{% load custom_filters %}
-{% load result_item_filters %}
+{% load i18n_filters %}
+{% load document_filters %}
 
 {% block item_title_href %}
     {% if doc.source.ids.doi %}
@@ -20,7 +20,7 @@
         {% if doc.source.biblio.pages %}
         <span class="result-card__source-meta">{% trans "Pages" %} {{ doc.source.biblio.pages }}</span>
         {% endif %}
-        {% with language_codes=doc.source.language|language_codes %}
+        {% with language_codes=doc.source|document_language_codes %}
             {% if language_codes %}
             <span class="result-card__source-meta">
                 {% for language_code in language_codes %}
@@ -55,8 +55,8 @@
 {% endblock %}
 
 {% block item_summary %}
-    {% get_localized_field doc.source "synopsis" as display_synopsis %}
-    {% get_field_language_variants doc.source "synopsis" as synopsis_variants %}
+    {% localized_field doc.source "synopsis" as display_synopsis %}
+    {% field_variants doc.source "synopsis" as synopsis_variants %}
     {% if display_synopsis %}
         {% if synopsis_variants|length > 1 %}
             {% for synopsis_variant in synopsis_variants %}

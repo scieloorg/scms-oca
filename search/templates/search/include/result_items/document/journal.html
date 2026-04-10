@@ -1,11 +1,11 @@
 {% extends "search/include/result_items/doc_base.html" %}
 {% load i18n %}
-{% load custom_filters %}
-{% load result_item_filters %}
+{% load i18n_filters %}
+{% load document_filters %}
 
 {% block item_title_href %}
-    {% if doc.source.content_url|first_item %}
-        {{ doc.source.content_url|first_item }}
+    {% if doc.source.content_url|first %}
+        {{ doc.source.content_url|first }}
     {% elif doc.source.locations %}
         {{ doc.source.locations.0.landing_page_url }}
     {% else %}
@@ -32,8 +32,8 @@
 {% endblock %}
 
 {% block item_summary %}
-    {% get_localized_field doc.source "description" as display_description %}
-    {% get_field_language_variants doc.source "description" as description_variants %}
+    {% localized_field doc.source "description" as display_description %}
+    {% field_variants doc.source "description" as description_variants %}
     {% if display_description %}
         {% if description_variants|length > 1 %}
             {% for description_variant in description_variants %}
@@ -80,7 +80,7 @@
 {% block item_extra %}{% endblock %}
 
 {% block item_footer_actions %}
-    {% if doc.source.content_url|first_item %}
-    <a href="{{ doc.source.content_url|first_item }}" target="_blank" rel="noopener noreferrer" class="result-card__action">{% trans "Acessar" %}</a>
+    {% if doc.source.content_url|first %}
+    <a href="{{ doc.source.content_url|first }}" target="_blank" rel="noopener noreferrer" class="result-card__action">{% trans "Acessar" %}</a>
     {% endif %}
 {% endblock %}
