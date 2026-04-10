@@ -1,15 +1,12 @@
-from django import template
-from datetime import date, datetime
 import re
+
+from datetime import date, datetime
+
+from django import template
+from search.value_utils import dedupe_keep_order, get_attr_or_key
+
+
 register = template.Library()
-
-
-def _get_attr_or_key(data, key, default=None):
-    if data is None:
-        return default
-    if isinstance(data, dict):
-        return data.get(key, default)
-    return getattr(data, key, default)
 
 
 def _normalize_lang_code(lang_code):
@@ -28,24 +25,25 @@ def _get_request_lang_code(context):
     return context.get("LANGUAGE_CODE")
 
 
-def _split_matches_by_lang(items, field_name, lang_code, value_key=None):
-    if not isinstance(items, list):
-        return [], []
+def _get_with_lang_items(source, field_name):
+    items = get_attr_or_key(source, f"{field_name}_with_lang")
+    return items if isinstance(items, list) else []
 
+
+def _get_preferred_localized_values(items, lang_code, key):
     requested, requested_base = _normalize_lang_code(lang_code)
     if not requested:
-        return [], []
+        return []
 
-    key = value_key if value_key else field_name
     exact_matches = []
     base_matches = []
 
     for item in items:
-        value = _get_attr_or_key(item, key)
+        value = get_attr_or_key(item, key)
         if value in (None, ""):
             continue
 
-        item_lang = _get_attr_or_key(item, "language")
+        item_lang = get_attr_or_key(item, "language")
         item_lang_norm, item_lang_base = _normalize_lang_code(item_lang)
         if not item_lang_norm:
             continue
@@ -57,40 +55,7 @@ def _split_matches_by_lang(items, field_name, lang_code, value_key=None):
         if item_lang_base == requested_base:
             base_matches.append(value)
 
-    return exact_matches, base_matches
-
-
-def _pick_value_from_with_lang(items, field_name, lang_code, value_key=None):
-    exact_matches, base_matches = _split_matches_by_lang(
-        items, field_name, lang_code, value_key=value_key
-    )
-    if exact_matches:
-        return exact_matches[0]
-    if base_matches:
-        return base_matches[0]
-    return None
-
-def _dedupe_keep_order(values):
-    result = []
-    seen = set()
-    for value in values:
-        marker = repr(value)
-        if marker in seen:
-            continue
-        seen.add(marker)
-        result.append(value)
-    return result
-
-
-def _pick_values_from_with_lang(items, field_name, lang_code, value_key=None):
-    exact_matches, base_matches = _split_matches_by_lang(
-        items, field_name, lang_code, value_key=value_key
-    )
-    if exact_matches:
-        return _dedupe_keep_order(exact_matches)
-    if base_matches:
-        return _dedupe_keep_order(base_matches)
-    return []
+    return exact_matches or base_matches
 
 
 def _as_bool(value):
@@ -100,12 +65,31 @@ def _as_bool(value):
         return False
     return str(value).strip().lower() in {"1", "true", "yes", "y", "list", "many"}
 
-@register.filter
-def get_item(dictionary, key):
-    """Retorna o valor de um dicionário usando uma chave dinâmica"""
-    if dictionary is None:
-        return []
-    return dictionary.get(key, [])
+
+def _parse_localized_tag_args(args):
+    value_key = None
+    as_list = False
+
+    for arg in args:
+        if _as_bool(arg):
+            as_list = True
+        elif value_key is None and arg:
+            value_key = str(arg).strip() or None
+
+    return value_key, as_list
+
+
+def _normalize_variant_value(value, as_list):
+    if as_list:
+        if isinstance(value, list):
+            values = [entry for entry in value if entry not in (None, "")]
+        elif value in (None, ""):
+            values = []
+        else:
+            values = [value]
+        return dedupe_keep_order(values)
+
+    return None if value in (None, "") else value
 
 
 @register.filter
@@ -122,7 +106,7 @@ def format_date_br(value):
 
     match = re.match(r"^(\d{4})-(\d{2})-(\d{2})", value)
     if match:
-        return f"{match.group(3)}-{match.group(2)}-{match.group(1)}"
+        return f"{match.group(3)}/{match.group(2)}/{match.group(1)}"
 
     return value
 
@@ -137,22 +121,15 @@ def get_localized_field(context, source, field_name, *args):
 
     Optional 4th/5th arg: "list" (or truthy) — return list of values instead of scalar.
     """
-    value_key = None
-    as_list = False
-    for arg in args:
-        if _as_bool(arg):
-            as_list = True
-        elif value_key is None and arg and not _as_bool(arg):
-            value_key = str(arg).strip() or None
+    value_key, as_list = _parse_localized_tag_args(args)
+    key = value_key if value_key else field_name
 
     language_code = _get_request_lang_code(context)
-    base_value = _get_attr_or_key(source, field_name)
-    with_lang_items = _get_attr_or_key(source, f"{field_name}_with_lang")
+    base_value = get_attr_or_key(source, field_name)
+    with_lang_items = _get_with_lang_items(source, field_name)
+    localized_values = _get_preferred_localized_values(with_lang_items, language_code, key)
 
     if as_list:
-        localized_values = _pick_values_from_with_lang(
-            with_lang_items, field_name, language_code, value_key=value_key
-        )
         if localized_values:
             return localized_values
         if isinstance(base_value, list):
@@ -161,7 +138,55 @@ def get_localized_field(context, source, field_name, *args):
             return []
         return [base_value]
 
-    localized_value = _pick_value_from_with_lang(
-        with_lang_items, field_name, language_code, value_key=value_key
-    )
+    localized_value = localized_values[0] if localized_values else None
     return localized_value if localized_value not in (None, "") else base_value
+
+
+@register.simple_tag(takes_context=True)
+def get_field_language_variants(context, source, field_name, *args):
+    """
+    Return all language variants available in `<field>_with_lang`.
+
+    Each variant is returned as `{"language": "<base-code>", "value": ...}` so
+    templates can render every available translation and let the client switch
+    between them. Regional codes such as `pt-br` are collapsed to their base
+    code (`pt`), preferring the request language variant when more than one maps
+    to the same base code.
+    """
+    value_key, as_list = _parse_localized_tag_args(args)
+    key = value_key if value_key else field_name
+    with_lang_items = _get_with_lang_items(source, field_name)
+    if not with_lang_items:
+        return []
+
+    preferred_language = _get_request_lang_code(context)
+    preferred_full, preferred_base = _normalize_lang_code(preferred_language)
+    grouped_variants = {}
+
+    for item in with_lang_items:
+        language_code, base_language_code = _normalize_lang_code(get_attr_or_key(item, "language"))
+        if not base_language_code:
+            continue
+
+        value = _normalize_variant_value(get_attr_or_key(item, key), as_list)
+        if value in (None, []):
+            continue
+
+        candidate = {
+            "language": base_language_code,
+            "value": value,
+        }
+        current = grouped_variants.get(base_language_code)
+        if current is None:
+            grouped_variants[base_language_code] = candidate
+            continue
+
+        if preferred_full and language_code == preferred_full:
+            grouped_variants[base_language_code] = candidate
+            continue
+
+        if preferred_base and base_language_code == preferred_base and language_code == base_language_code:
+            grouped_variants[base_language_code] = candidate
+            continue
+
+    return list(grouped_variants.values())
