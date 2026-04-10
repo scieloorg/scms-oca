@@ -1,0 +1,83 @@
+{% extends "search/include/result_items/doc_base.html" %}
+{% load i18n %}
+{% load custom_filters %}
+{% load result_item_filters %}
+
+{% block item_title_href %}
+    {% if doc.source.ids.doi %}
+        {{ doc.source.ids.doi|doi_url }}
+    {% else %}
+        {{ pageurl }}
+    {% endif %}
+{% endblock %}
+
+{% block item_source_line %}
+    {% if doc.source.publication_year or doc.source.biblio.pages or doc.source.language or doc.source.biblio.city or doc.source.biblio.country %}
+    <p class="result-card__source-line">
+        {% if doc.source.publication_year %}
+        <span class="result-card__source-meta">{{ doc.source.publication_year }}</span>
+        {% endif %}
+        {% if doc.source.biblio.pages %}
+        <span class="result-card__source-meta">{% trans "Pages" %} {{ doc.source.biblio.pages }}</span>
+        {% endif %}
+        {% with language_codes=doc.source.language|language_codes %}
+            {% if language_codes %}
+            <span class="result-card__source-meta">
+                {% for language_code in language_codes %}
+                    {{ language_code }}{% if not forloop.last %}, {% endif %}
+                {% endfor %}
+            </span>
+            {% endif %}
+        {% endwith %}
+        {% if doc.source.biblio.city or doc.source.biblio.country %}
+        <span class="result-card__source-meta">
+            {% if doc.source.biblio.city %}{{ doc.source.biblio.city }}{% endif %}
+            {% if doc.source.biblio.city and doc.source.biblio.country %} - {% endif %}
+            {% if doc.source.biblio.country %}{{ doc.source.biblio.country }}{% endif %}
+        </span>
+        {% endif %}
+    </p>
+    {% endif %}
+    {% if doc.source.publishers or doc.source.ids.isbn or doc.source.ids.eisbn or doc.source.ids.bisac_code %}
+    <p class="result-card__source-line">
+        {% include "search/include/result_items/partials/publishers.html" with publishers=doc.source.publishers only %}
+        {% if doc.source.ids.isbn %}
+        <span class="result-card__source-meta">ISBN {{ doc.source.ids.isbn }}</span>
+        {% endif %}
+        {% if doc.source.ids.eisbn %}
+        <span class="result-card__source-meta">eISBN {{ doc.source.ids.eisbn }}</span>
+        {% endif %}
+        {% if doc.source.ids.bisac_code %}
+        <span class="result-card__source-meta">BISAC {% for code in doc.source.ids.bisac_code %}{{ code }}{% if not forloop.last %}, {% endif %}{% endfor %}</span>
+        {% endif %}
+    </p>
+    {% endif %}
+{% endblock %}
+
+{% block item_summary %}
+    {% get_localized_field doc.source "synopsis" as display_synopsis %}
+    {% get_field_language_variants doc.source "synopsis" as synopsis_variants %}
+    {% if display_synopsis %}
+        {% if synopsis_variants|length > 1 %}
+            {% for synopsis_variant in synopsis_variants %}
+            <div class="result-card__abstract result-card__abstract--compact"{% if synopsis_variant.language != active_language_code %} hidden{% endif %} data-result-lang-variant="{{ synopsis_variant.language }}">
+                {{ synopsis_variant.value|truncatewords:50 }}
+            </div>
+            {% endfor %}
+        {% else %}
+        <div class="result-card__abstract result-card__abstract--compact">
+            {{ display_synopsis|truncatewords:50 }}
+        </div>
+        {% endif %}
+    {% endif %}
+{% endblock %}
+
+{% block item_meta %}{% endblock %}
+
+{% block item_extra %}{% endblock %}
+
+{% block item_footer_actions %}
+    {% if doc.source.ids.openalex %}
+    <a href="{{ doc.source.ids.openalex }}" target="_blank" rel="noopener noreferrer" class="result-card__action result-card__action--ghost">OpenAlex</a>
+    {% endif %}
+{% endblock %}
