@@ -1,0 +1,7 @@
+{% if publishers %}
+<span class="result-card__source-name">
+    {% for publisher in publishers %}
+        {% if publisher.name %}{{ publisher.name }}{% else %}{{ publisher }}{% endif %}{% if not forloop.last %}, {% endif %}
+    {% endfor %}
+</span>
+{% endif %}
