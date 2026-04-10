@@ -7,7 +7,7 @@ from search.normalize import as_list, split_lang_code, unique
 register = template.Library()
 
 
-def _infer_lang_codes(source):
+def _language_codes_from_translations(source):
     codes = []
     for key, value in source.items():
         if not str(key).endswith("_with_lang") or not isinstance(value, list):
@@ -22,8 +22,7 @@ def _infer_lang_codes(source):
     return codes
 
 
-@register.filter
-def language_codes(value):
+def _normalize_language_codes(value):
     codes = []
     for code in as_list(normalize_language_field(value)):
         _, base = split_lang_code(code)
