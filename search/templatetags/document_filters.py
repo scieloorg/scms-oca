@@ -44,7 +44,7 @@ def preferred_language(context, source):
     if not available:
         return ""
 
-    req_full, req_base = split_lang_code(context["LANGUAGE_CODE"])
+    req_full, req_base = split_lang_code(context.get("LANGUAGE_CODE", ""))
     for lang in available:
         full, base = split_lang_code(lang)
         if req_full and full == req_full:

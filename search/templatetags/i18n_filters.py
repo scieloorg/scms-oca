@@ -3,7 +3,7 @@ import re
 from datetime import date, datetime
 
 from django import template
-from search.normalize import split_lang_code, as_list
+from search.normalize import split_lang_code, as_list, unique
 
 
 register = template.Library()
@@ -56,10 +56,10 @@ def localized_field(context, source, field_name, value_key=None, output="scalar"
     """Return localized value from `<field>_with_lang` using the request language."""
     key = (value_key.strip() if value_key and value_key.strip() else None) or field_name
     items = source.get(f"{field_name}_with_lang") or []
-    localized = _match_language(items, context["LANGUAGE_CODE"], key)
+    localized = _match_language(items, context.get("LANGUAGE_CODE", ""), key)
 
     if str(output).strip().lower() == "list":
-        return as_list(localized or source.get(field_name))
+        return as_list(unique(localized) if localized else source.get(field_name))
 
     value = localized[0] if localized else None
     return value if value not in (None, "") else source.get(field_name)
@@ -74,7 +74,7 @@ def field_variants(context, source, field_name, value_key=None, output="scalar")
     if not items:
         return []
 
-    preferred_full, preferred_base = split_lang_code(context["LANGUAGE_CODE"])
+    preferred_full, preferred_base = split_lang_code(context.get("LANGUAGE_CODE", ""))
     grouped = {}
 
     for item in items:
