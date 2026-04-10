@@ -1,0 +1,94 @@
+{% extends "search/include/result_items/item_base.html" %}
+{% load i18n %}
+{% load custom_filters %}
+
+{% block item_root_class %}result-card__inner--social{% endblock %}
+
+{% block item_header %}
+<div class="result-card__header">
+    <div class="result-card__eyebrow">
+        {% if result_number %}
+        <span class="result-card__index">{{ result_number }}.</span>
+        {% endif %}
+        {% if doc.source.action %}
+        <span class="result-card__badge result-card__badge--accent">{{ doc.source.action }}</span>
+        {% endif %}
+        {% if doc.source.directory_type %}
+        <span class="result-card__badge">{{ doc.source.directory_type }}</span>
+        {% endif %}
+        {% if doc.source.practice %}
+        <span class="result-card__badge">{{ doc.source.practice }}</span>
+        {% endif %}
+        {% if doc.source.classification %}
+        <span class="result-card__badge">{{ doc.source.classification }}</span>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block item_body %}
+    {% get_localized_field doc.source "description" as display_description %}
+
+    <h3 class="result-card__title">
+        {% if doc.source.link %}
+            <a href="{{ doc.source.link }}" target="_blank" rel="noopener noreferrer" class="result-card__title-link">
+                {{ display_title }}
+            </a>
+        {% else %}
+            {{ display_title }}
+        {% endif %}
+    </h3>
+
+    {% if doc.source.organization or doc.source.start_date %}
+    <p class="result-card__source-line">
+        {% if doc.source.organization %}
+        <span class="result-card__source-name">{% for org in doc.source.organization %}{{ org }}{% if not forloop.last %}, {% endif %}{% endfor %}</span>
+        {% endif %}
+        {% if doc.source.start_date %}
+        <span class="result-card__source-meta">{% trans "Registro" %} {{ doc.source.start_date|format_date_br }}</span>
+        {% endif %}
+    </p>
+    {% endif %}
+
+    {% if doc.source.institutions or doc.source.created or doc.source.cities or doc.source.states %}
+    <p class="result-card__source-line">
+        {% if doc.source.institutions %}
+        <span class="result-card__source-name">{% for inst in doc.source.institutions %}{{ inst }}{% if not forloop.last %}, {% endif %}{% endfor %}</span>
+        {% endif %}
+        {% if doc.source.created %}
+        <span class="result-card__source-meta">{{ doc.source.created|format_date_br }}</span>
+        {% endif %}
+        {% if doc.source.cities %}
+        <span class="result-card__source-meta">{% for city in doc.source.cities %}{{ city }}{% if not forloop.last %}, {% endif %}{% endfor %}</span>
+        {% endif %}
+        {% if doc.source.states %}
+        <span class="result-card__source-meta">{% for state in doc.source.states %}{{ state }}{% if not forloop.last %}, {% endif %}{% endfor %}</span>
+        {% endif %}
+    </p>
+    {% endif %}
+
+    {% if display_description %}
+    <div class="result-card__abstract result-card__abstract--compact">
+        {{ display_description|truncatewords:50 }}
+    </div>
+    {% endif %}
+
+    {% if doc.source.thematic_level_0 %}
+    <p class="result-card__meta-row result-card__meta-row--topic-inline">
+        <span class="result-card__topic-inline-text">{% for theme in doc.source.thematic_level_0 %}{{ theme }}{% if not forloop.last %} | {% endif %}{% endfor %}</span>
+    </p>
+    {% endif %}
+{% endblock %}
+
+{% block item_footer %}
+{% if doc.source.link %}
+<div class="result-card__footer">
+    <div class="result-card__actions">
+        <a href="{{ doc.source.link }}" target="_blank" rel="noopener noreferrer" class="result-card__action">{% trans "Acessar" %}</a>
+    </div>
+    <div class="result-card__footer-side">
+        {% include "search/include/result_items/partials/cite_action.html" %}
+    </div>
+</div>
+{% endif %}
+{% endblock %}
