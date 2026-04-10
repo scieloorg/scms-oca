@@ -29,3 +29,27 @@ def _normalize_language_codes(value):
         if base:
             codes.append(base)
     return unique(codes)
+
+
+@register.filter
+def document_language_codes(source):
+    explicit = _normalize_language_codes(source.get("language"))
+    inferred = _language_codes_from_translations(source)
+    return unique([*explicit, *inferred])
+
+
+@register.simple_tag(takes_context=True)
+def preferred_language(context, source):
+    available = document_language_codes(source)
+    if not available:
+        return ""
+
+    req_full, req_base = split_lang_code(context["LANGUAGE_CODE"])
+    for lang in available:
+        full, base = split_lang_code(lang)
+        if req_full and full == req_full:
+            return lang
+        if req_base and base == req_base:
+            return lang
+
+    return available[0]
