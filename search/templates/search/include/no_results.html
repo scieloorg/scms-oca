@@ -1,0 +1,15 @@
+{% load i18n %}
+
+<section class="results-empty" aria-labelledby="results-empty-title">
+    <article class="results-empty__card">
+        <div class="results-empty__icon" aria-hidden="true"></div>
+        <div class="results-empty__content">
+            <h2 id="results-empty-title" class="results-empty__title">
+                {% trans "Nenhum resultado encontrado" %}
+            </h2>
+            <p class="results-empty__description">
+                {% trans "Não encontramos itens que correspondam aos termos e filtros aplicados nesta busca." %}
+            </p>
+        </div>
+    </article>
+</section>
