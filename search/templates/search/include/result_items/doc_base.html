@@ -23,7 +23,9 @@
             <span class="result-card__flag-text">{{ doc.source.type }}</span>
         </span>
         {% endif %}
-        {% block item_header_flags %}{% endblock %}
+        {% block item_header_flags %}
+            {% include "search/include/result_items/partials/scope.html" with item_scope=item_scope %}
+        {% endblock %}
     </div>
     <span class="result-card__languages">
         {% if title_variants|length > 1 %}
