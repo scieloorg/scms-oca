@@ -1,10 +1,7 @@
-{% load humanize %}
-{% load static %}
-{% load i18n %}
-{% load wagtailsettings_tags %}
-{% load wagtailcore_tags %}
-
-
 <div id="results-container" class="sg-layout__results-offset">
-    {% include "search/include/results_list.html" %}
+    {% if results_data.search_results %}
+        {% include "search/include/results_list.html" %}
+    {% else %}
+        {% include "search/include/no_results.html" %}
+    {% endif %}
 </div>
