@@ -1,0 +1,17 @@
+{% load humanize %}
+{% load static %}
+{% load i18n %}
+{% load wagtailsettings_tags %}
+{% load wagtailcore_tags %}
+{% load i18n_filters %}
+{% load document_filters %}
+
+{% localized_field doc.source "title" as display_title %}
+{% field_variants doc.source "title" as title_variants %}
+{% preferred_language doc.source as active_language_code %}
+
+<div class="result-card__inner {% block item_root_class %}{% endblock %}">
+    {% block item_header %}{% endblock %}
+    {% block item_body %}{% endblock %}
+    {% block item_footer %}{% endblock %}
+</div>

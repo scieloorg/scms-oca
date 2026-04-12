@@ -1,0 +1,153 @@
+{% extends "search/include/result_items/item_base.html" %}
+{% load i18n %}
+{% load i18n_filters %}
+{% load document_filters %}
+
+{% block item_root_class %}result-card__inner--work{% endblock %}
+
+{% block item_header %}
+<div class="result-card__header result-card__header--work">
+    <div class="result-card__eyebrow">
+        {% if result_number %}
+        <span class="result-card__index">{{ result_number }}.</span>
+        {% endif %}
+        {% if doc.source.open_access_status and doc.source.open_access_status|lower != "closed" %}
+        <span class="result-card__flag result-card__flag--open-access">
+            <span class="result-card__flag-icon result-card__flag-icon--open-access" aria-hidden="true"></span>
+            <span class="result-card__flag-text">{% trans "Open access" %}</span>
+        </span>
+        {% endif %}
+        {% if doc.source.type %}
+        <span class="result-card__flag result-card__flag--type">
+            <span class="result-card__flag-icon {% if doc.source.type|lower == 'article' %}result-card__flag-icon--article{% else %}result-card__flag-icon--generic{% endif %}" aria-hidden="true"></span>
+            <span class="result-card__flag-text">{{ doc.source.type }}</span>
+        </span>
+        {% endif %}
+        {% block item_header_flags %}{% endblock %}
+    </div>
+    <span class="result-card__languages">
+        {% if title_variants|length > 1 %}
+            {% for title_variant in title_variants %}
+                <button
+                    type="button"
+                    class="result-card__language{% if title_variant.language == active_language_code %} result-card__language--active{% endif %}"
+                    data-result-language="{{ title_variant.language }}"
+                    aria-pressed="{% if title_variant.language == active_language_code %}true{% else %}false{% endif %}"
+                >
+                    {{ title_variant.language }}
+                </button>
+            {% endfor %}
+        {% elif active_language_code %}
+            <span class="result-card__language result-card__language--active">{{ active_language_code }}</span>
+        {% endif %}
+    </span>
+</div>
+{% endblock %}
+
+{% block item_body %}
+    {% block item_title %}
+    <h3 class="result-card__title">
+        <a href="{% spaceless %}{% block item_title_href %}{% if doc.source.content_url|first %}{{ doc.source.content_url|first }}{% elif doc.source.ids.doi %}{{ doc.source.ids.doi|doi_url }}{% else %}{{ pageurl }}{% endif %}{% endblock %}{% endspaceless %}" target="_blank" rel="noopener noreferrer" class="result-card__title-link">
+            {% if title_variants|length > 1 %}
+                {% for title_variant in title_variants %}
+                <span{% if title_variant.language != active_language_code %} hidden{% endif %} data-result-lang-variant="{{ title_variant.language }}">{{ title_variant.value }}</span>
+                {% endfor %}
+            {% else %}
+                {{ display_title }}
+            {% endif %}
+        </a>
+    </h3>
+    {% endblock %}
+
+    {% block item_authors %}
+        {% include "search/include/result_items/partials/authors.html" with authorships=doc.source.authorships only %}
+    {% endblock %}
+
+    {% block item_source_line %}
+        {% firstof doc.source.resolved_source_name doc.source.primary_source_title doc.source.sources.0.title doc.source.sources.0.display_name doc.source.primary_location.source.display_name doc.source.primary_location.source.title doc.source.source_name as display_source_name %}
+        {% if display_source_name or doc.source.biblio.volume or doc.source.biblio.issue or doc.source.publication_year or doc.source.biblio.pages or doc.source.biblio.first_page or doc.source.biblio.last_page or doc.source.metrics.received_citations.total %}
+        <p class="result-card__source-line">
+            {% if display_source_name %}
+            <span class="result-card__source-name">{{ display_source_name }}</span>
+            {% endif %}
+            {% if doc.source.biblio.volume %}
+            <span class="result-card__source-meta">vol.{{ doc.source.biblio.volume }}</span>
+            {% endif %}
+            {% if doc.source.biblio.issue %}
+            <span class="result-card__source-meta">n.{{ doc.source.biblio.issue }}</span>
+            {% endif %}
+            {% if doc.source.publication_year %}
+            <span class="result-card__source-meta">{{ doc.source.publication_year }}</span>
+            {% endif %}
+            {% if doc.source.biblio.pages %}
+            <span class="result-card__source-meta">{% trans "Pages" %} {{ doc.source.biblio.pages }}</span>
+            {% elif doc.source.biblio.first_page or doc.source.biblio.last_page %}
+            <span class="result-card__source-meta">{% trans "Pages" %} {{ doc.source.biblio.first_page|default:"" }}{% if doc.source.biblio.last_page %}-{{ doc.source.biblio.last_page }}{% endif %}</span>
+            {% endif %}
+            {% if doc.source.metrics.received_citations.total %}
+            <span class="result-card__source-meta result-card__source-meta--accent">{% trans "Citations" %}: {{ doc.source.metrics.received_citations.total }}</span>
+            {% endif %}
+        </p>
+        {% endif %}
+    {% endblock %}
+
+    {% block item_summary %}
+        {% localized_field doc.source "abstract" "text" as display_abstract %}
+        {% field_variants doc.source "abstract" "text" as abstract_variants %}
+        {% if display_abstract %}
+            {% if abstract_variants|length > 1 %}
+                {% for abstract_variant in abstract_variants %}
+                <div class="result-card__abstract"{% if abstract_variant.language != active_language_code %} hidden{% endif %} data-result-lang-variant="{{ abstract_variant.language }}">
+                    {{ abstract_variant.value|safe }}
+                </div>
+                {% endfor %}
+            {% else %}
+            <div class="result-card__abstract">
+                {{ display_abstract|safe }}
+            </div>
+            {% endif %}
+        {% endif %}
+    {% endblock %}
+
+    {% block item_meta %}{% endblock %}
+
+    {% block item_extra %}
+        {% if doc.source.primary_topic_name or doc.source.primary_topic_field or doc.source.primary_topic_domain %}
+        <p class="result-card__meta-row result-card__meta-row--topic-inline">
+            <span class="result-card__topic-inline-text">
+                {{ doc.source.primary_topic_name|default:"" }}
+                {% if doc.source.primary_topic_name and doc.source.primary_topic_field %} - {% endif %}
+                {{ doc.source.primary_topic_field|default:"" }}
+                {% if doc.source.primary_topic_domain %}
+                    {% if doc.source.primary_topic_name or doc.source.primary_topic_field %} ({% endif %}
+                    {{ doc.source.primary_topic_domain }}
+                    {% if doc.source.primary_topic_name or doc.source.primary_topic_field %}){% endif %}
+                {% endif %}
+            </span>
+        </p>
+        {% endif %}
+    {% endblock %}
+{% endblock %}
+
+{% block item_footer %}
+    {% if doc.source.content_url or doc.source.ids.doi or doc.source.ids.openalex %}
+    <div class="result-card__footer">
+        <div class="result-card__actions">
+            {% block item_footer_actions %}
+                {% if doc.source.content_url|first %}
+                <a href="{{ doc.source.content_url|first }}" target="_blank" rel="noopener noreferrer" class="result-card__action">{% trans "Acessar" %}</a>
+                {% endif %}
+                {% if doc.source.ids.openalex %}
+                <a href="{{ doc.source.ids.openalex }}" target="_blank" rel="noopener noreferrer" class="result-card__action result-card__action--ghost">OpenAlex</a>
+                {% endif %}
+            {% endblock %}
+        </div>
+        <div class="result-card__footer-side">
+            {% block item_footer_side %}
+                {% include "search/include/result_items/partials/doi_identifier.html" with doi=doc.source.ids.doi only %}
+                {% include "search/include/result_items/partials/cite_action.html" %}
+            {% endblock %}
+        </div>
+    </div>
+    {% endif %}
+{% endblock %}

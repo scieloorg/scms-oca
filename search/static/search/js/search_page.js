@@ -413,6 +413,17 @@ class SearchPageManager {
       return;
     }
 
+    this.resultsContainer.addEventListener('click', event => {
+      const languageButton = event.target.closest('[data-result-language]');
+      if (!languageButton) return;
+
+      const card = languageButton.closest('.result-card__inner');
+      const languageCode = languageButton.dataset.resultLanguage;
+      if (!card || !languageCode) return;
+
+      this.setCardLanguage(card, languageCode);
+    });
+
     this.resultsContainer.addEventListener('change', event => {
       const { target } = event;
 
@@ -430,6 +441,27 @@ class SearchPageManager {
     });
 
     this.resultsContainer.dataset.searchPageSelectionBound = 'true';
+  }
+
+  setCardLanguage(card, languageCode) {
+    card.querySelectorAll('[data-result-language]').forEach(button => {
+      const isActive = button.dataset.resultLanguage === languageCode;
+      button.classList.toggle('result-card__language--active', isActive);
+      button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+    });
+
+    const groups = new Map();
+    card.querySelectorAll('[data-result-lang-variant]').forEach(node => {
+      const key = node.parentElement;
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(node);
+    });
+
+    groups.forEach(nodes => {
+      const hasMatch = nodes.some(n => n.dataset.resultLangVariant === languageCode);
+      if (!hasMatch) return;
+      nodes.forEach(n => { n.hidden = n.dataset.resultLangVariant !== languageCode; });
+    });
   }
 
   updateResultsSelectionCounter() {

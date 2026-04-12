@@ -1,0 +1,89 @@
+{% extends "search/include/result_items/doc_base.html" %}
+{% load i18n %}
+{% load i18n_filters %}
+{% load document_filters %}
+{% load license_filter %}
+
+{% block item_title_href %}
+    {% if doc.source.ids.doi %}
+        {{ doc.source.ids.doi|doi_url }}
+    {% elif doc.source.content_url|first %}
+        {{ doc.source.content_url|first }}
+    {% else %}
+        {{ pageurl }}
+    {% endif %}
+{% endblock %}
+
+{% block item_header_flags %}
+    {% localized_field doc.source "rights" output="list" as display_rights %}
+    {% get_license_badge display_rights as license_badges %}
+    {% for license_badge in license_badges %}
+    <span class="result-card__flag result-card__flag--license result-card__flag--{{ license_badge.slug }}">
+        {% if license_badge.url %}
+        <a href="{{ license_badge.url }}" target="_blank" rel="noopener noreferrer" class="result-card__flag-text">{{ license_badge.label }}</a>
+        {% else %}
+        <span class="result-card__flag-text">{{ license_badge.label }}</span>
+        {% endif %}
+    </span>
+    {% endfor %}
+{% endblock %}
+
+{% block item_source_line %}
+    {% firstof doc.source.resolved_source_name doc.source.primary_source_title doc.source.source_name doc.source.publisher as display_source_name %}
+    {% firstof doc.source.ids.scl_preprint_id doc.source.scl_preprint_id doc.source.pid as display_preprint_id %}
+    {% if display_source_name or doc.source.publication_date or doc.source.publication_year or display_preprint_id %}
+    <p class="result-card__source-line">
+        {% if display_source_name %}
+        <span class="result-card__source-name">{{ display_source_name }}</span>
+        {% endif %}
+        {% if doc.source.publication_date %}
+        <span class="result-card__source-meta">{{ doc.source.publication_date }}</span>
+        {% elif doc.source.publication_year %}
+        <span class="result-card__source-meta">{{ doc.source.publication_year }}</span>
+        {% endif %}
+        {% if display_preprint_id %}
+        <span class="result-card__source-meta">{% trans "SciELO Preprint ID" %} {{ display_preprint_id }}</span>
+        {% endif %}
+    </p>
+    {% endif %}
+{% endblock %}
+
+{% block item_summary %}
+    {% localized_field doc.source "abstract" as display_abstract %}
+    {% field_variants doc.source "abstract" as abstract_variants %}
+    {% if display_abstract %}
+        {% if abstract_variants|length > 1 %}
+            {% for abstract_variant in abstract_variants %}
+            <div class="result-card__abstract result-card__abstract--compact"{% if abstract_variant.language != active_language_code %} hidden{% endif %} data-result-lang-variant="{{ abstract_variant.language }}">
+                {{ abstract_variant.value|truncatewords_html:65|safe }}
+            </div>
+            {% endfor %}
+        {% else %}
+        <div class="result-card__abstract result-card__abstract--compact">
+            {{ display_abstract|truncatewords_html:65|safe }}
+        </div>
+        {% endif %}
+    {% endif %}
+{% endblock %}
+
+{% block item_meta %}{% endblock %}
+
+{% block item_extra %}
+    {% localized_field doc.source "subjects" output="list" as display_subjects %}
+    {% if display_subjects %}
+    <p class="result-card__meta-row result-card__meta-row--topic-inline">
+        <span class="result-card__topic-inline-text">
+            {% for subject in display_subjects %}
+                {{ subject }}{% if not forloop.last %} - {% endif %}
+            {% endfor %}
+        </span>
+    </p>
+    {% endif %}
+    {{ block.super }}
+{% endblock %}
+
+{% block item_footer_actions %}
+    {% if doc.source.content_url|first %}
+    <a href="{{ doc.source.content_url|first }}" target="_blank" rel="noopener noreferrer" class="result-card__action">{% trans "Acessar" %}</a>
+    {% endif %}
+{% endblock %}

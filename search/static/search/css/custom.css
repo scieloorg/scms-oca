@@ -904,6 +904,36 @@
   font-size: 0.6rem;
   font-weight: 800;
   text-transform: uppercase;
+  cursor: pointer;
+  appearance: none;
+  transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease;
+}
+
+.result-card__language:hover,
+.result-card__language:focus-visible {
+  border-color: #9bb2e3;
+  background: #f5f8ff;
+  outline: none;
+}
+
+.result-card__language--active {
+  border-color: #2f4ea1;
+  background: #2f4ea1;
+  color: #ffffff;
+}
+
+.result-card__language--active:hover,
+.result-card__language--active:focus-visible {
+  border-color: #1f3d8c;
+  background: #1f3d8c;
+  color: #ffffff;
+}
+
+.result-card__languages {
+  display: inline-flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.28rem;
 }
 
 .result-card__title {
