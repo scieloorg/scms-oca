@@ -19,9 +19,6 @@
     {% if display_access_url or doc.source.ids.openalex or display_doi or doc.id %}
     <div class="result-card__footer">
         <div class="result-card__actions">
-            {% if display_access_url %}
-            <a href="{{ display_access_url }}" target="_blank" rel="noopener noreferrer" class="result-card__action">{% trans "Acessar" %}</a>
-            {% endif %}
             {% if doc.source.ids.openalex %}
             <a href="{{ doc.source.ids.openalex }}" target="_blank" rel="noopener noreferrer" class="result-card__action result-card__action--ghost">OpenAlex</a>
             {% endif %}

@@ -134,9 +134,6 @@
     <div class="result-card__footer">
         <div class="result-card__actions">
             {% block item_footer_actions %}
-                {% if doc.source.content_url|first %}
-                <a href="{{ doc.source.content_url|first }}" target="_blank" rel="noopener noreferrer" class="result-card__action">{% trans "Acessar" %}</a>
-                {% endif %}
                 {% if doc.source.ids.openalex %}
                 <a href="{{ doc.source.ids.openalex }}" target="_blank" rel="noopener noreferrer" class="result-card__action result-card__action--ghost">OpenAlex</a>
                 {% endif %}
