@@ -1146,6 +1146,7 @@
 }
 
 .result-card__inner--social .result-card__footer {
+  justify-content: flex-end;
   margin-top: 0;
   padding-top: 0.62rem;
 }
