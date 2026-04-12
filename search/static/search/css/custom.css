@@ -1292,7 +1292,21 @@
   }
 
   .results-toolbar__actions {
+    width: 100%;
     justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    min-width: 0;
+  }
+
+  .results-toolbar__icon-group {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .results-toolbar__view-group {
+    flex: 0 0 auto;
+    margin-left: auto;
   }
 
   .results-toolbar__divider {
