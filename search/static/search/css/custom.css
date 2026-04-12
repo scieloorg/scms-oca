@@ -1406,15 +1406,22 @@
 }
 
 .results-list--lean .result-item {
-  border: none;
-  border-radius: 0;
+  border: 1px solid transparent;
+  border-radius: 6px;
   background: transparent;
   box-shadow: none;
   overflow: visible;
 }
 
 .results-list--lean .result-item__body {
-  padding: 0.2rem 0 0.35rem;
+  padding: 0.45rem 0.7rem 0.55rem;
+}
+
+.results-list--lean .result-item__select-input:checked ~ .result-item {
+  border: 1px solid #bfd1ee;
+  border-radius: 6px;
+  background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+  box-shadow: 0 10px 24px rgba(32, 57, 110, 0.1);
 }
 
 .results-list--lean .result-item-row {
