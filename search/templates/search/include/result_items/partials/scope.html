@@ -1,9 +1,9 @@
 {% load static %}
 
 {% if item_scope == "openalex_works" %}
-    <img src="{% static 'search/img/logo_openalex.svg' %}" alt="" class="result-card__source-logo result-card__source-logo--openalex" width="20" decoding="async">
+    <img src="{% static 'search/img/logo_openalex.svg' %}" alt="OpenAlex" class="result-card__source-logo result-card__source-logo--openalex" width="20" decoding="async">
 {% endif %}
 
 {% if item_scope == "scielo" %}
-    <img src="{% static 'img/logo-scielo-no-label.svg' %}" alt="" class="result-card__source-logo result-card__source-logo--scielo" width="20" decoding="async">
+    <img src="{% static 'img/logo-scielo-no-label.svg' %}" alt="SciELO" class="result-card__source-logo result-card__source-logo--scielo" width="20" decoding="async">
 {% endif %}
