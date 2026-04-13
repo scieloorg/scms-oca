@@ -83,7 +83,9 @@
 {% endblock %}
 
 {% block search_content %}
-    {% include "search/include/results.html" %}
+    <div id="results-container" class="sg-layout__results-offset">
+        {% include "search/include/results_list.html" %}
+    </div>
 {% endblock %}
 
 {% block extra_css %}
