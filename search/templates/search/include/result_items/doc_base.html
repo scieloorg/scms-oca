@@ -132,7 +132,6 @@
 {% endblock %}
 
 {% block item_footer %}
-    {% if doc.source.content_url or doc.source.ids.doi or doc.source.ids.openalex %}
     <div class="result-card__footer">
         <div class="result-card__actions">
             {% block item_footer_actions %}
@@ -148,5 +147,4 @@
             {% endblock %}
         </div>
     </div>
-    {% endif %}
 {% endblock %}

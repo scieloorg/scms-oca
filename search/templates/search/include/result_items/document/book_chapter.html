@@ -41,7 +41,5 @@
 {% block item_extra %}{% endblock %}
 
 {% block item_footer_actions %}
-    {% if doc.source.ids.openalex %}
-    <a href="{{ doc.source.ids.openalex }}" target="_blank" rel="noopener noreferrer" class="result-card__action result-card__action--ghost">OpenAlex</a>
-    {% endif %}
+    {{ block.super }}
 {% endblock %}
