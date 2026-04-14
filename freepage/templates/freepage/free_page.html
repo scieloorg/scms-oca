@@ -1,22 +1,5 @@
 {% extends "base.html" %}
-{% load wagtailcore_tags %}
 
 {% block content %}
-
-   {% if not page.specific.use_only_embed %}
-      <section id="content">
-        <div class="content-wrap p-1">
-          <div class="container clearfix">
-            {{ page.body|richtext }}
-          </div>
-        </div>
-      </section>
-   {% endif %}
-
-   <div class="container py-0 fixed-height-3024">
-    {% if page.specific.embed %}
-      {{ page.specific.embed|safe }}  
-    {% endif %}
-   </div>
-   
+  {% include "include/richtext_embed_page.html" with page=page embed_container_classes="container py-0 fixed-height-3024" %}
 {% endblock content %}
