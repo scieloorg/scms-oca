@@ -5,6 +5,7 @@ from django.utils.translation import gettext_lazy as _
 from modelcluster.fields import ParentalKey
 from modelcluster.models import ClusterableModel
 from wagtail.admin.panels import FieldPanel, InlinePanel
+from wagtail.fields import RichTextField
 from wagtail.models import Orderable, Page, TranslatableMixin
 
 from core.utils import utils
@@ -48,6 +49,35 @@ class CommonControlField(models.Model):
         blank=True,
         on_delete=models.CASCADE,
     )
+
+    class Meta:
+        abstract = True
+
+
+class RichTextEmbedPage(Page):
+    body = RichTextField()
+
+    embed = models.TextField(
+        _("Embed"),
+        null=True,
+        blank=True,
+        help_text=_(
+            "Embed content for the page, such as an iframe or other embed code."
+        ),
+    )
+    use_only_embed = models.BooleanField(
+        default=False,
+        verbose_name=_("Set only embed"),
+        help_text=_(
+            "If checked, the page will only display the embed content without the body text."
+        ),
+    )
+
+    content_panels = Page.content_panels + [
+        FieldPanel("body", classname="full"),
+        FieldPanel("embed", classname="full"),
+        FieldPanel("use_only_embed", classname="full"),
+    ]
 
     class Meta:
         abstract = True
