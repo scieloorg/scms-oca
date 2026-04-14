@@ -1,6 +1,7 @@
 {% load humanize %}
 {% load i18n %}
 
+{% if results_data.search_results %}
 <div id="results-count" class="mb-3">
     {% with total_count=results_data.total_results|default:"0" %}
     <div class="results-toolbar">
@@ -152,4 +153,7 @@
         <span class="results-pagination__nav-arrow" aria-hidden="true">&rsaquo;</span>
     </button>
 </div>
+{% endif %}
+{% else %}
+    {% include "search/include/no_results.html" %}
 {% endif %}
