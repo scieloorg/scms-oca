@@ -876,6 +876,24 @@
               "group_order": 50
             }
           },
+          "regions": {
+            "kind": "index",
+            "index_field_name": "regions",
+            "filter": {
+              "size": 100,
+              "order": {
+                "_key": "asc"
+              }
+            },
+            "settings": {
+              "label": "Region",
+              "support_query_operator": false,
+              "widget": "select",
+              "multiple_selection": true,
+              "group": "location",
+              "group_order": 50
+            }
+          },          
           "directory_type": {
             "kind": "index",
             "index_field_name": "directory_type",
@@ -982,6 +1000,10 @@
                   "label": "Practice"
                 },
                 {
+                  "value": "regions",
+                  "label": "Region"
+                },
+                {
                   "value": "states",
                   "label": "State"
                 },
@@ -1014,6 +1036,7 @@
               "classification",
               "practice",
               "institutions",
+              "regions",
               "states",
               "cities",
               "start_date_year"
@@ -1039,6 +1062,7 @@
               "classification",
               "practice",
               "institutions",
+              "regions",
               "states",
               "cities",
               "start_date_year"
