@@ -83,9 +83,6 @@
 {% block item_footer %}
 {% if doc.source.link %}
 <div class="result-card__footer">
-    <div class="result-card__actions">
-        <a href="{{ doc.source.link }}" target="_blank" rel="noopener noreferrer" class="result-card__action">{% trans "Acessar" %}</a>
-    </div>
     <div class="result-card__footer-side">
         {% include "search/include/result_items/partials/cite_action.html" %}
     </div>

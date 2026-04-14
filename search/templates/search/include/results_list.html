@@ -121,13 +121,6 @@
                 {% include "search/include/result_items/document/other.html" with doc=doc result_number=result_number %}
             {% endif %}
         {% endwith %}
-            {% if doc.source.oca_data.scope %}
-            <div class="result-card__meta-list result-card__meta-list--trailing">
-                <p class="result-card__meta-row">
-                    <strong>{% trans "Scope" %}:</strong> {{ doc.source.oca_data.scope }}
-                </p>
-            </div>
-            {% endif %}
         </div>
         </article>
     </div>

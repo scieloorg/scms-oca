@@ -23,7 +23,9 @@
             <span class="result-card__flag-text">{{ doc.source.type }}</span>
         </span>
         {% endif %}
-        {% block item_header_flags %}{% endblock %}
+        {% block item_header_flags %}
+            {% include "search/include/result_items/partials/scope.html" with item_scope=item_scope %}
+        {% endblock %}
     </div>
     <span class="result-card__languages">
         {% if title_variants|length > 1 %}
@@ -130,13 +132,9 @@
 {% endblock %}
 
 {% block item_footer %}
-    {% if doc.source.content_url or doc.source.ids.doi or doc.source.ids.openalex %}
     <div class="result-card__footer">
         <div class="result-card__actions">
             {% block item_footer_actions %}
-                {% if doc.source.content_url|first %}
-                <a href="{{ doc.source.content_url|first }}" target="_blank" rel="noopener noreferrer" class="result-card__action">{% trans "Acessar" %}</a>
-                {% endif %}
                 {% if doc.source.ids.openalex %}
                 <a href="{{ doc.source.ids.openalex }}" target="_blank" rel="noopener noreferrer" class="result-card__action result-card__action--ghost">OpenAlex</a>
                 {% endif %}
@@ -149,5 +147,4 @@
             {% endblock %}
         </div>
     </div>
-    {% endif %}
 {% endblock %}

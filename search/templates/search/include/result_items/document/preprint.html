@@ -26,6 +26,7 @@
         {% endif %}
     </span>
     {% endfor %}
+    {{ block.super }}
 {% endblock %}
 
 {% block item_source_line %}
@@ -82,8 +83,6 @@
     {{ block.super }}
 {% endblock %}
 
-{% block item_footer_actions %}
-    {% if doc.source.content_url|first %}
-    <a href="{{ doc.source.content_url|first }}" target="_blank" rel="noopener noreferrer" class="result-card__action">{% trans "Acessar" %}</a>
-    {% endif %}
+{% block item_footer %}
+    {{ block.super }}
 {% endblock %}

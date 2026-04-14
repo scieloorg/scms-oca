@@ -69,25 +69,21 @@
 {% block item_extra %}{% endblock %}
 
 {% block item_footer %}
-    {% if doc.source.files or doc.source.content_url or doc.source.ids.doi or doc.source.ids.openalex %}
     <div class="result-card__footer">
         <div class="result-card__actions">
-            {% if doc.source.files %}
-                {% for file in doc.source.files %}
-                <a href="{{ file.pid_url }}" target="_blank" rel="noopener noreferrer" class="result-card__action">{{ file.label }}</a>
-                {% endfor %}
-            {% endif %}
-            {% if doc.source.content_url|first %}
-            <a href="{{ doc.source.content_url|first }}" target="_blank" rel="noopener noreferrer" class="result-card__action result-card__action--ghost">{% trans "Acessar" %}</a>
-            {% endif %}
-            {% if doc.source.ids.openalex %}
-            <a href="{{ doc.source.ids.openalex }}" target="_blank" rel="noopener noreferrer" class="result-card__action result-card__action--ghost">OpenAlex</a>
-            {% endif %}
+            {% block item_footer_actions %}
+                {% if doc.source.files %}
+                    {% for file in doc.source.files %}
+                    <a href="{{ file.pid_url }}" target="_blank" rel="noopener noreferrer" class="result-card__action">{{ file.label }}</a>
+                    {% endfor %}
+                {% endif %}
+                {{ block.super }}
+            {% endblock %}
         </div>
         <div class="result-card__footer-side">
-            {% include "search/include/result_items/partials/doi_identifier.html" with doi=doc.source.ids.doi only %}
-            {% include "search/include/result_items/partials/cite_action.html" %}
+            {% block item_footer_side %}
+                {{ block.super }}
+            {% endblock %}
         </div>
     </div>
-    {% endif %}
 {% endblock %}

@@ -890,6 +890,25 @@
   color: #f28c35;
 }
 
+.result-card__source-logo {
+  display: block;
+  height: 1rem;
+  width: auto;
+  max-width: 1.25rem;
+  flex-shrink: 0;
+  object-fit: contain;
+}
+
+.result-card__source-logo--openalex {
+  height: 0.9rem;
+  max-width: 1.05rem;
+}
+
+.result-card__source-logo--scielo {
+  height: 1.15rem;
+  max-width: 1.35rem;
+}
+
 .result-card__language {
   display: inline-flex;
   align-items: center;
@@ -1127,6 +1146,7 @@
 }
 
 .result-card__inner--social .result-card__footer {
+  justify-content: flex-end;
   margin-top: 0;
   padding-top: 0.62rem;
 }
@@ -1273,7 +1293,21 @@
   }
 
   .results-toolbar__actions {
+    width: 100%;
     justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    min-width: 0;
+  }
+
+  .results-toolbar__icon-group {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .results-toolbar__view-group {
+    flex: 0 0 auto;
+    margin-left: auto;
   }
 
   .results-toolbar__divider {
@@ -1373,15 +1407,22 @@
 }
 
 .results-list--lean .result-item {
-  border: none;
-  border-radius: 0;
+  border: 1px solid transparent;
+  border-radius: 6px;
   background: transparent;
   box-shadow: none;
   overflow: visible;
 }
 
 .results-list--lean .result-item__body {
-  padding: 0.2rem 0 0.35rem;
+  padding: 0.45rem 0.7rem 0.55rem;
+}
+
+.results-list--lean .result-item__select-input:checked ~ .result-item {
+  border: 1px solid #bfd1ee;
+  border-radius: 6px;
+  background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+  box-shadow: 0 10px 24px rgba(32, 57, 110, 0.1);
 }
 
 .results-list--lean .result-item-row {
