@@ -2,8 +2,6 @@ from django.db import models
 from django.http import JsonResponse
 from django.template.response import TemplateResponse
 
-from wagtail.models import Page
-
 from modelcluster.fields import ParentalKey
 from wagtail.admin.panels import (
     FieldPanel,
@@ -14,11 +12,12 @@ from wagtail.admin.panels import (
 from wagtail.fields import RichTextField
 from wagtail.contrib.forms.models import AbstractFormField
 from wagtail.contrib.forms.panels import FormSubmissionsPanel
-
 from wagtailcaptcha.models import WagtailCaptchaEmailForm
 
+from core.models import RichTextEmbedPage
 
-class HomePage(Page):
+
+class HomePage(RichTextEmbedPage):
     pass
 
 
