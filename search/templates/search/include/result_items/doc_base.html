@@ -40,7 +40,7 @@
                 </button>
             {% endfor %}
         {% elif active_language_code %}
-            <span class="result-card__language result-card__language--active">{{ active_language_code }}</span>
+            <span class="result-card__language result-card__language--active" data-result-language="{{ active_language_code }}">{{ active_language_code }}</span>
         {% endif %}
     </span>
 </div>

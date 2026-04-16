@@ -417,7 +417,7 @@
   box-shadow: 0 0 0 1px #1f1f24, 0 5px 12px rgba(24, 41, 84, 0.22);
 }
 
-.results-toolbar__icon-btn[data-results-print-selected]:disabled {
+.results-toolbar__icon-btn:disabled {
   opacity: 0.42;
   cursor: not-allowed;
   background: rgba(241, 245, 250, 0.85);
@@ -1230,6 +1230,68 @@
 .result-card__action--static {
   cursor: default;
   pointer-events: none;
+}
+
+.citation-modal__export-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.15rem;
+}
+
+.citation-modal__section + .citation-modal__section {
+  margin-top: 1rem;
+}
+
+.citation-modal__label {
+  color: #283c58;
+  font-weight: 700;
+  font-size: 0.92rem;
+  margin-bottom: 0.35rem;
+}
+
+.citation-modal__textarea {
+  font-size: 0.86rem;
+  line-height: 1.55;
+  color: #3a4e68;
+  background: #f8fafd;
+  border-color: #dfe7f0;
+  resize: none;
+}
+
+.citation-modal__custom-input,
+.citation-modal__custom-select {
+  font-size: 0.88rem;
+}
+
+.citation-modal .citation-style-dropdown .dropdown-menu {
+  z-index: 1060;
+}
+
+.citation-style-dropdown__current {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.citation-style-dropdown__list {
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.citation-modal__copy-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.citation-modal__copy-row .citation-modal__textarea {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.citation-modal__copy-btn {
+  flex: 0 0 auto;
+  margin-top: 0.15rem;
+  white-space: nowrap;
 }
 
 .result-card__action-icon {
