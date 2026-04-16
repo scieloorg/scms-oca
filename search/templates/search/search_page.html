@@ -83,7 +83,9 @@
 {% endblock %}
 
 {% block search_content %}
-    {% include "search/include/results.html" %}
+    <div id="results-container">
+        {% include "search/include/results_list.html" %}
+    </div>
 
     <div class="modal fade" id="citation-modal" tabindex="-1" aria-labelledby="citation-modal-title" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">

@@ -1,6 +1,6 @@
 from django.conf import settings
 
-from .templatetags.custom_filters import _normalize_lang_code
+from harvest.language_normalizer import normalize_language_value
 
 _DOI_PREFIXES = (
     "https://doi.org/",
@@ -61,12 +61,27 @@ def _str_or_none(value):
     return str(value).strip() or None
 
 
+def _normalized_lang_pair(raw):
+    """Return ``(normalized_lower, base_code)`` for matching ``*_with_lang`` entries.
+
+    ``harvest.language_normalizer.normalize_language_value`` returns a single
+    string, not a ``(code, base)`` tuple.
+    """
+    if raw in (None, ""):
+        return None, None
+    s = str(raw).strip()
+    norm = normalize_language_value(s)
+    norm_lc = norm.strip().lower()
+    base = norm_lc.split("-")[0].split("_")[0]
+    return norm_lc, base
+
+
 def _split_matches_by_lang(items, field_name, lang_code, *, value_key=None):
     """Split ``*_with_lang`` entries into exact-match vs base-language-match lists."""
     if not isinstance(items, list):
         return [], []
+    requested, requested_base = _normalized_lang_pair(lang_code)
 
-    requested, requested_base = _normalize_lang_code(lang_code)
     if not requested:
         return [], []
 
@@ -80,7 +95,7 @@ def _split_matches_by_lang(items, field_name, lang_code, *, value_key=None):
         if value in (None, ""):
             continue
 
-        item_norm, item_base = _normalize_lang_code(str(item.get("language") or ""))
+        item_norm, item_base = _normalized_lang_pair(str(item.get("language") or ""))
         if not item_norm:
             continue
 
@@ -100,11 +115,7 @@ def _pick_localized(source, field_name, lang_code, *, value_key=None):
 
 
 def _resolve_title(source, lang):
-    return (
-        _pick_localized(source, "title", lang, value_key="text")
-        or _pick_localized(source, "title", lang)
-        or "Untitled"
-    )
+    return _pick_localized(source, "title", lang) or "Untitled"
 
 
 def normalize_doi(doi):
@@ -368,5 +379,10 @@ def documents_payload_to_csl_json(documents, *, language_code=None):
         source = entry.get("source")
         if doc_id is None or not isinstance(source, dict):
             continue
-        items.append(document_source_to_csl_item(source, doc_id=str(doc_id), language_code=language_code))
+        entry_lang = _str_or_none(entry.get("language_code"))
+        items.append(document_source_to_csl_item(
+            source,
+            doc_id=str(doc_id),
+            language_code=entry_lang or language_code,
+        ))
     return items

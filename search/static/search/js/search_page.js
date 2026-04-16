@@ -452,6 +452,19 @@ class SearchPageManager {
     this.resultsContainer.dataset.searchPageSelectionBound = 'true';
   }
 
+  getActiveCardLanguage(card) {
+    if (!card) return null;
+    const active = card.querySelector('[data-result-language].result-card__language--active');
+    const code = active?.dataset?.resultLanguage?.trim();
+    return code || null;
+  }
+
+  citationDocumentWithCardLanguage(doc, card) {
+    const languageCode = this.getActiveCardLanguage(card);
+    if (!languageCode) return { ...doc };
+    return { ...doc, language_code: languageCode };
+  }
+
   setCardLanguage(card, languageCode) {
     card.querySelectorAll('[data-result-language]').forEach(button => {
       const isActive = button.dataset.resultLanguage === languageCode;
@@ -505,6 +518,11 @@ class SearchPageManager {
       printBtn.disabled = !hasSelection;
       printBtn.classList.toggle('results-toolbar__icon-btn--print-ready', hasSelection);
     }
+
+    const toolbarCiteBtn = this.resultsContainer.querySelector('.js-toolbar-cite-selected');
+    if (toolbarCiteBtn) {
+      toolbarCiteBtn.disabled = selectedCount === 0;
+    }
   }
 
   // ── Citation modal ──────────────────────────────────────
@@ -553,7 +571,9 @@ class SearchPageManager {
     if (!scriptEl) return;
 
     try {
-      this.currentCitationDocuments = [JSON.parse(scriptEl.textContent)];
+      const doc = JSON.parse(scriptEl.textContent);
+      const card = button.closest('.result-card__inner');
+      this.currentCitationDocuments = [this.citationDocumentWithCardLanguage(doc, card)];
     } catch { return; }
 
     this.showCitationModal();
@@ -569,7 +589,11 @@ class SearchPageManager {
       if (!row) return;
       const script = row.querySelector('script[id^="citation-doc-"]');
       if (!script) return;
-      try { docs.push(JSON.parse(script.textContent)); } catch { /* skip */ }
+      try {
+        const doc = JSON.parse(script.textContent);
+        const card = row.querySelector('.result-card__inner');
+        docs.push(this.citationDocumentWithCardLanguage(doc, card));
+      } catch { /* skip */ }
     });
 
     if (!docs.length) return;
