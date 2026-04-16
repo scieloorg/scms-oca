@@ -1,5 +1,5 @@
 {% extends "search_gateway/search_gateway.html" %}
-{% load custom_filters %}
+{% load i18n_filters %}
 {% load static %}
 {% load i18n %}
 
@@ -136,6 +136,7 @@
 {% block javascript %}
 {{ block.super }}
 {{ search_clauses|json_script:"search-clauses-data" }}
+<script src="{% static 'search/js/results_print.js' %}"></script>
 <script src="{% static 'search/js/search_page.js' %}"></script>
 <script>
     window.searchPageConfig = {

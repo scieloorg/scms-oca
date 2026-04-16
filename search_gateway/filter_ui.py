@@ -30,7 +30,7 @@ def _apply_form_group_expanded_state(grouped_fields):
     )
     for group in grouped_items:
         group_is_active = any(field.get("is_active") for field in group.get("fields", []))
-        group["expanded"] = group_is_active if has_active_fields else False
+        group["expanded"] = group_is_active if has_active_fields else True
         for field in group.get("fields", []):
             field["expanded"] = field.get("is_active") if has_active_fields else False
     return grouped_items
@@ -436,8 +436,6 @@ def render_filter_sidebar(
     sidebar_form_id="search-gateway-filter-form",
     sidebar_form_method="get",
     sidebar_form_action="",
-    submit_label=gettext("FILTRAR"),
-    reset_label=gettext("LIMPAR"),
     submit_id="search-gateway-filter-submit",
     reset_id="search-gateway-filter-reset",
     reset_type="button",
@@ -457,8 +455,6 @@ def render_filter_sidebar(
         "sidebar_form_id": sidebar_form_id,
         "sidebar_form_method": sidebar_form_method,
         "sidebar_form_action": sidebar_form_action,
-        "submit_label": submit_label,
-        "reset_label": reset_label,
         "submit_id": submit_id,
         "reset_id": reset_id,
         "reset_type": reset_type,

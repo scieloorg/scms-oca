@@ -1,0 +1,45 @@
+{% extends "search/include/result_items/doc_base.html" %}
+{% load i18n %}
+{% load document_filters %}
+
+{% block item_title_href %}
+    {% if doc.source.ids.doi %}
+        {{ doc.source.ids.doi|doi_url }}
+    {% else %}
+        {{ pageurl }}
+    {% endif %}
+{% endblock %}
+
+{% block item_source_line %}
+    {% if doc.source.monograph.title or doc.source.publication_year or doc.source.biblio.first_page or doc.source.biblio.last_page %}
+    <p class="result-card__source-line">
+        {% if doc.source.monograph.title %}
+        <span class="result-card__source-name">{{ doc.source.monograph.title }}</span>
+        {% endif %}
+        {% if doc.source.publication_year %}
+        <span class="result-card__source-meta">{{ doc.source.publication_year }}</span>
+        {% endif %}
+        {% if doc.source.biblio.first_page or doc.source.biblio.last_page %}
+        <span class="result-card__source-meta">{% trans "Pages" %} {{ doc.source.biblio.first_page|default:"" }}{% if doc.source.biblio.last_page %}-{{ doc.source.biblio.last_page }}{% endif %}</span>
+        {% endif %}
+    </p>
+    {% endif %}
+    {% if doc.source.publishers or doc.source.ids.isbn %}
+    <p class="result-card__source-line">
+        {% include "search/include/result_items/partials/publishers.html" with publishers=doc.source.publishers only %}
+        {% if doc.source.ids.isbn %}
+        <span class="result-card__source-meta">ISBN {{ doc.source.ids.isbn }}</span>
+        {% endif %}
+    </p>
+    {% endif %}
+{% endblock %}
+
+{% block item_summary %}{% endblock %}
+
+{% block item_meta %}{% endblock %}
+
+{% block item_extra %}{% endblock %}
+
+{% block item_footer_actions %}
+    {{ block.super }}
+{% endblock %}

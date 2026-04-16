@@ -1,0 +1,23 @@
+{% load static %}
+
+{% if authorships %}
+<p class="result-card__authors">
+    {% for auth in authorships %}
+        {% if auth.author.display_name %}
+            {{ auth.author.display_name }}
+        {% elif auth.name %}
+            {{ auth.name }}
+        {% endif %}
+        {% if auth.author.orcid %}
+            <a href="{{ auth.author.orcid }}" target="_blank" rel="noopener noreferrer" class="result-card__orcid-link">
+                <img src="{% static 'images/authorIcon-orcid.png' %}" alt="ORCID" class="result-card__orcid-icon">
+            </a>
+        {% elif auth.orcid %}
+            <a href="{{ auth.orcid }}" target="_blank" rel="noopener noreferrer" class="result-card__orcid-link">
+                <img src="{% static 'images/authorIcon-orcid.png' %}" alt="ORCID" class="result-card__orcid-icon">
+            </a>
+        {% endif %}
+        {% if not forloop.last %}<span class="result-card__author-separator">;</span>{% endif %}
+    {% endfor %}
+</p>
+{% endif %}

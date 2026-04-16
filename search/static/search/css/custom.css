@@ -711,6 +711,57 @@
   line-height: 1;
 }
 
+.results-empty {
+  margin-bottom: 1.85rem;
+}
+
+.results-empty__card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 23.5rem;
+  padding: 3rem 1.9rem 3.2rem;
+  border: 1px solid #dfe7f0;
+  border-radius: 6px;
+  background: #ffffff;
+  box-shadow: 0 8px 22px rgba(20, 38, 64, 0.05);
+  text-align: center;
+}
+
+.results-empty__icon {
+  width: 6.35rem;
+  height: 6.35rem;
+  margin-bottom: 1.7rem;
+  border-radius: 999px;
+  background-color: #f5f8fc;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 24 24' fill='none' stroke='%2394A3B8' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 3rem 3rem;
+}
+
+.results-empty__content {
+  width: 100%;
+  max-width: 43rem;
+}
+
+.results-empty__title {
+  margin: 0;
+  color: #153b73;
+  font-size: 1.8rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.results-empty__description {
+  margin: 1.15rem auto 0;
+  color: #60799a;
+  font-size: 1.02rem;
+  line-height: 1.6;
+}
+
 .results-list {
   display: flex;
   flex-direction: column;
@@ -890,6 +941,25 @@
   color: #f28c35;
 }
 
+.result-card__source-logo {
+  display: block;
+  height: 1rem;
+  width: auto;
+  max-width: 1.25rem;
+  flex-shrink: 0;
+  object-fit: contain;
+}
+
+.result-card__source-logo--openalex {
+  height: 0.9rem;
+  max-width: 1.05rem;
+}
+
+.result-card__source-logo--scielo {
+  height: 1.15rem;
+  max-width: 1.35rem;
+}
+
 .result-card__language {
   display: inline-flex;
   align-items: center;
@@ -904,6 +974,36 @@
   font-size: 0.6rem;
   font-weight: 800;
   text-transform: uppercase;
+  cursor: pointer;
+  appearance: none;
+  transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease;
+}
+
+.result-card__language:hover,
+.result-card__language:focus-visible {
+  border-color: #9bb2e3;
+  background: #f5f8ff;
+  outline: none;
+}
+
+.result-card__language--active {
+  border-color: #2f4ea1;
+  background: #2f4ea1;
+  color: #ffffff;
+}
+
+.result-card__language--active:hover,
+.result-card__language--active:focus-visible {
+  border-color: #1f3d8c;
+  background: #1f3d8c;
+  color: #ffffff;
+}
+
+.result-card__languages {
+  display: inline-flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.28rem;
 }
 
 .result-card__title {
@@ -1097,6 +1197,7 @@
 }
 
 .result-card__inner--social .result-card__footer {
+  justify-content: flex-end;
   margin-top: 0;
   padding-top: 0.62rem;
 }
@@ -1305,7 +1406,21 @@
   }
 
   .results-toolbar__actions {
+    width: 100%;
     justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    min-width: 0;
+  }
+
+  .results-toolbar__icon-group {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .results-toolbar__view-group {
+    flex: 0 0 auto;
+    margin-left: auto;
   }
 
   .results-toolbar__divider {
@@ -1344,6 +1459,27 @@
     flex-direction: column;
     align-items: stretch;
     margin-bottom: 1.6rem;
+  }
+
+  .results-empty__icon {
+    width: 5.1rem;
+    height: 5.1rem;
+    margin-bottom: 1.2rem;
+    background-size: 2.6rem 2.6rem;
+  }
+
+  .results-empty__card {
+    min-height: 18rem;
+    padding: 2.2rem 1.15rem 2.35rem;
+    border-radius: 4px;
+  }
+
+  .results-empty__title {
+    font-size: 1.45rem;
+  }
+
+  .results-empty__description {
+    font-size: 0.94rem;
   }
 
   .results-pagination__center {
@@ -1405,15 +1541,22 @@
 }
 
 .results-list--lean .result-item {
-  border: none;
-  border-radius: 0;
+  border: 1px solid transparent;
+  border-radius: 6px;
   background: transparent;
   box-shadow: none;
   overflow: visible;
 }
 
 .results-list--lean .result-item__body {
-  padding: 0.2rem 0 0.35rem;
+  padding: 0.45rem 0.7rem 0.55rem;
+}
+
+.results-list--lean .result-item__select-input:checked ~ .result-item {
+  border: 1px solid #bfd1ee;
+  border-radius: 6px;
+  background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+  box-shadow: 0 10px 24px rgba(32, 57, 110, 0.1);
 }
 
 .results-list--lean .result-item-row {

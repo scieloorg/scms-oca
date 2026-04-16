@@ -1,21 +1,21 @@
-{% for item in items %}
-    <li class="menu-item {% if not is_dropdown %}analytics-nav-item{% endif %}{% if item.render_children %} sub-menu{% endif %}{% if item.active %} active{% endif %}">
-        {% if item.render_children %}
-            <button class="menu-link {% if not is_dropdown %}analytics-nav-link{% endif %}{% if item.icon_svg %} analytics-nav-link-with-icon{% endif %} analytics-nav-toggle" type="button" aria-haspopup="true" aria-expanded="false">
+{% for node in items %}
+    <li class="menu-item {% if not is_dropdown %}analytics-nav-item{% endif %}{% if node.children %} sub-menu{% endif %}{% if node.active %} active{% endif %}">
+        {% if node.children %}
+            <button class="menu-link {% if not is_dropdown %}analytics-nav-link{% endif %}{% if node.icon_svg %} analytics-nav-link-with-icon{% endif %} analytics-nav-toggle" type="button" aria-haspopup="true" aria-expanded="false">
                 <span class="analytics-inline-icon" aria-hidden="true">
-                    {{ item.icon_svg|safe }}
+                    {{ node.icon_svg|safe }}
                 </span>
-                <div>{{ item.resolved_label }}</div>
+                <div>{{ node.label }}</div>
             </button>
             <ul class="sub-menu-container analytics-dropdown{% if is_dropdown %} analytics-dropdown-nested{% endif %} menu-container">
-                {% include 'sa_menu/desktop_items.html' with items=item.render_children is_dropdown=True %}
+                {% include 'sa_menu/desktop_items.html' with items=node.children is_dropdown=True %}
             </ul>
         {% else %}
-            <a class="menu-link {% if not is_dropdown %}analytics-nav-link{% endif %}{% if item.icon_svg %} analytics-nav-link-with-icon{% endif %}" href="{{ item.resolved_url }}"{% if item.open_in_new_tab %} target="_blank" rel="noopener noreferrer"{% endif %}>
+            <a class="menu-link {% if not is_dropdown %}analytics-nav-link{% endif %}{% if node.icon_svg %} analytics-nav-link-with-icon{% endif %}" href="{{ node.url }}"{% if node.open_in_new_tab %} target="_blank" rel="noopener noreferrer"{% endif %}>
                 <span class="analytics-inline-icon" aria-hidden="true">
-                    {{ item.icon_svg|safe }}
+                    {{ node.icon_svg|safe }}
                 </span>
-                <div>{{ item.resolved_label }}</div>
+                <div>{{ node.label }}</div>
             </a>
         {% endif %}
     </li>

@@ -16,7 +16,7 @@ class SearchPageManager {
     this.citationStylesLoaded = false;
     this.currentSort = urlParams.get('sort') || 'desc';
     this.currentLimit = urlParams.get('limit') || '25';
-    this.currentPage = parseInt(urlParams.get('page'), 10) || 1;
+    this.currentPage = 1;
     this.currentDisplayMode = window.localStorage.getItem('searchPageDisplayMode') || 'grid';
     this.searchForm = document.getElementById('search-form');
     this.sidebarRoot = document.getElementById('search-sidebar-root');
@@ -24,6 +24,7 @@ class SearchPageManager {
     this.layoutRoot = document.getElementById('mainContent');
     this.headerRow = document.getElementById('search-header-row');
     this.sidebarToggleButton = document.getElementById('search-sidebar-toggle');
+    this._filtersFetchAbortController = null;
 
     this.init();
   }
@@ -33,6 +34,7 @@ class SearchPageManager {
     this.setupAdvancedSearchUI();
     this.setupSidebarToggle();
     this.setupGlobalResultsControlEvents();
+    this.setupResultsSelectionDelegation();
     this.restoreSearchClauses();
     await this.initSidebar();
     this.setupResultsUi();
@@ -248,22 +250,12 @@ class SearchPageManager {
       params.append(key, value);
     });
 
-    const sortSelect = document.getElementById('results-sort-select');
-    const sortValue = sortSelect?.value || this.currentSort;
-    if (sortValue) {
-      params.set('sort', sortValue);
+    if (this.currentSort) {
+      params.set('sort', this.currentSort);
     }
 
-    const activeLimitButton = document.querySelector(
-      '[data-results-limit-option].results-controls__limit-option--active',
-    );
-    const limitValue = activeLimitButton?.textContent?.trim() || this.currentLimit;
-    if (limitValue) {
-      params.set('limit', limitValue);
-    }
-
-    if (this.currentDisplayMode) {
-      params.set('display_mode', this.currentDisplayMode);
+    if (this.currentLimit) {
+      params.set('limit', this.currentLimit);
     }
 
     params.set('page', this.currentPage);
@@ -279,11 +271,17 @@ class SearchPageManager {
 
   async applyFiltersAjax(page = 1) {
     this.currentPage = page;
+    if (this._filtersFetchAbortController) {
+      this._filtersFetchAbortController.abort();
+    }
+    this._filtersFetchAbortController = new AbortController();
+    const { signal } = this._filtersFetchAbortController;
+
     this.showLoading();
     const params = this.buildSearchParams();
 
     try {
-      const response = await fetch(`${this.apiEndpoint}?${params.toString()}`);
+      const response = await fetch(`${this.apiEndpoint}?${params.toString()}`, { signal });
       if (!response.ok) throw new Error('Network response was not ok');
       const data = await response.json();
 
@@ -296,15 +294,18 @@ class SearchPageManager {
         this.setupResultsUi();
       }
 
-      if (this.sidebarRoot && data.sidebar_html) {
-        this.sidebarRoot.innerHTML = data.sidebar_html;
-        await this.initSidebar();
+      const sidebarForm = this.sidebarForm;
+      if (sidebarForm && window.SearchGatewayFilterForm?.commitAppliedFilters) {
+        window.SearchGatewayFilterForm.commitAppliedFilters(sidebarForm);
       }
 
       const url = new URL(window.location.href);
       url.search = params.toString();
       window.history.replaceState({}, '', url.toString());
     } catch (error) {
+      if (error.name === 'AbortError') {
+        return;
+      }
       console.error('Error applying filters:', error);
       if (this.resultsContainer) {
         this.resultsContainer.innerHTML = `
@@ -375,7 +376,14 @@ class SearchPageManager {
       window.localStorage.setItem('searchPageDisplayMode', mode);
       this.applyDisplayMode();
       this.setupResultsUi();
-      this.syncDisplayModeInUrl();
+    });
+
+    document.addEventListener('click', event => {
+      const printBtn = event.target.closest('[data-results-print-selected]');
+      if (!printBtn || printBtn.disabled) return;
+      if (window.SearchResultsPrint && typeof window.SearchResultsPrint.printSelectedCards === 'function') {
+        window.SearchResultsPrint.printSelectedCards();
+      }
     });
 
     document.body.dataset.searchPageControlsBound = 'true';
@@ -399,7 +407,7 @@ class SearchPageManager {
     });
 
     this.applyDisplayMode();
-    this.bindResultsSelectionControls();
+    this.updateResultsSelectionCounter();
   }
 
   applyDisplayMode() {
@@ -409,71 +417,94 @@ class SearchPageManager {
     resultsList.classList.toggle('results-list--lean', this.currentDisplayMode === 'list');
   }
 
-  syncDisplayModeInUrl() {
-    const url = new URL(window.location.href);
-    if (this.currentDisplayMode) {
-      url.searchParams.set('display_mode', this.currentDisplayMode);
-    } else {
-      url.searchParams.delete('display_mode');
+  setupResultsSelectionDelegation() {
+    if (!this.resultsContainer || this.resultsContainer.dataset.searchPageSelectionBound === 'true') {
+      return;
     }
 
-    window.history.replaceState({}, '', url.toString());
+    this.resultsContainer.addEventListener('click', event => {
+      const languageButton = event.target.closest('[data-result-language]');
+      if (!languageButton) return;
+
+      const card = languageButton.closest('.result-card__inner');
+      const languageCode = languageButton.dataset.resultLanguage;
+      if (!card || !languageCode) return;
+
+      this.setCardLanguage(card, languageCode);
+    });
+
+    this.resultsContainer.addEventListener('change', event => {
+      const { target } = event;
+
+      if (target.id === 'results-select-page') {
+        this.resultsContainer.querySelectorAll('.result-item__select-input').forEach(input => {
+          input.checked = target.checked;
+        });
+        this.updateResultsSelectionCounter();
+        return;
+      }
+
+      if (target.classList.contains('result-item__select-input')) {
+        this.updateResultsSelectionCounter();
+      }
+    });
+
+    this.resultsContainer.dataset.searchPageSelectionBound = 'true';
   }
 
-  bindResultsSelectionControls() {
-    const selectPage = document.getElementById('results-select-page');
-    const itemCheckboxes = Array.from(document.querySelectorAll('.result-item__select-input'));
-    const selectedCounter = document.getElementById('results-selected-counter');
-    const toolbarCiteBtn = document.querySelector('.js-toolbar-cite-selected');
+  setCardLanguage(card, languageCode) {
+    card.querySelectorAll('[data-result-language]').forEach(button => {
+      const isActive = button.dataset.resultLanguage === languageCode;
+      button.classList.toggle('result-card__language--active', isActive);
+      button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+    });
 
-    if (!selectPage || !selectedCounter) return;
+    const groups = new Map();
+    card.querySelectorAll('[data-result-lang-variant]').forEach(node => {
+      const key = node.parentElement;
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(node);
+    });
 
-    const singularLabel = selectedCounter.dataset.labelSingular || gettext('selecionado');
-    const pluralLabel = selectedCounter.dataset.labelPlural || gettext('selecionados');
+    groups.forEach(nodes => {
+      const hasMatch = nodes.some(n => n.dataset.resultLangVariant === languageCode);
+      if (!hasMatch) return;
+      nodes.forEach(n => { n.hidden = n.dataset.resultLangVariant !== languageCode; });
+    });
+  }
 
-    const updateSelectionState = () => {
-      const selectedCount = itemCheckboxes.filter(input => input.checked).length;
+  updateResultsSelectionCounter() {
+    if (!this.resultsContainer) return;
+
+    const selectPage = this.resultsContainer.querySelector('#results-select-page');
+    const selectedCounter = this.resultsContainer.querySelector('#results-selected-counter');
+    const itemCheckboxes = this.resultsContainer.querySelectorAll('.result-item__select-input');
+    const selectedCount = Array.from(itemCheckboxes).filter(input => input.checked).length;
+
+    if (selectPage && selectedCounter) {
+      const singularLabel = selectedCounter.dataset.labelSingular || gettext('selecionado');
+      const pluralLabel = selectedCounter.dataset.labelPlural || gettext('selecionados');
       const label = selectedCount === 1 ? singularLabel : pluralLabel;
       selectedCounter.textContent = `${selectedCount} ${label}`;
 
-      if (toolbarCiteBtn) {
-        toolbarCiteBtn.disabled = selectedCount === 0;
-      }
-
-      if (!itemCheckboxes.length) {
+      if (!itemCheckboxes.length || selectedCount === 0) {
         selectPage.checked = false;
         selectPage.indeterminate = false;
-        return;
-      }
-
-      if (selectedCount === 0) {
-        selectPage.checked = false;
-        selectPage.indeterminate = false;
-        return;
-      }
-
-      if (selectedCount === itemCheckboxes.length) {
+      } else if (selectedCount === itemCheckboxes.length) {
         selectPage.checked = true;
         selectPage.indeterminate = false;
-        return;
+      } else {
+        selectPage.checked = false;
+        selectPage.indeterminate = true;
       }
+    }
 
-      selectPage.checked = false;
-      selectPage.indeterminate = true;
-    };
-
-    selectPage.addEventListener('change', () => {
-      itemCheckboxes.forEach(input => {
-        input.checked = selectPage.checked;
-      });
-      updateSelectionState();
-    });
-
-    itemCheckboxes.forEach(input => {
-      input.addEventListener('change', updateSelectionState);
-    });
-
-    updateSelectionState();
+    const printBtn = this.resultsContainer.querySelector('[data-results-print-selected]');
+    if (printBtn) {
+      const hasSelection = selectedCount > 0;
+      printBtn.disabled = !hasSelection;
+      printBtn.classList.toggle('results-toolbar__icon-btn--print-ready', hasSelection);
+    }
   }
 
   // ── Citation modal ──────────────────────────────────────

@@ -1,6 +1,7 @@
 {% load humanize %}
 {% load i18n %}
 
+{% if results_data.search_results %}
 <div id="results-count" class="mb-3">
     {% with total_count=results_data.total_results|default:"0" %}
     <div class="results-toolbar">
@@ -22,7 +23,7 @@
                 <button type="button" class="results-toolbar__icon-btn js-toolbar-cite-selected" disabled aria-label="{% trans 'Citar' %}">
                     <span class="results-toolbar__icon results-toolbar__icon--quotes"></span>
                 </button>
-                <button type="button" class="results-toolbar__icon-btn" tabindex="-1" aria-hidden="true" aria-label="{% trans 'Imprimir' %}">
+                <button type="button" class="results-toolbar__icon-btn" tabindex="-1" aria-label="{% trans 'Imprimir' %}" data-results-print-selected disabled>
                     <span class="results-toolbar__icon results-toolbar__icon--print"></span>
                 </button>
                 <button type="button" class="results-toolbar__icon-btn" tabindex="-1" aria-hidden="true" aria-label="{% trans 'Compartilhar' %}">
@@ -124,13 +125,6 @@
                 {% include "search/include/result_items/openalex_works.html" with doc=doc result_number=result_number citation_doc_id=citation_doc_id %}
             {% endif %}
         {% endwith %}
-            {% if doc.source.oca_data.scope %}
-            <div class="result-card__meta-list result-card__meta-list--trailing">
-                <p class="result-card__meta-row">
-                    <strong>{% trans "Scope" %}:</strong> {{ doc.source.oca_data.scope }}
-                </p>
-            </div>
-            {% endif %}
         </div>
         </article>
     </div>
@@ -164,4 +158,7 @@
         <span class="results-pagination__nav-arrow" aria-hidden="true">&rsaquo;</span>
     </button>
 </div>
+{% endif %}
+{% else %}
+    {% include "search/include/no_results.html" %}
 {% endif %}

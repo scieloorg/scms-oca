@@ -5,7 +5,7 @@ from django.utils.translation import gettext_lazy as _
 from modelcluster.fields import ParentalKey
 from modelcluster.models import ClusterableModel
 from wagtail.admin.panels import FieldPanel, InlinePanel
-from wagtail.models import Locale, Orderable, Page, TranslatableMixin
+from wagtail.models import Orderable, Page, TranslatableMixin
 
 from core.utils import utils
 
@@ -152,18 +152,8 @@ class SAMenu(TranslatableMixin, ClusterableModel):
         return self.root_items().filter(is_visible=True)
 
     @classmethod
-    def for_request(cls, request, handle="analytics"):
+    def for_locale(cls, locale, handle="analytics"):
         queryset = cls.objects.filter(handle=handle, is_active=True)
-        if request is None:
-            return queryset.first()
-
-        language_code = getattr(request, "LANGUAGE_CODE", None)
-        locale = (
-            Locale.objects.filter(language_code__iexact=language_code).first()
-            if language_code
-            else None
-        )
-
         if locale is not None:
             return queryset.filter(locale=locale).first() or queryset.first()
 
@@ -252,12 +242,12 @@ class SAMenuItem(Orderable):
         return self.label or getattr(self.link_page, "title", "")
 
     @property
-    def resolved_url(self):
+    def base_url(self):
         if self.item_type == self.ItemType.PAGE and self.link_page:
             try:
-                return self.link_page.url or self.link_page.get_url()
+                return self.link_page.url or self.link_page.get_url() or ""
             except Exception:
-                return getattr(self.link_page, "url", "")
+                return getattr(self.link_page, "url", "") or ""
 
         if self.item_type == self.ItemType.URL:
             return self.link_url

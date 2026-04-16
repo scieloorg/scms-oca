@@ -157,8 +157,6 @@ class SearchPage(Page):
             applied_filters=applied_filters,
             sidebar_form_id="search-filter-form",
             sidebar_form_method="get",
-            submit_label=_("APLICAR"),
-            reset_label=_("LIMPAR"),
             submit_id="search-filter-submit",
             reset_id="search-filter-reset",
             reset_type="button",

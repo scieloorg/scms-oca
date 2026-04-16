@@ -1,0 +1,30 @@
+{% extends "search/include/result_items/doc_base.html" %}
+{% load i18n %}
+{% load document_filters %}
+
+{% block item_title_href %}
+    {% if doc.source.content_url|first %}
+        {{ doc.source.content_url|first }}
+    {% elif doc.source.locations and doc.source.locations.0.landing_page_url %}
+        {{ doc.source.locations.0.landing_page_url }}
+    {% else %}
+        {{ pageurl }}
+    {% endif %}
+{% endblock %}
+
+{% block item_footer %}
+    {% firstof doc.source.ids.doi doc.source.primary_location.doi as display_doi %}
+    <div class="result-card__footer">
+        <div class="result-card__actions">
+            {% block item_footer_actions %}
+                {{ block.super }}
+            {% endblock %}
+        </div>
+        <div class="result-card__footer-side">
+            {% block item_footer_side %}
+                {% include "search/include/result_items/partials/doi_identifier.html" with doi=display_doi only %}
+                {% include "search/include/result_items/partials/cite_action.html" %}
+            {% endblock %}
+        </div>
+    </div>
+{% endblock %}

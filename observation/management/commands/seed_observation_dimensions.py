@@ -3,50 +3,83 @@ from django.core.management.base import BaseCommand, CommandError
 from observation.models import ObservationDimension, ObservationPage
 
 
-DIMENSION_SPECS = [
-    {
-        "slug": "documents-by-institution",
-        "menu_label": "Evolution of Scientific Production - World - number of documents by Institution",
-        "row_label": "Institution",
-        "row_field_candidates": ["institutions", "institution"],
-        "is_default": False,
-    },
-    {
-        "slug": "documents-by-journal",
-        "menu_label": "Evolution of Scientific Production - World - number of documents by Journal",
-        "row_label": "Journal",
-        "row_field_candidates": ["source_name", "journal_title", "primary_source_title"],
-        "is_default": False,
-    },
-    {
-        "slug": "documents-by-thematic-area",
-        "menu_label": "Evolution of Scientific Production - World - number of documents by Thematic Area",
-        "row_label": "Thematic Area",
-        "row_field_candidates": ["subject_area_level_1", "topic_fields", "primary_topic_field"],
-        "is_default": False,
-    },
-    {
-        "slug": "documents-by-type-of-access",
-        "menu_label": "Evolution of Scientific Production - World - number of documents by Type of Access",
-        "row_label": "Type of Access",
-        "row_field_candidates": ["open_access_status", "open_access"],
-        "is_default": False,
-    },
-    {
-        "slug": "documents-by-publisher",
-        "menu_label": "Evolution of Scientific Production - World - number of documents by Publisher",
-        "row_label": "Publisher",
-        "row_field_candidates": ["publisher"],
-        "is_default": False,
-    },
-    {
-        "slug": "documents-by-country-region-affiliation",
-        "menu_label": "Evolution of Scientific Production - World - number of documents by Country and Region of Affiliation",
-        "row_label": "Country and Region of Affiliation",
-        "row_field_candidates": ["country", "author_country_codes"],
-        "is_default": True,
-    },
-]
+DIMENSION_SPECS_BY_INDEX = {
+    "scientific_production": [
+        {
+            "slug": "documents-by-institution",
+            "menu_label": "Evolution of Scientific Production - World - number of documents by Institution",
+            "row_label": "Institution",
+            "row_field_candidates": ["institutions", "institution"],
+            "is_default": False,
+        },
+        {
+            "slug": "documents-by-journal",
+            "menu_label": "Evolution of Scientific Production - World - number of documents by Journal",
+            "row_label": "Journal",
+            "row_field_candidates": ["source_name", "journal_title", "primary_source_title"],
+            "is_default": False,
+        },
+        {
+            "slug": "documents-by-thematic-area",
+            "menu_label": "Evolution of Scientific Production - World - number of documents by Thematic Area",
+            "row_label": "Thematic Area",
+            "row_field_candidates": ["subject_area_level_1", "topic_fields", "primary_topic_field"],
+            "is_default": False,
+        },
+        {
+            "slug": "documents-by-type-of-access",
+            "menu_label": "Evolution of Scientific Production - World - number of documents by Type of Access",
+            "row_label": "Type of Access",
+            "row_field_candidates": ["open_access_status", "open_access"],
+            "is_default": False,
+        },
+        {
+            "slug": "documents-by-publisher",
+            "menu_label": "Evolution of Scientific Production - World - number of documents by Publisher",
+            "row_label": "Publisher",
+            "row_field_candidates": ["publisher"],
+            "is_default": False,
+        },
+        {
+            "slug": "documents-by-country-region-affiliation",
+            "menu_label": "Evolution of Scientific Production - World - number of documents by Country and Region of Affiliation",
+            "row_label": "Country and Region of Affiliation",
+            "row_field_candidates": ["country", "author_country_codes"],
+            "is_default": True,
+        },
+    ],
+    "social_production": [
+        {
+            "slug": "documents-by-events",
+            "menu_label": "Brazil - Social Production - Country - Documents - Events",
+            "row_label": "Types",
+            "row_field_candidates": ["directory_type", "type"],
+            "is_default": True,
+        },
+        {
+            "slug": "documents-by-institutions",
+            "menu_label": "Brazil - Social Production - Country - Documents - Institutions",
+            "row_label": "Institutions",
+            "row_field_candidates": ["institutions"],
+            "is_default": False,
+        },
+        {
+            "slug": "documents-by-states",
+            "menu_label": "Brazil - Social Production - Country - Documents - States",
+            "row_label": "States",
+            "row_field_candidates": ["states"],
+            "is_default": False,
+        },
+        {
+            "slug": "documents-by-regions",
+            "menu_label": "Brazil - Social Production - Country - Documents - Regions",
+            "row_label": "Regions",
+            "row_field_candidates": ["regions"],
+            "row_field_fallback": "regions",
+            "is_default": False,
+        },
+    ],
+}
 
 
 class Command(BaseCommand):
@@ -102,8 +135,14 @@ class Command(BaseCommand):
         created_or_updated = 0
         default_slug = None
 
-        for spec in DIMENSION_SPECS:
+        dimension_specs = DIMENSION_SPECS_BY_INDEX.get(page.data_source.index_name)
+        if dimension_specs is None:
+            dimension_specs = DIMENSION_SPECS_BY_INDEX["scientific_production"]
+
+        for spec in dimension_specs:
             row_field_name = self._pick_row_field(field_settings, spec["row_field_candidates"])
+            if not row_field_name:
+                row_field_name = spec.get("row_field_fallback")
             if not row_field_name:
                 self.stdout.write(
                     self.style.WARNING(

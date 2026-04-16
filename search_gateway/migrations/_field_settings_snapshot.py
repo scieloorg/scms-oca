@@ -191,6 +191,7 @@ SOCIAL_BREAKDOWN_OPTIONS = [
     {"value": "action", "label": "Action"},
     {"value": "classification", "label": "Classification"},
     {"value": "practice", "label": "Practice"},
+    {"value": "regions", "label": "Region"},
     {"value": "states", "label": "State"},
     {"value": "cities", "label": "City"},
 ]
@@ -703,6 +704,13 @@ def _build_social_fields(legacy_fields):
                 **_group_settings("location", 40),
             }
         },
+        "regions": {
+            "settings": {
+                "label": "Region",
+                "widget": "select",
+                **_group_settings("location", 40),
+            }
+        },
         "directory_type": {
             "settings": {
                 "label": "Directory Type",
@@ -750,6 +758,7 @@ def _build_social_fields(legacy_fields):
             "classification",
             "practice",
             "institutions",
+            "regions",
             "states",
             "cities",
             "start_date_year",
@@ -774,6 +783,7 @@ def _build_social_fields(legacy_fields):
             "classification",
             "practice",
             "institutions",
+            "regions",
             "states",
             "cities",
             "start_date_year",

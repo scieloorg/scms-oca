@@ -1,0 +1,84 @@
+{% extends "search/include/result_items/doc_base.html" %}
+{% load i18n %}
+{% load i18n_filters %}
+{% load document_filters %}
+
+{% block item_title_href %}
+    {% if doc.source.content_url|first %}
+        {{ doc.source.content_url|first }}
+    {% elif doc.source.locations %}
+        {{ doc.source.locations.0.landing_page_url }}
+    {% else %}
+        {{ pageurl }}
+    {% endif %}
+{% endblock %}
+
+{% block item_authors %}{% endblock %}
+
+{% block item_source_line %}
+    {% if doc.source.affiliation or doc.source.publication_year or doc.source.publication_date %}
+    <p class="result-card__source-line">
+        {% if doc.source.affiliation %}
+        <span class="result-card__source-name">{{ doc.source.affiliation }}</span>
+        {% endif %}
+        {% if doc.source.publication_year %}
+        <span class="result-card__source-meta">{{ doc.source.publication_year }}</span>
+        {% endif %}
+        {% if doc.source.publication_date %}
+        <span class="result-card__source-meta">{{ doc.source.publication_date }}</span>
+        {% endif %}
+    </p>
+    {% endif %}
+{% endblock %}
+
+{% block item_summary %}
+    {% localized_field doc.source "description" as display_description %}
+    {% field_variants doc.source "description" as description_variants %}
+    {% if display_description %}
+        {% if description_variants|length > 1 %}
+            {% for description_variant in description_variants %}
+            <div class="result-card__abstract result-card__abstract--compact"{% if description_variant.language != active_language_code %} hidden{% endif %} data-result-lang-variant="{{ description_variant.language }}">
+                {{ description_variant.value|truncatewords_html:70|safe }}
+            </div>
+            {% endfor %}
+        {% else %}
+        <div class="result-card__abstract result-card__abstract--compact">
+            {{ display_description|truncatewords_html:70|safe }}
+        </div>
+        {% endif %}
+    {% endif %}
+{% endblock %}
+
+{% block item_meta %}
+    {% if doc.source.ids.alias or doc.source.ids_search or doc.source.dataverse_contacts %}
+    <div class="result-card__meta-list">
+        {% if doc.source.ids.alias %}
+        <p class="result-card__meta-row"><strong>{% trans "Alias" %}:</strong> {{ doc.source.ids.alias }}</p>
+        {% endif %}
+        {% if doc.source.ids_search %}
+        <p class="result-card__meta-row">
+            <strong>{% trans "IDs" %}:</strong>
+            {% for id in doc.source.ids_search %}
+                {{ id }}{% if not forloop.last %}, {% endif %}
+            {% endfor %}
+        </p>
+        {% endif %}
+        {% if doc.source.dataverse_contacts %}
+        <p class="result-card__meta-row">
+            <strong>{% trans "Contacts" %}:</strong>
+            {% for contact in doc.source.dataverse_contacts %}
+                {% if contact.contact_email %}
+                    <a href="mailto:{{ contact.contact_email }}">{{ contact.contact_email }}</a>{% if not forloop.last %}; {% endif %}
+                {% endif %}
+            {% endfor %}
+        </p>
+        {% endif %}
+    </div>
+    {% endif %}
+{% endblock %}
+
+{% block item_extra %}{% endblock %}
+
+{% block item_footer %}
+    {{ block.super }}
+{% endblock %}

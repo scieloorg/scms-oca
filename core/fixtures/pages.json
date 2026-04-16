@@ -4,6 +4,7 @@
       "key": "search_root",
       "title": "Busca",
       "type": "FreePage",
+      "publish": false,
       "children": [
         {
           "key": "search_scientific_production",
@@ -25,6 +26,7 @@
       "key": "indicators_root",
       "title": "Indicadores",
       "type": "FreePage",
+      "publish": false,
       "children": [
         {
           "key": "indicators_scientific_production",
@@ -44,6 +46,7 @@
       "key": "observation_root",
       "title": "Observação",
       "type": "ObservationPage",
+      "publish": false,
       "children": [
         {
           "key": "observation_scientific_production",
@@ -63,6 +66,7 @@
       "key": "help_root",
       "title": "Ajuda",
       "type": "FreePage",
+      "publish": false,
       "children": [
         {
           "key": "bibliometry_page",
@@ -80,6 +84,7 @@
           "key": "data_dictionary_root",
           "title": "Dicionário de Dados",
           "type": "FreePage",
+          "publish": false,
           "slug": "dados",
           "children": [
             {
@@ -116,6 +121,7 @@
       "key": "search_root",
       "title": "Search",
       "type": "FreePage",
+      "publish": false,
       "children": [
         {
           "key": "search_scientific_production",
@@ -137,6 +143,7 @@
       "key": "indicators_root",
       "title": "Indicators",
       "type": "FreePage",
+      "publish": false,
       "children": [
         {
           "key": "indicators_scientific_production",
@@ -156,6 +163,7 @@
       "key": "observation_root",
       "title": "Observation",
       "type": "ObservationPage",
+      "publish": false,
       "children": [
         {
           "key": "observation_scientific_production",
@@ -175,6 +183,7 @@
       "key": "help_root",
       "title": "Help",
       "type": "FreePage",
+      "publish": false,
       "children": [
         {
           "key": "bibliometry_page",
@@ -192,6 +201,7 @@
           "key": "data_dictionary_root",
           "title": "Data Dictionary",
           "type": "FreePage",
+          "publish": false,
           "slug": "data-dictionary",
           "children": [
             {
@@ -228,6 +238,7 @@
       "key": "search_root",
       "title": "Búsqueda",
       "type": "FreePage",
+      "publish": false,
       "children": [
         {
           "key": "search_scientific_production",
@@ -249,6 +260,7 @@
       "key": "indicators_root",
       "title": "Indicadores",
       "type": "FreePage",
+      "publish": false,
       "children": [
         {
           "key": "indicators_scientific_production",
@@ -268,6 +280,7 @@
       "key": "observation_root",
       "title": "Observación",
       "type": "ObservationPage",
+      "publish": false,
       "children": [
         {
           "key": "observation_scientific_production",
@@ -287,6 +300,7 @@
       "key": "help_root",
       "title": "Ayuda",
       "type": "FreePage",
+      "publish": false,
       "children": [
         {
           "key": "bibliometry_page",
@@ -304,6 +318,7 @@
           "key": "data_dictionary_root",
           "title": "Diccionario de Datos",
           "type": "FreePage",
+          "publish": false,
           "slug": "diccionario-datos",
           "children": [
             {
