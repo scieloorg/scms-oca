@@ -27,6 +27,23 @@ _WORK_TYPE_MAP = {
 _CONTAINER_TITLE_TYPES = frozenset({"article-journal", "article", "chapter", "review"})
 _PUBLISHER_TYPES = frozenset({"book", "chapter", "dataset"})
 
+_NAME_PARTICLES = frozenset({
+    "da", "das", "de", "del", "della", "delle", "degli", "den", "der",
+    "des", "di", "do", "dos", "du", "e",
+    "el", "het", "la", "las", "le", "les", "lo", "los",
+    "te", "ten", "ter",
+    "al", "ben", "bin", "ibn",
+    "van", "von",
+})
+
+_NAME_SUFFIXES = {
+    "jr": "Jr.", "jr.": "Jr.", "junior": "Junior",
+    "sr": "Sr.", "sr.": "Sr.", "senior": "Senior",
+    "filho": "Filho", "filha": "Filha",
+    "neto": "Neto", "neta": "Neta", "netto": "Netto",
+    "sobrinho": "Sobrinho", "sobrinha": "Sobrinha",
+    "ii": "II", "iii": "III", "iv": "IV", "v": "V",
+}
 
 def _deep_get(data, *keys, default=None):
     """Safely traverse nested dicts: ``_deep_get(d, "a", "b")`` → ``d["a"]["b"]``."""
@@ -155,43 +172,139 @@ def _resolve_biblio(source):
     return _str_or_none(bib.get("volume")), _str_or_none(bib.get("issue"))
 
 
-def _parse_display_name(display_name):
-    name = str(display_name).strip()
+def _tokenize_name(name):
+    """Split a name string into tokens, isolating commas as separate tokens."""
+    return name.replace(",", " , ").split()
+
+
+def _extract_suffix(tokens):
+    """Pop the last token if it is a known name suffix; return canonical form."""
+    if tokens and tokens[-1].lower() in _NAME_SUFFIXES:
+        return _NAME_SUFFIXES[tokens.pop().lower()]
+    return None
+
+
+def _strip_trailing_commas(tokens):
+    """Remove trailing comma tokens left after suffix extraction."""
+    while tokens and tokens[-1] == ",":
+        tokens.pop()
+
+
+def _split_leading_particles(tokens):
+    """Pop leading particle words from *tokens*, keeping at least one word."""
+    particles = []
+    while len(tokens) > 1 and tokens[0].lower() in _NAME_PARTICLES:
+        particles.append(tokens.pop(0))
+    return " ".join(particles) if particles else None
+
+
+def _split_trailing_particles(tokens):
+    """Extract particle words between given names and the last token (family).
+
+    Scans backwards, keeping at least one word for the given name.
+    Returns the joined particle string or *None*.
+    """
+    particles = []
+    i = len(tokens) - 2
+    while i > 0 and tokens[i].lower() in _NAME_PARTICLES:
+        particles.insert(0, tokens[i])
+        i -= 1
+    return " ".join(particles) if particles else None, i
+
+
+def _classify_particle(particle):
+    """Lowercase-initial → dropping-particle; uppercase → non-dropping-particle."""
+    return "dropping-particle" if particle[0].islower() else "non-dropping-particle"
+
+
+def _build_csl_name(*, family=None, given=None, particle=None, suffix=None):
+    """Assemble a CSL-JSON name dict from already-parsed parts."""
+    if not family and not given:
+        return None
+    result = {}
+    if family:
+        result["family"] = family
+    if given:
+        result["given"] = given
+    if particle:
+        result[_classify_particle(particle)] = particle
+    if suffix:
+        result["suffix"] = suffix
+    return result
+
+
+def _parse_comma_name(tokens):
+    """Parse ``Family, Given`` format → *(family, given, particle)*.
+
+    Leading particles in the family segment (e.g. "da Silva, João")
+    are extracted automatically.
+    """
+    comma_idx = tokens.index(",")
+    family_tokens = tokens[:comma_idx]
+    given_tokens = [t for t in tokens[comma_idx + 1:] if t != ","]
+
+    particle = _split_leading_particles(family_tokens)
+    family = " ".join(family_tokens) if family_tokens else None
+    given = " ".join(given_tokens) if given_tokens else None
+    return family, given, particle
+
+
+def _parse_natural_name(tokens):
+    """Parse ``Given [particles] Family`` format → *(family, given, particle)*.
+
+    Particles between the given name and the last word are extracted
+    by scanning backwards.
+    """
+    if len(tokens) == 1:
+        return tokens[0], None, None
+
+    family = tokens[-1]
+    particle, boundary = _split_trailing_particles(tokens)
+    given = " ".join(tokens[: boundary + 1])
+    return family, given, particle
+
+
+def _parse_name_parts(raw_name):
+    """Best-effort split of a display name into CSL-JSON name-variable parts.
+
+    Handles formats like::
+
+      "João da Silva Jr."          → given / dropping-particle / family / suffix
+      "da Silva, João"             → dropping-particle / family / given
+      "Van Dyck, Peter"            → non-dropping-particle / family / given
+      "Maria de los Santos Neto"   → given / dropping-particle / family / suffix
+    """
+    name = str(raw_name).strip()
     if not name:
         return None
 
-    if "," in name:
-        family, _, given = name.partition(",")
-        return {"family": family.strip(), "given": given.strip() or None}
+    tokens = _tokenize_name(name)
+    suffix = _extract_suffix(tokens)
+    _strip_trailing_commas(tokens)
 
-    parts = name.split()
-    if len(parts) >= 2:
-        return {"family": parts[-1], "given": " ".join(parts[:-1])}
+    if not tokens:
+        return {"literal": name}
 
-    return {"literal": name}
+    if "," in tokens:
+        family, given, particle = _parse_comma_name(tokens)
+    else:
+        family, given, particle = _parse_natural_name(tokens)
+
+    return _build_csl_name(
+        family=family or name,
+        given=given,
+        particle=particle,
+        suffix=suffix,
+    )
 
 
 def _parse_author(authorship):
     if not isinstance(authorship, dict):
         return None
-
-    author = authorship.get("author")
-    if isinstance(author, dict):
-        display = author.get("display_name")
-        if display:
-            return _parse_display_name(display)
-
-        family, given = _str_or_none(author.get("family")), _str_or_none(author.get("given"))
-        if family or given:
-            result = {}
-            if family:
-                result["family"] = family
-            if given:
-                result["given"] = given
-            return result
-
-    literal = _str_or_none(authorship.get("name"))
-    return {"literal": literal} if literal else None
+    name = _str_or_none(authorship.get("name"))
+    if not name:
+        return None
+    return _parse_name_parts(name)
 
 
 def _collect_authors(source):
@@ -222,7 +335,6 @@ def document_source_to_csl_item(source, *, doc_id, language_code=None):
         "type": csl_type,
         "title": _resolve_title(source, lang),
     }
-
     _add_if(item, "issued", _resolve_issued(source))
     _add_if(item, "author", _collect_authors(source))
     _add_if(item, "DOI", normalize_doi(_deep_get(source, "ids", "doi")))
