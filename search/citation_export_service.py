@@ -68,8 +68,6 @@ def _validate_documents(body):
     documents = body.get("documents")
     if not isinstance(documents, list) or not documents:
         raise CitationBadRequest(_("Field documents must be a non-empty list."))
-    if len(documents) != 1:
-        raise CitationBadRequest(_("Only one document can be cited at a time."))
     for i, entry in enumerate(documents):
         _validate_document_entry(entry, i)
     return documents
@@ -127,7 +125,7 @@ def build_citation_file(inputs):
 
 def _render_style(csl_json, style):
     rendered = render_citation(csl_json, style=style, validate=False)
-    return rendered[0].strip() if rendered else ""
+    return "\n\n".join(r.strip() for r in rendered if r and r.strip())
 
 
 def set_presets_cited(csl_json):

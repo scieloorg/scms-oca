@@ -12,7 +12,7 @@ class SearchPageManager {
     this.citationCustomStyleEndpoint = config.citationCustomStyleEndpoint || '/search/api/citation-custom-style/';
     this.citationExportEndpoint = config.citationExportEndpoint || '/search/api/citation-export/';
     this.searchableFields = config.searchableFields || [];
-    this.currentCitationDocument = null;
+    this.currentCitationDocuments = [];
     this.citationStylesLoaded = false;
     this.currentSort = urlParams.get('sort') || 'desc';
     this.currentLimit = urlParams.get('limit') || '25';
@@ -424,6 +424,7 @@ class SearchPageManager {
     const selectPage = document.getElementById('results-select-page');
     const itemCheckboxes = Array.from(document.querySelectorAll('.result-item__select-input'));
     const selectedCounter = document.getElementById('results-selected-counter');
+    const toolbarCiteBtn = document.querySelector('.js-toolbar-cite-selected');
 
     if (!selectPage || !selectedCounter) return;
 
@@ -434,6 +435,10 @@ class SearchPageManager {
       const selectedCount = itemCheckboxes.filter(input => input.checked).length;
       const label = selectedCount === 1 ? singularLabel : pluralLabel;
       selectedCounter.textContent = `${selectedCount} ${label}`;
+
+      if (toolbarCiteBtn) {
+        toolbarCiteBtn.disabled = selectedCount === 0;
+      }
 
       if (!itemCheckboxes.length) {
         selectPage.checked = false;
@@ -482,6 +487,11 @@ class SearchPageManager {
     });
 
     document.addEventListener('click', event => {
+      const btn = event.target.closest('.js-toolbar-cite-selected');
+      if (btn) this.openBulkCitationModal();
+    });
+
+    document.addEventListener('click', event => {
       const btn = event.target.closest('.js-citation-export');
       if (btn) this.downloadCitationExport(btn.dataset.exportFormat);
     });
@@ -512,9 +522,31 @@ class SearchPageManager {
     if (!scriptEl) return;
 
     try {
-      this.currentCitationDocument = JSON.parse(scriptEl.textContent);
+      this.currentCitationDocuments = [JSON.parse(scriptEl.textContent)];
     } catch { return; }
 
+    this.showCitationModal();
+  }
+
+  openBulkCitationModal() {
+    const checked = document.querySelectorAll('.result-item__select-input:checked');
+    if (!checked.length) return;
+
+    const docs = [];
+    checked.forEach(cb => {
+      const row = cb.closest('.result-item-row');
+      if (!row) return;
+      const script = row.querySelector('script[id^="citation-doc-"]');
+      if (!script) return;
+      try { docs.push(JSON.parse(script.textContent)); } catch { /* skip */ }
+    });
+
+    if (!docs.length) return;
+    this.currentCitationDocuments = docs;
+    this.showCitationModal();
+  }
+
+  showCitationModal() {
     const modalEl = document.getElementById('citation-modal');
     if (!modalEl) return;
 
@@ -528,8 +560,8 @@ class SearchPageManager {
     this.syncCitationStyleDropdownUi();
 
     this.showModal(modalEl);
-    await this.ensureCitationStyleOptions();
-    await this.loadCitationPreview();
+    this.ensureCitationStyleOptions();
+    this.loadCitationPreview();
   }
 
   showModal(el) {
@@ -591,10 +623,10 @@ class SearchPageManager {
   }
 
   async loadCitationPreview() {
-    if (!this.currentCitationDocument) return;
+    if (!this.currentCitationDocuments.length) return;
     try {
       const resp = await this.postJson(this.citationPreviewEndpoint, {
-        documents: [this.currentCitationDocument],
+        documents: this.currentCitationDocuments,
       });
       const data = await resp.json();
       this.renderPresets(data.presets || []);
@@ -749,7 +781,7 @@ class SearchPageManager {
     if (!style) { field.value = ''; return; }
     try {
       const resp = await this.postJson(this.citationCustomStyleEndpoint, {
-        documents: [this.currentCitationDocument],
+        documents: this.currentCitationDocuments,
         style,
       });
       const data = await resp.json();
@@ -761,11 +793,11 @@ class SearchPageManager {
   }
 
   async downloadCitationExport(format) {
-    if (!this.currentCitationDocument || !format) return;
+    if (!this.currentCitationDocuments.length || !format) return;
     try {
       const resp = await this.postJson(this.citationExportEndpoint, {
         format,
-        documents: [this.currentCitationDocument],
+        documents: this.currentCitationDocuments,
       });
       const blob = await resp.blob();
       const url = URL.createObjectURL(blob);

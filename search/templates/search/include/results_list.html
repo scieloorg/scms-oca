@@ -14,18 +14,18 @@
             <span class="results-toolbar__summary-label">{% trans "resultados" %}</span>
         </div>
 
-        <div class="results-toolbar__actions" aria-hidden="true">
+        <div class="results-toolbar__actions">
             <div class="results-toolbar__icon-group">
-                <button type="button" class="results-toolbar__icon-btn" tabindex="-1" aria-label="{% trans 'Exportar' %}">
+                <button type="button" class="results-toolbar__icon-btn" tabindex="-1" aria-hidden="true" aria-label="{% trans 'Exportar' %}">
                     <span class="results-toolbar__icon results-toolbar__icon--download"></span>
                 </button>
-                <button type="button" class="results-toolbar__icon-btn" tabindex="-1" aria-label="{% trans 'Citar' %}">
+                <button type="button" class="results-toolbar__icon-btn js-toolbar-cite-selected" disabled aria-label="{% trans 'Citar' %}">
                     <span class="results-toolbar__icon results-toolbar__icon--quotes"></span>
                 </button>
-                <button type="button" class="results-toolbar__icon-btn" tabindex="-1" aria-label="{% trans 'Imprimir' %}">
+                <button type="button" class="results-toolbar__icon-btn" tabindex="-1" aria-hidden="true" aria-label="{% trans 'Imprimir' %}">
                     <span class="results-toolbar__icon results-toolbar__icon--print"></span>
                 </button>
-                <button type="button" class="results-toolbar__icon-btn" tabindex="-1" aria-label="{% trans 'Compartilhar' %}">
+                <button type="button" class="results-toolbar__icon-btn" tabindex="-1" aria-hidden="true" aria-label="{% trans 'Compartilhar' %}">
                     <span class="results-toolbar__icon results-toolbar__icon--share"></span>
                 </button>
             </div>
