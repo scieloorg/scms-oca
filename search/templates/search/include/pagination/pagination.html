@@ -1,0 +1,26 @@
+{% load i18n %}
+
+<div class="results-pagination" aria-label="{% trans 'Paginação dos resultados' %}">
+    <button type="button" data-page="{{ results_data.previous_page }}" class="results-pagination__nav{% if not results_data.has_previous %} results-pagination__nav--disabled{% endif %}" {% if not results_data.has_previous %}disabled{% endif %}>
+        <span class="results-pagination__nav-arrow" aria-hidden="true">&lsaquo;</span>
+        <span>{% trans "Anterior" %}</span>
+    </button>
+
+    <div class="results-pagination__center">
+        <div class="results-pagination__pages">
+            {% for page_number in results_data.page_numbers %}
+            <button type="button" data-page="{{ page_number }}" class="results-pagination__page{% if page_number == results_data.current_page %} results-pagination__page--active{% endif %}">
+                {{ page_number }}
+            </button>
+            {% endfor %}
+        </div>
+        <div class="results-pagination__status">
+            {% blocktrans with current=results_data.current_page total=results_data.total_pages %}Página {{ current }} de {{ total }}{% endblocktrans %}
+        </div>
+    </div>
+
+    <button type="button" data-page="{{ results_data.next_page }}" class="results-pagination__nav{% if not results_data.has_next %} results-pagination__nav--disabled{% endif %}" {% if not results_data.has_next %}disabled{% endif %}>
+        <span>{% trans "Próxima" %}</span>
+        <span class="results-pagination__nav-arrow" aria-hidden="true">&rsaquo;</span>
+    </button>
+</div>
