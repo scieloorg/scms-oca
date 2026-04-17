@@ -13,10 +13,11 @@ class SearchPageManager {
     this.citationExportEndpoint = config.citationExportEndpoint || '/search/api/citation-export/';
     this.searchableFields = config.searchableFields || [];
     this.currentCitationDocuments = [];
+    this.citationDocuments = {};
     this.citationStylesLoaded = false;
     this.currentSort = urlParams.get('sort') || 'desc';
     this.currentLimit = urlParams.get('limit') || '25';
-    this.currentPage = 1;
+    this.currentPage = parseInt(urlParams.get('page') || '1', 10) || 1;
     this.currentDisplayMode = window.localStorage.getItem('searchPageDisplayMode') || 'grid';
     this.searchForm = document.getElementById('search-form');
     this.sidebarRoot = document.getElementById('search-sidebar-root');
@@ -25,6 +26,10 @@ class SearchPageManager {
     this.headerRow = document.getElementById('search-header-row');
     this.sidebarToggleButton = document.getElementById('search-sidebar-toggle');
     this._filtersFetchAbortController = null;
+    this.resultsSelectionState = {
+      checkboxes: [],
+      selectedCount: 0,
+    };
 
     this.init();
   }
@@ -35,6 +40,7 @@ class SearchPageManager {
     this.setupSidebarToggle();
     this.setupGlobalResultsControlEvents();
     this.setupResultsSelectionDelegation();
+    this.syncCitationDocumentsFromDom();
     this.restoreSearchClauses();
     await this.initSidebar();
     this.setupResultsUi();
@@ -263,9 +269,73 @@ class SearchPageManager {
     return params;
   }
 
+  ensureLoadingOverlay() {
+    if (!this.resultsContainer) return null;
+    let overlay = this.resultsContainer.querySelector('.results-container__loading');
+    if (overlay) return overlay;
+
+    overlay = document.createElement('div');
+    overlay.className = 'results-container__loading';
+    overlay.hidden = true;
+    overlay.innerHTML = '<div class="text-center p-4"><i class="icon-spinner icon-spin icon-2x"></i></div>';
+    this.resultsContainer.appendChild(overlay);
+    return overlay;
+  }
+
   showLoading() {
-    if (this.resultsContainer) {
-      this.resultsContainer.innerHTML = '<div class="text-center p-5"><i class="icon-spinner icon-spin icon-2x"></i></div>';
+    const overlay = this.ensureLoadingOverlay();
+    if (!this.resultsContainer || !overlay) return;
+    this.resultsContainer.classList.add('results-container--loading');
+    this.resultsContainer.setAttribute('aria-busy', 'true');
+    overlay.hidden = false;
+  }
+
+  hideLoading() {
+    if (!this.resultsContainer) return;
+    this.resultsContainer.classList.remove('results-container--loading');
+    this.resultsContainer.setAttribute('aria-busy', 'false');
+    const overlay = this.resultsContainer.querySelector('.results-container__loading');
+    if (overlay) overlay.hidden = true;
+  }
+
+  getResultsRegion(regionId) {
+    return this.resultsContainer?.querySelector(`#${regionId}`) || null;
+  }
+
+  replaceResultsRegion(regionId, html) {
+    const region = this.getResultsRegion(regionId);
+    if (!region) return;
+    region.innerHTML = html || '';
+  }
+
+  renderResultsFragments(data) {
+    this.replaceResultsRegion('results-toolbar-region', data.toolbar_html);
+    this.replaceResultsRegion('results-controls-region', data.controls_html);
+    this.replaceResultsRegion('results-list-region', data.results_list_html);
+    this.replaceResultsRegion('results-pagination-region', data.pagination_html);
+  }
+
+  syncCitationDocuments(documents) {
+    this.citationDocuments = documents && typeof documents === 'object' ? documents : {};
+
+    const scriptEl = document.getElementById('search-citation-documents');
+    if (scriptEl) {
+      scriptEl.textContent = JSON.stringify(this.citationDocuments);
+    }
+  }
+
+  syncCitationDocumentsFromDom() {
+    const scriptEl = document.getElementById('search-citation-documents');
+    if (!scriptEl) {
+      this.citationDocuments = {};
+      return;
+    }
+
+    try {
+      const parsed = JSON.parse(scriptEl.textContent);
+      this.citationDocuments = parsed && typeof parsed === 'object' ? parsed : {};
+    } catch {
+      this.citationDocuments = {};
     }
   }
 
@@ -285,14 +355,9 @@ class SearchPageManager {
       if (!response.ok) throw new Error('Network response was not ok');
       const data = await response.json();
 
-      if (this.resultsContainer) {
-        this.resultsContainer.innerHTML = data.results_html || `
-          <div class="alert alert-info" role="alert">
-            ${gettext('No results found. Try adjusting your search or filters.')}
-          </div>
-        `;
-        this.setupResultsUi();
-      }
+      this.renderResultsFragments(data);
+      this.syncCitationDocuments(data.citation_documents);
+      this.setupResultsUi();
 
       const sidebarForm = this.sidebarForm;
       if (sidebarForm && window.SearchGatewayFilterForm?.commitAppliedFilters) {
@@ -307,13 +372,19 @@ class SearchPageManager {
         return;
       }
       console.error('Error applying filters:', error);
-      if (this.resultsContainer) {
-        this.resultsContainer.innerHTML = `
+      this.renderResultsFragments({
+        toolbar_html: '',
+        controls_html: '',
+        results_list_html: `
           <div class="alert alert-danger" role="alert">
             ${gettext('Error loading results. Try again.')}
           </div>
-        `;
-      }
+        `,
+        pagination_html: '',
+      });
+      this.syncCitationDocuments({});
+    } finally {
+      this.hideLoading();
     }
   }
 
@@ -407,7 +478,7 @@ class SearchPageManager {
     });
 
     this.applyDisplayMode();
-    this.updateResultsSelectionCounter();
+    this.updateResultsSelectionCounter({ refresh: true });
   }
 
   applyDisplayMode() {
@@ -437,14 +508,22 @@ class SearchPageManager {
       const { target } = event;
 
       if (target.id === 'results-select-page') {
-        this.resultsContainer.querySelectorAll('.result-item__select-input').forEach(input => {
+        const itemCheckboxes = this.resultsSelectionState.checkboxes;
+        itemCheckboxes.forEach(input => {
           input.checked = target.checked;
         });
+        this.resultsSelectionState.selectedCount = target.checked ? itemCheckboxes.length : 0;
         this.updateResultsSelectionCounter();
         return;
       }
 
       if (target.classList.contains('result-item__select-input')) {
+        const delta = target.checked ? 1 : -1;
+        const nextCount = this.resultsSelectionState.selectedCount + delta;
+        this.resultsSelectionState.selectedCount = Math.max(
+          0,
+          Math.min(nextCount, this.resultsSelectionState.checkboxes.length),
+        );
         this.updateResultsSelectionCounter();
       }
     });
@@ -486,13 +565,33 @@ class SearchPageManager {
     });
   }
 
-  updateResultsSelectionCounter() {
+  getCitationDocument(citationKey) {
+    if (citationKey == null) return null;
+    const doc = this.citationDocuments[String(citationKey)];
+    return doc && typeof doc === 'object' ? doc : null;
+  }
+
+  refreshResultsSelectionState() {
     if (!this.resultsContainer) return;
+
+    const itemCheckboxes = Array.from(this.resultsContainer.querySelectorAll('.result-item__select-input'));
+    const selectedCount = itemCheckboxes.filter(input => input.checked).length;
+    this.resultsSelectionState = {
+      checkboxes: itemCheckboxes,
+      selectedCount,
+    };
+  }
+
+  updateResultsSelectionCounter({ refresh = false } = {}) {
+    if (!this.resultsContainer) return;
+    if (refresh) {
+      this.refreshResultsSelectionState();
+    }
 
     const selectPage = this.resultsContainer.querySelector('#results-select-page');
     const selectedCounter = this.resultsContainer.querySelector('#results-selected-counter');
-    const itemCheckboxes = this.resultsContainer.querySelectorAll('.result-item__select-input');
-    const selectedCount = Array.from(itemCheckboxes).filter(input => input.checked).length;
+    const itemCheckboxes = this.resultsSelectionState.checkboxes;
+    const selectedCount = this.resultsSelectionState.selectedCount;
 
     if (selectPage && selectedCounter) {
       const singularLabel = selectedCounter.dataset.labelSingular || gettext('selecionado');
@@ -567,14 +666,11 @@ class SearchPageManager {
   }
 
   async openCitationModal(button) {
-    const scriptEl = document.getElementById(button.dataset.citationDocId);
-    if (!scriptEl) return;
+    const doc = this.getCitationDocument(button.dataset.citationKey);
+    if (!doc) return;
 
-    try {
-      const doc = JSON.parse(scriptEl.textContent);
-      const card = button.closest('.result-card__inner');
-      this.currentCitationDocuments = [this.citationDocumentWithCardLanguage(doc, card)];
-    } catch { return; }
+    const card = button.closest('.result-card__inner');
+    this.currentCitationDocuments = [this.citationDocumentWithCardLanguage(doc, card)];
 
     this.showCitationModal();
   }
@@ -587,13 +683,10 @@ class SearchPageManager {
     checked.forEach(cb => {
       const row = cb.closest('.result-item-row');
       if (!row) return;
-      const script = row.querySelector('script[id^="citation-doc-"]');
-      if (!script) return;
-      try {
-        const doc = JSON.parse(script.textContent);
-        const card = row.querySelector('.result-card__inner');
-        docs.push(this.citationDocumentWithCardLanguage(doc, card));
-      } catch { /* skip */ }
+      const doc = this.getCitationDocument(row.dataset.citationKey);
+      if (!doc) return;
+      const card = row.querySelector('.result-card__inner');
+      docs.push(this.citationDocumentWithCardLanguage(doc, card));
     });
 
     if (!docs.length) return;
