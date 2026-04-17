@@ -1,0 +1,25 @@
+{% load i18n %}
+
+<div class="results-controls" aria-label="{% trans 'Controles dos resultados' %}">
+    <div class="results-controls__main">
+        <label class="results-controls__page-select" for="results-select-page">
+            <input type="checkbox" id="results-select-page" class="results-controls__checkbox">
+            <span class="results-controls__checkbox-mark" aria-hidden="true"></span>
+            <span class="results-controls__page-label">{% trans "Selecionar página" %}</span>
+        </label>
+
+        {% include "search/include/results_controls/sort.html" %}
+    </div>
+
+    <div class="results-controls__aside">
+        {% include "search/include/results_controls/limit.html" %}
+        <div
+            id="results-selected-counter"
+            class="results-controls__selected"
+            data-label-singular="{% trans 'selecionado' %}"
+            data-label-plural="{% trans 'selecionados' %}"
+        >
+            0 {% trans "selecionados" %}
+        </div>
+    </div>
+</div>

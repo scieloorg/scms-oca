@@ -54,6 +54,22 @@ class SearchPage(Page):
         return clauses if isinstance(clauses, list) else []
 
     @classmethod
+    def max_page_size(cls):
+        configured = getattr(settings, "SEARCH_RESULTS_MAX_PAGE_SIZE", 100)
+        try:
+            configured = int(configured)
+        except (TypeError, ValueError):
+            configured = 100
+        return max(configured, 1)
+
+    @classmethod
+    def normalize_page_size(cls, raw_value, default=25):
+        return min(
+            normalize_positive_number(raw_value, default),
+            cls.max_page_size(),
+        )
+
+    @classmethod
     def get_search_request_state(cls, request, *, data_source=None):
         current_sort = normalize_search_result_sort(
             request.GET.get("sort", "desc")
@@ -69,7 +85,7 @@ class SearchPage(Page):
             "sort_field": sort_field,
             "sort_order": sort_order,
             "current_page": normalize_positive_number(request.GET.get("page"), 1),
-            "current_limit": normalize_positive_number(request.GET.get("limit"), 25),
+            "current_limit": cls.normalize_page_size(request.GET.get("limit"), 25),
         }
 
     @classmethod
@@ -130,7 +146,16 @@ class SearchPage(Page):
         return decorated
 
     @staticmethod
+    def build_citation_documents(search_results):
+        return {
+            str(index): document
+            for index, document in enumerate(search_results or [])
+            if isinstance(document, dict)
+        }
+
+    @classmethod
     def build_search_template_context(
+        cls,
         request_state,
         *,
         index_name="",
@@ -147,6 +172,7 @@ class SearchPage(Page):
             "search_query": request_state["search_query"],
             "search_sidebar_html": search_sidebar_html,
             "results_data": payload,
+            "citation_documents": cls.build_citation_documents(payload.get("search_results")),
         }
 
     def render_search_filter_sidebar_html(self, request, data_source, applied_filters):
