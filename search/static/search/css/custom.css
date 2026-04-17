@@ -404,15 +404,21 @@
   padding: 0;
   border: 1px solid transparent;
   border-radius: 0.28rem;
-  background: transparent;
+  background-color: transparent;
   color: #9aabbe;
   box-shadow: none;
-  transition: background-color 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease, color 0.16s ease;
+  opacity: 1;
+  transition:
+    opacity 0.22s ease,
+    background-color 0.22s ease,
+    border-color 0.22s ease,
+    box-shadow 0.22s ease,
+    color 0.22s ease;
 }
 
 .results-toolbar__icon-btn--active {
   border-color: #1f1f24;
-  background: #29438f;
+  background-color: #29438f;
   color: #ffffff;
   box-shadow: 0 0 0 1px #1f1f24, 0 5px 12px rgba(24, 41, 84, 0.22);
 }
@@ -420,13 +426,13 @@
 .results-toolbar__icon-btn:disabled {
   opacity: 0.42;
   cursor: not-allowed;
-  background: rgba(241, 245, 250, 0.85);
+  background-color: rgba(241, 245, 250, 0.85);
   border-color: rgba(225, 231, 240, 0.9);
 }
 
 .results-toolbar__icon-btn--print-ready {
   border-color: transparent;
-  background: transparent;
+  background-color: transparent;
   color: #9aabbe;
   box-shadow: none;
   opacity: 1;
