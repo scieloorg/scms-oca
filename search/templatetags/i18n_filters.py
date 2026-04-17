@@ -19,6 +19,9 @@ def _match_language(items, lang_code, key):
     base = []
 
     for item in items:
+        if not isinstance(item, dict):
+            continue
+
         value = item.get(key)
         if value in (None, ""):
             continue
@@ -78,6 +81,9 @@ def field_variants(context, source, field_name, value_key=None, output="scalar")
     grouped = {}
 
     for item in items:
+        if not isinstance(item, dict):
+            continue
+
         code, base = split_lang_code(item.get("language"))
         if not base:
             continue
