@@ -1,0 +1,47 @@
+{% load i18n %}
+
+{% if results_data.search_results %}
+<div id="results-list" class="results-list">
+    {% for doc in results_data.search_results %}
+    {% with citation_key=forloop.counter0|stringformat:"d" %}
+    <div class="result-item-row" data-citation-key="{{ citation_key }}">
+        <input
+            type="checkbox"
+            class="result-item__select-input"
+            id="result-select-{{ forloop.counter }}"
+            name="selected_results"
+            value="{{ doc.id|default:forloop.counter }}"
+        >
+        <label class="result-item__selector" for="result-select-{{ forloop.counter }}">
+            <span class="visually-hidden">{% blocktrans with number=forloop.counter %}Selecionar resultado {{ number }}{% endblocktrans %}</span>
+        </label>
+        <article class="card result-item">
+        <div class="card-body result-item__body">
+        {% with item_type=doc.source.type|default_if_none:"" item_type_source=doc.source.sources.type|default_if_none:"" item_scope=doc.source.oca_data.scope|default_if_none:"" item_index=doc.index|default_if_none:"" result_number=results_data.start_result|add:forloop.counter0 %}
+            {% if item_index == "social_production" or item_type == "directory" %}
+                {% include "search/include/result_items/document/social_production.html" with doc=doc result_number=result_number citation_key=citation_key %}
+            {% elif item_type == "article" or item_type == "dissertation" or item_scope == "openalex_works" %}
+                {% include "search/include/result_items/document/article.html" with doc=doc result_number=result_number citation_key=citation_key %}
+            {% elif item_type == "dataset" or item_type == "database" %}
+                {% include "search/include/result_items/document/dataset.html" with doc=doc result_number=result_number citation_key=citation_key %}
+            {% elif item_type == "book" %}
+                {% include "search/include/result_items/document/book.html" with doc=doc result_number=result_number citation_key=citation_key %}
+            {% elif item_type == "book-chapter" or item_type == "book-section" %}
+                {% include "search/include/result_items/document/book_chapter.html" with doc=doc result_number=result_number citation_key=citation_key %}
+            {% elif item_type_source == "journals" %}
+                {% include "search/include/result_items/document/journal.html" with doc=doc result_number=result_number citation_key=citation_key %}
+            {% elif item_type == "preprint" %}
+                {% include "search/include/result_items/document/preprint.html" with doc=doc result_number=result_number citation_key=citation_key %}
+            {% else %}
+                {% include "search/include/result_items/document/other.html" with doc=doc result_number=result_number citation_key=citation_key %}
+            {% endif %}
+        {% endwith %}
+        </div>
+        </article>
+    </div>
+    {% endwith %}
+    {% endfor %}
+</div>
+{% else %}
+    {% include "search/include/no_results.html" %}
+{% endif %}

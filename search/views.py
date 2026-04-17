@@ -30,6 +30,33 @@ def _applied_filters_for_json(applied_filters):
     return result
 
 
+def _render_results_fragments(request, results_data):
+    context = {"results_data": results_data}
+    has_results = bool(results_data.get("search_results"))
+    total_count = results_data.get("total_results", 0)
+    return {
+        "toolbar_html": render_to_string(
+            "search/include/results_fragments/toolbar.html",
+            {**context, "total_count": total_count},
+            request=request,
+        ) if has_results else "",
+        "controls_html": render_to_string(
+            "search/include/results_fragments/controls.html",
+            context,
+            request=request,
+        ) if has_results else "",
+        "results_list_html": render_to_string(
+            "search/include/results_fragments/list.html",
+            context,
+            request=request,
+        ),
+        "pagination_html": render_to_string(
+            "search/include/results_fragments/pagination.html",
+            context,
+            request=request,
+        ) if has_results else "",
+    }
+
 @require_GET
 def search_view_list(request):
     index_name = request.GET.get(
@@ -58,13 +85,12 @@ def search_view_list(request):
             page_size=request_state["current_limit"],
             current_sort=request_state["current_sort"],
         )
-        results_html = render_to_string(
-            "search/include/results_list.html",
-            {"results_data": results_data},
-            request=request,
-        )
+        fragments = _render_results_fragments(request, results_data)
         return JsonResponse({
-            "results_html": results_html,
+            **fragments,
+            "citation_documents": SearchPage.build_citation_documents(
+                results_data.get("search_results")
+            ),
         })
     except Exception as e:
         logging.exception(f"Error getting filters for index {index_name}. {e}")

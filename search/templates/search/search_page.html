@@ -13,9 +13,10 @@
 
 {% block search_content %}
 
-    <div id="results-container">
+    <div id="results-container" class="results-container">
         {% include "search/include/results_list.html" %}
     </div>
+    {{ citation_documents|json_script:"search-citation-documents" }}
     {% include "search/include/citation/cited.html" %}
 
 {% endblock %}
