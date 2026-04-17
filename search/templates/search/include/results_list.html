@@ -4,45 +4,7 @@
 {% if results_data.search_results %}
 <div id="results-count" class="mb-3">
     {% with total_count=results_data.total_results|default:"0" %}
-    <div class="results-toolbar">
-        <div class="results-toolbar__summary">
-            <span class="results-toolbar__summary-label">{% trans "Mostrando" %}</span>
-            <span class="results-toolbar__summary-range">
-                {% if results_data.shown_count %}{{ results_data.start_result|intcomma }}-{{ results_data.end_result|intcomma }}{% else %}0{% endif %}
-            </span>
-            <span class="results-toolbar__summary-label">{% trans "de" %}</span>
-            <span class="results-toolbar__summary-total">{{ total_count|intcomma }}</span>
-            <span class="results-toolbar__summary-label">{% trans "resultados" %}</span>
-        </div>
-
-        <div class="results-toolbar__actions">
-            <div class="results-toolbar__icon-group">
-                <button type="button" class="results-toolbar__icon-btn" tabindex="-1" aria-hidden="true" aria-label="{% trans 'Exportar' %}">
-                    <span class="results-toolbar__icon results-toolbar__icon--download"></span>
-                </button>
-                <button type="button" class="results-toolbar__icon-btn js-toolbar-cite-selected" disabled aria-label="{% trans 'Citar' %}">
-                    <span class="results-toolbar__icon results-toolbar__icon--quotes"></span>
-                </button>
-                <button type="button" class="results-toolbar__icon-btn" tabindex="-1" aria-label="{% trans 'Imprimir' %}" data-results-print-selected disabled>
-                    <span class="results-toolbar__icon results-toolbar__icon--print"></span>
-                </button>
-                <button type="button" class="results-toolbar__icon-btn" tabindex="-1" aria-hidden="true" aria-label="{% trans 'Compartilhar' %}">
-                    <span class="results-toolbar__icon results-toolbar__icon--share"></span>
-                </button>
-            </div>
-
-            <div class="results-toolbar__divider"></div>
-
-            <div class="results-toolbar__view-group">
-                <button type="button" class="results-toolbar__icon-btn" tabindex="-1" aria-label="{% trans 'Lista' %}" data-display-mode="list" aria-pressed="false">
-                    <span class="results-toolbar__icon results-toolbar__icon--list"></span>
-                </button>
-                <button type="button" class="results-toolbar__icon-btn results-toolbar__icon-btn--active" tabindex="-1" aria-label="{% trans 'Grade' %}" data-display-mode="grid" aria-pressed="true">
-                    <span class="results-toolbar__icon results-toolbar__icon--grid"></span>
-                </button>
-            </div>
-        </div>
-    </div>
+        {% include "search/include/resullts_toolbar/toolbar.html" with total_count=total_count %}
     {% endwith %}
 </div>
 
@@ -54,29 +16,12 @@
             <span class="results-controls__page-label">{% trans "Selecionar página" %}</span>
         </label>
 
-        <div class="results-controls__sort">
-            <span class="results-controls__label">{% trans "Ordenar por:" %}</span>
-            <div class="results-controls__select-wrap">
-                <select id="results-sort-select" class="results-controls__select" aria-label="{% trans 'Ordenar resultados' %}">
-                    <option value="desc" {% if results_data.current_sort == "desc" %}selected{% endif %}>{% trans "Mais recentes" %}</option>
-                    <option value="asc" {% if results_data.current_sort == "asc" %}selected{% endif %}>{% trans "Mais antigos" %}</option>
-                    <option value="cited_by_count" {% if results_data.current_sort == "cited_by_count" %}selected{% endif %}>{% trans "Mais citados" %}</option>
-                </select>
-            </div>
-        </div>
+        {% include "search/include/results_controls/sort.html" %}
     </div>
 
     <div class="results-controls__aside">
-        <div class="results-controls__limit">
-            <span class="results-controls__label">{% trans "Exibir:" %}</span>
-            <div class="results-controls__limit-options">
-                <button type="button" class="results-controls__limit-option{% if results_data.current_limit == 10 %} results-controls__limit-option--active{% endif %}" data-results-limit-option>10</button>
-                <button type="button" class="results-controls__limit-option{% if results_data.current_limit == 25 %} results-controls__limit-option--active{% endif %}" data-results-limit-option>25</button>
-                <button type="button" class="results-controls__limit-option{% if results_data.current_limit == 50 %} results-controls__limit-option--active{% endif %}" data-results-limit-option>50</button>
-                <button type="button" class="results-controls__limit-option{% if results_data.current_limit == 100 %} results-controls__limit-option--active{% endif %}" data-results-limit-option>100</button>
-            </div>
-        </div>
 
+        {% include "search/include/results_controls/limit.html" %}
         <div
             id="results-selected-counter"
             class="results-controls__selected"
@@ -133,32 +78,12 @@
     {% endfor %}
 </div>
 
-{% if results_data.total_pages > 1 %}
-<div class="results-pagination" aria-label="{% trans 'Paginação dos resultados' %}">
-    <button type="button" data-page="{{ results_data.previous_page }}" class="results-pagination__nav{% if not results_data.has_previous %} results-pagination__nav--disabled{% endif %}" {% if not results_data.has_previous %}disabled{% endif %}>
-        <span class="results-pagination__nav-arrow" aria-hidden="true">&lsaquo;</span>
-        <span>{% trans "Anterior" %}</span>
-    </button>
+    {% if results_data.total_pages > 1 %}
+        
+        {% include "search/include/pagination/pagination.html" %}
 
-    <div class="results-pagination__center">
-        <div class="results-pagination__pages">
-            {% for page_number in results_data.page_numbers %}
-            <button type="button" data-page="{{ page_number }}" class="results-pagination__page{% if page_number == results_data.current_page %} results-pagination__page--active{% endif %}">
-                {{ page_number }}
-            </button>
-            {% endfor %}
-        </div>
-        <div class="results-pagination__status">
-            {% blocktrans with current=results_data.current_page total=results_data.total_pages %}Página {{ current }} de {{ total }}{% endblocktrans %}
-        </div>
-    </div>
+    {% endif %}
 
-    <button type="button" data-page="{{ results_data.next_page }}" class="results-pagination__nav{% if not results_data.has_next %} results-pagination__nav--disabled{% endif %}" {% if not results_data.has_next %}disabled{% endif %}>
-        <span>{% trans "Próxima" %}</span>
-        <span class="results-pagination__nav-arrow" aria-hidden="true">&rsaquo;</span>
-    </button>
-</div>
-{% endif %}
 {% else %}
     {% include "search/include/no_results.html" %}
 {% endif %}

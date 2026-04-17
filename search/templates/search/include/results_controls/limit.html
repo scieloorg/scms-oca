@@ -1,0 +1,11 @@
+{% load i18n %}
+
+<div class="results-controls__limit">
+    <span class="results-controls__label">{% trans "Exibir:" %}</span>
+    <div class="results-controls__limit-options">
+        <button type="button" class="results-controls__limit-option{% if results_data.current_limit == 10 %} results-controls__limit-option--active{% endif %}" data-results-limit-option>10</button>
+        <button type="button" class="results-controls__limit-option{% if results_data.current_limit == 25 %} results-controls__limit-option--active{% endif %}" data-results-limit-option>25</button>
+        <button type="button" class="results-controls__limit-option{% if results_data.current_limit == 50 %} results-controls__limit-option--active{% endif %}" data-results-limit-option>50</button>
+        <button type="button" class="results-controls__limit-option{% if results_data.current_limit == 100 %} results-controls__limit-option--active{% endif %}" data-results-limit-option>100</button>
+    </div>
+</div>

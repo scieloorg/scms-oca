@@ -1,0 +1,43 @@
+{% load i18n %}
+{% load humanize %}
+
+
+<div class="results-toolbar">
+    <div class="results-toolbar__summary">
+        <span class="results-toolbar__summary-label">{% trans "Mostrando" %}</span>
+        <span class="results-toolbar__summary-range">
+            {% if results_data.shown_count %}{{ results_data.start_result|intcomma }}-{{ results_data.end_result|intcomma }}{% else %}0{% endif %}
+        </span>
+        <span class="results-toolbar__summary-label">{% trans "de" %}</span>
+        <span class="results-toolbar__summary-total">{{ total_count|intcomma }}</span>
+        <span class="results-toolbar__summary-label">{% trans "resultados" %}</span>
+    </div>
+
+    <div class="results-toolbar__actions">
+        <div class="results-toolbar__icon-group">
+            <button type="button" class="results-toolbar__icon-btn" tabindex="-1" aria-hidden="true" aria-label="{% trans 'Exportar' %}">
+                <span class="results-toolbar__icon results-toolbar__icon--download"></span>
+            </button>
+            <button type="button" class="results-toolbar__icon-btn js-toolbar-cite-selected" disabled aria-label="{% trans 'Citar' %}">
+                <span class="results-toolbar__icon results-toolbar__icon--quotes"></span>
+            </button>
+            <button type="button" class="results-toolbar__icon-btn" tabindex="-1" aria-label="{% trans 'Imprimir' %}" data-results-print-selected disabled>
+                <span class="results-toolbar__icon results-toolbar__icon--print"></span>
+            </button>
+            <button type="button" class="results-toolbar__icon-btn" tabindex="-1" aria-hidden="true" aria-label="{% trans 'Compartilhar' %}">
+                <span class="results-toolbar__icon results-toolbar__icon--share"></span>
+            </button>
+        </div>
+
+        <div class="results-toolbar__divider"></div>
+
+        <div class="results-toolbar__view-group">
+            <button type="button" class="results-toolbar__icon-btn" tabindex="-1" aria-label="{% trans 'Lista' %}" data-display-mode="list" aria-pressed="false">
+                <span class="results-toolbar__icon results-toolbar__icon--list"></span>
+            </button>
+            <button type="button" class="results-toolbar__icon-btn results-toolbar__icon-btn--active" tabindex="-1" aria-label="{% trans 'Grade' %}" data-display-mode="grid" aria-pressed="true">
+                <span class="results-toolbar__icon results-toolbar__icon--grid"></span>
+            </button>
+        </div>
+    </div>
+</div>

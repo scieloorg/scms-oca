@@ -1,0 +1,43 @@
+{% load i18n %}
+
+<div class="modal fade" id="citation-modal" tabindex="-1" aria-labelledby="citation-modal-title" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content citation-modal">
+            <div class="modal-header">
+                <h5 class="modal-title" id="citation-modal-title">{% trans "Como citar" %}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Fechar' %}"></button>
+            </div>
+            <div class="modal-body">
+                <div class="citation-modal__export-actions">
+                    <button type="button" class="btn btn-outline-secondary btn-sm js-citation-export" data-export-format="ris">RIS</button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm js-citation-export" data-export-format="bib">BIBTEX</button>
+                </div>
+
+                <div id="citation-modal-presets"></div>
+
+                <div class="citation-modal__section">
+                    <label class="citation-modal__label" id="citation-custom-style-label" for="citation-custom-style-toggle">{% trans "Outros formatos de citação e exportação:" %}</label>
+                    <div class="dropdown citation-style-dropdown">
+                        <button type="button" class="btn btn-outline-secondary dropdown-toggle w-100 text-start d-flex align-items-center justify-content-between citation-modal__custom-select citation-style-dropdown__toggle" id="citation-custom-style-toggle" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="listbox" aria-labelledby="citation-custom-style-label">
+                            <span class="citation-style-dropdown__current text-truncate">{% trans "Selecione um formato de citação…" %}</span>
+                        </button>
+                        <div class="dropdown-menu w-100 citation-style-dropdown__menu shadow-sm" role="listbox" aria-labelledby="citation-custom-style-toggle">
+                            <div class="px-2 pt-2 pb-0">
+                                <input type="search" class="form-control form-control-sm citation-style-dropdown__filter" placeholder="{% trans 'Buscar formato…' %}" autocomplete="off" aria-label="{% trans 'Filtrar formatos de citação' %}">
+                            </div>
+                            <div class="citation-style-dropdown__list px-1 pb-2 pt-1"></div>
+                        </div>
+                    </div>
+                    <select id="citation-custom-style" class="visually-hidden" tabindex="-1" aria-hidden="true">
+                        <option value="">{% trans "Selecione um formato de citação…" %}</option>
+                    </select>
+                    <p id="citation-custom-style-hint" class="form-text citation-modal__hint small text-muted mb-0 mt-1">{% trans "Lista baseada nos estilos CSL instalados no servidor." %}</p>
+                    <div class="citation-modal__copy-row mt-2">
+                        <textarea class="form-control citation-modal__textarea js-citation-copy-target js-citation-custom" rows="5" readonly></textarea>
+                        <button type="button" class="btn btn-outline-secondary btn-sm citation-modal__copy-btn js-citation-copy" aria-label="{% trans 'Copiar citação' %}">{% trans "Copiar" %}</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
