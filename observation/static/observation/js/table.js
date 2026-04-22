@@ -88,6 +88,329 @@
     return params;
   }
 
+  const EXPORT_STORAGE_KEY = "observation_export_jobs_v1";
+  let exportJobs = [];
+  let exportPollTimer = null;
+
+  function getExportStatusEndpoint(jobId) {
+    const config = window.searchPageConfig || {};
+    const startEndpoint = config.exportStartEndpoint || "";
+    return startEndpoint.replace(/\/start\/?$/, "/status/" + encodeURIComponent(jobId) + "/");
+  }
+
+  function getExportDownloadEndpoint(jobId) {
+    const config = window.searchPageConfig || {};
+    const startEndpoint = config.exportStartEndpoint || "";
+    return startEndpoint.replace(/\/start\/?$/, "/download/" + encodeURIComponent(jobId) + "/");
+  }
+
+  function loadJobsFromStorage() {
+    try {
+      const parsed = JSON.parse(window.localStorage.getItem(EXPORT_STORAGE_KEY) || "[]");
+      exportJobs = Array.isArray(parsed) ? parsed : [];
+    } catch (e) {
+      exportJobs = [];
+    }
+  }
+
+  function saveJobsToStorage() {
+    try {
+      window.localStorage.setItem(EXPORT_STORAGE_KEY, JSON.stringify(exportJobs.slice(0, 100)));
+    } catch (e) {}
+  }
+
+  function clearSavedJobs() {
+    exportJobs = [];
+    try {
+      window.localStorage.removeItem(EXPORT_STORAGE_KEY);
+    } catch (e) {}
+    if (exportPollTimer) {
+      clearInterval(exportPollTimer);
+      exportPollTimer = null;
+    }
+    renderExportJobs();
+  }
+
+  function upsertJob(job) {
+    const idx = exportJobs.findIndex(function (item) { return item.id === job.id; });
+    if (idx >= 0) exportJobs[idx] = Object.assign({}, exportJobs[idx], job);
+    else exportJobs.unshift(job);
+    saveJobsToStorage();
+  }
+
+  function isSingleFileModeEnabled() {
+    const toggle = document.getElementById("observation-export-single-file-toggle");
+    return Boolean(toggle && toggle.checked);
+  }
+
+  function updateExportControlsState() {
+    const rowLimit = document.getElementById("observation-export-row-limit");
+    const allBtn = document.getElementById("observation-export-all-btn");
+    const singleFileMode = isSingleFileModeEnabled();
+    if (rowLimit) rowLimit.disabled = singleFileMode;
+    if (allBtn) {
+      if (singleFileMode) {
+        allBtn.disabled = true;
+        allBtn.setAttribute("title", "Disabled while single-file mode is enabled.");
+      } else {
+        allBtn.removeAttribute("title");
+      }
+    }
+  }
+
+  function renderExportJobs() {
+    const container = document.getElementById("observation-export-jobs");
+    if (!container) return;
+    if (!exportJobs.length) {
+      container.innerHTML = '<div class="list-group-item text-muted small">No export jobs yet.</div>';
+      return;
+    }
+    let orderedJobs = exportJobs.slice().sort(function (a, b) {
+      const aIsBatch = a.job_type === "batch";
+      const bIsBatch = b.job_type === "batch";
+      if (aIsBatch !== bIsBatch) {
+        return aIsBatch ? -1 : 1;
+      }
+      const aIsRunningBatch = aIsBatch && (a.status === "running" || a.status === "queued");
+      const bIsRunningBatch = bIsBatch && (b.status === "running" || b.status === "queued");
+      if (aIsRunningBatch !== bIsRunningBatch) {
+        return aIsRunningBatch ? -1 : 1;
+      }
+      const aParent = String(a.parent_id || "");
+      const bParent = String(b.parent_id || "");
+      const aSeq = Number(a.sequence || 0);
+      const bSeq = Number(b.sequence || 0);
+      if (aParent && bParent && aParent === bParent && aSeq > 0 && bSeq > 0) {
+        return aSeq - bSeq;
+      }
+      return Number(b.created_at || 0) - Number(a.created_at || 0);
+    });
+    if (isSingleFileModeEnabled()) {
+      orderedJobs = orderedJobs.filter(function (job) { return job.job_type !== "batch"; });
+      if (orderedJobs.length > 1) orderedJobs = [orderedJobs[0]];
+    }
+    if (!orderedJobs.length) {
+      container.innerHTML = '<div class="list-group-item text-muted small">No export jobs yet.</div>';
+      return;
+    }
+    const html = orderedJobs.map(function (job) {
+      const done = job.status === "done";
+      const error = job.status === "error";
+      const isBatch = job.job_type === "batch";
+      const isRunning = job.status === "running" || job.status === "queued";
+      const statusClass = done ? "text-success" : (error ? "text-danger" : "text-muted");
+      const statusLabel = job.status || "queued";
+      const progress = Math.max(0, Math.min(100, Number(job.progress_percent || 0)));
+      const processed = Number(job.processed_rows || 0);
+      const total = Number(job.total_rows || 0);
+      const createdAt = Number(job.created_at || 0);
+      const isFresh = createdAt > 0 && (Date.now() / 1000 - createdAt) < (60 * 60);
+      const actionHtml = (done && !isBatch)
+        ? '<button type="button" class="btn btn-sm btn-outline-success observation-download-link' + (isFresh ? '' : ' disabled') + '" ' +
+          (isFresh ? ('data-job-id="' + job.id + '" data-file-name="' + (job.file_name || "observation.csv") + '"') : 'disabled') +
+          '>Download CSV</button>'
+        : '<button class="btn btn-sm btn-outline-secondary" type="button" disabled>' + (isBatch ? (job.ready_files_count || 0) + " files" : (progress + "%")) + "</button>";
+      const progressHtml = isRunning
+        ? '<div class="observation-export-progress-wrap">' +
+            '<div class="observation-export-meter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + progress + '">' +
+              '<div class="observation-export-meter-fill" style="width: ' + progress + '%;"></div>' +
+            "</div>" +
+          "</div>"
+        : "";
+      const sequenceLabel = Number(job.sequence || 0) > 0 ? ("#" + Number(job.sequence)) : "";
+      const rangeStart = Number(job.range_start || 0);
+      const rangeEnd = Number(job.range_end || 0);
+      const rangeLabel = (rangeStart > 0 && rangeEnd >= rangeStart) ? (" (" + rangeStart + "-" + rangeEnd + ")") : "";
+      return (
+        '<div class="list-group-item">' +
+          progressHtml +
+          '<div class="d-flex justify-content-between align-items-start gap-2">' +
+            '<div>' +
+              '<div class="small fw-semibold">' + (sequenceLabel ? (sequenceLabel + " - ") : "") + (job.dimension_label || job.dimension_slug || "Dimension") + rangeLabel + "</div>" +
+              '<div class="small ' + statusClass + '">Status: ' + statusLabel + " | " + (job.message || "") + "</div>" +
+              (job.debug ? ('<div class="small text-muted">' + String(job.debug) + "</div>") : "") +
+              '<div class="small text-muted">' + processed + "/" + total + " rows</div>" +
+            '</div>' +
+            actionHtml +
+          "</div>" +
+        "</div>"
+      );
+    }).join("");
+    container.innerHTML = html;
+  }
+
+  function downloadJobCsv(jobId, fileName) {
+    const endpoint = getExportDownloadEndpoint(jobId);
+    fetch(endpoint, { cache: "no-store" })
+      .then(function (response) {
+        const contentType = String(response.headers.get("content-type") || "").toLowerCase();
+        if (!response.ok || contentType.indexOf("text/csv") === -1) {
+          return response.text().then(function (text) {
+            throw new Error(text || "Could not download CSV.");
+          });
+        }
+        return response.blob().then(function (blob) {
+          if (!blob || blob.size === 0) {
+            throw new Error("Downloaded file is empty.");
+          }
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = fileName || "observation.csv";
+          link.click();
+          setTimeout(function () { URL.revokeObjectURL(url); }, 1200);
+        });
+      })
+      .catch(function (err) {
+        window.alert(err.message || "Could not download CSV.");
+      });
+  }
+
+  function shouldPollJobs() {
+    return exportJobs.some(function (job) {
+      return job.status === "queued" || job.status === "running";
+    });
+  }
+
+  function pollExportJobs() {
+    if (!shouldPollJobs()) {
+      if (exportPollTimer) {
+        clearInterval(exportPollTimer);
+        exportPollTimer = null;
+      }
+      return;
+    }
+    const pending = exportJobs.filter(function (job) {
+      return job.status === "queued" || job.status === "running";
+    });
+    pending.forEach(function (job) {
+      fetch(getExportStatusEndpoint(job.id))
+        .then(function (r) { if (!r.ok) throw new Error("Status error"); return r.json(); })
+        .then(function (payload) {
+          if (payload && payload.job) {
+            upsertJob(payload.job);
+            const ready = (payload && payload.ready_jobs) || [];
+            ready.forEach(function (child) { upsertJob(child); });
+            renderExportJobs();
+          }
+        })
+        .catch(function () {});
+    });
+  }
+
+  function ensurePoller() {
+    if (exportPollTimer) return;
+    exportPollTimer = setInterval(pollExportJobs, 2000);
+  }
+
+  function startExport(scope, options) {
+    const config = window.searchPageConfig || {};
+    const endpoint = config.exportStartEndpoint || "";
+    if (!endpoint) return;
+    const opts = options || {};
+    const singleFileMode = Boolean(opts.singleFileMode);
+    const params = buildTableParams();
+    params.set("export_scope", singleFileMode ? "all" : (scope === "all" ? "all" : "current"));
+    params.set("batch_size", "1000");
+    params.set("progress_step", "100");
+    const rowLimit = document.getElementById("observation-export-row-limit");
+    if (!singleFileMode && rowLimit && rowLimit.value) params.set("row_bucket_size", rowLimit.value);
+    if (!singleFileMode && rowLimit && rowLimit.value) params.set("split_size", rowLimit.value);
+    params.set("split_mode", (opts.chunked && !singleFileMode) ? "chunked" : "single");
+    fetch(endpoint + "?" + params.toString())
+      .then(function (r) { if (!r.ok) throw new Error("Export start failed"); return r.json(); })
+      .then(function (payload) {
+        const jobs = (payload && payload.jobs) || [];
+        jobs.forEach(function (job) { upsertJob(job); });
+        renderExportJobs();
+        if (shouldPollJobs()) {
+          ensurePoller();
+          pollExportJobs();
+        }
+      })
+      .catch(function (err) {
+        window.alert(err.message || "Could not start export");
+      });
+  }
+
+  function initObservationExports() {
+    if (!document.getElementById("observation-export-jobs")) return;
+    loadJobsFromStorage();
+    renderExportJobs();
+    if (shouldPollJobs()) {
+      ensurePoller();
+      pollExportJobs();
+    }
+    const currentBtn = document.getElementById("observation-export-current-btn");
+    const allBtn = document.getElementById("observation-export-all-btn");
+    const clearBtn = document.getElementById("observation-export-clear-jobs-btn");
+    const singleFileToggle = document.getElementById("observation-export-single-file-toggle");
+    if (currentBtn) {
+      currentBtn.addEventListener("click", function () {
+        startExport("current", { chunked: false, singleFileMode: isSingleFileModeEnabled() });
+      });
+    }
+    if (allBtn) {
+      allBtn.addEventListener("click", function () { startExport("current", { chunked: true }); });
+    }
+    if (singleFileToggle) {
+      singleFileToggle.addEventListener("change", function () {
+        updateExportControlsState();
+        updateGenerateAllButtonState();
+        renderExportJobs();
+      });
+    }
+    if (clearBtn) {
+      clearBtn.addEventListener("click", function () {
+        if (!exportJobs.length) return;
+        if (window.confirm("Remove all saved download jobs from this browser?")) {
+          clearSavedJobs();
+        }
+      });
+    }
+    $("#observation-export-jobs")
+      .off("click.observationDownload")
+      .on("click.observationDownload", ".observation-download-link", function () {
+        if ($(this).prop("disabled")) return;
+        const jobId = $(this).data("job-id");
+        const fileName = $(this).data("file-name");
+        if (!jobId) return;
+        downloadJobCsv(String(jobId), String(fileName || "observation.csv"));
+      });
+    updateExportControlsState();
+    updateGenerateAllButtonState();
+  }
+
+  function getLoadedRowCount() {
+    const $table = $("#observation-table");
+    if (!$table.length) return 0;
+    if (typeof jQuery !== "undefined" && jQuery.fn.DataTable && $table.hasClass("dataTable")) {
+      try {
+        return $table.DataTable().rows().count();
+      } catch (e) {
+        return $("#observation-table tbody tr").length;
+      }
+    }
+    return $("#observation-table tbody tr").length;
+  }
+
+  function updateGenerateAllButtonState() {
+    const allBtn = document.getElementById("observation-export-all-btn");
+    if (!allBtn) return;
+    if (isSingleFileModeEnabled()) {
+      allBtn.disabled = true;
+      return;
+    }
+    const rowCount = getLoadedRowCount();
+    const shouldDisable = rowCount > 0 && rowCount < 1000;
+    allBtn.disabled = shouldDisable;
+    if (shouldDisable) {
+      allBtn.setAttribute("title", "Enable when there are at least 1000 items.");
+    } else {
+      allBtn.removeAttribute("title");
+    }
+  }
+
   function formatNumber(value) {
     return Number(value || 0).toLocaleString("en-US");
   }
@@ -163,6 +486,8 @@
       });
       $tbody.append("<tr>" + cells + "</tr>");
     });
+
+    updateGenerateAllButtonState();
 
     const numberColumns = [];
     for (let i = 2; i < 2 + columns.length; i++) numberColumns.push(i);
@@ -450,6 +775,7 @@
       injectCountryActions();
       updateHeaderSelectAllState();
       updateInfoText();
+      updateGenerateAllButtonState();
     });
     updateHeaderSelectAllState();
     updateInfoText();
@@ -1151,6 +1477,7 @@
         });
       }
       loadAndInitObservationTable();
+      initObservationExports();
     });
   }
 })();

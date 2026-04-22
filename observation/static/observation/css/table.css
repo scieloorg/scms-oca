@@ -564,6 +564,30 @@
   margin-bottom: 4px;
 }
 
+.observation-export-progress-wrap {
+  display: block;
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.observation-export-meter {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 8px;
+  border-radius: 999px;
+  background: #e9edf5;
+  overflow: hidden;
+}
+
+.observation-export-meter-fill {
+  display: block;
+  height: 100%;
+  background: #2f67d8;
+  border-radius: inherit;
+  transition: width 160ms linear;
+}
+
 @media (max-width: 991px) {
   .observation-title {
     font-size: 32px;
