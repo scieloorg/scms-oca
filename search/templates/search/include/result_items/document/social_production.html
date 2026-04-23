@@ -8,19 +8,16 @@
 <div class="result-card__header">
     <div class="result-card__eyebrow">
         {% if result_number %}
-        <span class="result-card__index">{{ result_number }}.</span>
+            <span class="result-card__index">{{ result_number }}.</span>
         {% endif %}
         {% if doc.source.action %}
-        <span class="result-card__badge result-card__badge--accent">{{ doc.source.action }}</span>
-        {% endif %}
-        {% if doc.source.directory_type %}
-        <span class="result-card__badge">{{ doc.source.directory_type }}</span>
+            <span class="result-card__badge result-card__badge--accent">{{ doc.source.action }}</span>
         {% endif %}
         {% if doc.source.practice %}
-        <span class="result-card__badge">{{ doc.source.practice }}</span>
+            <span class="result-card__badge">{{ doc.source.practice }}</span>
         {% endif %}
         {% if doc.source.classification %}
-        <span class="result-card__badge">{{ doc.source.classification }}</span>
+            <span class="result-card__badge">{{ doc.source.classification }}</span>
         {% endif %}
     </div>
 </div>
