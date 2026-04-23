@@ -29,7 +29,15 @@
 {% block javascript %}
 {{ block.super }}
 {{ search_clauses|json_script:"search-clauses-data" }}
-<script src="{% static 'search/js/results_print.js' %}"></script>
+<script src="{% static 'search/js/search_page/results_print.js' %}"></script>
+<script src="{% static 'search/js/search_page/utils.js' %}"></script>
+<script src="{% static 'search/js/search_page/state.js' %}"></script>
+<script src="{% static 'search/js/search_page/search_form.js' %}"></script>
+<script src="{% static 'search/js/search_page/sidebar.js' %}"></script>
+<script src="{% static 'search/js/search_page/results_api.js' %}"></script>
+<script src="{% static 'search/js/search_page/results_ui.js' %}"></script>
+<script src="{% static 'search/js/search_page/selection.js' %}"></script>
+<script src="{% static 'search/js/search_page/citation.js' %}"></script>
 <script src="{% static 'search/js/search_page.js' %}"></script>
 <script>
     window.searchPageConfig = {
