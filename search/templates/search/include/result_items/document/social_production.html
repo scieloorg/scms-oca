@@ -38,14 +38,13 @@
             {{ display_title }}
         {% endif %}
     </h3>
-
-    {% if doc.source.organization or doc.source.start_date %}
+    {% if doc.source.organization or doc.source.start_date_year %}
     <p class="result-card__source-line">
         {% if doc.source.organization %}
         <span class="result-card__source-name">{% for org in doc.source.organization %}{{ org }}{% if not forloop.last %}, {% endif %}{% endfor %}</span>
         {% endif %}
-        {% if doc.source.start_date %}
-        <span class="result-card__source-meta">{% trans "Registro" %} {{ doc.source.start_date|format_date_br }}</span>
+        {% if doc.source.start_date_year %}
+        <span class="result-card__source-meta">{% trans "Registro" %}: {{ doc.source.start_date_year }}</span>
         {% endif %}
     </p>
     {% endif %}
