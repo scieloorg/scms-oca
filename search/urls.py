@@ -1,6 +1,6 @@
 from django.urls import path
 
-from . import citation_views
+from .citation import views as citation_views
 from .views import search_view_list
 
 app_name = "search"
