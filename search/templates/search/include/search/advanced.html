@@ -1,0 +1,21 @@
+{% load i18n_filters %}
+{% load i18n %}
+
+<div class="advanced-search-input-wrap">
+    <input type="search" id="advanced-search-input"
+        class="search-input-card__input search-text-input advanced-search-input"
+        placeholder="{% trans 'Ex: title: &quot;Ciência Aberta&quot; AND publication_year: 2025' %}"
+        autocomplete="off" value="">
+</div>
+
+<div class="search-header-card__footer">
+    <div class="advanced-search-actions">
+        <button type="button" class="search-header-card__action-link" id="btn-syntax-help">
+            <span class="search-header-card__action-link-icon help-icon" aria-hidden="true"></span>
+            <span>{% trans "Ajuda na sintaxe" %}</span>
+        </button>
+    </div>
+    <button type="submit" class="search-header-card__submit">
+        {% trans "Pesquisar" %}
+    </button>
+</div>
