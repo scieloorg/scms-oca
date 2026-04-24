@@ -1,0 +1,28 @@
+{% load i18n_filters %}
+{% load i18n %}
+
+<div class="advanced-search-rows">
+    <div class="advanced-search-row search-input-card__row" data-row-index="0">
+        <select id="search-field-0" name="search_field_0" class="form-select search-field-select"
+            aria-label="{% trans 'Campo de busca' %}">
+            <option value="all" selected>{% trans "Todos os campos" %}</option>
+            {% for value, label in searchable_fields %}
+            <option value="{{ value }}">{{ label }}</option>
+            {% endfor %}
+        </select>
+        <input type="search" name="search_text_0" id="search-input-0" class="search-input-card__input search-text-input"
+            placeholder="{% trans 'Termos de pesquisa...' %}" value="" autocomplete="off">
+    </div>
+    <div id="advanced-search-rows"></div>
+</div>
+<div class="search-header-card__footer">
+    <div class="advanced-search-actions">
+        <button type="button" class="search-header-card__action-link" id="btn-add-field">
+            <span class="search-header-card__action-link-icon plus-icon" aria-hidden="true"></span>
+            <span>{% trans "Adicionar campo" %}</span>
+        </button>
+    </div>
+    <button type="submit" class="search-header-card__submit">
+        {% trans "Pesquisar" %}
+    </button>
+</div>
