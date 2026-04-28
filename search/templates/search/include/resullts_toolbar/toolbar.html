@@ -15,7 +15,10 @@
 
     <div class="results-toolbar__actions">
         <div class="results-toolbar__icon-group">
-            <button type="button" class="results-toolbar__icon-btn" tabindex="-1" aria-hidden="true" aria-label="{% trans 'Exportar' %}">
+            <button type="button"
+                    class="results-toolbar__icon-btn js-toolbar-csv-export"
+                    aria-label="{% trans 'Exportar CSV' %}"
+                    disabled>
                 <span class="results-toolbar__icon results-toolbar__icon--download"></span>
             </button>
             <button type="button" class="results-toolbar__icon-btn js-toolbar-cite-selected" disabled aria-label="{% trans 'Citar' %}">

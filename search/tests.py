@@ -2,12 +2,12 @@ import json
 
 from django.test import RequestFactory, SimpleTestCase
 
-from .citation_views import (
+from .citation.views import (
     citation_custom_style_view,
-    citation_export_view,
     citation_preview_view,
+    export_view,
 )
-from .citeproc_render import render_bibtex
+from .citation.render import render_bibtex
 from .csl_json import (
     document_source_to_csl_item,
     documents_payload_to_csl_json,
@@ -88,7 +88,7 @@ class CitationExportApiTests(SimpleTestCase):
             data=json.dumps(body),
             content_type="application/json",
         )
-        r = citation_export_view(request)
+        r = export_view(request)
         self.assertEqual(r.status_code, 200)
         self.assertIn("attachment", r["Content-Disposition"])
         text = r.content.decode("utf-8")
@@ -115,12 +115,38 @@ class CitationExportApiTests(SimpleTestCase):
             data=json.dumps(body),
             content_type="application/json",
         )
-        r = citation_export_view(request)
+        r = export_view(request)
         self.assertEqual(r.status_code, 200)
         text = r.content.decode("utf-8")
         self.assertIn("TY  - JOUR", text)
         self.assertIn("TI  - RIS one", text)
         self.assertIn("ER  -", text)
+
+    def test_export_csv_streams_multiple_documents(self):
+        body = {
+            "format": "csv",
+            "documents": [
+                {"id": "doc-a", "source": {"type": "article", "title": "Alpha study"}},
+                {"id": "doc-b", "source": {"type": "article", "title": "Beta study"}},
+            ],
+        }
+        request = self.factory.post(
+            "/search/api/export-files/",
+            data=json.dumps(body),
+            content_type="application/json",
+        )
+        r = export_view(request)
+        self.assertEqual(r.status_code, 200)
+        self.assertTrue(r.streaming)
+        self.assertIn("attachment", r["Content-Disposition"])
+        self.assertEqual(r["Content-Type"], "text/csv; charset=utf-8")
+        text = b"".join(r.streaming_content).decode("utf-8")
+        self.assertTrue(text.startswith("\ufeff"))
+        self.assertIn('"id","type","title"', text)
+        self.assertIn('"doc-a"', text)
+        self.assertIn('"Alpha study"', text)
+        self.assertIn('"doc-b"', text)
+        self.assertIn('"Beta study"', text)
 
     def test_export_rejects_empty_documents(self):
         request = self.factory.post(
@@ -128,7 +154,7 @@ class CitationExportApiTests(SimpleTestCase):
             data=json.dumps({"format": "bib", "documents": []}),
             content_type="application/json",
         )
-        r = citation_export_view(request)
+        r = export_view(request)
         self.assertEqual(r.status_code, 400)
 
     def test_export_rejects_bad_format(self):
@@ -142,10 +168,10 @@ class CitationExportApiTests(SimpleTestCase):
             ),
             content_type="application/json",
         )
-        r = citation_export_view(request)
+        r = export_view(request)
         self.assertEqual(r.status_code, 400)
 
-    def test_export_rejects_multiple_documents(self):
+    def test_export_bib_multiple_documents(self):
         body = {
             "format": "bib",
             "documents": [
@@ -158,8 +184,11 @@ class CitationExportApiTests(SimpleTestCase):
             data=json.dumps(body),
             content_type="application/json",
         )
-        r = citation_export_view(request)
-        self.assertEqual(r.status_code, 400)
+        r = export_view(request)
+        self.assertEqual(r.status_code, 200)
+        text = r.content.decode("utf-8")
+        self.assertIn("Alpha study", text)
+        self.assertIn("Beta study", text)
 
     def test_preview_returns_presets(self):
         body = {

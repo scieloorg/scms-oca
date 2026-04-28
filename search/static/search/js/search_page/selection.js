@@ -149,6 +149,11 @@
       if (toolbarCiteBtn) {
         toolbarCiteBtn.disabled = selectedCount === 0;
       }
+
+      const toolbarCsvBtn = this.resultsContainer.querySelector('.js-toolbar-csv-export');
+      if (toolbarCsvBtn) {
+        toolbarCsvBtn.disabled = selectedCount === 0;
+      }
     }
   }
 

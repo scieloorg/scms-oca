@@ -323,7 +323,7 @@
       if (!state.currentCitationDocuments.length || !format) return;
       try {
         const resp = await global.SearchPage.Utils.postJson(
-          state.citationExportEndpoint,
+          state.exportFilesEndpoint,
           { format, documents: state.currentCitationDocuments },
           state.csrfToken,
         );

@@ -38,6 +38,7 @@
 <script src="{% static 'search/js/search_page/results_ui.js' %}"></script>
 <script src="{% static 'search/js/search_page/selection.js' %}"></script>
 <script src="{% static 'search/js/search_page/citation.js' %}"></script>
+<script src="{% static 'search/js/search_page/csv_export.js' %}"></script>
 <script src="{% static 'search/js/search_page.js' %}"></script>
 <script>
     window.searchPageConfig = {
@@ -48,7 +49,7 @@
         citationStylesEndpoint: '{% url "search:citation_csl_styles" %}',
         citationPreviewEndpoint: '{% url "search:citation_preview" %}',
         citationCustomStyleEndpoint: '{% url "search:citation_custom_style" %}',
-        citationExportEndpoint: '{% url "search:citation_export" %}',
+        exportFilesEndpoint: '{% url "search:export_files" %}',
         searchableFields: [
             {% for value, label in searchable_fields %}
             { value: '{{ value|escapejs }}', label: '{{ label|escapejs }}' }{% if not forloop.last %},{% endif %}

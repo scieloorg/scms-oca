@@ -22,8 +22,8 @@
         this.config.citationPreviewEndpoint || '/search/api/citation-preview/';
       this.citationCustomStyleEndpoint =
         this.config.citationCustomStyleEndpoint || '/search/api/citation-custom-style/';
-      this.citationExportEndpoint =
-        this.config.citationExportEndpoint || '/search/api/citation-export/';
+      this.exportFilesEndpoint =
+        this.config.exportFilesEndpoint || '/search/api/export-files/';
 
       this.currentSort = urlParams.get('sort') || 'desc';
       this.currentLimit = urlParams.get('limit') || '25';

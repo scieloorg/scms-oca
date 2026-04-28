@@ -22,6 +22,7 @@
       this.resultsUi = new SP.ResultsUiController(this);
       this.selection = new SP.SelectionController(this);
       this.citation = new SP.CitationController(this);
+      this.csvExport = new SP.ToolbarCsvExportController(this);
 
       this.init();
     }
@@ -37,6 +38,7 @@
       await this.sidebar.initSidebar();
       this.resultsUi.setupResultsUi();
       this.citation.setupCitationUi();
+      this.csvExport.setupToolbarCsvExport();
     }
   }
 
