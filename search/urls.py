@@ -9,5 +9,5 @@ urlpatterns = [
     path("api/citation-styles/", citation_views.citation_csl_styles_view, name="citation_csl_styles"),
     path("api/citation-preview/", citation_views.citation_preview_view, name="citation_preview"),
     path("api/citation-custom-style/", citation_views.citation_custom_style_view, name="citation_custom_style"),
-    path("api/citation-export/", citation_views.citation_export_view, name="citation_export"),
+    path("api/export-files/", citation_views.export_view, name="export_files"),
 ]

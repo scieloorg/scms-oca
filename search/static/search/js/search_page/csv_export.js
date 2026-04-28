@@ -46,7 +46,7 @@
       if (!documents?.length) return;
 
       const resp = await global.SearchPage.Utils.postJson(
-        state.citationExportEndpoint,
+        state.exportFilesEndpoint,
         { format: 'csv', documents },
         state.csrfToken,
       );
