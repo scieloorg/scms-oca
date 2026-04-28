@@ -1,0 +1,65 @@
+{% load i18n_filters %}
+{% load i18n %}
+
+<div class="advanced-search-guide guide-card" id="advanced-search-guide">
+    <div class="advanced-search-guide__cards">
+        <div class="guide-inner-card guide-inner-card--operators">
+            <div class="advanced-search-guide__card-title">{% trans "Operadores Lógicos" %}</div>
+            <ul class="advanced-search-guide__list">
+                <li><span class="search-tag search-tag--and">AND</span> <span class="search-tag-desc">{% trans "Intersecção (ambos os termos)" %}</span></li>
+                <li><span class="search-tag search-tag--or">OR</span> <span class="search-tag-desc">{% trans "União (um ou outro termo)" %}</span></li>
+                <li><span class="search-tag search-tag--not">NOT</span> <span class="search-tag-desc">{% trans "Exclusão de termo específico" %}</span></li>
+                <li><span class="search-tag search-tag--phrase">" "</span> <span class="search-tag-desc">{% trans "Busca por frase exata" %}</span></li>
+            </ul>
+        </div>
+
+        <div class="guide-inner-card guide-inner-card--fields">
+            <div class="advanced-search-guide__card-title">{% trans "Identificadores de Campos" %}</div>
+            <div class="advanced-search-guide__fields-grid">
+                <div class="advanced-search-guide__fields-group">
+                    <h5 class="advanced-search-guide__group-title">{% trans "DOCUMENTO" %}</h5>
+                    <ul class="advanced-search-guide__field-list">
+                        <li><span class="field-key">title</span><span class="field-desc">{% trans "Título do documento" %}</span></li>
+                        <li><span class="field-key">abstract</span><span class="field-desc">{% trans "Resumo" %}</span></li>
+                        <li><span class="field-key">keyword</span><span class="field-desc">{% trans "Palavras-chave" %}</span></li>
+                        <li><span class="field-key">is_open_access</span><span class="field-desc">{% trans "Acesso aberto (true/false)" %}</span></li>
+                        <li><span class="field-key">publication_year</span><span class="field-desc">{% trans "Ano de publicação" %}</span></li>
+                        <li><span class="field-key">doi</span><span class="field-desc">{% trans "Código DOI" %}</span></li>
+                    </ul>
+                </div>
+                <div class="advanced-search-guide__fields-group">
+                    <h5 class="advanced-search-guide__group-title">{% trans "AUTORIA E INSTITUIÇÃO" %}</h5>
+                    <ul class="advanced-search-guide__field-list">
+                        <li><span class="field-key">author</span><span class="field-desc">{% trans "Autor do documento" %}</span></li>
+                        <li><span class="field-key">institution_title</span><span class="field-desc">{% trans "Nome da instituição" %}</span></li>
+                        <li><span class="field-key">institution_country</span><span class="field-desc">{% trans "País da instituição" %}</span></li>
+                    </ul>
+                </div>
+                <div class="advanced-search-guide__fields-group">
+                    <h5 class="advanced-search-guide__group-title">{% trans "FONTE" %}</h5>
+                    <ul class="advanced-search-guide__field-list">
+                        <li><span class="field-key">source_title</span><span class="field-desc">{% trans "Nome do periódico ou livro" %}</span></li>
+                        <li><span class="field-key">publisher</span><span class="field-desc">{% trans "Casa publicadora" %}</span></li>
+                        <li><span class="field-key">source_type</span><span class="field-desc">{% trans "Tipo de fonte" %}</span></li>
+                        <li><span class="field-key">source_country</span><span class="field-desc">{% trans "País da fonte" %}</span></li>
+                        <li><span class="field-key">issn</span><span class="field-desc">{% trans "ISSN de periódico" %}</span></li>
+                        <li><span class="field-key">isbn</span><span class="field-desc">{% trans "ISBN de livro" %}</span></li>
+                    </ul>
+                </div>
+                <div class="advanced-search-guide__fields-group">
+                    <h5 class="advanced-search-guide__group-title">{% trans "FINANCIAMENTO" %}</h5>
+                    <ul class="advanced-search-guide__field-list">
+                        <li><span class="field-key">funder</span><span class="field-desc">{% trans "Nome do financiador" %}</span></li>
+                        <li><span class="field-key">award</span><span class="field-desc">{% trans "Nome do prêmio ou bolsa" %}</span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="advanced-search-guide__example">
+        <div class="advanced-search-guide__card-title">{% trans "Exemplo de Construção" %}</div>
+        <code class="advanced-search-guide__example-code"><span class="code-field">title:</span> <span class="code-str">"Ciência Aberta"</span> <span class="code-op">AND</span> <span class="code-field">publication_year:</span> <span class="code-num">2025</span></code>
+        <p class="advanced-search-guide__example-tip">{% trans "Dica: Combine múltiplos campos para refinar os seus resultados. Use aspas para termos compostos." %}</p>
+    </div>
+</div>

@@ -5,57 +5,40 @@
 <div class="search-header-card">
     <div class="search-header-card__top">
         <div class="search-header-card__heading">
-            <h1 class="search-header-card__title">{% trans "Busca avançada" %}</h1>
-            <span class="search-header-card__subtitle">{% if is_scientific_data_source %}{% trans 'articles, preprints, datasets, books' %}...{% else %}{% trans 'Actions, events and infrastructure' %}{% endif %}</span>
+            <h1 class="search-header-card__title">{% trans "Modo de busca" %}</h1>
+            <div class="search-mode-toggle" role="group" aria-label="{% trans 'Modo de busca' %}">
+                <button type="button" class="search-mode-btn search-mode-btn--active" data-mode="by_field">
+                    <span class="search-mode-btn__icon list-icon"></span>
+                    {% trans "Campos" %}
+                </button>
+                <button type="button" class="search-mode-btn" data-mode="advanced">
+                    <span class="search-mode-btn__icon terminal-icon"></span>
+                    {% trans "Avançada" %}
+                </button>
+            </div>
         </div>
-        <button
-            type="button"
-            id="search-sidebar-toggle"
-            class="search-header-card__toggle"
-            data-label-show="{% trans 'Mostrar filtros' %}"
-            data-label-hide="{% trans 'Ocultar filtros' %}"
-            aria-expanded="true"
-            aria-controls="search-sidebar-col"
-        >
+        <button type="button" id="search-sidebar-toggle"
+            class="search-header-card__toggle search-header-card__toggle--filters"
+            data-label-show="{% trans 'Mostrar filtros' %}" data-label-hide="{% trans 'Ocultar filtros' %}"
+            aria-expanded="true" aria-controls="search-sidebar-col">
             <span class="search-header-card__toggle-icon" aria-hidden="true"></span>
             <span class="search-header-card__toggle-text">{% trans "Ocultar filtros" %}</span>
         </button>
     </div>
     <form method="get" action="{{ request.path }}" id="search-form" class="search-header-card__search">
-        <div class="advanced-search-rows">
-            <div class="advanced-search-row search-input-card__row" data-row-index="0">
-                <select id="search-field-0" name="search_field_0" class="form-select search-field-select" aria-label="{% trans 'Campo de busca' %}">
-                    {% for value, label in searchable_fields %}
-                    <option value="{{ value }}">{{ label }}</option>
-                    {% endfor %}
-                </select>
-                <input
-                    type="search"
-                    name="search_text_0"
-                    id="search-input-0"
-                    class="search-input-card__input search-text-input"
-                    placeholder="{% trans 'Termos de pesquisa...' %}"
-                    value="{{ search_query }}"
-                    autocomplete="off"
-                >
-            </div>
-            <div id="advanced-search-rows"></div>
+        <div id="search-mode-by-field-container" class="search-mode-container">
+            {% include "search/include/search/by_field.html" %}
         </div>
-        <div class="advanced-search-divider"></div>
-        <div class="search-header-card__footer">
-            <div class="advanced-search-actions">
-                <button type="button" class="search-header-card__action-link" id="btn-add-field">
-                    <span class="search-header-card__action-link-icon" aria-hidden="true"></span>
-                    <span>{% trans "Adicionar campo" %}</span>
-                </button>
-                <button type="button" class="search-header-card__clear" id="btn-clear">{% trans "Limpar" %}</button>
-            </div>
-            <button type="submit" class="search-header-card__submit">
-                {% trans "Pesquisar" %}
-            </button>
+        <div id="search-mode-advanced-container" class="search-mode-container" style="display: none;">
+            {% include "search/include/search/advanced.html" %}
         </div>
     </form>
 </div>
+
+<div id="advanced-guide-wrapper" style="display: none;">
+    {% include "search/include/search/advanced_guide.html" %}
+</div>
+
 <template id="advanced-search-row-template">
     <div class="advanced-search-row search-input-card__row" data-row-index="">
         <select class="form-select search-operator" aria-label="{% trans 'Operador lógico' %}">
@@ -68,7 +51,8 @@
             <option value="{{ value }}">{{ label }}</option>
             {% endfor %}
         </select>
-        <input type="search" class="search-input-card__input search-text-input" placeholder="{% trans 'Termos de pesquisa...' %}" autocomplete="off">
+        <input type="search" class="search-input-card__input search-text-input"
+            placeholder="{% trans 'Termos de pesquisa...' %}" autocomplete="off">
         <button type="button" class="btn-remove-row" aria-label="{% trans 'Remover' %}">
             <i class="icon-trash"></i>
         </button>
