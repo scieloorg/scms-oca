@@ -13,13 +13,15 @@ import re
 
 from .csl_json import CSLSourceExtractor
 
+CSV_EXPORT_BATCH_SIZE = 500
+
 CSV_COLUMNS = (
     "id",
     "type",
     "title",
     "authors",
     "publication_year",
-    "container_title",
+    "source_title",
     "volume",
     "issue",
     "pages",
@@ -28,6 +30,12 @@ CSV_COLUMNS = (
     "url",
     "language",
 )
+
+
+class _CsvBuffer:
+    def write(self, value):
+        return value
+
 
 def _format_authors(authors):
     if not isinstance(authors, list):
@@ -65,23 +73,7 @@ def _row_for(extractor, doc_id):
     }
 
 
-def render_csv(documents, *, language=None):
-    """Return a CSV string (UTF-8 BOM-prefixed for spreadsheet compatibility).
-
-    Iterates entries of shape ``{id, source, language_code?}`` and builds one
-    row per valid entry using :class:`CSLSourceExtractor`.
-    """
-    buf = io.StringIO()
-    writer = csv.DictWriter(
-        buf,
-        fieldnames=CSV_COLUMNS,
-        # Quote all fields to improve compatibility with spreadsheet tools
-        # that auto-detect ';' as delimiter in some locales.
-        quoting=csv.QUOTE_ALL,
-        lineterminator="\n",
-    )
-    writer.writeheader()
-
+def _valid_rows(documents, *, language=None):
     for entry in documents or []:
         if not isinstance(entry, dict):
             continue
@@ -94,6 +86,39 @@ def render_csv(documents, *, language=None):
         entry_lang = str(entry_lang).strip() if entry_lang not in (None, "") else None
         extractor = CSLSourceExtractor(source, language=entry_lang or language)
         row = _row_for(extractor, doc_id)
-        writer.writerow({k: _sanitize_csv_cell(v) for k, v in row.items()})
+        yield {k: _sanitize_csv_cell(v) for k, v in row.items()}
 
-    return "\ufeff" + buf.getvalue()
+
+def stream_csv(documents, *, language=None, batch_size=CSV_EXPORT_BATCH_SIZE):
+    """Yield CSV content in small chunks for ``StreamingHttpResponse``."""
+    writer = csv.DictWriter(
+        _CsvBuffer(),
+        fieldnames=CSV_COLUMNS,
+        # Quote all fields to improve compatibility with spreadsheet tools
+        # that auto-detect ';' as delimiter in some locales.
+        quoting=csv.QUOTE_ALL,
+        lineterminator="\n",
+    )
+    yield "\ufeff" + writer.writeheader()
+
+    batch = []
+    for row in _valid_rows(documents, language=language):
+        batch.append(writer.writerow(row))
+        if len(batch) >= batch_size:
+            yield "".join(batch)
+            batch = []
+
+    if batch:
+        yield "".join(batch)
+
+
+def render_csv(documents, *, language=None):
+    """Return a CSV string (UTF-8 BOM-prefixed for spreadsheet compatibility).
+
+    Iterates entries of shape ``{id, source, language_code?}`` and builds one
+    row per valid entry using :class:`CSLSourceExtractor`.
+    """
+    buf = io.StringIO()
+    for chunk in stream_csv(documents, language=language):
+        buf.write(chunk)
+    return buf.getvalue()

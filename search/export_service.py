@@ -6,7 +6,7 @@ from typing import Optional
 
 from django.utils.translation import gettext as _
 
-from .csv_export import render_csv
+from .csv_export import stream_csv
 from .citation.constants import CITATION_EXPORT_FORMATS
 
 class BadRequestError(Exception):
@@ -84,6 +84,5 @@ def extract_preview_inputs(body, request):
 
 
 def build_csv_file(inputs):
-    """Return ``(content, mime_type, file_extension)`` for CSV export."""
-    content = render_csv(inputs.documents, language=inputs.language_code)
-    return content, "text/csv", "csv"
+    """Return ``(content_iterable, mime_type, file_extension)`` for CSV export."""
+    return stream_csv(inputs.documents, language=inputs.language_code), "text/csv", "csv"
