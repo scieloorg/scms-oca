@@ -288,6 +288,7 @@ class SearchGatewayService:
     def search_documents(
         self,
         query_text=None,
+        advanced_query=None,
         query_clauses=None,
         filters=None,
         page=1,
@@ -301,6 +302,7 @@ class SearchGatewayService:
         mapped_filters = get_mapped_filters(filters, self.field_settings)
         body = build_document_search_body(
             query_text=query_text,
+            advanced_query=advanced_query,
             query_clauses=query_clauses,
             filters=mapped_filters,
             page=page,
@@ -322,6 +324,7 @@ class SearchGatewayService:
         self,
         aggs,
         query_text=None,
+        advanced_query=None,
         query_clauses=None,
         filters=None,
         parse_config=None,
@@ -332,6 +335,7 @@ class SearchGatewayService:
         Args:
             aggs: Aggregation definition dict (e.g. {"by_country": {...}}).
             query_text: Text search (same as search_documents).
+            advanced_query: Query string syntax (same as search_documents).
             query_clauses: Advanced search clauses (same as search_documents).
             filters: Selected filters, form field names (same as search_documents).
             parse_config: Optional dict for parse_aggregation_response.
@@ -344,6 +348,7 @@ class SearchGatewayService:
         mapped_filters = get_mapped_filters(filters or {}, field_settings)
         bool_query = build_bool_query_from_search_params(
             query_text=query_text,
+            advanced_query=advanced_query,
             query_clauses=query_clauses,
             filters=mapped_filters,
         )
