@@ -12,6 +12,7 @@
       this.advancedContainer = document.getElementById('search-mode-advanced-container');
       this.guideWrapper = document.getElementById('advanced-guide-wrapper');
       this.advancedInput = document.getElementById('advanced-search-input');
+      this.advancedError = document.getElementById('advanced-search-error');
       this.extraRows = document.getElementById('advanced-search-rows');
     }
 
@@ -70,6 +71,26 @@
       this.guideWrapper.style.display = activeMode === 'advanced' ? 'block' : 'none';
     }
 
+    showAdvancedSearchError(message) {
+      this.ctx.state.advancedSearchError = message || '';
+      if (!this.advancedError || !this.advancedInput) return;
+
+      this.advancedError.textContent = this.ctx.state.advancedSearchError;
+      this.advancedError.hidden = !this.ctx.state.advancedSearchError;
+      this.advancedInput.classList.toggle(
+        'advanced-search-input--invalid',
+        Boolean(this.ctx.state.advancedSearchError),
+      );
+      this.advancedInput.setAttribute(
+        'aria-invalid',
+        this.ctx.state.advancedSearchError ? 'true' : 'false',
+      );
+    }
+
+    clearAdvancedSearchError() {
+      this.showAdvancedSearchError('');
+    }
+
     toggleSyntaxGuide(button) {
       const guide = document.getElementById('advanced-search-guide');
 
@@ -78,24 +99,42 @@
       this.searchForm.classList.toggle('search-header-card__search--with-guide');
     }
 
+    getAdvancedSearchQuery() {
+      return this.advancedInput ? this.advancedInput.value.trim() : '';
+    }
+
     syncSearchStateFromForm() {
+      this.clearAdvancedSearchError();
+
       if (this.getActiveSearchMode() === 'advanced') {
         this.ctx.state.searchClauses = [];
-        this.ctx.state.searchQuery = this.advancedInput.value.trim();
+        this.ctx.state.searchQuery = '';
+        this.ctx.state.advancedSearchQuery = this.getAdvancedSearchQuery();
         return;
       }
 
       this.ctx.state.searchClauses = this.getSearchClauses();
       this.ctx.state.searchQuery = '';
+      this.ctx.state.advancedSearchQuery = '';
     }
 
     restoreSearchClauses() {
       const clauses = this.ctx.state.searchClauses;
       const query = this.ctx.state.searchQuery;
+      const advancedQuery = this.ctx.state.advancedSearchQuery;
+
+      if (advancedQuery) {
+        this.advancedInput.value = advancedQuery;
+        this.setSearchMode('advanced');
+        this.showAdvancedSearchError(this.ctx.state.advancedSearchError);
+        return;
+      }
 
       if (query && (!clauses || clauses.length === 0)) {
-        this.advancedInput.value = (query === '*' || query === 'all') ? '' : query;
-        this.setSearchMode('advanced');
+        const firstRow = document.querySelector('.advanced-search-row[data-row-index="0"]');
+        const text = (query === '*' || query === 'all') ? '' : query;
+        this.setRowValues(firstRow, { field: 'all', text });
+        this.setSearchMode('by_field');
         return;
       }
 
@@ -173,7 +212,9 @@
 
     clearSearchQuery() {
       this.ctx.state.searchQuery = '';
+      this.ctx.state.advancedSearchQuery = '';
       this.ctx.state.searchClauses = [];
+      this.clearAdvancedSearchError();
 
       this.advancedInput.value = '';
 

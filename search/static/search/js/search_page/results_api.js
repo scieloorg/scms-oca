@@ -14,12 +14,20 @@
     buildSearchParams() {
       const params = new URLSearchParams();
       const state = this.ctx.state;
-      const clauses = this.ctx.searchForm.getSearchClauses();
 
-      if (clauses.length > 0) {
-        params.set('search_clauses', JSON.stringify(clauses));
-      } else if (state.searchQuery) {
-        params.set('search', state.searchQuery);
+      if (this.ctx.searchForm.getActiveSearchMode() === 'advanced') {
+        const advancedQuery = this.ctx.searchForm.getAdvancedSearchQuery();
+        state.advancedSearchQuery = advancedQuery;
+        if (advancedQuery) {
+          params.set('advanced_search', advancedQuery);
+        }
+      } else {
+        const clauses = this.ctx.searchForm.getSearchClauses();
+        if (clauses.length > 0) {
+          params.set('search_clauses', JSON.stringify(clauses));
+        } else if (state.searchQuery) {
+          params.set('search', state.searchQuery);
+        }
       }
 
       if (state.dataSourceName) {
@@ -108,9 +116,17 @@
 
       try {
         const response = await fetch(`${state.apiEndpoint}?${params.toString()}`, { signal });
-        if (!response.ok) throw new Error('Network response was not ok');
         const data = await response.json();
 
+        if (!response.ok) {
+          if (response.status === 400 && data.error_type === 'advanced_query') {
+            this.ctx.searchForm.showAdvancedSearchError(data.error);
+            return;
+          }
+          throw new Error(data.error || 'Network response was not ok');
+        }
+
+        this.ctx.searchForm.clearAdvancedSearchError();
         this.renderResultsFragments(data);
         state.syncCitationDocuments(data.citation_documents);
         this.ctx.resultsUi.setupResultsUi();
