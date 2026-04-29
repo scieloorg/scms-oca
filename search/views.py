@@ -5,6 +5,7 @@ from django.http import JsonResponse
 from django.template.loader import render_to_string
 from django.views.decorators.http import require_GET
 
+from .advance_search import AdvancedQueryValidationError
 from search_gateway.request_filters import (
     extract_applied_filters,
     normalize_option_filters,
@@ -12,22 +13,6 @@ from search_gateway.request_filters import (
 from search_gateway.service import SearchGatewayService
 
 from .models import SearchPage
-
-
-def _applied_filters_for_json(applied_filters):
-    """Expose server-side applied filters (incl. operators) for the client without re-rendering the sidebar."""
-    result = {}
-    for key, value in (applied_filters or {}).items():
-        if str(key).startswith("__"):
-            continue
-        if isinstance(value, (list, tuple)):
-            cleaned = [str(item) for item in value if item not in (None, "")]
-            if not cleaned:
-                continue
-            result[key] = cleaned if len(cleaned) > 1 else cleaned[0]
-        elif value not in (None, ""):
-            result[key] = str(value)
-    return result
 
 
 def _render_results_fragments(request, results_data):
@@ -71,7 +56,13 @@ def search_view_list(request):
         applied_filters = extract_applied_filters(request.GET, data_source, form_key="search")
         selected_filters = normalize_option_filters(applied_filters)
         results_data = service.search_documents(
-            query_text=request_state["search_query"] if not request_state["query_clauses"] else None,
+            query_text=(
+                request_state["search_query"]
+                if not request_state["query_clauses"]
+                and not request_state["advanced_search_query"]
+                else None
+            ),
+            advanced_query=request_state["advanced_search_query"],
             query_clauses=request_state["query_clauses"],
             filters=selected_filters,
             page=request_state["current_page"],
@@ -92,6 +83,8 @@ def search_view_list(request):
                 results_data.get("search_results")
             ),
         })
+    except AdvancedQueryValidationError as e:
+        return JsonResponse({"error": str(e), "error_type": "advanced_query"}, status=400)
     except Exception as e:
         logging.exception(f"Error getting filters for index {index_name}. {e}")
         return JsonResponse({"error": str(e)}, status=500)

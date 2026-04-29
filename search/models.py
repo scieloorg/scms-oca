@@ -14,6 +14,7 @@ from search_gateway.option_normalization import (
     normalize_positive_number,
     normalize_search_result_sort,
 )
+from .advance_search import AdvancedQueryValidationError
 from search_gateway.request_filters import (
     extract_applied_filters,
     normalize_option_filters,
@@ -79,7 +80,8 @@ class SearchPage(Page):
             current_sort,
         )
         return {
-            "search_query": request.GET.get("search", ""),
+            "search_query": request.GET.get("search", "").strip(),
+            "advanced_search_query": request.GET.get("advanced_search", "").strip(),
             "query_clauses": cls.query_clauses(request),
             "current_sort": current_sort,
             "sort_field": sort_field,
@@ -161,6 +163,7 @@ class SearchPage(Page):
         index_name="",
         search_sidebar_html="",
         results_data=None,
+        advanced_search_error="",
     ):
         scientific_index = getattr(settings, "OP_INDEX_SCIENTIFIC_PRODUCTION", "scientific_production")
         payload = {"search_results": [], "total_results": 0} if results_data is None else results_data
@@ -170,6 +173,8 @@ class SearchPage(Page):
             "search_clauses": request_state["query_clauses"],
             "is_scientific_data_source": index_name == scientific_index,
             "search_query": request_state["search_query"],
+            "advanced_search_query": request_state["advanced_search_query"],
+            "advanced_search_error": advanced_search_error,
             "search_sidebar_html": search_sidebar_html,
             "results_data": payload,
             "citation_documents": cls.build_citation_documents(payload.get("search_results")),
@@ -192,7 +197,13 @@ class SearchPage(Page):
     def fetch_gateway_search_results(self, data_source, request_state, selected_filters):
         service = SearchGatewayService(index_name=data_source.index_name)
         return service.search_documents(
-            query_text=request_state["search_query"] if not request_state["query_clauses"] else None,
+            query_text=(
+                request_state["search_query"]
+                if not request_state["query_clauses"]
+                and not request_state["advanced_search_query"]
+                else None
+            ),
+            advanced_query=request_state["advanced_search_query"],
             query_clauses=request_state["query_clauses"],
             filters=selected_filters,
             page=request_state["current_page"],
@@ -214,7 +225,12 @@ class SearchPage(Page):
         applied_filters = extract_applied_filters(request.GET, data_source, form_key="search")
         selected_filters = normalize_option_filters(applied_filters)
         sidebar_html = self.render_search_filter_sidebar_html(request, data_source, applied_filters)
-        raw_results = self.fetch_gateway_search_results(data_source, request_state, selected_filters)
+        advanced_search_error = ""
+        try:
+            raw_results = self.fetch_gateway_search_results(data_source, request_state, selected_filters)
+        except AdvancedQueryValidationError as exc:
+            advanced_search_error = str(exc)
+            raw_results = {"search_results": [], "total_results": 0}
         results_data = self.current_pagination(
             raw_results,
             page=request_state["current_page"],
@@ -227,6 +243,7 @@ class SearchPage(Page):
                 index_name=data_source.index_name,
                 search_sidebar_html=sidebar_html,
                 results_data=results_data,
+                advanced_search_error=advanced_search_error,
             )
         )
         return context
