@@ -13,6 +13,7 @@ DEFAULT_EXCLUDED_QUERY_KEYS = frozenset(
     {
         "csrfmiddlewaretoken",
         "search",
+        "advanced_search",
         "search_clauses",
         "page",
         "limit",

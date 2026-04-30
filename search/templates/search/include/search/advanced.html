@@ -5,7 +5,9 @@
     <input type="search" id="advanced-search-input"
         class="search-input-card__input search-text-input advanced-search-input"
         placeholder="{% trans 'Ex: title: &quot;Ciência Aberta&quot; AND publication_year: 2025' %}"
+        aria-describedby="advanced-search-error"
         autocomplete="off" value="">
+    <div id="advanced-search-error" class="advanced-search-error" role="alert" aria-live="polite" hidden></div>
 </div>
 
 <div class="search-header-card__footer">

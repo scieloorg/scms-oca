@@ -10,6 +10,8 @@
 
       this.config = config || {};
       this.searchQuery = this.config.initialSearchQuery || '';
+      this.advancedSearchQuery = this.config.initialAdvancedSearchQuery || '';
+      this.advancedSearchError = this.config.initialAdvancedSearchError || '';
       this.searchClauses = this.config.initialSearchClauses || [];
       this.dataSourceName = this.config.dataSourceName || '';
       this.csrfToken = this.config.csrfToken || '';

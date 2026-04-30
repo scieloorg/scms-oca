@@ -44,6 +44,8 @@
 <script>
     window.searchPageConfig = {
         initialSearchQuery: '{{ search_query|escapejs }}',
+        initialAdvancedSearchQuery: '{{ advanced_search_query|escapejs }}',
+        initialAdvancedSearchError: '{{ advanced_search_error|escapejs }}',
         initialSearchClauses: JSON.parse(document.getElementById('search-clauses-data').textContent),
         dataSourceName: '{{ index_name|escapejs }}',
         csrfToken: '{{ csrf_token }}',

@@ -148,14 +148,35 @@ SEARCH_FIELD_MAPPING = {
 
 # Aliases for query_string: user-friendly name -> index field
 QUERY_STRING_FIELD_ALIASES = {
+    "ti": "title_search",
     "title": "title_search",
+    "ab": "abstract",
     "abstract": "abstract",
+    "kw": "subjects_search",
     "ids": "ids_search",
+    "doi": "ids_search",
+    "issn": "ids_search",
+    "isbn": "ids_search",
+    "au": "authors_search",
     "authors": "authors_search",
     "subjects": "subjects_search",
+    "subject": "subjects_search",
     "publishers": "publishers_search",
+    "publisher": "publishers_search",
     "sources": "sources_search",
+    "source": "sources_search",
     "institutions": "institutions_search",
+    "institution": "institutions_search",
+    "aff_institution": "institutions_search",
+    "aff_country": "author_country_codes",
+    "institution_title": "institutions_search",
+    "institution_country": "author_country_codes",
+    "journal_title": "sources_search",
+    "source_type": "sources.type",
+    "source_country": "oca_data.source.country_search",
+    "publication_year": "publication_year",
+    "is_open_access": "is_open_access",
+    "funder": "funders.id",
 }
 
 QUERY_STRING_FIELDS = list(

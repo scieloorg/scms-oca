@@ -1,10 +1,6 @@
-import re
 
-from search.choices import (
-    QUERY_STRING_FIELD_ALIASES,
-    QUERY_STRING_FIELDS,
-    SEARCH_FIELD_MAPPING,
-)
+from search.advance_search import normalize_advanced_query
+from search.choices import SEARCH_FIELD_MAPPING
 
 
 def _escape_wildcard_chars(text):
@@ -34,13 +30,13 @@ def build_terms_clause(field_name, values):
 
 def query_filters(filters):
     """
-    Build filter clauses for Elasticsearch query.
+    Build filter clauses for opensearch query.
 
-    Note: Filters should already have Elasticsearch field names as keys
+    Note: Filters should already have opensearch field names as keys
     (i.e., already mapped from form field names).
 
     Args:
-        filters: Dict of filters with Elasticsearch field names as keys.
+        filters: Dict of filters with opensearch field names as keys.
 
     Returns:
         List of filter clauses for the bool query.
@@ -208,57 +204,27 @@ def build_filters_aggs(field_settings, exclude_fields=None):
     return aggs
 
 
-def _is_advanced_query(text):
-    """Detect if text contains advanced query syntax (field:value, OR, AND, parentheses)."""
-    if not text or not isinstance(text, str):
-        return False
-    t = text.strip()
-    if re.search(r"\w+:\S+", t):
-        return True
-    if re.search(r"\b(OR|AND|NOT)\b", t, re.IGNORECASE):
-        return True
-    if "(" in t or ")" in t:
-        return True
-    return False
-
-
-def _rewrite_field_aliases_in_query(query_text):
-    """Rewrite user-friendly field names to index field names in the query string."""
-    result = query_text
-    for alias, index_field in sorted(
-        QUERY_STRING_FIELD_ALIASES.items(), key=lambda x: -len(x[0])
-    ):
-        result = re.sub(
-            rf"\b{re.escape(alias)}\s*:",
-            f"{index_field}:",
-            result,
-            flags=re.IGNORECASE,
-        )
-    return result
-
-
 def _build_advanced_query(query_text):
     """Build a query_string query for advanced syntax like (title:covid OR abstract:covid)."""
-    rewritten = _rewrite_field_aliases_in_query(query_text)
+    rewritten = normalize_advanced_query(query_text)
     return {
         "query_string": {
             "query": rewritten,
-            "fields": QUERY_STRING_FIELDS,
+            "fields": ["title_search"],
             "default_operator": "AND",
+            "lenient": True,
         }
     }
 
 
 def _build_clause_query(field_key, query_text):
-    """Build a clause for a given field and text. Uses query_string if advanced syntax detected."""
-    if _is_advanced_query(query_text):
-        return _build_advanced_query(query_text)
+    """Build a simple text clause for a given field without advanced syntax parsing."""
     fields = SEARCH_FIELD_MAPPING.get(field_key, ["title_search", "ids_search"])
     return {
-        "simple_query_string": {
+        "multi_match": {
             "query": query_text,
-            "default_operator": "AND",
             "fields": fields,
+            "operator": "and",
         }
     }
 
@@ -369,6 +335,7 @@ def build_search_text_body(query_text):
 
 def build_document_search_body(
         query_text=None,
+        advanced_query=None,
         query_clauses=None,
         filters=None,
         page=1,
@@ -382,6 +349,7 @@ def build_document_search_body(
 
     Args:
         query_text: Text to search for (legacy, used when query_clauses is empty).
+        advanced_query: Query string syntax submitted from the advanced search input.
         query_clauses: List of {operator, field, text} for advanced search.
         filters: Dict of filters (should already be mapped to ES field names).
         page: Page number (1-based).
@@ -395,6 +363,7 @@ def build_document_search_body(
     """
     bool_query = build_bool_query_from_search_params(
         query_text=query_text,
+        advanced_query=advanced_query,
         query_clauses=query_clauses,
         filters=filters,
     )
@@ -419,6 +388,7 @@ def build_document_search_body(
 
 def build_bool_query_from_search_params(
     query_text=None,
+    advanced_query=None,
     query_clauses=None,
     filters=None,
 ):
@@ -426,17 +396,20 @@ def build_bool_query_from_search_params(
     Bool query fragment (must / must_not / filter) shared by document search and
     aggregations. ``filters`` must already use OpenSearch index field names.
     """
-    if query_clauses:
+    advanced_query = (advanced_query or "").strip()
+    if advanced_query:
+        bool_query = {"must": [_build_advanced_query(advanced_query)]}
+    elif query_clauses:
         bool_query = build_bool_from_clauses(query_clauses)
     else:
         bool_query = {"must": []}
         if query_text:
             bool_query["must"].append(
                 {
-                    "simple_query_string": {
+                    "multi_match": {
                         "query": query_text,
-                        "default_operator": "AND",
                         "fields": ["title_search", "ids_search"],
+                        "operator": "and",
                     },
                 }
             )
