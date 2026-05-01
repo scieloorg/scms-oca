@@ -30,6 +30,8 @@ from search_gateway.service import SearchGatewayService
 logger = logging.getLogger(__name__)
 
 OBSERVATION_SEARCH_FORM_KEY = "search"
+OBSERVATION_YEAR_START = 2019
+OBSERVATION_YEAR_END = 2025
 EXPORT_JOBS = {}
 EXPORT_JOBS_LOCK = threading.Lock()
 
@@ -104,16 +106,52 @@ def _parse_query_clauses_from_source(source):
         return []
 
 
-def _apply_lookup_labels_to_rows(service, row_field_name, result):
+def _normalize_field_name_variant(value):
+    cleaned = str(value or "").strip()
+    if cleaned.endswith(".keyword"):
+        return cleaned[: -len(".keyword")]
+    return cleaned
+
+
+def _resolve_lookup_field_name(service, row_field_name, row_index_field=None):
+    data_source = service.data_source
+    if not data_source:
+        return None
+
+    preferred_field = data_source.get_field(row_field_name) if row_field_name else None
+    if preferred_field and preferred_field.lookup:
+        return row_field_name
+
+    candidates = {
+        _normalize_field_name_variant(row_field_name),
+        _normalize_field_name_variant(row_index_field),
+    }
+    candidates.discard("")
+
+    field_settings = data_source.field_settings_dict or {}
+    for field_name, cfg in field_settings.items():
+        if not cfg.get("lookup"):
+            continue
+        normalized_field_name = _normalize_field_name_variant(field_name)
+        normalized_index_name = _normalize_field_name_variant(cfg.get("index_field_name"))
+        if (
+            normalized_field_name in candidates
+            or normalized_index_name in candidates
+        ):
+            return field_name
+    return None
+
+
+def _apply_lookup_labels_to_rows(service, row_field_name, result, row_index_field=None):
     if not result or not row_field_name:
         return result
 
-    data_source = service.data_source
-    if not data_source:
-        return result
-
-    resolved_field = data_source.get_field(row_field_name)
-    if not resolved_field or not resolved_field.lookup:
+    lookup_field_name = _resolve_lookup_field_name(
+        service,
+        row_field_name=row_field_name,
+        row_index_field=row_index_field,
+    )
+    if not lookup_field_name:
         return result
 
     rows = result.get("rows") or []
@@ -125,14 +163,24 @@ def _apply_lookup_labels_to_rows(service, row_field_name, result):
     if not row_keys:
         return result
 
-    lookup_options, lookup_error = service.get_lookup_options_by_values(
-        row_field_name,
-        row_keys,
-    )
+    lookup_options = []
+    lookup_error = None
+    batch_size = 200
+    for start in range(0, len(row_keys), batch_size):
+        batch = row_keys[start : start + batch_size]
+        batch_options, batch_error = service.get_lookup_options_by_values(
+            lookup_field_name,
+            batch,
+        )
+        if batch_error:
+            lookup_error = batch_error
+            break
+        lookup_options.extend(batch_options or [])
     if lookup_error or not lookup_options:
         logger.warning(
-            "Observation table: lookup label resolution failed for field %s: %s",
+            "Observation table: lookup label resolution failed for field %s (lookup=%s): %s",
             row_field_name,
+            lookup_field_name,
             lookup_error or "empty lookup response",
         )
         return result
@@ -154,6 +202,81 @@ def _apply_lookup_labels_to_rows(service, row_field_name, result):
             row["label"] = resolved_label
 
     return result
+
+
+def _resolve_lookup_labels_for_export_rows(service, row_field_name, rows, row_index_field=None):
+    if not rows:
+        return rows
+    wrapped = {"rows": rows}
+    resolved = _apply_lookup_labels_to_rows(
+        service,
+        row_field_name,
+        wrapped,
+        row_index_field=row_index_field,
+    )
+    return resolved.get("rows") or rows
+
+
+def _observation_year_columns():
+    return [str(year) for year in range(OBSERVATION_YEAR_START, OBSERVATION_YEAR_END + 1)]
+
+
+def _normalize_year_columns_result(result):
+    normalized = dict(result or {})
+    year_columns = _observation_year_columns()
+    normalized["columns"] = year_columns
+
+    rows = normalized.get("rows") or []
+    for row in rows:
+        values = row.get("values") or {}
+        row["values"] = {
+            year: int(values.get(year, 0) or 0)
+            for year in year_columns
+        }
+    return normalized
+
+
+def _estimate_dimension_row_total(
+    service,
+    *,
+    query_text,
+    query_clauses,
+    selected_filters,
+    row_field,
+):
+    if not row_field:
+        return 0
+    try:
+        mapped_filters = get_mapped_filters(selected_filters or {}, service.field_settings)
+        bool_query = build_bool_query_from_search_params(
+            query_text=query_text if not query_clauses else None,
+            query_clauses=query_clauses if query_clauses else None,
+            filters=mapped_filters,
+        )
+        response = service.client.search(
+            index=service.index_name,
+            body={
+                "size": 0,
+                "query": {"bool": bool_query},
+                "aggs": {
+                    "row_total": {
+                        "cardinality": {
+                            "field": row_field,
+                            "precision_threshold": 40000,
+                        }
+                    }
+                },
+            },
+            request_cache=True,
+            request_timeout=service.request_timeout,
+        )
+        return int(
+            (((response.get("aggregations") or {}).get("row_total") or {}).get("value"))
+            or 0
+        )
+    except Exception:
+        logger.exception("Observation table: failed to estimate row_total for field %s", row_field)
+        return 0
 
 
 def _build_dimension_table_result(query_source, service, dimension):
@@ -245,7 +368,20 @@ def _build_dimension_table_result(query_source, service, dimension):
             row_field,
             col_field,
         )
-    return _apply_lookup_labels_to_rows(service, row_field_name, result)
+    result["row_total"] = _estimate_dimension_row_total(
+        service,
+        query_text=text_search,
+        query_clauses=query_clauses,
+        selected_filters=selected_filters,
+        row_field=(used_pair[0] if used_pair else row_field),
+    )
+    labeled_result = _apply_lookup_labels_to_rows(
+        service,
+        row_field_name,
+        result,
+        row_index_field=(used_pair[0] if used_pair else row_field),
+    )
+    return _normalize_year_columns_result(labeled_result)
 
 
 def _build_dimension_table_result_all_rows(
@@ -395,7 +531,13 @@ def _build_dimension_table_result_all_rows(
             configured_row_field,
             configured_col_field,
         )
-    return _apply_lookup_labels_to_rows(service, row_field_name, best_result)
+    labeled_result = _apply_lookup_labels_to_rows(
+        service,
+        row_field_name,
+        best_result,
+        row_index_field=(used_pair[0] if used_pair else configured_row_field),
+    )
+    return _normalize_year_columns_result(labeled_result)
 
 
 def _job_snapshot(job):
@@ -853,31 +995,6 @@ def _run_chunked_export_async(*, batch_job_id, dimension, query_source, index_na
             if cleaned and cleaned not in col_candidates:
                 col_candidates.append(cleaned)
 
-        def _col_sort_key(key):
-            try:
-                return (0, int(key))
-            except (TypeError, ValueError):
-                return (1, str(key))
-
-        def _get_column_keys(col_field):
-            body = {
-                "size": 0,
-                "query": {"bool": bool_query},
-                "aggs": {
-                    "cols": {
-                        "terms": {"field": col_field, "size": col_size}
-                    }
-                },
-            }
-            response = service.client.search(
-                index=service.index_name,
-                body=body,
-                request_cache=True,
-                request_timeout=service.request_timeout,
-            )
-            buckets = ((response.get("aggregations") or {}).get("cols") or {}).get("buckets") or []
-            return [str(bucket.get("key")) for bucket in buckets if bucket.get("key") is not None]
-
         def _estimate_total_rows(row_field):
             body = {
                 "size": 0,
@@ -904,7 +1021,7 @@ def _run_chunked_export_async(*, batch_job_id, dimension, query_source, index_na
 
         for row_field in row_candidates:
             for col_field in col_candidates:
-                columns = sorted(_get_column_keys(col_field), key=_col_sort_key)
+                columns = _observation_year_columns()
                 estimated_total = _estimate_total_rows(row_field)
                 after_key = None
                 found_any = False
@@ -950,6 +1067,12 @@ def _run_chunked_export_async(*, batch_job_id, dimension, query_source, index_na
                         if len(buffer_rows) >= split_size:
                             chunk_rows = builtins.list(buffer_rows[:split_size])
                             del buffer_rows[:split_size]
+                            chunk_rows = _resolve_lookup_labels_for_export_rows(
+                                service,
+                                row_field_name,
+                                chunk_rows,
+                                row_index_field=row_field,
+                            )
                             range_start = processed_rows + 1
                             processed_rows += len(chunk_rows)
                             range_end = processed_rows
@@ -1003,6 +1126,12 @@ def _run_chunked_export_async(*, batch_job_id, dimension, query_source, index_na
 
         if buffer_rows:
             chunk_rows = builtins.list(buffer_rows)
+            chunk_rows = _resolve_lookup_labels_for_export_rows(
+                service,
+                row_field_name,
+                chunk_rows,
+                row_index_field=(used_pair[0] if used_pair else configured_row_field),
+            )
             range_start = processed_rows + 1
             processed_rows += len(chunk_rows)
             range_end = processed_rows
