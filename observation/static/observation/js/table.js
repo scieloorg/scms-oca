@@ -91,6 +91,8 @@
   const EXPORT_STORAGE_KEY = "observation_export_jobs_v1";
   let exportJobs = [];
   let exportPollTimer = null;
+  let latestGrandTotal = 0;
+  let latestRowTotal = 0;
 
   function getExportStatusEndpoint(jobId) {
     const config = window.searchPageConfig || {};
@@ -401,11 +403,14 @@
       allBtn.disabled = true;
       return;
     }
+    const totalItems = Number(latestRowTotal || 0);
     const rowCount = getLoadedRowCount();
-    const shouldDisable = rowCount > 0 && rowCount < 1000;
+    // Prefer backend row_total when available because visible table rows can be capped.
+    const effectiveCount = totalItems > 0 ? totalItems : rowCount;
+    const shouldDisable = effectiveCount < 1000;
     allBtn.disabled = shouldDisable;
     if (shouldDisable) {
-      allBtn.setAttribute("title", "Enable when there are at least 1000 items.");
+      allBtn.setAttribute("title", "Enable when there are at least 1000 rows.");
     } else {
       allBtn.removeAttribute("title");
     }
@@ -454,6 +459,9 @@
     const columns = data.columns || [];
     const rows = data.rows || [];
     const grandTotal = data.grand_total || 0;
+    const rowTotal = data.row_total || 0;
+    latestGrandTotal = Number(grandTotal || 0);
+    latestRowTotal = Number(rowTotal || rows.length || 0);
 
     const $table = $("#observation-table");
     if (typeof jQuery !== "undefined" && jQuery.fn.DataTable && $table.length && $table.hasClass("dataTable")) {
@@ -577,8 +585,9 @@
         const y2023 = Math.round(base * 1.31);
         const y2024 = Math.round(base * 1.39);
         const y2025 = Math.round(base * 1.47);
+        const y2026 = Math.round(base * 1.55);
         $("#observation-table tbody").append(
-          "<tr><td class=\"observation-select-col\"><input type=\"checkbox\" class=\"form-check-input observation-row-checkbox compare-row-checkbox\"></td><td>" + country + "</td><td>" + y2019 + "</td><td>" + y2020 + "</td><td>" + y2021 + "</td><td>" + y2022 + "</td><td>" + y2023 + "</td><td>" + y2024 + "</td><td>" + y2025 + "</td></tr>"
+          "<tr><td class=\"observation-select-col\"><input type=\"checkbox\" class=\"form-check-input observation-row-checkbox compare-row-checkbox\"></td><td>" + country + "</td><td>" + y2019 + "</td><td>" + y2020 + "</td><td>" + y2021 + "</td><td>" + y2022 + "</td><td>" + y2023 + "</td><td>" + y2024 + "</td><td>" + y2025 + "</td><td>" + y2026 + "</td></tr>"
         );
       });
     }
@@ -926,7 +935,7 @@
       exportCtx.fillStyle = "#ffffff";
       exportCtx.fillRect(0, 0, cssWidth, cssHeight);
 
-      const labelOrder = ["2019", "2020", "2021", "2022", "2023", "2024", "2025"];
+      const labelOrder = (yearColumns && yearColumns.length) ? yearColumns.slice() : ["2019", "2020", "2021", "2022", "2023", "2024", "2025", "2026"];
       const modalText = $("#country-detail-body").text();
       const values = labelOrder.map(function (year) {
         const match = modalText.match(new RegExp(year + ":\\s*([0-9,.-]+)"));
