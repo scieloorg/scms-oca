@@ -336,13 +336,11 @@
     if (!wrapper || wrapper.classList.contains('lookup-checkbox-field')) return;
 
     const searchInput = wrapper.querySelector('.checkbox-field__search');
-    const optionsContainer = wrapper.querySelector('.checkbox-field__options');
     const state = wrapper.__checkboxState;
-    if (!searchInput || !optionsContainer || !state) return;
+    if (!searchInput || !state) return;
 
-    const hasActiveQuery = Boolean(String(state.query || '').trim() || String(searchInput.value || '').trim());
-    const hasOverflow = optionsContainer.scrollHeight > (optionsContainer.clientHeight + 1);
-    const shouldShowSearch = hasActiveQuery || hasOverflow;
+    // Keep the search affordance stable once the field has options.
+    const shouldShowSearch = Array.isArray(state.allOptions) && state.allOptions.length > 0;
 
     searchInput.hidden = !shouldShowSearch;
     wrapper.classList.toggle('checkbox-field--search-hidden', !shouldShowSearch);
