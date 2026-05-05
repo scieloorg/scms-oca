@@ -1250,6 +1250,47 @@
     }));
   }
 
+  function syncFilterSidebarStickyOffset() {
+    const sidebarHead = document.querySelector('.sg-filter-sidebar__head');
+    if (!sidebarHead) return;
+
+    const headerWrap = document.querySelector('#header-wrap') || document.querySelector('#header');
+    if (!headerWrap) return;
+
+    const bottom = headerWrap.getBoundingClientRect().bottom;
+    const offset = Math.max(0, bottom);
+    document.documentElement.style.setProperty('--sg-header-offset', `${offset}px`);
+  }
+
+  function initStickySidebarOffset() {
+    let syncTimer = null;
+    let isSyncing = false;
+
+    function syncLoop() {
+      syncFilterSidebarStickyOffset();
+      if (isSyncing) {
+        window.requestAnimationFrame(syncLoop);
+      }
+    }
+
+    function handleScroll() {
+      if (!isSyncing) {
+        isSyncing = true;
+        window.requestAnimationFrame(syncLoop);
+      }
+      clearTimeout(syncTimer);
+      syncTimer = setTimeout(() => {
+        isSyncing = false;
+        // One final sync to ensure pixel-perfect end state
+        syncFilterSidebarStickyOffset();
+      }, 500);
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('resize', syncFilterSidebarStickyOffset, { passive: true });
+    syncFilterSidebarStickyOffset();
+  }
+
   async function init(root) {
     const container = root || document;
     initCollapsibleFilterGroups(container);
@@ -1262,6 +1303,7 @@
     bindNativeResetHandling(container);
     bindAppliedFiltersSummary(container);
     bindSelectPlaceholderState(container);
+    initStickySidebarOffset();
     await lookupPromise;
     getFilterForms(container).forEach(commitAppliedFilters);
     dispatchFiltersReady(container);
