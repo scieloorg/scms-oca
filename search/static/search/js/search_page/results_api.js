@@ -67,13 +67,47 @@
       overlay = document.createElement('div');
       overlay.className = 'results-container__loading';
       overlay.hidden = true;
-      overlay.innerHTML =
-        '<div class="text-center p-4"><i class="icon-spinner icon-spin icon-2x"></i></div>';
+      overlay.setAttribute('role', 'status');
+      overlay.setAttribute('aria-live', 'polite');
+      overlay.innerHTML = `
+        <div class="results-container__loading-inner text-center p-4">
+          <span class="search-loading-spinner search-loading-spinner--large" aria-hidden="true"></span>
+          <p class="results-container__loading-text mb-0 mt-3">${this.getLoadingMessage()}</p>
+        </div>`;
       this.resultsContainer.appendChild(overlay);
       return overlay;
     }
 
+    getLoadingMessage() {
+      if (typeof gettext === 'function') {
+        return gettext('Loading...');
+      }
+      return 'Buscando...';
+    }
+
+    toggleSearchSubmitLoading(active) {
+      const submitButtons = document.querySelectorAll('#search-form .search-header-card__submit');
+      submitButtons.forEach(submitBtn => {
+        if (active) {
+          if (submitBtn.dataset.loadingOriginalHtml === undefined) {
+            submitBtn.dataset.loadingOriginalHtml = submitBtn.innerHTML.trim();
+          }
+          submitBtn.disabled = true;
+          submitBtn.setAttribute('aria-busy', 'true');
+          const label = submitBtn.dataset.loadingOriginalHtml;
+          submitBtn.innerHTML = `<span class="search-loading-spinner" aria-hidden="true"></span><span class="search-header-card__submit-label">${label}</span>`;
+          return;
+        }
+        submitBtn.disabled = false;
+        submitBtn.removeAttribute('aria-busy');
+        if (submitBtn.dataset.loadingOriginalHtml !== undefined) {
+          submitBtn.innerHTML = submitBtn.dataset.loadingOriginalHtml;
+        }
+      });
+    }
+
     showLoading() {
+      this.toggleSearchSubmitLoading(true);
       const overlay = this.ensureLoadingOverlay();
       if (!this.resultsContainer || !overlay) return;
       this.resultsContainer.classList.add('results-container--loading');
@@ -87,6 +121,7 @@
       this.resultsContainer.setAttribute('aria-busy', 'false');
       const overlay = this.resultsContainer.querySelector('.results-container__loading');
       if (overlay) overlay.hidden = true;
+      this.toggleSearchSubmitLoading(false);
     }
 
     renderResultsFragments(data) {
