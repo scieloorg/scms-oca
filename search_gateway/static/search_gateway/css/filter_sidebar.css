@@ -16,7 +16,6 @@
   background: var(--sg-surface);
   border-radius: 6px;
   box-shadow: var(--sg-shadow);
-  overflow: hidden;
 }
 
 .sg-filter-sidebar__head {
@@ -27,6 +26,11 @@
   padding: 1.05rem 1.35rem 0.9rem;
   border-bottom: 1px solid #ebf0f6;
   background: var(--sg-surface);
+  position: sticky;
+  top: var(--sg-header-offset, 0px);
+  z-index: 10;
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
 }
 
 .sg-filter-sidebar__title {
