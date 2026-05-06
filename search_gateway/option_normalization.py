@@ -1,13 +1,37 @@
+import re
+import unicodedata
 from collections import OrderedDict
+from typing import Any
 
 from django.utils.translation import gettext
 
+# ---------------------------------------------------------------------------
+# Constants
+# ---------------------------------------------------------------------------
 
 TRUE_VALUES = {"true", "1", "yes", "y", "sim", "on"}
 FALSE_VALUES = {"false", "0", "no", "n", "nao"}
 
 SEARCH_RESULT_SORT_VALUES = frozenset({"desc", "asc", "cited_by_count"})
 
+
+# ---------------------------------------------------------------------------
+# Core text utilities
+# ---------------------------------------------------------------------------
+
+def clean_text(value: Any) -> str:
+    return re.sub(r"\s+", " ", str(value or "").strip())
+
+
+def normalize_text(value: str) -> str:
+    value = unicodedata.normalize("NFKD", value)
+    value = value.encode("ascii", "ignore").decode("ascii")
+    return clean_text(value).lower()
+
+
+# ---------------------------------------------------------------------------
+# Primitive normalizers
+# ---------------------------------------------------------------------------
 
 def normalize_int(value, default: int) -> int:
     try:
@@ -21,8 +45,28 @@ def normalize_positive_number(value, default: int) -> int:
     return normalized if normalized > 0 else default
 
 
+def normalize_boolean(value):
+    if isinstance(value, str):
+        normalized = clean_text(value).lower()
+        if normalized in TRUE_VALUES:
+            return True
+        if normalized in FALSE_VALUES:
+            return False
+        return None
+
+    if value in (True, 1):
+        return True
+    if value in (False, 0):
+        return False
+    return None
+
+
+# ---------------------------------------------------------------------------
+# Filter / request normalizers
+# ---------------------------------------------------------------------------
+
 def normalize_search_result_sort(value):
-    normalized = str(value or "desc").strip().lower()
+    normalized = clean_text(value or "desc").lower()
     return normalized if normalized in SEARCH_RESULT_SORT_VALUES else "desc"
 
 
@@ -47,6 +91,10 @@ def normalize_selected_values(applied_filters, field_name, default=None):
 
     return [str(value)]
 
+
+# ---------------------------------------------------------------------------
+# Option normalizers
+# ---------------------------------------------------------------------------
 
 def normalize_option(option, selected_values):
     if isinstance(option, dict):
@@ -111,19 +159,3 @@ def group_options(options):
         for label, grouped_options in groups.items()
     )
     return option_groups
-
-
-def normalize_boolean(value):
-    if isinstance(value, str):
-        normalized = value.strip().lower()
-        if normalized in TRUE_VALUES:
-            return True
-        if normalized in FALSE_VALUES:
-            return False
-        return None
-
-    if value in (True, 1):
-        return True
-    if value in (False, 0):
-        return False
-    return None

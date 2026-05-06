@@ -5,6 +5,7 @@ from django.utils.translation import gettext
 
 from .field_options import resolve_form_options
 from .option_normalization import (
+    clean_text,
     group_options,
     normalize_options,
     normalize_selected_values,
@@ -75,15 +76,15 @@ def _field_has_visible_content(*, widget, options=None, is_active=False, searcha
 
 def _build_boolean_toggle_options(options, selected_values):
     normalized_selected_values = {
-        str(value or "").strip().lower()
+        clean_text(value).lower()
         for value in (selected_values or [])
-        if str(value or "").strip()
+        if clean_text(value)
     }
     normalized_options = []
     option_labels = {}
 
     for option in options or []:
-        option_value = str(option.get("value") or "").strip().lower()
+        option_value = clean_text(option.get("value")).lower()
         if option_value not in {"true", "false"}:
             continue
         if option_value not in option_labels:
@@ -105,7 +106,7 @@ def _build_boolean_toggle_options(options, selected_values):
 
 
 def _parse_year_option_value(option):
-    raw_value = str((option or {}).get("value") or "").strip()
+    raw_value = clean_text((option or {}).get("value"))
     if not raw_value or not raw_value.lstrip("-").isdigit():
         return None
 
@@ -116,8 +117,8 @@ def _parse_year_option_value(option):
 
 
 def _field_prefers_descending_year_options(field, widget, field_label):
-    normalized_name = str(getattr(field, "field_name", "") or "").strip().lower()
-    normalized_label = str(field_label or "").strip().lower()
+    normalized_name = clean_text(getattr(field, "field_name", "")).lower()
+    normalized_label = clean_text(field_label).lower()
 
     if widget == "year":
         return True

@@ -16,23 +16,26 @@ from .filters_cache import (
     get_cached_filters,
     store_filters_cache,
 )
-from .lookup import search_lookup_options, search_lookup_options_by_values
 from .models import DataSource
+from .option_normalization import clean_text
 from .query import (
     build_aggregation_body,
     build_bool_query_from_search_params,
     build_document_search_body,
     build_filters_aggs,
     build_keyword_contains_search_body,
+    build_lookup_hits_body,
     build_term_search_body,
     build_unique_items_aggregation_body,
 )
 from .response_parser import (
+    parse_lookup_hits,
     parse_aggregation_response,
     parse_document_search_response,
     parse_filters_response,
     parse_search_item_response,
 )
+
 
 logger = logging.getLogger(__name__)
 
@@ -181,6 +184,53 @@ class SearchGatewayService:
             if field_info.get("kind") != "control"
         }
 
+    def _search_lookup_options(self, field, query_text=""):
+        lookup_config = field.lookup
+        source_fields = [
+            lookup_config["source_value_field"],
+            lookup_config["source_label_field"],
+            "size",
+        ]
+        body = build_lookup_hits_body(
+            query_text=query_text,
+            search_fields=[lookup_config["search_field"]],
+            size=field.get_option_limit(default=100),
+            source_fields=source_fields,
+            sort_field=lookup_config["sort_field"],
+        )
+        response = self.client.search(
+            index=lookup_config["index_name"],
+            body=body,
+            request_timeout=self.request_timeout,
+        )
+        return parse_lookup_hits(response, lookup_config), None
+
+    def _search_lookup_options_by_values(self, field, values):
+        lookup_config = field.lookup
+        normalized = [c for v in (values or []) if (c := clean_text(v))]
+
+        if not normalized:
+            return [], None
+
+        source_fields = [
+            lookup_config["source_value_field"],
+            lookup_config["source_label_field"],
+            "size",
+        ]
+        body = {
+            "size": max(50, len(normalized) * 3),
+            "query": {"terms": {lookup_config["value_field"]: normalized}},
+            "_source": source_fields,
+        }
+        response = self.client.search(
+            index=lookup_config["index_name"],
+            body=body,
+            request_timeout=self.request_timeout,
+        )
+        options = parse_lookup_hits(response, lookup_config)
+        option_map = {opt["value"]: opt for opt in options}
+        return [option_map.get(v) or {"value": v, "label": v} for v in normalized]
+
     def get_field_options(self, field_name, query_text="", filters=None):
         field, error = self._resolve_field(field_name)
         if error:
@@ -194,12 +244,10 @@ class SearchGatewayService:
             )
 
         if field.lookup:
-            return search_lookup_options(
-                self.client,
-                field,
-                query_text=query_text,
-                request_timeout=self.request_timeout,
-            )
+            try:
+                return self._search_lookup_options(field, query_text=query_text)
+            except Exception as exc:
+                return [], f"Error retrieving lookup options: {exc}"
 
         if not field.index_field_name:
             return [], None
@@ -219,12 +267,7 @@ class SearchGatewayService:
             return None, "Lookup not configured"
 
         try:
-            return search_lookup_options_by_values(
-                self.client,
-                field,
-                values,
-                request_timeout=self.request_timeout,
-            )
+            return self._search_lookup_options_by_values(field, values)
         except Exception as exc:
             return None, f"Error retrieving lookup options: {exc}"
 
