@@ -495,9 +495,54 @@ def run(recreate=True):
                 "enabled": False,
                 "description": "Essa tarefa tem como responsabilidade gerar os registro de indicadores baseado nos parâmetros definido na chave ``indicators`` da lista de argumentos (Keyword Arguments)",
             },
+            # ── ETL Silver Pipeline ──────────────────────────────────────────
+            {
+                "name": "[ETL] Process pending silver items",
+                "task": "[ETL] Process pending silver items",
+                "args": json.dumps([]),
+                "kwargs": json.dumps({"limit": 1000}),
+                "enabled": True,
+                "description": (
+                    "Processa um lote de itens ETL com status PENDING, executando o pipeline completo "
+                    "(dedup → match → merge → standardize → index). "
+                    "Agendado via Celery Beat — NÃO se auto-reagenda."
+                ),
+            },
+            {
+                "name": "[ETL] Retry failed silver ETL items",
+                "task": "[ETL] Retry failed silver ETL items",
+                "args": json.dumps([]),
+                "kwargs": json.dumps({"limit": 500}),
+                "enabled": True,
+                "description": (
+                    "Reprocessa um lote de itens ETL com status FAILED. "
+                    "Agendado via Celery Beat com intervalo maior que o processamento normal."
+                ),
+            },
         ]
     }
 
+    # Schedule for pending processing: every 5 minutes
+    pending_schedule, _ = CrontabSchedule.objects.get_or_create(
+        minute="*/5",
+        hour="*",
+        day_of_week="*",
+        day_of_month="*",
+        month_of_year="*",
+        timezone=zoneinfo.ZoneInfo("America/Sao_Paulo"),
+    )
+
+    # Schedule for retry: every 2 hours
+    retry_schedule, _ = CrontabSchedule.objects.get_or_create(
+        minute="0",
+        hour="*/2",
+        day_of_week="*",
+        day_of_month="*",
+        month_of_year="*",
+        timezone=zoneinfo.ZoneInfo("America/Sao_Paulo"),
+    )
+
+    # Default schedule for other tasks: every 30 minutes
     schedule, _ = CrontabSchedule.objects.get_or_create(
         minute="30",
         hour="*",
@@ -507,8 +552,14 @@ def run(recreate=True):
         timezone=zoneinfo.ZoneInfo("America/Sao_Paulo"),
     )
 
+    etl_schedules = {
+        "[ETL] Process pending silver items": pending_schedule,
+        "[ETL] Retry failed silver ETL items": retry_schedule,
+    }
+
     for task in tasks.get("tasks"):
-        task.update({"crontab": schedule})
+        task_schedule = etl_schedules.get(task.get("name"), schedule)
+        task.update({"crontab": task_schedule})
         try:
             PeriodicTask.objects.create(**task)
         except django.core.exceptions.ValidationError as e:

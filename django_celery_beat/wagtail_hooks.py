@@ -192,7 +192,7 @@ class SolarScheduleAdmin(ModelAdmin):
 class TasksModelsAdminGroup(ModelAdminGroup):
     menu_label = _("Tasks")
     menu_icon = "cogs"
-    menu_order = 1000
+    menu_order = 86
     items = (
         PeriodicTaskAdmin,
         CrontabScheduleAdmin,

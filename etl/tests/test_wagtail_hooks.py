@@ -7,6 +7,20 @@ class EtlAdminActionTests(SimpleTestCase):
     def setUp(self):
         self.factory = RequestFactory()
 
+    def test_trigger_pipeline_requires_post(self):
+        response = wagtail_hooks.trigger_pipeline_view(
+            self.factory.get("/admin/etl/trigger-pipeline/")
+        )
+
+        self.assertEqual(response.status_code, 405)
+
+    def test_trigger_pending_requires_post(self):
+        response = wagtail_hooks.trigger_pending_view(
+            self.factory.get("/admin/etl/trigger-pending/")
+        )
+
+        self.assertEqual(response.status_code, 405)
+
     def test_reset_to_pending_requires_post(self):
         response = wagtail_hooks.reset_to_pending_view(
             self.factory.get("/admin/etl/reset-pending/")
