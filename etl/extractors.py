@@ -2,6 +2,20 @@ from typing import Any
 
 from etl.normalizers import normalize_text, stz_doi, stz_isbn, stz_issn
 
+__all__ = [
+    "display_name",
+    "extract_doi",
+    "extract_isbns",
+    "extract_issns",
+    "extract_scielo_id",
+    "extract_source",
+    "first_value",
+    "get_normalized_titles",
+    "match_key",
+    "normalize_identifiers",
+    "rebuild_abstract_from_inverted_index",
+]
+
 
 def extract_doi(doc: dict[str, Any]) -> str | None:
     if doi := doc.get("doi"):
