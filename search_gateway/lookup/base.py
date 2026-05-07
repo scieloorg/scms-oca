@@ -23,7 +23,7 @@ class LookupBuilder:
         properties: dict[str, Any] = {
             "value": {"type": "keyword", "ignore_above": 512},
             "normalized_value": {"type": "keyword", "ignore_above": 512},
-            "label": {"type": "keyword", "ignore_above": 512},
+            "label": {"type": "keyword", "ignore_above": 512, "copy_to": "label_search"},
             "label_search": {
                 "type": "search_as_you_type",
                 "analyzer": "multilingual",
