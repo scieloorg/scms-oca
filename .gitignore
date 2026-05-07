@@ -281,4 +281,3 @@ core/media/
 .ipython/
 .env
 .envs/*
-!.envs/.local/
