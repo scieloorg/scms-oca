@@ -2,6 +2,8 @@ import re
 import unicodedata
 from typing import Any
 
+import pycountry
+
 
 def stz_doi(doi: str | None) -> str | None:
     if not doi:
@@ -96,3 +98,38 @@ def unique(values: list) -> list:
 def scalar_or_list(values: list):
     values = unique(values)
     return values[0] if len(values) == 1 else values
+
+
+def stz_language(language: str | None) -> str | None:
+    if not language:
+        return None
+
+    language_value = str(language).strip()
+
+    if len(language_value) == 2 and language_value.isalpha():
+        result = pycountry.languages.get(alpha_2=language_value.lower())
+        if result:
+            return result.alpha_2
+
+    if len(language_value) == 3 and language_value.isalpha():
+        result = pycountry.languages.get(alpha_3=language_value.lower())
+        if result and hasattr(result, "alpha_2"):
+            return result.alpha_2
+
+        result = pycountry.languages.get(bibliographic=language_value.lower())
+        if result and hasattr(result, "alpha_2"):
+            return result.alpha_2
+
+    language_lower = language_value.lower()
+    for language_item in pycountry.languages:
+        if hasattr(language_item, "name") and language_item.name.lower() == language_lower:
+            if hasattr(language_item, "alpha_2"):
+                return language_item.alpha_2
+        if (
+            hasattr(language_item, "common_name")
+            and language_item.common_name.lower() == language_lower
+        ):
+            if hasattr(language_item, "alpha_2"):
+                return language_item.alpha_2
+
+    return None
