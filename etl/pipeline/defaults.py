@@ -96,6 +96,32 @@ def article_rules() -> DocumentRules:
     )
 
 
+def dataset_rules() -> DocumentRules:
+    return DocumentRules(
+        document_type="dataset",
+        scielo_dedup_strategies=("doi", "pid"),
+        openalex_match_strategies=("doi",),
+        doi_requires_title_overlap=True,
+        pid_requires_year_match=True,
+        pid_requires_source_match=False,
+        pid_requires_title_overlap=True,
+        fuzzy_min_similarity=0.95,
+        fuzzy_year_tolerance=0,
+        fuzzy_requires_source_match=False,
+        openalex_validation=OpenAlexValidationRules(
+            year_tolerance=1,
+            require_openalex_year=True,
+            require_source_match=False,
+            source_similarity_threshold=0.80,
+            title_match_threshold=0.90,
+            title_reject_threshold=0.85,
+            min_score=60,
+            strict_min_score=70,
+        ),
+        merge=DEFAULT_MERGE_RULES,
+    )
+
+
 def preprint_rules() -> DocumentRules:
     return DocumentRules(
         document_type="preprint",
@@ -207,6 +233,12 @@ PIPELINE_TARGETS = {
         silver_index_pattern=settings.ETL_SILVER_PREPRINT,
         rules=preprint_rules(),
     ),
+    "dataset": PipelineTarget(
+        document_type="dataset",
+        bronze_index=settings.ETL_BRONZE_SCIELO_DATASET,
+        silver_index_pattern=settings.ETL_SILVER_DATASET,
+        rules=dataset_rules(),
+    ),
 }
 
 
@@ -243,6 +275,7 @@ __all__ = [
     "DEFAULT_MERGE_RULES",
     "DEFAULT_OPENALEX_VALIDATION",
     "article_rules",
+    "dataset_rules",
     "preprint_rules",
     "book_rules",
     "book_chapter_rules",

@@ -41,6 +41,17 @@ class DocumentRulesTests(SimpleTestCase):
 
         self.assertEqual(len(groups), 1)
 
+    def test_dataset_does_not_use_fuzzy_strategy(self):
+        deduplicator = make_deduplicator("dataset")
+        groups = deduplicator.find_duplicates(
+            [
+                {"type": "dataset", "title": "Same dataset title", "publication_year": 2024},
+                {"type": "dataset", "title": "Same dataset title", "publication_year": 2024},
+            ]
+        )
+
+        self.assertEqual(len(groups), 2)
+
     def test_book_chapter_isbn_requires_chapter_title_match(self):
         matcher = make_matcher("book-chapter")
         is_valid, confidence, details = matcher._validate_openalex_match(

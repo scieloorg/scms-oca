@@ -46,6 +46,10 @@ class PipelineTargetDocumentTypeTests(SimpleTestCase):
         )
         self.assertEqual(result, "preprint")
 
+    def test_dataset(self):
+        result = get_pipeline_target("bronze_scielo_dataset").document_type_for({})
+        self.assertEqual(result, "dataset")
+
     def test_book(self):
         result = get_pipeline_target("bronze_scielo_books").document_type_for({"type": "book"})
         self.assertEqual(result, "book")

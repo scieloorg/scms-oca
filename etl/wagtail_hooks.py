@@ -14,7 +14,7 @@ from wagtail.snippets.views.snippets import SnippetViewSet
 from etl.models import EtlItemProcess, EtlResult, EtlStatus
 from etl.tasks import process_pending_silver_etl, run_silver_etl
 
-DOCUMENT_TYPES = ("article", "book", "preprint")
+DOCUMENT_TYPES = ("article", "book", "preprint", "dataset")
 STATUS_FIELDS = (
     EtlStatus.PENDING,
     EtlStatus.PROCESSING,
@@ -26,6 +26,7 @@ DOCUMENT_TYPE_LABELS = {
     "article": _("Articles"),
     "book": _("Books"),
     "preprint": _("Preprints"),
+    "dataset": _("Datasets"),
 }
 
 
