@@ -133,3 +133,36 @@ def stz_language(language: str | None) -> str | None:
                 return language_item.alpha_2
 
     return None
+
+
+def stz_country_code(country: str | None) -> str | None:
+    if not country:
+        return None
+
+    country_value = str(country).strip()
+
+    if len(country_value) == 2 and country_value.isalpha():
+        result = pycountry.countries.get(alpha_2=country_value.upper())
+        if result:
+            return result.alpha_2
+
+    if len(country_value) == 3 and country_value.isalpha():
+        result = pycountry.countries.get(alpha_3=country_value.upper())
+        if result:
+            return result.alpha_2
+
+    try:
+        result = pycountry.countries.search_fuzzy(country_value)
+        if result:
+            return result[0].alpha_2
+    except (LookupError, ValueError):
+        pass
+
+    try:
+        result = pycountry.countries.lookup(country_value)
+        if result:
+            return result.alpha_2
+    except (LookupError, KeyError):
+        pass
+
+    return None
