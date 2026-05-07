@@ -7,6 +7,7 @@ from etl.normalizers import (
     normalize_name,
     normalize_text,
     scalar_or_list,
+    stz_country_code,
     stz_doi,
     stz_isbn,
     stz_issn,
@@ -86,3 +87,16 @@ class LanguageNormalizerTests(SimpleTestCase):
     def test_stz_language_rejects_unknown_values(self):
         self.assertIsNone(stz_language("not-a-language"))
         self.assertIsNone(stz_language(None))
+
+
+class CountryNormalizerTests(SimpleTestCase):
+    def test_stz_country_code_accepts_alpha_codes(self):
+        self.assertEqual(stz_country_code("BR"), "BR")
+        self.assertEqual(stz_country_code("bra"), "BR")
+
+    def test_stz_country_code_accepts_country_names(self):
+        self.assertEqual(stz_country_code("Brazil"), "BR")
+
+    def test_stz_country_code_rejects_unknown_values(self):
+        self.assertIsNone(stz_country_code("not-a-country"))
+        self.assertIsNone(stz_country_code(None))
