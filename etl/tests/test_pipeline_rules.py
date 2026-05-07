@@ -30,6 +30,17 @@ class DocumentRulesTests(SimpleTestCase):
 
         self.assertEqual(len(groups), 2)
 
+    def test_preprint_fuzzy_does_not_require_source_match(self):
+        deduplicator = make_deduplicator("preprint")
+        groups = deduplicator.find_duplicates(
+            [
+                {"type": "preprint", "title": "Same preprint title", "publication_year": 2024},
+                {"type": "preprint", "title": "Same preprint title", "publication_year": 2024},
+            ]
+        )
+
+        self.assertEqual(len(groups), 1)
+
     def test_book_chapter_isbn_requires_chapter_title_match(self):
         matcher = make_matcher("book-chapter")
         is_valid, confidence, details = matcher._validate_openalex_match(

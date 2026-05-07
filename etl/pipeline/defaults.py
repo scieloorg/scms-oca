@@ -96,6 +96,32 @@ def article_rules() -> DocumentRules:
     )
 
 
+def preprint_rules() -> DocumentRules:
+    return DocumentRules(
+        document_type="preprint",
+        scielo_dedup_strategies=("doi", "pid", "fuzzy"),
+        openalex_match_strategies=("doi", "title"),
+        doi_requires_title_overlap=True,
+        pid_requires_year_match=True,
+        pid_requires_source_match=False,
+        pid_requires_title_overlap=True,
+        fuzzy_min_similarity=0.88,
+        fuzzy_year_tolerance=1,
+        fuzzy_requires_source_match=False,
+        openalex_validation=OpenAlexValidationRules(
+            year_tolerance=1,
+            require_openalex_year=True,
+            require_source_match=False,
+            source_similarity_threshold=0.80,
+            title_match_threshold=0.88,
+            title_reject_threshold=0.82,
+            min_score=50,
+            strict_min_score=60,
+        ),
+        merge=DEFAULT_MERGE_RULES,
+    )
+
+
 def book_rules() -> DocumentRules:
     return DocumentRules(
         document_type="book",
@@ -175,6 +201,12 @@ PIPELINE_TARGETS = {
         silver_index_pattern=settings.ETL_SILVER_BOOK,
         rules=book_rules(),
     ),
+    "preprint": PipelineTarget(
+        document_type="preprint",
+        bronze_index=settings.ETL_BRONZE_SCIELO_PREPRINT,
+        silver_index_pattern=settings.ETL_SILVER_PREPRINT,
+        rules=preprint_rules(),
+    ),
 }
 
 
@@ -211,6 +243,7 @@ __all__ = [
     "DEFAULT_MERGE_RULES",
     "DEFAULT_OPENALEX_VALIDATION",
     "article_rules",
+    "preprint_rules",
     "book_rules",
     "book_chapter_rules",
     "PipelineTarget",
