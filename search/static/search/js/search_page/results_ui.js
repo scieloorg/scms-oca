@@ -19,16 +19,10 @@
         this.ctx.resultsApi.applyFiltersAjax();
       });
 
-      document.addEventListener('click', event => {
-        const limitButton = event.target.closest('[data-results-limit-option]');
-        if (!limitButton) return;
-
-        document.querySelectorAll('[data-results-limit-option]').forEach(option => {
-          option.classList.remove('results-controls__limit-option--active');
-        });
-
-        limitButton.classList.add('results-controls__limit-option--active');
-        this.ctx.state.currentLimit = limitButton.textContent.trim() || '25';
+      document.addEventListener('change', event => {
+        const limitSelect = event.target.closest('#results-limit-select');
+        if (!limitSelect) return;
+        this.ctx.state.currentLimit = limitSelect.value || '25';
         this.ctx.resultsApi.applyFiltersAjax();
       });
 
@@ -71,10 +65,10 @@
         sortSelect.value = state.currentSort;
       }
 
-      document.querySelectorAll('[data-results-limit-option]').forEach(option => {
-        const isActive = option.textContent.trim() === state.currentLimit;
-        option.classList.toggle('results-controls__limit-option--active', isActive);
-      });
+      const limitSelect = document.getElementById('results-limit-select');
+      if (limitSelect) {
+        limitSelect.value = state.currentLimit;
+      }
 
       document.querySelectorAll('[data-display-mode]').forEach(btn => {
         const isActive = btn.dataset.displayMode === state.currentDisplayMode;
