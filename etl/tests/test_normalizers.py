@@ -10,6 +10,7 @@ from etl.normalizers import (
     stz_doi,
     stz_isbn,
     stz_issn,
+    stz_language,
     unique,
 )
 
@@ -71,3 +72,17 @@ class TextAndCollectionNormalizerTests(SimpleTestCase):
     def test_scalar_or_list_returns_scalar_for_single_value(self):
         self.assertEqual(scalar_or_list(["a", "a"]), "a")
         self.assertEqual(scalar_or_list(["a", "b"]), ["a", "b"])
+
+
+class LanguageNormalizerTests(SimpleTestCase):
+    def test_stz_language_accepts_iso_639_codes(self):
+        self.assertEqual(stz_language("pt"), "pt")
+        self.assertEqual(stz_language("por"), "pt")
+        self.assertEqual(stz_language("eng"), "en")
+
+    def test_stz_language_accepts_language_names(self):
+        self.assertEqual(stz_language("Portuguese"), "pt")
+
+    def test_stz_language_rejects_unknown_values(self):
+        self.assertIsNone(stz_language("not-a-language"))
+        self.assertIsNone(stz_language(None))
