@@ -131,6 +131,7 @@ LOCAL_APPS = [
     "journal",
     "chart",
     "search_gateway",
+    "etl",
     "harvest",
     "observation",
     'wagtail_json_widget',
