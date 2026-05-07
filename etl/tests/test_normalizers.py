@@ -1,6 +1,17 @@
 from django.test import SimpleTestCase
 
-from etl.normalizers import stz_doi, stz_isbn, stz_issn
+from etl.normalizers import (
+    as_list,
+    int_or_none,
+    normalize_keywords,
+    normalize_name,
+    normalize_text,
+    scalar_or_list,
+    stz_doi,
+    stz_isbn,
+    stz_issn,
+    unique,
+)
 
 
 class IdentifierNormalizerTests(SimpleTestCase):
@@ -29,3 +40,34 @@ class IdentifierNormalizerTests(SimpleTestCase):
     def test_stz_issn_rejects_invalid_values(self):
         self.assertIsNone(stz_issn("123"))
         self.assertIsNone(stz_issn(None))
+
+
+class TextAndCollectionNormalizerTests(SimpleTestCase):
+    def test_normalize_text_collapses_spaces_and_strips_accents(self):
+        self.assertEqual(normalize_text("  Sa\u00fade   p\u00fablica  "), "Saude publica")
+        self.assertIsNone(normalize_text(""))
+
+    def test_normalize_name_is_case_and_dash_insensitive(self):
+        self.assertEqual(normalize_name(" Jo\u00e3o\u2013Silva  "), "joao-silva")
+        self.assertEqual(normalize_name(None), "")
+
+    def test_normalize_keywords_deduplicates_and_sorts(self):
+        self.assertEqual(
+            normalize_keywords(["Sa\u00fade", "saude", "Epidemiologia"]),
+            ["epidemiologia", "saude"],
+        )
+
+    def test_int_or_none_converts_safe_values(self):
+        self.assertEqual(int_or_none("2024"), 2024)
+        self.assertIsNone(int_or_none("not-a-year"))
+
+    def test_as_list_wraps_scalar_values(self):
+        self.assertEqual(as_list("abc"), ["abc"])
+        self.assertEqual(as_list([]), [])
+
+    def test_unique_keeps_first_occurrence_order(self):
+        self.assertEqual(unique(["b", "a", "b", None]), ["b", "a"])
+
+    def test_scalar_or_list_returns_scalar_for_single_value(self):
+        self.assertEqual(scalar_or_list(["a", "a"]), "a")
+        self.assertEqual(scalar_or_list(["a", "b"]), ["a", "b"])
