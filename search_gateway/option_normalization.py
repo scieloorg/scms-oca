@@ -24,9 +24,9 @@ def clean_text(value: Any) -> str:
 
 
 def normalize_text(value: str) -> str:
-    value = unicodedata.normalize("NFKD", value)
-    value = value.encode("ascii", "ignore").decode("ascii")
-    return clean_text(value).lower()
+    """Normalize text using NFC form, preserving accents but standardizing representation."""
+    value = unicodedata.normalize("NFC", value)
+    return clean_text(value)
 
 
 # ---------------------------------------------------------------------------
