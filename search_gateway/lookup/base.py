@@ -113,7 +113,7 @@ class LookupBuilder:
                 "value": value,
                 "label": label,
                 "normalized_value": normalize_text(label),
-                "label_search": label,
+                "label_search": normalize_text(label),
             },
         )
 
