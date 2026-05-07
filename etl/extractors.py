@@ -1,6 +1,6 @@
 from typing import Any
 
-from etl.normalizers import stz_doi, stz_isbn, stz_issn
+from etl.normalizers import normalize_text, stz_doi, stz_isbn, stz_issn
 
 
 def extract_doi(doc: dict[str, Any]) -> str | None:
@@ -158,3 +158,69 @@ def normalize_identifiers(raw_doc: dict[str, Any]) -> dict[str, str | None]:
             identifiers[key] = str(value).strip()
 
     return identifiers
+
+
+def extract_source(doc: dict[str, Any]) -> dict[str, Any]:
+    source = doc.get("source")
+    if isinstance(source, dict) and source:
+        return source
+
+    for location_key in ("primary_location", "best_oa_location"):
+        location = doc.get(location_key)
+        if isinstance(location, dict):
+            location_source = location.get("source")
+            if isinstance(location_source, dict):
+                return location_source
+
+    return {}
+
+
+def get_normalized_titles(doc: dict[str, Any]) -> list[str]:
+    titles: list[str] = []
+
+    for entry in doc.get("title_with_lang", []):
+        if isinstance(entry, dict) and entry.get("title"):
+            normalized = normalize_text(entry["title"])
+            if normalized:
+                titles.append(normalized.lower().strip())
+
+    if not titles:
+        title = doc.get("title") or doc.get("display_name", "")
+        if title:
+            normalized = normalize_text(title)
+            if normalized:
+                titles.append(normalized.lower().strip())
+
+    return titles
+
+
+def rebuild_abstract_from_inverted_index(inverted_index: dict) -> str | None:
+    if not inverted_index or not isinstance(inverted_index, dict):
+        return None
+
+    word_positions = []
+    for word, positions in inverted_index.items():
+        for position in positions:
+            word_positions.append((position, word))
+    word_positions.sort()
+    abstract = " ".join(word for _position, word in word_positions)
+    return normalize_text(abstract)
+
+
+def display_name(value: Any) -> Any:
+    if isinstance(value, dict):
+        return value.get("display_name") or value.get("name")
+    return value
+
+
+def first_value(value: Any) -> Any:
+    if isinstance(value, list):
+        for item in value:
+            if isinstance(item, str) and "scielo.br" in item:
+                return item
+        return value[0] if value else None
+    return value
+
+
+def match_key(value: Any) -> str:
+    return " ".join(str(value or "").lower().split())
