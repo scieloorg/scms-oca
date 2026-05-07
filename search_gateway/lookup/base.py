@@ -48,7 +48,7 @@ class LookupBuilder:
                         "multilingual": {
                             "type": "custom",
                             "tokenizer": "standard",
-                            "filter": ["lowercase", "asciifolding"],
+                            "filter": ["lowercase"],
                         },
                     },
                 },
