@@ -5,6 +5,7 @@ import math
 from django.conf import settings
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from opensearchpy.exceptions import RequestError as OpenSearchRequestError
 from wagtail.admin.panels import FieldPanel
 from wagtail.models import Page
 
@@ -71,6 +72,17 @@ class SearchPage(Page):
         )
 
     @classmethod
+    def last_accessible_page(cls, page_size, total_results=None):
+        current_limit = cls.normalize_page_size(page_size, 25)
+        window_last_page = max(10000 // current_limit, 1)
+        if total_results is None:
+            return window_last_page
+
+        total_results = normalize_positive_number(total_results, 0)
+        total_pages = int(math.ceil(total_results / current_limit)) if total_results else 1
+        return min(total_pages, window_last_page)
+
+    @classmethod
     def get_search_request_state(cls, request, *, data_source=None):
         current_sort = normalize_search_result_sort(
             request.GET.get("sort", "desc")
@@ -86,7 +98,10 @@ class SearchPage(Page):
             "current_sort": current_sort,
             "sort_field": sort_field,
             "sort_order": sort_order,
-            "current_page": normalize_positive_number(request.GET.get("page"), 1),
+            "current_page": min(
+                normalize_positive_number(request.GET.get("page"), 1),
+                cls.last_accessible_page(request.GET.get("limit", 25)),
+            ),
             "current_limit": cls.normalize_page_size(request.GET.get("limit"), 25),
         }
 
@@ -115,9 +130,10 @@ class SearchPage(Page):
         current_limit = page_size
         shown_count = len(search_results)
 
+        total_pages = SearchPage.last_accessible_page(current_limit, total_results) if total_results else 0
+        current_page = min(current_page, total_pages) if total_pages else current_page
         start_result = ((current_page - 1) * current_limit) + 1 if shown_count else 0
         end_result = start_result + shown_count - 1 if shown_count else 0
-        total_pages = int(math.ceil(total_results / current_limit)) if total_results and current_limit else 0
 
         page_numbers = []
         if total_pages:
@@ -146,6 +162,38 @@ class SearchPage(Page):
             "next_page": current_page + 1 if total_pages > current_page else total_pages,
         })
         return decorated
+
+    @staticmethod
+    def search_query_text(request_state):
+        return (
+            request_state["search_query"]
+            if not request_state["query_clauses"]
+            and not request_state["advanced_search_query"]
+            else None
+        )
+
+    @classmethod
+    def search_documents_with_retry(cls, service, request_state, selected_filters):
+        def search():
+            return service.search_documents(
+                query_text=cls.search_query_text(request_state),
+                advanced_query=request_state["advanced_search_query"],
+                query_clauses=request_state["query_clauses"],
+                filters=selected_filters,
+                page=request_state["current_page"],
+                page_size=request_state["current_limit"],
+                sort_field=request_state["sort_field"],
+                sort_order=request_state["sort_order"],
+            )
+
+        try:
+            return search()
+        except OpenSearchRequestError:
+            last_page = cls.last_accessible_page(request_state["current_limit"])
+            if request_state["current_page"] <= last_page:
+                raise
+            request_state["current_page"] = last_page
+            return search()
 
     @staticmethod
     def build_citation_documents(search_results):
@@ -196,21 +244,7 @@ class SearchPage(Page):
 
     def fetch_gateway_search_results(self, data_source, request_state, selected_filters):
         service = SearchGatewayService(index_name=data_source.index_name)
-        return service.search_documents(
-            query_text=(
-                request_state["search_query"]
-                if not request_state["query_clauses"]
-                and not request_state["advanced_search_query"]
-                else None
-            ),
-            advanced_query=request_state["advanced_search_query"],
-            query_clauses=request_state["query_clauses"],
-            filters=selected_filters,
-            page=request_state["current_page"],
-            page_size=request_state["current_limit"],
-            sort_field=request_state["sort_field"],
-            sort_order=request_state["sort_order"],
-        )
+        return self.search_documents_with_retry(service, request_state, selected_filters)
 
     def get_context(self, request, *args, **kwargs):
         context = super().get_context(request, *args, **kwargs)
