@@ -57,6 +57,7 @@ coverage.xml
 
 # Django stuff:
 staticfiles/
+local_settings.py
 
 # Sphinx documentation
 docs/_build/
@@ -74,6 +75,8 @@ celerybeat-schedule
 .venv
 venv/
 ENV/
+.env.local
+.env.*.local
 
 # Rope project settings
 .ropeproject
@@ -83,6 +86,11 @@ ENV/
 
 # mypy
 .mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
 
 
 ### Node template
@@ -168,7 +176,11 @@ typings/
 .history/
 
 
-
+### JetBrains IDEs template
+.idea/
+*.iml
+*.iws
+*.ipr
 
 
 ### Windows template
@@ -281,3 +293,11 @@ core/media/
 .ipython/
 .env
 .envs/*
+
+# Local database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Local configuration
+*.local
