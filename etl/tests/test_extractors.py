@@ -1,11 +1,17 @@
 from django.test import SimpleTestCase
 
 from etl.extractors import (
+    display_name,
     extract_doi,
     extract_isbns,
     extract_issns,
     extract_scielo_id,
+    extract_source,
+    first_value,
+    get_normalized_titles,
+    match_key,
     normalize_identifiers,
+    rebuild_abstract_from_inverted_index,
 )
 
 
@@ -62,3 +68,53 @@ class IdentifierExtractorTests(SimpleTestCase):
         self.assertEqual(identifiers["openalex_id"], "https://openalex.org/W1")
         self.assertEqual(identifiers["scielo_id"], "S1")
         self.assertEqual(identifiers["pmid"], "123")
+
+
+class SourceAndTextExtractorTests(SimpleTestCase):
+    def test_extract_source_prefers_top_level_source(self):
+        self.assertEqual(
+            extract_source({"source": {"title": "Journal"}}),
+            {"title": "Journal"},
+        )
+
+    def test_extract_source_falls_back_to_location_source(self):
+        self.assertEqual(
+            extract_source({"primary_location": {"source": {"title": "Book"}}}),
+            {"title": "Book"},
+        )
+
+    def test_get_normalized_titles_reads_multilingual_titles_first(self):
+        titles = get_normalized_titles(
+            {
+                "title": "Fallback title",
+                "title_with_lang": [{"language": "pt", "title": "T\u00edtulo"}],
+            }
+        )
+
+        self.assertEqual(titles, ["titulo"])
+
+    def test_get_normalized_titles_falls_back_to_display_name(self):
+        self.assertEqual(
+            get_normalized_titles({"display_name": "OpenAlex title"}),
+            ["openalex title"],
+        )
+
+    def test_rebuild_abstract_from_inverted_index_orders_tokens(self):
+        abstract = rebuild_abstract_from_inverted_index(
+            {"world": [1], "Hello": [0], "again": [2]}
+        )
+
+        self.assertEqual(abstract, "Hello world again")
+
+    def test_display_name_reads_common_name_fields(self):
+        self.assertEqual(display_name({"display_name": "Name"}), "Name")
+        self.assertEqual(display_name("raw"), "raw")
+
+    def test_first_value_prefers_scielo_url(self):
+        self.assertEqual(
+            first_value(["https://example.org/file.pdf", "https://scielo.br/article"]),
+            "https://scielo.br/article",
+        )
+
+    def test_match_key_normalizes_case_and_whitespace(self):
+        self.assertEqual(match_key("  Mixed   Case  "), "mixed case")
