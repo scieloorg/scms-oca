@@ -649,3 +649,39 @@ class DefaultStandardizer:
 
     def _extract_open_access_status(self, raw_data: dict[str, Any]) -> Any:
         return raw_data.get("open_access_status") or (raw_data.get("open_access") or {}).get("oa_status")
+
+
+class BookStandardizer(DefaultStandardizer):
+
+    def _extract_parent_book(self, raw_data: dict[str, Any]) -> dict:
+        monograph = raw_data.get("monograph")
+        if not isinstance(monograph, dict) or not monograph:
+            return {}
+
+        ids = {}
+        if monograph.get("id"):
+            ids["scl_book_id"] = monograph["id"]
+        for key in ("doi", "isbn", "eisbn"):
+            if monograph.get(key):
+                ids[key] = monograph[key]
+
+        publishers = self._normalize_named_items(monograph.get("publishers"))
+        authorships = [
+            {
+                "role": item.get("role"),
+                "name": item.get("name"),
+                "orcid": item.get("orcid") or item.get("link_resume"),
+            }
+            for item in monograph.get("authorships") or []
+            if isinstance(item, dict)
+        ]
+
+        return {
+            "id": monograph.get("id"),
+            "title": monograph.get("title"),
+            "publication_year": int_or_none(monograph.get("publication_year")),
+            "language": monograph.get("language"),
+            "ids": ids,
+            "publishers": publishers,
+            "authorships": authorships,
+        }

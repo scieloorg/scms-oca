@@ -2,9 +2,11 @@ from django.conf import settings
 
 from etl.pipeline.defaults import (
     article_rules,
+    book_chapter_rules,
+    book_rules,
 )
 from etl.pipeline.merger import merge
-from etl.pipeline.standardizer import DefaultStandardizer
+from etl.pipeline.standardizer import BookStandardizer, DefaultStandardizer
 
 _BUILTIN_ALIASES: dict[str, str] = {
     "research-article": "article",
@@ -47,6 +49,8 @@ class Strategy:
 
 _STRATEGIES: dict[str, Strategy] = {
     "article": Strategy(article_rules, DefaultStandardizer, merge),
+    "book": Strategy(book_rules, BookStandardizer, merge),
+    "book-chapter": Strategy(book_chapter_rules, BookStandardizer, merge),
 }
 
 
