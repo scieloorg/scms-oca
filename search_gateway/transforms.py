@@ -5,6 +5,7 @@ from iso639 import Lang
 from pycountry import countries
 
 from .models import DataSource
+from .option_normalization import clean_text
 
 
 def _resolve_data_source(data_source):
@@ -47,7 +48,7 @@ def _get_category_level_display(value):
         "field": _("Area"),
         "subfield": _("Subarea"),
         "topic": _("Topic"),
-    }.get(str(value or "").strip().lower(), value)
+    }.get(clean_text(value).lower(), value)
 
 
 TRANSFORMS = {
@@ -59,8 +60,8 @@ TRANSFORMS = {
 
 
 def _get_static_option_label_from_field_settings(field_settings, field_name, value):
-    normalized_value = str(value or "").strip().lower()
-    if normalized_value == "":
+    normalized_value = clean_text(value).lower()
+    if not normalized_value:
         return None
 
     static_options = (
@@ -70,7 +71,7 @@ def _get_static_option_label_from_field_settings(field_settings, field_name, val
     ) or []
 
     for option in static_options:
-        option_value = str((option or {}).get("value") or "").strip().lower()
+        option_value = clean_text((option or {}).get("value")).lower()
         if option_value != normalized_value:
             continue
 

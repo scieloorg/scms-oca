@@ -106,7 +106,9 @@ def build_lookup_hits_body(
     if source_fields:
         body["_source"] = source_fields
     if sort_field:
-        body["sort"] = [{sort_field: {"order": "asc", "unmapped_type": "keyword"}}]
+        sort_order = "desc" if sort_field == "size" else "asc"
+        unmapped_type = "long" if sort_field == "size" else "keyword"
+        body["sort"] = [{sort_field: {"order": sort_order, "unmapped_type": unmapped_type}}]
     return body
 
 

@@ -46,7 +46,7 @@
           },
           "publisher": {
             "kind": "index",
-            "index_field_name": "publishers.id",
+            "index_field_name": "publishers.name.keyword",
             "filter": {
               "size": 10,
               "order": {
@@ -63,14 +63,14 @@
               "group_order": 10
             },
             "lookup": {
-              "index_name": "lookup_publisher",
+              "index_name": "lookup_publisher_v2",
               "search_field": "label_search",
-              "sort_field": "label",
+              "sort_field": "size",
               "value_field": "value",
               "label_field": "label",
               "source_value_field": "value",
               "source_label_field": "label",
-              "size": 100
+              "size": 10
             }
           },
           "source_name": {
@@ -92,14 +92,14 @@
               "group_order": 10
             },
             "lookup": {
-              "index_name": "lookup_source",
+              "index_name": "lookup_source_v2",
               "search_field": "label_search",
-              "sort_field": "label",
+              "sort_field": "size",
               "value_field": "value",
               "label_field": "label",
               "source_value_field": "value",
               "source_label_field": "label",
-              "size": 100
+              "size": 10
             }
           },
           "source_type": {
@@ -140,14 +140,14 @@
               "group_order": 10
             },
             "lookup": {
-              "index_name": "lookup_source_country",
+              "index_name": "lookup_source_country_v2",
               "search_field": "label_search",
-              "sort_field": "label",
+              "sort_field": "size",
               "value_field": "value",
               "label_field": "label",
               "source_value_field": "value",
               "source_label_field": "label",
-              "size": 200
+              "size": 10
             }
           },
           "publication_year": {
@@ -386,19 +386,19 @@
               "group_order": 50
             },
             "lookup": {
-              "index_name": "lookup_topic",
+              "index_name": "lookup_topic_v2",
               "search_field": "label_search",
-              "sort_field": "label",
+              "sort_field": "size",
               "value_field": "value",
               "label_field": "label",
               "source_value_field": "value",
               "source_label_field": "label",
-              "size": 100
+              "size": 10
             }
           },
           "institution": {
             "kind": "index",
-            "index_field_name": "authorships.institutions.id",
+            "index_field_name": "authorships.institutions.name.keyword",
             "filter": {
               "size": 10,
               "order": {
@@ -415,14 +415,14 @@
               "group_order": 60
             },
             "lookup": {
-              "index_name": "lookup_institution",
+              "index_name": "lookup_institution_v2",
               "search_field": "label_search",
-              "sort_field": "label",
+              "sort_field": "size",
               "value_field": "value",
               "label_field": "label",
               "source_value_field": "value",
               "source_label_field": "label",
-              "size": 100
+              "size": 10
             }
           },
           "funder": {
@@ -444,14 +444,14 @@
               "group_order": 70
             },
             "lookup": {
-              "index_name": "lookup_funder",
+              "index_name": "lookup_funder_v2",
               "search_field": "label_search",
-              "sort_field": "label",
+              "sort_field": "size",
               "value_field": "value",
               "label_field": "label",
               "source_value_field": "value",
               "source_label_field": "label",
-              "size": 100
+              "size": 10
             }
           },
           "country": {
@@ -812,14 +812,14 @@
               "group_order": 40
             },
             "lookup": {
-              "index_name": "lookup_institution",
+              "index_name": "lookup_institution_v2",
               "search_field": "label_search",
-              "sort_field": "label",
+              "sort_field": "size",
               "value_field": "value",
               "label_field": "label",
               "source_value_field": "value",
               "source_label_field": "label",
-              "size": 100
+              "size": 10
             }
           },
           "classification": {
@@ -893,7 +893,7 @@
               "group": "location",
               "group_order": 50
             }
-          },          
+          },
           "directory_type": {
             "kind": "index",
             "index_field_name": "directory_type",
@@ -1116,12 +1116,12 @@
               "group_order": 20
             },
             "lookup": {
-              "index_name": "lookup_source",
+              "index_name": "lookup_source_v2",
               "search_field": "label_search",
-              "sort_field": "label",
+              "sort_field": "size",
               "source_value_field": "label",
               "source_label_field": "label",
-              "size": 100
+              "size": 10
             }
           },
           "journal_issn": {
@@ -1142,12 +1142,12 @@
               "group_order": 20
             },
             "lookup": {
-              "index_name": "lookup_source",
+              "index_name": "lookup_source_v2",
               "search_field": "label_search",
-              "sort_field": "label",
+              "sort_field": "size",
               "source_value_field": "source_issn_l",
               "source_label_field": "label",
-              "size": 100
+              "size": 10
             }
           },
           "journal_id": {
@@ -1186,14 +1186,14 @@
               "group_order": 20
             },
             "lookup": {
-              "index_name": "lookup_publisher",
+              "index_name": "lookup_publisher_v2",
               "search_field": "label_search",
-              "sort_field": "label",
+              "sort_field": "size",
               "value_field": "value",
               "label_field": "label",
               "source_value_field": "value",
               "source_label_field": "label",
-              "size": 100
+              "size": 10
             }
           },
           "collection": {
@@ -1312,14 +1312,14 @@
               "group_order": 0
             },
             "lookup": {
-              "index_name": "lookup_topic",
+              "index_name": "lookup_topic_v2",
               "search_field": "label_search",
-              "sort_field": "label",
+              "sort_field": "size",
               "value_field": "value",
               "label_field": "label",
               "source_value_field": "value",
               "source_label_field": "label",
-              "size": 100
+              "size": 10
             }
           },
           "publication_year": {

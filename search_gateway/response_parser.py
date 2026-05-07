@@ -1,7 +1,37 @@
+from .option_normalization import clean_text
 from .transforms import (
     apply_display_transform,
     apply_display_transform_from_field_settings,
 )
+
+
+def parse_lookup_hits(response, lookup_config):
+    hits = response.get("hits", {}).get("hits", [])
+    source_value_field = lookup_config["source_value_field"]
+    source_label_field = lookup_config["source_label_field"]
+
+    options = []
+    seen = set()
+
+    for hit in hits:
+        source_payload = hit.get("_source", {})
+        value = clean_text(source_payload.get(source_value_field))
+        if not value:
+            continue
+
+        label = clean_text(source_payload.get(source_label_field)) or value
+
+        if value in seen:
+            continue
+
+        seen.add(value)
+        option = {"value": value, "label": label}
+        size = source_payload.get("size")
+        if size is not None:
+            option["size"] = size
+        options.append(option)
+
+    return options
 
 
 def _get_agg_buckets(response, agg_name):

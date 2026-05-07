@@ -1,23 +1,21 @@
+from .option_normalization import clean_text, normalize_selected_values
 from .request_filters import build_option_filters, normalize_option_filters
-
-def _normalize_selected_lookup_values(applied_filters, field_name):
-    selected_values = (applied_filters or {}).get(field_name)
-    if selected_values in (None, "", []):
-        return []
-    if not isinstance(selected_values, (list, tuple)):
-        selected_values = [selected_values]
-    return [str(value).strip() for value in selected_values if str(value).strip()]
 
 
 def _normalize_lookup_options(lookup_options):
-    return [
-        {
-            "value": str(option.get("value") or "").strip(),
-            "label": str(option.get("label") or option.get("value") or "").strip(),
+    normalized = []
+    for option in (lookup_options or []):
+        value = clean_text(option.get("value"))
+        if not value:
+            continue
+        item = {
+            "value": value,
+            "label": clean_text(option.get("label") or option.get("value")),
         }
-        for option in (lookup_options or [])
-        if str(option.get("value") or "").strip()
-    ]
+        if option.get("size") is not None:
+            item["size"] = option.get("size")
+        normalized.append(item)
+    return normalized
 
 
 def _append_selected_lookup_options(
@@ -34,13 +32,13 @@ def _append_selected_lookup_options(
         if not field.lookup:
             continue
 
-        selected_values = _normalize_selected_lookup_values(applied_filters, field.field_name)
+        selected_values = normalize_selected_values(applied_filters, field.field_name)
         if not selected_values:
             continue
 
         existing_options = options_by_field.get(field.field_name) or []
         known_values = {
-            str(option.get("value") or "").strip()
+            clean_text(option.get("value"))
             for option in existing_options
             if isinstance(option, dict)
         }
