@@ -649,32 +649,6 @@
   outline: none;
 }
 
-.results-controls__limit-options {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-}
-
-.results-controls__limit-option {
-  min-width: 2.35rem;
-  min-height: 2.15rem;
-  padding: 0.28rem 0.62rem;
-  border: 1px solid transparent;
-  border-radius: 4px;
-  background: transparent;
-  color: #607793;
-  font-size: 0.8rem;
-  font-weight: 800;
-  line-height: 1;
-}
-
-.results-controls__limit-option--active {
-  border-color: #2f4ea1;
-  background: #2f4ea1;
-  color: #ffffff;
-  box-shadow: 0 6px 14px rgba(47, 78, 161, 0.12);
-}
-
 .results-controls__selected {
   display: inline-flex;
   align-items: center;
@@ -1525,10 +1499,6 @@
   .results-controls__sort,
   .results-controls__limit {
     justify-content: space-between;
-  }
-
-  .results-controls__limit-options {
-    flex-wrap: wrap;
   }
 
   .results-controls__selected {
