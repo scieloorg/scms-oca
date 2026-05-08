@@ -1085,6 +1085,13 @@
   line-height: 1.4;
 }
 
+.result-card__author-block {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0;
+}
+
 .result-card__author-separator {
   color: #a6b3c4;
   margin-right: 0.1rem;
