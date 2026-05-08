@@ -55,20 +55,10 @@ def search_view_list(request):
         request_state = SearchPage.get_search_request_state(request, data_source=data_source)
         applied_filters = extract_applied_filters(request.GET, data_source, form_key="search")
         selected_filters = normalize_option_filters(applied_filters)
-        results_data = service.search_documents(
-            query_text=(
-                request_state["search_query"]
-                if not request_state["query_clauses"]
-                and not request_state["advanced_search_query"]
-                else None
-            ),
-            advanced_query=request_state["advanced_search_query"],
-            query_clauses=request_state["query_clauses"],
-            filters=selected_filters,
-            page=request_state["current_page"],
-            page_size=request_state["current_limit"],
-            sort_field=request_state["sort_field"],
-            sort_order=request_state["sort_order"],
+        results_data = SearchPage.search_documents_with_retry(
+            service,
+            request_state,
+            selected_filters,
         )
         results_data = SearchPage.current_pagination(
             results_data,
@@ -79,6 +69,7 @@ def search_view_list(request):
         fragments = _render_results_fragments(request, results_data)
         return JsonResponse({
             **fragments,
+            "current_page": results_data.get("current_page"),
             "citation_documents": SearchPage.build_citation_documents(
                 results_data.get("search_results")
             ),
