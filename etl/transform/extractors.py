@@ -122,7 +122,7 @@ def extract_scielo_id(doc: dict[str, Any]) -> str | None:
     return ids.get("scl_preprint_id")
 
 
-def normalize_identifiers(raw_doc: dict[str, Any]) -> dict[str, str | None]:
+def extract_identifiers(raw_doc: dict[str, Any]) -> dict[str, str | None]:
     identifiers: dict[str, str | None] = {}
 
     if doi := extract_doi(raw_doc):
@@ -175,7 +175,7 @@ def extract_source(doc: dict[str, Any]) -> dict[str, Any]:
     return {}
 
 
-def get_normalized_titles(doc: dict[str, Any]) -> list[str]:
+def extract_titles(doc: dict[str, Any]) -> list[str]:
     titles: list[str] = []
 
     for entry in doc.get("title_with_lang", []):
@@ -194,7 +194,7 @@ def get_normalized_titles(doc: dict[str, Any]) -> list[str]:
     return titles
 
 
-def rebuild_abstract_from_inverted_index(inverted_index: dict) -> str | None:
+def extract_abstract_from_inverted_index(inverted_index: dict) -> str | None:
     if not inverted_index or not isinstance(inverted_index, dict):
         return None
 
@@ -207,7 +207,7 @@ def rebuild_abstract_from_inverted_index(inverted_index: dict) -> str | None:
     return normalize_text(abstract)
 
 
-def display_name(value: Any) -> Any:
+def extract_display_name(value: Any) -> Any:
     if isinstance(value, dict):
         return value.get("display_name") or value.get("name")
     return value
