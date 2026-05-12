@@ -9,7 +9,9 @@ from django.conf import settings
 from etl.client import OpenSearchClient
 from etl.documents import InputDocument, SilverDocument
 from etl.schema import SILVER_MAPPING
-from etl.deduplicator import OpenAlexMatcher, SciELODeduplicator, extract_doi
+from etl.deduplicator.openalex import OpenAlexMatcher
+from etl.deduplicator.scielo import SciELODeduplicator
+from etl.transform.extractors import extract_doi
 from etl.pipeline.defaults import get_pipeline_target
 from etl.pipeline.strategies import get_strategy
 from harvest.utils import clean_source_payload
