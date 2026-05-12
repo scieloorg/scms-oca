@@ -1,7 +1,7 @@
 from django.test import SimpleTestCase
 
 from etl.indexing.contracts import BronzeDocument
-from etl.pipeline.standardizer import DefaultStandardizer
+from etl.transform.standardizer import DefaultStandardizer
 
 
 class DefaultStandardizerTests(SimpleTestCase):

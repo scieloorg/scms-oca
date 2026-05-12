@@ -8,7 +8,7 @@ from etl.pipeline.defaults import (
     preprint_rules,
 )
 from etl.transform.merger import merge
-from etl.pipeline.standardizer import BookStandardizer, DefaultStandardizer
+from etl.transform.standardizer import BookStandardizer, DefaultStandardizer
 
 _BUILTIN_ALIASES: dict[str, str] = {
     "research-article": "article",

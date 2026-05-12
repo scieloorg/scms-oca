@@ -2,7 +2,7 @@ from django.test import SimpleTestCase
 
 from etl.indexing.schema import SILVER_MAPPING, SILVER_PROPERTIES
 from etl.indexing.contracts import BronzeDocument, SilverDocument
-from etl.pipeline.standardizer import DefaultStandardizer
+from etl.transform.standardizer import DefaultStandardizer
 
 
 class SilverContractTests(SimpleTestCase):
