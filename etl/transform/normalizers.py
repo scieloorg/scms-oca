@@ -39,30 +39,45 @@ def normalize_issn(issn: str | None) -> str | None:
     return None
 
 
-def normalize_text(text: str | None) -> str | None:
+def normalize_text(text: str | None, strip_accents=True) -> str | None:
     if not text:
         return None
 
-    normalized = str(text).strip()
-    nfkd = unicodedata.normalize("NFKD", normalized)
-    normalized = "".join(char for char in nfkd if not unicodedata.combining(char))
-    normalized = re.sub(r"\s+", " ", normalized)
-    return normalized if normalized else None
+    stripped_text = str(text).strip()
+    unicode_form = "NFKD" if strip_accents else "NFC"
+    unicode_normalized_text = unicodedata.normalize(unicode_form, stripped_text)
+
+    if strip_accents:
+        unicode_normalized_text = "".join(
+            char for char in unicode_normalized_text if not unicodedata.combining(char)
+        )
+
+    whitespace_normalized_text = re.sub(r"\s+", " ", unicode_normalized_text)
+    return whitespace_normalized_text if whitespace_normalized_text else None
 
 
-def normalize_name(name: str | None) -> str:
+def normalize_author_name(name: str | None, strip_accents=True) -> str:
     if not name:
         return ""
 
-    normalized = str(name).lower().strip()
-    normalized = (
-        normalized.replace("\u2010", "-")
+    lowercased_name = str(name).lower().strip()
+    dash_normalized_name = (
+        lowercased_name.replace("\u2010", "-")
         .replace("\u2013", "-")
         .replace("\u2014", "-")
     )
-    normalized = " ".join(normalized.split())
-    normalized = unicodedata.normalize("NFKD", normalized)
-    return "".join(char for char in normalized if not unicodedata.combining(char))
+    whitespace_normalized_name = " ".join(dash_normalized_name.split())
+    unicode_form = "NFKD" if strip_accents else "NFC"
+    unicode_normalized_name = unicodedata.normalize(
+        unicode_form, whitespace_normalized_name
+    )
+
+    if strip_accents:
+        unicode_normalized_name = "".join(
+            char for char in unicode_normalized_name if not unicodedata.combining(char)
+        )
+
+    return unicode_normalized_name
 
 
 def normalize_keywords(keywords: list[str] | None) -> list[str]:
