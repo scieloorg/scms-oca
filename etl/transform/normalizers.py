@@ -92,18 +92,6 @@ def normalize_keywords(keywords: list[str] | None) -> list[str]:
     return sorted(normalized)
 
 
-def int_or_none(value: Any) -> int | None:
-    try:
-        return int(value) if value is not None else None
-    except (TypeError, ValueError):
-        return None
-
-
-def scalar_or_list(values: list):
-    values = unique(values)
-    return values[0] if len(values) == 1 else values
-
-
 def normalize_language(language: str | None) -> str | None:
     if not language:
         return None
