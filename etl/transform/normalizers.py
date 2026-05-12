@@ -1,11 +1,10 @@
 import re
 import unicodedata
-from typing import Any
 
 import pycountry
 
 
-def stz_doi(doi: str | None) -> str | None:
+def normalize_doi(doi: str | None) -> str | None:
     if not doi:
         return None
 
@@ -17,7 +16,7 @@ def stz_doi(doi: str | None) -> str | None:
     return normalized if re.match(r"^10\.\d{4,9}/\S+$", normalized) else None
 
 
-def stz_isbn(isbn: str | None) -> str | None:
+def normalize_isbn(isbn: str | None) -> str | None:
     if not isbn:
         return None
 
@@ -30,7 +29,7 @@ def stz_isbn(isbn: str | None) -> str | None:
     return None
 
 
-def stz_issn(issn: str | None) -> str | None:
+def normalize_issn(issn: str | None) -> str | None:
     if not issn:
         return None
 
@@ -100,7 +99,7 @@ def scalar_or_list(values: list):
     return values[0] if len(values) == 1 else values
 
 
-def stz_language(language: str | None) -> str | None:
+def normalize_language(language: str | None) -> str | None:
     if not language:
         return None
 
@@ -135,7 +134,7 @@ def stz_language(language: str | None) -> str | None:
     return None
 
 
-def stz_country_code(country: str | None) -> str | None:
+def normalize_country_code(country: str | None) -> str | None:
     if not country:
         return None
 
