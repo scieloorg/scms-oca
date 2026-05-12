@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from typing import Any, Dict, List, Tuple
 
-from etl.indexing.client import OpenSearchClient
+from etl.client import OpenSearchClient
 from etl.transform.normalizers import normalize_text, stz_doi
 from etl.pipeline.deduplicator.helpers import (
     calculate_similarity,

@@ -2,7 +2,7 @@ import json
 
 from django.core.management.base import BaseCommand
 
-from etl.indexing.client import OpenSearchClient
+from etl.client import OpenSearchClient
 from etl.pipeline.defaults import PIPELINE_TARGETS
 from etl.services import enqueue_etl_item
 

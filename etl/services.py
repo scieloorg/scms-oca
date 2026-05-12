@@ -6,7 +6,7 @@ from django.conf import settings
 from django.db import transaction
 from django.utils import timezone
 
-from etl.indexing.client import OpenSearchClient
+from etl.client import OpenSearchClient
 from etl.models import EtlItemProcess, EtlResult, EtlStatus
 from etl.pipeline.orchestrator import OpenSearchETLPipeline
 from etl.pipeline.defaults import PIPELINE_TARGETS, get_pipeline_target, resolve_target_name
