@@ -136,7 +136,6 @@ SEARCH_OPERATORS = [
 ]
 
 SEARCH_FIELD_MAPPING = {
-    "all": ["title_search", "ids_search"],
     "title_search": ["title_search"],
     "ids_search": ["ids_search"],
     "authors_search": ["authors_search"],
