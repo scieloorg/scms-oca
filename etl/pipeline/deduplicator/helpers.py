@@ -3,6 +3,7 @@ from typing import Any, Dict, List
 
 from etl.pipeline.defaults import DocumentRules
 from etl.pipeline.strategies import get_strategy
+from etl.transform.extractors import extract_doi, extract_scielo_id
 
 
 def rules_for_doc(doc: Dict[str, Any], fallback_rules: DocumentRules) -> DocumentRules:
@@ -37,8 +38,6 @@ def calculate_similarity(text1: str, text2: str) -> float:
 
 
 def select_primary_scielo_doc(scielo_group: List[Dict[str, Any]]) -> Dict[str, Any]:
-    from etl.transform.extractors import extract_doi, extract_scielo_id
-
     if len(scielo_group) == 1:
         return scielo_group[0]
 
