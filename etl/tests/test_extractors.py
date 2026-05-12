@@ -1,6 +1,6 @@
 from django.test import SimpleTestCase
 
-from etl.extractors import (
+from etl.transform.extractors import (
     display_name,
     extract_doi,
     extract_isbns,

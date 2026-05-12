@@ -10,7 +10,7 @@ from etl.pipeline.deduplicator.helpers import (
     can_compare,
     rules_for_pair,
 )
-from etl.extractors import (
+from etl.transform.extractors import (
     extract_doi,
     extract_issns,
     extract_scielo_id,

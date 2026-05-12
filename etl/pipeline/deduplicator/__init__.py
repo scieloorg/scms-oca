@@ -1,4 +1,4 @@
-from etl.extractors import extract_doi
+from etl.transform.extractors import extract_doi
 from etl.pipeline.deduplicator.openalex import OpenAlexMatcher
 from etl.pipeline.deduplicator.scielo import SciELODeduplicator
 

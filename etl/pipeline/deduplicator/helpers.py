@@ -37,7 +37,7 @@ def calculate_similarity(text1: str, text2: str) -> float:
 
 
 def select_primary_scielo_doc(scielo_group: List[Dict[str, Any]]) -> Dict[str, Any]:
-    from etl.extractors import extract_doi, extract_scielo_id
+    from etl.transform.extractors import extract_doi, extract_scielo_id
 
     if len(scielo_group) == 1:
         return scielo_group[0]

@@ -10,7 +10,7 @@ from etl.pipeline.deduplicator.helpers import (
     rules_for_doc,
     select_primary_scielo_doc,
 )
-from etl.extractors import (
+from etl.transform.extractors import (
     extract_doi,
     extract_isbns,
     extract_issns,
