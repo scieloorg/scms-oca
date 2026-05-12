@@ -211,16 +211,3 @@ def extract_display_name(value: Any) -> Any:
     if isinstance(value, dict):
         return value.get("display_name") or value.get("name")
     return value
-
-
-def first_value(value: Any) -> Any:
-    if isinstance(value, list):
-        for item in value:
-            if isinstance(item, str) and "scielo.br" in item:
-                return item
-        return value[0] if value else None
-    return value
-
-
-def match_key(value: Any) -> str:
-    return " ".join(str(value or "").lower().split())

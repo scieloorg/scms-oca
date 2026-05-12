@@ -99,16 +99,6 @@ def int_or_none(value: Any) -> int | None:
         return None
 
 
-def as_list(value: Any) -> list:
-    if value in (None, [], {}):
-        return []
-    return value if isinstance(value, list) else [value]
-
-
-def unique(values: list) -> list:
-    return list(dict.fromkeys(value for value in values if value))
-
-
 def scalar_or_list(values: list):
     values = unique(values)
     return values[0] if len(values) == 1 else values
