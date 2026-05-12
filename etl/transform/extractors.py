@@ -1,6 +1,6 @@
 from typing import Any
 
-from etl.transform.normalizers import normalize_text, stz_doi, stz_isbn, stz_issn
+from etl.transform.normalizers import normalize_doi, normalize_isbn, normalize_issn, normalize_text
 
 
 def extract_doi(doc: dict[str, Any]) -> str | None:
@@ -61,7 +61,7 @@ def extract_isbns(doc: dict[str, Any]) -> list[str]:
         elif raw_value:
             values.append(raw_value)
 
-    return sorted({normalized for value in values if (normalized := stz_isbn(value))})
+    return sorted({normalized for value in values if (normalized := normalize_isbn(value))})
 
 
 def extract_issns(doc: dict[str, Any]) -> list[str]:
@@ -107,7 +107,7 @@ def extract_issns(doc: dict[str, Any]) -> list[str]:
             elif isinstance(raw_value, str):
                 issns.add(raw_value)
 
-    return sorted({normalized for value in issns if (normalized := stz_issn(value))})
+    return sorted({normalized for value in issns if (normalized := normalize_issn(value))})
 
 
 def extract_scielo_id(doc: dict[str, Any]) -> str | None:
@@ -126,7 +126,7 @@ def normalize_identifiers(raw_doc: dict[str, Any]) -> dict[str, str | None]:
     identifiers: dict[str, str | None] = {}
 
     if doi := extract_doi(raw_doc):
-        if normalized_doi := stz_doi(doi):
+        if normalized_doi := normalize_doi(doi):
             identifiers["doi"] = normalized_doi
 
     ids = raw_doc.get("ids") if isinstance(raw_doc.get("ids"), dict) else {}
@@ -134,7 +134,7 @@ def normalize_identifiers(raw_doc: dict[str, Any]) -> dict[str, str | None]:
     if issn := raw_doc.get("issn") or ids.get("issn"):
         issn_values = issn if isinstance(issn, list) else [issn]
         if normalized_issn := next(
-            (stz_issn(value) for value in issn_values if stz_issn(value)),
+            (normalize_issn(value) for value in issn_values if normalize_issn(value)),
             None,
         ):
             identifiers["issn"] = normalized_issn
@@ -142,7 +142,7 @@ def normalize_identifiers(raw_doc: dict[str, Any]) -> dict[str, str | None]:
     if isbn := raw_doc.get("isbn") or ids.get("isbn") or ids.get("eisbn"):
         isbn_values = isbn if isinstance(isbn, list) else [isbn]
         if normalized_isbn := next(
-            (stz_isbn(value) for value in isbn_values if stz_isbn(value)),
+            (normalize_isbn(value) for value in isbn_values if normalize_isbn(value)),
             None,
         ):
             identifiers["isbn"] = normalized_isbn
