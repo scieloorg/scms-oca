@@ -9,9 +9,6 @@ from etl.services import backfill_bronze_items, process_pending_items
 BATCH_SIZE = 1000
 
 
-# ── Celery tasks ────────────────────────────────────────────────────────────
-
-
 @celery_app.task(name="[ETL] Run pipeline")
 def run_silver_etl(
     target_type="article",
@@ -48,9 +45,6 @@ def retry_failed_silver_etl(limit=BATCH_SIZE, user_id=None):
     Configure the run interval in the Wagtail admin under Celery > Periodic Tasks.
     """
     return process_pending_items(limit=limit, retry_failed=True)
-
-
-# ── Pipeline runner ─────────────────────────────────────────────────────────
 
 
 def run_pipeline_targets(
@@ -95,4 +89,3 @@ def _run_pipeline_target(
     result["public_alias"] = pipeline.public_alias
     result["indexed_indices"] = sorted(pipeline.indexed_index_names)
     return result
-

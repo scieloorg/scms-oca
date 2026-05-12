@@ -1,1 +1,0 @@
-"""Silver ETL pipeline primitives."""
