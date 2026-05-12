@@ -146,11 +146,3 @@ class EtlItemProcess(models.Model):
                 "updated_at",
             ]
         )
-
-
-__all__ = [
-    "EtlItemProcess",
-    "EtlItemProcessQuerySet",
-    "EtlResult",
-    "EtlStatus",
-]
