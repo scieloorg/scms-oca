@@ -8,7 +8,7 @@ from django.conf import settings
 
 from etl.client import OpenSearchClient
 from etl.documents import InputDocument, SilverDocument
-from etl.indexing.schema import SILVER_MAPPING
+from etl.schema import SILVER_MAPPING
 from etl.pipeline.deduplicator import OpenAlexMatcher, SciELODeduplicator, extract_doi
 from etl.pipeline.defaults import get_pipeline_target
 from etl.pipeline.strategies import get_strategy

@@ -1,6 +1,6 @@
 from django.test import SimpleTestCase
 
-from etl.indexing.schema import SILVER_MAPPING, SILVER_PROPERTIES
+from etl.schema import SILVER_MAPPING, SILVER_PROPERTIES
 from etl.documents import InputDocument, SilverDocument
 from etl.transform.standardizer import DefaultStandardizer
 
