@@ -5,7 +5,7 @@ from collections import defaultdict
 from typing import Any, Dict, List
 
 from etl.transform.normalizers import stz_doi
-from etl.pipeline.deduplicator.helpers import (
+from etl.deduplicator.helpers import (
     calculate_similarity,
     can_compare,
     rules_for_pair,

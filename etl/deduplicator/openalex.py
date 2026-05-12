@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Tuple
 
 from etl.client import OpenSearchClient
 from etl.transform.normalizers import normalize_text, stz_doi
-from etl.pipeline.deduplicator.helpers import (
+from etl.deduplicator.helpers import (
     calculate_similarity,
     rules_for_doc,
     select_primary_scielo_doc,

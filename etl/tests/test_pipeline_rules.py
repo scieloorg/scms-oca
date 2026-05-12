@@ -1,6 +1,6 @@
 from django.test import SimpleTestCase
 
-from etl.pipeline.deduplicator import OpenAlexMatcher, SciELODeduplicator
+from etl.deduplicator import OpenAlexMatcher, SciELODeduplicator
 from etl.pipeline.strategies import get_strategy
 
 
