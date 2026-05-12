@@ -4,7 +4,7 @@ import logging
 from collections import defaultdict
 from typing import Any, Dict, List
 
-from etl.normalizers import stz_doi
+from etl.transform.normalizers import stz_doi
 from etl.pipeline.deduplicator.helpers import (
     calculate_similarity,
     can_compare,

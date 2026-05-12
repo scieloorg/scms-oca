@@ -4,7 +4,7 @@ import logging
 from typing import Any, Dict, List, Tuple
 
 from etl.indexing.client import OpenSearchClient
-from etl.normalizers import normalize_text, stz_doi
+from etl.transform.normalizers import normalize_text, stz_doi
 from etl.pipeline.deduplicator.helpers import (
     calculate_similarity,
     rules_for_doc,

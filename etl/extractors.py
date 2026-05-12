@@ -1,6 +1,6 @@
 from typing import Any
 
-from etl.normalizers import normalize_text, stz_doi, stz_isbn, stz_issn
+from etl.transform.normalizers import normalize_text, stz_doi, stz_isbn, stz_issn
 
 
 def extract_doi(doc: dict[str, Any]) -> str | None:

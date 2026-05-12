@@ -1,7 +1,7 @@
 import logging
 
 from etl.indexing.contracts import SilverDocument
-from etl.normalizers import as_list, normalize_name, scalar_or_list, unique
+from etl.transform.normalizers import as_list, normalize_name, scalar_or_list, unique
 from etl.pipeline.defaults import DocumentRules
 
 logger = logging.getLogger(__name__)

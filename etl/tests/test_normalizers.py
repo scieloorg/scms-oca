@@ -1,6 +1,6 @@
 from django.test import SimpleTestCase
 
-from etl.normalizers import (
+from etl.transform.normalizers import (
     as_list,
     int_or_none,
     normalize_keywords,
