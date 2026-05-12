@@ -1,12 +1,12 @@
 from django.test import SimpleTestCase
 
-from etl.documents import BronzeDocument
+from etl.documents import InputDocument
 from etl.transform.standardizer import DefaultStandardizer
 
 
 class DefaultStandardizerTests(SimpleTestCase):
     def test_standardizes_basic_source_payload(self):
-        bronze = BronzeDocument(
+        bronze = InputDocument(
             doc_id="S1",
             document_type="article",
             source="scielo",
@@ -35,7 +35,7 @@ class DefaultStandardizerTests(SimpleTestCase):
         self.assertEqual(silver.oca_data["scope"], ["scielo"])
 
     def test_rebuilds_openalex_abstract_from_inverted_index(self):
-        bronze = BronzeDocument(
+        bronze = InputDocument(
             doc_id="https://openalex.org/W1",
             document_type="article",
             source="openalex",

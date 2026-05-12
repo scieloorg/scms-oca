@@ -1,7 +1,7 @@
 from django.test import SimpleTestCase
 
 from etl.indexing.schema import SILVER_MAPPING, SILVER_PROPERTIES
-from etl.documents import BronzeDocument, SilverDocument
+from etl.documents import InputDocument, SilverDocument
 from etl.transform.standardizer import DefaultStandardizer
 
 
@@ -75,4 +75,4 @@ class StandardizerPipelineTests(SimpleTestCase):
         pipeline.steps = [failing_step]
 
         with self.assertRaisesRegex(RuntimeError, "bad source payload"):
-            pipeline.run(BronzeDocument(doc_id="S001", document_type="article"))
+            pipeline.run(InputDocument(doc_id="S001", document_type="article"))

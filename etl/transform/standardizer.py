@@ -1,7 +1,7 @@
 import logging
 from typing import Any
 
-from etl.documents import BronzeDocument, SilverDocument
+from etl.documents import InputDocument, SilverDocument
 from etl.transform.extractors import (
     display_name,
     first_value,
@@ -33,7 +33,7 @@ class DefaultStandardizer:
             self._normalize_metadata,
         ]
 
-    def run(self, bronze_doc: BronzeDocument) -> SilverDocument:
+    def run(self, bronze_doc: InputDocument) -> SilverDocument:
         silver_data: dict[str, Any] = {}
         for step in self.steps:
             try:
@@ -51,7 +51,7 @@ class DefaultStandardizer:
     def _normalize_basic_fields(
         self,
         data: dict[str, Any],
-        bronze: BronzeDocument,
+        bronze: InputDocument,
     ) -> dict[str, Any]:
         data["doc_id"] = bronze.doc_id
         data["type"] = bronze.document_type
@@ -62,7 +62,7 @@ class DefaultStandardizer:
     def _normalize_identifiers_step(
         self,
         data: dict[str, Any],
-        bronze: BronzeDocument,
+        bronze: InputDocument,
     ) -> dict[str, Any]:
         raw_doc: dict[str, Any] = {}
 
@@ -86,7 +86,7 @@ class DefaultStandardizer:
     def _normalize_text_fields(
         self,
         data: dict[str, Any],
-        bronze: BronzeDocument,
+        bronze: InputDocument,
     ) -> dict[str, Any]:
         raw_data = bronze.raw_openalex_data or bronze.raw_scielo_data or {}
 
@@ -118,7 +118,7 @@ class DefaultStandardizer:
     def _normalize_metadata(
         self,
         data: dict[str, Any],
-        bronze: BronzeDocument,
+        bronze: InputDocument,
     ) -> dict[str, Any]:
         indexed_in: list[str] = []
 
@@ -152,7 +152,7 @@ class DefaultStandardizer:
     def _normalize_rich_fields(
         self,
         data: dict[str, Any],
-        bronze: BronzeDocument,
+        bronze: InputDocument,
     ) -> dict[str, Any]:
         raw_scielo = bronze.raw_scielo_data or {}
         raw_oa = bronze.raw_openalex_data or {}
@@ -312,7 +312,7 @@ class DefaultStandardizer:
 
         return data
 
-    def _determine_scope(self, bronze: BronzeDocument) -> list:
+    def _determine_scope(self, bronze: InputDocument) -> list:
         scope = []
         if bronze.raw_scielo_data:
             scope.append("scielo")
@@ -601,7 +601,7 @@ class DefaultStandardizer:
             })
         return publishers
 
-    def _build_scielo_oca_data(self, bronze: BronzeDocument) -> dict:
+    def _build_scielo_oca_data(self, bronze: InputDocument) -> dict:
         raw = bronze.raw_scielo_data or {}
 
         collections = bronze.scielo_collections or as_list(bronze.collection or raw.get("collection"))

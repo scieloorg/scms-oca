@@ -24,7 +24,7 @@ class OcaModel:
 
 
 @dataclass
-class BronzeDocument(OcaModel):
+class InputDocument(OcaModel):
     doc_id: str
     document_type: str
     source: str

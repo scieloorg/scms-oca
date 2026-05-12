@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Optional
 from django.conf import settings
 
 from etl.indexing.client import OpenSearchClient
-from etl.documents import BronzeDocument, SilverDocument
+from etl.documents import InputDocument, SilverDocument
 from etl.indexing.schema import SILVER_MAPPING
 from etl.pipeline.deduplicator import OpenAlexMatcher, SciELODeduplicator, extract_doi
 from etl.pipeline.defaults import get_pipeline_target
@@ -379,7 +379,7 @@ class OpenSearchETLPipeline:
         self,
         raw_data: Dict[str, Any],
         source: str = "scielo",
-    ) -> BronzeDocument:
+    ) -> InputDocument:
         """
         Create a BronzeDocument from raw data.
 
@@ -419,7 +419,7 @@ class OpenSearchETLPipeline:
                 except (ValueError, TypeError):
                     publication_year = None
 
-            return BronzeDocument(
+            return InputDocument(
                 doc_id=doc_id,
                 document_type=self.target.document_type_for(raw_data),
                 doi=extract_doi(raw_data),
@@ -437,7 +437,7 @@ class OpenSearchETLPipeline:
                 except (ValueError, TypeError):
                     publication_year = None
 
-            return BronzeDocument(
+            return InputDocument(
                 doc_id=doc_id,
                 document_type=raw_data.get("type") or "article",
                 doi=extract_doi(raw_data),

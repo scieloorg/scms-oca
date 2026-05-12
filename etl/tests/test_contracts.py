@@ -1,16 +1,16 @@
 from django.test import SimpleTestCase
 
-from etl.documents import BronzeDocument, SilverDocument
+from etl.documents import InputDocument, SilverDocument
 
 
 class BronzeDocumentContractTests(SimpleTestCase):
     def test_bronze_document_requires_doc_id(self):
         with self.assertRaisesRegex(ValueError, "doc_id"):
-            BronzeDocument(doc_id="", document_type="article", source="scielo")
+            InputDocument(doc_id="", document_type="article", source="scielo")
 
     def test_bronze_document_validates_publication_year(self):
         with self.assertRaisesRegex(ValueError, "publication_year"):
-            BronzeDocument(
+            InputDocument(
                 doc_id="S1",
                 document_type="article",
                 source="scielo",
