@@ -1,8 +1,6 @@
 from dataclasses import asdict, dataclass, field
 from typing import Any
 
-__all__ = ["BronzeDocument", "OcaModel", "SilverDocument"]
-
 
 @dataclass
 class OcaModel:

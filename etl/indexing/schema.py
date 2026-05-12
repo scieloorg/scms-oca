@@ -73,5 +73,3 @@ SILVER_MAPPING = {
         "properties": SILVER_PROPERTIES,
     },
 }
-
-__all__ = ["SILVER_MAPPING", "SILVER_PROPERTIES"]
