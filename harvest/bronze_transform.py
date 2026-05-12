@@ -6,7 +6,7 @@ import json
 import logging
 
 from django.utils import timezone
-from etl.pipeline.defaults import resolve_target_name
+from etl.defaults import resolve_target_name
 from etl.services import enqueue_etl_item
 from search_gateway.client import get_opensearch_client
 

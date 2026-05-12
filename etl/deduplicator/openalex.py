@@ -16,7 +16,7 @@ from etl.transform.extractors import (
     extract_issns,
     extract_source,
 )
-from etl.pipeline.defaults import DocumentRules
+from etl.defaults import DocumentRules
 
 logger = logging.getLogger(__name__)
 

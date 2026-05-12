@@ -16,7 +16,7 @@ from etl.transform.extractors import (
     extract_scielo_id,
     get_normalized_titles,
 )
-from etl.pipeline.defaults import DocumentRules
+from etl.defaults import DocumentRules
 
 logger = logging.getLogger(__name__)
 

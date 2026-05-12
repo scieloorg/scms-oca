@@ -3,7 +3,7 @@ from unittest.mock import Mock, patch
 from django.test import SimpleTestCase
 
 from etl.documents import SilverDocument
-from etl.pipeline.orchestrator import OpenSearchETLPipeline
+from etl.orchestrator import OpenSearchETLPipeline
 
 
 class OrchestratorAliasTests(SimpleTestCase):

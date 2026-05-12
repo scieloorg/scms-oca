@@ -1,6 +1,6 @@
 from django.conf import settings
 
-from etl.pipeline.defaults import (
+from etl.defaults import (
     article_rules,
     book_chapter_rules,
     book_rules,

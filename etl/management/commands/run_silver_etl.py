@@ -5,7 +5,7 @@ from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 
 from etl.services import process_pending_items
-from etl.pipeline.defaults import PIPELINE_TARGETS
+from etl.defaults import PIPELINE_TARGETS
 from etl.tasks import run_pipeline_targets
 
 

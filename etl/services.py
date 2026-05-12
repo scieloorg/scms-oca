@@ -8,8 +8,8 @@ from django.utils import timezone
 
 from etl.client import OpenSearchClient
 from etl.models import EtlItemProcess, EtlResult, EtlStatus
-from etl.pipeline.orchestrator import OpenSearchETLPipeline
-from etl.pipeline.defaults import PIPELINE_TARGETS, get_pipeline_target, resolve_target_name
+from etl.orchestrator import OpenSearchETLPipeline
+from etl.defaults import PIPELINE_TARGETS, get_pipeline_target, resolve_target_name
 from harvest.utils import clean_source_payload, source_hash
 
 logger = logging.getLogger(__name__)

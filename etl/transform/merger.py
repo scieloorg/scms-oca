@@ -2,7 +2,7 @@ import logging
 
 from etl.documents import SilverDocument
 from etl.transform.normalizers import as_list, normalize_name, scalar_or_list, unique
-from etl.pipeline.defaults import DocumentRules
+from etl.defaults import DocumentRules
 
 logger = logging.getLogger(__name__)
 

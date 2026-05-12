@@ -1,9 +1,9 @@
 from django.conf import settings
 
 from config import celery_app
-from etl.models import EtlItemProcess, EtlStatus
-from etl.pipeline.defaults import PIPELINE_TARGETS, resolve_target_names
-from etl.pipeline.orchestrator import OpenSearchETLPipeline
+from etl.models import EtlStatus
+from etl.defaults import PIPELINE_TARGETS, resolve_target_names
+from etl.orchestrator import OpenSearchETLPipeline
 from etl.services import backfill_bronze_items, process_pending_items
 
 BATCH_SIZE = 1000

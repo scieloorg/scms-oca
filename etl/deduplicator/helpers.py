@@ -1,8 +1,8 @@
 import difflib
 from typing import Any, Dict, List
 
-from etl.pipeline.defaults import DocumentRules
-from etl.pipeline.strategies import get_strategy
+from etl.defaults import DocumentRules
+from etl.strategies import get_strategy
 from etl.transform.extractors import extract_doi, extract_scielo_id
 
 

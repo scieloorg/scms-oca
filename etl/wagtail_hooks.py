@@ -1,4 +1,3 @@
-from django.db.models import Count
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.urls import path, reverse
@@ -11,10 +10,16 @@ from wagtail.admin.menu import Menu, MenuItem, SubmenuMenuItem
 from wagtail.snippets.models import register_snippet
 from wagtail.snippets.views.snippets import SnippetViewSet
 
-from etl.models import EtlItemProcess, EtlResult, EtlStatus
+from etl.models import EtlItemProcess, EtlStatus
 from etl.tasks import process_pending_silver_etl, run_silver_etl
 
-DOCUMENT_TYPES = ("article", "book", "preprint", "dataset")
+
+DOCUMENT_TYPES = (
+    "article", 
+    "book", 
+    "preprint", 
+    "dataset"
+)
 STATUS_FIELDS = (
     EtlStatus.PENDING,
     EtlStatus.PROCESSING,
@@ -32,10 +37,10 @@ DOCUMENT_TYPE_LABELS = {
 
 def _compute_stats():
     raw_stats = EtlItemProcess.objects.get_summary_stats()
-    status_counts = raw_stats["status_counts"]
-    type_counts = raw_stats["type_counts"]
-    type_status_counts = raw_stats["type_status_counts"]
-    merged_counts = raw_stats["merged_counts"]
+    status_counts = raw_stats.get("status_counts", {})
+    type_counts = raw_stats.get("type_counts")
+    type_status_counts = raw_stats.get("type_status_counts", {})
+    merged_counts = raw_stats.get("merged_counts", {})
     total_merged = sum(merged_counts.values())
 
     return {

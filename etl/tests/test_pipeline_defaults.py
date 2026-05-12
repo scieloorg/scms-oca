@@ -1,7 +1,7 @@
 from django.test import SimpleTestCase
 
-from etl.pipeline.defaults import PipelineTarget, normalize_document_type
-from etl.pipeline.strategies import get_strategy
+from etl.defaults import PipelineTarget, normalize_document_type
+from etl.strategies import get_strategy
 
 
 class PipelineTargetTests(SimpleTestCase):

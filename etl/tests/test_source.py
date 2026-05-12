@@ -1,7 +1,7 @@
 from django.test import SimpleTestCase
 
-from etl.pipeline.defaults import PipelineTarget, get_pipeline_target
-from etl.pipeline.strategies import get_strategy
+from etl.defaults import PipelineTarget, get_pipeline_target
+from etl.strategies import get_strategy
 
 
 class PipelineTargetMatchTests(SimpleTestCase):

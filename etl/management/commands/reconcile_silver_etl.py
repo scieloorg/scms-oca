@@ -3,7 +3,7 @@ import json
 from django.core.management.base import BaseCommand
 
 from etl.client import OpenSearchClient
-from etl.pipeline.defaults import PIPELINE_TARGETS
+from etl.defaults import PIPELINE_TARGETS
 from etl.services import enqueue_etl_item
 
 TARGET_BRONZE_INDICES = sorted(

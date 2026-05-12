@@ -2,7 +2,7 @@ from unittest.mock import patch
 
 from django.test import SimpleTestCase, override_settings
 
-from etl.pipeline.defaults import resolve_target_names
+from etl.defaults import resolve_target_names
 from etl.tasks import _run_pipeline_target
 
 
