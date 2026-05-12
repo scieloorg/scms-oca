@@ -1,7 +1,7 @@
 import logging
 from typing import Any
 
-from etl.indexing.contracts import BronzeDocument, SilverDocument
+from etl.documents import BronzeDocument, SilverDocument
 from etl.transform.extractors import (
     display_name,
     first_value,

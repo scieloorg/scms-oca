@@ -1,6 +1,6 @@
 from django.test import SimpleTestCase
 
-from etl.indexing.contracts import BronzeDocument, SilverDocument
+from etl.documents import BronzeDocument, SilverDocument
 
 
 class BronzeDocumentContractTests(SimpleTestCase):

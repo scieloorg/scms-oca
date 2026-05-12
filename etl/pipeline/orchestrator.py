@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Optional
 from django.conf import settings
 
 from etl.indexing.client import OpenSearchClient
-from etl.indexing.contracts import BronzeDocument, SilverDocument
+from etl.documents import BronzeDocument, SilverDocument
 from etl.indexing.schema import SILVER_MAPPING
 from etl.pipeline.deduplicator import OpenAlexMatcher, SciELODeduplicator, extract_doi
 from etl.pipeline.defaults import get_pipeline_target

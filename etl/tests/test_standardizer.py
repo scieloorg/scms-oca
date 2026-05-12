@@ -1,6 +1,6 @@
 from django.test import SimpleTestCase
 
-from etl.indexing.contracts import BronzeDocument
+from etl.documents import BronzeDocument
 from etl.transform.standardizer import DefaultStandardizer
 
 

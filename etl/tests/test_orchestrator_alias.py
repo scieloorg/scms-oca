@@ -2,7 +2,7 @@ from unittest.mock import Mock, patch
 
 from django.test import SimpleTestCase
 
-from etl.indexing.contracts import SilverDocument
+from etl.documents import SilverDocument
 from etl.pipeline.orchestrator import OpenSearchETLPipeline
 
 

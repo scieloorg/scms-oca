@@ -1,6 +1,6 @@
 from django.test import SimpleTestCase
 
-from etl.indexing.contracts import SilverDocument
+from etl.documents import SilverDocument
 from etl.transform.merger import merge
 
 
