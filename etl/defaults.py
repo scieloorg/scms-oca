@@ -263,25 +263,3 @@ def resolve_target_names(target_type: str) -> list[str]:
         raise ValueError(f"Unknown ETL target type: {target_type}")
     return [target_type]
 
-
-__all__ = [
-    "DocumentType",
-    "DedupStrategy",
-    "OpenAlexStrategy",
-    "MergeAction",
-    "OpenAlexValidationRules",
-    "MergeRules",
-    "DocumentRules",
-    "DEFAULT_MERGE_RULES",
-    "DEFAULT_OPENALEX_VALIDATION",
-    "article_rules",
-    "dataset_rules",
-    "preprint_rules",
-    "book_rules",
-    "book_chapter_rules",
-    "PipelineTarget",
-    "PIPELINE_TARGETS",
-    "resolve_target_name",
-    "get_pipeline_target",
-    "resolve_target_names",
-]
