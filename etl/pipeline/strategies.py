@@ -7,7 +7,7 @@ from etl.pipeline.defaults import (
     dataset_rules,
     preprint_rules,
 )
-from etl.pipeline.merger import merge
+from etl.transform.merger import merge
 from etl.pipeline.standardizer import BookStandardizer, DefaultStandardizer
 
 _BUILTIN_ALIASES: dict[str, str] = {

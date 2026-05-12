@@ -1,7 +1,7 @@
 from django.test import SimpleTestCase
 
 from etl.indexing.contracts import SilverDocument
-from etl.pipeline.merger import merge
+from etl.transform.merger import merge
 
 
 class MergeTests(SimpleTestCase):
