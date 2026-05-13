@@ -219,16 +219,56 @@ def build_lookup_indices(
 
         return processed
 
-    def _bulk_index(index_name, actions):
+    def _bulk_index(index_name, actions, expected_count):
         success = 0
-        for ok, _ in streaming_bulk(
-            client, actions, chunk_size=config.batch_size, max_retries=3, raise_on_error=True
+        errors = []
+        if progress:
+            progress(
+                f"Starting bulk indexing {expected_count:,} lookup documents "
+                f"in '{index_name}'..."
+            )
+
+        for ok, item in streaming_bulk(
+            client, actions, chunk_size=config.batch_size, max_retries=3, raise_on_error=False
         ):
             if ok:
                 success += 1
-                if progress and success % 10000 == 0:
+                if progress and success % 5000 == 0:
                     progress(f"Indexed {success:,} lookup documents in '{index_name}'...")
+            elif len(errors) < 5:
+                errors.append(item)
+
+        if errors:
+            raise ValueError(
+                f"Bulk indexing failed for '{index_name}' after indexing "
+                f"{success:,} of {expected_count:,} lookup documents. "
+                f"First errors: {errors}"
+            )
+
+        if progress:
+            progress(f"Finished indexing {success:,} documents in '{index_name}'.")
+
         client.indices.refresh(index=index_name)
+        count_response = client.count(index=index_name)
+        if hasattr(count_response, "get"):
+            indexed_total = count_response.get("count")
+        elif hasattr(count_response, "body") and hasattr(count_response.body, "get"):
+            indexed_total = count_response.body.get("count")
+        else:
+            indexed_total = None
+        if indexed_total != success:
+            raise ValueError(
+                f"Index '{index_name}' count mismatch after refresh: bulk reported "
+                f"{success:,} successful documents, but OpenSearch count returned "
+                f"{indexed_total!r}."
+            )
+        if expected_count != success:
+            raise ValueError(
+                f"Index '{index_name}' expected {expected_count:,} lookup documents, "
+                f"but bulk reported {success:,} successful documents."
+            )
+        if progress:
+            progress(f"Verified {indexed_total:,} documents in '{index_name}'.")
         return success
 
     builders: dict[str, LookupBuilder] = {
