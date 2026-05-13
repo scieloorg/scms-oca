@@ -5,11 +5,15 @@ Funções responsáveis por indexar os dados brutos (quando disponível o raw_da
 import logging
 
 from django.conf import settings
+from django.utils import timezone
 
+from etl.pipeline.defaults import resolve_target_name
+from etl.services import enqueue_etl_item
 from search_gateway.client import get_opensearch_client
 
 from .exception_logs import ExceptionContext
 from .models import HarvestStatus
+from .utils import source_hash
 
 logger = logging.getLogger(__name__)
 
@@ -81,15 +85,26 @@ def index_harvested_instance(instance, index_name=None, refresh=False):
         return
 
     try:
+        payload_hash = source_hash(instance.raw_data)
         logging.info(
             f"Indexando instancia {instance.__class__.__name__}: {instance.identifier} no indice {index_name}"
         )
         client.index(
             index=index_name,
             id=instance.identifier,
-            body={"raw_data": instance.raw_data},
+            body={
+                "raw_data": instance.raw_data,
+                "oca_indexed_at": timezone.now().isoformat(),
+                "oca_source_hash": payload_hash,
+            },
             refresh=False,
         )
+        if resolve_target_name(index_name):
+            enqueue_etl_item(
+                source_index=index_name,
+                external_id=instance.identifier,
+                source_payload=instance.raw_data,
+            )
         instance.mark_as_indexed(index_name=index_name)
     except Exception as exc:
         logger.warning(

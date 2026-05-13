@@ -1,0 +1,40 @@
+{% extends "wagtailadmin/generic/base.html" %}
+{% load i18n %}
+
+{% block main_content %}
+  <section>
+    <h2>{% trans "Processing summary" %}</h2>
+    <ul>
+      <li>{% trans "Total" %}: {{ stats.total }}</li>
+      <li>{% trans "Pending" %}: {{ stats.pending }}</li>
+      <li>{% trans "Processing" %}: {{ stats.processing }}</li>
+      <li>{% trans "Success" %}: {{ stats.success }}</li>
+      <li>{% trans "Failed" %}: {{ stats.failed }}</li>
+      <li>{% trans "Skipped" %}: {{ stats.skipped }}</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>{% trans "By document type" %}</h2>
+    <table class="listing">
+      <thead>
+        <tr>
+          <th>{% trans "Document type" %}</th>
+          <th>{% trans "Total" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for document_type, total in stats.by_type %}
+          <tr>
+            <td>{{ document_type }}</td>
+            <td>{{ total }}</td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="2">{% trans "No ETL items registered yet." %}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+{% endblock %}
