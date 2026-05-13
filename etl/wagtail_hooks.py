@@ -1,84 +1,21 @@
-from django.http import HttpResponseRedirect
-from django.shortcuts import redirect, render
 from django.urls import path, reverse
 from django.utils.translation import gettext_lazy as _
-from django.views.decorators.http import require_POST
 from wagtail import hooks
-from wagtail.admin import messages
-from wagtail.admin.auth import permission_denied, require_admin_access
 from wagtail.admin.menu import Menu, MenuItem, SubmenuMenuItem
 from wagtail.snippets.models import register_snippet
 from wagtail.snippets.views.snippets import SnippetViewSet
 
-from etl.models import EtlItemProcess, EtlStatus
-from etl.tasks import process_pending_silver_etl, run_silver_etl
-
-
-DOCUMENT_TYPES = (
-    "article", 
-    "book", 
-    "preprint", 
-    "dataset"
+from etl.models import EtlItemProcess, EtlPipelineConfig
+from etl.views import (
+    DOCUMENT_TYPE_LABELS,
+    retry_failed_by_type_view,
+    retry_failed_view,
+    reset_to_pending_view,
+    summary_view,
+    trigger_pending_by_type_view,
+    trigger_pending_view,
+    trigger_pipeline_view,
 )
-STATUS_FIELDS = (
-    EtlStatus.PENDING,
-    EtlStatus.PROCESSING,
-    EtlStatus.SUCCESS,
-    EtlStatus.FAILED,
-    EtlStatus.SKIPPED,
-)
-DOCUMENT_TYPE_LABELS = {
-    "article": _("Articles"),
-    "book": _("Books"),
-    "preprint": _("Preprints"),
-    "dataset": _("Datasets"),
-}
-
-
-def _compute_stats():
-    raw_stats = EtlItemProcess.objects.get_summary_stats()
-    status_counts = raw_stats.get("status_counts", {})
-    type_counts = raw_stats.get("type_counts")
-    type_status_counts = raw_stats.get("type_status_counts", {})
-    merged_counts = raw_stats.get("merged_counts", {})
-    total_merged = sum(merged_counts.values())
-
-    return {
-        "total": sum(status_counts.values()),
-        "pending": status_counts.get(EtlStatus.PENDING, 0),
-        "processing": status_counts.get(EtlStatus.PROCESSING, 0),
-        "success": status_counts.get(EtlStatus.SUCCESS, 0),
-        "failed": status_counts.get(EtlStatus.FAILED, 0),
-        "skipped": status_counts.get(EtlStatus.SKIPPED, 0),
-        "merged": total_merged,
-        "by_type": {dt: type_counts.get(dt, 0) for dt in DOCUMENT_TYPES},
-        "by_type_rows": [
-            {
-                "key": document_type,
-                "label": DOCUMENT_TYPE_LABELS[document_type],
-                "total": type_counts.get(document_type, 0),
-                "merged": merged_counts.get(document_type, 0),
-                **{
-                    status: type_status_counts.get((document_type, status), 0)
-                    for status in STATUS_FIELDS
-                },
-            }
-            for document_type in DOCUMENT_TYPES
-        ],
-    }
-
-
-def _processing_already_running(document_type, request) -> bool:
-    if EtlItemProcess.objects.filter(
-        document_type=document_type,
-        status=EtlStatus.PROCESSING,
-    ).exists():
-        messages.warning(
-            request,
-            _("Já existe uma task em execução para '%(doc_type)s'. Aguarde a conclusão.") % {"doc_type": DOCUMENT_TYPE_LABELS.get(document_type, document_type)},
-        )
-        return True
-    return False
 
 
 class EtlItemProcessViewSet(SnippetViewSet):
@@ -90,11 +27,17 @@ class EtlItemProcessViewSet(SnippetViewSet):
 
     list_display = (
         "external_id",
+        "pid_v2",
+        "doi",
         "document_type",
         "source_index",
         "publication_year",
         "status",
         "result",
+        "has_openalex_match",
+        "has_scielo_dedup",
+        "scielo_dedup_ids",
+        "openalex_match_ids",
         "attempts",
         "processed_at",
     )
@@ -103,9 +46,16 @@ class EtlItemProcessViewSet(SnippetViewSet):
         "result",
         "document_type",
         "source_index",
+        "has_openalex_match",
+        "has_scielo_dedup",
     )
     search_fields = (
         "external_id",
+        "pid_v2",
+        "doi",
+        "isbn",
+        "preprint_id",
+        "dataset_id",
         "source_index",
     )
     ordering = ("-updated_at",)
@@ -113,6 +63,28 @@ class EtlItemProcessViewSet(SnippetViewSet):
 
 
 register_snippet(EtlItemProcessViewSet)
+
+
+class EtlPipelineConfigViewSet(SnippetViewSet):
+    model = EtlPipelineConfig
+    icon = "cog"
+    menu_label = _("Pipeline Configs")
+    add_to_admin_menu = False
+    menu_order = 901
+    list_display = (
+        "name",
+        "enabled",
+        "input_index",
+        "silver_index_pattern",
+        "default_document_type",
+        "deduplicate_scielo",
+    )
+    list_filter = ("enabled", "default_document_type", "deduplicate_scielo")
+    search_fields = ("name", "input_index", "silver_index_pattern")
+    ordering = ("name",)
+
+
+register_snippet(EtlPipelineConfigViewSet)
 
 
 class EtlMenuItem(MenuItem):
@@ -145,6 +117,12 @@ def register_etl_menu():
                     DOCUMENT_TYPE_LABELS.items()
                 )
             ],
+            EtlMenuItem(
+                _("Pipeline Configs"),
+                reverse("wagtailsnippets_etl_etlpipelineconfig:list"),
+                icon_name="cog",
+                order=10,
+            ),
         ]
     )
     return SubmenuMenuItem(
@@ -154,110 +132,6 @@ def register_etl_menu():
         name="etl",
         order=85,
     )
-
-
-@require_admin_access
-def summary_view(request):
-    if not EtlItemProcessViewSet().permission_policy.user_has_any_permission(
-        request.user,
-        {"add", "change", "delete", "view"},
-    ):
-        return permission_denied(request)
-
-    return render(
-        request,
-        "etl/admin/summary.html",
-        {
-            "stats": _compute_stats(),
-            "list_url": reverse("wagtailsnippets_etl_etlitemprocess:list"),
-            "header_title": _("ETL Summary"),
-            "header_icon": "tasks",
-            "breadcrumbs_items": [
-                {"url": reverse("wagtailadmin_home"), "label": _("Home")},
-                {"url": "", "label": _("ETL Summary")},
-            ],
-            "trigger_pipeline_url": reverse("etl_trigger_pipeline"),
-            "trigger_pending_by_type_url": reverse("etl_trigger_pending_by_type"),
-            "retry_failed_by_type_url": reverse("etl_retry_failed_by_type"),
-        },
-    )
-
-
-@require_POST
-def trigger_pipeline_view(request):
-    target_type = request.POST.get("type", "preprint")
-    if target_type not in DOCUMENT_TYPES:
-        messages.error(request, f"Invalid target type: {target_type}")
-        return HttpResponseRedirect(request.META.get("HTTP_REFERER", "/admin/"))
-    if _processing_already_running(target_type, request):
-        return HttpResponseRedirect(request.META.get("HTTP_REFERER", "/admin/"))
-    result = run_silver_etl.delay(target_type=target_type)
-    messages.success(
-        request,
-        f"ETL pipeline triggered for '{target_type}'. Task ID: {result.id}",
-    )
-    return HttpResponseRedirect(request.META.get("HTTP_REFERER", "/admin/"))
-
-
-@require_POST
-def trigger_pending_view(request):
-    result = process_pending_silver_etl.delay(limit=5000)
-    messages.success(request, f"Pending ETL triggered. Task ID: {result.id}")
-    return HttpResponseRedirect(request.META.get("HTTP_REFERER", "/admin/"))
-
-
-@require_POST
-def trigger_pending_by_type_view(request):
-    document_type = request.POST.get("type", "preprint")
-    if document_type not in DOCUMENT_TYPES:
-        messages.error(request, f"Invalid document type: {document_type}")
-        return HttpResponseRedirect(request.META.get("HTTP_REFERER", "/admin/"))
-    if _processing_already_running(document_type, request):
-        return HttpResponseRedirect(request.META.get("HTTP_REFERER", "/admin/"))
-    result = process_pending_silver_etl.delay(limit=5000, document_type=document_type)
-    messages.success(
-        request,
-        f"Pending ETL triggered for '{document_type}'. Task ID: {result.id}",
-    )
-    return HttpResponseRedirect(request.META.get("HTTP_REFERER", "/admin/"))
-
-
-@require_POST
-def retry_failed_by_type_view(request):
-    document_type = request.POST.get("type", "preprint")
-    if document_type not in DOCUMENT_TYPES:
-        messages.error(request, f"Invalid document type: {document_type}")
-        return HttpResponseRedirect(request.META.get("HTTP_REFERER", "/admin/"))
-    if _processing_already_running(document_type, request):
-        return HttpResponseRedirect(request.META.get("HTTP_REFERER", "/admin/"))
-    rows = EtlItemProcess.objects.retry_failed_by_type(document_type)
-    messages.success(request, _("%(count)s failed item(s) of type '%(doc_type)s' reset to pending.") % {"count": rows, "doc_type": document_type})
-    result = process_pending_silver_etl.delay(limit=5000, document_type=document_type)
-    messages.success(
-        request,
-        f"Pending ETL triggered for '{document_type}'. Task ID: {result.id}",
-    )
-    return HttpResponseRedirect(request.META.get("HTTP_REFERER", "/admin/"))
-
-
-@require_POST
-def reset_to_pending_view(request):
-    ids = request.POST.get("ids", "")
-    if ids:
-        id_list = [i.strip() for i in ids.split(",") if i.strip()]
-        rows = EtlItemProcess.objects.reset_to_pending(id_list)
-        messages.success(request, _("%(count)s item(s) reset to pending.") % {"count": rows})
-    return redirect(request.META.get("HTTP_REFERER", "/admin/"))
-
-
-@require_POST
-def retry_failed_view(request):
-    ids = request.POST.get("ids", "")
-    if ids:
-        id_list = [i.strip() for i in ids.split(",") if i.strip()]
-        rows = EtlItemProcess.objects.retry_failed(id_list)
-        messages.success(request, _("%(count)s failed item(s) marked for retry.") % {"count": rows})
-    return redirect(request.META.get("HTTP_REFERER", "/admin/"))
 
 
 @hooks.register("register_admin_urls")
