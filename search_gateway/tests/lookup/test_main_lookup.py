@@ -184,6 +184,134 @@ class BuildLookupCommandTests(SimpleTestCase):
         with self.assertRaisesMessage(ValueError, "Source index or alias 'scientific_production' does not exist"):
             build_lookup_indices(client, config, LOOKUP_BUILDERS)
 
+    def test_build_service_rejects_existing_target_index_before_creating_any_index(self):
+        client = Mock()
+        client.ping.return_value = True
+        client.indices.exists.side_effect = lambda index: index in {
+            "scientific_production",
+            "lookup_publisher",
+        }
+        config = BuildConfig(
+            source_index="scientific_production",
+            batch_size=100,
+            max_docs=None,
+            selected_lookups=["source", "publisher"],
+            lookup_index_overrides={},
+            max_items={},
+        )
+
+        with self.assertRaisesMessage(ValueError, "Target lookup index 'lookup_publisher' already exists"):
+            build_lookup_indices(client, config, LOOKUP_BUILDERS)
+
+        client.indices.create.assert_not_called()
+
+    def test_build_service_rejects_duplicate_target_index_names(self):
+        client = Mock()
+        config = BuildConfig(
+            source_index="scientific_production",
+            batch_size=100,
+            max_docs=None,
+            selected_lookups=["source", "publisher"],
+            lookup_index_overrides={"source": "lookup_shared", "publisher": "lookup_shared"},
+            max_items={},
+        )
+
+        with self.assertRaisesMessage(ValueError, "target the same index 'lookup_shared'"):
+            build_lookup_indices(client, config, LOOKUP_BUILDERS)
+
+        client.ping.assert_not_called()
+        client.indices.create.assert_not_called()
+
+    @patch("search_gateway.lookup.base.streaming_bulk")
+    @patch("search_gateway.lookup.base.scan")
+    def test_build_service_verifies_index_count_after_bulk(self, scan_mock, streaming_bulk_mock):
+        client = Mock()
+        client.ping.return_value = True
+        client.indices.exists.side_effect = lambda index: index == "scientific_production"
+        client.count.return_value = {"count": 1}
+        scan_mock.return_value = [
+            {
+                "_source": {
+                    "sources": [{"type": "journal"}],
+                    "publishers": [{"name": "SciELO"}],
+                }
+            }
+        ]
+        streaming_bulk_mock.return_value = [(True, {"index": {"_id": "SciELO"}})]
+        config = BuildConfig(
+            source_index="scientific_production",
+            batch_size=100,
+            max_docs=None,
+            selected_lookups=["publisher"],
+            lookup_index_overrides={},
+            max_items={},
+        )
+
+        counts = build_lookup_indices(client, config, LOOKUP_BUILDERS)
+
+        self.assertEqual(counts["publisher"], 1)
+        client.indices.refresh.assert_called_once_with(index="lookup_publisher")
+        client.count.assert_called_once_with(index="lookup_publisher")
+
+    @patch("search_gateway.lookup.base.streaming_bulk")
+    @patch("search_gateway.lookup.base.scan")
+    def test_build_service_raises_when_index_count_does_not_match_bulk(self, scan_mock, streaming_bulk_mock):
+        client = Mock()
+        client.ping.return_value = True
+        client.indices.exists.side_effect = lambda index: index == "scientific_production"
+        client.count.return_value = {"count": 0}
+        scan_mock.return_value = [
+            {
+                "_source": {
+                    "sources": [{"type": "journal"}],
+                    "publishers": [{"name": "SciELO"}],
+                }
+            }
+        ]
+        streaming_bulk_mock.return_value = [(True, {"index": {"_id": "SciELO"}})]
+        config = BuildConfig(
+            source_index="scientific_production",
+            batch_size=100,
+            max_docs=None,
+            selected_lookups=["publisher"],
+            lookup_index_overrides={},
+            max_items={},
+        )
+
+        with self.assertRaisesMessage(ValueError, "count mismatch after refresh"):
+            build_lookup_indices(client, config, LOOKUP_BUILDERS)
+
+    @patch("search_gateway.lookup.base.streaming_bulk")
+    @patch("search_gateway.lookup.base.scan")
+    def test_build_service_reports_bulk_errors(self, scan_mock, streaming_bulk_mock):
+        client = Mock()
+        client.ping.return_value = True
+        client.indices.exists.side_effect = lambda index: index == "scientific_production"
+        scan_mock.return_value = [
+            {
+                "_source": {
+                    "sources": [{"type": "journal"}],
+                    "publishers": [{"name": "SciELO"}],
+                }
+            }
+        ]
+        streaming_bulk_mock.return_value = [
+            (False, {"index": {"_id": "SciELO", "error": "mapping error"}})
+        ]
+        config = BuildConfig(
+            source_index="scientific_production",
+            batch_size=100,
+            max_docs=None,
+            selected_lookups=["publisher"],
+            lookup_index_overrides={},
+            max_items={},
+        )
+
+        with self.assertRaisesMessage(ValueError, "Bulk indexing failed for 'lookup_publisher'"):
+            build_lookup_indices(client, config, LOOKUP_BUILDERS)
+
+        client.count.assert_not_called()
+
     @patch("search_gateway.management.commands.build_lookup_indices.build_lookup_indices")
     @patch("search_gateway.management.commands.build_lookup_indices.get_opensearch_client")
     def test_command_validates_batch_size(self, get_client_mock, build_mock):
