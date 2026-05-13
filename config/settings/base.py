@@ -488,13 +488,27 @@ SEARCH_GATEWAY_LOOKUP_NUMBER_OF_REPLICAS = env.int("SEARCH_GATEWAY_LOOKUP_NUMBER
 ETL_PUBLIC_ALIAS = env.str("ETL_PUBLIC_ALIAS", "scientific_production")
 ETL_ERROR_INDEX = env.str("ETL_ERROR_INDEX", "etl_errors")
 ETL_DEFAULT_BATCH_SIZE = env.int("ETL_DEFAULT_BATCH_SIZE", 1000)
+ETL_DOCUMENT_TYPE_ALIAS = env.json(
+    "ETL_DOCUMENT_TYPE_ALIAS",
+    default={
+        "research-article": "article",
+        "review": "article",
+        "review-article": "article",
+        "letter": "article",
+        "editorial": "article",
+        "correction": "article",
+        "erratum": "article",
+        "book-part": "book-chapter",
+        "chapter": "book-chapter",
+    },
+)
 
 # ETL — Bronze Index Names
-ETL_BRONZE_SCIELO_ARTICLES = env.str("ETL_BRONZE_SCIELO_ARTICLES", "bronze_scielo_articles-000001")
-ETL_BRONZE_SCIELO_BOOKS = env.str("ETL_BRONZE_SCIELO_BOOKS", "bronze_scielo_books")
-ETL_BRONZE_SCIELO_PREPRINT = env.str("ETL_BRONZE_SCIELO_PREPRINT", "bronze_scielo_preprint")
-ETL_BRONZE_SCIELO_DATASET = env.str("ETL_BRONZE_SCIELO_DATASET", "bronze_scielo_dataset")
-ETL_RAW_OPENALEX_WORKS = env.str("ETL_RAW_OPENALEX_WORKS", "raw_openalex_works")
+ETL_INPUT_SCIELO_ARTICLES = env.str("ETL_INPUT_SCIELO_ARTICLES", "bronze_scielo_articles-000001")
+ETL_INPUT_SCIELO_BOOKS = env.str("ETL_INPUT_SCIELO_BOOKS", "bronze_scielo_books")
+ETL_INPUT_SCIELO_PREPRINT = env.str("ETL_INPUT_SCIELO_PREPRINT", "bronze_scielo_preprint")
+ETL_INPUT_SCIELO_DATASET = env.str("ETL_INPUT_SCIELO_DATASET", "bronze_scielo_dataset")
+ETL_INPUT_OPENALEX_WORKS = env.str("ETL_INPUT_OPENALEX_WORKS", "raw_openalex_works")
 
 # ETL — Silver Index Patterns
 ETL_SILVER_ARTICLE_PATTERN = env.str("ETL_SILVER_ARTICLE_PATTERN", "silver_article_{year}")
