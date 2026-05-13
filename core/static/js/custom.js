@@ -178,4 +178,18 @@ $('.lang-select').change(function(){
 
         closeAllMenus();
     });
+
+    const desktopNavMediaQuery = window.matchMedia('(min-width: 992px)');
+
+    $(document).on(
+        'mouseleave.analyticsMenuDesktop',
+        `${desktopRootSelector} .menu-item.sub-menu`,
+        function () {
+            if (!desktopNavMediaQuery.matches) {
+                return;
+            }
+
+            closeBranch($(this));
+        }
+    );
 })(jQuery);
