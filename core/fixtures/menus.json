@@ -29,20 +29,14 @@
       "allow_subnav": true,
       "children": [
         {
-          "type": "url",
-          "url_name": "indicator",
-          "url_kwargs": {
-            "data_source_name": "scientific_production"
-          },
+          "type": "page",
+          "link_page_slug": "producao-cientifica",
           "text": "Produção Científica",
           "icon_key": "indicadores"
         },
         {
-          "type": "url",
-          "url_name": "indicator",
-          "url_kwargs": {
-            "data_source_name": "social_production"
-          },
+          "type": "page",
+          "link_page_slug": "producao-social",
           "text": "Produção Social",
           "icon_key": "indicadores"
         }
@@ -154,20 +148,14 @@
       "allow_subnav": true,
       "children": [
         {
-          "type": "url",
-          "url_name": "indicator",
-          "url_kwargs": {
-            "data_source_name": "scientific_production"
-          },
+          "type": "page",
+          "link_page_slug": "scientific-production",
           "text": "Scientific Production",
           "icon_key": "indicators"
         },
         {
-          "type": "url",
-          "url_name": "indicator",
-          "url_kwargs": {
-            "data_source_name": "social_production"
-          },
+          "type": "page",
+          "link_page_slug": "social-production",
           "text": "Social Production",
           "icon_key": "indicators"
         }
@@ -279,20 +267,14 @@
       "allow_subnav": true,
       "children": [
         {
-          "type": "url",
-          "url_name": "indicator",
-          "url_kwargs": {
-            "data_source_name": "scientific_production"
-          },
+          "type": "page",
+          "link_page_slug": "produccion-cientifica",
           "text": "Producción Científica",
           "icon_key": "indicadores"
         },
         {
-          "type": "url",
-          "url_name": "indicator",
-          "url_kwargs": {
-            "data_source_name": "social_production"
-          },
+          "type": "page",
+          "link_page_slug": "produccion-social",
           "text": "Producción Social",
           "icon_key": "indicadores"
         }

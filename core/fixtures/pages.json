@@ -29,16 +29,29 @@
       "publish": false,
       "children": [
         {
+          "key": "indicators_global",
+          "title": "Global",
+          "type": "IndicatorGlobalPage",
+          "slug": "global",
+          "data_source": "journal_metrics_global_*"
+        },
+        {
           "key": "indicators_scientific_production",
           "title": "Produção Científica",
-          "type": "FreePage",
-          "slug": "producao-cientifica"
+          "type": "IndicatorByCategoryPage",
+          "slug": "producao-cientifica",
+          "data_source": "scientific_production",
+          "default_category_level": "field",
+          "default_ranking_metric": "document_count"
         },
         {
           "key": "indicators_social_production",
           "title": "Produção Social",
-          "type": "FreePage",
-          "slug": "producao-social"
+          "type": "IndicatorByCategoryPage",
+          "slug": "producao-social",
+          "data_source": "social_production",
+          "default_category_level": "field",
+          "default_ranking_metric": "document_count"
         }
       ]
     },
@@ -146,16 +159,29 @@
       "publish": false,
       "children": [
         {
+          "key": "indicators_global",
+          "title": "Global",
+          "type": "IndicatorGlobalPage",
+          "slug": "global",
+          "data_source": "journal_metrics_global_*"
+        },
+        {
           "key": "indicators_scientific_production",
           "title": "Scientific Production",
-          "type": "FreePage",
-          "slug": "scientific-production"
+          "type": "IndicatorByCategoryPage",
+          "slug": "scientific-production",
+          "data_source": "scientific_production",
+          "default_category_level": "field",
+          "default_ranking_metric": "document_count"
         },
         {
           "key": "indicators_social_production",
           "title": "Social Production",
-          "type": "FreePage",
-          "slug": "social-production"
+          "type": "IndicatorByCategoryPage",
+          "slug": "social-production",
+          "data_source": "social_production",
+          "default_category_level": "field",
+          "default_ranking_metric": "document_count"
         }
       ]
     },
@@ -263,16 +289,29 @@
       "publish": false,
       "children": [
         {
+          "key": "indicators_global",
+          "title": "Global",
+          "type": "IndicatorGlobalPage",
+          "slug": "global",
+          "data_source": "journal_metrics_global_*"
+        },
+        {
           "key": "indicators_scientific_production",
           "title": "Producción Científica",
-          "type": "FreePage",
-          "slug": "produccion-cientifica"
+          "type": "IndicatorByCategoryPage",
+          "slug": "produccion-cientifica",
+          "data_source": "scientific_production",
+          "default_category_level": "field",
+          "default_ranking_metric": "document_count"
         },
         {
           "key": "indicators_social_production",
           "title": "Producción Social",
-          "type": "FreePage",
-          "slug": "produccion-social"
+          "type": "IndicatorByCategoryPage",
+          "slug": "produccion-social",
+          "data_source": "social_production",
+          "default_category_level": "field",
+          "default_ranking_metric": "document_count"
         }
       ]
     },
