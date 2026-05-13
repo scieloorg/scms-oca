@@ -10,6 +10,12 @@ from wagtail.admin.panels import FieldPanel
 from wagtail_json_widget.widgets import JSONEditorWidget
 
 from harvest.utils import clean_source_payload
+from etl.documents import (
+    SciELOArticleInputDocument,
+    SciELOBookInputDocument,
+    SciELODatasetInputDocument,
+    SciELOPreprintInputDocument,
+)
 from etl.transform.normalizers import normalize_document_type_for_etl
 
 
@@ -205,11 +211,16 @@ class EtlPipelineConfig(models.Model):
         return override or self.openalex_index or settings.ETL_INPUT_OPENALEX_WORKS
 
     def input_document_class(self):
-        from etl.documents import input_document_class_for_kind
+        input_document_classes = {
+            "article": SciELOArticleInputDocument,
+            "book": SciELOBookInputDocument,
+            "preprint": SciELOPreprintInputDocument,
+            "dataset": SciELODatasetInputDocument,
+        }
 
         try:
-            return input_document_class_for_kind(self.input_document_kind)
-        except ValueError as exc:
+            return input_document_classes[self.input_document_kind]
+        except KeyError as exc:
             raise ValueError(
                 f"Invalid input_document_kind for ETL pipeline config '{self.name}': "
                 f"{self.input_document_kind}"
