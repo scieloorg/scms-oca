@@ -4831,3 +4831,87 @@ msgstr ""
 
 msgid "articles, preprints, datasets, books"
 msgstr ""
+
+#: observation/templates/observation/include/table.html
+msgid "Select an observation table"
+msgstr "Select an observation table"
+
+#: observation/templates/observation/include/table.html
+msgid "Use the detail icon next to country name. Use row checkboxes and then Compare selected."
+msgstr "Use the detail icon next to country name. Use row checkboxes and then Compare selected."
+
+#: observation/templates/observation/include/table.html
+msgid "Processing date"
+msgstr "Processing date"
+
+#: observation/templates/observation/include/table.html
+msgid "Table"
+msgstr "Table"
+
+#: observation/templates/observation/include/table.html
+msgid "Downloads"
+msgstr "Downloads"
+
+#: observation/templates/observation/include/table.html
+msgid "Compare selected"
+msgstr "Compare selected"
+
+#: observation/templates/observation/include/table.html
+msgid "Download CSV (.csv)"
+msgstr "Download CSV (.csv)"
+
+#: observation/templates/observation/include/table.html
+msgid "Rows per page"
+msgstr "Rows per page"
+
+#: observation/templates/observation/include/table.html
+msgid "Loading table data..."
+msgstr "Loading table data..."
+
+#: observation/templates/observation/include/table.html
+msgid "Select or deselect all rows"
+msgstr "Select or deselect all rows"
+
+#: observation/templates/observation/include/table.html
+msgid "Select"
+msgstr "Select"
+
+#: observation/templates/observation/include/table.html
+msgid "Totals"
+msgstr "Totals"
+
+#: observation/templates/observation/include/table.html
+msgid "Rows limit"
+msgstr "Rows limit"
+
+#: observation/templates/observation/include/table.html
+msgid "Generate all CSVs"
+msgstr "Generate all CSVs"
+
+#: observation/templates/observation/include/table.html
+msgid "Clear .csv"
+msgstr "Clear .csv"
+
+#: observation/templates/observation/include/table.html
+msgid "Single file (.csv)"
+msgstr "Single file (.csv)"
+
+#: observation/templates/observation/include/table.html
+msgid "Jobs are persisted in your browser and can be resumed after reload."
+msgstr "Jobs are persisted in your browser and can be resumed after reload."
+
+#: observation/templates/observation/include/table.html
+msgid "Country details"
+msgstr "Country details"
+
+#: observation/templates/observation/include/table.html
+msgid "Country comparison"
+msgstr "Country comparison"
+
+#: observation/templates/observation/include/table.html
+msgid "Documents"
+msgstr "Documents"
+
+#: observation/templates/observation/include/table.html
+msgid "Clear selection"
+msgstr "Clear selection"

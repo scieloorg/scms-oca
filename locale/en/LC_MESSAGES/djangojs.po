@@ -566,3 +566,199 @@ msgstr "Filters applied"
 
 msgid "Search"
 msgstr "Search"
+
+#: observation/static/observation/js/table.js
+msgid "Disabled while single-file mode is enabled."
+msgstr "Disabled while single-file mode is enabled."
+
+#: observation/static/observation/js/table.js
+msgid "No export jobs yet."
+msgstr "No export jobs yet."
+
+#: observation/static/observation/js/table.js
+msgid "Download CSV"
+msgstr "Download CSV"
+
+#: observation/static/observation/js/table.js
+msgid "%(count)s files"
+msgstr "%(count)s files"
+
+#: observation/static/observation/js/table.js
+msgid "Dimension"
+msgstr "Dimension"
+
+#: observation/static/observation/js/table.js
+msgid "Status"
+msgstr "Status"
+
+#: observation/static/observation/js/table.js
+msgid "%(processed)s/%(total)s rows"
+msgstr "%(processed)s/%(total)s rows"
+
+#: observation/static/observation/js/table.js
+msgid "Could not download CSV."
+msgstr "Could not download CSV."
+
+#: observation/static/observation/js/table.js
+msgid "Downloaded file is empty."
+msgstr "Downloaded file is empty."
+
+#: observation/static/observation/js/table.js
+msgid "Status error"
+msgstr "Status error"
+
+#: observation/static/observation/js/table.js
+msgid "Export start failed"
+msgstr "Export start failed"
+
+#: observation/static/observation/js/table.js
+msgid "Could not start export"
+msgstr "Could not start export"
+
+#: observation/static/observation/js/table.js
+msgid "Remove all saved download jobs from this browser?"
+msgstr "Remove all saved download jobs from this browser?"
+
+#: observation/static/observation/js/table.js
+msgid "Enable when there are at least 1000 rows."
+msgstr "Enable when there are at least 1000 rows."
+
+#: observation/static/observation/js/table.js
+msgid "Network error"
+msgstr "Network error"
+
+#: observation/static/observation/js/table.js
+msgid "Error loading table data"
+msgstr "Error loading table data"
+
+#: observation/static/observation/js/table.js
+msgid "View details"
+msgstr "View details"
+
+#: observation/static/observation/js/table.js
+msgid "Copy row"
+msgstr "Copy row"
+
+#: observation/static/observation/js/table.js
+msgid "Type to search %(label)s..."
+msgstr "Type to search %(label)s..."
+
+#: observation/static/observation/js/table.js
+msgid "Showing _START_ to _END_ of _TOTAL_"
+msgstr "Showing _START_ to _END_ of _TOTAL_"
+
+#: observation/static/observation/js/table.js
+msgid "First"
+msgstr "First"
+
+#: observation/static/observation/js/table.js
+msgid "Previous"
+msgstr "Previous"
+
+#: observation/static/observation/js/table.js
+msgid "Next"
+msgstr "Next"
+
+#: observation/static/observation/js/table.js
+msgid "Last"
+msgstr "Last"
+
+#: observation/static/observation/js/table.js
+msgid "Showing %(start)s to %(end)s of %(total)s"
+msgstr "Showing %(start)s to %(end)s of %(total)s"
+
+#: observation/static/observation/js/table.js
+msgid "Contains"
+msgstr "Contains"
+
+#: observation/static/observation/js/table.js
+msgid "Starts with"
+msgstr "Starts with"
+
+#: observation/static/observation/js/table.js
+msgid "Equals"
+msgstr "Equals"
+
+#: observation/static/observation/js/table.js
+msgid "Search..."
+msgstr "Search..."
+
+#: observation/static/observation/js/table.js
+msgid "Sort column"
+msgstr "Sort column"
+
+#: observation/static/observation/js/table.js
+msgid "Sort ascending"
+msgstr "Sort ascending"
+
+#: observation/static/observation/js/table.js
+msgid "Column options"
+msgstr "Column options"
+
+#: observation/static/observation/js/table.js
+msgid "Sort Ascending"
+msgstr "Sort Ascending"
+
+#: observation/static/observation/js/table.js
+msgid "Sort Descending"
+msgstr "Sort Descending"
+
+#: observation/static/observation/js/table.js
+msgid "Clear sort"
+msgstr "Clear sort"
+
+#: observation/static/observation/js/table.js
+msgid "Select at least 2 rows using the row checkboxes."
+msgstr "Select at least 2 rows using the row checkboxes."
+
+#: observation/static/observation/js/table.js
+msgid "Comparison"
+msgstr "Comparison"
+
+#: observation/static/observation/js/table.js
+msgid "Processing date"
+msgstr "Processing date"
+
+#: observation/static/observation/js/table.js
+msgid "Source"
+msgstr "Source"
+
+#: observation/static/observation/js/table.js
+msgid "Evolution comparison by year"
+msgstr "Evolution comparison by year"
+
+#: observation/static/observation/js/table.js
+msgid "Download chart"
+msgstr "Download chart"
+
+#: observation/static/observation/js/table.js
+msgid "Select at least one row using the checkbox in the first column."
+msgstr "Select at least one row using the checkbox in the first column."
+
+#: observation/static/observation/js/table.js
+msgid "Details"
+msgstr "Details"
+
+#: observation/static/observation/js/table.js
+msgid "Evolution by %(label)s"
+msgstr "Evolution by %(label)s"
+
+#: observation/static/observation/js/table.js
+msgid "Peak"
+msgstr "Peak"
+
+#: observation/static/observation/js/table.js
+msgid "Lowest"
+msgstr "Lowest"
+
+#: observation/static/observation/js/table.js
+msgid "Average"
+msgstr "Average"
+
+#: observation/static/observation/js/table.js
+msgid "Growth (%(start)s-%(end)s)"
+msgstr "Growth (%(start)s-%(end)s)"
+
+#: observation/static/observation/js/table.js
+msgid "Scope"
+msgstr "Scope"

@@ -24,7 +24,7 @@
   </div>
 
   <p class="text-muted small mb-2">{% trans "Use the detail icon next to country name. Use row checkboxes and then Compare selected." %}</p>
-  <div class="observation-chart-meta">{% trans "Processing date" %}: 2026-03-17 | {% trans "Source" %}: OpenAlex</div>
+  <div class="observation-chart-meta">{% trans "Processing date" %}: 2026-03-17 | {% trans "Scope" %}: OpenAlex</div>
 
   <ul class="nav nav-tabs mt-3" id="observation-content-tabs" role="tablist">
     <li class="nav-item" role="presentation">
@@ -71,6 +71,7 @@
             <option value="" selected>{% trans "Action" %}</option>
             <option value="compare">{% trans "Compare selected" %}</option>
             <option value="csv">{% trans "Download CSV (.csv)" %}</option>
+            <option value="clear-selection">{% trans "Clear selection" %}</option>
           </select>
         </div>
         <div class="observation-page-length-wrap">
