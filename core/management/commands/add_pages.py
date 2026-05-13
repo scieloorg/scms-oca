@@ -8,11 +8,14 @@ from freepage.models import FreePage
 from observation.models import ObservationPage
 from search.models import SearchPage
 from search_gateway.models import DataSource
+from indicator_journal.models import IndicatorByCategoryPage, IndicatorGlobalPage
 
 
 PAGE_TYPE_FREE_PAGE = "FreePage"
 PAGE_TYPE_SEARCH_PAGE = "SearchPage"
 PAGE_TYPE_OBSERVATION_PAGE = "ObservationPage"
+PAGE_TYPE_INDICATOR_CATEGORY_PAGE = "IndicatorByCategoryPage"
+PAGE_TYPE_INDICATOR_GLOBAL_PAGE = "IndicatorGlobalPage"
 HOME_PAGE_TITLES = {
     "pt-BR": "Início",
     "en": "Home",
@@ -78,6 +81,10 @@ class Command(BaseCommand):
             locale.language_code,
             source_home.title,
         )
+        
+        if hasattr(translated_home, 'body') and not translated_home.body:
+            translated_home.body = f"<p>{translated_home.title}</p>"
+
         translated_home.save_revision().publish()
         return translated_home.specific
 
@@ -167,6 +174,31 @@ class Command(BaseCommand):
                 publish=p_publish,
             )
 
+        if p_type == PAGE_TYPE_INDICATOR_CATEGORY_PAGE:
+            return self.create_indicatorcategorypage(
+                parent=parent,
+                title=p_title,
+                slug=p_slug,
+                locale=locale,
+                data_source_name=p_datasource,
+                page_key=p_key,
+                publish=p_publish,
+                default_category_level=page.get("default_category_level", ""),
+                default_publication_year=page.get("default_publication_year", ""),
+                default_ranking_metric=page.get("default_ranking_metric", ""),
+            )
+
+        if p_type == PAGE_TYPE_INDICATOR_GLOBAL_PAGE:
+            return self.create_indicatorglobalpage(
+                parent=parent,
+                title=p_title,
+                slug=p_slug,
+                locale=locale,
+                data_source_name=p_datasource,
+                page_key=p_key,
+                publish=p_publish,
+            )
+
         self.stdout.write(self.style.ERROR(f"Tipo de página inválido: {p_type}"))
         return None
 
@@ -206,6 +238,17 @@ class Command(BaseCommand):
         if base_page:
             translated = base_page.get_translation_or_none(locale)
             if translated:
+                changed = False
+                if translated.slug != slug:
+                    translated.slug = slug
+                    changed = True
+                if translated.title != title:
+                    translated.title = title
+                    changed = True
+                if changed:
+                    translated.save()
+                    if publish:
+                        translated.save_revision().publish()
                 self.remember_page(page_key, locale, translated)
                 return self.apply_publish_state(translated, publish)
 
@@ -252,6 +295,17 @@ class Command(BaseCommand):
         if base_page:
             translated = base_page.get_translation_or_none(locale)
             if translated:
+                changed = False
+                if translated.slug != slug:
+                    translated.slug = slug
+                    changed = True
+                if translated.title != title:
+                    translated.title = title
+                    changed = True
+                if changed:
+                    translated.save()
+                    if publish:
+                        translated.save_revision().publish()
                 self.remember_page(page_key, locale, translated)
                 return self.apply_publish_state(translated, publish)
 
@@ -300,6 +354,17 @@ class Command(BaseCommand):
         if base_page:
             translated = base_page.get_translation_or_none(locale)
             if translated:
+                changed = False
+                if translated.slug != slug:
+                    translated.slug = slug
+                    changed = True
+                if translated.title != title:
+                    translated.title = title
+                    changed = True
+                if changed:
+                    translated.save()
+                    if publish:
+                        translated.save_revision().publish()
                 self.remember_page(page_key, locale, translated)
                 return self.apply_publish_state(translated, publish)
 
@@ -318,6 +383,159 @@ class Command(BaseCommand):
             return self.apply_publish_state(sibling, publish)
 
         p_obj = ObservationPage(
+            title=title,
+            slug=slug,
+            data_source=ds,
+            locale=locale,
+        )
+        parent.add_child(instance=p_obj)
+        self.apply_publish_state(p_obj, publish)
+
+        self.remember_page(page_key, locale, p_obj)
+        return p_obj
+
+    def create_indicatorcategorypage(self, parent, title, slug, locale, data_source_name, page_key, publish=True, default_category_level="", default_publication_year="", default_ranking_metric=""):
+        existing = self.get_page_from_memory(page_key, locale)
+        if existing:
+            return self.apply_publish_state(existing, publish)
+
+        ds = None
+        if data_source_name:
+            ds = DataSource.objects.filter(index_name=data_source_name).first()
+            if not ds:
+                self.stdout.write(self.style.ERROR(f"DataSource não encontrado para {page_key}: {data_source_name}"))
+                return None
+
+        base_page = self.get_page_from_memory(page_key)
+
+        if base_page:
+            translated = base_page.get_translation_or_none(locale)
+            if translated:
+                changed = False
+                if translated.slug != slug:
+                    translated.slug = slug
+                    changed = True
+                if translated.title != title:
+                    translated.title = title
+                    changed = True
+                if ds and getattr(translated, 'data_source_id', None) != ds.pk:
+                    translated.data_source = ds
+                    changed = True
+                if default_category_level and translated.default_category_level != default_category_level:
+                    translated.default_category_level = default_category_level
+                    changed = True
+                if default_publication_year and translated.default_publication_year != default_publication_year:
+                    translated.default_publication_year = default_publication_year
+                    changed = True
+                if default_ranking_metric and translated.default_ranking_metric != default_ranking_metric:
+                    translated.default_ranking_metric = default_ranking_metric
+                    changed = True
+                if changed:
+                    translated.save()
+                    if publish:
+                        translated.save_revision().publish()
+                self.remember_page(page_key, locale, translated)
+                return self.apply_publish_state(translated, publish)
+
+            p_obj = base_page.copy_for_translation(locale)
+            p_obj.title = title
+            p_obj.slug = slug
+            p_obj.data_source = ds
+            p_obj.default_category_level = default_category_level
+            p_obj.default_publication_year = default_publication_year
+            p_obj.default_ranking_metric = default_ranking_metric
+            self.apply_publish_state(p_obj, publish)
+
+            self.remember_page(page_key, locale, p_obj)
+            return p_obj
+
+        sibling = parent.get_children().specific().filter(locale=locale, slug=slug).first()
+        if sibling:
+            changed = False
+            if ds and getattr(sibling, 'data_source_id', None) != ds.pk:
+                sibling.data_source = ds
+                changed = True
+            if default_category_level and sibling.default_category_level != default_category_level:
+                sibling.default_category_level = default_category_level
+                changed = True
+            if default_publication_year and sibling.default_publication_year != default_publication_year:
+                sibling.default_publication_year = default_publication_year
+                changed = True
+            if default_ranking_metric and sibling.default_ranking_metric != default_ranking_metric:
+                sibling.default_ranking_metric = default_ranking_metric
+                changed = True
+            if changed:
+                sibling.save()
+            self.remember_page(page_key, locale, sibling)
+            return self.apply_publish_state(sibling, publish)
+
+        p_obj = IndicatorByCategoryPage(
+            title=title,
+            slug=slug,
+            data_source=ds,
+            locale=locale,
+            default_category_level=default_category_level,
+            default_publication_year=default_publication_year,
+            default_ranking_metric=default_ranking_metric,
+        )
+        parent.add_child(instance=p_obj)
+        self.apply_publish_state(p_obj, publish)
+
+        self.remember_page(page_key, locale, p_obj)
+        return p_obj
+
+    def create_indicatorglobalpage(self, parent, title, slug, locale, data_source_name, page_key, publish=True):
+        existing = self.get_page_from_memory(page_key, locale)
+        if existing:
+            return self.apply_publish_state(existing, publish)
+
+        ds = None
+        if data_source_name:
+            ds = DataSource.objects.filter(index_name=data_source_name).first()
+            if not ds:
+                self.stdout.write(self.style.ERROR(f"DataSource não encontrado para {page_key}: {data_source_name}"))
+                return None
+
+        base_page = self.get_page_from_memory(page_key)
+
+        if base_page:
+            translated = base_page.get_translation_or_none(locale)
+            if translated:
+                changed = False
+                if translated.slug != slug:
+                    translated.slug = slug
+                    changed = True
+                if translated.title != title:
+                    translated.title = title
+                    changed = True
+                if ds and getattr(translated, 'data_source_id', None) != ds.pk:
+                    translated.data_source = ds
+                    changed = True
+                if changed:
+                    translated.save()
+                    if publish:
+                        translated.save_revision().publish()
+                self.remember_page(page_key, locale, translated)
+                return self.apply_publish_state(translated, publish)
+
+            p_obj = base_page.copy_for_translation(locale)
+            p_obj.title = title
+            p_obj.slug = slug
+            p_obj.data_source = ds
+            self.apply_publish_state(p_obj, publish)
+
+            self.remember_page(page_key, locale, p_obj)
+            return p_obj
+
+        sibling = parent.get_children().specific().filter(locale=locale, slug=slug).first()
+        if sibling:
+            if ds and getattr(sibling, 'data_source_id', None) != ds.pk:
+                sibling.data_source = ds
+                sibling.save()
+            self.remember_page(page_key, locale, sibling)
+            return self.apply_publish_state(sibling, publish)
+
+        p_obj = IndicatorGlobalPage(
             title=title,
             slug=slug,
             data_source=ds,
