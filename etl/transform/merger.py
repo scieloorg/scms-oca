@@ -1,8 +1,8 @@
 import logging
 
 from etl.documents import SilverDocument
-from etl.transform.normalizers import as_list, normalize_name, scalar_or_list, unique
-from etl.defaults import DocumentRules
+from etl.transform.normalizers import normalize_author_name
+from etl.transform.utils import as_list, scalar_or_list, unique
 
 logger = logging.getLogger(__name__)
 
