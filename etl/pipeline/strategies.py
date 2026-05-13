@@ -4,6 +4,7 @@ from etl.pipeline.defaults import (
     article_rules,
     book_chapter_rules,
     book_rules,
+    preprint_rules,
 )
 from etl.pipeline.merger import merge
 from etl.pipeline.standardizer import BookStandardizer, DefaultStandardizer
@@ -49,6 +50,7 @@ class Strategy:
 
 _STRATEGIES: dict[str, Strategy] = {
     "article": Strategy(article_rules, DefaultStandardizer, merge),
+    "preprint": Strategy(preprint_rules, DefaultStandardizer, merge),
     "book": Strategy(book_rules, BookStandardizer, merge),
     "book-chapter": Strategy(book_chapter_rules, BookStandardizer, merge),
 }

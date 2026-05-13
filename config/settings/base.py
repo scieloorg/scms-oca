@@ -492,11 +492,13 @@ ETL_DEFAULT_BATCH_SIZE = env.int("ETL_DEFAULT_BATCH_SIZE", 1000)
 # ETL — Bronze Index Names
 ETL_BRONZE_SCIELO_ARTICLES = env.str("ETL_BRONZE_SCIELO_ARTICLES", "bronze_scielo_articles-000001")
 ETL_BRONZE_SCIELO_BOOKS = env.str("ETL_BRONZE_SCIELO_BOOKS", "bronze_scielo_books")
+ETL_BRONZE_SCIELO_PREPRINT = env.str("ETL_BRONZE_SCIELO_PREPRINT", "bronze_scielo_preprint")
 ETL_RAW_OPENALEX_WORKS = env.str("ETL_RAW_OPENALEX_WORKS", "raw_openalex_works")
 
 # ETL — Silver Index Patterns
 ETL_SILVER_ARTICLE_PATTERN = env.str("ETL_SILVER_ARTICLE_PATTERN", "silver_article_{year}")
 ETL_SILVER_BOOK = env.str("ETL_SILVER_BOOK", "silver_book")
+ETL_SILVER_PREPRINT = env.str("ETL_SILVER_PREPRINT", "silver_preprint")
 
 # OpenSearch Raw Index Names
 OS_INDEX_RAW_PREPRINT = env.str("OS_INDEX_RAW_PREPRINT", "raw_scielo_preprint")

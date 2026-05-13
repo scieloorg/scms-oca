@@ -40,6 +40,12 @@ class PipelineTargetMatchTests(SimpleTestCase):
 
 
 class PipelineTargetDocumentTypeTests(SimpleTestCase):
+    def test_preprint(self):
+        result = get_pipeline_target("bronze_scielo_preprint").document_type_for(
+            {"type": "research-article"}
+        )
+        self.assertEqual(result, "preprint")
+
     def test_book(self):
         result = get_pipeline_target("bronze_scielo_books").document_type_for({"type": "book"})
         self.assertEqual(result, "book")
