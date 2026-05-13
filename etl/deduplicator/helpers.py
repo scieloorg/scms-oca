@@ -1,34 +1,32 @@
 import difflib
 from typing import Any, Dict, List
 
-from etl.defaults import DocumentRules
-from etl.strategies import get_strategy
+from etl.transform.normalizers import normalize_document_type_for_etl
 from etl.transform.extractors import extract_doi, extract_scielo_id
 
 
-def rules_for_doc(doc: Dict[str, Any], fallback_rules: DocumentRules) -> DocumentRules:
+def _matches_rules_document_type(doc: Dict[str, Any], rules: dict) -> bool:
     raw_type = doc.get("type") or doc.get("document_type")
     if not raw_type:
-        return fallback_rules
-    return get_strategy(str(raw_type)).rules
+        return True
+    return normalize_document_type_for_etl(str(raw_type)) == rules["document_type"]
 
 
-def can_compare(left: Dict[str, Any], right: Dict[str, Any], fallback_rules: DocumentRules) -> bool:
-    return (
-        rules_for_doc(left, fallback_rules).document_type
-        == rules_for_doc(right, fallback_rules).document_type
+def can_compare(left: Dict[str, Any], right: Dict[str, Any], fallback_rules: dict) -> bool:
+    return _matches_rules_document_type(left, fallback_rules) and _matches_rules_document_type(
+        right,
+        fallback_rules,
     )
 
 
-def rules_for_pair(left: Dict[str, Any], right: Dict[str, Any], fallback_rules: DocumentRules) -> DocumentRules:
-    left_rules = rules_for_doc(left, fallback_rules)
-    right_rules = rules_for_doc(right, fallback_rules)
-    if left_rules.document_type != right_rules.document_type:
+def rules_for_pair(left: Dict[str, Any], right: Dict[str, Any], fallback_rules: dict) -> dict:
+    if not can_compare(left, right, fallback_rules):
         raise ValueError(
             "Cannot apply one deduplication rule to different document types: "
-            f"{left_rules.document_type}, {right_rules.document_type}"
+            f"{left.get('type') or left.get('document_type')}, "
+            f"{right.get('type') or right.get('document_type')}"
         )
-    return left_rules
+    return fallback_rules
 
 
 def calculate_similarity(text1: str, text2: str) -> float:
