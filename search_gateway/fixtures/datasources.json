@@ -1879,5 +1879,382 @@
         }
       }
     }
+  },
+  {
+    "model": "search_gateway.datasource",
+    "pk": 4,
+    "fields": {
+      "index_name": "journal_metrics_global_*",
+      "display_name": "Journal Global Metrics",
+      "source_fields": [],
+      "field_settings": {
+        "fields": {
+          "journal_id": {
+            "kind": "index",
+            "index_field_name": "journal_id",
+            "filter": {
+              "size": 1,
+              "order": { "_key": "asc" }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": true,
+              "label": "Journal ID",
+              "hidden_in_form": true,
+              "group": "journal_identity",
+              "group_order": 20
+            }
+          },
+          "journal_title": {
+            "kind": "index",
+            "index_field_name": "journal_title",
+            "filter": {
+              "size": 1,
+              "order": { "_key": "asc" },
+              "use": false
+            },
+            "settings": {
+              "widget": "lookup",
+              "multiple_selection": false,
+              "label": "Journal",
+              "group": "journal_identity",
+              "group_order": 20
+            },
+            "lookup": {
+              "index_name": "lookup_source_v2",
+              "search_field": "label_search",
+              "sort_field": "size",
+              "source_value_field": "label",
+              "source_label_field": "label",
+              "size": 10
+            }
+          },
+          "journal_issn": {
+            "kind": "index",
+            "index_field_name": "journal_issn",
+            "filter": {
+              "size": 1,
+              "order": { "_key": "asc" },
+              "use": false
+            },
+            "settings": {
+              "widget": "lookup",
+              "multiple_selection": false,
+              "label": "ISSN",
+              "group": "journal_identity",
+              "group_order": 20
+            },
+            "lookup": {
+              "index_name": "lookup_source_v2",
+              "search_field": "label_search",
+              "sort_field": "size",
+              "source_value_field": "source_issn_l",
+              "source_label_field": "label",
+              "size": 10
+            }
+          },
+          "country": {
+            "kind": "index",
+            "index_field_name": "journal_country",
+            "filter": {
+              "size": 500,
+              "order": { "_key": "asc" }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Country",
+              "group": "journal_identity",
+              "group_order": 20
+            }
+          },
+          "publisher_name": {
+            "kind": "index",
+            "index_field_name": "journal_publisher",
+            "filter": {
+              "size": 1,
+              "order": { "_key": "asc" },
+              "use": false
+            },
+            "settings": {
+              "widget": "lookup",
+              "multiple_selection": false,
+              "label": "Publisher",
+              "group": "journal_identity",
+              "group_order": 20
+            },
+            "lookup": {
+              "index_name": "lookup_publisher_v2",
+              "search_field": "label_search",
+              "sort_field": "size",
+              "value_field": "value",
+              "label_field": "label",
+              "source_value_field": "value",
+              "source_label_field": "label",
+              "size": 10
+            }
+          },
+          "collection": {
+            "kind": "index",
+            "index_field_name": "scielo_collection",
+            "filter": {
+              "size": 100,
+              "order": { "_key": "asc" }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "SciELO Collection",
+              "group": "journal_identity",
+              "group_order": 20
+            }
+          },
+          "publication_year": {
+            "kind": "index",
+            "index_field_name": "publication_year",
+            "filter": {
+              "size": 200,
+              "order": { "_key": "desc" }
+            },
+            "settings": {
+              "widget": "year",
+              "multiple_selection": false,
+              "label": "Publication Year",
+              "input_type": "text",
+              "default_value": "2020",
+              "group": "ranking",
+              "group_order": 0
+            }
+          },
+          "is_scielo": {
+            "kind": "index",
+            "index_field_name": "is_scielo_global",
+            "filter": {
+              "transform": { "type": "boolean" },
+              "size": 2,
+              "order": { "_key": "asc" }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Is SciELO",
+              "display_transform": "boolean",
+              "group": "indexing_coverage",
+              "group_order": 30
+            }
+          },
+          "is_scopus": {
+            "kind": "index",
+            "index_field_name": "is_scopus_global",
+            "filter": {
+              "transform": { "type": "boolean" },
+              "size": 2,
+              "order": { "_key": "asc" }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Is Scopus",
+              "display_transform": "boolean",
+              "group": "indexing_coverage",
+              "group_order": 30
+            }
+          },
+          "is_wos": {
+            "kind": "index",
+            "index_field_name": "is_wos_global",
+            "filter": {
+              "transform": { "type": "boolean" },
+              "size": 2,
+              "order": { "_key": "asc" }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Is WoS",
+              "display_transform": "boolean",
+              "group": "indexing_coverage",
+              "group_order": 30
+            }
+          },
+          "is_doaj": {
+            "kind": "index",
+            "index_field_name": "is_doaj_global",
+            "filter": {
+              "transform": { "type": "boolean" },
+              "size": 2,
+              "order": { "_key": "asc" }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Is DOAJ",
+              "display_transform": "boolean",
+              "group": "indexing_coverage",
+              "group_order": 30
+            }
+          },
+          "is_journal_oa": {
+            "kind": "index",
+            "index_field_name": "is_journal_oa_global",
+            "filter": {
+              "transform": { "type": "boolean" },
+              "size": 2,
+              "order": { "_key": "asc" }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Is Open Access",
+              "display_transform": "boolean",
+              "group": "publishing_model",
+              "group_order": 25
+            }
+          },
+          "is_journal_multilingual": {
+            "kind": "index",
+            "index_field_name": "is_journal_multilingual_global",
+            "filter": {
+              "transform": { "type": "boolean" },
+              "size": 2,
+              "order": { "_key": "asc" }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Is Multilingual",
+              "display_transform": "boolean",
+              "group": "publishing_model",
+              "group_order": 25
+            }
+          },
+          "global_field_normalized_impact": {
+            "kind": "index",
+            "index_field_name": "global_field_normalized_impact",
+            "filter": { "use": false, "size": 1, "order": { "_key": "desc" } },
+            "settings": { "widget": "select", "multiple_selection": true }
+          },
+          "global_field_normalized_impact_median": {
+            "kind": "index",
+            "index_field_name": "global_field_normalized_impact_median",
+            "filter": { "use": false, "size": 1, "order": { "_key": "desc" } },
+            "settings": { "widget": "select", "multiple_selection": true }
+          },
+          "global_consistency_score": {
+            "kind": "index",
+            "index_field_name": "global_consistency_score",
+            "filter": { "use": false, "size": 1, "order": { "_key": "desc" } },
+            "settings": { "widget": "select", "multiple_selection": true }
+          },
+          "global_total_publications": {
+            "kind": "index",
+            "index_field_name": "global_total_publications",
+            "filter": { "use": false, "size": 1, "order": { "_key": "desc" } },
+            "settings": { "widget": "select", "multiple_selection": true }
+          },
+          "global_total_citations": {
+            "kind": "index",
+            "index_field_name": "global_total_citations",
+            "filter": { "use": false, "size": 1, "order": { "_key": "desc" } },
+            "settings": { "widget": "select", "multiple_selection": true }
+          },
+          "global_num_observations": {
+            "kind": "index",
+            "index_field_name": "global_num_observations",
+            "filter": { "use": false, "size": 1, "order": { "_key": "desc" } },
+            "settings": { "widget": "select", "multiple_selection": true }
+          },
+          "ranking_metric": {
+            "kind": "control",
+            "index_field_name": "",
+            "filter": {},
+            "settings": {
+              "label": "Ranking metric",
+              "widget": "select",
+              "multiple_selection": false,
+              "static_options": [
+                {
+                  "value": "global_field_normalized_impact",
+                  "label": "Global Normalized Impact (Total)",
+                  "group": "Impact"
+                },
+                {
+                  "value": "global_field_normalized_impact_median",
+                  "label": "Global Normalized Impact (Median)",
+                  "group": "Impact"
+                },
+                {
+                  "value": "global_consistency_score",
+                  "label": "Consistency Score",
+                  "group": "Impact"
+                },
+                {
+                  "value": "global_total_publications",
+                  "label": "Total Publications",
+                  "group": "Publications"
+                },
+                {
+                  "value": "global_total_citations",
+                  "label": "Total Citations",
+                  "group": "Citations"
+                }
+              ],
+              "default_value": "global_field_normalized_impact",
+              "help_text": "Global Normalized Impact ranks journals by their field-normalized citation impact across all categories.",
+              "group": "ranking",
+              "group_order": 0
+            }
+          },
+          "limit": {
+            "kind": "control",
+            "index_field_name": "",
+            "filter": {},
+            "settings": {
+              "label": "Number of results",
+              "widget": "select",
+              "multiple_selection": false,
+              "static_options": [
+                { "value": "10",   "label": "10"   },
+                { "value": "25",   "label": "25"   },
+                { "value": "50",   "label": "50"   },
+                { "value": "100",  "label": "100"  },
+                { "value": "200",  "label": "200"  },
+                { "value": "500",  "label": "500"  },
+                { "value": "1000", "label": "1000" }
+              ],
+              "default_value": "100",
+              "group": "ranking",
+              "group_order": 0
+            }
+          }
+        },
+        "forms": {
+          "journal_metrics_global": {
+            "group_labels": {
+              "ranking": "Ranking",
+              "journal_identity": "Journal Identity",
+              "publishing_model": "Publishing Model",
+              "indexing_coverage": "Indexing / Coverage"
+            },
+            "panel_groups": ["ranking"],
+            "fields": [
+              "publication_year",
+              "ranking_metric",
+              "limit",
+              "country",
+              "publisher_name",
+              "collection",
+              "journal_title",
+              "is_journal_oa",
+              "is_journal_multilingual",
+              "is_scielo",
+              "is_scopus",
+              "is_wos",
+              "is_doaj"
+            ]
+          }
+        }
+      }
+    }
   }
 ]
