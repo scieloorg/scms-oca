@@ -2,6 +2,7 @@ import re
 import unicodedata
 
 import pycountry
+from django.conf import settings
 
 
 def normalize_doi(doi: str | None) -> str | None:
@@ -14,6 +15,14 @@ def normalize_doi(doi: str | None) -> str | None:
     normalized = re.sub(r"([0-9\-])([a-z]{2})$", r"\1", normalized)
 
     return normalized if re.match(r"^10\.\d{4,9}/\S+$", normalized) else None
+
+
+def normalize_document_type_for_etl(value: str | None) -> str:
+    if value in {None, ""}:
+        raise ValueError("document_type is required")
+    normalized = str(value).strip().lower().replace("_", "-")
+    aliases = getattr(settings, "ETL_DOCUMENT_TYPE_ALIAS", {}) or {}
+    return aliases.get(normalized, normalized)
 
 
 def normalize_isbn(isbn: str | None) -> str | None:
