@@ -4,7 +4,7 @@ import logging
 from collections import defaultdict
 from typing import Any, Dict, List
 
-from etl.transform.normalizers import stz_doi
+from etl.transform.normalizers import normalize_doi
 from etl.deduplicator.helpers import (
     calculate_similarity,
     can_compare,
@@ -14,9 +14,8 @@ from etl.transform.extractors import (
     extract_doi,
     extract_issns,
     extract_scielo_id,
-    get_normalized_titles,
+    extract_titles,
 )
-from etl.defaults import DocumentRules
 
 logger = logging.getLogger(__name__)
 
@@ -42,7 +41,7 @@ class UnionFind:
 
 class SciELODeduplicator:
 
-    def __init__(self, rules: DocumentRules):
+    def __init__(self, rules: dict):
         self.rules = rules
 
     def find_duplicates(self, articles: List[Dict[str, Any]]) -> Dict[int, List[Dict[str, Any]]]:
@@ -56,21 +55,21 @@ class SciELODeduplicator:
         pid_to_indices: Dict[str, List[int]] = defaultdict(list)
 
         for idx, article in enumerate(articles):
-            if doi_stz := stz_doi(extract_doi(article)):
+            if doi_stz := normalize_doi(extract_doi(article)):
                 doi_to_indices[doi_stz].append(idx)
             if pid := extract_scielo_id(article):
                 pid_to_indices[pid].append(idx)
 
-        if "doi" in self.rules.scielo_dedup_strategies:
+        if "doi" in self.rules["scielo_dedup_strategies"]:
             self._merge_by_doi(articles, doi_to_indices, uf)
-        if "pid" in self.rules.scielo_dedup_strategies:
+        if "pid" in self.rules["scielo_dedup_strategies"]:
             self._merge_by_pid(articles, pid_to_indices, uf)
-        if "fuzzy" in self.rules.scielo_dedup_strategies:
+        if "fuzzy" in self.rules["scielo_dedup_strategies"]:
             self._merge_by_title_fuzzy(
                 articles,
                 uf,
-                min_similarity=self.rules.fuzzy_min_similarity,
-                year_tolerance=self.rules.fuzzy_year_tolerance,
+                min_similarity=self.rules["fuzzy_min_similarity"],
+                year_tolerance=self.rules["fuzzy_year_tolerance"],
             )
 
         components: Dict[int, List[Dict[str, Any]]] = defaultdict(list)
@@ -103,9 +102,9 @@ class SciELODeduplicator:
                         continue
 
                     rules = rules_for_pair(articles[idx_i], articles[idx_j], self.rules)
-                    titles_i = set(get_normalized_titles(articles[idx_i]))
-                    titles_j = set(get_normalized_titles(articles[idx_j]))
-                    if (titles_i & titles_j) or not rules.doi_requires_title_overlap:
+                    titles_i = set(extract_titles(articles[idx_i]))
+                    titles_j = set(extract_titles(articles[idx_j]))
+                    if (titles_i & titles_j) or not rules["doi_requires_title_overlap"]:
                         uf.union(idx_i, idx_j)
 
     def _merge_by_pid(
@@ -130,7 +129,7 @@ class SciELODeduplicator:
 
                     rules = rules_for_pair(art_i, art_j, self.rules)
                     year_match = True
-                    if rules.pid_requires_year_match:
+                    if rules["pid_requires_year_match"]:
                         try:
                             year_i = int(art_i.get("publication_year", 0) or 0)
                             year_j = int(art_j.get("publication_year", 0) or 0)
@@ -139,7 +138,7 @@ class SciELODeduplicator:
                             year_match = False
 
                     same_source = True
-                    if rules.pid_requires_source_match:
+                    if rules["pid_requires_source_match"]:
                         issns_i = set(extract_issns(art_i))
                         issns_j = set(extract_issns(art_j))
                         same_source = bool(
@@ -150,9 +149,9 @@ class SciELODeduplicator:
                             )
                         )
 
-                    titles_i = set(get_normalized_titles(art_i))
-                    titles_j = set(get_normalized_titles(art_j))
-                    title_match = bool(titles_i & titles_j) or not rules.pid_requires_title_overlap
+                    titles_i = set(extract_titles(art_i))
+                    titles_j = set(extract_titles(art_j))
+                    title_match = bool(titles_i & titles_j) or not rules["pid_requires_title_overlap"]
 
                     if year_match and same_source and title_match:
                         uf.union(idx_i, idx_j)
@@ -193,15 +192,15 @@ class SciELODeduplicator:
                         continue
                     rules = rules_for_pair(art_i, art_j, self.rules)
 
-                    if rules.fuzzy_requires_source_match:
+                    if rules["fuzzy_requires_source_match"]:
                         issns_i = set(extract_issns(art_i))
                         issns_j = set(extract_issns(art_j))
                         if not (issns_i & issns_j):
                             continue
 
                     best_similarity = 0.0
-                    for t1 in get_normalized_titles(art_i):
-                        for t2 in get_normalized_titles(art_j):
+                    for t1 in extract_titles(art_i):
+                        for t2 in extract_titles(art_j):
                             best_similarity = max(best_similarity, calculate_similarity(t1, t2))
 
                     try:
