@@ -167,12 +167,33 @@ def build_lookup_indices(
     progress=None,
 ) -> dict[str, int]:
 
-    def _index_name(lookup_key, builder):
-        return config.lookup_index_overrides.get(lookup_key, builder.default_index_name)
+    def _resolve_index_names(builders):
+        index_names = {
+            lookup_key: config.lookup_index_overrides.get(
+                lookup_key,
+                builder.default_index_name,
+            )
+            for lookup_key, builder in builders.items()
+        }
+        seen: dict[str, str] = {}
+        for lookup_key, index_name in index_names.items():
+            existing_lookup_key = seen.get(index_name)
+            if existing_lookup_key:
+                raise ValueError(
+                    f"Lookups '{existing_lookup_key}' and '{lookup_key}' target the same "
+                    f"index '{index_name}'. Please use different index names."
+                )
+            seen[index_name] = lookup_key
+        return index_names
 
-    def _ensure_index(index_name, mapping):
-        if not client.indices.exists(index=index_name):
-            client.indices.create(index=index_name, body=mapping)
+    def _validate_target_indices(index_names):
+        for lookup_key, index_name in index_names.items():
+            if client.indices.exists(index=index_name):
+                raise ValueError(
+                    f"Target lookup index '{index_name}' already exists for lookup "
+                    f"'{lookup_key}'. Use --lookup-index {lookup_key}=<new_index> "
+                    "or delete the existing index first."
+                )
 
     def _collect(builders):
         source_fields = sorted(
