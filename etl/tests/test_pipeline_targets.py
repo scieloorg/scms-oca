@@ -10,7 +10,7 @@ class PipelineTargetTests(SimpleTestCase):
     def test_resolve_all_targets(self):
         self.assertEqual(
             resolve_target_names("all"),
-            ["article"],
+            ["article", "book"],
         )
 
     @override_settings(
