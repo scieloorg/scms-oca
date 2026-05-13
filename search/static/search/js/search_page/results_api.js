@@ -163,6 +163,10 @@
 
         this.ctx.searchForm.clearAdvancedSearchError();
         this.renderResultsFragments(data);
+        if (data.current_page) {
+          state.currentPage = parseInt(data.current_page, 10) || state.currentPage;
+          params.set('page', state.currentPage);
+        }
         state.syncCitationDocuments(data.citation_documents);
         this.ctx.resultsUi.setupResultsUi();
 

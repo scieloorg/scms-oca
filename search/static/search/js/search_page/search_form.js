@@ -216,12 +216,23 @@
       this.ctx.state.searchClauses = [];
       this.clearAdvancedSearchError();
 
-      this.advancedInput.value = '';
+      if (this.advancedInput) {
+        this.advancedInput.value = '';
+      }
 
       const firstRow = document.querySelector('.advanced-search-row[data-row-index="0"]');
       this.setRowValues(firstRow, { field: 'all', text: '' });
 
       this.extraRows.innerHTML = '';
+
+      const sidebarForm = this.ctx.sidebar.sidebarForm;
+      if (sidebarForm) {
+        if (global.SearchGatewayFilterForm) {
+          global.SearchGatewayFilterForm.resetForm(sidebarForm);
+        } else {
+          sidebarForm.reset();
+        }
+      }
 
       this.ctx.resultsApi.applyFiltersAjax();
     }

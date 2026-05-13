@@ -47,6 +47,7 @@
         initialAdvancedSearchQuery: '{{ advanced_search_query|escapejs }}',
         initialAdvancedSearchError: '{{ advanced_search_error|escapejs }}',
         initialSearchClauses: JSON.parse(document.getElementById('search-clauses-data').textContent),
+        initialCurrentPage: {{ results_data.current_page|default:1 }},
         dataSourceName: '{{ index_name|escapejs }}',
         csrfToken: '{{ csrf_token }}',
         citationStylesEndpoint: '{% url "search:citation_csl_styles" %}',

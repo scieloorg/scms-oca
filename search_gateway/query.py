@@ -221,7 +221,7 @@ def _build_advanced_query(query_text):
 
 def _build_clause_query(field_key, query_text):
     """Build a simple text clause for a given field without advanced syntax parsing."""
-    fields = SEARCH_FIELD_MAPPING.get(field_key, ["title_search", "ids_search"])
+    fields = SEARCH_FIELD_MAPPING.get(field_key, sum(SEARCH_FIELD_MAPPING.values(), []))
     return {
         "multi_match": {
             "query": query_text,
@@ -410,7 +410,7 @@ def build_bool_query_from_search_params(
                 {
                     "multi_match": {
                         "query": query_text,
-                        "fields": ["title_search", "ids_search"],
+                        "fields": sum(SEARCH_FIELD_MAPPING.values(), []),
                         "operator": "and",
                     },
                 }

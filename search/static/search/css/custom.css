@@ -649,32 +649,6 @@
   outline: none;
 }
 
-.results-controls__limit-options {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-}
-
-.results-controls__limit-option {
-  min-width: 2.35rem;
-  min-height: 2.15rem;
-  padding: 0.28rem 0.62rem;
-  border: 1px solid transparent;
-  border-radius: 4px;
-  background: transparent;
-  color: #607793;
-  font-size: 0.8rem;
-  font-weight: 800;
-  line-height: 1;
-}
-
-.results-controls__limit-option--active {
-  border-color: #2f4ea1;
-  background: #2f4ea1;
-  color: #ffffff;
-  box-shadow: 0 6px 14px rgba(47, 78, 161, 0.12);
-}
-
 .results-controls__selected {
   display: inline-flex;
   align-items: center;
@@ -695,7 +669,7 @@
 .results-pagination {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   gap: 1rem;
   margin-top: 1.15rem;
   margin-bottom: 2rem;
@@ -706,15 +680,17 @@
 .results-pagination__nav {
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
-  min-height: 2rem;
-  padding: 0.32rem 0.72rem;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
   border: 1px solid #dbe5f7;
   border-radius: 4px;
   background: #ffffff;
   color: #2f4ea1;
-  font-size: 0.76rem;
+  font-size: 0.95rem;
   font-weight: 800;
+  line-height: 1;
 }
 
 .results-pagination__nav--disabled {
@@ -751,16 +727,8 @@
   color: #ffffff;
 }
 
-.results-pagination__status {
-  color: #8ea0b8;
-  font-size: 0.74rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-.results-pagination__nav-arrow {
-  line-height: 1;
+.results-pagination__page--disabled {
+  opacity: 0.45;
 }
 
 .results-empty {
@@ -1125,6 +1093,13 @@
   color: #52647f;
   font-size: 0.8rem;
   line-height: 1.4;
+}
+
+.result-card__author-block {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0;
 }
 
 .result-card__author-separator {
@@ -1531,10 +1506,6 @@
   .results-controls__sort,
   .results-controls__limit {
     justify-content: space-between;
-  }
-
-  .results-controls__limit-options {
-    flex-wrap: wrap;
   }
 
   .results-controls__selected {

@@ -352,8 +352,8 @@
   position: relative;
   width: 1rem;
   height: 1rem;
-  border: 1px solid #d2dde8;
-  border-radius: 999px;
+  border: 1px solid #2f4ea1;
+  border-radius: 1rem;
   background: #ffffff;
   flex-shrink: 0;
 }
@@ -364,7 +364,7 @@
   position: absolute;
   left: 50%;
   top: 50%;
-  background: #a0b0c4;
+  background: #2f4ea1;
   transform: translate(-50%, -50%);
 }
 

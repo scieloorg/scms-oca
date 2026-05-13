@@ -29,7 +29,14 @@
 
       this.currentSort = urlParams.get('sort') || 'desc';
       this.currentLimit = urlParams.get('limit') || '25';
-      this.currentPage = parseInt(urlParams.get('page') || '1', 10) || 1;
+      const requestedPage = parseInt(urlParams.get('page') || '1', 10) || 1;
+      this.currentPage = parseInt(this.config.initialCurrentPage || requestedPage, 10) || 1;
+      if (this.currentPage !== requestedPage) {
+        urlParams.set('page', this.currentPage);
+        const url = new URL(global.location.href);
+        url.search = urlParams.toString();
+        global.history.replaceState({}, '', url.toString());
+      }
       this.currentDisplayMode =
         global.localStorage.getItem('searchPageDisplayMode') || 'grid';
 

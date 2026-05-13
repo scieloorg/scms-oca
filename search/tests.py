@@ -13,7 +13,67 @@ from .csl_json import (
     documents_payload_to_csl_json,
     normalize_doi,
 )
+from .models import SearchPage
 from .ris_export import render_ris_lines
+
+
+class SearchPaginationTests(SimpleTestCase):
+    def page_labels(self, page, total_pages):
+        results = SearchPage.current_pagination(
+            {"search_results": [{}], "total_results": total_pages * 25},
+            page=page,
+            page_size=25,
+        )
+        labels = []
+        if results["page_numbers"] and results["page_numbers"][0] > 1:
+            labels.append("<<")
+        labels.append("<")
+        labels.extend(str(n) for n in results["page_numbers"])
+        labels.extend([">", ">>"])
+        return labels
+
+    def test_pagination_shows_first_page_shortcut(self):
+        self.assertEqual(
+            self.page_labels(page=12, total_pages=24),
+            ["<<", "<", "10", "11", "12", "13", "14", ">", ">>"],
+        )
+
+    def test_pagination_shows_left_shortcut_near_start(self):
+        self.assertEqual(
+            self.page_labels(page=5, total_pages=24),
+            ["<<", "<", "3", "4", "5", "6", "7", ">", ">>"],
+        )
+        self.assertEqual(
+            self.page_labels(page=6, total_pages=24),
+            ["<<", "<", "4", "5", "6", "7", "8", ">", ">>"],
+        )
+
+    def test_pagination_shows_last_page_shortcut(self):
+        self.assertEqual(
+            self.page_labels(page=19, total_pages=24),
+            ["<<", "<", "17", "18", "19", "20", "21", ">", ">>"],
+        )
+        self.assertEqual(
+            self.page_labels(page=20, total_pages=24),
+            ["<<", "<", "18", "19", "20", "21", "22", ">", ">>"],
+        )
+
+    def test_pagination_is_limited_to_opensearch_result_window(self):
+        results = SearchPage.current_pagination(
+            {"search_results": [{}], "total_results": 3090622 * 25},
+            page=400,
+            page_size=25,
+        )
+        self.assertEqual(results["total_pages"], 400)
+        self.assertFalse(results["has_next"])
+        self.assertEqual(
+            results["page_numbers"],
+            [396, 397, 398, 399, 400],
+        )
+        self.assertEqual(
+            self.page_labels(page=400, total_pages=3090622),
+            ["<<", "<", "396", "397", "398", "399", "400", ">", ">>"],
+        )
 
 
 class NormalizeDoiTests(SimpleTestCase):
