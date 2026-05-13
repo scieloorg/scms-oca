@@ -21,6 +21,201 @@ class EtlResult(models.TextChoices):
     ERROR = "error", "Error"
 
 
+class EtlPipelineConfigQuerySet(models.QuerySet):
+    def enabled(self):
+        return self.filter(enabled=True).order_by("id")
+
+
+class EtlPipelineConfigManager(models.Manager.from_queryset(EtlPipelineConfigQuerySet)):
+    def enabled(self):
+        return self.get_queryset().enabled()
+
+    def get_for_source(self, source_index: str, source_payload: dict | None = None):
+        config = self.select_for_source(source_index, source_payload)
+        if config:
+            return config
+        raise ValueError(f"No enabled ETL pipeline config for source index: {source_index}")
+
+    def select_for_source(self, source_index: str, source_payload: dict | None = None):
+        configs = [
+            config
+            for config in self.enabled()
+            if config.matches_input_index(source_index)
+        ]
+        if not configs:
+            return None
+
+        payload_type = self._source_payload_document_type(source_payload)
+        if payload_type:
+            typed_configs = [
+                config
+                for config in configs
+                if normalize_document_type_for_etl(config.default_document_type) == payload_type
+            ]
+            if len(typed_configs) == 1:
+                return typed_configs[0]
+            if len(typed_configs) > 1:
+                raise ValueError(
+                    f"Multiple enabled ETL pipeline configs for source index "
+                    f"{source_index} and document type {payload_type}"
+                )
+
+        if len(configs) == 1:
+            return configs[0]
+
+        raise ValueError(
+            f"Multiple enabled ETL pipeline configs for source index {source_index}; "
+            "source payload type is required"
+        )
+
+    def resolve_name_for_source(self, source_index: str, source_payload: dict | None = None) -> str | None:
+        config = self.select_for_source(source_index, source_payload)
+        return config.name if config else None
+
+    def get_enabled_by_name(self, name: str):
+        try:
+            return self.enabled().get(name=name)
+        except self.model.DoesNotExist as exc:
+            raise ValueError(f"No enabled ETL pipeline config named: {name}") from exc
+
+    def resolve_names(self, target_type: str) -> list[str]:
+        if target_type == "all":
+            return list(self.enabled().values_list("name", flat=True))
+        if not self.enabled().filter(name=target_type).exists():
+            raise ValueError(f"Unknown or disabled ETL target type: {target_type}")
+        return [target_type]
+
+    def available_names(self) -> list[str]:
+        return list(self.enabled().values_list("name", flat=True))
+
+    @staticmethod
+    def _source_payload_document_type(source_payload: dict | None) -> str | None:
+        if not source_payload:
+            return None
+        payload = clean_source_payload(source_payload)
+        raw_type = payload.get("type") or payload.get("document_type")
+        if not raw_type:
+            return None
+        return normalize_document_type_for_etl(raw_type)
+
+
+class EtlPipelineConfig(models.Model):
+    name = models.CharField(max_length=50, unique=True)
+    enabled = models.BooleanField(default=True)
+    input_index = models.CharField(max_length=255, db_index=True)
+    silver_index_pattern = models.CharField(max_length=255)
+    input_document_kind = models.CharField(
+        max_length=20,
+        choices=INPUT_DOCUMENT_KIND_CHOICES,
+    )
+    default_document_type = models.CharField(
+        max_length=30,
+        choices=DOCUMENT_TYPE_CHOICES,
+    )
+    infer_document_type_from_payload = models.BooleanField(default=False)
+    deduplicate_scielo = models.BooleanField(default=False)
+    openalex_index = models.CharField(
+        max_length=255,
+        default=settings.ETL_INPUT_OPENALEX_WORKS,
+    )
+    rules = models.JSONField(default=dict, blank=True)
+
+    objects = EtlPipelineConfigManager()
+
+    panels = [
+        FieldPanel("name"),
+        FieldPanel("enabled"),
+        FieldPanel("input_index"),
+        FieldPanel("silver_index_pattern"),
+        FieldPanel("input_document_kind"),
+        FieldPanel("default_document_type"),
+        FieldPanel("infer_document_type_from_payload"),
+        FieldPanel("deduplicate_scielo"),
+        FieldPanel("openalex_index"),
+        FieldPanel(
+            "rules",
+            widget=JSONEditorWidget(options={"mode": "code", "modes": ["code", "tree"]}),
+        ),
+    ]
+
+    class Meta:
+        verbose_name = _("ETL Pipeline Config")
+        verbose_name_plural = _("ETL Pipeline Configs")
+
+    def __str__(self):
+        return self.name
+
+    def matches_input_index(self, source_index: str) -> bool:
+        return fnmatch(source_index, self.input_index)
+
+    def document_type_for_payload(self, source_payload: dict) -> str:
+        if not self.infer_document_type_from_payload:
+            return self.default_document_type
+
+        payload = clean_source_payload(source_payload)
+        raw_type = payload.get("type") or self.default_document_type
+        return normalize_document_type_for_etl(raw_type)
+
+    def openalex_index_for(self, override: str | None = None) -> str:
+        return override or self.openalex_index or settings.ETL_INPUT_OPENALEX_WORKS
+
+    def input_document_class(self):
+        from etl.documents import input_document_class_for_kind
+
+        try:
+            return input_document_class_for_kind(self.input_document_kind)
+        except ValueError as exc:
+            raise ValueError(
+                f"Invalid input_document_kind for ETL pipeline config '{self.name}': "
+                f"{self.input_document_kind}"
+            ) from exc
+
+    def clean(self):
+        super().clean()
+        self.default_document_type = normalize_document_type_for_etl(self.default_document_type)
+        self._validate_rules()
+
+    def _validate_rules(self):
+        rules = self.rules or {}
+        allowed_scielo = {"doi", "pid", "fuzzy"}
+        allowed_openalex = {"doi", "isbn", "title"}
+
+        unknown_scielo = set(rules.get("scielo_dedup_strategies", [])) - allowed_scielo
+        unknown_openalex = set(rules.get("openalex_match_strategies", [])) - allowed_openalex
+        errors = {}
+        if unknown_scielo:
+            errors["rules"] = [
+                f"Invalid scielo_dedup_strategies: {', '.join(sorted(unknown_scielo))}"
+            ]
+        if unknown_openalex:
+            errors.setdefault("rules", []).append(
+                f"Invalid openalex_match_strategies: {', '.join(sorted(unknown_openalex))}"
+            )
+        if errors:
+            raise ValidationError(errors)
+
+    def to_rules(self) -> dict:
+        self.clean()
+        rules = self.rules or {}
+        oa_val = rules.get("openalex_validation", {})
+        return {
+            "document_type": normalize_document_type_for_etl(self.default_document_type),
+            "scielo_dedup_strategies": list(rules.get("scielo_dedup_strategies", [])),
+            "openalex_match_strategies": list(rules.get("openalex_match_strategies", [])),
+            "doi_requires_title_overlap": rules.get("doi_requires_title_overlap", True),
+            "pid_requires_year_match": rules.get("pid_requires_year_match", True),
+            "pid_requires_source_match": rules.get("pid_requires_source_match", False),
+            "pid_requires_title_overlap": rules.get("pid_requires_title_overlap", True),
+            "fuzzy_min_similarity": rules.get("fuzzy_min_similarity", 0.85),
+            "fuzzy_year_tolerance": rules.get("fuzzy_year_tolerance", 1),
+            "fuzzy_requires_source_match": rules.get("fuzzy_requires_source_match", False),
+            "openalex_validation": {
+                **DEFAULT_OPENALEX_VALIDATION_RULES,
+                **oa_val,
+            },
+        }
+
+
 class EtlItemProcessQuerySet(models.QuerySet):
     def requeue_stale_processing(self, timeout_minutes: int = 30) -> int:
         stale_before = timezone.now() - timedelta(minutes=timeout_minutes)
