@@ -201,6 +201,9 @@ def build_lookup_indices(
         )
         query = {"_source": source_fields, "query": {"match_all": {}}}
         processed = 0
+        if progress:
+            progress(f"Scanning source index '{config.source_index}'...")
+
         for hit in scan(client, index=config.source_index, query=query, size=config.batch_size):
             source = hit.get("_source", {})
             processed += 1
@@ -210,6 +213,10 @@ def build_lookup_indices(
                 progress(f"Processed {processed:,} source documents...")
             if config.max_docs is not None and processed >= config.max_docs:
                 break
+
+        if progress:
+            progress(f"Finished scanning {processed:,} documents.")
+
         return processed
 
     def _bulk_index(index_name, actions):
