@@ -100,22 +100,23 @@ class LookupBuilder:
     ) -> dict[str, Any] | None:
         value = clean_text(value)
         label = clean_text(label)
-        is_new_value = value not in self.entries
 
         if not value or not label:
             return None
+
+        is_new_value = value not in self.entries
         if max_items is not None and is_new_value and len(self.entries) >= max_items:
             return None
 
-        entry = self.entries.setdefault(
-            value,
-            {
+        if is_new_value:
+            entry = {
                 "value": value,
                 "label": label,
                 "normalized_value": normalize_text(label),
-                "label_search": normalize_text(label),
-            },
-        )
+            }
+            self.entries[value] = entry
+        else:
+            entry = self.entries[value]
 
         for key, extra_value in extra.items():
             if isinstance(extra_value, set):
@@ -143,7 +144,6 @@ class LookupBuilder:
                     "value": entry["value"],
                     "label": entry["label"],
                     "normalized_value": entry["normalized_value"],
-                    "label_search": entry["label_search"],
                     "size": self.counts[value],
                 },
             }
