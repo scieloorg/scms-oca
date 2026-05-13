@@ -60,9 +60,30 @@ class EtlItemProcessQuerySet(models.QuerySet):
             .annotate(count=models.Count("id"))
             .values_list("document_type", "count")
         )
+        type_status_counts = {}
+        for row in (
+            self.values("document_type", "status")
+            .annotate(count=models.Count("id"))
+        ):
+            type_status_counts[(row["document_type"], row["status"])] = row["count"]
+        scielo_dedup_counts = dict(
+            self.filter(has_scielo_dedup=True)
+            .values("document_type")
+            .annotate(count=models.Count("id"))
+            .values_list("document_type", "count")
+        )
+        openalex_counts = dict(
+            self.filter(has_openalex_match=True)
+            .values("document_type")
+            .annotate(count=models.Count("id"))
+            .values_list("document_type", "count")
+        )
         return {
             "status_counts": status_counts,
             "type_counts": type_counts,
+            "type_status_counts": type_status_counts,
+            "scielo_dedup_counts": scielo_dedup_counts,
+            "openalex_counts": openalex_counts,
         }
 
 
@@ -87,6 +108,15 @@ class EtlItemProcess(models.Model):
         choices=EtlResult.choices,
         blank=True,
     )
+    pid_v2 = models.CharField(max_length=255, blank=True, default="")
+    doi = models.CharField(max_length=500, blank=True, default="")
+    isbn = models.CharField(max_length=255, blank=True, default="")
+    preprint_id = models.CharField(max_length=255, blank=True, default="")
+    dataset_id = models.CharField(max_length=255, blank=True, default="")
+    has_openalex_match = models.BooleanField(default=False)
+    has_scielo_dedup = models.BooleanField(default=False)
+    scielo_dedup_ids = models.JSONField(default=list, blank=True)
+    openalex_match_ids = models.JSONField(default=list, blank=True)
     attempts = models.PositiveIntegerField(default=0)
     error = models.TextField(null=True, blank=True)
     processed_at = models.DateTimeField(null=True, blank=True)
@@ -117,15 +147,23 @@ class EtlItemProcess(models.Model):
         self.error = None
         self.save(update_fields=["status", "attempts", "error", "updated_at"])
 
-    def mark_success(self, result=EtlResult.UPDATED):
+    def mark_success(self, result=EtlResult.UPDATED, has_openalex_match=False, has_scielo_dedup=False, scielo_dedup_ids=None, openalex_match_ids=None):
         self.status = EtlStatus.SUCCESS
         self.result = result
+        self.has_openalex_match = has_openalex_match
+        self.has_scielo_dedup = has_scielo_dedup
+        self.scielo_dedup_ids = scielo_dedup_ids or []
+        self.openalex_match_ids = openalex_match_ids or []
         self.error = None
         self.processed_at = timezone.now()
         self.save(
             update_fields=[
                 "status",
                 "result",
+                "has_openalex_match",
+                "has_scielo_dedup",
+                "scielo_dedup_ids",
+                "openalex_match_ids",
                 "error",
                 "processed_at",
                 "updated_at",
