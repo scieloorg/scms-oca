@@ -1,0 +1,69 @@
+{% load i18n l10n %}
+{% load indicator_filters %}
+
+<div class="col-lg-9 mx-0 ps-3 pe-0 indicator-results-col sg-layout__content-col sg-layout__content">
+    {% if error %}
+    <div class="alert alert-danger shadow-sm mb-3" role="alert">
+        {{ error }}
+    </div>
+    {% endif %}
+
+    {% include "partials/warning_banner.html" %}
+    {% include "controls_bar.html" %}
+
+    {% if ranking_data %}
+    <div class="card mb-3 shadow-sm indicator-chart-card">
+        <div class="card-body p-2 p-lg-3">
+            <div class="box is-invisible" id="ranking-container">
+                <table id="ranking-table" class="table table-striped display nowrap">
+                    <thead>
+                        <tr>
+                            <th scope="col">{% trans "Rank" %}</th>
+                            <th scope="col" class="ranking-metric-header">{{ ranking_data.ranking_metric|ui_value:"ranking_metric" }}</th>
+                            <th scope="col">{% trans "Journal" %}</th>
+                            <th scope="col">{% trans "ISSN" %}</th>
+                            <th scope="col">{% trans "Country" %}</th>
+                            <th scope="col">{% trans "Publisher" %}</th>
+                            <th scope="col">{% trans "Is Open Access" %}</th>
+                            <th scope="col">{% trans "Publication Year" %}</th>
+                            <th scope="col">{% trans "Total Publications" %}</th>
+                            <th scope="col">{% trans "Total Citations" %}</th>
+                            <th scope="col">{% trans "Consistency Score" %}</th>
+                            <th scope="col">{% trans "Observations" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ranking-table-body">
+                        {% for entry in ranking_data.journals %}
+                        <tr>
+                            <td data-order="{{ forloop.counter }}">{{ forloop.counter }}</td>
+                            {% with metric_value=entry|get_attr:ranking_data.ranking_metric %}
+                            <td data-order="{{ metric_value|default_if_none:''|unlocalize }}">
+                                {{ metric_value|floatformat:"2g" }}
+                            </td>
+                            {% endwith %}
+                            <td>{{ entry.title }}</td>
+                            <td>{{ entry.issn|default:"-" }}</td>
+                            <td>{{ entry.country|default:"-" }}</td>
+                            <td>{{ entry.publisher_name|default:"-" }}</td>
+                            <td>{{ entry.is_journal_oa|ui_value }}</td>
+                            <td data-order="{{ entry.publication_year|default_if_none:''|unlocalize }}">{{ entry.publication_year }}</td>
+                            <td data-order="{{ entry.global_total_publications|default_if_none:''|unlocalize }}">{{ entry.global_total_publications|floatformat:"0g" }}</td>
+                            <td data-order="{{ entry.global_total_citations|default_if_none:''|unlocalize }}">{{ entry.global_total_citations|floatformat:"0g" }}</td>
+                            <td data-order="{{ entry.global_consistency_score|default_if_none:''|unlocalize }}">{{ entry.global_consistency_score|floatformat:"2g" }}</td>
+                            <td data-order="{{ entry.global_num_observations|default_if_none:''|unlocalize }}">{{ entry.global_num_observations|floatformat:"0g" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% elif not error %}
+    <div class="card p-3 shadow-sm bg-oca-light">
+        <p class="mb-2">{% trans "Select filters and click Apply to load the global journal metrics ranking." %}</p>
+        <p class="mb-0 text-muted small">
+            {% trans "Global Normalized Impact ranks journals by their field-normalized citation impact across all categories and year." %}
+        </p>
+    </div>
+    {% endif %}
+</div>

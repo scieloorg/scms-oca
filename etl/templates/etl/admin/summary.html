@@ -12,7 +12,8 @@
                 <th>Success</th>
                 <th>Failed</th>
                 <th>Skipped</th>
-                <th>Merged</th>
+                <th>SciELO</th>
+                <th>OpenAlex</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -30,7 +31,8 @@
                     <td>{{ row.success }}</td>
                     <td>{{ row.failed }}</td>
                     <td>{{ row.skipped }}</td>
-                    <td>{{ row.merged }}</td>
+                    <td>{{ row.scielo_dedup }}</td>
+                    <td>{{ row.openalex }}</td>
                     <td>
                         <div style="display:flex; flex-direction:column; gap:4px;">
                             <form method="post" action="{{ trigger_pipeline_url }}">

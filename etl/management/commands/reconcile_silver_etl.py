@@ -2,20 +2,16 @@ import json
 
 from django.core.management.base import BaseCommand
 
-from etl.indexing.client import OpenSearchClient
-from etl.pipeline.defaults import PIPELINE_TARGETS
+from etl.client import OpenSearchClient
+from etl.models import EtlPipelineConfig
 from etl.services import enqueue_etl_item
-
-TARGET_BRONZE_INDICES = sorted(
-    target.bronze_index for target in PIPELINE_TARGETS.values()
-)
 
 
 class Command(BaseCommand):
-    help = "Recreate ETL pending items from bronze indices without processing them."
+    help = "Recreate ETL pending items from input indices without processing them."
 
     def add_arguments(self, parser):
-        parser.add_argument("--source-index", choices=TARGET_BRONZE_INDICES)
+        parser.add_argument("--source-index")
         parser.add_argument("--since", help="Only documents with oca_indexed_at greater than this value.")
         parser.add_argument("--year", type=int, help="Only documents from this publication year.")
         parser.add_argument("--limit", type=int, default=1000)
@@ -25,7 +21,7 @@ class Command(BaseCommand):
         source_indices = (
             [options["source_index"]]
             if options.get("source_index")
-            else TARGET_BRONZE_INDICES
+            else sorted(config.input_index for config in EtlPipelineConfig.objects.enabled())
         )
         client = OpenSearchClient().client
         total = 0

@@ -5,7 +5,6 @@ from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 
 from etl.services import process_pending_items
-from etl.pipeline.defaults import PIPELINE_TARGETS
 from etl.tasks import run_pipeline_targets
 
 
@@ -15,7 +14,6 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument(
             "--type",
-            choices=[*PIPELINE_TARGETS.keys(), "all"],
             default="article",
             help="Document type to process.",
         )
@@ -39,7 +37,7 @@ class Command(BaseCommand):
         )
         parser.add_argument(
             "--openalex-index",
-            default=settings.ETL_RAW_OPENALEX_WORKS,
+            default=settings.ETL_INPUT_OPENALEX_WORKS,
             help="OpenAlex source index.",
         )
         parser.add_argument(
@@ -64,7 +62,7 @@ class Command(BaseCommand):
                 options["type"],
                 year=options.get("year"),
                 max_docs=options.get("max_docs"),
-                openalex_index=options.get("openalex_index") or settings.ETL_RAW_OPENALEX_WORKS,
+                openalex_index=options.get("openalex_index") or settings.ETL_INPUT_OPENALEX_WORKS,
             )
         self.stdout.write(json.dumps(results, indent=2, sort_keys=True))
 

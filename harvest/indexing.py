@@ -7,7 +7,7 @@ import logging
 from django.conf import settings
 from django.utils import timezone
 
-from etl.pipeline.defaults import resolve_target_name
+from etl.models import EtlPipelineConfig
 from etl.services import enqueue_etl_item
 from search_gateway.client import get_opensearch_client
 
@@ -99,7 +99,7 @@ def index_harvested_instance(instance, index_name=None, refresh=False):
             },
             refresh=False,
         )
-        if resolve_target_name(index_name):
+        if EtlPipelineConfig.objects.resolve_name_for_source(index_name, instance.raw_data):
             enqueue_etl_item(
                 source_index=index_name,
                 external_id=instance.identifier,

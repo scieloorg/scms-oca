@@ -1,15 +1,11 @@
 from django.conf import settings
 
 from config import celery_app
-from etl.models import EtlItemProcess, EtlStatus
-from etl.pipeline.defaults import PIPELINE_TARGETS, resolve_target_names
-from etl.pipeline.orchestrator import OpenSearchETLPipeline
-from etl.services import backfill_bronze_items, process_pending_items
+from etl.models import EtlItemProcess, EtlPipelineConfig, EtlResult, EtlStatus
+from etl.pipeline import OpenSearchETLPipeline
+from etl.services import backfill_input_items, process_pending_items
 
 BATCH_SIZE = 1000
-
-
-# ── Celery tasks ────────────────────────────────────────────────────────────
 
 
 @celery_app.task(name="[ETL] Run pipeline")
@@ -17,7 +13,7 @@ def run_silver_etl(
     target_type="article",
     year=None,
     max_docs=None,
-    openalex_index=settings.ETL_RAW_OPENALEX_WORKS,
+    openalex_index=settings.ETL_INPUT_OPENALEX_WORKS,
     user_id=None,
 ):
     return run_pipeline_targets(
@@ -50,15 +46,12 @@ def retry_failed_silver_etl(limit=BATCH_SIZE, user_id=None):
     return process_pending_items(limit=limit, retry_failed=True)
 
 
-# ── Pipeline runner ─────────────────────────────────────────────────────────
-
-
 def run_pipeline_targets(
     target_type: str,
     *,
     year: int | None = None,
     max_docs: int | None = None,
-    openalex_index: str = settings.ETL_RAW_OPENALEX_WORKS,
+    openalex_index: str = settings.ETL_INPUT_OPENALEX_WORKS,
 ) -> list[dict]:
     return [
         _run_pipeline_target(
@@ -67,7 +60,7 @@ def run_pipeline_targets(
             max_docs=max_docs,
             openalex_index=openalex_index,
         )
-        for target_name in resolve_target_names(target_type)
+        for target_name in EtlPipelineConfig.objects.resolve_names(target_type)
     ]
 
 
@@ -76,23 +69,75 @@ def _run_pipeline_target(
     *,
     year: int | None = None,
     max_docs: int | None = None,
-    openalex_index: str = settings.ETL_RAW_OPENALEX_WORKS,
+    openalex_index: str = settings.ETL_INPUT_OPENALEX_WORKS,
 ) -> dict:
-    target = PIPELINE_TARGETS[target_name]
+    pipeline_config = EtlPipelineConfig.objects.get_enabled_by_name(target_name)
+
     pipeline = OpenSearchETLPipeline(
         opensearch_url=getattr(settings, "OS_URL", "http://localhost:9200"),
-        bronze_scielo_index=target.bronze_index,
-        bronze_openalex_index=openalex_index,
-        silver_index_pattern=target.silver_index_pattern,
+        input_scielo_index=pipeline_config.input_index,
+        input_openalex_index=pipeline_config.openalex_index_for(openalex_index),
+        silver_index_pattern=pipeline_config.silver_index_pattern,
         public_alias=settings.ETL_PUBLIC_ALIAS,
+        pipeline_config=pipeline_config,
     )
+
     result = pipeline.run(
         max_docs=max_docs,
         year_filter=year,
     )
-    backfill_bronze_items(target.bronze_index, year=year, limit=max_docs, initial_status=EtlStatus.SUCCESS)
+
+    backfill_input_items(
+        pipeline_config.input_index,
+        year=year,
+        limit=max_docs,
+        initial_status=EtlStatus.SUCCESS,
+    )
+
+    openalex_ids = set(result.get("openalex_matched_source_ids") or [])
+    dedup_ids = set(result.get("scielo_dedup_source_ids") or [])
+    scielo_dedup_map = result.get("scielo_dedup_map") or {}
+    openalex_match_map = result.get("openalex_match_map") or {}
+    indexed = result.get("total_indexed_docs", 0) > 0
+
+    filters = {
+        "source_index": pipeline_config.input_index,
+        "document_type": pipeline_config.default_document_type,
+        "status": EtlStatus.SUCCESS,
+        "result": EtlResult.UNCHANGED,
+    }
+    if year is not None:
+        filters["publication_year"] = year
+
+    items = list(EtlItemProcess.objects.filter(**filters))
+
+    for item in items:
+        has_oa = item.external_id in openalex_ids
+        has_dedup = item.external_id in dedup_ids
+        item.result = (
+            EtlResult.MERGED if (has_oa or has_dedup)
+            else EtlResult.UPDATED if indexed
+            else EtlResult.UNCHANGED
+        )
+        item.has_openalex_match = has_oa
+        item.has_scielo_dedup = has_dedup
+        item.scielo_dedup_ids = scielo_dedup_map.get(item.external_id) or []
+        item.openalex_match_ids = openalex_match_map.get(item.external_id) or []
+
+    if items:
+        EtlItemProcess.objects.bulk_update(
+            items,
+            [
+                "result",
+                "has_openalex_match",
+                "has_scielo_dedup",
+                "scielo_dedup_ids",
+                "openalex_match_ids",
+            ],
+        )
+
     result["target"] = target_name
     result["public_alias"] = pipeline.public_alias
     result["indexed_indices"] = sorted(pipeline.indexed_index_names)
-    return result
 
+    return result

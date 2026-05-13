@@ -9,12 +9,14 @@ def clean_source_payload(source: Any) -> Any:
     """Return the domain payload without harvest/indexing metadata."""
     if isinstance(source, dict) and isinstance(source.get("raw_data"), dict):
         return source["raw_data"]
+
     if isinstance(source, dict):
         return {
             key: value
             for key, value in source.items()
             if key not in {"oca_indexed_at", "oca_source_hash"}
         }
+
     return source or {}
 
 

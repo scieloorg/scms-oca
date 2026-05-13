@@ -62,6 +62,18 @@
     window.requestAnimationFrame(updateTopScroll);
   }
 
+  function buildColumnsFromTable(tableId) {
+    const headerCells = document.querySelectorAll(`#${tableId} thead th`);
+    return Array.from(headerCells).map((_, i) => {
+      // col 0: Rank (num), col 1: Metric value (num)
+      if (i < 2) return { type: 'num' };
+      // cols 2–6: Journal, ISSN, Country, Publisher, OA status (string)
+      if (i >= 2 && i <= 6) return { type: 'string' };
+      // remaining: Year, numeric metrics
+      return { type: 'num' };
+    });
+  }
+
   function initRankingDataTable() {
     const tableContainer = document.getElementById('ranking-container');
 
@@ -73,21 +85,7 @@
     }
 
     $('#ranking-table').DataTable({
-      columns: [
-        { type: 'num' },
-        { type: 'num' },
-        { type: 'string' },
-        { type: 'string' },
-        { type: 'string' },
-        { type: 'string' },
-        { type: 'string' },
-        { type: 'num' },
-        { type: 'num' },
-        { type: 'num' },
-        { type: 'num' },
-        { type: 'num' },
-        { type: 'num' },
-      ],
+      columns: buildColumnsFromTable('ranking-table'),
       order: [[0, 'asc']],
       scrollX: true,
       pageLength: 25,

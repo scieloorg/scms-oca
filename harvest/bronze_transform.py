@@ -6,7 +6,7 @@ import json
 import logging
 
 from django.utils import timezone
-from etl.pipeline.defaults import resolve_target_name
+from etl.models import EtlPipelineConfig
 from etl.services import enqueue_etl_item
 from search_gateway.client import get_opensearch_client
 
@@ -171,11 +171,11 @@ def transform_document(script, identifier=None):
 
 
 def _enqueue_transformed_bronze(index_name, identifier):
-    if not resolve_target_name(index_name):
-        return
     try:
         response = client.get(index=index_name, id=identifier)
         source = response.get("_source") or {}
+        if not EtlPipelineConfig.objects.resolve_name_for_source(index_name, source):
+            return
         payload_hash = source_hash(source)
         client.update(
             index=index_name,
