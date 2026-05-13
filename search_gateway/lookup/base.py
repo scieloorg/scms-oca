@@ -274,28 +274,34 @@ def build_lookup_indices(
     builders: dict[str, LookupBuilder] = {
         key: lookup_builders[key]() for key in config.selected_lookups
     }
+    index_names = _resolve_index_names(builders)
 
     if not client.ping():
         raise ConnectionError("Could not connect to OpenSearch.")
     if not client.indices.exists(index=config.source_index):
         raise ValueError(f"Source index or alias '{config.source_index}' does not exist.")
 
-    for lookup_key, builder in builders.items():
-        index_name = _index_name(lookup_key, builder)
-        _ensure_index(index_name, builder.mapping)
+    _validate_target_indices(index_names)
 
     processed_docs = _collect(builders)
     indexed_counts: dict[str, int] = {"_processed_docs": processed_docs}
 
+    _validate_target_indices(index_names)
+
     for lookup_key, builder in builders.items():
-        index_name = _index_name(lookup_key, builder)
+        client.indices.create(index=index_names[lookup_key], body=builder.mapping)
+
+    for lookup_key, builder in builders.items():
+        index_name = index_names[lookup_key]
         if progress:
             progress(
                 f"Collected {builder.count():,} values for lookup '{lookup_key}' "
                 f"from {processed_docs:,} documents."
             )
         indexed_counts[lookup_key] = _bulk_index(
-            index_name, builder.iter_actions(index_name)
+            index_name,
+            builder.iter_actions(index_name),
+            builder.count(),
         )
 
     return indexed_counts
