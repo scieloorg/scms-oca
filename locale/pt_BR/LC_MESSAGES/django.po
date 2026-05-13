@@ -4966,3 +4966,87 @@ msgstr "Lista de campos retornados do ES, ex: ['_id', 'title']"
 
 msgid "Fonte de dados OpenSearch associada a esta página de busca."
 msgstr "Fonte de dados OpenSearch associada a esta página de busca."
+
+#: observation/templates/observation/include/table.html
+msgid "Select an observation table"
+msgstr "Selecione uma tabela de observação"
+
+#: observation/templates/observation/include/table.html
+msgid "Use the detail icon next to country name. Use row checkboxes and then Compare selected."
+msgstr "Use o ícone de detalhes ao lado do nome do país. Use as caixas de seleção das linhas e depois Comparar selecionados."
+
+#: observation/templates/observation/include/table.html
+msgid "Processing date"
+msgstr "Data de processamento"
+
+#: observation/templates/observation/include/table.html
+msgid "Table"
+msgstr "Tabela"
+
+#: observation/templates/observation/include/table.html
+msgid "Downloads"
+msgstr "Downloads"
+
+#: observation/templates/observation/include/table.html
+msgid "Compare selected"
+msgstr "Comparar selecionados"
+
+#: observation/templates/observation/include/table.html
+msgid "Download CSV (.csv)"
+msgstr "Baixar CSV (.csv)"
+
+#: observation/templates/observation/include/table.html
+msgid "Rows per page"
+msgstr "Linhas por página"
+
+#: observation/templates/observation/include/table.html
+msgid "Loading table data..."
+msgstr "Carregando dados da tabela..."
+
+#: observation/templates/observation/include/table.html
+msgid "Select or deselect all rows"
+msgstr "Selecionar ou desmarcar todas as linhas"
+
+#: observation/templates/observation/include/table.html
+msgid "Select"
+msgstr "Selecionar"
+
+#: observation/templates/observation/include/table.html
+msgid "Totals"
+msgstr "Totais"
+
+#: observation/templates/observation/include/table.html
+msgid "Rows limit"
+msgstr "Limite de linhas"
+
+#: observation/templates/observation/include/table.html
+msgid "Generate all CSVs"
+msgstr "Gerar todos os CSVs"
+
+#: observation/templates/observation/include/table.html
+msgid "Clear .csv"
+msgstr "Limpar .csv"
+
+#: observation/templates/observation/include/table.html
+msgid "Single file (.csv)"
+msgstr "Arquivo único (.csv)"
+
+#: observation/templates/observation/include/table.html
+msgid "Jobs are persisted in your browser and can be resumed after reload."
+msgstr "Os jobs são salvos no navegador e podem ser retomados após recarregar."
+
+#: observation/templates/observation/include/table.html
+msgid "Country details"
+msgstr "Detalhes do país"
+
+#: observation/templates/observation/include/table.html
+msgid "Country comparison"
+msgstr "Comparação de países"
+
+#: observation/templates/observation/include/table.html
+msgid "Documents"
+msgstr "Documentos"
+
+#: observation/templates/observation/include/table.html
+msgid "Clear selection"
+msgstr "Limpar seleção"

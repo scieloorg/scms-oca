@@ -2,6 +2,20 @@
 (function () {
   "use strict";
 
+  function _t(text) {
+    return (typeof window !== "undefined" && typeof window.gettext === "function")
+      ? window.gettext(text)
+      : text;
+  }
+
+  function _format(template, params) {
+    return String(template).replace(/%\(([^)]+)\)s/g, function (_, key) {
+      return (params && Object.prototype.hasOwnProperty.call(params, key))
+        ? String(params[key])
+        : "";
+    });
+  }
+
   function getDimensions() {
     const config = window.searchPageConfig || {};
     return Array.isArray(config.dimensions) ? config.dimensions : [];
@@ -153,7 +167,7 @@
     if (allBtn) {
       if (singleFileMode) {
         allBtn.disabled = true;
-        allBtn.setAttribute("title", "Disabled while single-file mode is enabled.");
+        allBtn.setAttribute("title", _t("Disabled while single-file mode is enabled."));
       } else {
         allBtn.removeAttribute("title");
       }
@@ -164,7 +178,7 @@
     const container = document.getElementById("observation-export-jobs");
     if (!container) return;
     if (!exportJobs.length) {
-      container.innerHTML = '<div class="list-group-item text-muted small">No export jobs yet.</div>';
+      container.innerHTML = '<div class="list-group-item text-muted small">' + _t("No export jobs yet.") + '</div>';
       return;
     }
     let orderedJobs = exportJobs.slice().sort(function (a, b) {
@@ -192,7 +206,7 @@
       if (orderedJobs.length > 1) orderedJobs = [orderedJobs[0]];
     }
     if (!orderedJobs.length) {
-      container.innerHTML = '<div class="list-group-item text-muted small">No export jobs yet.</div>';
+      container.innerHTML = '<div class="list-group-item text-muted small">' + _t("No export jobs yet.") + '</div>';
       return;
     }
     const html = orderedJobs.map(function (job) {
@@ -210,8 +224,8 @@
       const actionHtml = (done && !isBatch)
         ? '<button type="button" class="btn btn-sm btn-outline-success observation-download-link' + (isFresh ? '' : ' disabled') + '" ' +
           (isFresh ? ('data-job-id="' + job.id + '" data-file-name="' + (job.file_name || "observation.csv") + '"') : 'disabled') +
-          '>Download CSV</button>'
-        : '<button class="btn btn-sm btn-outline-secondary" type="button" disabled>' + (isBatch ? (job.ready_files_count || 0) + " files" : (progress + "%")) + "</button>";
+          '>' + _t("Download CSV") + '</button>'
+        : '<button class="btn btn-sm btn-outline-secondary" type="button" disabled>' + (isBatch ? _format(_t("%(count)s files"), { count: (job.ready_files_count || 0) }) : (progress + "%")) + "</button>";
       const progressHtml = isRunning
         ? '<div class="observation-export-progress-wrap">' +
             '<div class="observation-export-meter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + progress + '">' +
@@ -228,10 +242,10 @@
           progressHtml +
           '<div class="d-flex justify-content-between align-items-start gap-2">' +
             '<div>' +
-              '<div class="small fw-semibold">' + (sequenceLabel ? (sequenceLabel + " - ") : "") + (job.dimension_label || job.dimension_slug || "Dimension") + rangeLabel + "</div>" +
-              '<div class="small ' + statusClass + '">Status: ' + statusLabel + " | " + (job.message || "") + "</div>" +
+              '<div class="small fw-semibold">' + (sequenceLabel ? (sequenceLabel + " - ") : "") + (job.dimension_label || job.dimension_slug || _t("Dimension")) + rangeLabel + "</div>" +
+              '<div class="small ' + statusClass + '">' + _t("Status") + ": " + statusLabel + " | " + (job.message || "") + "</div>" +
               (job.debug ? ('<div class="small text-muted">' + String(job.debug) + "</div>") : "") +
-              '<div class="small text-muted">' + processed + "/" + total + " rows</div>" +
+              '<div class="small text-muted">' + _format(_t("%(processed)s/%(total)s rows"), { processed: processed, total: total }) + "</div>" +
             '</div>' +
             actionHtml +
           "</div>" +
@@ -248,12 +262,12 @@
         const contentType = String(response.headers.get("content-type") || "").toLowerCase();
         if (!response.ok || contentType.indexOf("text/csv") === -1) {
           return response.text().then(function (text) {
-            throw new Error(text || "Could not download CSV.");
+            throw new Error(text || _t("Could not download CSV."));
           });
         }
         return response.blob().then(function (blob) {
           if (!blob || blob.size === 0) {
-            throw new Error("Downloaded file is empty.");
+            throw new Error(_t("Downloaded file is empty."));
           }
           const url = URL.createObjectURL(blob);
           const link = document.createElement("a");
@@ -264,7 +278,7 @@
         });
       })
       .catch(function (err) {
-        window.alert(err.message || "Could not download CSV.");
+        window.alert(err.message || _t("Could not download CSV."));
       });
   }
 
@@ -287,7 +301,7 @@
     });
     pending.forEach(function (job) {
       fetch(getExportStatusEndpoint(job.id))
-        .then(function (r) { if (!r.ok) throw new Error("Status error"); return r.json(); })
+        .then(function (r) { if (!r.ok) throw new Error(_t("Status error")); return r.json(); })
         .then(function (payload) {
           if (payload && payload.job) {
             upsertJob(payload.job);
@@ -320,7 +334,7 @@
     if (!singleFileMode && rowLimit && rowLimit.value) params.set("split_size", rowLimit.value);
     params.set("split_mode", (opts.chunked && !singleFileMode) ? "chunked" : "single");
     fetch(endpoint + "?" + params.toString())
-      .then(function (r) { if (!r.ok) throw new Error("Export start failed"); return r.json(); })
+      .then(function (r) { if (!r.ok) throw new Error(_t("Export start failed")); return r.json(); })
       .then(function (payload) {
         const jobs = (payload && payload.jobs) || [];
         jobs.forEach(function (job) { upsertJob(job); });
@@ -331,7 +345,7 @@
         }
       })
       .catch(function (err) {
-        window.alert(err.message || "Could not start export");
+        window.alert(err.message || _t("Could not start export"));
       });
   }
 
@@ -365,7 +379,7 @@
     if (clearBtn) {
       clearBtn.addEventListener("click", function () {
         if (!exportJobs.length) return;
-        if (window.confirm("Remove all saved download jobs from this browser?")) {
+        if (window.confirm(_t("Remove all saved download jobs from this browser?"))) {
           clearSavedJobs();
         }
       });
@@ -410,7 +424,7 @@
     const shouldDisable = effectiveCount < 1000;
     allBtn.disabled = shouldDisable;
     if (shouldDisable) {
-      allBtn.setAttribute("title", "Enable when there are at least 1000 rows.");
+      allBtn.setAttribute("title", _t("Enable when there are at least 1000 rows."));
     } else {
       allBtn.removeAttribute("title");
     }
@@ -423,6 +437,17 @@
   function parseDisplayNumber(value) {
     const normalized = String(value || "").replace(/,/g, "").replace(/[^\d-]/g, "");
     return Number(normalized) || 0;
+  }
+
+  function sortYearColumnsDescending(columns) {
+    return (Array.isArray(columns) ? columns.slice() : []).sort(function (a, b) {
+      const yearA = Number(String(a).trim());
+      const yearB = Number(String(b).trim());
+      if (Number.isFinite(yearA) && Number.isFinite(yearB)) {
+        return yearB - yearA;
+      }
+      return String(b).localeCompare(String(a));
+    });
   }
 
   function loadAndInitObservationTable() {
@@ -440,7 +465,7 @@
     applyDimensionLabels();
     const params = buildTableParams();
     fetch(tableApiEndpoint + "?" + params.toString())
-      .then(function (r) { if (!r.ok) throw new Error("Network error"); return r.json(); })
+      .then(function (r) { if (!r.ok) throw new Error(_t("Network error")); return r.json(); })
       .then(function (data) {
         if (data.error) throw new Error(data.error);
         populateAndInitTable(data);
@@ -449,14 +474,14 @@
       })
       .catch(function (err) {
         $loading.hide();
-        $error.text(err.message || "Error loading table data").show();
+        $error.text(err.message || _t("Error loading table data")).show();
         $table.show();
         populateAndInitTable({ columns: [], rows: [], grand_total: 0 });
       });
   }
 
   function populateAndInitTable(data) {
-    const columns = data.columns || [];
+    const columns = sortYearColumnsDescending(data.columns);
     const rows = data.rows || [];
     const grandTotal = data.grand_total || 0;
     const rowTotal = data.row_total || 0;
@@ -558,13 +583,16 @@
     }
 
     function injectCountryActions() {
+      const viewDetailsLabel = _t("View details");
+      const copyRowLabel = _t("Copy row");
+      const copiedLabel = _t("Copied");
       $("#observation-table tbody tr").each(function () {
         const $countryCell = $(this).find("td:eq(1)");
         if ($countryCell.find(".country-name").length) return;
         $countryCell.addClass("observation-country-cell");
         const countryName = $countryCell.text().trim();
         $countryCell.html(
-          '<span class="country-name">' + countryName + '</span><button type="button" class="observation-detail-icon-btn detail-icon-btn" title="View details" aria-label="View details">&#9432;</button><button type="button" class="observation-copy-icon-btn copy-icon-btn" title="Copy row" aria-label="Copy row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"></rect><path d="M5 15V5a2 2 0 0 1 2-2h10"></path></svg></button><span class="observation-copied-tooltip" aria-hidden="true">Copied</span>'
+          '<span class="country-name">' + countryName + '</span><button type="button" class="observation-detail-icon-btn detail-icon-btn" title="' + viewDetailsLabel + '" aria-label="' + viewDetailsLabel + '">&#9432;</button><button type="button" class="observation-copy-icon-btn copy-icon-btn" title="' + copyRowLabel + '" aria-label="' + copyRowLabel + '"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"></rect><path d="M5 15V5a2 2 0 0 1 2-2h10"></path></svg></button><span class="observation-copied-tooltip" aria-hidden="true">' + copiedLabel + '</span>'
         );
       });
     }
@@ -619,13 +647,18 @@
       columnDefs: columnDefs,
       language: {
         search: "",
-        searchPlaceholder: "Type to search " + rowLabelLower + "...",
+        searchPlaceholder: _format(_t("Type to search %(label)s..."), { label: rowLabelLower }),
         lengthMenu: "_MENU_",
-        info: "Showing _START_ to _END_ of _TOTAL_",
-        paginate: { first: "First", previous: "Previous", next: "Next", last: "Last" }
+        info: _t("Showing _START_ to _END_ of _TOTAL_"),
+        paginate: {
+          first: _t("First"),
+          previous: _t("Previous"),
+          next: _t("Next"),
+          last: _t("Last"),
+        },
       },
       infoCallback: function (settings, start, end, max, total) {
-        return "Showing " + start + " to " + end + " of " + total;
+        return _format(_t("Showing %(start)s to %(end)s of %(total)s"), { start: start, end: end, total: total });
       },
       footerCallback: function () {
         const api = this.api();
@@ -645,7 +678,7 @@
       const start = info.recordsDisplay === 0 ? 0 : info.start + 1;
       const end = info.end;
       const total = info.recordsDisplay;
-      $info.text("Showing " + start + " to " + end + " of " + total);
+      $info.text(_format(_t("Showing %(start)s to %(end)s of %(total)s"), { start: start, end: end, total: total }));
     }
 
     function closeColumnMenus() {
@@ -681,21 +714,21 @@
         const title = $th.text().trim();
       const isRowLabelCol = index === 1;
       const menuSearchBlock = isRowLabelCol
-          ? '<div class="observation-col-menu-row"><span class="observation-col-menu-icon" aria-hidden="true">&#8645;</span><select class="observation-col-menu-select"><option value="contains">Contains</option><option value="starts">Starts with</option><option value="equals">Equals</option></select></div><div class="observation-col-menu-row"><span class="observation-col-menu-icon" aria-hidden="true">&#128269;</span><input type="text" class="observation-col-menu-input" placeholder="Search..."></div>'
+          ? '<div class="observation-col-menu-row"><span class="observation-col-menu-icon" aria-hidden="true">&#8645;</span><select class="observation-col-menu-select"><option value="contains">' + _t("Contains") + '</option><option value="starts">' + _t("Starts with") + '</option><option value="equals">' + _t("Equals") + '</option></select></div><div class="observation-col-menu-row"><span class="observation-col-menu-icon" aria-hidden="true">&#128269;</span><input type="text" class="observation-col-menu-input" placeholder="' + _t("Search...") + '"></div>'
           : '';
         $th.html(
           '<div class="observation-col-head">' +
             '<span class="observation-col-label">' + title + '</span>' +
-            '<button type="button" class="observation-col-sort-toggle" title="Sort column" aria-label="Sort ascending">' +
+            '<button type="button" class="observation-col-sort-toggle" title="' + _t("Sort column") + '" aria-label="' + _t("Sort ascending") + '">' +
               '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 13V3"></path><path d="M1.5 4.5L3 3l1.5 1.5"></path><path d="M6.5 5H13"></path><path d="M6.5 8H11.5"></path><path d="M6.5 11H10"></path></svg>' +
             '</button>' +
-            '<button type="button" class="observation-col-menu-toggle" title="Column options" aria-label="Column options">&#9776;</button>' +
+            '<button type="button" class="observation-col-menu-toggle" title="' + _t("Column options") + '" aria-label="' + _t("Column options") + '">&#9776;</button>' +
           '</div>' +
           '<div class="observation-col-menu">' +
             menuSearchBlock +
-            '<button type="button" class="observation-col-menu-action" data-action="sort-asc"><span class="observation-col-menu-icon" aria-hidden="true">&#8593;</span><span>Sort Ascending</span></button>' +
-            '<button type="button" class="observation-col-menu-action" data-action="sort-desc"><span class="observation-col-menu-icon" aria-hidden="true">&#8595;</span><span>Sort Descending</span></button>' +
-            '<button type="button" class="observation-col-menu-action" data-action="clear-sort"><span class="observation-col-menu-icon" aria-hidden="true">&#10005;</span><span>Clear sort</span></button>' +
+            '<button type="button" class="observation-col-menu-action" data-action="sort-asc"><span class="observation-col-menu-icon" aria-hidden="true">&#8593;</span><span>' + _t("Sort Ascending") + '</span></button>' +
+            '<button type="button" class="observation-col-menu-action" data-action="sort-desc"><span class="observation-col-menu-icon" aria-hidden="true">&#8595;</span><span>' + _t("Sort Descending") + '</span></button>' +
+            '<button type="button" class="observation-col-menu-action" data-action="clear-sort"><span class="observation-col-menu-icon" aria-hidden="true">&#10005;</span><span>' + _t("Clear sort") + '</span></button>' +
           '</div>'
         );
       });
@@ -779,6 +812,12 @@
     $("#observation-table tbody").on("change", ".compare-row-checkbox", function () {
       updateHeaderSelectAllState();
     });
+
+    function clearSelectedRows() {
+      $(table.rows().nodes()).find(".compare-row-checkbox").prop("checked", false);
+      $("#select-all-checkbox").prop("checked", false).prop("indeterminate", false);
+      updateHeaderSelectAllState();
+    }
 
     table.on("draw", function () {
       injectCountryActions();
@@ -918,7 +957,11 @@
     function downloadDetailChartImage() {
       const canvas = document.getElementById("country-detail-chart");
       if (!canvas) return;
-      const title = ($("#country-detail-title").text() || "").replace(/^Details:\s*/i, "").trim();
+      const detailsPrefix = _t("Details") + ":";
+      const titleRaw = ($("#country-detail-title").text() || "");
+      const title = (titleRaw.indexOf(detailsPrefix) === 0
+        ? titleRaw.slice(detailsPrefix.length)
+        : titleRaw).trim();
       const safe = title.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "_").replace(/_+/g, "_").replace(/^_+|_+$/g, "");
       const filename = safe ? "detail_" + safe + ".png" : "detail_chart.png";
       const dpr = window.devicePixelRatio || 1;
@@ -1154,14 +1197,18 @@
         const low = Math.min.apply(null, series.values);
         const avg = Math.round(series.values.reduce(function (sum, v) { return sum + v; }, 0) / (series.values.length || 1));
         const growthPct = first > 0 ? (((last - first) / first) * 100) : 0;
-        return '<div class="observation-comparison-insight"><strong>' + series.country + '</strong><div>Peak: ' + formatNumber(peak) + '</div><div>Lowest: ' + formatNumber(low) + '</div><div>Average: ' + formatNumber(avg) + '</div><div>Growth (' + labels[0] + '-' + labels[labels.length - 1] + '): ' + growthPct.toFixed(1) + '%</div></div>';
+        return '<div class="observation-comparison-insight"><strong>' + series.country + '</strong>' +
+          '<div>' + _t("Peak") + ': ' + formatNumber(peak) + '</div>' +
+          '<div>' + _t("Lowest") + ': ' + formatNumber(low) + '</div>' +
+          '<div>' + _t("Average") + ': ' + formatNumber(avg) + '</div>' +
+          '<div>' + _format(_t("Growth (%(start)s-%(end)s)"), { start: labels[0], end: labels[labels.length - 1] }) + ': ' + growthPct.toFixed(1) + '%</div></div>';
       }).join("");
       $insights.html(cards);
     }
 
     function getCheckedRowsForComparison() {
       const selected = [];
-      $("#observation-table tbody tr").each(function () {
+      $(table.rows().nodes()).each(function () {
         const $row = $(this);
         if ($row.find(".compare-row-checkbox").is(":checked")) {
           const values = getRowValues($row);
@@ -1306,7 +1353,11 @@
         });
       })(labels, series, exportCtx, cssWidth, cssHeight);
 
-      const compareTitle = ($("#country-compare-title").text() || "").replace(/^Comparison:\s*/i, "").trim();
+      const comparisonPrefix = _t("Comparison") + ":";
+      const compareTitleRaw = ($("#country-compare-title").text() || "");
+      const compareTitle = (compareTitleRaw.indexOf(comparisonPrefix) === 0
+        ? compareTitleRaw.slice(comparisonPrefix.length)
+        : compareTitleRaw).trim();
       const safeCountries = compareTitle.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+vs\s+/g, "_vs_").replace(/[^a-z0-9_]+/g, "_").replace(/_+/g, "_").replace(/^_+|_+$/g, "");
       const filename = safeCountries ? "comparison_" + safeCountries + ".png" : "comparison_chart.png";
 
@@ -1330,7 +1381,7 @@
     function openComparisonModal() {
       const selected = getCheckedRowsForComparison();
       if (selected.length < 2) {
-        window.alert("Select at least 2 rows using the row checkboxes.");
+        window.alert(_t("Select at least 2 rows using the row checkboxes."));
         return;
       }
       const labels = yearColumns.slice();
@@ -1343,15 +1394,15 @@
         return "<tr><td>" + item.country + "</td>" + tdCells + "</tr>";
       }).join("");
 
-      $("#country-compare-title").text("Comparison: " + selected.map(function (s) { return s.country; }).join(" vs "));
+      $("#country-compare-title").text(_t("Comparison") + ": " + selected.map(function (s) { return s.country; }).join(" vs "));
       $("#country-compare-body").html(
         '<div class="table-responsive mb-3">' +
           '<table class="table table-sm table-bordered align-middle">' +
           '<thead class="table-light"><tr><th>' + rowLabel + '</th>' + thCells + '</tr></thead>' +
           '<tbody>' + rowsHtml + '</tbody></table></div>' +
         '<div class="observation-detail-chart-wrap">' +
-          '<div class="observation-chart-meta">Processing date: 2026-03-17 | Source: OpenAlex</div>' +
-          '<div class="observation-detail-chart-head"><strong>Evolution comparison by year</strong><button type="button" id="download-comparison-chart-btn" class="btn btn-outline-secondary btn-sm">Download chart</button></div>' +
+          '<div class="observation-chart-meta">' + _t("Processing date") + ': 2026-03-17 | ' + _t("Scope") + ': OpenAlex</div>' +
+          '<div class="observation-detail-chart-head"><strong>' + _t("Evolution comparison by year") + '</strong><button type="button" id="download-comparison-chart-btn" class="btn btn-outline-secondary btn-sm">' + _t("Download chart") + '</button></div>' +
           '<canvas id="comparison-chart" width="900" height="260"></canvas>' +
           '<div id="comparison-chart-insights" class="observation-comparison-insights"></div></div>'
       );
@@ -1364,7 +1415,7 @@
 
     function getRowsForDownload() {
       const selectedRows = [];
-      $("#observation-table tbody tr").each(function () {
+      $(table.rows().nodes()).each(function () {
         const $row = $(this);
         if ($row.find(".compare-row-checkbox").is(":checked")) {
           const values = getRowValues($row);
@@ -1377,7 +1428,7 @@
     function exportTableCsv() {
       const rowsToExport = getRowsForDownload();
       if (!rowsToExport.length) {
-        window.alert("Select at least one row using the checkbox in the first column.");
+        window.alert(_t("Select at least one row using the checkbox in the first column."));
         return;
       }
       const headers = [rowLabel].concat(yearColumns || []);
@@ -1410,6 +1461,7 @@
       if (!action) return;
       if (action === "compare") openComparisonModal();
       if (action === "csv") exportTableCsv();
+      if (action === "clear-selection") clearSelectedRows();
       $(this).val("");
     });
 
@@ -1433,7 +1485,7 @@
     $("#observation-table").on("click", ".detail-icon-btn", function () {
       const values = getRowValues($(this).closest("tr"));
       if (!values.length) return;
-      $("#country-detail-title").text("Details: " + values[0]);
+      $("#country-detail-title").text(_t("Details") + ": " + values[0]);
       const chartLabels = yearColumns.slice();
       const chartValues = [];
       for (let i = 1; i < values.length; i++) chartValues.push(parseDisplayNumber(values[i]));
@@ -1451,14 +1503,14 @@
           yearCells +
           '<div class="col-12">' +
             '<div class="observation-detail-chart-wrap">' +
-              '<div class="observation-chart-meta">Processing date: 2026-03-17 | Source: OpenAlex</div>' +
-              '<div class="observation-detail-chart-head"><strong>Evolution by ' + colLabel + '</strong>' +
-              '<button type="button" id="download-detail-chart-btn" class="btn btn-outline-secondary btn-sm observation-chart-download-btn">Download chart</button></div>' +
+              '<div class="observation-chart-meta">' + _t("Processing date") + ': 2026-03-17 | ' + _t("Scope") + ': OpenAlex</div>' +
+              '<div class="observation-detail-chart-head"><strong>' + _format(_t("Evolution by %(label)s"), { label: colLabel }) + '</strong>' +
+              '<button type="button" id="download-detail-chart-btn" class="btn btn-outline-secondary btn-sm observation-chart-download-btn">' + _t("Download chart") + '</button></div>' +
               '<canvas id="country-detail-chart" width="560" height="220"></canvas>' +
               '<div class="observation-detail-insights">' +
                 '<div class="observation-detail-insight"><strong>' + values[0] + '</strong>' +
-                '<div>Peak: ' + formatNumber(peak) + '</div><div>Lowest: ' + formatNumber(low) + '</div>' +
-                '<div>Average: ' + formatNumber(avg) + '</div><div>Growth (' + chartLabels[0] + "-" + chartLabels[chartLabels.length - 1] + '): ' + growthPct.toFixed(1) + '%</div></div>' +
+                '<div>' + _t("Peak") + ': ' + formatNumber(peak) + '</div><div>' + _t("Lowest") + ': ' + formatNumber(low) + '</div>' +
+                '<div>' + _t("Average") + ': ' + formatNumber(avg) + '</div><div>' + _format(_t("Growth (%(start)s-%(end)s)"), { start: chartLabels[0], end: chartLabels[chartLabels.length - 1] }) + ': ' + growthPct.toFixed(1) + '%</div></div>' +
               '</div></div></div></div>'
       );
       if (detailsModal) detailsModal.show();
