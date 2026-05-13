@@ -25,6 +25,13 @@ def global_admin_js():
     return format_html('<script src="{}"></script>', static("admin/js/custom.js"))
 
 
+@hooks.register("construct_main_menu")
+def align_primary_admin_menu(request, menu_items):
+    for item in menu_items:
+        if item.name == "explorer":
+            item.order = 81
+
+
 
 class SourceAdmin(ModelAdmin):
     model = Source
@@ -48,9 +55,9 @@ modeladmin_register(SourceAdmin)
 class SAMenuSnippetViewSet(SnippetViewSet):
     model = SAMenu
     icon = "list-ul"
-    menu_label = _("SciELO Analytics Menus")
+    menu_label = _("Menu")
     add_to_admin_menu = True
-    menu_order = 250
+    menu_order = 83
     list_display = ("title", "handle", "locale", "is_active")
     list_filter = ("is_active", "locale")
     search_fields = ("title", "handle", "short_name")

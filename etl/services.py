@@ -1,38 +1,18 @@
-import hashlib
-import json
 import logging
 import traceback
 from collections import defaultdict
-from typing import Any
 
 from django.conf import settings
 from django.db import transaction
 from django.utils import timezone
 
+from etl.indexing.client import OpenSearchClient
 from etl.models import EtlItemProcess, EtlResult, EtlStatus
-from etl.normalizers import int_or_none
-from etl.pipeline.defaults import PipelineTarget, normalize_document_type
-from etl.pipeline.orchestrator import SilverETLPipeline
-from search_gateway.opensearch import OpenSearchIndexClient
+from etl.pipeline.orchestrator import OpenSearchETLPipeline
+from etl.pipeline.defaults import PIPELINE_TARGETS, get_pipeline_target, resolve_target_name
+from harvest.utils import clean_source_payload, source_hash
 
 logger = logging.getLogger(__name__)
-
-
-def clean_source_payload(source: Any) -> Any:
-    if isinstance(source, dict) and isinstance(source.get("raw_data"), dict):
-        return source["raw_data"]
-    if isinstance(source, dict):
-        return {
-            key: value
-            for key, value in source.items()
-            if key not in {"oca_indexed_at", "oca_source_hash"}
-        }
-    return source or {}
-
-
-def source_hash(source: Any) -> str:
-    payload = json.dumps(clean_source_payload(source), sort_keys=True, default=str)
-    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
 def enqueue_etl_item(
@@ -40,14 +20,15 @@ def enqueue_etl_item(
     source_index: str,
     external_id: str,
     source_payload: dict,
-    document_type: str,
+    document_type: str | None = None,
     publication_year: int | None = None,
     initial_status: str = EtlStatus.PENDING,
 ) -> EtlItemProcess:
-    payload = clean_source_payload(source_payload)
-    current_hash = source_hash(payload)
-    resolved_type = normalize_document_type(document_type)
-    resolved_year = publication_year or int_or_none(payload.get("publication_year"))
+    current_hash = source_hash(source_payload)
+    target = get_pipeline_target(source_index)
+    resolved_type = document_type or target.document_type_for(source_payload)
+    resolved_year = publication_year or _extract_publication_year(source_payload)
+
     defaults = {
         "document_type": resolved_type,
         "publication_year": resolved_year,
@@ -74,58 +55,73 @@ def enqueue_etl_item(
         item.processed_at = None
         item.save(
             update_fields=[
-                "document_type",
-                "publication_year",
-                "source_hash",
-                "status",
-                "result",
-                "error",
-                "processed_at",
-                "updated_at",
+                "document_type", "publication_year", "source_hash",
+                "status", "result", "error", "processed_at", "updated_at",
             ]
         )
     return item
 
 
-def backfill_bronze_items(
-    *,
-    source_index: str,
-    document_type: str,
-    year: int | None = None,
-    limit: int | None = None,
-    initial_status: str = EtlStatus.PENDING,
-) -> int:
-    client = OpenSearchIndexClient()
-    if not client.index_exists(source_index):
-        logger.warning("Index not found for ETL backfill: %s", source_index)
+def _extract_publication_year(source_payload: dict) -> int | None:
+    payload = clean_source_payload(source_payload)
+    value = payload.get("publication_year")
+    if value is None and payload.get("year") is not None:
+        value = payload.get("year")
+    try:
+        return int(value) if value is not None and value != "" else None
+    except (TypeError, ValueError):
+        return None
+
+
+def backfill_bronze_items(bronze_index: str, *, year: int | None = None, limit: int | None = None, initial_status: str = EtlStatus.PENDING) -> int:
+    client = OpenSearchClient()
+    if not client.index_exists(bronze_index):
+        logger.warning("Index not found for backfill: %s", bronze_index)
         return 0
 
-    query: dict[str, Any] = {"match_all": {}}
+    query: dict = {"match_all": {}}
     if year is not None:
         query = {"bool": {"filter": [{"term": {"publication_year": year}}]}}
 
+    page_size = min(limit, 1000) if limit else 1000
+    search_body = {"query": query, "size": page_size}
+
     count = 0
-    for hit in client.scroll_all(source_index, query=query):
-        if limit is not None and count >= limit:
-            break
-        enqueue_etl_item(
-            source_index=source_index,
-            external_id=hit["_id"],
-            source_payload=hit["_source"],
-            document_type=document_type,
-            initial_status=initial_status,
-        )
-        count += 1
+    response = client.client.search(index=bronze_index, body=search_body, scroll="5m")
+    scroll_id = response.get("_scroll_id")
+    try:
+        while True:
+            hits = response["hits"]["hits"]
+            if not hits:
+                break
+            for hit in hits:
+                if limit is not None and count >= limit:
+                    break
+                enqueue_etl_item(
+                    source_index=bronze_index,
+                    external_id=hit["_id"],
+                    source_payload=hit["_source"],
+                    initial_status=initial_status,
+                )
+                count += 1
+
+            if limit is not None and count >= limit:
+                break
+
+            response = client.client.scroll(scroll_id=scroll_id, scroll="5m")
+            scroll_id = response.get("_scroll_id")
+    finally:
+        if scroll_id:
+            client.client.clear_scroll(scroll_id=scroll_id)
+
+    logger.info("Backfilled %s items from %s (status=%s)", count, bronze_index, initial_status)
     return count
 
 
 def process_pending_items(
-    *,
-    source_index: str,
-    document_type: str,
-    silver_index_pattern: str,
     limit: int = 5000,
     retry_failed: bool = False,
+    document_type: str | None = None,
 ) -> list[dict]:
     statuses = [EtlStatus.PENDING]
     if retry_failed:
@@ -133,29 +129,23 @@ def process_pending_items(
 
     with transaction.atomic():
         EtlItemProcess.objects.requeue_stale_processing()
-        qs = EtlItemProcess.objects.select_for_update(skip_locked=True).filter(
-            source_index=source_index,
-            document_type=normalize_document_type(document_type),
-            status__in=statuses,
-        )
+
+        qs = EtlItemProcess.objects.select_for_update(skip_locked=True).filter(status__in=statuses)
+        if document_type:
+            qs = qs.filter(document_type=document_type)
+
         items = list(qs.order_by("updated_at")[:limit])
         for item in items:
             item.mark_processing()
 
-    groups: dict[int | None, list[EtlItemProcess]] = defaultdict(list)
+    groups: dict[tuple[str, int | None], list[EtlItemProcess]] = defaultdict(list)
     for item in items:
-        groups[item.publication_year].append(item)
+        groups[(item.source_index, item.publication_year)].append(item)
 
     results = []
-    for publication_year, group_items in groups.items():
+    for (source_index, year), group_items in groups.items():
         try:
-            result = process_item_group(
-                source_index=source_index,
-                document_type=document_type,
-                silver_index_pattern=silver_index_pattern,
-                publication_year=publication_year,
-                items=group_items,
-            )
+            result = process_item_group(source_index, year, group_items)
             results.append(result)
             group_result = _resolve_item_result(result)
             for item in group_items:
@@ -168,31 +158,23 @@ def process_pending_items(
                     log_etl_error(item=item, exc=exc)
                 except Exception:
                     logger.exception("Failed to write ETL error log")
-            results.append(
-                {
-                    "source_index": source_index,
-                    "publication_year": publication_year,
-                    "errors": len(group_items),
-                    "error": str(exc),
-                }
-            )
+            results.append({"source_index": source_index, "publication_year": year, "errors": len(group_items), "error": str(exc)})
+
     return results
 
 
-def process_item_group(
-    *,
-    source_index: str,
-    document_type: str,
-    silver_index_pattern: str,
-    publication_year: int | None,
-    items: list[EtlItemProcess],
-) -> dict:
-    target = PipelineTarget(
-        document_type=normalize_document_type(document_type),
-        source_index=source_index,
-        silver_index_pattern=silver_index_pattern,
+def process_item_group(source_index: str, publication_year: int | None, items: list[EtlItemProcess]) -> dict:
+    target_name = resolve_target_name(source_index)
+    if not target_name:
+        raise ValueError(f"No ETL target configured for source index: {source_index}")
+
+    target = PIPELINE_TARGETS[target_name]
+    pipeline = OpenSearchETLPipeline(
+        bronze_scielo_index=source_index,
+        bronze_openalex_index=settings.ETL_RAW_OPENALEX_WORKS,
+        silver_index_pattern=target.silver_index_pattern,
+        public_alias=settings.ETL_PUBLIC_ALIAS,
     )
-    pipeline = SilverETLPipeline(target)
     result = pipeline.run(
         year_filter=publication_year,
         doc_ids=[item.external_id for item in items],
@@ -202,11 +184,7 @@ def process_item_group(
     result["item_count"] = len(items)
     result["indexed_indices"] = sorted(pipeline.indexed_index_names)
 
-    missing_ids = [
-        item.external_id
-        for item in items
-        if str(item.external_id) not in pipeline.loaded_source_ids
-    ]
+    missing_ids = [item.external_id for item in items if str(item.external_id) not in pipeline.loaded_source_ids]
     if missing_ids:
         result["missing_source_ids"] = missing_ids
         raise RuntimeError(f"Pipeline did not load requested source IDs: {missing_ids}")
@@ -215,19 +193,22 @@ def process_item_group(
         raise RuntimeError(f"Pipeline finished with errors: {result}")
     if result.get("total_indexed_docs", 0) <= 0:
         raise RuntimeError(f"Pipeline did not index any silver documents: {result}")
+
     return result
 
 
 def _resolve_item_result(result: dict) -> str:
+    if result.get("groups_with_openalex_matches", 0) or result.get("total_duplicates_found", 0):
+        return EtlResult.MERGED
     if result.get("total_indexed_docs", 0):
         return EtlResult.UPDATED
     return EtlResult.UNCHANGED
 
 
 def log_etl_error(item: EtlItemProcess, exc: Exception):
-    client = OpenSearchIndexClient()
+    client = OpenSearchClient()
     client.client.index(
-        index=settings.ETL_ERROR_INDEX,
+        index="etl_errors",
         body={
             "source_index": item.source_index,
             "external_id": item.external_id,
@@ -240,14 +221,3 @@ def log_etl_error(item: EtlItemProcess, exc: Exception):
         },
         refresh=False,
     )
-
-
-__all__ = [
-    "backfill_bronze_items",
-    "clean_source_payload",
-    "enqueue_etl_item",
-    "log_etl_error",
-    "process_item_group",
-    "process_pending_items",
-    "source_hash",
-]

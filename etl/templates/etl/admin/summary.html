@@ -1,40 +1,67 @@
-{% extends "wagtailadmin/generic/base.html" %}
-{% load i18n %}
+{% extends "wagtailadmin/generic/listing.html" %}
 
-{% block main_content %}
-  <section>
-    <h2>{% trans "Processing summary" %}</h2>
-    <ul>
-      <li>{% trans "Total" %}: {{ stats.total }}</li>
-      <li>{% trans "Pending" %}: {{ stats.pending }}</li>
-      <li>{% trans "Processing" %}: {{ stats.processing }}</li>
-      <li>{% trans "Success" %}: {{ stats.success }}</li>
-      <li>{% trans "Failed" %}: {{ stats.failed }}</li>
-      <li>{% trans "Skipped" %}: {{ stats.skipped }}</li>
-    </ul>
-  </section>
-
-  <section>
-    <h2>{% trans "By document type" %}</h2>
+{% block listing %}
+<div id="listing-results">
     <table class="listing">
-      <thead>
-        <tr>
-          <th>{% trans "Document type" %}</th>
-          <th>{% trans "Total" %}</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for document_type, total in stats.by_type %}
-          <tr>
-            <td>{{ document_type }}</td>
-            <td>{{ total }}</td>
-          </tr>
-        {% empty %}
-          <tr>
-            <td colspan="2">{% trans "No ETL items registered yet." %}</td>
-          </tr>
-        {% endfor %}
-      </tbody>
+        <thead>
+            <tr>
+                <th>Type</th>
+                <th>Total</th>
+                <th>Pending</th>
+                <th>Processing</th>
+                <th>Success</th>
+                <th>Failed</th>
+                <th>Skipped</th>
+                <th>Merged</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in stats.by_type_rows %}
+                <tr>
+                    <td>
+                        <a href="{{ list_url }}?document_type={{ row.key }}">
+                            {{ row.label }}
+                        </a>
+                    </td>
+                    <td>{{ row.total }}</td>
+                    <td>{{ row.pending }}</td>
+                    <td>{{ row.processing }}</td>
+                    <td>{{ row.success }}</td>
+                    <td>{{ row.failed }}</td>
+                    <td>{{ row.skipped }}</td>
+                    <td>{{ row.merged }}</td>
+                    <td>
+                        <div style="display:flex; flex-direction:column; gap:4px;">
+                            <form method="post" action="{{ trigger_pipeline_url }}">
+                                {% csrf_token %}
+                                <input type="hidden" name="type" value="{{ row.key }}">
+                                <button type="submit" class="button button-small button-secondary" title="Run full pipeline for {{ row.label }}"
+                                        onclick="return confirm('Run full pipeline for {{ row.label|escapejs }}?')">
+                                    Run Pipeline
+                                </button>
+                            </form>
+                            <form method="post" action="{{ trigger_pending_by_type_url }}">
+                                {% csrf_token %}
+                                <input type="hidden" name="type" value="{{ row.key }}">
+                                <button type="submit" class="button button-small button-secondary" title="Process pending items for {{ row.label }}"
+                                        onclick="return confirm('Process pending items for {{ row.label|escapejs }}?')">
+                                    Run Pending
+                                </button>
+                            </form>
+                            <form method="post" action="{{ retry_failed_by_type_url }}">
+                                {% csrf_token %}
+                                <input type="hidden" name="type" value="{{ row.key }}">
+                                <button type="submit" class="button button-small button-secondary" title="Retry failed items for {{ row.label }}"
+                                        onclick="return confirm('Retry failed items for {{ row.label|escapejs }}?')">
+                                    Retry Failed
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
     </table>
-  </section>
+</div>
 {% endblock %}
