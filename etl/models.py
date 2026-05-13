@@ -1,7 +1,52 @@
 from datetime import timedelta
+from fnmatch import fnmatch
 
+from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
+from wagtail.admin.panels import FieldPanel
+from wagtail_json_widget.widgets import JSONEditorWidget
+
+from harvest.utils import clean_source_payload
+from etl.transform.normalizers import normalize_document_type_for_etl
+
+
+DOCUMENT_TYPE_CHOICES = (
+    ("article", "Article"),
+    ("book", "Book"),
+    ("book-chapter", "Book chapter"),
+    ("preprint", "Preprint"),
+    ("dataset", "Dataset"),
+)
+
+INPUT_DOCUMENT_KIND_CHOICES = (
+    ("article", "SciELO Article"),
+    ("book", "SciELO Book"),
+    ("preprint", "SciELO Preprint"),
+    ("dataset", "SciELO Dataset"),
+)
+
+DEFAULT_OPENALEX_VALIDATION_RULES = {
+    "year_tolerance": 1,
+    "require_openalex_year": True,
+    "require_source_match": False,
+    "source_similarity_threshold": 0.80,
+    "title_match_threshold": 0.85,
+    "title_reject_threshold": 0.80,
+    "min_score": 50,
+    "strict_min_score": 60,
+    "doi_score": 50,
+    "year_exact_score": 30,
+    "year_close_score": 20,
+    "isbn_score": 35,
+    "source_id_score": 40,
+    "source_title_score": 30,
+    "title_score": 30,
+    "isbn_requires_title_match": False,
+    "isbn_title_threshold": 0.80,
+}
 
 
 class EtlStatus(models.TextChoices):
