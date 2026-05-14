@@ -14,6 +14,7 @@ from .csl_json import (
     normalize_doi,
 )
 from .models import SearchPage
+from .normalize import normalize_orcid, orcid_url
 from .ris_export import render_ris_lines
 
 
@@ -75,12 +76,45 @@ class SearchPaginationTests(SimpleTestCase):
             ["<<", "<", "396", "397", "398", "399", "400", ">", ">>"],
         )
 
+    def test_pagination_marks_when_result_window_limit_is_exceeded(self):
+        results = SearchPage.current_pagination(
+            {"search_results": [{}], "total_results": 10001},
+            page=1,
+            page_size=25,
+        )
+
+        self.assertEqual(results["accessible_results_limit"], 10000)
+        self.assertTrue(results["accessible_results_limit_exceeded"])
+
+    def test_pagination_does_not_mark_result_window_limit_at_boundary(self):
+        results = SearchPage.current_pagination(
+            {"search_results": [{}], "total_results": 10000},
+            page=1,
+            page_size=25,
+        )
+
+        self.assertFalse(results["accessible_results_limit_exceeded"])
+
 
 class NormalizeDoiTests(SimpleTestCase):
     def test_strips_https_prefix(self):
         self.assertEqual(
             normalize_doi("https://doi.org/10.1234/foo"),
             "10.1234/foo",
+        )
+
+
+class NormalizeOrcidTests(SimpleTestCase):
+    def test_strips_orcid_url_prefix(self):
+        self.assertEqual(
+            normalize_orcid("https://orcid.org/0000-0002-1825-0097"),
+            "0000-0002-1825-0097",
+        )
+
+    def test_builds_orcid_url(self):
+        self.assertEqual(
+            orcid_url("0000-0002-1825-0097"),
+            "https://orcid.org/0000-0002-1825-0097",
         )
 
 

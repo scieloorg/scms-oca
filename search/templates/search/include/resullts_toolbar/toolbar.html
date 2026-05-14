@@ -9,8 +9,30 @@
             {% if results_data.shown_count %}{{ results_data.start_result|intcomma }}-{{ results_data.end_result|intcomma }}{% else %}0{% endif %}
         </span>
         <span class="results-toolbar__summary-label">{% trans "de" %}</span>
-        <span class="results-toolbar__summary-total">{{ total_count|intcomma }}</span>
+            <span class="results-toolbar__summary-total">{{ total_count|intcomma }}</span>
         <span class="results-toolbar__summary-label">{% trans "resultados" %}</span>
+        {% if total_count > 10000 %}
+            <div class="results-toolbar__hint ml-2"
+                 tabindex="0"
+                 aria-label="{% trans 'Por questões de performance, o sistema exibe apenas os primeiros 10.000 registros. Use os filtros laterais para encontrar resultados específicos.' %}">
+                <svg width="16"
+                     height="16"
+                     viewBox="0 0 24 24"
+                     fill="none"
+                     xmlns="http://www.w3.org/2000/svg"
+                     stroke="currentColor"
+                     stroke-width="2"
+                     stroke-linecap="round"
+                     stroke-linejoin="round"
+                     aria-hidden="true"
+                     focusable="false">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="16" x2="12" y2="12"></line>
+                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                </svg>
+                <span class="tooltiptext">{% trans "Por questões de performance, o sistema exibe apenas os primeiros 10.000 registros. Use os filtros laterais para encontrar resultados específicos." %}</span>
+            </div>
+        {% endif %}
     </div>
 
     <div class="results-toolbar__actions">

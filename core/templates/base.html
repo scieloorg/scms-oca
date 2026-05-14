@@ -3,9 +3,11 @@
 {% load wagtailsettings_tags %}
 
 {% get_settings use_default_site=True %}
+{% get_current_language as LANGUAGE_CODE %}
+{% get_current_language_bidi as LANGUAGE_BIDI %}
 
 <!DOCTYPE html>
-<html dir="ltr" lang="en-US">
+<html dir="{% if LANGUAGE_BIDI %}rtl{% else %}ltr{% endif %}" lang="{{ LANGUAGE_CODE|default:'en' }}">
 
   <head>
       <meta charset="utf-8">
@@ -53,13 +55,17 @@
 
   <body class="{% block body_class %}stretched device-xl has-plugin-easing has-plugin-bootstrap has-plugin-swiper has-plugin-animations has-plugin-carousel has-plugin-form has-plugin-ajaxform has-plugin-subscribeform has-plugin-isotope has-plugin-html5video quick-contact-form-ready gototop-active{% endblock %}">
 
+    <a class="skip-link" href="#main-content">{% trans "Pular para o conteúdo principal" %}</a>
+
     <div id="wrapper" class="clearfix">
 
       {# {% include 'include/top_bar.html' %} #}
 
       {% include 'include/header.html' %}
 
-      {% block content %}{% endblock content %}
+      <main id="main-content" tabindex="-1">
+        {% block content %}{% endblock content %}
+      </main>
 
     </div>
 
