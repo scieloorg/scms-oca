@@ -10,6 +10,7 @@ from etl.client import OpenSearchClient
 from etl.models import EtlItemProcess, EtlPipelineConfig, EtlResult, EtlStatus
 from etl.pipeline import OpenSearchETLPipeline
 from etl.transform.extractors import extract_isbns
+from etl.transform.normalizers import normalize_document_type_for_etl
 from harvest.utils import clean_source_payload, source_hash
 from search_gateway.opensearch import OpenSearchIndexClient
 
@@ -27,7 +28,11 @@ def enqueue_etl_item(
 ) -> EtlItemProcess:
     current_hash = source_hash(source_payload)
     pipeline_config = EtlPipelineConfig.objects.get_for_source(source_index, source_payload)
-    resolved_type = document_type or pipeline_config.document_type_for_payload(source_payload)
+    resolved_type = (
+        normalize_document_type_for_etl(document_type)
+        if document_type
+        else pipeline_config.document_type_for_payload(source_payload)
+    )
     resolved_year = publication_year or _extract_publication_year(source_payload)
 
     raw_ids = source_payload.get("ids") if isinstance(source_payload.get("ids"), dict) else {}

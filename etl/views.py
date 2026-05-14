@@ -9,12 +9,6 @@ from wagtail.admin.auth import permission_denied, require_admin_access
 from etl.models import EtlItemProcess, EtlStatus
 from etl.tasks import process_pending_silver_etl
 
-DOCUMENT_TYPES = (
-    "article",
-    "book",
-    "preprint",
-    "dataset",
-)
 STATUS_FIELDS = (
     EtlStatus.PENDING,
     EtlStatus.PROCESSING,
@@ -25,9 +19,11 @@ STATUS_FIELDS = (
 DOCUMENT_TYPE_LABELS = {
     "article": _("Articles"),
     "book": _("Books"),
+    "book-chapter": _("Book Chapters"),
     "preprint": _("Preprints"),
     "dataset": _("Datasets"),
 }
+DOCUMENT_TYPES = tuple(DOCUMENT_TYPE_LABELS)
 
 
 def _compute_stats():

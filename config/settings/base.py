@@ -483,7 +483,7 @@ SEARCH_GATEWAY_LOOKUP_SOURCE_INDEX = env.str(
     "SEARCH_GATEWAY_LOOKUP_SOURCE_INDEX",
     OP_INDEX_SCIENTIFIC_PRODUCTION,
 )
-SEARCH_GATEWAY_LOOKUP_BATCH_SIZE = env.int("SEARCH_GATEWAY_LOOKUP_BATCH_SIZE", 500)
+SEARCH_GATEWAY_LOOKUP_BATCH_SIZE = env.int("SEARCH_GATEWAY_LOOKUP_BATCH_SIZE", 10000)
 SEARCH_GATEWAY_LOOKUP_NUMBER_OF_SHARDS = env.int("SEARCH_GATEWAY_LOOKUP_NUMBER_OF_SHARDS", 5)
 SEARCH_GATEWAY_LOOKUP_NUMBER_OF_REPLICAS = env.int("SEARCH_GATEWAY_LOOKUP_NUMBER_OF_REPLICAS", 0)
 SEARCH_GATEWAY_ERROR_INDEX = env.str("SEARCH_GATEWAY_ERROR_INDEX", "search_gateway_errors")
@@ -497,10 +497,21 @@ ETL_DOCUMENT_TYPE_ALIAS = env.json(
         "research-article": "article",
         "review": "article",
         "review-article": "article",
+        "abstract": "article",
+        "addendum": "article",
+        "article-commentary": "article",
+        "book-review": "article",
+        "brief-report": "article",
+        "case-report": "article",
         "letter": "article",
         "editorial": "article",
         "correction": "article",
         "erratum": "article",
+        "news": "article",
+        "oration": "article",
+        "press-release": "article",
+        "rapid-communication": "article",
+        "undefined": "article",
         "book-part": "book-chapter",
         "chapter": "book-chapter",
     },

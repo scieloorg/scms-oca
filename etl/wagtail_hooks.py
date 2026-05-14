@@ -26,7 +26,6 @@ class EtlItemProcessViewSet(SnippetViewSet):
 
     list_display = (
         "external_id",
-        "pid_v2",
         "doi",
         "document_type",
         "source_index",
@@ -35,8 +34,6 @@ class EtlItemProcessViewSet(SnippetViewSet):
         "result",
         "has_openalex_match",
         "has_scielo_dedup",
-        "scielo_dedup_ids",
-        "openalex_match_ids",
         "attempts",
         "processed_at",
     )

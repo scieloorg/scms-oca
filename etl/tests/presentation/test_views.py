@@ -25,6 +25,9 @@ class SummaryViewTests(EtlAdminViewTestCase):
         response = self.client.get(reverse("etl_summary"))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "ETL Summary")
+        self.assertContains(response, "Book Chapters")
+        self.assertContains(response, "SciELO dedup")
+        self.assertContains(response, "OpenAlex match")
         self.assertIn("stats", response.context)
         self.assertIn("by_type_rows", response.context["stats"])
 
@@ -54,6 +57,26 @@ class TriggerViewTests(EtlAdminViewTestCase):
         )
         self.assertEqual(response.status_code, 302)
         mock_task.delay.assert_not_called()
+
+    @patch("etl.views.process_pending_silver_etl")
+    def test_trigger_pending_by_type_accepts_book_chapter(self, mock_task):
+        mock_task.delay.return_value.id = "task-book-chapter"
+        response = self.client.post(
+            reverse("etl_trigger_pending_by_type"),
+            {"type": "book-chapter"},
+        )
+        self.assertEqual(response.status_code, 302)
+        mock_task.delay.assert_called_once_with(document_type="book-chapter")
+
+    @patch("etl.views.process_pending_silver_etl")
+    def test_retry_failed_by_type_accepts_book_chapter(self, mock_task):
+        mock_task.delay.return_value.id = "task-book-chapter"
+        response = self.client.post(
+            reverse("etl_retry_failed_by_type"),
+            {"type": "book-chapter"},
+        )
+        self.assertEqual(response.status_code, 302)
+        mock_task.delay.assert_called_once_with(document_type="book-chapter")
 
     def test_retry_failed_by_type_requires_post(self):
         response = self.client.get(reverse("etl_retry_failed_by_type"))
