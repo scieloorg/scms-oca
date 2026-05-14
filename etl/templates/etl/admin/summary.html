@@ -35,14 +35,6 @@
                     <td>{{ row.openalex }}</td>
                     <td>
                         <div style="display:flex; flex-direction:column; gap:4px;">
-                            <form method="post" action="{{ trigger_pipeline_url }}">
-                                {% csrf_token %}
-                                <input type="hidden" name="type" value="{{ row.key }}">
-                                <button type="submit" class="button button-small button-secondary" title="Run full pipeline for {{ row.label }}"
-                                        onclick="return confirm('Run full pipeline for {{ row.label|escapejs }}?')">
-                                    Run Pipeline
-                                </button>
-                            </form>
                             <form method="post" action="{{ trigger_pending_by_type_url }}">
                                 {% csrf_token %}
                                 <input type="hidden" name="type" value="{{ row.key }}">
