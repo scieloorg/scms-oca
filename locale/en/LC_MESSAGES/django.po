@@ -542,7 +542,7 @@ msgstr "Article Directory"
 
 #: config/settings/base.py:408
 msgid "Português (Brasil)"
-msgstr ""
+msgstr "Portuguese (Brazil)"
 
 #: config/settings/base.py:409
 msgid "English"
@@ -550,7 +550,7 @@ msgstr ""
 
 #: config/settings/base.py:410
 msgid "Español"
-msgstr ""
+msgstr "Spanish"
 
 #: config/settings/base.py:427 core/templates/menus/menu_items_bottom.html:37
 #: core/templates/menus/menu_items_bottom.html:39

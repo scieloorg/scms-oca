@@ -542,7 +542,7 @@ msgstr "Diretório de Artigos"
 
 #: config/settings/base.py:408
 msgid "Português (Brasil)"
-msgstr ""
+msgstr "Portugués Brasileño"
 
 #: config/settings/base.py:409
 msgid "English"
