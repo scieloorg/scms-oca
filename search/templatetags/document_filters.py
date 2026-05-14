@@ -1,7 +1,7 @@
 from django import template
 
 from harvest.language_normalizer import normalize_language_field
-from search.normalize import as_list, split_lang_code, unique
+from search.normalize import as_list, orcid_url as build_orcid_url, split_lang_code, unique
 
 
 register = template.Library()
@@ -79,3 +79,8 @@ def normalize_doi(value):
 def doi_url(value):
     doi = normalize_doi(value)
     return f"https://doi.org/{doi}" if doi else ""
+
+
+@register.filter
+def orcid_url(value):
+    return build_orcid_url(value)

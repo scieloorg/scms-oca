@@ -7,9 +7,13 @@
     {% csrf_token %}
     <input type="hidden" id="language-next" name="next" value="{{ request.get_full_path|default:'/' }}" />
 
+    <label class="visually-hidden" for="language-select">{% trans "Selecionar idioma" %}</label>
     <select id="language-select" name="language" class="sm-form-control lang-select">
         {% for language in language_links %}
-            <option value="{{ language.code }}"{% if language.selected %} selected{% endif %} data-url="{{ language.url }}">{{ language.code|upper }}</option>
+            <option value="{{ language.code }}"{% if language.selected %} selected{% endif %} data-url="{{ language.url }}">{{ language.label }}</option>
         {% endfor %}
     </select>
+    <noscript>
+        <button type="submit" class="language-submit">{% trans "Aplicar idioma" %}</button>
+    </noscript>
 </form>

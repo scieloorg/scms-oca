@@ -41,3 +41,29 @@ def as_list(value):
         normalized.append(item)
 
     return unique(normalized)
+
+
+_ORCID_PREFIXES = (
+    "https://orcid.org/",
+    "http://orcid.org/",
+    "orcid.org/",
+)
+
+
+def normalize_orcid(value):
+    items = as_list(value)
+    if not items:
+        return ""
+
+    orcid = str(items[0]).strip()
+    lower_orcid = orcid.lower()
+    for prefix in _ORCID_PREFIXES:
+        if lower_orcid.startswith(prefix):
+            return orcid[len(prefix):]
+
+    return orcid
+
+
+def orcid_url(value):
+    orcid = normalize_orcid(value)
+    return f"https://orcid.org/{orcid}" if orcid else ""

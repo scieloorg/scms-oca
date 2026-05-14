@@ -389,6 +389,7 @@
   border-radius: 6px;
   box-shadow: 0 8px 22px rgba(20, 38, 64, 0.05);
   padding: 1rem 1.25rem;
+  overflow: visible;
 }
 
 .results-toolbar__summary {
@@ -397,6 +398,7 @@
   flex-wrap: wrap;
   gap: 0.4rem;
   min-width: 0;
+  overflow: visible;
   color: #132741;
   font-size: 0.86rem;
   font-weight: 700;
@@ -411,6 +413,99 @@
 .results-toolbar__summary-range,
 .results-toolbar__summary-total {
   color: #23428a;
+}
+
+.results-toolbar__summary-actual-total {
+  color: #7e90a7;
+  font-size: 0.64rem;
+  font-weight: 700;
+}
+
+/* Nota: não usar a classe global `tooltip` do Bootstrap — ela define opacity:0 e quebra o ícone. */
+.results-toolbar .results-toolbar__hint {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: help;
+  flex-shrink: 0;
+  outline: none;
+  opacity: 1;
+  margin: 0;
+  padding: 0;
+  z-index: auto;
+  font: inherit;
+  text-transform: none;
+  letter-spacing: normal;
+  line-height: 1;
+  white-space: normal;
+  pointer-events: auto;
+}
+
+.results-toolbar .results-toolbar__hint.ml-2 {
+  margin-left: 0.5rem;
+}
+
+.results-toolbar .results-toolbar__hint svg {
+  display: block;
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  color: #9ca3af;
+  transition: color 0.15s ease;
+}
+
+.results-toolbar .results-toolbar__hint:hover svg,
+.results-toolbar .results-toolbar__hint:focus-visible svg {
+  color: #3b82f6;
+}
+
+.results-toolbar .results-toolbar__hint .tooltiptext {
+  visibility: hidden;
+  opacity: 0;
+  /* Largura explícita: o ancestor (.results-toolbar__hint) é estreito; width:auto/colapsa ao CB. */
+  width: min(18rem, calc(100vw - 1.5rem));
+  max-width: min(18rem, calc(100vw - 1.5rem));
+  box-sizing: border-box;
+  /* Mesma cor do total de resultados (.results-toolbar__summary-total) */
+  background-color: #23428a;
+  color: #fff;
+  text-align: left;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.35;
+  text-transform: none;
+  letter-spacing: normal;
+  padding: 0.5rem 0.65rem;
+  border-radius: 0.35rem;
+  position: absolute;
+  z-index: 1090;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  box-shadow: 0 4px 12px rgba(20, 38, 64, 0.18);
+  transition:
+    opacity 0.15s ease,
+    visibility 0.15s ease,
+    transform 0.15s ease;
+  pointer-events: none;
+  overflow-wrap: normal;
+  word-break: normal;
+  hyphens: none;
+  white-space: normal;
+}
+
+.results-toolbar .results-toolbar__hint:hover .tooltiptext,
+.results-toolbar .results-toolbar__hint:focus-within .tooltiptext,
+.results-toolbar .results-toolbar__hint:focus-visible .tooltiptext {
+  visibility: visible;
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.results-toolbar .results-toolbar__hint:focus-visible {
+  box-shadow: 0 0 0 2px rgba(91, 141, 239, 0.45);
+  border-radius: 50%;
 }
 
 .results-toolbar__actions {
@@ -1465,6 +1560,22 @@
     align-items: stretch;
     padding: 0.9rem 1rem;
     border-radius: 4px;
+  }
+
+  /* Tooltip: sem cortar à esquerda; largura fixa em vw (evita shrink ao width do ícone ~16px). */
+  .results-toolbar .results-toolbar__hint .tooltiptext {
+    left: 0;
+    right: auto;
+    transform: translateY(4px);
+    width: min(18rem, calc(100vw - 1.25rem));
+    max-width: min(18rem, calc(100vw - 1.25rem));
+    z-index: 1200;
+  }
+
+  .results-toolbar .results-toolbar__hint:hover .tooltiptext,
+  .results-toolbar .results-toolbar__hint:focus-within .tooltiptext,
+  .results-toolbar .results-toolbar__hint:focus-visible .tooltiptext {
+    transform: translateY(0);
   }
 
   .results-toolbar__actions {
