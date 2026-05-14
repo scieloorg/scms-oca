@@ -97,29 +97,10 @@ def summary_view(request):
                 {"url": reverse("wagtailadmin_home"), "label": _("Home")},
                 {"url": "", "label": _("ETL Summary")},
             ],
-            "trigger_pipeline_url": reverse("etl_trigger_pipeline"),
             "trigger_pending_by_type_url": reverse("etl_trigger_pending_by_type"),
             "retry_failed_by_type_url": reverse("etl_retry_failed_by_type"),
         },
     )
-
-
-@require_POST
-def trigger_pipeline_view(request):
-    from etl.tasks import run_silver_etl
-
-    target_type = request.POST.get("type", "preprint")
-    if target_type not in DOCUMENT_TYPES:
-        messages.error(request, f"Invalid target type: {target_type}")
-        return HttpResponseRedirect(request.META.get("HTTP_REFERER", "/admin/"))
-    if _processing_already_running(target_type, request):
-        return HttpResponseRedirect(request.META.get("HTTP_REFERER", "/admin/"))
-    result = run_silver_etl.delay(target_type=target_type)
-    messages.success(
-        request,
-        f"ETL pipeline triggered for '{target_type}'. Task ID: {result.id}",
-    )
-    return HttpResponseRedirect(request.META.get("HTTP_REFERER", "/admin/"))
 
 
 @require_POST
@@ -167,16 +148,6 @@ def retry_failed_by_type_view(request):
         f"Pending ETL triggered for '{document_type}'. Task ID: {result.id}",
     )
     return HttpResponseRedirect(request.META.get("HTTP_REFERER", "/admin/"))
-
-
-@require_POST
-def reset_to_pending_view(request):
-    ids = request.POST.get("ids", "")
-    if ids:
-        id_list = [i.strip() for i in ids.split(",") if i.strip()]
-        rows = EtlItemProcess.objects.reset_to_pending(id_list)
-        messages.success(request, _("%(count)s item(s) reset to pending.") % {"count": rows})
-    return redirect(request.META.get("HTTP_REFERER", "/admin/"))
 
 
 @require_POST

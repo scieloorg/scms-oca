@@ -189,6 +189,7 @@ class LookupIndexBuildService:
             )
             for lookup_key, builder in builders.items()
         }
+
         seen: dict[str, str] = {}
         for lookup_key, index_name in index_names.items():
             existing_lookup_key = seen.get(index_name)
@@ -197,12 +198,15 @@ class LookupIndexBuildService:
                     f"Lookups '{existing_lookup_key}' and '{lookup_key}' target the same "
                     f"index '{index_name}'. Please use different index names."
                 )
+
             seen[index_name] = lookup_key
+
         return index_names
 
     def validate_source(self) -> None:
         if not self.client.ping():
             raise ConnectionError("Could not connect to OpenSearch.")
+
         if not self.client.indices.exists(index=self.source_index):
             raise ValueError(f"Source index or alias '{self.source_index}' does not exist.")
 
@@ -220,6 +224,7 @@ class LookupIndexBuildService:
             {field for builder in builders.values() for field in builder.source_fields}
         )
         query = {"_source": source_fields, "query": {"match_all": {}}}
+
         processed = 0
         if self.progress:
             self.progress(f"Scanning source index '{self.source_index}'...")
@@ -227,10 +232,13 @@ class LookupIndexBuildService:
         for hit in scan(self.client, index=self.source_index, query=query, size=self.batch_size):
             source = hit.get("_source", {})
             processed += 1
+
             for lookup_key, builder in builders.items():
                 builder.collect(source, self.max_items.get(lookup_key))
+
             if self.progress and processed % 10000 == 0:
                 self.progress(f"Processed {processed:,} source documents...")
+
             if self.max_docs is not None and processed >= self.max_docs:
                 break
 
@@ -242,9 +250,11 @@ class LookupIndexBuildService:
     def _truncate(self, value: Any, limit: int = 160) -> str | None:
         if value is None:
             return None
+
         text = str(value)
         if len(text) <= limit:
             return text
+
         return f"{text[:limit]}..."
 
     def _safe_bulk_error(self, item: Any) -> dict[str, Any]:
@@ -291,6 +301,7 @@ class LookupIndexBuildService:
             "expected_count": expected_count,
             "sample_errors": sample_errors,
         }
+
         try:
             OpenSearchIndexClient(client=self.client).index_error(
                 component="search_gateway.lookup",
@@ -312,6 +323,7 @@ class LookupIndexBuildService:
         success = 0
         error_count = 0
         sample_errors = []
+
         if self.progress:
             self.progress(
                 f"Starting bulk indexing {expected_count:,} lookup documents "
@@ -335,6 +347,7 @@ class LookupIndexBuildService:
                     error_count += 1
                     if len(sample_errors) < 5:
                         sample_errors.append(self._safe_bulk_error(item))
+
         except Exception as exc:
             raise ValueError(
                 f"Fatal bulk indexing failure for lookup '{lookup_key}' in '{index_name}' "
@@ -350,6 +363,7 @@ class LookupIndexBuildService:
             expected_count=expected_count,
             sample_errors=sample_errors,
         )
+
         if error_count and self.progress:
             self.progress(
                 f"Finished indexing '{index_name}' with {success:,} successes "
@@ -361,25 +375,32 @@ class LookupIndexBuildService:
 
         self.client.indices.refresh(index=index_name)
         count_response = self.client.count(index=index_name)
+
         if hasattr(count_response, "get"):
             indexed_total = count_response.get("count")
+
         elif hasattr(count_response, "body") and hasattr(count_response.body, "get"):
             indexed_total = count_response.body.get("count")
+
         else:
             indexed_total = None
+
         if indexed_total != success:
             raise ValueError(
                 f"Index '{index_name}' count mismatch after refresh: bulk reported "
                 f"{success:,} successful documents, but OpenSearch count returned "
                 f"{indexed_total!r}."
             )
+
         if expected_count != success + error_count:
             raise ValueError(
                 f"Index '{index_name}' expected {expected_count:,} lookup documents, "
                 f"but bulk reported {success:,} successful and {error_count:,} failed documents."
             )
+
         if self.progress:
             self.progress(f"Verified {indexed_total:,} documents in '{index_name}'.")
+
         return {"indexed": success, "errors": error_count}
 
     def create_indices(self, builders: dict[str, LookupBuilder], index_names: dict[str, str]) -> None:
@@ -410,12 +431,14 @@ class LookupIndexBuildService:
                     f"Collected {builder.count():,} values for lookup '{lookup_key}' "
                     f"from {processed_docs:,} documents."
                 )
+
             bulk_result = self.bulk_index(
                 lookup_key,
                 index_name,
                 builder.iter_actions(index_name),
                 builder.count(),
             )
+
             indexed_counts[lookup_key] = bulk_result["indexed"]
             if bulk_result["errors"]:
                 error_counts[lookup_key] = bulk_result["errors"]

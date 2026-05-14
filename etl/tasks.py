@@ -9,22 +9,6 @@ from etl.services import backfill_input_items, process_pending_items
 BATCH_SIZE = 1000
 
 
-@celery_app.task(name="[ETL] Run pipeline")
-def run_silver_etl(
-    target_type="article",
-    year=None,
-    max_docs=None,
-    openalex_index=settings.ETL_INPUT_OPENALEX_WORKS,
-    user_id=None,
-):
-    return run_pipeline_targets(
-        target_type,
-        year=year,
-        max_docs=max_docs,
-        openalex_index=openalex_index,
-    )
-
-
 @celery_app.task(name="[ETL] Process pending silver items")
 def process_pending_silver_etl(limit=BATCH_SIZE, user_id=None, document_type=None):
     """
