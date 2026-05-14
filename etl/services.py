@@ -4,13 +4,14 @@ from collections import defaultdict
 
 from django.conf import settings
 from django.db import transaction
-from django.utils import timezone
 
+from core.utils.db import refresh_db_connections
 from etl.client import OpenSearchClient
 from etl.models import EtlItemProcess, EtlPipelineConfig, EtlResult, EtlStatus
 from etl.pipeline import OpenSearchETLPipeline
 from etl.transform.extractors import extract_isbns
 from harvest.utils import clean_source_payload, source_hash
+from search_gateway.opensearch import OpenSearchIndexClient
 
 logger = logging.getLogger(__name__)
 
@@ -121,6 +122,7 @@ def backfill_input_items(
     initial_status: str = EtlStatus.PENDING,
 ) -> int:
     client = OpenSearchClient()
+    refresh_db_connections()
 
     if not client.index_exists(input_index):
         logger.warning("Index not found for backfill: %s", input_index)
@@ -136,6 +138,7 @@ def backfill_input_items(
     count = 0
     response = client.client.search(index=input_index, body=search_body, scroll="5m")
     scroll_id = response.get("_scroll_id")
+    refresh_interval = settings.ETL_DB_CONNECTION_REFRESH_INTERVAL
 
     try:
         while True:
@@ -143,10 +146,13 @@ def backfill_input_items(
             if not hits:
                 break
 
+            refresh_db_connections()
             for hit in hits:
                 if limit is not None and count >= limit:
                     break
 
+                if refresh_interval > 0 and count and count % refresh_interval == 0:
+                    refresh_db_connections()
                 enqueue_etl_item(
                     source_index=input_index,
                     external_id=hit["_id"],
@@ -205,6 +211,7 @@ def process_pending_items(
         try:
             result = process_item_group(source_index, year, item_document_type, group_items)
             results.append(result)
+            refresh_db_connections()
 
             openalex_ids = set(result.get("openalex_matched_source_ids") or [])
             dedup_ids = set(result.get("scielo_dedup_source_ids") or [])
@@ -230,6 +237,7 @@ def process_pending_items(
 
         except Exception as exc:
             logger.exception("Silver ETL pending group failed")
+            refresh_db_connections()
 
             for item in group_items:
                 item.mark_failed(exc)
@@ -274,10 +282,14 @@ def process_item_group(
         pipeline_config=pipeline_config,
     )
 
-    result = pipeline.run(
-        year_filter=publication_year,
-        doc_ids=[item.external_id for item in items],
-    )
+    refresh_db_connections()
+    try:
+        result = pipeline.run(
+            year_filter=publication_year,
+            doc_ids=[item.external_id for item in items],
+        )
+    finally:
+        refresh_db_connections()
 
     result["source_index"] = source_index
     result["publication_year"] = publication_year
@@ -304,18 +316,17 @@ def process_item_group(
 
 
 def log_etl_error(item: EtlItemProcess, exc: Exception):
-    client = OpenSearchClient()
-    client.client.index(
-        index="etl_errors",
-        body={
+    OpenSearchIndexClient().index_error(
+        component="etl",
+        operation="silver_etl",
+        message=str(exc),
+        error_type=exc.__class__.__name__,
+        traceback_text=traceback.format_exc(),
+        context={
             "source_index": item.source_index,
             "external_id": item.external_id,
             "document_type": item.document_type,
             "publication_year": item.publication_year,
-            "error_type": exc.__class__.__name__,
-            "message": str(exc),
-            "traceback": traceback.format_exc(),
-            "created_at": timezone.now().isoformat(),
         },
-        refresh=False,
+        error_index_name=settings.ETL_ERROR_INDEX,
     )
