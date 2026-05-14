@@ -1,0 +1,45 @@
+{% extends "wagtailadmin/bulk_actions/confirmation/base.html" %}
+{% load i18n %}
+
+{% block titletag %}
+    {% trans "Reset to pending" %}
+{% endblock %}
+
+{% block header %}
+    {% trans "Reset to pending" as reset_title %}
+    {% include "wagtailadmin/shared/header.html" with title=reset_title subtitle=model_opts.verbose_name_plural icon=header_icon only %}
+{% endblock header %}
+
+{% block items_with_access %}
+    {% if items %}
+        <p>{% blocktrans trimmed count counter=items|length %}Reset this ETL item to pending?{% plural %}Reset these {{ counter }} ETL items to pending?{% endblocktrans %}</p>
+        <ul>
+            {% for item in items %}
+                <li>
+                    <a href="{{ item.edit_url }}" target="_blank" rel="noreferrer">{{ item.item }}</a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endblock items_with_access %}
+
+{% block items_with_no_access %}
+    {% if items_with_no_access %}
+        <p>{% trans "You do not have permission to reset these ETL items." %}</p>
+        <ul>
+            {% for item in items_with_no_access %}
+                <li>{{ item }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endblock items_with_no_access %}
+
+{% block form_section %}
+    {% if items %}
+        {% trans "Yes, reset to pending" as action_button_text %}
+        {% trans "No, go back" as no_action_button_text %}
+        {% include "wagtailadmin/bulk_actions/confirmation/form.html" with action_button_class="" %}
+    {% else %}
+        {% include "wagtailadmin/bulk_actions/confirmation/go_back.html" %}
+    {% endif %}
+{% endblock form_section %}

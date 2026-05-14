@@ -5,16 +5,15 @@ from wagtail.admin.menu import Menu, MenuItem, SubmenuMenuItem
 from wagtail.snippets.models import register_snippet
 from wagtail.snippets.views.snippets import SnippetViewSet
 
+from etl.bulk_actions import ResetToPendingBulkAction
 from etl.models import EtlItemProcess, EtlPipelineConfig
 from etl.views import (
     DOCUMENT_TYPE_LABELS,
     retry_failed_by_type_view,
     retry_failed_view,
-    reset_to_pending_view,
     summary_view,
     trigger_pending_by_type_view,
     trigger_pending_view,
-    trigger_pipeline_view,
 )
 
 
@@ -138,10 +137,11 @@ def register_etl_menu():
 def register_etl_urls():
     return [
         path("etl/summary/", summary_view, name="etl_summary"),
-        path("etl/trigger-pipeline/", trigger_pipeline_view, name="etl_trigger_pipeline"),
         path("etl/trigger-pending/", trigger_pending_view, name="etl_trigger_pending"),
         path("etl/trigger-pending-by-type/", trigger_pending_by_type_view, name="etl_trigger_pending_by_type"),
         path("etl/retry-failed-by-type/", retry_failed_by_type_view, name="etl_retry_failed_by_type"),
-        path("etl/reset-pending/", reset_to_pending_view, name="etl_reset_pending"),
         path("etl/retry-failed/", retry_failed_view, name="etl_retry_failed"),
     ]
+
+
+hooks.register("register_bulk_action", ResetToPendingBulkAction)
