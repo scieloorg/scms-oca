@@ -52,7 +52,7 @@ class SourceLookupBuilder(LookupBuilder):
 
     def iter_actions(self, index_name: str) -> Iterable[dict[str, Any]]:
         for action in super().iter_actions(index_name):
-            entry = self.entries[action["_id"]]
+            entry = self.entries[action["_source"]["value"]]
             action["_source"].update(
                 {
                     "source_id": entry.get("source_id", ""),
