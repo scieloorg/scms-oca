@@ -6,13 +6,12 @@ from django.test import SimpleTestCase, override_settings
 
 from search_gateway.lookup import (
     LOOKUP_BUILDERS,
-    BuildConfig,
     InstitutionLookupBuilder,
     LookupBuilder,
     PublisherLookupBuilder,
     SourceLookupBuilder,
-    build_lookup_indices,
 )
+from search_gateway.lookup.base import LookupIndexBuildService
 from search_gateway.models import ResolvedField
 from search_gateway.query import build_lookup_hits_body
 from search_gateway.response_parser import parse_lookup_hits
@@ -172,7 +171,7 @@ class BuildLookupCommandTests(SimpleTestCase):
         client = Mock()
         client.ping.return_value = True
         client.indices.exists.return_value = False
-        config = BuildConfig(
+        config = dict(
             source_index="scientific_production",
             batch_size=100,
             max_docs=None,
@@ -182,7 +181,7 @@ class BuildLookupCommandTests(SimpleTestCase):
         )
 
         with self.assertRaisesMessage(ValueError, "Source index or alias 'scientific_production' does not exist"):
-            build_lookup_indices(client, config, LOOKUP_BUILDERS)
+            LookupIndexBuildService(client=client, lookup_builders=LOOKUP_BUILDERS, **config).run()
 
     def test_build_service_rejects_existing_target_index_before_creating_any_index(self):
         client = Mock()
@@ -191,7 +190,7 @@ class BuildLookupCommandTests(SimpleTestCase):
             "scientific_production",
             "lookup_publisher",
         }
-        config = BuildConfig(
+        config = dict(
             source_index="scientific_production",
             batch_size=100,
             max_docs=None,
@@ -201,13 +200,13 @@ class BuildLookupCommandTests(SimpleTestCase):
         )
 
         with self.assertRaisesMessage(ValueError, "Target lookup index 'lookup_publisher' already exists"):
-            build_lookup_indices(client, config, LOOKUP_BUILDERS)
+            LookupIndexBuildService(client=client, lookup_builders=LOOKUP_BUILDERS, **config).run()
 
         client.indices.create.assert_not_called()
 
     def test_build_service_rejects_duplicate_target_index_names(self):
         client = Mock()
-        config = BuildConfig(
+        config = dict(
             source_index="scientific_production",
             batch_size=100,
             max_docs=None,
@@ -217,7 +216,7 @@ class BuildLookupCommandTests(SimpleTestCase):
         )
 
         with self.assertRaisesMessage(ValueError, "target the same index 'lookup_shared'"):
-            build_lookup_indices(client, config, LOOKUP_BUILDERS)
+            LookupIndexBuildService(client=client, lookup_builders=LOOKUP_BUILDERS, **config).run()
 
         client.ping.assert_not_called()
         client.indices.create.assert_not_called()
@@ -238,7 +237,7 @@ class BuildLookupCommandTests(SimpleTestCase):
             }
         ]
         streaming_bulk_mock.return_value = [(True, {"index": {"_id": "SciELO"}})]
-        config = BuildConfig(
+        config = dict(
             source_index="scientific_production",
             batch_size=100,
             max_docs=None,
@@ -247,7 +246,7 @@ class BuildLookupCommandTests(SimpleTestCase):
             max_items={},
         )
 
-        counts = build_lookup_indices(client, config, LOOKUP_BUILDERS)
+        counts = LookupIndexBuildService(client=client, lookup_builders=LOOKUP_BUILDERS, **config).run()
 
         self.assertEqual(counts["publisher"], 1)
         client.indices.refresh.assert_called_once_with(index="lookup_publisher")
@@ -269,7 +268,7 @@ class BuildLookupCommandTests(SimpleTestCase):
             }
         ]
         streaming_bulk_mock.return_value = [(True, {"index": {"_id": "SciELO"}})]
-        config = BuildConfig(
+        config = dict(
             source_index="scientific_production",
             batch_size=100,
             max_docs=None,
@@ -279,14 +278,15 @@ class BuildLookupCommandTests(SimpleTestCase):
         )
 
         with self.assertRaisesMessage(ValueError, "count mismatch after refresh"):
-            build_lookup_indices(client, config, LOOKUP_BUILDERS)
+            LookupIndexBuildService(client=client, lookup_builders=LOOKUP_BUILDERS, **config).run()
 
     @patch("search_gateway.lookup.base.streaming_bulk")
     @patch("search_gateway.lookup.base.scan")
-    def test_build_service_reports_bulk_errors(self, scan_mock, streaming_bulk_mock):
+    def test_build_service_reports_partial_bulk_errors(self, scan_mock, streaming_bulk_mock):
         client = Mock()
         client.ping.return_value = True
         client.indices.exists.side_effect = lambda index: index == "scientific_production"
+        client.count.return_value = {"count": 0}
         scan_mock.return_value = [
             {
                 "_source": {
@@ -298,7 +298,7 @@ class BuildLookupCommandTests(SimpleTestCase):
         streaming_bulk_mock.return_value = [
             (False, {"index": {"_id": "SciELO", "error": "mapping error"}})
         ]
-        config = BuildConfig(
+        config = dict(
             source_index="scientific_production",
             batch_size=100,
             max_docs=None,
@@ -307,12 +307,20 @@ class BuildLookupCommandTests(SimpleTestCase):
             max_items={},
         )
 
-        with self.assertRaisesMessage(ValueError, "Bulk indexing failed for 'lookup_publisher'"):
-            build_lookup_indices(client, config, LOOKUP_BUILDERS)
+        counts = LookupIndexBuildService(client=client, lookup_builders=LOOKUP_BUILDERS, **config).run()
 
-        client.count.assert_not_called()
+        self.assertEqual(counts["publisher"], 0)
+        self.assertEqual(counts["_errors"]["publisher"], 1)
+        client.index.assert_called_once()
+        error_body = client.index.call_args.kwargs["body"]
+        self.assertEqual(error_body["component"], "search_gateway.lookup")
+        self.assertEqual(error_body["context"]["lookup_key"], "publisher")
+        self.assertEqual(error_body["context"]["error_count"], 1)
+        self.assertEqual(error_body["context"]["sample_errors"][0]["error"], "mapping error")
+        client.indices.delete.assert_not_called()
 
-    @patch("search_gateway.management.commands.build_lookup_indices.build_lookup_indices")
+
+    @patch("search_gateway.management.commands.build_lookup_indices.LookupIndexBuildService")
     @patch("search_gateway.management.commands.build_lookup_indices.get_opensearch_client")
     def test_command_validates_batch_size(self, get_client_mock, build_mock):
         with self.assertRaises(CommandError):
