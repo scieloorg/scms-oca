@@ -20,15 +20,6 @@
         {% if doc.source.publication_year %}
         <span class="result-card__source-meta">{{ doc.source.publication_year }}</span>
         {% endif %}
-        {% with language_codes=doc.source|document_language_codes %}
-            {% if language_codes %}
-            <span class="result-card__source-meta">
-                {% for language_code in language_codes %}
-                    {{ language_code }}{% if not forloop.last %}, {% endif %}
-                {% endfor %}
-            </span>
-            {% endif %}
-        {% endwith %}
     </p>
     {% endif %}
 {% endblock %}

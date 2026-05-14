@@ -20,15 +20,6 @@
         {% if doc.source.biblio.pages %}
         <span class="result-card__source-meta">{% trans "Pages" %} {{ doc.source.biblio.pages }}</span>
         {% endif %}
-        {% with language_codes=doc.source|document_language_codes %}
-            {% if language_codes %}
-            <span class="result-card__source-meta">
-                {% for language_code in language_codes %}
-                    {{ language_code }}{% if not forloop.last %}, {% endif %}
-                {% endfor %}
-            </span>
-            {% endif %}
-        {% endwith %}
         {% if doc.source.biblio.city or doc.source.biblio.country %}
         <span class="result-card__source-meta">
             {% if doc.source.biblio.city %}{{ doc.source.biblio.city }}{% endif %}
