@@ -1,4 +1,4 @@
-from search_gateway.lookup.base import BuildConfig, LookupBuilder, build_lookup_indices
+from search_gateway.lookup.base import LookupBuilder
 from search_gateway.lookup.builders import (
     DocumentLanguageLookupBuilder,
     FunderLookupBuilder,
@@ -24,18 +24,4 @@ DEFAULT_LOOKUPS: list[str] = [
     SourceLookupBuilder.key,
     TopicLookupBuilder.key,
     DocumentLanguageLookupBuilder.key,
-]
-
-__all__ = [
-    "BuildConfig",
-    "DEFAULT_LOOKUPS",
-    "DocumentLanguageLookupBuilder",
-    "FunderLookupBuilder",
-    "InstitutionLookupBuilder",
-    "LOOKUP_BUILDERS",
-    "LookupBuilder",
-    "PublisherLookupBuilder",
-    "SourceLookupBuilder",
-    "TopicLookupBuilder",
-    "build_lookup_indices",
 ]

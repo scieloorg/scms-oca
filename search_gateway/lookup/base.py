@@ -1,12 +1,16 @@
+import hashlib
+import logging
 from collections import Counter
 from collections.abc import Iterable
-from dataclasses import dataclass
 from typing import Any
 
 from django.conf import settings
 from opensearchpy.helpers import scan, streaming_bulk
 
 from search_gateway.option_normalization import clean_text, normalize_text
+from search_gateway.opensearch import OpenSearchIndexClient
+
+logger = logging.getLogger(__name__)
 
 
 class LookupBuilder:
@@ -90,6 +94,11 @@ class LookupBuilder:
     def count(self) -> int:
         return len(self.entries)
 
+    @staticmethod
+    def document_id(value: str) -> str:
+        digest = hashlib.sha256(value.encode("utf-8")).hexdigest()
+        return f"lookup_{digest}"
+
     def add_entry(
         self,
         value: str,
@@ -139,7 +148,7 @@ class LookupBuilder:
             yield {
                 "_op_type": "index",
                 "_index": index_name,
-                "_id": value,
+                "_id": self.document_id(value),
                 "_source": {
                     "value": entry["value"],
                     "label": entry["label"],
@@ -149,32 +158,38 @@ class LookupBuilder:
             }
 
 
-@dataclass
-class BuildConfig:
-    source_index: str
-    batch_size: int
-    max_docs: int | None
-    selected_lookups: list[str]
-    lookup_index_overrides: dict[str, str]
-    max_items: dict[str, int]
+class LookupIndexBuildService:
+    def __init__(
+        self,
+        client: Any,
+        lookup_builders: dict[str, type[LookupBuilder]],
+        source_index: str,
+        batch_size: int,
+        selected_lookups: list[str],
+        max_docs: int | None = None,
+        lookup_index_overrides: dict[str, str] | None = None,
+        max_items: dict[str, int] | None = None,
+        progress=None,
+    ) -> None:
+        self.client = client
+        self.lookup_builders = lookup_builders
+        self.source_index = source_index
+        self.batch_size = batch_size
+        self.selected_lookups = selected_lookups
+        self.max_docs = max_docs
+        self.lookup_index_overrides = lookup_index_overrides or {}
+        self.max_items = max_items or {}
+        self.progress = progress
 
-
-def build_lookup_indices(
-    client: Any,
-    config: BuildConfig,
-    lookup_builders: dict[str, type[LookupBuilder]],
-    *,
-    progress=None,
-) -> dict[str, int]:
-
-    def _resolve_index_names(builders):
+    def resolve_index_names(self, builders: dict[str, LookupBuilder]) -> dict[str, str]:
         index_names = {
-            lookup_key: config.lookup_index_overrides.get(
+            lookup_key: self.lookup_index_overrides.get(
                 lookup_key,
                 builder.default_index_name,
             )
             for lookup_key, builder in builders.items()
         }
+
         seen: dict[str, str] = {}
         for lookup_key, index_name in index_names.items():
             existing_lookup_key = seen.get(index_name)
@@ -183,125 +198,254 @@ def build_lookup_indices(
                     f"Lookups '{existing_lookup_key}' and '{lookup_key}' target the same "
                     f"index '{index_name}'. Please use different index names."
                 )
+
             seen[index_name] = lookup_key
+
         return index_names
 
-    def _validate_target_indices(index_names):
+    def validate_source(self) -> None:
+        if not self.client.ping():
+            raise ConnectionError("Could not connect to OpenSearch.")
+
+        if not self.client.indices.exists(index=self.source_index):
+            raise ValueError(f"Source index or alias '{self.source_index}' does not exist.")
+
+    def validate_targets(self, index_names: dict[str, str]) -> None:
         for lookup_key, index_name in index_names.items():
-            if client.indices.exists(index=index_name):
+            if self.client.indices.exists(index=index_name):
                 raise ValueError(
                     f"Target lookup index '{index_name}' already exists for lookup "
                     f"'{lookup_key}'. Use --lookup-index {lookup_key}=<new_index> "
                     "or delete the existing index first."
                 )
 
-    def _collect(builders):
+    def collect(self, builders: dict[str, LookupBuilder]) -> int:
         source_fields = sorted(
             {field for builder in builders.values() for field in builder.source_fields}
         )
         query = {"_source": source_fields, "query": {"match_all": {}}}
-        processed = 0
-        if progress:
-            progress(f"Scanning source index '{config.source_index}'...")
 
-        for hit in scan(client, index=config.source_index, query=query, size=config.batch_size):
+        processed = 0
+        if self.progress:
+            self.progress(f"Scanning source index '{self.source_index}'...")
+
+        for hit in scan(self.client, index=self.source_index, query=query, size=self.batch_size):
             source = hit.get("_source", {})
             processed += 1
+
             for lookup_key, builder in builders.items():
-                builder.collect(source, config.max_items.get(lookup_key))
-            if progress and processed % 10000 == 0:
-                progress(f"Processed {processed:,} source documents...")
-            if config.max_docs is not None and processed >= config.max_docs:
+                builder.collect(source, self.max_items.get(lookup_key))
+
+            if self.progress and processed % 10000 == 0:
+                self.progress(f"Processed {processed:,} source documents...")
+
+            if self.max_docs is not None and processed >= self.max_docs:
                 break
 
-        if progress:
-            progress(f"Finished scanning {processed:,} documents.")
+        if self.progress:
+            self.progress(f"Finished scanning {processed:,} documents.")
 
         return processed
 
-    def _bulk_index(index_name, actions, expected_count):
+    def _truncate(self, value: Any, limit: int = 160) -> str | None:
+        if value is None:
+            return None
+
+        text = str(value)
+        if len(text) <= limit:
+            return text
+
+        return f"{text[:limit]}..."
+
+    def _safe_bulk_error(self, item: Any) -> dict[str, Any]:
+        if not isinstance(item, dict) or not item:
+            return {"error": self._truncate(item)}
+
+        action, info = next(iter(item.items()))
+        if not isinstance(info, dict):
+            return {"action": action, "error": self._truncate(info)}
+
+        data = info.get("data") if isinstance(info.get("data"), dict) else {}
+        return {
+            "action": action,
+            "_index": info.get("_index"),
+            "_id": self._truncate(info.get("_id")),
+            "status": info.get("status"),
+            "error": self._truncate(info.get("error")),
+            "value": self._truncate(data.get("value")),
+            "label": self._truncate(data.get("label")),
+        }
+
+    def record_bulk_errors(
+        self,
+        lookup_key: str,
+        index_name: str,
+        success_count: int,
+        error_count: int,
+        expected_count: int,
+        sample_errors: list[Any],
+    ) -> None:
+        if not error_count:
+            return
+
+        message = (
+            f"Lookup '{lookup_key}' indexed partially in '{index_name}': "
+            f"{success_count:,} succeeded and {error_count:,} failed."
+        )
+        context = {
+            "source_index": self.source_index,
+            "lookup_key": lookup_key,
+            "index_name": index_name,
+            "success_count": success_count,
+            "error_count": error_count,
+            "expected_count": expected_count,
+            "sample_errors": sample_errors,
+        }
+
+        try:
+            OpenSearchIndexClient(client=self.client).index_error(
+                component="search_gateway.lookup",
+                operation="build_lookup_indices",
+                message=message,
+                error_type="BulkIndexPartialFailure",
+                context=context,
+            )
+        except Exception:
+            logger.exception("Failed to write lookup bulk error summary")
+
+    def bulk_index(
+        self,
+        lookup_key: str,
+        index_name: str,
+        actions: Iterable[dict[str, Any]],
+        expected_count: int,
+    ) -> dict[str, int]:
         success = 0
-        errors = []
-        if progress:
-            progress(
+        error_count = 0
+        sample_errors = []
+
+        if self.progress:
+            self.progress(
                 f"Starting bulk indexing {expected_count:,} lookup documents "
                 f"in '{index_name}'..."
             )
 
-        for ok, item in streaming_bulk(
-            client, actions, chunk_size=config.batch_size, max_retries=3, raise_on_error=False
-        ):
-            if ok:
-                success += 1
-                if progress and success % 5000 == 0:
-                    progress(f"Indexed {success:,} lookup documents in '{index_name}'...")
-            elif len(errors) < 5:
-                errors.append(item)
+        try:
+            for ok, item in streaming_bulk(
+                self.client,
+                actions,
+                chunk_size=self.batch_size,
+                max_retries=3,
+                raise_on_error=False,
+                raise_on_exception=False,
+            ):
+                if ok:
+                    success += 1
+                    if self.progress and success % 5000 == 0:
+                        self.progress(f"Indexed {success:,} lookup documents in '{index_name}'...")
+                else:
+                    error_count += 1
+                    if len(sample_errors) < 5:
+                        sample_errors.append(self._safe_bulk_error(item))
 
-        if errors:
+        except Exception as exc:
             raise ValueError(
-                f"Bulk indexing failed for '{index_name}' after indexing "
-                f"{success:,} of {expected_count:,} lookup documents. "
-                f"First errors: {errors}"
+                f"Fatal bulk indexing failure for lookup '{lookup_key}' in '{index_name}' "
+                f"after indexing {success:,} of {expected_count:,} lookup documents. "
+                f"Error: {exc}"
+            ) from exc
+
+        self.record_bulk_errors(
+            lookup_key=lookup_key,
+            index_name=index_name,
+            success_count=success,
+            error_count=error_count,
+            expected_count=expected_count,
+            sample_errors=sample_errors,
+        )
+
+        if error_count and self.progress:
+            self.progress(
+                f"Finished indexing '{index_name}' with {success:,} successes "
+                f"and {error_count:,} errors."
             )
 
-        if progress:
-            progress(f"Finished indexing {success:,} documents in '{index_name}'.")
+        if self.progress and not error_count:
+            self.progress(f"Finished indexing {success:,} documents in '{index_name}'.")
 
-        client.indices.refresh(index=index_name)
-        count_response = client.count(index=index_name)
+        self.client.indices.refresh(index=index_name)
+        count_response = self.client.count(index=index_name)
+
         if hasattr(count_response, "get"):
             indexed_total = count_response.get("count")
+
         elif hasattr(count_response, "body") and hasattr(count_response.body, "get"):
             indexed_total = count_response.body.get("count")
+
         else:
             indexed_total = None
+
         if indexed_total != success:
             raise ValueError(
                 f"Index '{index_name}' count mismatch after refresh: bulk reported "
                 f"{success:,} successful documents, but OpenSearch count returned "
                 f"{indexed_total!r}."
             )
-        if expected_count != success:
+
+        if expected_count != success + error_count:
             raise ValueError(
                 f"Index '{index_name}' expected {expected_count:,} lookup documents, "
-                f"but bulk reported {success:,} successful documents."
+                f"but bulk reported {success:,} successful and {error_count:,} failed documents."
             )
-        if progress:
-            progress(f"Verified {indexed_total:,} documents in '{index_name}'.")
-        return success
 
-    builders: dict[str, LookupBuilder] = {
-        key: lookup_builders[key]() for key in config.selected_lookups
-    }
-    index_names = _resolve_index_names(builders)
+        if self.progress:
+            self.progress(f"Verified {indexed_total:,} documents in '{index_name}'.")
 
-    if not client.ping():
-        raise ConnectionError("Could not connect to OpenSearch.")
-    if not client.indices.exists(index=config.source_index):
-        raise ValueError(f"Source index or alias '{config.source_index}' does not exist.")
+        return {"indexed": success, "errors": error_count}
 
-    _validate_target_indices(index_names)
+    def create_indices(self, builders: dict[str, LookupBuilder], index_names: dict[str, str]) -> None:
+        for lookup_key, builder in builders.items():
+            index_name = index_names[lookup_key]
+            self.client.indices.create(index=index_name, body=builder.mapping)
 
-    processed_docs = _collect(builders)
-    indexed_counts: dict[str, int] = {"_processed_docs": processed_docs}
+    def run(self) -> dict[str, Any]:
+        builders: dict[str, LookupBuilder] = {
+            key: self.lookup_builders[key]() for key in self.selected_lookups
+        }
+        index_names = self.resolve_index_names(builders)
 
-    _validate_target_indices(index_names)
+        self.validate_source()
+        self.validate_targets(index_names)
 
-    for lookup_key, builder in builders.items():
-        client.indices.create(index=index_names[lookup_key], body=builder.mapping)
+        processed_docs = self.collect(builders)
+        indexed_counts: dict[str, Any] = {"_processed_docs": processed_docs}
+        error_counts: dict[str, int] = {}
 
-    for lookup_key, builder in builders.items():
-        index_name = index_names[lookup_key]
-        if progress:
-            progress(
-                f"Collected {builder.count():,} values for lookup '{lookup_key}' "
-                f"from {processed_docs:,} documents."
+        self.validate_targets(index_names)
+        self.create_indices(builders, index_names)
+
+        for lookup_key, builder in builders.items():
+            index_name = index_names[lookup_key]
+            if self.progress:
+                self.progress(
+                    f"Collected {builder.count():,} values for lookup '{lookup_key}' "
+                    f"from {processed_docs:,} documents."
+                )
+
+            bulk_result = self.bulk_index(
+                lookup_key,
+                index_name,
+                builder.iter_actions(index_name),
+                builder.count(),
             )
-        indexed_counts[lookup_key] = _bulk_index(
-            index_name,
-            builder.iter_actions(index_name),
-            builder.count(),
-        )
 
-    return indexed_counts
+            indexed_counts[lookup_key] = bulk_result["indexed"]
+            if bulk_result["errors"]:
+                error_counts[lookup_key] = bulk_result["errors"]
+
+        if error_counts:
+            indexed_counts["_errors"] = error_counts
+
+        return indexed_counts
+
+

@@ -1,7 +1,6 @@
 from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
-from django.test import TestCase
 from django.urls import reverse
 
 from etl.tests.base import EtlTestCase
@@ -31,45 +30,23 @@ class SummaryViewTests(EtlAdminViewTestCase):
 
 
 class TriggerViewTests(EtlAdminViewTestCase):
-    def test_trigger_pipeline_requires_post(self):
-        response = self.client.get(reverse("etl_trigger_pipeline"))
-        self.assertEqual(response.status_code, 405)
-
-    @patch("etl.tasks.run_silver_etl")
-    def test_trigger_pipeline_dispatches_celery_task(self, mock_task):
-        mock_task.delay.return_value.id = "task-123"
-        response = self.client.post(
-            reverse("etl_trigger_pipeline"),
-            {"type": "preprint"},
-        )
-        self.assertEqual(response.status_code, 302)
-        mock_task.delay.assert_called_once_with(target_type="preprint")
-
-    @patch("etl.tasks.run_silver_etl")
-    def test_trigger_pipeline_rejects_invalid_type(self, mock_task):
-        response = self.client.post(
-            reverse("etl_trigger_pipeline"),
-            {"type": "invalid"},
-        )
-        self.assertEqual(response.status_code, 302)
-        mock_task.delay.assert_not_called()
 
     def test_trigger_pending_requires_post(self):
         response = self.client.get(reverse("etl_trigger_pending"))
         self.assertEqual(response.status_code, 405)
 
-    @patch("etl.tasks.process_pending_silver_etl")
+    @patch("etl.views.process_pending_silver_etl")
     def test_trigger_pending_dispatches_celery_task(self, mock_task):
         mock_task.delay.return_value.id = "task-456"
         response = self.client.post(reverse("etl_trigger_pending"))
         self.assertEqual(response.status_code, 302)
-        mock_task.delay.assert_called_once_with(limit=5000)
+        mock_task.delay.assert_called_once_with()
 
     def test_trigger_pending_by_type_requires_post(self):
         response = self.client.get(reverse("etl_trigger_pending_by_type"))
         self.assertEqual(response.status_code, 405)
 
-    @patch("etl.tasks.process_pending_silver_etl")
+    @patch("etl.views.process_pending_silver_etl")
     def test_trigger_pending_by_type_rejects_invalid_type(self, mock_task):
         response = self.client.post(
             reverse("etl_trigger_pending_by_type"),
@@ -80,10 +57,6 @@ class TriggerViewTests(EtlAdminViewTestCase):
 
     def test_retry_failed_by_type_requires_post(self):
         response = self.client.get(reverse("etl_retry_failed_by_type"))
-        self.assertEqual(response.status_code, 405)
-
-    def test_reset_to_pending_requires_post(self):
-        response = self.client.get(reverse("etl_reset_pending"))
         self.assertEqual(response.status_code, 405)
 
     def test_retry_failed_requires_post(self):

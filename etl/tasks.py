@@ -1,48 +1,35 @@
 from django.conf import settings
 
 from config import celery_app
+from core.utils.db import refresh_db_connections
 from etl.models import EtlItemProcess, EtlPipelineConfig, EtlResult, EtlStatus
 from etl.pipeline import OpenSearchETLPipeline
 from etl.services import backfill_input_items, process_pending_items
 
-BATCH_SIZE = 1000
-
-
-@celery_app.task(name="[ETL] Run pipeline")
-def run_silver_etl(
-    target_type="article",
-    year=None,
-    max_docs=None,
-    openalex_index=settings.ETL_INPUT_OPENALEX_WORKS,
-    user_id=None,
-):
-    return run_pipeline_targets(
-        target_type,
-        year=year,
-        max_docs=max_docs,
-        openalex_index=openalex_index,
-    )
-
 
 @celery_app.task(name="[ETL] Process pending silver items")
-def process_pending_silver_etl(limit=BATCH_SIZE, user_id=None, document_type=None):
+def process_pending_silver_etl(limit=None, user_id=None, document_type=None):
     """
     Processes one batch of pending ETL items.
 
     Scheduling is handled by Celery Beat — this task does NOT re-enqueue itself.
     Configure the run interval in the Wagtail admin under Celery > Periodic Tasks.
     """
+    if limit is None:
+        limit = settings.ETL_DEFAULT_BATCH_SIZE
     return process_pending_items(limit=limit, document_type=document_type)
 
 
 @celery_app.task(name="[ETL] Retry failed silver ETL items")
-def retry_failed_silver_etl(limit=BATCH_SIZE, user_id=None):
+def retry_failed_silver_etl(limit=None, user_id=None):
     """
     Retries one batch of failed ETL items.
 
     Scheduling is handled by Celery Beat — this task does NOT re-enqueue itself.
     Configure the run interval in the Wagtail admin under Celery > Periodic Tasks.
     """
+    if limit is None:
+        limit = settings.ETL_DEFAULT_BATCH_SIZE
     return process_pending_items(limit=limit, retry_failed=True)
 
 
@@ -82,17 +69,23 @@ def _run_pipeline_target(
         pipeline_config=pipeline_config,
     )
 
-    result = pipeline.run(
-        max_docs=max_docs,
-        year_filter=year,
-    )
+    refresh_db_connections()
+    try:
+        result = pipeline.run(
+            max_docs=max_docs,
+            year_filter=year,
+        )
+    finally:
+        refresh_db_connections()
 
+    refresh_db_connections()
     backfill_input_items(
         pipeline_config.input_index,
         year=year,
         limit=max_docs,
         initial_status=EtlStatus.SUCCESS,
     )
+    refresh_db_connections()
 
     openalex_ids = set(result.get("openalex_matched_source_ids") or [])
     dedup_ids = set(result.get("scielo_dedup_source_ids") or [])
@@ -125,6 +118,7 @@ def _run_pipeline_target(
         item.openalex_match_ids = openalex_match_map.get(item.external_id) or []
 
     if items:
+        refresh_db_connections()
         EtlItemProcess.objects.bulk_update(
             items,
             [
@@ -135,6 +129,7 @@ def _run_pipeline_target(
                 "openalex_match_ids",
             ],
         )
+        refresh_db_connections()
 
     result["target"] = target_name
     result["public_alias"] = pipeline.public_alias

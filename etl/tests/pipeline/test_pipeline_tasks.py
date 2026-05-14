@@ -2,7 +2,7 @@ from unittest.mock import patch
 
 from django.test import TestCase, override_settings
 
-from etl.models import EtlPipelineConfig
+from etl.models import EtlItemProcess, EtlPipelineConfig, EtlResult, EtlStatus
 from etl.tasks import _run_pipeline_target
 
 
@@ -19,12 +19,23 @@ class PipelineConfigTaskTests(TestCase):
         ETL_PUBLIC_ALIAS="scientific_production",
     )
     @patch("etl.tasks.backfill_input_items")
+    @patch("etl.tasks.refresh_db_connections")
     @patch("etl.tasks.OpenSearchETLPipeline")
     def test_run_pipeline_target_builds_django_configured_pipeline(
         self,
         pipeline_cls,
+        refresh_db_connections,
         backfill_input_items,
     ):
+        EtlItemProcess.objects.create(
+            source_index="bronze_scielo_articles*",
+            external_id="p1",
+            document_type="article",
+            publication_year=2024,
+            source_hash="hash",
+            status=EtlStatus.SUCCESS,
+            result=EtlResult.UNCHANGED,
+        )
         pipeline_cls.return_value.run.return_value = {"errors": 0, "total_indexed_docs": 2}
         pipeline_cls.return_value.indexed_index_names = {"silver_article_2024"}
         pipeline_cls.return_value.public_alias = "scientific_production"
@@ -46,3 +57,4 @@ class PipelineConfigTaskTests(TestCase):
         self.assertEqual(result["target"], "article")
         self.assertEqual(result["public_alias"], "scientific_production")
         self.assertEqual(result["indexed_indices"], ["silver_article_2024"])
+        self.assertGreaterEqual(refresh_db_connections.call_count, 4)
