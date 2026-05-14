@@ -18,7 +18,10 @@
     <p class="result-card__source-line">
         {% include "search/include/result_items/partials/publishers.html" with publishers=doc.source.publishers only %}
         {% if doc.source.publication_year %}
-        <span class="result-card__source-meta">{{ doc.source.publication_year }}</span>
+            <span class="result-card__source-meta">{{ doc.source.publication_year }}</span>
+        {% endif %}
+        {% if doc.source.metrics.received_citations.total %}
+            <span class="result-card__source-meta result-card__source-meta--accent">{% trans "Citations" %}: {{ doc.source.metrics.received_citations.total }}</span>
         {% endif %}
     </p>
     {% endif %}

@@ -27,6 +27,9 @@
             {% if doc.source.biblio.country %}{{ doc.source.biblio.country }}{% endif %}
         </span>
         {% endif %}
+        {% if doc.source.metrics.received_citations.total %}
+            <span class="result-card__source-meta result-card__source-meta--accent">{% trans "Citations" %}: {{ doc.source.metrics.received_citations.total }}</span>
+        {% endif %}
     </p>
     {% endif %}
     {% if doc.source.publishers or doc.source.ids.isbn or doc.source.ids.eisbn or doc.source.ids.bisac_code %}
