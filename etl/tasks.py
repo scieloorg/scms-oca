@@ -1,6 +1,7 @@
 from django.conf import settings
 
 from config import celery_app
+from core.utils.db import refresh_db_connections
 from etl.models import EtlItemProcess, EtlPipelineConfig, EtlResult, EtlStatus
 from etl.pipeline import OpenSearchETLPipeline
 from etl.services import backfill_input_items, process_pending_items
@@ -82,17 +83,23 @@ def _run_pipeline_target(
         pipeline_config=pipeline_config,
     )
 
-    result = pipeline.run(
-        max_docs=max_docs,
-        year_filter=year,
-    )
+    refresh_db_connections()
+    try:
+        result = pipeline.run(
+            max_docs=max_docs,
+            year_filter=year,
+        )
+    finally:
+        refresh_db_connections()
 
+    refresh_db_connections()
     backfill_input_items(
         pipeline_config.input_index,
         year=year,
         limit=max_docs,
         initial_status=EtlStatus.SUCCESS,
     )
+    refresh_db_connections()
 
     openalex_ids = set(result.get("openalex_matched_source_ids") or [])
     dedup_ids = set(result.get("scielo_dedup_source_ids") or [])
@@ -125,6 +132,7 @@ def _run_pipeline_target(
         item.openalex_match_ids = openalex_match_map.get(item.external_id) or []
 
     if items:
+        refresh_db_connections()
         EtlItemProcess.objects.bulk_update(
             items,
             [
@@ -135,6 +143,7 @@ def _run_pipeline_target(
                 "openalex_match_ids",
             ],
         )
+        refresh_db_connections()
 
     result["target"] = target_name
     result["public_alias"] = pipeline.public_alias
