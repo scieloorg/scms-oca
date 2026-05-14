@@ -7,6 +7,7 @@ from wagtail.admin import messages
 from wagtail.admin.auth import permission_denied, require_admin_access
 
 from etl.models import EtlItemProcess, EtlStatus
+from etl.tasks import process_pending_silver_etl
 
 DOCUMENT_TYPES = (
     "article",
@@ -105,24 +106,24 @@ def summary_view(request):
 
 @require_POST
 def trigger_pending_view(request):
-    from etl.tasks import process_pending_silver_etl
-
-    result = process_pending_silver_etl.delay(limit=5000)
+    result = process_pending_silver_etl.delay()
     messages.success(request, f"Pending ETL triggered. Task ID: {result.id}")
     return HttpResponseRedirect(request.META.get("HTTP_REFERER", "/admin/"))
 
 
 @require_POST
 def trigger_pending_by_type_view(request):
-    from etl.tasks import process_pending_silver_etl
-
     document_type = request.POST.get("type", "preprint")
     if document_type not in DOCUMENT_TYPES:
         messages.error(request, f"Invalid document type: {document_type}")
         return HttpResponseRedirect(request.META.get("HTTP_REFERER", "/admin/"))
+    
     if _processing_already_running(document_type, request):
         return HttpResponseRedirect(request.META.get("HTTP_REFERER", "/admin/"))
-    result = process_pending_silver_etl.delay(limit=5000, document_type=document_type)
+    
+    result = process_pending_silver_etl.delay(
+        document_type=document_type,
+    )
     messages.success(
         request,
         f"Pending ETL triggered for '{document_type}'. Task ID: {result.id}",
@@ -132,17 +133,19 @@ def trigger_pending_by_type_view(request):
 
 @require_POST
 def retry_failed_by_type_view(request):
-    from etl.tasks import process_pending_silver_etl
-
     document_type = request.POST.get("type", "preprint")
     if document_type not in DOCUMENT_TYPES:
         messages.error(request, f"Invalid document type: {document_type}")
         return HttpResponseRedirect(request.META.get("HTTP_REFERER", "/admin/"))
+    
     if _processing_already_running(document_type, request):
         return HttpResponseRedirect(request.META.get("HTTP_REFERER", "/admin/"))
+    
     rows = EtlItemProcess.objects.retry_failed_by_type(document_type)
     messages.success(request, _("%(count)s failed item(s) of type '%(doc_type)s' reset to pending.") % {"count": rows, "doc_type": document_type})
-    result = process_pending_silver_etl.delay(limit=5000, document_type=document_type)
+    result = process_pending_silver_etl.delay(
+        document_type=document_type,
+    )
     messages.success(
         request,
         f"Pending ETL triggered for '{document_type}'. Task ID: {result.id}",
@@ -157,4 +160,5 @@ def retry_failed_view(request):
         id_list = [i.strip() for i in ids.split(",") if i.strip()]
         rows = EtlItemProcess.objects.retry_failed(id_list)
         messages.success(request, _("%(count)s failed item(s) marked for retry.") % {"count": rows})
+
     return redirect(request.META.get("HTTP_REFERER", "/admin/"))
