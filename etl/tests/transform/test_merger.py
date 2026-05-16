@@ -16,6 +16,9 @@ class MergeTests(SimpleTestCase):
             doc_id="https://openalex.org/W1",
             type="article",
             title="OpenAlex title",
+            doi="10.1590/openalex",
+            ids={"doi_with_lang": [{"language": "en", "doi": "10.1590/openalex"}]},
+            openalex_id="https://openalex.org/W1",
             oca_data={"scope": ["openalex"]},
         )
 
@@ -25,8 +28,13 @@ class MergeTests(SimpleTestCase):
         )
 
         self.assertEqual(merged.title, "SciELO title")
+        self.assertEqual(merged.doi, "10.1590/openalex")
+        self.assertEqual(merged.ids["doi"], "10.1590/openalex")
+        self.assertEqual(
+            merged.ids["doi_with_lang"],
+            [{"language": "en", "doi": "10.1590/openalex"}],
+        )
         self.assertEqual(merged.oca_data["scope"], ["scielo", "openalex"])
-        self.assertTrue(merged.oca_data["merge_trace"]["merged"])
         self.assertEqual(merged.oca_data["merge_trace"]["openalex_matches"][0]["match_strategy"], "doi")
 
     def test_merge_handles_book_chapter_without_rules(self):
@@ -67,15 +75,17 @@ class MergeTests(SimpleTestCase):
             openalex_matches=[],
         )
 
-        self.assertIn("scl", merged.oca_data["merge_trace"]["scielo_group"]["collections"])
-        self.assertIn("col", merged.oca_data["merge_trace"]["scielo_group"]["collections"])
-        self.assertEqual(merged.oca_data["merge_trace"]["scielo_group"]["total_duplicates"], 2)
+        self.assertIn("scl", merged.oca_data["merge_trace"]["scielo_matches"]["collections"])
+        self.assertIn("col", merged.oca_data["merge_trace"]["scielo_matches"]["collections"])
+        self.assertEqual(len(merged.oca_data["merge_trace"]["scielo_matches"]["doc_ids"]), 2)
 
     def test_merge_enriches_with_openalex_citation_count(self):
         primary = SilverDocument(
             doc_id="S1",
             type="article",
             title="SciELO title",
+            doi="10.1590/scielo",
+            ids={"doi": "10.1590/scielo"},
             citation_count=5,
             oca_data={"scope": ["scielo"]},
         )
@@ -83,6 +93,7 @@ class MergeTests(SimpleTestCase):
             doc_id="https://openalex.org/W1",
             type="article",
             title="OpenAlex title",
+            doi="10.1590/openalex",
             citation_count=10,
             oca_data={"scope": ["openalex"]},
         )
@@ -93,6 +104,8 @@ class MergeTests(SimpleTestCase):
         )
 
         self.assertEqual(merged.citation_count, 15)
+        self.assertEqual(merged.doi, "10.1590/scielo")
+        self.assertEqual(merged.ids["doi"], "10.1590/scielo")
 
     def test_merge_enriches_with_openalex_referenced_works(self):
         primary = SilverDocument(

@@ -94,6 +94,46 @@ class DocumentRulesTests(TestCase):
             articles=[{"id": "a1"}]
         )
 
+    def test_expand_scielo_input_context_keeps_dict_payloads(self):
+        pipeline = OpenSearchETLPipeline.__new__(OpenSearchETLPipeline)
+        pipeline.input_scielo_index = "bronze_scielo_datasets"
+        pipeline.loaded_source_ids = set()
+        pipeline.client = Mock()
+        pipeline.client.client.search.return_value = {
+            "_scroll_id": "scroll-1",
+            "hits": {
+                "hits": [
+                    {
+                        "_id": "related-os-id",
+                        "_source": {
+                            "id": "related-dataset",
+                            "ids": {"dataset_id": "dataset-1"},
+                            "type": "dataset",
+                        },
+                    }
+                ]
+            },
+        }
+        pipeline.client.client.scroll.return_value = {
+            "_scroll_id": "scroll-1",
+            "hits": {"hits": []},
+        }
+        docs = [
+            {
+                "_os_id": "requested-os-id",
+                "id": "requested-dataset",
+                "ids": {"dataset_id": "dataset-1"},
+                "type": "dataset",
+            }
+        ]
+
+        expanded = pipeline._expand_scielo_input_context(docs)
+
+        self.assertEqual(len(expanded), 2)
+        self.assertTrue(all(isinstance(doc, dict) for doc in expanded))
+        self.assertIn("related-os-id", pipeline.loaded_source_ids)
+        pipeline.client.client.clear_scroll.assert_called_once_with(scroll_id="scroll-1")
+
     def test_book_chapter_isbn_requires_chapter_title_match(self):
         matcher = make_matcher("book-chapter")
         is_valid, confidence, details = matcher._validate_openalex_match(

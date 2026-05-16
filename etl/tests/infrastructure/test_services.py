@@ -127,7 +127,7 @@ class IncrementalEtlTests(TestCase):
 
         item.refresh_from_db()
         self.assertEqual(item.status, EtlStatus.FAILED)
-        self.assertIn("did not index", item.error)
+        self.assertIn("did not process", item.error)
         self.assertEqual(result[0]["errors"], 1)
         log_etl_error.assert_called_once()
 
