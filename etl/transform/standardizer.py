@@ -8,20 +8,22 @@ from etl.documents import (
     SciELOBookInputDocument,
     SilverDocument,
 )
-from etl.transform.normalizers import normalize_document_type_for_etl
 from etl.transform.extractors import (
     extract_abstract_from_inverted_index,
     extract_display_name,
     extract_identifiers,
 )
 from etl.transform.normalizers import (
+    normalize_author_name,
     normalize_country_code,
     normalize_doi,
+    normalize_document_type_for_etl,
     normalize_keywords,
     normalize_language,
+    normalize_openalex_id,
     normalize_text,
 )
-from etl.transform.utils import first_value, int_or_none
+from etl.transform.utils import as_list, first_value, int_or_none
 
 logger = logging.getLogger(__name__)
 
@@ -29,13 +31,13 @@ logger = logging.getLogger(__name__)
 def standardizer_for(input_doc: InputDocument) -> "BaseStandardizer":
     if isinstance(input_doc, SciELOBookInputDocument):
         return SciELOBookStandardizer()
-    
+
     if isinstance(input_doc, BronzeInputDocument):
         return SciELOStandardizer()
-    
+
     if isinstance(input_doc, RawOpenAlexInputDocument):
         return OpenAlexStandardizer()
-    
+
     raise ValueError(f"Unknown input document type: {type(input_doc)}")
 
 
@@ -76,7 +78,6 @@ class BaseStandardizer:
             "mag": "mag",
             "pmcid": "pmcid",
             "pmid": "pmid",
-            "openalex_id": "openalex",
             "scielo_id": "scielo",
             "issn": "issn",
             "isbn": "isbn",
@@ -91,12 +92,6 @@ class BaseStandardizer:
         elif raw.get("doi") and raw.get("language"):
             if normalized := normalize_doi(raw["doi"]):
                 ids["doi_with_lang"] = [{"language": raw["language"], "doi": normalized}]
-
-        openalex_id = ids.get("openalex") or raw.get("id") or data.get("openalex_id")
-        if raw.get("openalex_with_lang"):
-            ids["openalex_with_lang"] = raw["openalex_with_lang"]
-        elif openalex_id and raw.get("language"):
-            ids["openalex_with_lang"] = [{"language": raw["language"], "openalex": openalex_id}]
 
         return ids
 
@@ -490,6 +485,23 @@ class SciELOStandardizer(BaseStandardizer):
 
 
 class OpenAlexStandardizer(BaseStandardizer):
+
+    def _build_identifier_fields(self, input_doc: InputDocument) -> dict[str, Any]:
+        identifiers = super()._build_identifier_fields(input_doc)
+        if openalex_id := normalize_openalex_id(input_doc.source_payload["id"]):
+            identifiers["openalex_id"] = openalex_id
+        return identifiers
+
+    def _build_ids_field(self, data: dict[str, Any], raw: dict[str, Any]) -> dict[str, Any]:
+        ids = super()._build_ids_field(data, raw)
+        openalex_id = normalize_openalex_id(raw["id"])
+        if openalex_id:
+            ids["openalex"] = openalex_id
+            if raw.get("language"):
+                ids["openalex_with_lang"] = [
+                    {"language": raw["language"], "openalex": openalex_id}
+                ]
+        return ids
 
     def _build_document_fields(self, input_doc: InputDocument) -> dict[str, Any]:
         data: dict[str, Any] = {}

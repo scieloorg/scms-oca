@@ -348,9 +348,16 @@ class SilverMerger:
         all_country_codes = set()
         all_metrics = {}
         all_sdgs = []
+        openalex_doi = None
+        openalex_doi_with_lang = []
 
         for oa_doc in openalex_docs:
             oa_data = oa_doc.to_dict()
+            oa_ids = oa_data.get("ids") or {}
+            if not openalex_doi:
+                openalex_doi = oa_data.get("doi") or oa_ids.get("doi")
+            if oa_ids.get("doi_with_lang"):
+                openalex_doi_with_lang.extend(oa_ids["doi_with_lang"])
             if oa_data.get("citation_count") is not None:
                 all_citation_counts.append(oa_data["citation_count"])
             if oa_data.get("topics"):
@@ -408,6 +415,13 @@ class SilverMerger:
             merged_data["sustainable_development_goals"] = self._unique_sdgs_by_score(
                 (merged_data.get("sustainable_development_goals") or []) + all_sdgs
             )
+        if openalex_doi and not merged_data.get("doi"):
+            merged_data["doi"] = openalex_doi
+            merged_data.setdefault("ids", {}).setdefault("doi", openalex_doi)
+        if openalex_doi_with_lang:
+            merged_ids = merged_data.setdefault("ids", {})
+            if not merged_ids.get("doi_with_lang"):
+                merged_ids["doi_with_lang"] = openalex_doi_with_lang
 
         try:
             return SilverDocument(**merged_data)
@@ -458,9 +472,8 @@ class SilverMerger:
         data.setdefault("ids", {})
         data.setdefault("oca_data", {})
 
-        scielo_ids = unique(
+        scielo_ids = [str(x) for x in unique(
             [item for doc in scielo_docs for item in self._scielo_ids(doc)]
-        )
         scielo_collections = unique(
             [item for doc in scielo_docs for item in self._scielo_collections(doc)]
         )

@@ -323,7 +323,7 @@ SILVER_PROPERTIES = {
     "source": {
         "type": "object",
         "properties": {
-            "id": {"type": "keyword"},
+            "acronym": {"type": "keyword"},
             "title": _text(copy_to=["source_title_search", "search_all_text"], ignore_above=512),
             "type": {"type": "keyword"},
             "is_open_access": {"type": "boolean"},
@@ -332,6 +332,12 @@ SILVER_PROPERTIES = {
             "issn_l": {"type": "keyword"},
             "host_organization": {"type": "keyword"},
             "host_organization_name": _text(),
+            "ids": {
+                "type": "object",
+                "properties": {
+                    "openalex": {"type": "keyword"},
+                },
+            },
         },
     },
     "source_title_search": _text(copy_to="search_all_text"),

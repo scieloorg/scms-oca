@@ -1,6 +1,12 @@
+import re
 from typing import Any
 
-from etl.transform.normalizers import normalize_doi, normalize_isbn, normalize_issn, normalize_text
+from etl.transform.normalizers import (
+    normalize_doi,
+    normalize_isbn,
+    normalize_issn,
+    normalize_text,
+)
 
 
 def extract_doi(doc: dict[str, Any]) -> str | None:
@@ -146,9 +152,6 @@ def extract_identifiers(raw_doc: dict[str, Any]) -> dict[str, str | None]:
             None,
         ):
             identifiers["isbn"] = normalized_isbn
-
-    if openalex_id := raw_doc.get("openalex_id") or raw_doc.get("id"):
-        identifiers["openalex_id"] = str(openalex_id).strip()
 
     if pid := raw_doc.get("pid_v2") or raw_doc.get("scielo_id"):
         identifiers["scielo_id"] = str(pid).strip()

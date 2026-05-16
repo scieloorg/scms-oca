@@ -2,8 +2,13 @@ from abc import ABC, abstractmethod
 from dataclasses import asdict, dataclass, field
 from typing import Any
 
-from etl.transform.extractors import extract_display_name, extract_doi, extract_issns
-from etl.transform.normalizers import normalize_country_code
+from etl.transform.extractors import (
+    extract_display_name,
+    extract_doi,
+    extract_issns,
+    extract_publication_year,
+)
+from etl.transform.normalizers import normalize_country_code, normalize_doi, normalize_openalex_id
 from etl.transform.utils import dict_or_empty, int_or_none
 
 
@@ -127,7 +132,7 @@ class BronzeInputDocument(InputDocument, ABC):
         raw = self.raw_data
         ids = raw.get("ids") if isinstance(raw.get("ids"), dict) else {}
 
-        pid_v2 = raw.get("pid_v2") or raw.get("code") or ids.get("scl_preprint_id") or ids.get("dataset_id")
+        pid_v2 = raw.get("pid_v2") or raw.get("code") or raw.get("dataset_id") or ids.get("scl_preprint_id") or ids.get("scl_book_id") or raw.get("id")
         pids = []
         if pid_v2:
             pids.append(pid_v2)
@@ -410,9 +415,14 @@ class SilverDocument(OcaModel):
         }.items():
             if value and key not in ids:
                 ids[key] = value
-        ids["doi_with_lang"] = self._index_id_lang_items(ids.get("doi_with_lang"), "doi", aliases=("id", "value"))
-        ids["openalex_with_lang"] = self._index_id_lang_items(ids.get("openalex_with_lang"), "openalex", aliases=("id", "value"))
-        if ids["openalex_with_lang"]:
+        if ids.get("doi"):
+            ids["doi"] = normalize_doi(ids["doi"])
+            if not ids["doi"]:
+                ids.pop("doi", None)
+        ids["doi_with_lang"] = self._index_doi_lang_items(ids.get("doi_with_lang"))
+        ids["openalex"] = self._index_openalex_id_values(ids.get("openalex"))
+        ids["openalex_with_lang"] = self._index_openalex_lang_items(ids.get("openalex_with_lang"))
+        if not ids["openalex"]:
             ids.pop("openalex", None)
         return self._only(
             ids,
@@ -456,7 +466,7 @@ class SilverDocument(OcaModel):
             source["issns"] = self.source_issns
         return self._only(
             source,
-            {"id", "title", "type", "is_open_access", "landing_page_url", "issns", "issn_l", "host_organization", "host_organization_name"},
+            {"acronym", "title", "type", "is_open_access", "landing_page_url", "issns", "issn_l", "host_organization", "host_organization_name", "ids"},
         )
 
     def _index_metrics(self) -> dict:
@@ -606,24 +616,52 @@ class SilverDocument(OcaModel):
             )
         return indexed
 
-    def _index_id_lang_items(self, items: Any, value_key: str, aliases: tuple[str, ...] = ()) -> list:
+    def _index_doi_lang_items(self, items: Any) -> list:
         indexed = []
         for item in items or []:
             if not isinstance(item, dict):
                 continue
-            value = item.get(value_key)
-            if value is None:
-                for alias in aliases:
-                    value = item.get(alias)
-                    if value is not None:
-                        break
-            indexed.append(
-                self._only(
-                    {"language": item.get("language") or item.get("lang"), value_key: value},
-                    {"language", value_key},
+            value = item.get("doi") or item.get("id") or item.get("value")
+            doi = normalize_doi(value)
+            if doi:
+                indexed.append(
+                    self._only(
+                        {"language": item.get("language") or item.get("lang"), "doi": doi},
+                        {"language", "doi"},
+                    )
                 )
-            )
         return indexed
+
+    def _index_openalex_lang_items(self, items: Any) -> list:
+        indexed = []
+        for item in items or []:
+            if not isinstance(item, dict):
+                continue
+            value = item.get("openalex")
+            if value is None:
+                value = item.get("id") or item.get("value")
+            openalex_id = normalize_openalex_id(value)
+            if openalex_id:
+                indexed.append(
+                    self._only(
+                        {"language": item.get("language") or item.get("lang"), "openalex": openalex_id},
+                        {"language", "openalex"},
+                    )
+                )
+        return indexed
+
+    def _index_openalex_id_values(self, value: Any) -> Any:
+        if value in (None, [], {}):
+            return None
+        values = value if isinstance(value, list) else [value]
+        normalized = [
+            openalex_id
+            for item in values
+            if (openalex_id := normalize_openalex_id(item))
+        ]
+        if not normalized:
+            return None
+        return normalized if isinstance(value, list) else normalized[0]
 
     def _index_oca_data(self) -> dict:
         raw = self.oca_data or {}
