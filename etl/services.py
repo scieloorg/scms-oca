@@ -9,7 +9,7 @@ from core.utils.db import refresh_db_connections
 from etl.client import OpenSearchClient
 from etl.models import EtlItemProcess, EtlPipelineConfig, EtlResult, EtlStatus
 from etl.pipeline import OpenSearchETLPipeline
-from etl.transform.extractors import extract_isbns
+from etl.transform.extractors import extract_isbns, extract_publication_year
 from etl.transform.normalizers import normalize_document_type_for_etl
 from harvest.utils import clean_source_payload, source_hash
 from search_gateway.opensearch import OpenSearchIndexClient
@@ -33,7 +33,7 @@ def enqueue_etl_item(
         if document_type
         else pipeline_config.document_type_for_payload(source_payload)
     )
-    resolved_year = publication_year or _extract_publication_year(source_payload)
+    resolved_year = publication_year or extract_publication_year(source_payload)
 
     raw_ids = source_payload.get("ids") if isinstance(source_payload.get("ids"), dict) else {}
     pid_v2 = (
@@ -104,19 +104,6 @@ def enqueue_etl_item(
         )
 
     return item
-
-
-def _extract_publication_year(source_payload: dict) -> int | None:
-    payload = clean_source_payload(source_payload)
-    value = payload.get("publication_year")
-
-    if value is None and payload.get("year") is not None:
-        value = payload.get("year")
-
-    try:
-        return int(value) if value is not None and value != "" else None
-    except (TypeError, ValueError):
-        return None
 
 
 def backfill_input_items(

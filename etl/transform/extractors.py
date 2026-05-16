@@ -211,3 +211,53 @@ def extract_display_name(value: Any) -> Any:
     if isinstance(value, dict):
         return value.get("display_name") or value.get("name")
     return value
+
+
+def extract_publication_year(raw_data: dict[str, Any]) -> int | None:
+    for field in ("publication_year", "year", "pub_year"):
+        val = raw_data.get(field)
+        if val:
+            try:
+                year = int(float(val))
+                if 1000 < year < 2100:
+                    return year
+            except (ValueError, TypeError):
+                pass
+
+    monograph = raw_data.get("monograph")
+    if isinstance(monograph, dict):
+        year = extract_publication_year(monograph)
+        if year:
+            return year
+
+        monograph_pub_date = monograph.get("publication_date")
+        if monograph_pub_date and isinstance(monograph_pub_date, str):
+            match = re.search(r"(\d{4})", monograph_pub_date)
+            if match:
+                try:
+                    year = int(match.group(1))
+                    if 1000 < year < 2100:
+                        return year
+                except (ValueError, TypeError):
+                    pass
+
+    for field in (
+        "publication_date",
+        "pub_date",
+        "date",
+        "release_time",
+        "create_time",
+        "citation_date",
+    ):
+        val = raw_data.get(field)
+        if val and isinstance(val, str):
+            match = re.search(r"(\d{4})", val)
+            if match:
+                try:
+                    year = int(match.group(1))
+                    if 1000 < year < 2100:
+                        return year
+                except (ValueError, TypeError):
+                    pass
+
+    return None

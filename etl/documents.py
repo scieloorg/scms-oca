@@ -88,7 +88,7 @@ class BronzeInputDocument(InputDocument, ABC):
         fallback_id_fn=None,
     ) -> "BronzeInputDocument":
         doc_id = cls._extract_doc_id(raw_data, fallback_id_fn)
-        publication_year = int_or_none(raw_data.get("publication_year") or raw_data.get("year"))
+        publication_year = extract_publication_year(raw_data)
         publication_date = raw_data.get("publication_date")
         doi = extract_doi(raw_data)
 
