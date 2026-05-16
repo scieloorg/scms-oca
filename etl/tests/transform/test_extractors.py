@@ -54,7 +54,6 @@ class IdentifierExtractorTests(SimpleTestCase):
                 "doi": "https://doi.org/10.1590/S0102-311X2024000100001",
                 "issn": ["bad", "0102-311X"],
                 "isbn": "978-65-00-00000-1",
-                "openalex_id": "https://openalex.org/W1",
                 "pid_v2": "S1",
                 "pmid": 123,
             }
@@ -63,7 +62,7 @@ class IdentifierExtractorTests(SimpleTestCase):
         self.assertEqual(identifiers["doi"], "10.1590/s0102-311x2024000100001")
         self.assertEqual(identifiers["issn"], "0102-311X")
         self.assertEqual(identifiers["isbn"], "9786500000001")
-        self.assertEqual(identifiers["openalex_id"], "https://openalex.org/W1")
+        self.assertNotIn("openalex_id", identifiers)
         self.assertEqual(identifiers["scielo_id"], "S1")
         self.assertEqual(identifiers["pmid"], "123")
 

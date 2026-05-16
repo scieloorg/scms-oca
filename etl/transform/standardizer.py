@@ -8,20 +8,22 @@ from etl.documents import (
     SciELOBookInputDocument,
     SilverDocument,
 )
-from etl.transform.normalizers import normalize_document_type_for_etl
 from etl.transform.extractors import (
     extract_abstract_from_inverted_index,
     extract_display_name,
     extract_identifiers,
 )
 from etl.transform.normalizers import (
+    normalize_author_name,
     normalize_country_code,
     normalize_doi,
+    normalize_document_type_for_etl,
     normalize_keywords,
     normalize_language,
+    normalize_openalex_id,
     normalize_text,
 )
-from etl.transform.utils import first_value, int_or_none
+from etl.transform.utils import as_list, first_value, int_or_none
 
 logger = logging.getLogger(__name__)
 
@@ -29,13 +31,13 @@ logger = logging.getLogger(__name__)
 def standardizer_for(input_doc: InputDocument) -> "BaseStandardizer":
     if isinstance(input_doc, SciELOBookInputDocument):
         return SciELOBookStandardizer()
-    
+
     if isinstance(input_doc, BronzeInputDocument):
         return SciELOStandardizer()
-    
+
     if isinstance(input_doc, RawOpenAlexInputDocument):
         return OpenAlexStandardizer()
-    
+
     raise ValueError(f"Unknown input document type: {type(input_doc)}")
 
 
@@ -76,7 +78,6 @@ class BaseStandardizer:
             "mag": "mag",
             "pmcid": "pmcid",
             "pmid": "pmid",
-            "openalex_id": "openalex",
             "scielo_id": "scielo",
             "issn": "issn",
             "isbn": "isbn",
@@ -91,12 +92,6 @@ class BaseStandardizer:
         elif raw.get("doi") and raw.get("language"):
             if normalized := normalize_doi(raw["doi"]):
                 ids["doi_with_lang"] = [{"language": raw["language"], "doi": normalized}]
-
-        openalex_id = ids.get("openalex") or raw.get("id") or data.get("openalex_id")
-        if raw.get("openalex_with_lang"):
-            ids["openalex_with_lang"] = raw["openalex_with_lang"]
-        elif openalex_id and raw.get("language"):
-            ids["openalex_with_lang"] = [{"language": raw["language"], "openalex": openalex_id}]
 
         return ids
 
@@ -156,15 +151,28 @@ class BaseStandardizer:
             author = authorship.get("author") or {}
             institutions = []
 
+            seen_insts = set()
             for inst in authorship.get("institutions") or []:
+                name = inst.get("display_name") or inst.get("name")
+                inst_id = inst.get("id")
+                ror = inst.get("ror")
+
+                key = (normalize_author_name(name) if name else None, inst_id, ror)
+                if any(k and k in seen_insts for k in key) or (not any(key) and name in seen_insts):
+                    continue
+
+                if name: seen_insts.add(normalize_author_name(name))
+                if inst_id: seen_insts.add(inst_id)
+                if ror: seen_insts.add(ror)
+
                 country_code = None
                 if raw_code := inst.get("country_code"):
                     country_code = normalize_country_code(raw_code)
 
                 institutions.append({
-                    "name": inst.get("display_name") or inst.get("name"),
-                    "id": inst.get("id"),
-                    "ror": inst.get("ror"),
+                    "name": name,
+                    "id": inst_id,
+                    "ror": ror,
                     "type": inst.get("type"),
                     "country_code": country_code,
                 })
@@ -381,7 +389,7 @@ class SciELOStandardizer(BaseStandardizer):
         data["abstract_with_lang"] = self._build_abstract_with_lang_field(raw)
         data["description_with_lang"] = self._build_description_with_lang_field(raw)
         data["keywords_with_lang"] = raw.get("keywords_with_lang") or []
-        data["subjects_with_lang"] = raw.get("subjects_with_lang") or []
+        data["subjects_with_lang"] = self._build_subjects_with_lang_field(raw)
         data["content_url"] = self._build_content_url_field(raw)
         data["content_url_with_lang"] = self._build_content_url_with_lang_field(raw)
         data["is_open_access"] = self._build_is_open_access_field(raw)
@@ -467,6 +475,25 @@ class SciELOStandardizer(BaseStandardizer):
             {"language": l, "content_url": u} for l, u in sorted(urls_map.items())
         ]
 
+    def _build_subjects_with_lang_field(self, raw_data: dict[str, Any]) -> list[dict[str, Any]]:
+        subjects_map: dict[str, list[str]] = {}
+        for item in raw_data.get("subjects_with_lang") or []:
+            if not isinstance(item, dict):
+                continue
+            lang = item.get("language")
+            value = item.get("subjects") or item.get("text")
+            if lang and value:
+                values = [value] if isinstance(value, str) else as_list(value)
+                subjects_map.setdefault(lang, []).extend(values)
+        if not subjects_map and raw_data.get("subjects"):
+            lang = self._fallback_language_code(raw_data)
+            subjects_map[lang] = normalize_keywords(raw_data["subjects"])
+        result = []
+        for lang in sorted(subjects_map):
+            for subject in subjects_map[lang]:
+                result.append({"language": lang, "subjects": subject})
+        return result
+
     def _build_referenced_works_field(self, raw_data: dict[str, Any]) -> list:
         return (
             raw_data.get("referenced_works")
@@ -475,6 +502,12 @@ class SciELOStandardizer(BaseStandardizer):
             or raw_data.get("refs")
             or []
         )
+
+    def _build_source_field(self, raw_data: dict[str, Any]) -> dict:
+        source = super()._build_source_field(raw_data)
+        if source.get("id"):
+            source["acronym"] = source.pop("id")
+        return source
 
     def _build_indexed_in_field(self, raw_data: dict[str, Any]) -> list[str]:
         indexed_in: list[str] = []
@@ -490,6 +523,23 @@ class SciELOStandardizer(BaseStandardizer):
 
 
 class OpenAlexStandardizer(BaseStandardizer):
+
+    def _build_identifier_fields(self, input_doc: InputDocument) -> dict[str, Any]:
+        identifiers = super()._build_identifier_fields(input_doc)
+        if openalex_id := normalize_openalex_id(input_doc.source_payload["id"]):
+            identifiers["openalex_id"] = openalex_id
+        return identifiers
+
+    def _build_ids_field(self, data: dict[str, Any], raw: dict[str, Any]) -> dict[str, Any]:
+        ids = super()._build_ids_field(data, raw)
+        openalex_id = normalize_openalex_id(raw["id"])
+        if openalex_id:
+            ids["openalex"] = openalex_id
+            if raw.get("language"):
+                ids["openalex_with_lang"] = [
+                    {"language": raw["language"], "openalex": openalex_id}
+                ]
+        return ids
 
     def _build_document_fields(self, input_doc: InputDocument) -> dict[str, Any]:
         data: dict[str, Any] = {}

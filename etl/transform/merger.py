@@ -30,7 +30,6 @@ class SilverMerger:
         else:
             merged = base_scielo
             merged.oca_data.setdefault("scope", []).append("scielo")
-            merged.oca_data["merged"] = True
 
         return self._with_merge_trace(merged, scielo_docs, openalex_matches)
 
@@ -347,9 +346,18 @@ class SilverMerger:
         all_institutions = []
         all_country_codes = set()
         all_metrics = {}
+        all_sdgs = []
+        all_indexed_in = list(merged_data.get("indexed_in") or [])
+        openalex_doi = None
+        openalex_doi_with_lang = []
 
         for oa_doc in openalex_docs:
             oa_data = oa_doc.to_dict()
+            oa_ids = oa_data.get("ids") or {}
+            if not openalex_doi:
+                openalex_doi = oa_data.get("doi") or oa_ids.get("doi")
+            if oa_ids.get("doi_with_lang"):
+                openalex_doi_with_lang.extend(oa_ids["doi_with_lang"])
             if oa_data.get("citation_count") is not None:
                 all_citation_counts.append(oa_data["citation_count"])
             if oa_data.get("topics"):
@@ -366,6 +374,10 @@ class SilverMerger:
                 all_country_codes.update(oa_data["author_country_codes"])
             if oa_data.get("metrics"):
                 all_metrics.update(oa_data["metrics"])
+            if oa_data.get("sustainable_development_goals"):
+                all_sdgs.extend(oa_data["sustainable_development_goals"])
+            if oa_data.get("indexed_in"):
+                all_indexed_in.extend(as_list(oa_data["indexed_in"]))
 
         if merged_data.get("citation_count") is not None:
             all_citation_counts.insert(0, merged_data["citation_count"])
@@ -401,6 +413,49 @@ class SilverMerger:
 
         if all_metrics:
             merged_data["metrics"] = {**(merged_data.get("metrics") or {}), **all_metrics}
+        if all_sdgs:
+            merged_data["sustainable_development_goals"] = self._unique_sdgs_by_score(
+                (merged_data.get("sustainable_development_goals") or []) + all_sdgs
+            )
+        if all_indexed_in:
+            merged_data["indexed_in"] = sorted(set(all_indexed_in))
+        if openalex_doi and not merged_data.get("doi"):
+            merged_data["doi"] = openalex_doi
+            merged_data.setdefault("ids", {}).setdefault("doi", openalex_doi)
+        if openalex_doi_with_lang:
+            merged_ids = merged_data.setdefault("ids", {})
+            if not merged_ids.get("doi_with_lang"):
+                merged_ids["doi_with_lang"] = openalex_doi_with_lang
+
+        all_languages = set(as_list(merged_data.get("language") or []))
+        for item in merged_data.get("title_with_lang") or []:
+            if lang := item.get("language"):
+                all_languages.add(lang)
+        for oa_doc in openalex_docs:
+            for item in (oa_doc.to_dict().get("title_with_lang") or []):
+                if lang := item.get("language"):
+                    all_languages.add(lang)
+        if all_languages:
+            merged_data["language"] = sorted(all_languages)
+
+        if openalex_docs:
+            oa_source = openalex_docs[0].source or {}
+            if oa_source:
+                sc_source = merged_data.get("source") or {}
+                if oa_source.get("id"):
+                    sc_source.setdefault("ids", {})["openalex"] = oa_source["id"]
+                for key in ("issn_l", "host_organization", "host_organization_name", "type"):
+                    if not sc_source.get(key) and oa_source.get(key):
+                        sc_source[key] = oa_source[key]
+
+                oa_issns = as_list(oa_source.get("issns"))
+                sc_issns = as_list(sc_source.get("issns"))
+                sc_source["issns"] = unique(sc_issns + oa_issns)
+
+                merged_data["source"] = sc_source
+                merged_data["source_title"] = sc_source.get("title")
+                merged_data["source_issns"] = sc_source.get("issns") or []
+                merged_data["source_type"] = sc_source.get("type")
 
         try:
             return SilverDocument(**merged_data)
@@ -430,6 +485,17 @@ class SilverMerger:
                 unique_institutions.append(institution)
         return unique_institutions
 
+    def _unique_sdgs_by_score(self, sdgs: list) -> list:
+        sdgs_by_id = {}
+
+        for sdg in sdgs:
+            sdg_id = sdg["id"]
+            current = sdgs_by_id.get(sdg_id)
+            if current is None or (sdg.get("score") or 0) > (current.get("score") or 0):
+                sdgs_by_id[sdg_id] = sdg
+
+        return list(sdgs_by_id.values())
+
     def _with_merge_trace(
         self,
         merged_doc: SilverDocument,
@@ -440,19 +506,23 @@ class SilverMerger:
         data.setdefault("ids", {})
         data.setdefault("oca_data", {})
 
-        scielo_ids = unique(
+        scielo_ids = [str(x) for x in unique(
             [item for doc in scielo_docs for item in self._scielo_ids(doc)]
-        )
-        scielo_collections = unique(
+        )]
+        scielo_collections = [str(x) for x in unique(
             [item for doc in scielo_docs for item in self._scielo_collections(doc)]
-        )
+        )]
 
         openalex_ids = []
         openalex_match_details = []
+        openalex_lang_map: dict[str, list[str]] = {}
         for oa_doc, strategy, confidence, validation in openalex_matches:
             oa_id_list = self._openalex_ids(oa_doc)
             if oa_id_list:
                 openalex_ids.extend(oa_id_list)
+                oa_langs = as_list(oa_doc.language or [])
+                for oa_id in oa_id_list:
+                    openalex_lang_map.setdefault(oa_id, []).extend(oa_langs)
             openalex_match_details.append(
                 {
                     "doc_id": oa_id_list[0] if oa_id_list else None,
@@ -476,21 +546,25 @@ class SilverMerger:
         if openalex_ids:
             data["ids"]["openalex"] = scalar_or_list(openalex_ids)
             data["openalex_id"] = openalex_ids[0]
+
+            oa_lang_items = []
+            for oa_id in openalex_ids:
+                for lang in openalex_lang_map.get(oa_id) or []:
+                    oa_lang_items.append({"language": lang, "openalex": oa_id})
+            if oa_lang_items:
+                data["ids"]["openalex_with_lang"] = oa_lang_items
+
             openalex = dict(data["oca_data"].get("openalex") or {})
             openalex["ids"] = openalex_ids
             data["oca_data"]["openalex"] = openalex
 
         data["oca_data"]["merge_trace"] = {
-            "merged": True,
-            "scielo_group": {
+            "scielo_matches": {
                 "doc_ids": scielo_ids,
                 "collections": scielo_collections,
-                "total_duplicates": len(scielo_docs),
             },
             "openalex_matches": openalex_match_details,
-            "rejected_matches": [],
         }
-        data["oca_data"]["merged"] = True
         data["oca_data"]["scope"] = (
             ["scielo", "openalex"] if openalex_matches else ["scielo"]
         )

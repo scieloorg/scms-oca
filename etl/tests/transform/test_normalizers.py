@@ -9,6 +9,7 @@ from etl.transform.normalizers import (
     normalize_isbn,
     normalize_issn,
     normalize_language,
+    normalize_openalex_id,
 )
 from etl.transform.utils import (
     as_list,
@@ -31,6 +32,14 @@ class IdentifierNormalizerTests(SimpleTestCase):
     def test_normalize_doi_rejects_invalid_values(self):
         self.assertIsNone(normalize_doi("not-a-doi"))
         self.assertIsNone(normalize_doi(None))
+
+    def test_normalize_openalex_id_canonicalizes_work_ids(self):
+        self.assertEqual(normalize_openalex_id("W123"), "https://openalex.org/W123")
+        self.assertEqual(
+            normalize_openalex_id("https://openalex.org/w123"),
+            "https://openalex.org/W123",
+        )
+        self.assertIsNone(normalize_openalex_id("65def291ba8c91985ed38f97"))
 
     def test_normalize_isbn_accepts_isbn10_and_isbn13(self):
         self.assertEqual(normalize_isbn("85-359-0277-5"), "8535902775")

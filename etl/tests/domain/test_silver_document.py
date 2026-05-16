@@ -18,6 +18,8 @@ class SilverContractTests(SimpleTestCase):
             subjects=["Chagas Disease", "Social Support"],
             subjects_with_lang=[{"language": "en", "subjects": "Chagas Disease"}],
             referenced_works=["https://openalex.org/W123"],
+            doi="10.1590/s0102-311x2024000100001",
+            ids={"openalex_with_lang": [{"language": "en", "openalex": "W999"}]},
             openalex_id="https://openalex.org/W999",
             scielo_id="S001",
             oca_data={"scope": "scielo"},
@@ -26,7 +28,13 @@ class SilverContractTests(SimpleTestCase):
         indexed = doc.to_index_dict()
 
         self.assertEqual(indexed["doc_id"], "S001")
+        self.assertNotIn("doi", indexed)
+        self.assertEqual(indexed["ids"]["doi"], "10.1590/s0102-311x2024000100001")
         self.assertEqual(indexed["ids"]["openalex"], "https://openalex.org/W999")
+        self.assertEqual(
+            indexed["ids"]["openalex_with_lang"],
+            [{"language": "en", "openalex": "https://openalex.org/W999"}],
+        )
         self.assertEqual(indexed["ids"]["scielo"], "S001")
         self.assertEqual(indexed["oca_data"]["scope"], ["scielo"])
         self.assertEqual(indexed["description"], "A preprint description")
@@ -91,6 +99,7 @@ class SilverContractTests(SimpleTestCase):
     def test_silver_mapping_contains_contract_fields(self):
         for field in ("doc_id", "type", "ids", "oca_data", "metrics"):
             self.assertIn(field, SILVER_PROPERTIES)
+        self.assertNotIn("doi", SILVER_PROPERTIES)
 
     def test_scope_is_keyword(self):
         self.assertEqual(

@@ -17,6 +17,18 @@ def normalize_doi(doi: str | None) -> str | None:
     return normalized if re.match(r"^10\.\d{4,9}/\S+$", normalized) else None
 
 
+def normalize_openalex_id(openalex_id: str | None) -> str | None:
+    if not openalex_id:
+        return None
+
+    normalized = str(openalex_id).strip()
+    match = re.match(r"^(?:https?://openalex\.org/)?(W\d+)$", normalized, re.IGNORECASE)
+    if not match:
+        return None
+
+    return f"https://openalex.org/{match.group(1).upper()}"
+
+
 def normalize_document_type_for_etl(value: str | None) -> str:
     if value in {None, ""}:
         raise ValueError("document_type is required")

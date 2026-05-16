@@ -102,6 +102,11 @@ class StandardizerIdentifierTests(SimpleTestCase):
                 "type": "article",
                 "doi": "https://doi.org/10.1590/S0102-311X2024000100001",
                 "publication_year": 2024,
+                "language": "pt",
+                "openalex_with_lang": [
+                    {"language": "pt", "openalex": "65def291ba8c91985ed38f97"},
+                    {"language": "en", "openalex": "W123"},
+                ],
             },
             doc_type_fn=doc_type_fn,
         )
@@ -110,15 +115,21 @@ class StandardizerIdentifierTests(SimpleTestCase):
         self.assertEqual(silver.doi, "10.1590/s0102-311x2024000100001")
         self.assertEqual(silver.scielo_id, "S123")
         self.assertEqual(silver.ids["doi"], "10.1590/s0102-311x2024000100001")
+        self.assertEqual(
+            silver.ids["doi_with_lang"],
+            [{"language": "pt", "doi": "10.1590/s0102-311x2024000100001"}],
+        )
         self.assertEqual(silver.ids["scielo"], "S123")
+        self.assertNotIn("openalex_with_lang", silver.ids)
 
     def test_top_level_identifiers_are_populated_from_openalex(self):
         oa = RawOpenAlexInputDocument.from_raw(
             {
-                "id": "https://openalex.org/W1",
+                "id": "W1",
                 "type": "article",
                 "doi": "https://doi.org/10.1590/S0102-311X2024000100001",
                 "publication_year": 2024,
+                "language": "en",
             }
         )
 
@@ -127,6 +138,10 @@ class StandardizerIdentifierTests(SimpleTestCase):
         self.assertEqual(silver.openalex_id, "https://openalex.org/W1")
         self.assertEqual(silver.ids["doi"], "10.1590/s0102-311x2024000100001")
         self.assertEqual(silver.ids["openalex"], "https://openalex.org/W1")
+        self.assertEqual(
+            silver.ids["openalex_with_lang"],
+            [{"language": "en", "openalex": "https://openalex.org/W1"}],
+        )
 
     def test_standardizer_error_propagates_not_silently_ignored(self):
         def doc_type_fn(raw):

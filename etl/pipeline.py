@@ -78,6 +78,7 @@ class OpenSearchETLPipeline:
             rules=self.rules,
         )
         self.merger = SilverMerger()
+        self.skipped_doc_ids = []
 
         logger.info("OpenSearchETLPipeline initialized")
         logger.info("  Input SciELO index: %s", self.input_scielo_index)
@@ -91,6 +92,9 @@ class OpenSearchETLPipeline:
         year_filter: Optional[int] = None,
         doc_ids: Optional[List[str]] = None,
     ) -> Dict[str, Any]:
+        self.skipped_doc_ids = []
+        self.indexed_index_names = set()
+
         result = {
             "status": "success",
             "total_input_docs": 0,
@@ -98,6 +102,8 @@ class OpenSearchETLPipeline:
             "total_duplicates_found": 0,
             "total_merged_docs": 0,
             "total_indexed_docs": 0,
+            "total_skipped_docs": 0,
+            "skipped_doc_ids": [],
             "groups_with_openalex_matches": 0,
             "total_openalex_matches": 0,
             "scielo_dedup_source_ids": [],
@@ -209,7 +215,7 @@ class OpenSearchETLPipeline:
                                     validation
                                 )
                             )
-                        
+
                         except Exception as e:
                             logger.warning(f"Error standardizing OpenAlex doc: {e}")
                             result["warning_messages"].append(
@@ -231,7 +237,11 @@ class OpenSearchETLPipeline:
             logger.info("\n[Step 4] Indexing to silver indices...")
             indexed_count = self._index_silver_documents(all_merged_docs)
             result["total_indexed_docs"] = indexed_count
+            result["total_skipped_docs"] = len(self.skipped_doc_ids)
+            result["skipped_doc_ids"] = self.skipped_doc_ids
             logger.info(f"Indexed {indexed_count} documents to silver indices")
+            if self.skipped_doc_ids:
+                logger.warning(f"Skipped {len(self.skipped_doc_ids)} documents due to missing publication_year")
 
             logger.info("\n" + "=" * 80)
             logger.info("PIPELINE EXECUTION COMPLETE")
@@ -254,7 +264,7 @@ class OpenSearchETLPipeline:
         filters = []
         if doc_ids:
             filters.append({"ids": {"values": [str(doc_id) for doc_id in doc_ids]}})
-        if year_filter:
+        if year_filter and not doc_ids:
             filters.append({"term": {"publication_year": year_filter}})
         if filters:
             query = {"bool": {"filter": filters}}
@@ -305,7 +315,7 @@ class OpenSearchETLPipeline:
 
                 response = self.client.client.scroll(scroll_id=scroll_id, scroll="5m")
                 scroll_id = response.get("_scroll_id")
-        
+
         finally:
             if scroll_id:
                 self.client.client.clear_scroll(scroll_id=scroll_id)
@@ -340,9 +350,9 @@ class OpenSearchETLPipeline:
 
         return self.scielo_deduplicator.find_duplicates(articles=input_docs)
 
-    def _expand_scielo_input_context(self, docs: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def _expand_scielo_input_context(self, docs: List[Dict[str, Any]]    ) -> List[Dict[str, Any]]:
         field_values: dict[str, list] = defaultdict(list)
-        
+
         for doc in docs:
             for identity_field in ("doi", "code", "id", "doc_id"):
                 value = doc.get(identity_field)
@@ -350,10 +360,19 @@ class OpenSearchETLPipeline:
                     field_values[identity_field].append(value)
 
             ids = doc.get("ids") if isinstance(doc.get("ids"), dict) else {}
-            for identity_field in ("scl_preprint_id", "dataset_id", "doi"):
+            for identity_field in ("scl_preprint_id", "dataset_id", "scl_book_id", "doi", "isbn"):
                 value = ids.get(identity_field)
                 if value:
                     field_values[f"ids.{identity_field}"].append(value)
+
+                monograph = doc.get("monograph") or {}
+                m_ids = monograph.get("ids") or monograph
+                if isinstance(m_ids, dict):
+                    m_value = m_ids.get(identity_field)
+                    if m_value:
+                        field_values[f"ids.{identity_field}"].append(m_value)
+                        field_values[f"monograph.ids.{identity_field}"].append(m_value)
+                        field_values[f"monograph.{identity_field}"].append(m_value)
 
         should = [
             {"terms": {field: list(dict.fromkeys(values))}}
@@ -363,25 +382,41 @@ class OpenSearchETLPipeline:
         if not should:
             return docs
 
+        logger.info(f"Expanding context for {len(docs)} documents...")
+        search_body = {
+            "query": {"bool": {"should": should, "minimum_should_match": 1}},
+            "size": 1000,
+        }
+
+        combined = {str(doc): doc for doc in docs}
+
         response = self.client.client.search(
             index=self.input_scielo_index,
-            body={
-                "query": {"bool": {"should": should, "minimum_should_match": 1}},
-                "size": max(100, len(docs) * 10),
-            },
+            body=search_body,
+            scroll="5m",
         )
+        scroll_id = response.get("_scroll_id")
 
-        combined = {}
-        for doc in docs:
-            combined[str(doc)] = doc
+        try:
+            while True:
+                hits = response["hits"]["hits"]
+                if not hits:
+                    break
 
-        for hit in response["hits"]["hits"]:
-            normalized = clean_source_payload(hit["_source"])
-            normalized["_os_id"] = hit.get("_id")
-            self.loaded_source_ids.update(
-                self._source_identity_values(hit.get("_id"), normalized)
-            )
-            combined[str(normalized)] = normalized
+                for hit in hits:
+                    normalized = clean_source_payload(hit["_source"])
+                    normalized["_os_id"] = hit.get("_id")
+                    self.loaded_source_ids.update(
+                        self._source_identity_values(hit.get("_id"), normalized)
+                    )
+                    combined[str(normalized)] = normalized
+
+                response = self.client.client.scroll(scroll_id=scroll_id, scroll="5m")
+                scroll_id = response.get("_scroll_id")
+
+        finally:
+            if scroll_id:
+                self.client.client.clear_scroll(scroll_id=scroll_id)
 
         return list(combined.values())
 
@@ -398,8 +433,14 @@ class OpenSearchETLPipeline:
         }
 
         ids = source.get("ids") if isinstance(source.get("ids"), dict) else {}
-        for identity_field in ("scl_preprint_id", "dataset_id", "doi"):
+        for identity_field in ("scl_preprint_id", "dataset_id", "scl_book_id", "doi", "isbn"):
             values.add(ids.get(identity_field))
+
+        monograph = source.get("monograph") or {}
+        m_ids = monograph.get("ids") or monograph
+        if isinstance(m_ids, dict):
+            for identity_field in ("scl_preprint_id", "dataset_id", "scl_book_id", "doi", "isbn"):
+                values.add(m_ids.get(identity_field))
 
         return {str(value) for value in values if value not in (None, "")}
 
@@ -424,15 +465,6 @@ class OpenSearchETLPipeline:
         self,
         silver_docs: List[SilverDocument],
     ) -> int:
-        """
-        Index silver documents to year-partitioned indices.
-
-        Args:
-            silver_docs: List of standardized silver documents
-
-        Returns:
-            Number of documents successfully indexed
-        """
         if not silver_docs:
             return 0
 
@@ -441,6 +473,7 @@ class OpenSearchETLPipeline:
             year = doc.publication_year
             if not year:
                 logger.warning(f"Document missing publication_year: {doc.doc_id}")
+                self.skipped_doc_ids.append(doc.doc_id)
                 continue
 
             if year not in docs_by_year:

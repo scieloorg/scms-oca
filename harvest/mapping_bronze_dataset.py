@@ -320,6 +320,22 @@ BRONZE_MAPPING = {
                     }
                 },
             },
+            "subjects_with_lang": {
+                "type": "object",
+                "properties": {
+                    "language": {"type": "keyword"},
+                    "subjects": {
+                        "type": "text",
+                        "analyzer": "multilingual",
+                        "fields": {
+                            "keyword": {
+                                "type": "keyword",
+                                "ignore_above": 256,
+                            }
+                        },
+                    },
+                },
+            },
             "subjects_search": {
                 "type": "text",
                 "analyzer": "multilingual",
