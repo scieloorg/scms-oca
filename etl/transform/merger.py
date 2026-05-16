@@ -347,6 +347,7 @@ class SilverMerger:
         all_institutions = []
         all_country_codes = set()
         all_metrics = {}
+        all_sdgs = []
 
         for oa_doc in openalex_docs:
             oa_data = oa_doc.to_dict()
@@ -366,6 +367,8 @@ class SilverMerger:
                 all_country_codes.update(oa_data["author_country_codes"])
             if oa_data.get("metrics"):
                 all_metrics.update(oa_data["metrics"])
+            if oa_data.get("sustainable_development_goals"):
+                all_sdgs.extend(oa_data["sustainable_development_goals"])
 
         if merged_data.get("citation_count") is not None:
             all_citation_counts.insert(0, merged_data["citation_count"])
@@ -401,6 +404,10 @@ class SilverMerger:
 
         if all_metrics:
             merged_data["metrics"] = {**(merged_data.get("metrics") or {}), **all_metrics}
+        if all_sdgs:
+            merged_data["sustainable_development_goals"] = self._unique_sdgs_by_score(
+                (merged_data.get("sustainable_development_goals") or []) + all_sdgs
+            )
 
         try:
             return SilverDocument(**merged_data)
@@ -429,6 +436,17 @@ class SilverMerger:
             elif not inst_id:
                 unique_institutions.append(institution)
         return unique_institutions
+
+    def _unique_sdgs_by_score(self, sdgs: list) -> list:
+        sdgs_by_id = {}
+
+        for sdg in sdgs:
+            sdg_id = sdg["id"]
+            current = sdgs_by_id.get(sdg_id)
+            if current is None or (sdg.get("score") or 0) > (current.get("score") or 0):
+                sdgs_by_id[sdg_id] = sdg
+
+        return list(sdgs_by_id.values())
 
     def _with_merge_trace(
         self,
