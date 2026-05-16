@@ -350,9 +350,9 @@ class OpenSearchETLPipeline:
 
         return self.scielo_deduplicator.find_duplicates(articles=input_docs)
 
-    def _expand_scielo_input_context(self, docs: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def _expand_scielo_input_context(self, docs: List[Dict[str, Any]]    ) -> List[Dict[str, Any]]:
         field_values: dict[str, list] = defaultdict(list)
-        
+
         for doc in docs:
             for identity_field in ("doi", "code", "id", "doc_id"):
                 value = doc.get(identity_field)
@@ -360,10 +360,19 @@ class OpenSearchETLPipeline:
                     field_values[identity_field].append(value)
 
             ids = doc.get("ids") if isinstance(doc.get("ids"), dict) else {}
-            for identity_field in ("scl_preprint_id", "dataset_id", "doi"):
+            for identity_field in ("scl_preprint_id", "dataset_id", "scl_book_id", "doi", "isbn"):
                 value = ids.get(identity_field)
                 if value:
                     field_values[f"ids.{identity_field}"].append(value)
+
+                monograph = doc.get("monograph") or {}
+                m_ids = monograph.get("ids") or monograph
+                if isinstance(m_ids, dict):
+                    m_value = m_ids.get(identity_field)
+                    if m_value:
+                        field_values[f"ids.{identity_field}"].append(m_value)
+                        field_values[f"monograph.ids.{identity_field}"].append(m_value)
+                        field_values[f"monograph.{identity_field}"].append(m_value)
 
         should = [
             {"terms": {field: list(dict.fromkeys(values))}}
@@ -373,25 +382,41 @@ class OpenSearchETLPipeline:
         if not should:
             return docs
 
+        logger.info(f"Expanding context for {len(docs)} documents...")
+        search_body = {
+            "query": {"bool": {"should": should, "minimum_should_match": 1}},
+            "size": 1000,
+        }
+
+        combined = {str(doc): doc for doc in docs}
+
         response = self.client.client.search(
             index=self.input_scielo_index,
-            body={
-                "query": {"bool": {"should": should, "minimum_should_match": 1}},
-                "size": max(100, len(docs) * 10),
-            },
+            body=search_body,
+            scroll="5m",
         )
+        scroll_id = response.get("_scroll_id")
 
-        combined = {}
-        for doc in docs:
-            combined[str(doc)] = doc
+        try:
+            while True:
+                hits = response["hits"]["hits"]
+                if not hits:
+                    break
 
-        for hit in response["hits"]["hits"]:
-            normalized = clean_source_payload(hit["_source"])
-            normalized["_os_id"] = hit.get("_id")
-            self.loaded_source_ids.update(
-                self._source_identity_values(hit.get("_id"), normalized)
-            )
-            combined[str(normalized)] = normalized
+                for hit in hits:
+                    normalized = clean_source_payload(hit["_source"])
+                    normalized["_os_id"] = hit.get("_id")
+                    self.loaded_source_ids.update(
+                        self._source_identity_values(hit.get("_id"), normalized)
+                    )
+                    combined[str(normalized)] = normalized
+
+                response = self.client.client.scroll(scroll_id=scroll_id, scroll="5m")
+                scroll_id = response.get("_scroll_id")
+
+        finally:
+            if scroll_id:
+                self.client.client.clear_scroll(scroll_id=scroll_id)
 
         return list(combined.values())
 
@@ -408,8 +433,14 @@ class OpenSearchETLPipeline:
         }
 
         ids = source.get("ids") if isinstance(source.get("ids"), dict) else {}
-        for identity_field in ("scl_preprint_id", "dataset_id", "doi"):
+        for identity_field in ("scl_preprint_id", "dataset_id", "scl_book_id", "doi", "isbn"):
             values.add(ids.get(identity_field))
+
+        monograph = source.get("monograph") or {}
+        m_ids = monograph.get("ids") or monograph
+        if isinstance(m_ids, dict):
+            for identity_field in ("scl_preprint_id", "dataset_id", "scl_book_id", "doi", "isbn"):
+                values.add(m_ids.get(identity_field))
 
         return {str(value) for value in values if value not in (None, "")}
 

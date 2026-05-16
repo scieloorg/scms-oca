@@ -347,6 +347,7 @@ class SilverMerger:
         all_country_codes = set()
         all_metrics = {}
         all_sdgs = []
+        all_indexed_in = list(merged_data.get("indexed_in") or [])
         openalex_doi = None
         openalex_doi_with_lang = []
 
@@ -375,6 +376,8 @@ class SilverMerger:
                 all_metrics.update(oa_data["metrics"])
             if oa_data.get("sustainable_development_goals"):
                 all_sdgs.extend(oa_data["sustainable_development_goals"])
+            if oa_data.get("indexed_in"):
+                all_indexed_in.extend(as_list(oa_data["indexed_in"]))
 
         if merged_data.get("citation_count") is not None:
             all_citation_counts.insert(0, merged_data["citation_count"])
@@ -414,6 +417,8 @@ class SilverMerger:
             merged_data["sustainable_development_goals"] = self._unique_sdgs_by_score(
                 (merged_data.get("sustainable_development_goals") or []) + all_sdgs
             )
+        if all_indexed_in:
+            merged_data["indexed_in"] = sorted(set(all_indexed_in))
         if openalex_doi and not merged_data.get("doi"):
             merged_data["doi"] = openalex_doi
             merged_data.setdefault("ids", {}).setdefault("doi", openalex_doi)
@@ -432,6 +437,26 @@ class SilverMerger:
                     all_languages.add(lang)
         if all_languages:
             merged_data["language"] = sorted(all_languages)
+
+        if openalex_docs:
+            oa_source = openalex_docs[0].source or {}
+            if oa_source:
+                sc_source = merged_data.get("source") or {}
+                if oa_source.get("id"):
+                    sc_source.setdefault("ids", {})["openalex"] = oa_source["id"]
+                for key in ("issn_l", "host_organization", "host_organization_name", "type"):
+                    if not sc_source.get(key) and oa_source.get(key):
+                        sc_source[key] = oa_source[key]
+
+                oa_issns = as_list(oa_source.get("issns"))
+                sc_issns = as_list(sc_source.get("issns"))
+                sc_source["issns"] = unique(sc_issns + oa_issns)
+
+                merged_data["source"] = sc_source
+                merged_data["source_title"] = sc_source.get("title")
+                merged_data["source_issns"] = sc_source.get("issns") or []
+                merged_data["source_type"] = sc_source.get("type")
+
         try:
             return SilverDocument(**merged_data)
         except Exception as exc:

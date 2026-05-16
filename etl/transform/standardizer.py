@@ -151,15 +151,28 @@ class BaseStandardizer:
             author = authorship.get("author") or {}
             institutions = []
 
+            seen_insts = set()
             for inst in authorship.get("institutions") or []:
+                name = inst.get("display_name") or inst.get("name")
+                inst_id = inst.get("id")
+                ror = inst.get("ror")
+
+                key = (normalize_author_name(name) if name else None, inst_id, ror)
+                if any(k and k in seen_insts for k in key) or (not any(key) and name in seen_insts):
+                    continue
+
+                if name: seen_insts.add(normalize_author_name(name))
+                if inst_id: seen_insts.add(inst_id)
+                if ror: seen_insts.add(ror)
+
                 country_code = None
                 if raw_code := inst.get("country_code"):
                     country_code = normalize_country_code(raw_code)
 
                 institutions.append({
-                    "name": inst.get("display_name") or inst.get("name"),
-                    "id": inst.get("id"),
-                    "ror": inst.get("ror"),
+                    "name": name,
+                    "id": inst_id,
+                    "ror": ror,
                     "type": inst.get("type"),
                     "country_code": country_code,
                 })
@@ -376,7 +389,7 @@ class SciELOStandardizer(BaseStandardizer):
         data["abstract_with_lang"] = self._build_abstract_with_lang_field(raw)
         data["description_with_lang"] = self._build_description_with_lang_field(raw)
         data["keywords_with_lang"] = raw.get("keywords_with_lang") or []
-        data["subjects_with_lang"] = raw.get("subjects_with_lang") or []
+        data["subjects_with_lang"] = self._build_subjects_with_lang_field(raw)
         data["content_url"] = self._build_content_url_field(raw)
         data["content_url_with_lang"] = self._build_content_url_with_lang_field(raw)
         data["is_open_access"] = self._build_is_open_access_field(raw)
@@ -489,6 +502,12 @@ class SciELOStandardizer(BaseStandardizer):
             or raw_data.get("refs")
             or []
         )
+
+    def _build_source_field(self, raw_data: dict[str, Any]) -> dict:
+        source = super()._build_source_field(raw_data)
+        if source.get("id"):
+            source["acronym"] = source.pop("id")
+        return source
 
     def _build_indexed_in_field(self, raw_data: dict[str, Any]) -> list[str]:
         indexed_in: list[str] = []
