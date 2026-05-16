@@ -674,7 +674,7 @@ class SilverDocument(OcaModel):
             allowed["scope"] = self._scope_values(allowed["scope"])
 
         trace = dict(allowed.get("merge_trace") or {})
-        for key in ("merged", "scielo_id", "openalex_id"):
+        for key in ("scielo_id", "openalex_id"):
             if key in raw and key not in trace:
                 trace[key] = raw[key]
         if trace:

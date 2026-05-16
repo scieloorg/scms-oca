@@ -30,7 +30,6 @@ class SilverMerger:
         else:
             merged = base_scielo
             merged.oca_data.setdefault("scope", []).append("scielo")
-            merged.oca_data["merged"] = True
 
         return self._with_merge_trace(merged, scielo_docs, openalex_matches)
 
@@ -512,16 +511,12 @@ class SilverMerger:
             data["oca_data"]["openalex"] = openalex
 
         data["oca_data"]["merge_trace"] = {
-            "merged": True,
-            "scielo_group": {
+            "scielo_matches": {
                 "doc_ids": scielo_ids,
                 "collections": scielo_collections,
-                "total_duplicates": len(scielo_docs),
             },
             "openalex_matches": openalex_match_details,
-            "rejected_matches": [],
         }
-        data["oca_data"]["merged"] = True
         data["oca_data"]["scope"] = (
             ["scielo", "openalex"] if openalex_matches else ["scielo"]
         )
