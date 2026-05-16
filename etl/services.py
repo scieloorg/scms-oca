@@ -210,12 +210,14 @@ def process_pending_items(
             scielo_dedup_map = result.get("scielo_dedup_map") or {}
             openalex_match_map = result.get("openalex_match_map") or {}
             indexed = result.get("total_indexed_docs", 0) > 0
+            skipped_ids = set(result.get("skipped_doc_ids") or [])
 
             for item in group_items:
                 has_oa = item.external_id in openalex_ids
                 has_dedup = item.external_id in dedup_ids
                 item_result = (
-                    EtlResult.MERGED if (has_oa or has_dedup)
+                    EtlResult.SKIPPED if item.external_id in skipped_ids
+                    else EtlResult.MERGED if (has_oa or has_dedup)
                     else EtlResult.UPDATED if indexed
                     else EtlResult.UNCHANGED
                 )
@@ -225,6 +227,8 @@ def process_pending_items(
                     has_scielo_dedup=has_dedup,
                     scielo_dedup_ids=scielo_dedup_map.get(item.external_id) or [],
                     openalex_match_ids=openalex_match_map.get(item.external_id) or [],
+                    status=EtlStatus.SKIPPED if item.external_id in skipped_ids else EtlStatus.SUCCESS,
+                    error="Missing mandatory publication_year" if item.external_id in skipped_ids else None,
                 )
 
         except Exception as exc:
@@ -301,8 +305,8 @@ def process_item_group(
     if result.get("errors"):
         raise RuntimeError(f"Pipeline finished with errors: {result}")
 
-    if result.get("total_indexed_docs", 0) <= 0:
-        raise RuntimeError(f"Pipeline did not index any silver documents: {result}")
+    if (result.get("total_indexed_docs", 0) + result.get("total_skipped_docs", 0)) <= 0:
+        raise RuntimeError(f"Pipeline did not process any silver documents (indexed+skipped=0): {result}")
 
     return result
 

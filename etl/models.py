@@ -398,14 +398,14 @@ class EtlItemProcess(models.Model):
         self.error = None
         self.save(update_fields=["status", "attempts", "error", "updated_at"])
 
-    def mark_success(self, result=EtlResult.UPDATED, has_openalex_match=False, has_scielo_dedup=False, scielo_dedup_ids=None, openalex_match_ids=None):
-        self.status = EtlStatus.SUCCESS
+    def mark_success(self, result=EtlResult.UPDATED, has_openalex_match=False, has_scielo_dedup=False, scielo_dedup_ids=None, openalex_match_ids=None, status=EtlStatus.SUCCESS, error=None):
+        self.status = status
         self.result = result
         self.has_openalex_match = has_openalex_match
         self.has_scielo_dedup = has_scielo_dedup
         self.scielo_dedup_ids = scielo_dedup_ids or []
         self.openalex_match_ids = openalex_match_ids or []
-        self.error = None
+        self.error = error
         self.processed_at = timezone.now()
         self.save(
             update_fields=[
