@@ -422,6 +422,16 @@ class SilverMerger:
             if not merged_ids.get("doi_with_lang"):
                 merged_ids["doi_with_lang"] = openalex_doi_with_lang
 
+        all_languages = set(as_list(merged_data.get("language") or []))
+        for item in merged_data.get("title_with_lang") or []:
+            if lang := item.get("language"):
+                all_languages.add(lang)
+        for oa_doc in openalex_docs:
+            for item in (oa_doc.to_dict().get("title_with_lang") or []):
+                if lang := item.get("language"):
+                    all_languages.add(lang)
+        if all_languages:
+            merged_data["language"] = sorted(all_languages)
         try:
             return SilverDocument(**merged_data)
         except Exception as exc:
@@ -473,16 +483,21 @@ class SilverMerger:
 
         scielo_ids = [str(x) for x in unique(
             [item for doc in scielo_docs for item in self._scielo_ids(doc)]
-        scielo_collections = unique(
+        )]
+        scielo_collections = [str(x) for x in unique(
             [item for doc in scielo_docs for item in self._scielo_collections(doc)]
-        )
+        )]
 
         openalex_ids = []
         openalex_match_details = []
+        openalex_lang_map: dict[str, list[str]] = {}
         for oa_doc, strategy, confidence, validation in openalex_matches:
             oa_id_list = self._openalex_ids(oa_doc)
             if oa_id_list:
                 openalex_ids.extend(oa_id_list)
+                oa_langs = as_list(oa_doc.language or [])
+                for oa_id in oa_id_list:
+                    openalex_lang_map.setdefault(oa_id, []).extend(oa_langs)
             openalex_match_details.append(
                 {
                     "doc_id": oa_id_list[0] if oa_id_list else None,
@@ -506,6 +521,14 @@ class SilverMerger:
         if openalex_ids:
             data["ids"]["openalex"] = scalar_or_list(openalex_ids)
             data["openalex_id"] = openalex_ids[0]
+
+            oa_lang_items = []
+            for oa_id in openalex_ids:
+                for lang in openalex_lang_map.get(oa_id) or []:
+                    oa_lang_items.append({"language": lang, "openalex": oa_id})
+            if oa_lang_items:
+                data["ids"]["openalex_with_lang"] = oa_lang_items
+
             openalex = dict(data["oca_data"].get("openalex") or {})
             openalex["ids"] = openalex_ids
             data["oca_data"]["openalex"] = openalex

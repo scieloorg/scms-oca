@@ -462,6 +462,25 @@ class SciELOStandardizer(BaseStandardizer):
             {"language": l, "content_url": u} for l, u in sorted(urls_map.items())
         ]
 
+    def _build_subjects_with_lang_field(self, raw_data: dict[str, Any]) -> list[dict[str, Any]]:
+        subjects_map: dict[str, list[str]] = {}
+        for item in raw_data.get("subjects_with_lang") or []:
+            if not isinstance(item, dict):
+                continue
+            lang = item.get("language")
+            value = item.get("subjects") or item.get("text")
+            if lang and value:
+                values = [value] if isinstance(value, str) else as_list(value)
+                subjects_map.setdefault(lang, []).extend(values)
+        if not subjects_map and raw_data.get("subjects"):
+            lang = self._fallback_language_code(raw_data)
+            subjects_map[lang] = normalize_keywords(raw_data["subjects"])
+        result = []
+        for lang in sorted(subjects_map):
+            for subject in subjects_map[lang]:
+                result.append({"language": lang, "subjects": subject})
+        return result
+
     def _build_referenced_works_field(self, raw_data: dict[str, Any]) -> list:
         return (
             raw_data.get("referenced_works")
