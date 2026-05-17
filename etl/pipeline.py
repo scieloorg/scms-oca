@@ -37,8 +37,7 @@ class OpenSearchETLPipeline:
         opensearch_port: int | None = None,
         input_scielo_index: str | None = None,
         input_openalex_index: str | None = None,
-        silver_index_pattern: str | None = None,
-        public_alias: str = "scientific_production",
+        public_alias: str = "silver_scientific_production",
         batch_size: int = 1000,
         pipeline_config: EtlPipelineConfig | None = None,
     ):
@@ -57,7 +56,8 @@ class OpenSearchETLPipeline:
         self.pipeline_config = pipeline_config or EtlPipelineConfig.objects.get_for_source(self.input_scielo_index)
         self.document_type = self.pipeline_config.default_document_type
         self.input_openalex_index = self.pipeline_config.openalex_index_for(input_openalex_index)
-        self.silver_index_pattern = silver_index_pattern or self.pipeline_config.silver_index_pattern
+        self.silver_index_pattern = getattr(settings, "ETL_SILVER_INDEX_PATTERN", "silver_scientific_production")
+        self.silver_write_alias = getattr(settings, "ETL_SILVER_WRITE_ALIAS", "silver_write")
         self.rules = self.pipeline_config.to_rules()
 
         self.client = OpenSearchClient(
@@ -84,6 +84,7 @@ class OpenSearchETLPipeline:
         logger.info("  Input SciELO index: %s", self.input_scielo_index)
         logger.info("  Input OpenAlex index: %s", self.input_openalex_index)
         logger.info("  Silver index pattern: %s", self.silver_index_pattern)
+        logger.info("  Silver write alias: %s", self.silver_write_alias)
         logger.info("  Batch size: %s", self.batch_size)
 
     def run(

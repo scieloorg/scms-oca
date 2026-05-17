@@ -142,7 +142,6 @@ class EtlPipelineConfig(models.Model):
     name = models.CharField(max_length=50, unique=True)
     enabled = models.BooleanField(default=True)
     input_index = models.CharField(max_length=255, db_index=True)
-    silver_index_pattern = models.CharField(max_length=255)
     input_document_kind = models.CharField(
         max_length=20,
         choices=INPUT_DOCUMENT_KIND_CHOICES,
@@ -165,7 +164,6 @@ class EtlPipelineConfig(models.Model):
         FieldPanel("name"),
         FieldPanel("enabled"),
         FieldPanel("input_index"),
-        FieldPanel("silver_index_pattern"),
         FieldPanel("input_document_kind"),
         FieldPanel("default_document_type"),
         FieldPanel("infer_document_type_from_payload"),
