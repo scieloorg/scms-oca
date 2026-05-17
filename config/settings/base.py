@@ -525,7 +525,7 @@ ETL_INPUT_SCIELO_DATASET = env.str("ETL_INPUT_SCIELO_DATASET", "bronze_scielo_da
 ETL_INPUT_OPENALEX_WORKS = env.str("ETL_INPUT_OPENALEX_WORKS", "raw_openalex_works")
 
 # ETL — Silver Index Patterns
-ETL_SILVER_ARTICLE_PATTERN = env.str("ETL_SILVER_ARTICLE_PATTERN", "silver_article_{year}")
+ETL_SILVER_ARTICLE_PATTERN = env.str("ETL_SILVER_ARTICLE_PATTERN", "silver_article")
 ETL_SILVER_BOOK = env.str("ETL_SILVER_BOOK", "silver_book")
 ETL_SILVER_PREPRINT = env.str("ETL_SILVER_PREPRINT", "silver_preprint")
 ETL_SILVER_DATASET = env.str("ETL_SILVER_DATASET", "silver_dataset")

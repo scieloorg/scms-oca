@@ -37,8 +37,8 @@ class PipelineConfigTaskTests(TestCase):
             result=EtlResult.UNCHANGED,
         )
         pipeline_cls.return_value.run.return_value = {"errors": 0, "total_indexed_docs": 2}
-        pipeline_cls.return_value.indexed_index_names = {"silver_article_2024"}
         pipeline_cls.return_value.public_alias = "scientific_production"
+        pipeline_cls.return_value.indexed_index_names = {"silver_article"}
 
         result = _run_pipeline_target("article", year=2024, max_docs=10)
 
@@ -46,8 +46,8 @@ class PipelineConfigTaskTests(TestCase):
         kwargs = pipeline_cls.call_args.kwargs
         self.assertEqual(kwargs["opensearch_url"], "http://opensearch:9200")
         self.assertEqual(kwargs["input_scielo_index"], "bronze_scielo_articles*")
-        self.assertEqual(kwargs["silver_index_pattern"], "silver_article_{year}")
         self.assertEqual(kwargs["public_alias"], "scientific_production")
+        self.assertEqual(kwargs["silver_index_pattern"], "silver_article")
         backfill_input_items.assert_called_once_with(
             "bronze_scielo_articles*",
             year=2024,
@@ -56,5 +56,5 @@ class PipelineConfigTaskTests(TestCase):
         )
         self.assertEqual(result["target"], "article")
         self.assertEqual(result["public_alias"], "scientific_production")
-        self.assertEqual(result["indexed_indices"], ["silver_article_2024"])
+        self.assertEqual(result["indexed_indices"], ["silver_article"])
         self.assertGreaterEqual(refresh_db_connections.call_count, 4)

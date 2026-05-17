@@ -37,8 +37,8 @@ class OrchestratorAliasTests(TestCase):
         self.assertEqual(indexed_count, 1)
         client.create_index.assert_called_once()
         client.add_alias.assert_called_once_with(
-            "silver_article_2024",
             "scientific_production",
+            "silver_article",
         )
         self.assertEqual(pipeline.indexed_index_names, {"silver_article_2024"})
 
