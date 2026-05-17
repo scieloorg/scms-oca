@@ -103,7 +103,6 @@ class EtlItemProcessModelTests(TestCase):
         config = EtlPipelineConfig(
             name="test",
             input_index="test_index",
-            silver_index_pattern="silver_test",
             input_document_kind="article",
             default_document_type="article",
             rules={},
@@ -121,7 +120,6 @@ class EtlItemProcessModelTests(TestCase):
         config = EtlPipelineConfig(
             name="partial",
             input_index="partial_index",
-            silver_index_pattern="silver_partial",
             input_document_kind="article",
             default_document_type="article",
             rules={

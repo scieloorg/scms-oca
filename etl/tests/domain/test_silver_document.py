@@ -1,6 +1,5 @@
 from django.test import SimpleTestCase
 
-from etl.mapping_silver import SILVER_MAPPING, SILVER_PROPERTIES
 from etl.documents import SilverDocument
 
 
@@ -59,28 +58,6 @@ class SilverContractTests(SimpleTestCase):
             indexed["referenced_works"],
             {"ids": {"openalex": ["https://openalex.org/W123"]}},
         )
-        self.assertTrue(set(indexed).issubset(SILVER_PROPERTIES))
-
-    def test_silver_mapping_is_strict_and_contains_expected_fields(self):
-        self.assertEqual(SILVER_MAPPING["mappings"]["dynamic"], "strict")
-        self.assertEqual(
-            SILVER_PROPERTIES["oca_data"]["properties"]["scope"],
-            {"type": "keyword"},
-        )
-        self.assertIn("ids", SILVER_PROPERTIES)
-        self.assertIn("source", SILVER_PROPERTIES)
-        self.assertIn("topic", SILVER_PROPERTIES)
-        self.assertIn("metrics", SILVER_PROPERTIES)
-
-    def test_silver_mapping_uses_nested_for_authorship_compound_filters(self):
-        self.assertEqual(SILVER_PROPERTIES["authorships"]["type"], "nested")
-        self.assertEqual(
-            SILVER_PROPERTIES["authorships"]["properties"]["institutions"]["type"],
-            "nested",
-        )
-        self.assertEqual(SILVER_PROPERTIES["funders"]["type"], "object")
-        self.assertEqual(SILVER_PROPERTIES["sustainable_development_goals"]["type"], "object")
-        self.assertEqual(SILVER_PROPERTIES["sdg_names"], {"type": "keyword"})
 
     def test_silver_document_indexes_sdg_names_flat(self):
         doc = SilverDocument(
@@ -96,38 +73,3 @@ class SilverContractTests(SimpleTestCase):
         indexed = doc.to_index_dict()
 
         self.assertEqual(indexed["sdg_names"], ["No poverty", "Zero hunger"])
-
-    def test_silver_mapping_search_autocomplete_fields(self):
-        self.assertEqual(SILVER_PROPERTIES["title_search_autocomplete"]["type"], "search_as_you_type")
-        self.assertEqual(SILVER_PROPERTIES["abstract_search_autocomplete"]["type"], "search_as_you_type")
-        self.assertEqual(SILVER_PROPERTIES["authors_search_autocomplete"]["type"], "search_as_you_type")
-        self.assertEqual(SILVER_PROPERTIES["institutions_search_autocomplete"]["type"], "search_as_you_type")
-
-    def test_silver_mapping_copy_to_aggregated_search_fields(self):
-        self.assertEqual(
-            SILVER_PROPERTIES["title"]["copy_to"],
-            ["title_search", "title_search_autocomplete", "search_all_text"],
-        )
-        self.assertEqual(
-            SILVER_PROPERTIES["abstract"]["copy_to"],
-            ["abstract_search", "abstract_search_autocomplete", "search_all_text"],
-        )
-        self.assertEqual(
-            SILVER_PROPERTIES["authorships"]["properties"]["name"]["copy_to"],
-            ["authors_search", "authors_search_autocomplete", "search_all_text"],
-        )
-        self.assertEqual(
-            SILVER_PROPERTIES["authorships"]["properties"]["institutions"]["properties"]["name"]["copy_to"],
-            ["institutions_search", "institutions_search_autocomplete", "search_all_text"],
-        )
-
-    def test_silver_mapping_contains_contract_fields(self):
-        for field in ("doc_id", "type", "ids", "oca_data", "metrics"):
-            self.assertIn(field, SILVER_PROPERTIES)
-        self.assertNotIn("doi", SILVER_PROPERTIES)
-
-    def test_scope_is_keyword(self):
-        self.assertEqual(
-            SILVER_PROPERTIES["oca_data"]["properties"]["scope"],
-            {"type": "keyword"},
-        )

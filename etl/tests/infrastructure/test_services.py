@@ -69,7 +69,7 @@ class IncrementalEtlTests(TestCase):
             "groups_with_openalex_matches": 0,
             "total_duplicates_found": 0,
         }
-        pipeline_cls.return_value.indexed_index_names = {"silver_book_2024"}
+        pipeline_cls.return_value.indexed_index_names = {"silver"}
         pipeline_cls.return_value.loaded_source_ids = {"p1"}
 
         result = process_pending_items(limit=10)
@@ -77,7 +77,7 @@ class IncrementalEtlTests(TestCase):
         item.refresh_from_db()
         self.assertEqual(item.status, EtlStatus.SUCCESS)
         self.assertEqual(item.result, EtlResult.UPDATED)
-        self.assertEqual(result[0]["indexed_indices"], ["silver_book_2024"])
+        self.assertEqual(result[0]["indexed_indices"], ["silver"])
         pipeline_cls.return_value.run.assert_called_once_with(
             year_filter=2024,
             doc_ids=["p1"],
@@ -155,7 +155,7 @@ class IncrementalEtlTests(TestCase):
             "groups_with_openalex_matches": 0,
             "total_duplicates_found": 0,
         }
-        pipeline_cls.return_value.indexed_index_names = {"silver_book_2024"}
+        pipeline_cls.return_value.indexed_index_names = {"silver"}
         pipeline_cls.return_value.loaded_source_ids = {"p-stale"}
 
         result = process_pending_items(limit=10)
@@ -187,7 +187,7 @@ class IncrementalEtlTests(TestCase):
             "groups_with_openalex_matches": 0,
             "total_duplicates_found": 0,
         }
-        pipeline_cls.return_value.indexed_index_names = {"silver_book_2024"}
+        pipeline_cls.return_value.indexed_index_names = {"silver"}
         pipeline_cls.return_value.loaded_source_ids = {"p1"}
 
         result = process_pending_items(limit=10)

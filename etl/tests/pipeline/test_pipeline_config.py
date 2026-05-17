@@ -9,7 +9,6 @@ class PipelineConfigMatchTests(TestCase):
         config = EtlPipelineConfig(
             name="article",
             input_index="bronze_scielo_articles-000001",
-            silver_index_pattern="silver_article",
             input_document_kind="article",
             default_document_type="article",
         )
@@ -20,7 +19,6 @@ class PipelineConfigMatchTests(TestCase):
         config = EtlPipelineConfig(
             name="article",
             input_index="bronze_scielo_articles*",
-            silver_index_pattern="silver_article",
             input_document_kind="article",
             default_document_type="article",
         )
@@ -33,7 +31,6 @@ class PipelineConfigMatchTests(TestCase):
         config = EtlPipelineConfig(
             name="article",
             input_index="bronze_scielo_articles-00000?",
-            silver_index_pattern="silver_article",
             input_document_kind="article",
             default_document_type="article",
         )
