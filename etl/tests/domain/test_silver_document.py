@@ -85,6 +85,7 @@ class SilverContractTests(SimpleTestCase):
     def test_silver_document_indexes_sdg_names_flat(self):
         doc = SilverDocument(
             doc_id="S001",
+            type="article",
             sustainable_development_goals=[
                 {"id": "1", "display_name": "No poverty", "score": 0.9},
                 {"id": "1", "display_name": "No poverty", "score": 0.8},

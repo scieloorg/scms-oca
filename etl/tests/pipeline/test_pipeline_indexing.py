@@ -37,10 +37,11 @@ class OrchestratorAliasTests(TestCase):
         self.assertEqual(indexed_count, 1)
         client.create_index.assert_called_once()
         client.add_alias.assert_called_once_with(
-            "scientific_production",
             "silver_article",
+            "scientific_production",
         )
-        self.assertEqual(pipeline.indexed_index_names, {"silver_article_2024"})
+        self.assertEqual(pipeline.indexed_index_names, {"silver_article"})
+
     @patch("etl.pipeline.standardizer_for")
     @patch("etl.pipeline.OpenAlexMatcher")
     @patch("etl.pipeline.SciELODeduplicator")
@@ -57,7 +58,7 @@ class OrchestratorAliasTests(TestCase):
         client_cls.return_value = client
         pipeline = OpenSearchETLPipeline(
             opensearch_url="http://opensearch:9200",
-            public_alias="silver_scientific_production",
+            public_alias="scientific_production",
             silver_index_pattern="silver_article",
         )
         docs = [
@@ -72,7 +73,7 @@ class OrchestratorAliasTests(TestCase):
         bulk_body = client.client.bulk.call_args.kwargs["body"]
         self.assertEqual(bulk_body[0]["index"]["_index"], "silver_article")
         self.assertEqual(bulk_body[2]["index"]["_index"], "silver_article")
-        client.add_alias.assert_called_once_with("silver_article", "silver_scientific_production")
+        client.add_alias.assert_called_once_with("silver_article", "scientific_production")
         self.assertEqual(pipeline.indexed_index_names, {"silver_article"})
 
     @patch("etl.pipeline.standardizer_for")
