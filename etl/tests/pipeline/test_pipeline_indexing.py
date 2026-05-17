@@ -41,6 +41,64 @@ class OrchestratorAliasTests(TestCase):
             "silver_article",
         )
         self.assertEqual(pipeline.indexed_index_names, {"silver_article_2024"})
+    @patch("etl.pipeline.standardizer_for")
+    @patch("etl.pipeline.OpenAlexMatcher")
+    @patch("etl.pipeline.SciELODeduplicator")
+    @patch("etl.pipeline.OpenSearchClient")
+    def test_indexing_multiple_years_uses_single_silver_index(
+        self,
+        client_cls,
+        _scielo_deduplicator_cls,
+        _openalex_matcher_cls,
+        _standardizer_for,
+    ):
+        client = Mock()
+        client.client.bulk.return_value = {"errors": False}
+        client_cls.return_value = client
+        pipeline = OpenSearchETLPipeline(
+            opensearch_url="http://opensearch:9200",
+            public_alias="silver_scientific_production",
+            silver_index_pattern="silver_article",
+        )
+        docs = [
+            SilverDocument(doc_id="S001", type="article", publication_year=2023, title="Title 1"),
+            SilverDocument(doc_id="S002", type="article", publication_year=2024, title="Title 2"),
+        ]
+
+        indexed_count = pipeline._index_silver_documents(docs)
+
+        self.assertEqual(indexed_count, 2)
+        client.create_index.assert_called_once()
+        bulk_body = client.client.bulk.call_args.kwargs["body"]
+        self.assertEqual(bulk_body[0]["index"]["_index"], "silver_article")
+        self.assertEqual(bulk_body[2]["index"]["_index"], "silver_article")
+        client.add_alias.assert_called_once_with("silver_article", "silver_scientific_production")
+        self.assertEqual(pipeline.indexed_index_names, {"silver_article"})
+
+    @patch("etl.pipeline.standardizer_for")
+    @patch("etl.pipeline.OpenAlexMatcher")
+    @patch("etl.pipeline.SciELODeduplicator")
+    @patch("etl.pipeline.OpenSearchClient")
+    def test_indexing_skips_documents_without_publication_year(
+        self,
+        client_cls,
+        _scielo_deduplicator_cls,
+        _openalex_matcher_cls,
+        _standardizer_for,
+    ):
+        client_cls.return_value = Mock()
+        pipeline = OpenSearchETLPipeline(
+            opensearch_url="http://opensearch:9200",
+            silver_index_pattern="silver_article",
+        )
+        doc = SilverDocument(doc_id="S001", type="article", title="Title")
+
+        indexed_count = pipeline._index_silver_documents([doc])
+
+        self.assertEqual(indexed_count, 0)
+        self.assertEqual(pipeline.skipped_doc_ids, ["S001"])
+        pipeline.client.create_index.assert_not_called()
+        pipeline.client.client.bulk.assert_not_called()
 
     @patch("etl.pipeline.standardizer_for")
     @patch("etl.pipeline.OpenAlexMatcher")
