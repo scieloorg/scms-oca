@@ -1,5 +1,6 @@
 import logging
 import time
+from copy import deepcopy
 from typing import Any, Dict, Optional
 
 from search_gateway.client import get_opensearch_client
@@ -23,12 +24,57 @@ class OpenSearchClient:
     def index_exists(self, index_name: str) -> bool:
         return self.client.indices.exists(index=index_name)
 
-    def create_index(self, index_name: str, mapping: Dict[str, Any]) -> None:
-        if not self.index_exists(index_name):
-            logger.info(f"Creating index '{index_name}'...")
-            self.client.indices.create(index=index_name, body=mapping)
-            self.wait_for_index(index_name)
-            logger.info(f"Index '{index_name}' created successfully.")
+    def ensure_rollover_index(
+        self,
+        *,
+        index_prefix: str,
+        write_alias: str,
+        public_alias: str,
+        mapping: Dict[str, Any],
+    ) -> str | None:
+        if self.index_exists(write_alias):
+            return None
+
+        index_name = f"{index_prefix}-000001"
+        body = deepcopy(mapping)
+        aliases = body.setdefault("aliases", {})
+        aliases[write_alias] = {"is_write_index": True}
+        aliases[public_alias] = {}
+
+        logger.info(
+            "Creating rollover bootstrap index '%s' for write alias '%s'...",
+            index_name,
+            write_alias,
+        )
+        self.client.indices.create(index=index_name, body=body)
+        self.wait_for_index(index_name)
+        logger.info("Rollover bootstrap index '%s' created successfully.", index_name)
+        return index_name
+
+    def rollover(
+        self,
+        *,
+        write_alias: str,
+        public_alias: str,
+        max_size: str | None = None,
+    ) -> str | None:
+        conditions: dict[str, Any] = {}
+        if max_size:
+            conditions["max_size"] = max_size
+        if not conditions:
+            return None
+
+        response = self.client.indices.rollover(
+            alias=write_alias,
+            body={"conditions": conditions},
+        )
+        if not response.get("rolled_over"):
+            return None
+
+        new_index = response.get("new_index")
+        if new_index:
+            self.add_alias(new_index, public_alias)
+        return new_index
 
     def wait_for_index(self, index_name: str, timeout_seconds: int = 60) -> None:
         deadline = time.monotonic() + timeout_seconds
@@ -41,26 +87,3 @@ class OpenSearchClient:
 
     def add_alias(self, index_name: str, alias_name: str) -> None:
         self.client.indices.put_alias(index=index_name, name=alias_name)
-
-    def scroll_all(self, index_name: str, batch_size: int = 1000):
-        scroll_id = None
-        try:
-            response = self.client.search(
-                index=index_name,
-                body={"query": {"match_all": {}}, "size": batch_size},
-                scroll="5m",
-            )
-            scroll_id = response.get("_scroll_id")
-            while True:
-                hits = response["hits"]["hits"]
-                if not hits:
-                    break
-                yield from hits
-                response = self.client.scroll(scroll_id=scroll_id, scroll="5m")
-                scroll_id = response.get("_scroll_id")
-        finally:
-            if scroll_id:
-                try:
-                    self.client.clear_scroll(scroll_id=scroll_id)
-                except Exception:
-                    pass

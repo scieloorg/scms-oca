@@ -480,16 +480,28 @@ class OpenSearchETLPipeline:
         if not docs_to_index:
             return 0
 
-        index_name = self.silver_index_pattern
-        logger.info(f"Indexing {len(docs_to_index)} documents to {index_name}...")
-        self.client.create_index(index_name, SILVER_MAPPING)
+        return self._index_silver_documents_to_rollover_alias(docs_to_index)
+
+    def _index_silver_documents_to_rollover_alias(
+        self,
+        docs_to_index: List[SilverDocument],
+    ) -> int:
+        index_prefix = self.silver_index_pattern
+        write_alias = self.silver_write_alias
+        logger.info(f"Indexing {len(docs_to_index)} documents to {write_alias}...")
+        bootstrap_index = self.client.ensure_rollover_index(
+            index_prefix=index_prefix,
+            write_alias=write_alias,
+            public_alias=self.public_alias,
+            mapping=SILVER_MAPPING,
+        )
 
         actions = []
         for doc in docs_to_index:
             actions.append(
                 {
                     "index": {
-                        "_index": index_name,
+                        "_index": write_alias,
                         "_id": doc.doc_id,
                     }
                 }
@@ -497,35 +509,47 @@ class OpenSearchETLPipeline:
             actions.append(doc.to_index_dict())
 
         try:
-            response = self.client.client.bulk(body=actions)
+            self._bulk_index(actions, len(docs_to_index), write_alias)
+            if bootstrap_index:
+                self.indexed_index_names.add(bootstrap_index)
 
-            if response.get("errors"):
-                error_items = [
-                    item.get("index", {})
-                    for item in response["items"]
-                    if item.get("index", {}).get("status", 200) >= 400
-                ]
-                error_count = len(error_items)
-                logger.error(f"Bulk indexing had {error_count} errors")
-                stats_errors = [item.get("error") for item in error_items]
-                for err in stats_errors[:5]:
-                    logger.error(f"  Index error: {err}")
-                raise RuntimeError(
-                    f"Bulk indexing failed for {error_count} documents in {index_name}"
-                )
-            else:
-                logger.info(f"Successfully indexed {len(docs_to_index)} documents")
-
-            self.client.add_alias(index_name, self.public_alias)
-            self.indexed_index_names.add(index_name)
+            rollover_index = self.client.rollover(
+                write_alias=write_alias,
+                public_alias=self.public_alias,
+                max_size=getattr(settings, "ETL_SILVER_ROLLOVER_MAX_SIZE", None),
+            )
+            if rollover_index:
+                self.indexed_index_names.add(rollover_index)
+            if not self.indexed_index_names:
+                self.indexed_index_names.add(write_alias)
 
         except RuntimeError:
             raise
         except Exception as e:
-            logger.error(f"Failed to index to {index_name}: {e}")
+            logger.error(f"Failed to index to {write_alias}: {e}")
             raise
 
         return len(docs_to_index)
+
+    def _bulk_index(self, actions: list[dict], expected_count: int, target_name: str) -> None:
+        response = self.client.client.bulk(body=actions)
+
+        if response.get("errors"):
+            error_items = [
+                item.get("index", {})
+                for item in response["items"]
+                if item.get("index", {}).get("status", 200) >= 400
+            ]
+            error_count = len(error_items)
+            logger.error(f"Bulk indexing had {error_count} errors")
+            stats_errors = [item.get("error") for item in error_items]
+            for err in stats_errors[:5]:
+                logger.error(f"  Index error: {err}")
+            raise RuntimeError(
+                f"Bulk indexing failed for {error_count} documents in {target_name}"
+            )
+
+        logger.info(f"Successfully indexed {expected_count} documents")
 
     def _stable_fallback_doc_id(self, raw_data: Dict[str, Any]) -> str:
         source_payload = {
