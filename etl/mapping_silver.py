@@ -359,6 +359,7 @@ SILVER_PROPERTIES = {
             "score": {"type": "float"},
         },
     },
+    "sdg_names": {"type": "keyword"},
     "metrics": {
         "type": "object",
         "properties": {
