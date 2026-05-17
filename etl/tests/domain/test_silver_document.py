@@ -72,6 +72,16 @@ class SilverContractTests(SimpleTestCase):
         self.assertIn("topic", SILVER_PROPERTIES)
         self.assertIn("metrics", SILVER_PROPERTIES)
 
+    def test_silver_mapping_uses_nested_for_authorship_compound_filters(self):
+        self.assertEqual(SILVER_PROPERTIES["authorships"]["type"], "nested")
+        self.assertEqual(
+            SILVER_PROPERTIES["authorships"]["properties"]["institutions"]["type"],
+            "nested",
+        )
+        self.assertEqual(SILVER_PROPERTIES["funders"]["type"], "object")
+        self.assertEqual(SILVER_PROPERTIES["sustainable_development_goals"]["type"], "object")
+        self.assertEqual(SILVER_PROPERTIES["sdg_names"], {"type": "keyword"})
+
     def test_silver_document_indexes_sdg_names_flat(self):
         doc = SilverDocument(
             doc_id="S001",

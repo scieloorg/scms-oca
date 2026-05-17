@@ -271,14 +271,14 @@ SILVER_PROPERTIES = {
         },
     },
     "authorships": {
-        "type": "object",
+        "type": "nested",
         "properties": {
             "author_position": {"type": "keyword"},
             "name": _text(copy_to=["authors_search", "authors_search_autocomplete", "search_all_text"]),
             "id": {"type": "keyword"},
             "orcid": {"type": "keyword"},
             "institutions": {
-                "type": "object",
+                "type": "nested",
                 "properties": {
                     "name": _text(copy_to=["institutions_search", "institutions_search_autocomplete", "search_all_text"]),
                     "id": {"type": "keyword"},
