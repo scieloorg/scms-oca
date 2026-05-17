@@ -339,6 +339,8 @@ class BuildLookupCommandTests(SimpleTestCase):
             "scientific_production",
             "--lookup",
             "source",
+            "--batch-size",
+            "500",
             "--lookup-index",
             "source=lookup_source_v2",
             "--enqueue",

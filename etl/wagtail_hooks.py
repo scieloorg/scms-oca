@@ -71,12 +71,11 @@ class EtlPipelineConfigViewSet(SnippetViewSet):
         "name",
         "enabled",
         "input_index",
-        "silver_index_pattern",
         "default_document_type",
         "deduplicate_scielo",
     )
     list_filter = ("enabled", "default_document_type", "deduplicate_scielo")
-    search_fields = ("name", "input_index", "silver_index_pattern")
+    search_fields = ("name", "input_index")
     ordering = ("name",)
 
 

@@ -64,7 +64,6 @@ def _run_pipeline_target(
         opensearch_url=getattr(settings, "OS_URL", "http://localhost:9200"),
         input_scielo_index=pipeline_config.input_index,
         input_openalex_index=pipeline_config.openalex_index_for(openalex_index),
-        silver_index_pattern=pipeline_config.silver_index_pattern,
         public_alias=settings.ETL_PUBLIC_ALIAS,
         pipeline_config=pipeline_config,
     )

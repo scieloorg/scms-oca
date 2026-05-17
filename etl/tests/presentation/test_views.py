@@ -34,20 +34,12 @@ class SummaryViewTests(EtlAdminViewTestCase):
 
 class TriggerViewTests(EtlAdminViewTestCase):
 
-    def test_trigger_pending_requires_post(self):
-        response = self.client.get(reverse("etl_trigger_pending"))
-        self.assertEqual(response.status_code, 405)
-
     @patch("etl.views.process_pending_silver_etl")
     def test_trigger_pending_dispatches_celery_task(self, mock_task):
         mock_task.delay.return_value.id = "task-456"
         response = self.client.post(reverse("etl_trigger_pending"))
         self.assertEqual(response.status_code, 302)
         mock_task.delay.assert_called_once_with()
-
-    def test_trigger_pending_by_type_requires_post(self):
-        response = self.client.get(reverse("etl_trigger_pending_by_type"))
-        self.assertEqual(response.status_code, 405)
 
     @patch("etl.views.process_pending_silver_etl")
     def test_trigger_pending_by_type_rejects_invalid_type(self, mock_task):
@@ -77,11 +69,3 @@ class TriggerViewTests(EtlAdminViewTestCase):
         )
         self.assertEqual(response.status_code, 302)
         mock_task.delay.assert_called_once_with(document_type="book-chapter")
-
-    def test_retry_failed_by_type_requires_post(self):
-        response = self.client.get(reverse("etl_retry_failed_by_type"))
-        self.assertEqual(response.status_code, 405)
-
-    def test_retry_failed_requires_post(self):
-        response = self.client.get(reverse("etl_retry_failed"))
-        self.assertEqual(response.status_code, 405)

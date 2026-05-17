@@ -37,8 +37,7 @@ class OpenSearchETLPipeline:
         opensearch_port: int | None = None,
         input_scielo_index: str | None = None,
         input_openalex_index: str | None = None,
-        silver_index_pattern: str | None = None,
-        public_alias: str = "scientific_production",
+        public_alias: str = "silver_scientific_production",
         batch_size: int = 1000,
         pipeline_config: EtlPipelineConfig | None = None,
     ):
@@ -57,7 +56,8 @@ class OpenSearchETLPipeline:
         self.pipeline_config = pipeline_config or EtlPipelineConfig.objects.get_for_source(self.input_scielo_index)
         self.document_type = self.pipeline_config.default_document_type
         self.input_openalex_index = self.pipeline_config.openalex_index_for(input_openalex_index)
-        self.silver_index_pattern = silver_index_pattern or self.pipeline_config.silver_index_pattern
+        self.silver_index_pattern = getattr(settings, "ETL_SILVER_INDEX_PATTERN", "silver_scientific_production")
+        self.silver_write_alias = getattr(settings, "ETL_SILVER_WRITE_ALIAS", "silver_write")
         self.rules = self.pipeline_config.to_rules()
 
         self.client = OpenSearchClient(
@@ -84,6 +84,7 @@ class OpenSearchETLPipeline:
         logger.info("  Input SciELO index: %s", self.input_scielo_index)
         logger.info("  Input OpenAlex index: %s", self.input_openalex_index)
         logger.info("  Silver index pattern: %s", self.silver_index_pattern)
+        logger.info("  Silver write alias: %s", self.silver_write_alias)
         logger.info("  Batch size: %s", self.batch_size)
 
     def run(
@@ -468,74 +469,87 @@ class OpenSearchETLPipeline:
         if not silver_docs:
             return 0
 
-        docs_by_year = {}
+        docs_to_index = []
         for doc in silver_docs:
-            year = doc.publication_year
-            if not year:
+            if not doc.publication_year:
                 logger.warning(f"Document missing publication_year: {doc.doc_id}")
                 self.skipped_doc_ids.append(doc.doc_id)
                 continue
+            docs_to_index.append(doc)
 
-            if year not in docs_by_year:
-                docs_by_year[year] = []
-            docs_by_year[year].append(doc)
+        if not docs_to_index:
+            return 0
 
-        total_indexed = 0
+        return self._index_silver_documents_to_rollover_alias(docs_to_index)
 
-        for year, docs in docs_by_year.items():
-            index_name = self._silver_index_name(year)
-            logger.info(f"Indexing {len(docs)} documents to {index_name}...")
-            self.client.create_index(index_name, SILVER_MAPPING)
+    def _index_silver_documents_to_rollover_alias(
+        self,
+        docs_to_index: List[SilverDocument],
+    ) -> int:
+        index_prefix = self.silver_index_pattern
+        write_alias = self.silver_write_alias
+        logger.info(f"Indexing {len(docs_to_index)} documents to {write_alias}...")
+        bootstrap_index = self.client.ensure_rollover_index(
+            index_prefix=index_prefix,
+            write_alias=write_alias,
+            public_alias=self.public_alias,
+            mapping=SILVER_MAPPING,
+        )
 
-            actions = []
-            for doc in docs:
-                actions.append(
-                    {
-                        "index": {
-                            "_index": index_name,
-                            "_id": doc.doc_id,
-                        }
+        actions = []
+        for doc in docs_to_index:
+            actions.append(
+                {
+                    "index": {
+                        "_index": write_alias,
+                        "_id": doc.doc_id,
                     }
-                )
-                actions.append(doc.to_index_dict())
+                }
+            )
+            actions.append(doc.to_index_dict())
 
-            try:
-                response = self.client.client.bulk(body=actions)
+        try:
+            self._bulk_index(actions, len(docs_to_index), write_alias)
+            if bootstrap_index:
+                self.indexed_index_names.add(bootstrap_index)
 
-                if response.get("errors"):
-                    error_items = [
-                        item.get("index", {})
-                        for item in response["items"]
-                        if item.get("index", {}).get("status", 200) >= 400
-                    ]
-                    error_count = len(error_items)
-                    logger.error(f"Bulk indexing had {error_count} errors")
-                    stats_errors = [item.get("error") for item in error_items]
-                    for err in stats_errors[:5]:
-                        logger.error(f"  Index error: {err}")
-                    total_indexed += len(docs) - error_count
-                    raise RuntimeError(
-                        f"Bulk indexing failed for {error_count} documents in {index_name}"
-                    )
-                else:
-                    logger.info(f"Successfully indexed {len(docs)} documents")
-                    total_indexed += len(docs)
+            rollover_index = self.client.rollover(
+                write_alias=write_alias,
+                public_alias=self.public_alias,
+                max_size=getattr(settings, "ETL_SILVER_ROLLOVER_MAX_SIZE", None),
+            )
+            if rollover_index:
+                self.indexed_index_names.add(rollover_index)
+            if not self.indexed_index_names:
+                self.indexed_index_names.add(write_alias)
 
-                self.client.add_alias(index_name, self.public_alias)
-                self.indexed_index_names.add(index_name)
+        except RuntimeError:
+            raise
+        except Exception as e:
+            logger.error(f"Failed to index to {write_alias}: {e}")
+            raise
 
-            except RuntimeError:
-                raise
-            except Exception as e:
-                logger.error(f"Failed to index to {index_name}: {e}")
-                raise
+        return len(docs_to_index)
 
-        return total_indexed
+    def _bulk_index(self, actions: list[dict], expected_count: int, target_name: str) -> None:
+        response = self.client.client.bulk(body=actions)
 
-    def _silver_index_name(self, year: int) -> str:
-        if "{year}" in self.silver_index_pattern:
-            return self.silver_index_pattern.format(year=year)
-        return self.silver_index_pattern
+        if response.get("errors"):
+            error_items = [
+                item.get("index", {})
+                for item in response["items"]
+                if item.get("index", {}).get("status", 200) >= 400
+            ]
+            error_count = len(error_items)
+            logger.error(f"Bulk indexing had {error_count} errors")
+            stats_errors = [item.get("error") for item in error_items]
+            for err in stats_errors[:5]:
+                logger.error(f"  Index error: {err}")
+            raise RuntimeError(
+                f"Bulk indexing failed for {error_count} documents in {target_name}"
+            )
+
+        logger.info(f"Successfully indexed {expected_count} documents")
 
     def _stable_fallback_doc_id(self, raw_data: Dict[str, Any]) -> str:
         source_payload = {

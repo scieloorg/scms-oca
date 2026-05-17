@@ -261,19 +261,11 @@ def process_item_group(
     items: list[EtlItemProcess],
 ) -> dict:
     source_payload = {"type": document_type}
-    config_name = EtlPipelineConfig.objects.resolve_name_for_source(
-        source_index,
-        source_payload,
-    )
-    if not config_name:
-        raise ValueError(f"No ETL target configured for source index: {source_index}")
-
     pipeline_config = EtlPipelineConfig.objects.get_for_source(source_index, source_payload)
 
     pipeline = OpenSearchETLPipeline(
         input_scielo_index=source_index,
         input_openalex_index=pipeline_config.openalex_index,
-        silver_index_pattern=pipeline_config.silver_index_pattern,
         public_alias=settings.ETL_PUBLIC_ALIAS,
         pipeline_config=pipeline_config,
     )

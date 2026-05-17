@@ -28,7 +28,7 @@ def _search_as_you_type(*, max_shingle_size: int = 3) -> dict[str, Any]:
 
 SILVER_SETTINGS = {
     "index": {
-        "number_of_shards": 1,
+        "number_of_shards": 5,
         "number_of_replicas": 0,
         "refresh_interval": "30s",
         "mapping.nested_objects.limit": 50000,
@@ -271,14 +271,14 @@ SILVER_PROPERTIES = {
         },
     },
     "authorships": {
-        "type": "object",
+        "type": "nested",
         "properties": {
             "author_position": {"type": "keyword"},
             "name": _text(copy_to=["authors_search", "authors_search_autocomplete", "search_all_text"]),
             "id": {"type": "keyword"},
             "orcid": {"type": "keyword"},
             "institutions": {
-                "type": "object",
+                "type": "nested",
                 "properties": {
                     "name": _text(copy_to=["institutions_search", "institutions_search_autocomplete", "search_all_text"]),
                     "id": {"type": "keyword"},
@@ -359,6 +359,7 @@ SILVER_PROPERTIES = {
             "score": {"type": "float"},
         },
     },
+    "sdg_names": {"type": "keyword"},
     "metrics": {
         "type": "object",
         "properties": {

@@ -72,14 +72,9 @@ class EtlResult(models.TextChoices):
     ERROR = "error", "Error"
 
 
-class EtlPipelineConfigQuerySet(models.QuerySet):
+class EtlPipelineConfigManager(models.Manager):
     def enabled(self):
         return self.filter(enabled=True).order_by("id")
-
-
-class EtlPipelineConfigManager(models.Manager.from_queryset(EtlPipelineConfigQuerySet)):
-    def enabled(self):
-        return self.get_queryset().enabled()
 
     def get_for_source(self, source_index: str, source_payload: dict | None = None):
         config = self.select_for_source(source_index, source_payload)
@@ -119,10 +114,6 @@ class EtlPipelineConfigManager(models.Manager.from_queryset(EtlPipelineConfigQue
             "source payload type is required"
         )
 
-    def resolve_name_for_source(self, source_index: str, source_payload: dict | None = None) -> str | None:
-        config = self.select_for_source(source_index, source_payload)
-        return config.name if config else None
-
     def get_enabled_by_name(self, name: str):
         try:
             return self.enabled().get(name=name)
@@ -135,9 +126,6 @@ class EtlPipelineConfigManager(models.Manager.from_queryset(EtlPipelineConfigQue
         if not self.enabled().filter(name=target_type).exists():
             raise ValueError(f"Unknown or disabled ETL target type: {target_type}")
         return [target_type]
-
-    def available_names(self) -> list[str]:
-        return list(self.enabled().values_list("name", flat=True))
 
     @staticmethod
     def _source_payload_document_type(source_payload: dict | None) -> str | None:
@@ -154,7 +142,6 @@ class EtlPipelineConfig(models.Model):
     name = models.CharField(max_length=50, unique=True)
     enabled = models.BooleanField(default=True)
     input_index = models.CharField(max_length=255, db_index=True)
-    silver_index_pattern = models.CharField(max_length=255)
     input_document_kind = models.CharField(
         max_length=20,
         choices=INPUT_DOCUMENT_KIND_CHOICES,
@@ -177,7 +164,6 @@ class EtlPipelineConfig(models.Model):
         FieldPanel("name"),
         FieldPanel("enabled"),
         FieldPanel("input_index"),
-        FieldPanel("silver_index_pattern"),
         FieldPanel("input_document_kind"),
         FieldPanel("default_document_type"),
         FieldPanel("infer_document_type_from_payload"),

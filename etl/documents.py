@@ -397,6 +397,7 @@ class SilverDocument(OcaModel):
             "source": self._index_source(),
             "topic": self._index_topics(),
             "sustainable_development_goals": self._index_sdgs(),
+            "sdg_names": self._index_sdg_names(),
             "metrics": self._index_metrics(),
         }
         return self._clean_dict(data)
@@ -581,6 +582,14 @@ class SilverDocument(OcaModel):
             for item in self.sustainable_development_goals or []
             if isinstance(item, dict)
         ]
+
+    def _index_sdg_names(self) -> list:
+        names = [
+            item.get("display_name")
+            for item in self.sustainable_development_goals or []
+            if isinstance(item, dict) and item.get("display_name")
+        ]
+        return list(dict.fromkeys(names))
 
     def _index_referenced_works(self) -> dict:
         openalex_ids = []

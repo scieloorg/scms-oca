@@ -53,7 +53,6 @@ class AddRulesCommandTests(EtlTestCase):
         EtlPipelineConfig.objects.create(
             name="stale",
             input_index="stale_index",
-            silver_index_pattern="stale_pattern",
             input_document_kind="article",
             default_document_type="article",
         )
