@@ -468,74 +468,63 @@ class OpenSearchETLPipeline:
         if not silver_docs:
             return 0
 
-        docs_by_year = {}
+        docs_to_index = []
         for doc in silver_docs:
-            year = doc.publication_year
-            if not year:
+            if not doc.publication_year:
                 logger.warning(f"Document missing publication_year: {doc.doc_id}")
                 self.skipped_doc_ids.append(doc.doc_id)
                 continue
+            docs_to_index.append(doc)
 
-            if year not in docs_by_year:
-                docs_by_year[year] = []
-            docs_by_year[year].append(doc)
+        if not docs_to_index:
+            return 0
 
-        total_indexed = 0
+        index_name = self.silver_index_pattern
+        logger.info(f"Indexing {len(docs_to_index)} documents to {index_name}...")
+        self.client.create_index(index_name, SILVER_MAPPING)
 
-        for year, docs in docs_by_year.items():
-            index_name = self._silver_index_name(year)
-            logger.info(f"Indexing {len(docs)} documents to {index_name}...")
-            self.client.create_index(index_name, SILVER_MAPPING)
-
-            actions = []
-            for doc in docs:
-                actions.append(
-                    {
-                        "index": {
-                            "_index": index_name,
-                            "_id": doc.doc_id,
-                        }
+        actions = []
+        for doc in docs_to_index:
+            actions.append(
+                {
+                    "index": {
+                        "_index": index_name,
+                        "_id": doc.doc_id,
                     }
+                }
+            )
+            actions.append(doc.to_index_dict())
+
+        try:
+            response = self.client.client.bulk(body=actions)
+
+            if response.get("errors"):
+                error_items = [
+                    item.get("index", {})
+                    for item in response["items"]
+                    if item.get("index", {}).get("status", 200) >= 400
+                ]
+                error_count = len(error_items)
+                logger.error(f"Bulk indexing had {error_count} errors")
+                stats_errors = [item.get("error") for item in error_items]
+                for err in stats_errors[:5]:
+                    logger.error(f"  Index error: {err}")
+                raise RuntimeError(
+                    f"Bulk indexing failed for {error_count} documents in {index_name}"
                 )
-                actions.append(doc.to_index_dict())
+            else:
+                logger.info(f"Successfully indexed {len(docs_to_index)} documents")
 
-            try:
-                response = self.client.client.bulk(body=actions)
+            self.client.add_alias(index_name, self.public_alias)
+            self.indexed_index_names.add(index_name)
 
-                if response.get("errors"):
-                    error_items = [
-                        item.get("index", {})
-                        for item in response["items"]
-                        if item.get("index", {}).get("status", 200) >= 400
-                    ]
-                    error_count = len(error_items)
-                    logger.error(f"Bulk indexing had {error_count} errors")
-                    stats_errors = [item.get("error") for item in error_items]
-                    for err in stats_errors[:5]:
-                        logger.error(f"  Index error: {err}")
-                    total_indexed += len(docs) - error_count
-                    raise RuntimeError(
-                        f"Bulk indexing failed for {error_count} documents in {index_name}"
-                    )
-                else:
-                    logger.info(f"Successfully indexed {len(docs)} documents")
-                    total_indexed += len(docs)
+        except RuntimeError:
+            raise
+        except Exception as e:
+            logger.error(f"Failed to index to {index_name}: {e}")
+            raise
 
-                self.client.add_alias(index_name, self.public_alias)
-                self.indexed_index_names.add(index_name)
-
-            except RuntimeError:
-                raise
-            except Exception as e:
-                logger.error(f"Failed to index to {index_name}: {e}")
-                raise
-
-        return total_indexed
-
-    def _silver_index_name(self, year: int) -> str:
-        if "{year}" in self.silver_index_pattern:
-            return self.silver_index_pattern.format(year=year)
-        return self.silver_index_pattern
+        return len(docs_to_index)
 
     def _stable_fallback_doc_id(self, raw_data: Dict[str, Any]) -> str:
         source_payload = {
