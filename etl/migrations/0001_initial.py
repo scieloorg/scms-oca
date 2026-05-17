@@ -8,7 +8,7 @@ PIPELINE_CONFIGS = [
         "name": "article",
         "enabled": True,
         "input_index": "bronze_scielo_articles*",
-        "silver_index_pattern": "silver_article_{year}",
+        "silver_index_pattern": "silver_article",
         "input_document_kind": "article",
         "default_document_type": "article",
         "infer_document_type_from_payload": True,
