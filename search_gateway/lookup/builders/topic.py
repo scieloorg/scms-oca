@@ -37,6 +37,27 @@ class TopicLookupBuilder(LookupBuilder):
             parent_subfield=clean_text(source.get("primary_topic_subfield")) or None,
         )
 
+        self.collect_level(
+            source.get("primary_topic_domain"),
+            "domain",
+            seen_values,
+            max_items,
+        )
+
+        self.collect_level(
+            source.get("primary_topic_field"),
+            "field",
+            seen_values,
+            max_items,
+        )
+
+        self.collect_level(
+            source.get("primary_topic_subfield"),
+            "subfield",
+            seen_values,
+            max_items,
+        )
+
     def collect_level(
         self,
         values: Any,

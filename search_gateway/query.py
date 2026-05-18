@@ -75,6 +75,7 @@ def build_lookup_hits_body(
     size=20,
     source_fields=None,
     sort_field=None,
+    filters=None,
 ):
     search_fields = [field for field in (search_fields or []) if field]
     cleaned_query = str(query_text or "").strip()
@@ -98,6 +99,18 @@ def build_lookup_hits_body(
         query = {"bool": {"should": should, "minimum_should_match": 1}}
     else:
         query = {"match_all": {}}
+
+    if filters:
+        inner_query = query
+        query = {
+            "bool": {
+                "must": [inner_query],
+                "filter": [
+                    {"terms": {field: values}}
+                    for field, values in filters.items()
+                ],
+            }
+        }
 
     body = {
         "size": size,
