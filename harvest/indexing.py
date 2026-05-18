@@ -99,7 +99,7 @@ def index_harvested_instance(instance, index_name=None, refresh=False):
             },
             refresh=False,
         )
-        if EtlPipelineConfig.objects.resolve_name_for_source(index_name, instance.raw_data):
+        if EtlPipelineConfig.objects.select_for_source(index_name, instance.raw_data):
             enqueue_etl_item(
                 source_index=index_name,
                 external_id=instance.identifier,
