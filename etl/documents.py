@@ -3,7 +3,6 @@ from dataclasses import asdict, dataclass, field
 from typing import Any
 
 from etl.transform.extractors import (
-    extract_display_name,
     extract_doi,
     extract_issns,
     extract_publication_year,
@@ -335,8 +334,15 @@ class SilverDocument(OcaModel):
     funders: list = field(default_factory=list)
     awards: list = field(default_factory=list)
     publishers: list = field(default_factory=list)
-    topic: dict | list = field(default_factory=list)
-    topics: dict | list = field(default_factory=list)
+    primary_topic_name: str = ""
+    primary_topic_domain: str = ""
+    primary_topic_field: str = ""
+    primary_topic_subfield: str = ""
+    primary_topic_score: float = 0.0
+    apc: dict = field(default_factory=dict)
+    authors_count: int = 0
+    references_count: int = 0
+    institutions: list = field(default_factory=list)
     sustainable_development_goals: list = field(default_factory=list)
     referenced_works: list = field(default_factory=list)
     oca_data: dict = field(default_factory=dict)
@@ -354,13 +360,6 @@ class SilverDocument(OcaModel):
                 raise ValueError("publication_year must be between 1000 and 2100")
         if self.oca_data and not isinstance(self.oca_data, dict):
             raise TypeError("oca_data must be a dict")
-
-    def get_scope(self) -> list[str]:
-        return self._scope_values(self.oca_data.get("scope"))
-
-    def is_merged(self) -> bool:
-        scope = set(self.get_scope())
-        return "scielo" in scope and "openalex" in scope
 
     def to_index_dict(self) -> dict:
         data = {
@@ -391,15 +390,19 @@ class SilverDocument(OcaModel):
             "referenced_works": self._index_referenced_works(),
             "authorships": self._index_authorships(),
             "author_country_codes": self.author_country_codes,
+            "institutions": self._index_institutions(),
             "funders": self._index_funders(),
             "awards": self._index_awards(),
             "publishers": self._index_publishers(),
             "source": self._index_source(),
-            "topic": self._index_topics(),
+            "authors_count": self.authors_count,
+            "references_count": self.references_count,
             "sustainable_development_goals": self._index_sdgs(),
             "sdg_names": self._index_sdg_names(),
             "metrics": self._index_metrics(),
         }
+        data.update(self._index_primary_topic())
+        data.update(self._index_apc())
         return self._clean_dict(data)
 
     def _index_ids(self) -> dict:
@@ -547,34 +550,24 @@ class SilverDocument(OcaModel):
     def _index_publishers(self) -> list:
         return [self._only(item, {"id", "name"}) for item in self.publishers or [] if isinstance(item, dict)]
 
-    def _index_topics(self) -> dict:
-        item = self._select_highest_score_topic(self.topic or self.topics)
-        if not item:
+    def _index_institutions(self) -> list:
+        return list(dict.fromkeys(item for item in self.institutions if item))
+
+    def _index_primary_topic(self) -> dict:
+        if not self.primary_topic_name:
             return {}
-        return self._only(
-            {
-                "name": item.get("name") or item.get("display_name"),
-                "domain": extract_display_name(item.get("domain")),
-                "field": extract_display_name(item.get("field")),
-                "subfield": extract_display_name(item.get("subfield")),
-                "score": item.get("score"),
-            },
-            {"name", "domain", "field", "subfield", "score"},
-        )
+        return {
+            "primary_topic_name": self.primary_topic_name,
+            "primary_topic_domain": self.primary_topic_domain,
+            "primary_topic_field": self.primary_topic_field,
+            "primary_topic_subfield": self.primary_topic_subfield,
+            "primary_topic_score": self.primary_topic_score,
+        }
 
-    def _select_highest_score_topic(self, value: Any) -> dict | None:
-        if isinstance(value, dict):
-            return value
-        topics = [item for item in value or [] if isinstance(item, dict)]
-        if not topics:
-            return None
-        return max(topics, key=self._topic_score)
-
-    def _topic_score(self, item: dict) -> float:
-        try:
-            return float(item.get("score", 0) or 0)
-        except (TypeError, ValueError):
-            return 0.0
+    def _index_apc(self) -> dict:
+        if not self.apc:
+            return {}
+        return {"apc": self._only(self.apc, {"apc_list", "apc_paid"})}
 
     def _index_sdgs(self) -> list:
         return [

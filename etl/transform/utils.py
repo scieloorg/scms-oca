@@ -34,7 +34,3 @@ def first_value(value: Any) -> Any:
                 return item
         return value[0] if value else None
     return value
-
-
-def match_key(value: Any) -> str:
-    return " ".join(str(value or "").lower().split())

@@ -141,52 +141,6 @@ class SilverMerger:
 
         return enriched
 
-    def _merge_institutions(
-        self,
-        scielo_institutions: list,
-        openalex_institutions: list,
-    ) -> list:
-        scielo_ids = set()
-        scielo_rors = set()
-        scielo_names = set()
-
-        for inst in scielo_institutions:
-            if isinstance(inst, dict):
-                if inst.get("id"):
-                    scielo_ids.add(inst["id"])
-                if inst.get("ror"):
-                    scielo_rors.add(inst["ror"])
-                name = normalize_author_name(inst.get("name", ""))
-                if name:
-                    scielo_names.add(name)
-
-        merged = list(scielo_institutions)
-
-        for oa_inst in openalex_institutions:
-            if not isinstance(oa_inst, dict):
-                continue
-
-            inst_id = oa_inst.get("id")
-            ror = oa_inst.get("ror")
-            oa_name = normalize_author_name(oa_inst.get("name", ""))
-
-            if inst_id and inst_id in scielo_ids:
-                continue
-            if ror and ror in scielo_rors:
-                continue
-            if oa_name and oa_name in scielo_names:
-                continue
-
-            merged.append(oa_inst)
-            if inst_id:
-                scielo_ids.add(inst_id)
-            if ror:
-                scielo_rors.add(ror)
-            if oa_name:
-                scielo_names.add(oa_name)
-
-        return merged
-
     def _openalex_ids(self, doc: SilverDocument) -> list:
         ids = []
         if doc.openalex_id:
@@ -340,16 +294,19 @@ class SilverMerger:
 
         merged_data = base_scielo.to_dict()
         all_citation_counts = []
-        all_topics = []
         all_referenced_works = []
         all_authorships = []
-        all_institutions = []
         all_country_codes = set()
+        all_institutions = []
         all_metrics = {}
         all_sdgs = []
         all_indexed_in = list(merged_data.get("indexed_in") or [])
         openalex_doi = None
         openalex_doi_with_lang = []
+        all_funders = []
+        all_awards = []
+        best_primary_topic_score = merged_data.get("primary_topic_score") or 0.0
+        merged_apc = merged_data.get("apc") or {}
 
         for oa_doc in openalex_docs:
             oa_data = oa_doc.to_dict()
@@ -360,35 +317,45 @@ class SilverMerger:
                 openalex_doi_with_lang.extend(oa_ids["doi_with_lang"])
             if oa_data.get("citation_count") is not None:
                 all_citation_counts.append(oa_data["citation_count"])
-            if oa_data.get("topics"):
-                all_topics.extend(oa_data["topics"])
-            elif oa_data.get("topic"):
-                all_topics.append(oa_data["topic"])
             if oa_data.get("referenced_works"):
                 all_referenced_works.extend(oa_data["referenced_works"])
             if oa_data.get("authorships"):
                 all_authorships.extend(oa_data["authorships"])
-            if oa_data.get("institutions"):
-                all_institutions.extend(oa_data["institutions"])
             if oa_data.get("author_country_codes"):
                 all_country_codes.update(oa_data["author_country_codes"])
+            if oa_data.get("institutions"):
+                all_institutions.extend(oa_data["institutions"])
             if oa_data.get("metrics"):
                 all_metrics.update(oa_data["metrics"])
             if oa_data.get("sustainable_development_goals"):
                 all_sdgs.extend(oa_data["sustainable_development_goals"])
             if oa_data.get("indexed_in"):
                 all_indexed_in.extend(as_list(oa_data["indexed_in"]))
+            if oa_data.get("funders"):
+                all_funders.extend(oa_data["funders"])
+            if oa_data.get("awards"):
+                all_awards.extend(oa_data["awards"])
+            if oa_data.get("primary_topic_name") and oa_data.get("primary_topic_score"):
+                oa_score = float(oa_data["primary_topic_score"])
+                if oa_score > best_primary_topic_score:
+                    best_primary_topic_score = oa_score
+                    merged_data["primary_topic_name"] = oa_data["primary_topic_name"]
+                    merged_data["primary_topic_domain"] = oa_data["primary_topic_domain"]
+                    merged_data["primary_topic_field"] = oa_data["primary_topic_field"]
+                    merged_data["primary_topic_subfield"] = oa_data["primary_topic_subfield"]
+                    merged_data["primary_topic_score"] = oa_data["primary_topic_score"]
+            if not merged_apc and oa_data.get("apc"):
+                merged_apc = oa_data["apc"]
 
         if merged_data.get("citation_count") is not None:
             all_citation_counts.insert(0, merged_data["citation_count"])
         if all_citation_counts:
             merged_data["citation_count"] = sum(all_citation_counts)
-        if all_topics and not merged_data.get("topics"):
-            merged_data["topics"] = self._unique_topics(all_topics)
         if all_referenced_works:
             merged_data["referenced_works"] = unique(
                 (merged_data.get("referenced_works") or []) + all_referenced_works
             )
+        merged_data["references_count"] = len(merged_data.get("referenced_works") or [])
 
         scielo_authorships = merged_data.get("authorships", [])
         if scielo_authorships and all_authorships:
@@ -399,17 +366,12 @@ class SilverMerger:
         elif all_authorships and not scielo_authorships:
             merged_data["authorships"] = all_authorships
 
-        scielo_institutions = merged_data.get("institutions", [])
-        if scielo_institutions and all_institutions:
-            merged_data["institutions"] = self._merge_institutions(
-                scielo_institutions,
-                all_institutions,
-            )
-        elif all_institutions and not scielo_institutions:
-            merged_data["institutions"] = self._unique_institutions(all_institutions)
-
         sc_countries = set(merged_data.get("author_country_codes", []))
         merged_data["author_country_codes"] = sorted(sc_countries | all_country_codes)
+
+        if all_institutions:
+            existing_insts = merged_data.get("institutions") or []
+            merged_data["institutions"] = list(dict.fromkeys(existing_insts + all_institutions))
 
         if all_metrics:
             merged_data["metrics"] = {**(merged_data.get("metrics") or {}), **all_metrics}
@@ -417,6 +379,14 @@ class SilverMerger:
             merged_data["sustainable_development_goals"] = self._unique_sdgs_by_score(
                 (merged_data.get("sustainable_development_goals") or []) + all_sdgs
             )
+        if all_funders:
+            existing_funders = merged_data.get("funders") or []
+            merged_data["funders"] = self._unique_funders(existing_funders + all_funders)
+        if all_awards:
+            existing_awards = merged_data.get("awards") or []
+            merged_data["awards"] = self._unique_awards(existing_awards + all_awards)
+        if merged_apc:
+            merged_data["apc"] = merged_apc
         if all_indexed_in:
             merged_data["indexed_in"] = sorted(set(all_indexed_in))
         if openalex_doi and not merged_data.get("doi"):
@@ -463,27 +433,41 @@ class SilverMerger:
             logger.error("Failed to enrich with OpenAlex docs: %s", exc)
             return base_scielo
 
-    def _unique_topics(self, topics: list) -> list:
-        seen_topics = set()
-        unique_topics = []
-        for topic in topics:
-            topic_id = topic.get("id") if isinstance(topic, dict) else str(topic)
-            if topic_id and topic_id not in seen_topics:
-                unique_topics.append(topic)
-                seen_topics.add(topic_id)
-        return unique_topics
-
-    def _unique_institutions(self, institutions: list) -> list:
+    def _unique_funders(self, funders: list) -> list:
         seen_ids = set()
-        unique_institutions = []
-        for institution in institutions:
-            inst_id = institution.get("id")
-            if inst_id and inst_id not in seen_ids:
-                unique_institutions.append(institution)
-                seen_ids.add(inst_id)
-            elif not inst_id:
-                unique_institutions.append(institution)
-        return unique_institutions
+        seen_rors = set()
+        seen_names = set()
+        unique_funders = []
+        for funder in funders:
+            if not isinstance(funder, dict):
+                continue
+            funder_id = funder.get("id")
+            ror = funder.get("ror")
+            name = normalize_author_name(funder.get("name", ""))
+            if (funder_id and funder_id in seen_ids) or (ror and ror in seen_rors) or (name and name in seen_names):
+                continue
+            unique_funders.append(funder)
+            if funder_id:
+                seen_ids.add(funder_id)
+            if ror:
+                seen_rors.add(ror)
+            if name:
+                seen_names.add(name)
+        return unique_funders
+
+    def _unique_awards(self, awards: list) -> list:
+        seen_award_ids = set()
+        unique_awards = []
+        for award in awards:
+            if not isinstance(award, dict):
+                continue
+            award_id = award.get("award_id") or award.get("id")
+            if award_id and award_id in seen_award_ids:
+                continue
+            unique_awards.append(award)
+            if award_id:
+                seen_award_ids.add(award_id)
+        return unique_awards
 
     def _unique_sdgs_by_score(self, sdgs: list) -> list:
         sdgs_by_id = {}

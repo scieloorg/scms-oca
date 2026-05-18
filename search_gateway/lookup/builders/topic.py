@@ -8,17 +8,10 @@ class TopicLookupBuilder(LookupBuilder):
     key = "topic"
     default_index_name = "lookup_topic"
     source_fields = [
-        "topics.name",
-        "topics.domain",
-        "topics.field",
-        "topics.subfield",
         "primary_topic_name",
         "primary_topic_domain",
         "primary_topic_field",
         "primary_topic_subfield",
-        "topic_domains",
-        "topic_fields",
-        "topic_subfields",
     ]
     @property
     def mapping(self) -> dict[str, Any]:
@@ -34,32 +27,6 @@ class TopicLookupBuilder(LookupBuilder):
     def collect(self, source: dict[str, Any], max_items: int | None = None) -> None:
         seen_values: set[str] = set()
 
-        for topic in self.iter_objects(source.get("topics")):
-            name = clean_text(topic.get("name"))
-            domain = clean_text(topic.get("domain"))
-            field = clean_text(topic.get("field"))
-            subfield = clean_text(topic.get("subfield"))
-
-            self.collect_level(domain, "domain", seen_values, max_items)
-            self.collect_level(field, "field", seen_values, max_items, parent_domain=domain or None)
-            self.collect_level(
-                subfield,
-                "subfield",
-                seen_values,
-                max_items,
-                parent_domain=domain or None,
-                parent_field=field or None,
-            )
-            self.collect_level(
-                name,
-                "topic",
-                seen_values,
-                max_items,
-                parent_domain=domain or None,
-                parent_field=field or None,
-                parent_subfield=subfield or None,
-            )
-
         self.collect_level(
             source.get("primary_topic_name"),
             "topic",
@@ -69,9 +36,6 @@ class TopicLookupBuilder(LookupBuilder):
             parent_field=clean_text(source.get("primary_topic_field")) or None,
             parent_subfield=clean_text(source.get("primary_topic_subfield")) or None,
         )
-        self.collect_level(source.get("topic_domains"), "domain", seen_values, max_items)
-        self.collect_level(source.get("topic_fields"), "field", seen_values, max_items)
-        self.collect_level(source.get("topic_subfields"), "subfield", seen_values, max_items)
 
     def collect_level(
         self,
