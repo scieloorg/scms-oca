@@ -52,7 +52,7 @@ class LookupBuilder:
                         "multilingual": {
                             "type": "custom",
                             "tokenizer": "standard",
-                            "filter": ["lowercase"],
+                            "filter": ["lowercase", "asciifolding"],
                         },
                     },
                 },
