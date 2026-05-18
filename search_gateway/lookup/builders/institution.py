@@ -6,7 +6,7 @@ from search_gateway.lookup.base import LookupBuilder, clean_text
 
 class InstitutionLookupBuilder(LookupBuilder):
     key = "institution"
-    default_index_name = "lookup_institution"
+    default_index_name = "silver_lookup_institution"
     source_fields = [
         "authorships.institutions.name",
         "authorships.institutions.id",

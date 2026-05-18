@@ -520,6 +520,16 @@ ETL_DOCUMENT_TYPE_ALIAS = env.json(
         "chapter": "book-chapter",
     },
 )
+ETL_OPENACCESS_STATUSES = env.json(
+    "ETL_OPENACCESS_STATUSES",
+    default={
+        "gold",
+        "green",
+        "hybrid",
+        "bronze",
+        "closed",
+        "diamond"
+     })
 
 # ETL Bronze Index Names
 ETL_INPUT_SCIELO_ARTICLES = env.str("ETL_INPUT_SCIELO_ARTICLES", "bronze_scielo_articles-000001")

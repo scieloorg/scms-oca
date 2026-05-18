@@ -120,6 +120,16 @@ class LanguageNormalizerTests(SimpleTestCase):
     def test_normalize_language_accepts_language_names(self):
         self.assertEqual(normalize_language("Portuguese"), "pt")
 
+    def test_normalize_language_handles_bcp47_tags(self):
+        self.assertEqual(normalize_language("pt-BR"), "pt")
+        self.assertEqual(normalize_language("pt_BR"), "pt")
+        self.assertEqual(normalize_language("en-US"), "en")
+        self.assertEqual(normalize_language("EN-us"), "en")
+        self.assertEqual(normalize_language("zh-CN"), "zh")
+
+    def test_normalize_language_handles_bcp47_with_unknown_base(self):
+        self.assertIsNone(normalize_language("xx-YY"))
+
     def test_normalize_language_rejects_unknown_values(self):
         self.assertIsNone(normalize_language("not-a-language"))
         self.assertIsNone(normalize_language(None))

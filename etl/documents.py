@@ -7,7 +7,7 @@ from etl.transform.extractors import (
     extract_issns,
     extract_publication_year,
 )
-from etl.transform.normalizers import normalize_country_code, normalize_doi, normalize_openalex_id
+from etl.transform.normalizers import normalize_country_code, normalize_doi, normalize_language, normalize_openalex_id
 from etl.transform.utils import dict_or_empty, int_or_none
 
 
@@ -604,6 +604,9 @@ class SilverDocument(OcaModel):
         for item in items or []:
             if not isinstance(item, dict):
                 continue
+            lang = normalize_language(item.get("language") or item.get("lang"))
+            if not lang:
+                continue
             value = item.get(value_key)
             if value is None:
                 for alias in aliases:
@@ -612,7 +615,7 @@ class SilverDocument(OcaModel):
                         break
             indexed.append(
                 self._only(
-                    {"language": item.get("language") or item.get("lang"), value_key: value},
+                    {"language": lang, value_key: value},
                     {"language", value_key},
                 )
             )
@@ -623,12 +626,15 @@ class SilverDocument(OcaModel):
         for item in items or []:
             if not isinstance(item, dict):
                 continue
+            lang = normalize_language(item.get("language") or item.get("lang"))
+            if not lang:
+                continue
             value = item.get("doi") or item.get("id") or item.get("value")
             doi = normalize_doi(value)
             if doi:
                 indexed.append(
                     self._only(
-                        {"language": item.get("language") or item.get("lang"), "doi": doi},
+                        {"language": lang, "doi": doi},
                         {"language", "doi"},
                     )
                 )
@@ -639,6 +645,9 @@ class SilverDocument(OcaModel):
         for item in items or []:
             if not isinstance(item, dict):
                 continue
+            lang = normalize_language(item.get("language") or item.get("lang"))
+            if not lang:
+                continue
             value = item.get("openalex")
             if value is None:
                 value = item.get("id") or item.get("value")
@@ -646,7 +655,7 @@ class SilverDocument(OcaModel):
             if openalex_id:
                 indexed.append(
                     self._only(
-                        {"language": item.get("language") or item.get("lang"), "openalex": openalex_id},
+                        {"language": lang, "openalex": openalex_id},
                         {"language", "openalex"},
                     )
                 )

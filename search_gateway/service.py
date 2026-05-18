@@ -197,6 +197,7 @@ class SearchGatewayService:
             size=field.get_option_limit(default=100),
             source_fields=source_fields,
             sort_field=lookup_config["sort_field"],
+            filters=lookup_config.get("filter"),
         )
         response = self.client.search(
             index=lookup_config["index_name"],

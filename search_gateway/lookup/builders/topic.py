@@ -6,7 +6,7 @@ from search_gateway.lookup.base import LookupBuilder, clean_text
 
 class TopicLookupBuilder(LookupBuilder):
     key = "topic"
-    default_index_name = "lookup_topic"
+    default_index_name = "silver_lookup_topic"
     source_fields = [
         "primary_topic_name",
         "primary_topic_domain",
@@ -35,6 +35,27 @@ class TopicLookupBuilder(LookupBuilder):
             parent_domain=clean_text(source.get("primary_topic_domain")) or None,
             parent_field=clean_text(source.get("primary_topic_field")) or None,
             parent_subfield=clean_text(source.get("primary_topic_subfield")) or None,
+        )
+
+        self.collect_level(
+            source.get("primary_topic_domain"),
+            "domain",
+            seen_values,
+            max_items,
+        )
+
+        self.collect_level(
+            source.get("primary_topic_field"),
+            "field",
+            seen_values,
+            max_items,
+        )
+
+        self.collect_level(
+            source.get("primary_topic_subfield"),
+            "subfield",
+            seen_values,
+            max_items,
         )
 
     def collect_level(

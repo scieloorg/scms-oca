@@ -6,7 +6,7 @@ from search_gateway.lookup.base import LookupBuilder, clean_text
 
 class FunderLookupBuilder(LookupBuilder):
     key = "funder"
-    default_index_name = "lookup_funder"
+    default_index_name = "silver_lookup_funder"
     source_fields = ["funders.name", "funders.id", "funders.ror"]
     @property
     def mapping(self) -> dict[str, Any]:
