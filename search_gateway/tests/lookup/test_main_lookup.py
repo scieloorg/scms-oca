@@ -28,7 +28,7 @@ class LookupBuilderTests(SimpleTestCase):
     def test_publisher_accepts_missing_id_and_counts_once_per_document(self):
         builder = PublisherLookupBuilder()
         source = {
-            "sources": [{"type": "journal"}],
+            "source": [{"type": "journal"}],
             "publishers": [
                 {"name": "SciELO"},
                 {"name": "SciELO"},
@@ -36,7 +36,7 @@ class LookupBuilderTests(SimpleTestCase):
         }
 
         builder.collect(source)
-        builder.collect({"sources": {"type": "journal"}, "publishers": [{"name": "SciELO"}]})
+        builder.collect({"source": {"type": "journal"}, "publishers": [{"name": "SciELO"}]})
 
         actions = list(builder.iter_actions("lookup_publisher"))
 
@@ -49,7 +49,7 @@ class LookupBuilderTests(SimpleTestCase):
         builder = PublisherLookupBuilder()
         builder.collect(
             {
-                "sources": [{"type": "journal"}],
+                "source": [{"type": "journal"}],
                 "publishers": [{"id": "https://openalex.org/P1", "name": "Elsevier BV"}],
             }
         )
@@ -102,8 +102,8 @@ class LookupBuilderTests(SimpleTestCase):
 
     def test_source_accepts_sources_as_list_or_object(self):
         builder = SourceLookupBuilder()
-        builder.collect({"sources": {"id": "j1", "title": "Journal One", "type": "journal"}})
-        builder.collect({"sources": [{"id": "j1", "title": "Journal One", "type": "journal"}]})
+        builder.collect({"source": {"ids": {"openalex": "j1"}, "title": "Journal One", "type": "journal"}})
+        builder.collect({"source": [{"ids": {"openalex": "j1"}, "title": "Journal One", "type": "journal"}]})
 
         actions = list(builder.iter_actions("lookup_source"))
 
@@ -188,7 +188,7 @@ class BuildLookupCommandTests(SimpleTestCase):
         client.ping.return_value = True
         client.indices.exists.side_effect = lambda index: index in {
             "scientific_production",
-            "lookup_publisher",
+            "silver_lookup_publisher",
         }
         config = dict(
             source_index="scientific_production",
@@ -199,7 +199,7 @@ class BuildLookupCommandTests(SimpleTestCase):
             max_items={},
         )
 
-        with self.assertRaisesMessage(ValueError, "Target lookup index 'lookup_publisher' already exists"):
+        with self.assertRaisesMessage(ValueError, "Target lookup index 'silver_lookup_publisher' already exists"):
             LookupIndexBuildService(client=client, lookup_builders=LOOKUP_BUILDERS, **config).run()
 
         client.indices.create.assert_not_called()
@@ -231,7 +231,7 @@ class BuildLookupCommandTests(SimpleTestCase):
         scan_mock.return_value = [
             {
                 "_source": {
-                    "sources": [{"type": "journal"}],
+                    "source": [{"type": "journal"}],
                     "publishers": [{"name": "SciELO"}],
                 }
             }
@@ -249,8 +249,8 @@ class BuildLookupCommandTests(SimpleTestCase):
         counts = LookupIndexBuildService(client=client, lookup_builders=LOOKUP_BUILDERS, **config).run()
 
         self.assertEqual(counts["publisher"], 1)
-        client.indices.refresh.assert_called_once_with(index="lookup_publisher")
-        client.count.assert_called_once_with(index="lookup_publisher")
+        client.indices.refresh.assert_called_once_with(index="silver_lookup_publisher")
+        client.count.assert_called_once_with(index="silver_lookup_publisher")
 
     @patch("search_gateway.lookup.base.streaming_bulk")
     @patch("search_gateway.lookup.base.scan")
@@ -262,7 +262,7 @@ class BuildLookupCommandTests(SimpleTestCase):
         scan_mock.return_value = [
             {
                 "_source": {
-                    "sources": [{"type": "journal"}],
+                    "source": [{"type": "journal"}],
                     "publishers": [{"name": "SciELO"}],
                 }
             }
@@ -290,7 +290,7 @@ class BuildLookupCommandTests(SimpleTestCase):
         scan_mock.return_value = [
             {
                 "_source": {
-                    "sources": [{"type": "journal"}],
+                    "source": [{"type": "journal"}],
                     "publishers": [{"name": "SciELO"}],
                 }
             }

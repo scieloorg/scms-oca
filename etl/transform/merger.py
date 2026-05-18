@@ -418,7 +418,7 @@ class SilverMerger:
                 sc_source = merged_data.get("source") or {}
                 if oa_source.get("id"):
                     sc_source.setdefault("ids", {})["openalex"] = oa_source["id"]
-                for key in ("issn_l", "host_organization", "host_organization_name", "type"):
+                for key in ("title", "issn_l", "host_organization", "host_organization_name", "type"):
                     if not sc_source.get(key) and oa_source.get(key):
                         sc_source[key] = oa_source[key]
 
