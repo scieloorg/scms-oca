@@ -1,7 +1,7 @@
 import logging
 
 from etl.documents import SilverDocument
-from etl.transform.normalizers import normalize_author_name
+from etl.transform.normalizers import normalize_author_name, normalize_language
 from etl.transform.utils import as_list, scalar_or_list, unique
 
 logger = logging.getLogger(__name__)
@@ -399,12 +399,16 @@ class SilverMerger:
 
         all_languages = set(as_list(merged_data.get("language") or []))
         for item in merged_data.get("title_with_lang") or []:
-            if lang := item.get("language"):
-                all_languages.add(lang)
+            if (lang := item.get("language")) and (
+                normalized := normalize_language(lang)
+            ):
+                all_languages.add(normalized)
         for oa_doc in openalex_docs:
             for item in (oa_doc.to_dict().get("title_with_lang") or []):
-                if lang := item.get("language"):
-                    all_languages.add(lang)
+                if (lang := item.get("language")) and (
+                    normalized := normalize_language(lang)
+                ):
+                    all_languages.add(normalized)
         if all_languages:
             merged_data["language"] = sorted(all_languages)
 

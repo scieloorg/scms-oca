@@ -128,6 +128,11 @@ def normalize_language(language: str | None) -> str | None:
 
     language_value = str(language).strip()
 
+    if "-" in language_value or "_" in language_value:
+        base_code = re.split(r"[-_]", language_value)[0]
+        if normalized := normalize_language(base_code):
+            return normalized
+
     if len(language_value) == 2 and language_value.isalpha():
         result = pycountry.languages.get(alpha_2=language_value.lower())
         if result:
