@@ -328,16 +328,26 @@ SILVER_PROPERTIES = {
         },
     },
     "source_title_search": _text(copy_to="search_all_text"),
-    "topic": {
+    "primary_topic_name": {"type": "keyword"},
+    "primary_topic_domain": {"type": "keyword"},
+    "primary_topic_field": {"type": "keyword"},
+    "primary_topic_subfield": {"type": "keyword"},
+    "primary_topic_score": {"type": "float"},
+    "apc": {
         "type": "object",
         "properties": {
-            "name": {"type": "keyword"},
-            "domain": {"type": "keyword"},
-            "field": {"type": "keyword"},
-            "subfield": {"type": "keyword"},
-            "score": {"type": "float"},
+            "apc_list": {
+                "type": "object",
+                "dynamic": True,
+            },
+            "apc_paid": {
+                "type": "object",
+                "dynamic": True,
+            },
         },
     },
+    "authors_count": {"type": "integer"},
+    "references_count": {"type": "integer"},
     "sustainable_development_goals": {
         "type": "object",
         "properties": {

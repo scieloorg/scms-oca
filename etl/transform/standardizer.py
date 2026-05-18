@@ -269,20 +269,25 @@ class BaseStandardizer:
 
         return metrics
 
-    def _build_topics_field(self, raw_data: dict[str, Any]) -> list:
-        topics = raw_data.get("topics") or []
-        if not topics and raw_data.get("primary_topic"):
-            topics = [raw_data["primary_topic"]]
-        return [
-            {
-                "name": topic.get("display_name") or topic.get("name"),
-                "domain": extract_display_name(topic.get("domain")),
-                "field": extract_display_name(topic.get("field")),
-                "subfield": extract_display_name(topic.get("subfield")),
-                "score": topic.get("score"),
-            }
-            for topic in topics
-        ]
+    def _build_primary_topic_fields(self, raw_data: dict[str, Any]) -> dict[str, Any]:
+        primary_topic = raw_data.get("primary_topic")
+        if not primary_topic:
+            return {}
+        return {
+            "primary_topic_name": primary_topic.get("display_name") or primary_topic.get("name") or "",
+            "primary_topic_domain": extract_display_name(primary_topic.get("domain")) or "",
+            "primary_topic_field": extract_display_name(primary_topic.get("field")) or "",
+            "primary_topic_subfield": extract_display_name(primary_topic.get("subfield")) or "",
+            "primary_topic_score": primary_topic.get("score") or 0.0,
+        }
+
+    def _build_apc_field(self, raw_data: dict[str, Any]) -> dict[str, Any]:
+        apc = {}
+        if raw_data.get("apc_list"):
+            apc["apc_list"] = raw_data["apc_list"]
+        if raw_data.get("apc_paid"):
+            apc["apc_paid"] = raw_data["apc_paid"]
+        return apc
 
     def _build_sdgs_field(self, raw_data: dict[str, Any]) -> list:
         return [
@@ -406,13 +411,17 @@ class SciELOStandardizer(BaseStandardizer):
         data["awards"] = self._build_awards_field(raw)
         data["publishers"] = self._build_publishers_field(raw)
 
+        data["apc"] = self._build_apc_field(raw)
+
+        data["authors_count"] = len(data["authorships"])
+
         data["source"] = self._build_source_field(raw)
         data.update(self._build_source_summary_fields(data["source"]))
 
-        data["topic"] = self._build_topics_field(raw)
-        data["topics"] = data["topic"]
+        data.update(self._build_primary_topic_fields(raw))
         data["sustainable_development_goals"] = self._build_sdgs_field(raw)
         data["referenced_works"] = self._build_referenced_works_field(raw)
+        data["references_count"] = len(data["referenced_works"])
         data["metrics"] = self._build_metrics_field(raw)
         data.update(self._build_citation_fields(data["metrics"]))
         data["indexed_in"] = self._build_indexed_in_field(raw)
@@ -568,13 +577,17 @@ class OpenAlexStandardizer(BaseStandardizer):
         data["awards"] = self._build_awards_field(raw)
         data["publishers"] = self._build_publishers_field(raw)
 
+        data["apc"] = self._build_apc_field(raw)
+
+        data["authors_count"] = len(data["authorships"])
+
         data["source"] = self._build_source_field(raw)
         data.update(self._build_source_summary_fields(data["source"]))
 
-        data["topic"] = self._build_topics_field(raw)
-        data["topics"] = data["topic"]
+        data.update(self._build_primary_topic_fields(raw))
         data["sustainable_development_goals"] = self._build_sdgs_field(raw)
         data["referenced_works"] = raw.get("referenced_works") or []
+        data["references_count"] = len(data["referenced_works"])
         data["metrics"] = self._build_metrics_field(raw)
         data.update(self._build_citation_fields(data["metrics"]))
         data["indexed_in"] = self._build_indexed_in_field(input_doc)

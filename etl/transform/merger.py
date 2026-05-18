@@ -340,7 +340,6 @@ class SilverMerger:
 
         merged_data = base_scielo.to_dict()
         all_citation_counts = []
-        all_topics = []
         all_referenced_works = []
         all_authorships = []
         all_institutions = []
@@ -350,6 +349,10 @@ class SilverMerger:
         all_indexed_in = list(merged_data.get("indexed_in") or [])
         openalex_doi = None
         openalex_doi_with_lang = []
+        all_funders = []
+        all_awards = []
+        best_primary_topic_score = merged_data.get("primary_topic_score") or 0.0
+        merged_apc = merged_data.get("apc") or {}
 
         for oa_doc in openalex_docs:
             oa_data = oa_doc.to_dict()
@@ -360,10 +363,6 @@ class SilverMerger:
                 openalex_doi_with_lang.extend(oa_ids["doi_with_lang"])
             if oa_data.get("citation_count") is not None:
                 all_citation_counts.append(oa_data["citation_count"])
-            if oa_data.get("topics"):
-                all_topics.extend(oa_data["topics"])
-            elif oa_data.get("topic"):
-                all_topics.append(oa_data["topic"])
             if oa_data.get("referenced_works"):
                 all_referenced_works.extend(oa_data["referenced_works"])
             if oa_data.get("authorships"):
@@ -378,17 +377,31 @@ class SilverMerger:
                 all_sdgs.extend(oa_data["sustainable_development_goals"])
             if oa_data.get("indexed_in"):
                 all_indexed_in.extend(as_list(oa_data["indexed_in"]))
+            if oa_data.get("funders"):
+                all_funders.extend(oa_data["funders"])
+            if oa_data.get("awards"):
+                all_awards.extend(oa_data["awards"])
+            if oa_data.get("primary_topic_name") and oa_data.get("primary_topic_score"):
+                oa_score = float(oa_data["primary_topic_score"])
+                if oa_score > best_primary_topic_score:
+                    best_primary_topic_score = oa_score
+                    merged_data["primary_topic_name"] = oa_data["primary_topic_name"]
+                    merged_data["primary_topic_domain"] = oa_data["primary_topic_domain"]
+                    merged_data["primary_topic_field"] = oa_data["primary_topic_field"]
+                    merged_data["primary_topic_subfield"] = oa_data["primary_topic_subfield"]
+                    merged_data["primary_topic_score"] = oa_data["primary_topic_score"]
+            if not merged_apc and oa_data.get("apc"):
+                merged_apc = oa_data["apc"]
 
         if merged_data.get("citation_count") is not None:
             all_citation_counts.insert(0, merged_data["citation_count"])
         if all_citation_counts:
             merged_data["citation_count"] = sum(all_citation_counts)
-        if all_topics and not merged_data.get("topics"):
-            merged_data["topics"] = self._unique_topics(all_topics)
         if all_referenced_works:
             merged_data["referenced_works"] = unique(
                 (merged_data.get("referenced_works") or []) + all_referenced_works
             )
+        merged_data["references_count"] = len(merged_data.get("referenced_works") or [])
 
         scielo_authorships = merged_data.get("authorships", [])
         if scielo_authorships and all_authorships:
@@ -417,6 +430,14 @@ class SilverMerger:
             merged_data["sustainable_development_goals"] = self._unique_sdgs_by_score(
                 (merged_data.get("sustainable_development_goals") or []) + all_sdgs
             )
+        if all_funders:
+            existing_funders = merged_data.get("funders") or []
+            merged_data["funders"] = self._unique_funders(existing_funders + all_funders)
+        if all_awards:
+            existing_awards = merged_data.get("awards") or []
+            merged_data["awards"] = self._unique_awards(existing_awards + all_awards)
+        if merged_apc:
+            merged_data["apc"] = merged_apc
         if all_indexed_in:
             merged_data["indexed_in"] = sorted(set(all_indexed_in))
         if openalex_doi and not merged_data.get("doi"):
@@ -463,15 +484,41 @@ class SilverMerger:
             logger.error("Failed to enrich with OpenAlex docs: %s", exc)
             return base_scielo
 
-    def _unique_topics(self, topics: list) -> list:
-        seen_topics = set()
-        unique_topics = []
-        for topic in topics:
-            topic_id = topic.get("id") if isinstance(topic, dict) else str(topic)
-            if topic_id and topic_id not in seen_topics:
-                unique_topics.append(topic)
-                seen_topics.add(topic_id)
-        return unique_topics
+    def _unique_funders(self, funders: list) -> list:
+        seen_ids = set()
+        seen_rors = set()
+        seen_names = set()
+        unique_funders = []
+        for funder in funders:
+            if not isinstance(funder, dict):
+                continue
+            funder_id = funder.get("id")
+            ror = funder.get("ror")
+            name = normalize_author_name(funder.get("name", ""))
+            if (funder_id and funder_id in seen_ids) or (ror and ror in seen_rors) or (name and name in seen_names):
+                continue
+            unique_funders.append(funder)
+            if funder_id:
+                seen_ids.add(funder_id)
+            if ror:
+                seen_rors.add(ror)
+            if name:
+                seen_names.add(name)
+        return unique_funders
+
+    def _unique_awards(self, awards: list) -> list:
+        seen_award_ids = set()
+        unique_awards = []
+        for award in awards:
+            if not isinstance(award, dict):
+                continue
+            award_id = award.get("award_id") or award.get("id")
+            if award_id and award_id in seen_award_ids:
+                continue
+            unique_awards.append(award)
+            if award_id:
+                seen_award_ids.add(award_id)
+        return unique_awards
 
     def _unique_institutions(self, institutions: list) -> list:
         seen_ids = set()
