@@ -18,14 +18,6 @@ def _text(
     return field
 
 
-def _search_as_you_type(*, max_shingle_size: int = 3) -> dict[str, Any]:
-    return {
-        "type": "search_as_you_type",
-        "doc_values": False,
-        "max_shingle_size": max_shingle_size,
-    }
-
-
 SILVER_SETTINGS = {
     "index": {
         "number_of_shards": 5,
@@ -141,37 +133,34 @@ SILVER_PROPERTIES = {
     "indexed_in": {"type": "keyword"},
     "language": {
         "type": "keyword",
-        "copy_to": ["language_search", "language_search_autocomplete"],
+        "copy_to": ["language_search"],
     },
     "language_search": _text(),
-    "language_search_autocomplete": _search_as_you_type(),
     "title": _text(
-        copy_to=["title_search", "title_search_autocomplete", "search_all_text"],
+        copy_to=["title_search", "search_all_text"],
         ignore_above=512,
     ),
     "title_search": _text(),
-    "title_search_autocomplete": _search_as_you_type(),
     "title_with_lang": {
         "type": "object",
         "properties": {
             "title": _text(
-                copy_to=["title_search", "title_search_autocomplete", "search_all_text"],
+                copy_to=["title_search", "search_all_text"],
                 ignore_above=512,
             ),
             "language": {"type": "keyword"},
         },
     },
     "abstract": _text(
-        copy_to=["abstract_search", "abstract_search_autocomplete", "search_all_text"],
+        copy_to=["abstract_search", "search_all_text"],
         keyword=False,
     ),
     "abstract_search": _text(keyword=False),
-    "abstract_search_autocomplete": _search_as_you_type(),
     "abstract_with_lang": {
         "type": "object",
         "properties": {
             "abstract": _text(
-                copy_to=["abstract_search", "abstract_search_autocomplete", "search_all_text"],
+                copy_to=["abstract_search", "search_all_text"],
                 keyword=False,
             ),
             "language": {"type": "keyword"},
@@ -274,13 +263,13 @@ SILVER_PROPERTIES = {
         "type": "nested",
         "properties": {
             "author_position": {"type": "keyword"},
-            "name": _text(copy_to=["authors_search", "authors_search_autocomplete", "search_all_text"]),
+            "name": _text(copy_to=["authors_search", "search_all_text"]),
             "id": {"type": "keyword"},
             "orcid": {"type": "keyword"},
             "institutions": {
                 "type": "nested",
                 "properties": {
-                    "name": _text(copy_to=["institutions_search", "institutions_search_autocomplete", "search_all_text"]),
+                    "name": _text(copy_to=["institutions_search", "search_all_text"]),
                     "id": {"type": "keyword"},
                     "ror": {"type": "keyword"},
                     "type": {"type": "keyword"},
@@ -291,9 +280,7 @@ SILVER_PROPERTIES = {
     },
     "author_country_codes": {"type": "keyword"},
     "authors_search": _text(copy_to="search_all_text"),
-    "authors_search_autocomplete": _search_as_you_type(),
     "institutions_search": _text(copy_to="search_all_text"),
-    "institutions_search_autocomplete": _search_as_you_type(),
     "publishers_search": _text(copy_to="search_all_text"),
     "search_all_text": _text(keyword=False),
     "funders": {
