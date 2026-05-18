@@ -16,7 +16,6 @@ from etl.transform.utils import (
     dict_or_empty,
     first_value,
     int_or_none,
-    match_key,
     scalar_or_list,
     unique,
 )
@@ -110,9 +109,6 @@ class TextAndCollectionNormalizerTests(SimpleTestCase):
             first_value(["https://example.org/file.pdf", "https://scielo.br/article"]),
             "https://scielo.br/article",
         )
-
-    def test_match_key_normalizes_case_and_whitespace(self):
-        self.assertEqual(match_key("  Mixed   Case  "), "mixed case")
 
 
 class LanguageNormalizerTests(SimpleTestCase):

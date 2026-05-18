@@ -360,13 +360,6 @@ class SilverDocument(OcaModel):
         if self.oca_data and not isinstance(self.oca_data, dict):
             raise TypeError("oca_data must be a dict")
 
-    def get_scope(self) -> list[str]:
-        return self._scope_values(self.oca_data.get("scope"))
-
-    def is_merged(self) -> bool:
-        scope = set(self.get_scope())
-        return "scielo" in scope and "openalex" in scope
-
     def to_index_dict(self) -> dict:
         data = {
             "doc_id": self.doc_id,

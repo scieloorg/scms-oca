@@ -98,12 +98,3 @@ class SilverDocumentContractTests(SimpleTestCase):
         self.assertEqual(indexed["ids"]["scielo"], "S1")
         self.assertEqual(indexed["metrics"]["received_citations"]["total"], 2)
         self.assertEqual(indexed["oca_data"]["scope"], ["scielo"])
-
-    def test_silver_document_detects_merged_scope(self):
-        doc = SilverDocument(
-            doc_id="S1",
-            type="article",
-            oca_data={"scope": ["scielo", "openalex"]},
-        )
-
-        self.assertTrue(doc.is_merged())
