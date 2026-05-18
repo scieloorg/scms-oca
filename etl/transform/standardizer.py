@@ -20,6 +20,7 @@ from etl.transform.normalizers import (
     normalize_document_type_for_etl,
     normalize_keywords,
     normalize_language,
+    normalize_open_access_status,
     normalize_openalex_id,
     normalize_text,
 )
@@ -359,7 +360,11 @@ class BaseStandardizer:
         return (raw_data.get("open_access") or {}).get("is_oa")
 
     def _build_open_access_status_field(self, raw_data: dict[str, Any]) -> Any:
-        return raw_data.get("open_access_status") or (raw_data.get("open_access") or {}).get("oa_status")
+        return normalize_open_access_status(
+            raw_data.get("open_access_status")
+        ) or normalize_open_access_status(
+            (raw_data.get("open_access") or {}).get("oa_status")
+        )
 
     def _build_biblio_fields(self, raw_data: dict[str, Any]) -> dict[str, Any]:
         biblio = dict(raw_data.get("biblio") or {})

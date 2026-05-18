@@ -37,6 +37,15 @@ def normalize_document_type_for_etl(value: str | None) -> str:
     return aliases.get(normalized, normalized)
 
 
+def normalize_open_access_status(value: str | None) -> str | None:
+    if not value:
+        return None
+    
+    normalized = str(value).strip().lower()
+    
+    return normalized if normalized in getattr(settings, "ETL_OPENACCESS_STATUSES", []) else None
+
+
 def normalize_isbn(isbn: str | None) -> str | None:
     if not isbn:
         return None
