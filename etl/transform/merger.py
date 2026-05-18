@@ -141,52 +141,6 @@ class SilverMerger:
 
         return enriched
 
-    def _merge_institutions(
-        self,
-        scielo_institutions: list,
-        openalex_institutions: list,
-    ) -> list:
-        scielo_ids = set()
-        scielo_rors = set()
-        scielo_names = set()
-
-        for inst in scielo_institutions:
-            if isinstance(inst, dict):
-                if inst.get("id"):
-                    scielo_ids.add(inst["id"])
-                if inst.get("ror"):
-                    scielo_rors.add(inst["ror"])
-                name = normalize_author_name(inst.get("name", ""))
-                if name:
-                    scielo_names.add(name)
-
-        merged = list(scielo_institutions)
-
-        for oa_inst in openalex_institutions:
-            if not isinstance(oa_inst, dict):
-                continue
-
-            inst_id = oa_inst.get("id")
-            ror = oa_inst.get("ror")
-            oa_name = normalize_author_name(oa_inst.get("name", ""))
-
-            if inst_id and inst_id in scielo_ids:
-                continue
-            if ror and ror in scielo_rors:
-                continue
-            if oa_name and oa_name in scielo_names:
-                continue
-
-            merged.append(oa_inst)
-            if inst_id:
-                scielo_ids.add(inst_id)
-            if ror:
-                scielo_rors.add(ror)
-            if oa_name:
-                scielo_names.add(oa_name)
-
-        return merged
-
     def _openalex_ids(self, doc: SilverDocument) -> list:
         ids = []
         if doc.openalex_id:
@@ -412,15 +366,6 @@ class SilverMerger:
         elif all_authorships and not scielo_authorships:
             merged_data["authorships"] = all_authorships
 
-        scielo_institutions = merged_data.get("institutions", [])
-        if scielo_institutions and all_institutions:
-            merged_data["institutions"] = self._merge_institutions(
-                scielo_institutions,
-                all_institutions,
-            )
-        elif all_institutions and not scielo_institutions:
-            merged_data["institutions"] = self._unique_institutions(all_institutions)
-
         sc_countries = set(merged_data.get("author_country_codes", []))
         merged_data["author_country_codes"] = sorted(sc_countries | all_country_codes)
 
@@ -523,18 +468,6 @@ class SilverMerger:
             if award_id:
                 seen_award_ids.add(award_id)
         return unique_awards
-
-    def _unique_institutions(self, institutions: list) -> list:
-        seen_ids = set()
-        unique_institutions = []
-        for institution in institutions:
-            inst_id = institution.get("id")
-            if inst_id and inst_id not in seen_ids:
-                unique_institutions.append(institution)
-                seen_ids.add(inst_id)
-            elif not inst_id:
-                unique_institutions.append(institution)
-        return unique_institutions
 
     def _unique_sdgs_by_score(self, sdgs: list) -> list:
         sdgs_by_id = {}
