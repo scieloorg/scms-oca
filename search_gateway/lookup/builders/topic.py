@@ -6,7 +6,7 @@ from search_gateway.lookup.base import LookupBuilder, clean_text
 
 class TopicLookupBuilder(LookupBuilder):
     key = "topic"
-    default_index_name = "lookup_topic"
+    default_index_name = "silver_lookup_topic"
     source_fields = [
         "primary_topic_name",
         "primary_topic_domain",

@@ -5,7 +5,7 @@ from search_gateway.lookup.base import LookupBuilder
 
 class DocumentLanguageLookupBuilder(LookupBuilder):
     key = "document_language"
-    default_index_name = "lookup_document_language"
+    default_index_name = "silver_lookup_document_language"
     source_fields = ["language"]
 
     def collect(self, source: dict[str, Any], max_items: int | None = None) -> None:
