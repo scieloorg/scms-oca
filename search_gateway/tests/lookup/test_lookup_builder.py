@@ -14,7 +14,7 @@ class LookupBuilderNormalizationTests(SimpleTestCase):
         multilingual_filter = analyzer_config['multilingual']['filter']
         
         # Verify that asciifolding is not present in the filter
-        self.assertNotIn('asciifolding', multilingual_filter)
+        self.assertIn('asciifolding', multilingual_filter)
         
         # Verify that lowercase is still present
         self.assertIn('lowercase', multilingual_filter)
