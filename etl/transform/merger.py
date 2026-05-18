@@ -342,8 +342,8 @@ class SilverMerger:
         all_citation_counts = []
         all_referenced_works = []
         all_authorships = []
-        all_institutions = []
         all_country_codes = set()
+        all_institutions = []
         all_metrics = {}
         all_sdgs = []
         all_indexed_in = list(merged_data.get("indexed_in") or [])
@@ -367,10 +367,10 @@ class SilverMerger:
                 all_referenced_works.extend(oa_data["referenced_works"])
             if oa_data.get("authorships"):
                 all_authorships.extend(oa_data["authorships"])
-            if oa_data.get("institutions"):
-                all_institutions.extend(oa_data["institutions"])
             if oa_data.get("author_country_codes"):
                 all_country_codes.update(oa_data["author_country_codes"])
+            if oa_data.get("institutions"):
+                all_institutions.extend(oa_data["institutions"])
             if oa_data.get("metrics"):
                 all_metrics.update(oa_data["metrics"])
             if oa_data.get("sustainable_development_goals"):
@@ -423,6 +423,10 @@ class SilverMerger:
 
         sc_countries = set(merged_data.get("author_country_codes", []))
         merged_data["author_country_codes"] = sorted(sc_countries | all_country_codes)
+
+        if all_institutions:
+            existing_insts = merged_data.get("institutions") or []
+            merged_data["institutions"] = list(dict.fromkeys(existing_insts + all_institutions))
 
         if all_metrics:
             merged_data["metrics"] = {**(merged_data.get("metrics") or {}), **all_metrics}

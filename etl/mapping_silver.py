@@ -279,6 +279,7 @@ SILVER_PROPERTIES = {
         },
     },
     "author_country_codes": {"type": "keyword"},
+    "institutions": {"type": "keyword"},
     "authors_search": _text(copy_to="search_all_text"),
     "institutions_search": _text(copy_to="search_all_text"),
     "publishers_search": _text(copy_to="search_all_text"),

@@ -289,6 +289,17 @@ class BaseStandardizer:
             apc["apc_paid"] = raw_data["apc_paid"]
         return apc
 
+    def _build_institutions_field(self, authorships: list) -> list:
+        names = []
+        seen = set()
+        for authorship in authorships or []:
+            for inst in authorship.get("institutions") or []:
+                name = inst.get("name")
+                if name and name not in seen:
+                    names.append(name)
+                    seen.add(name)
+        return names
+
     def _build_sdgs_field(self, raw_data: dict[str, Any]) -> list:
         return [
             {"id": sdg.get("id"), "display_name": sdg.get("display_name"), "score": sdg.get("score")}
@@ -406,6 +417,7 @@ class SciELOStandardizer(BaseStandardizer):
         data["author_country_codes"] = sorted(
             self._build_author_country_codes_field(raw, data["authorships"])
         )
+        data["institutions"] = self._build_institutions_field(data["authorships"])
 
         data["funders"] = self._build_funders_field(raw)
         data["awards"] = self._build_awards_field(raw)
@@ -572,6 +584,7 @@ class OpenAlexStandardizer(BaseStandardizer):
         data["author_country_codes"] = sorted(
             self._build_author_country_codes_field(raw, data["authorships"])
         )
+        data["institutions"] = self._build_institutions_field(data["authorships"])
 
         data["funders"] = self._build_funders_field(raw)
         data["awards"] = self._build_awards_field(raw)

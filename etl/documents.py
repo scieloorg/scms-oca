@@ -342,6 +342,7 @@ class SilverDocument(OcaModel):
     apc: dict = field(default_factory=dict)
     authors_count: int = 0
     references_count: int = 0
+    institutions: list = field(default_factory=list)
     sustainable_development_goals: list = field(default_factory=list)
     referenced_works: list = field(default_factory=list)
     oca_data: dict = field(default_factory=dict)
@@ -389,6 +390,7 @@ class SilverDocument(OcaModel):
             "referenced_works": self._index_referenced_works(),
             "authorships": self._index_authorships(),
             "author_country_codes": self.author_country_codes,
+            "institutions": self._index_institutions(),
             "funders": self._index_funders(),
             "awards": self._index_awards(),
             "publishers": self._index_publishers(),
@@ -547,6 +549,9 @@ class SilverDocument(OcaModel):
 
     def _index_publishers(self) -> list:
         return [self._only(item, {"id", "name"}) for item in self.publishers or [] if isinstance(item, dict)]
+
+    def _index_institutions(self) -> list:
+        return list(dict.fromkeys(item for item in self.institutions if item))
 
     def _index_primary_topic(self) -> dict:
         if not self.primary_topic_name:
