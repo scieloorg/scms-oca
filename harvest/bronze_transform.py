@@ -174,7 +174,7 @@ def _enqueue_transformed_bronze(index_name, identifier):
     try:
         response = client.get(index=index_name, id=identifier)
         source = response.get("_source") or {}
-        if not EtlPipelineConfig.objects.resolve_name_for_source(index_name, source):
+        if not EtlPipelineConfig.objects.select_for_source(index_name, source):
             return
         payload_hash = source_hash(source)
         client.update(
