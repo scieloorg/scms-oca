@@ -68,12 +68,14 @@ class OpenAlexMatcher:
 
         matches = []
         for candidate in self._search_openalex_by_doi(doi_stz, primary)[:max_candidates]:
-            if normalize_doi(extract_doi(candidate)) != doi_stz:
+            candidate_doi = normalize_doi(extract_doi(candidate))
+            if candidate_doi != doi_stz:
                 continue
 
             is_valid, confidence, validation = self._validate_openalex_match(primary, candidate)
             if is_valid:
                 matches.append((candidate, "doi", confidence, validation))
+
         return matches
 
     def _try_openalex_by_isbn(self, primary: dict, max_candidates: int) -> list:
@@ -129,13 +131,13 @@ class OpenAlexMatcher:
             logger.warning("Invalid DOI after normalization: %s", doi)
             return []
 
-        query = {"bool": {"must": [{"match": {"doi": normalized_doi}}]}}
+        query = {"bool": {"filter": [{"wildcard": {"doi.keyword": f"*{normalized_doi}*"}}]}}
         if year is not None:
             try:
                 year = int(year)
-                query["bool"]["filter"] = [
+                query["bool"]["filter"].append(
                     {"range": {"publication_year": {"gte": year - 1, "lte": year + 1}}}
-                ]
+                )
             except (ValueError, TypeError):
                 pass
 
