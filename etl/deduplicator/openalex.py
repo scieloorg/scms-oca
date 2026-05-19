@@ -14,6 +14,7 @@ from etl.transform.extractors import (
     extract_isbns,
     extract_issns,
     extract_source,
+    extract_titles,
 )
 
 logger = logging.getLogger(__name__)
@@ -57,7 +58,7 @@ class OpenAlexMatcher:
                 matches.extend(self._try_openalex_by_title(primary, max_candidates))
 
         matches = self._deduplicate_openalex_matches(matches)
-        logger.info("Found %s validated OpenAlex matches for SciELO group", len(matches))
+        logger.debug("Found %s validated OpenAlex matches for SciELO group", len(matches))
         return matches
 
     def _try_openalex_by_doi(self, primary: dict, max_candidates: int) -> list:
@@ -67,12 +68,14 @@ class OpenAlexMatcher:
 
         matches = []
         for candidate in self._search_openalex_by_doi(doi_stz, primary)[:max_candidates]:
-            if normalize_doi(extract_doi(candidate)) != doi_stz:
+            candidate_doi = normalize_doi(extract_doi(candidate))
+            if candidate_doi != doi_stz:
                 continue
 
             is_valid, confidence, validation = self._validate_openalex_match(primary, candidate)
             if is_valid:
                 matches.append((candidate, "doi", confidence, validation))
+
         return matches
 
     def _try_openalex_by_isbn(self, primary: dict, max_candidates: int) -> list:
@@ -128,13 +131,13 @@ class OpenAlexMatcher:
             logger.warning("Invalid DOI after normalization: %s", doi)
             return []
 
-        query = {"bool": {"must": [{"match": {"doi": normalized_doi}}]}}
+        query = {"bool": {"filter": [{"wildcard": {"doi.keyword": f"*{normalized_doi}*"}}]}}
         if year is not None:
             try:
                 year = int(year)
-                query["bool"]["filter"] = [
+                query["bool"]["filter"].append(
                     {"range": {"publication_year": {"gte": year - 1, "lte": year + 1}}}
-                ]
+                )
             except (ValueError, TypeError):
                 pass
 
@@ -316,9 +319,12 @@ class OpenAlexMatcher:
             if validation_rules["require_source_match"]:
                 return False, "rejected", {"reasons": reasons, "score": confidence_score}
 
-        scl_title = normalize_text(scielo_doc.get("title", "") or "")
-        oa_title = normalize_text(openalex_doc.get("title", "") or "")
-        article_title_sim = calculate_similarity(scl_title, oa_title)
+        scl_titles = extract_titles(scielo_doc)
+        oa_titles = extract_titles(openalex_doc)
+        article_title_sim = max(
+            (calculate_similarity(scl_t, oa_t) for scl_t in scl_titles for oa_t in oa_titles),
+            default=0.0,
+        )
 
         if (
             isbn_intersection
@@ -337,7 +343,12 @@ class OpenAlexMatcher:
             reasons.append(f"article_title_match_{article_title_sim:.2f}")
         else:
             reasons.append(f"article_title_low_sim_{article_title_sim:.2f}")
-            if not doi_match and scl_title and oa_title and article_title_sim < validation_rules["title_reject_threshold"]:
+            if (
+                not doi_match
+                and scl_titles
+                and oa_titles
+                and article_title_sim < validation_rules["title_reject_threshold"]
+            ):
                 return (
                     False,
                     "low_confidence",

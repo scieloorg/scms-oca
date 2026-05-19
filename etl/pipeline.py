@@ -16,6 +16,11 @@ from etl.deduplicator.openalex import OpenAlexMatcher
 from etl.deduplicator.scielo import SciELODeduplicator
 from etl.models import EtlPipelineConfig
 from etl.transform.merger import SilverMerger
+from etl.transform.normalizers import (
+    normalize_doi,
+    normalize_openalex_id,
+    normalize_text,
+)
 from etl.transform.standardizer import standardizer_for
 from harvest.utils import clean_source_payload
 
@@ -56,7 +61,11 @@ class OpenSearchETLPipeline:
         self.pipeline_config = pipeline_config or EtlPipelineConfig.objects.get_for_source(self.input_scielo_index)
         self.document_type = self.pipeline_config.default_document_type
         self.input_openalex_index = self.pipeline_config.openalex_index_for(input_openalex_index)
-        self.silver_index_pattern = getattr(settings, "ETL_SILVER_INDEX_PATTERN", "silver_scientific_production")
+        self.silver_index_pattern = getattr(
+            settings,
+            "ETL_SILVER_INDEX_PATTERN",
+            "silver_scientific_production",
+        )
         self.silver_write_alias = getattr(settings, "ETL_SILVER_WRITE_ALIAS", "silver_write")
         self.rules = self.pipeline_config.to_rules()
 
@@ -79,13 +88,6 @@ class OpenSearchETLPipeline:
         )
         self.merger = SilverMerger()
         self.skipped_doc_ids = []
-
-        logger.info("OpenSearchETLPipeline initialized")
-        logger.info("  Input SciELO index: %s", self.input_scielo_index)
-        logger.info("  Input OpenAlex index: %s", self.input_openalex_index)
-        logger.info("  Silver index pattern: %s", self.silver_index_pattern)
-        logger.info("  Silver write alias: %s", self.silver_write_alias)
-        logger.info("  Batch size: %s", self.batch_size)
 
     def run(
         self,
@@ -115,27 +117,20 @@ class OpenSearchETLPipeline:
             "warnings": 0,
             "error_messages": [],
             "warning_messages": [],
+            "openalex_only_removed_after_merge": 0,
         }
 
-        logger.info("=" * 80)
-        logger.info("STARTING OPENSEARCH ETL PIPELINE")
-        logger.info("=" * 80)
-
         try:
-            logger.info("\n[Step 1] Loading input documents...")
             input_docs = self._load_scielo_input_documents(
                 max_docs=max_docs,
                 year_filter=year_filter,
                 doc_ids=doc_ids,
             )
             result["total_input_docs"] = len(input_docs)
-            logger.info(f"Loaded {len(input_docs)} input documents")
 
             if not input_docs:
-                logger.warning("No documents to process")
                 return self._finalize_result(result)
 
-            logger.info("\n[Step 2] Building SciELO document groups...")
             groups = self._build_scielo_groups(input_docs)
             result["total_groups_formed"] = len(groups)
             result["total_duplicates_found"] = sum(
@@ -156,20 +151,11 @@ class OpenSearchETLPipeline:
                             scielo_dedup_map[os_id] = [pid for pid in group_pids if pid]
             result["scielo_dedup_source_ids"] = scielo_dedup_source_ids
             result["scielo_dedup_map"] = scielo_dedup_map
-            logger.info(
-                f"Grouping complete: {len(input_docs)} docs -> "
-                f"{len(groups)} groups ({result['total_duplicates_found']} duplicates)"
-            )
 
-            logger.info("\n[Step 3] Processing document groups...")
             all_merged_docs = []
 
             for idx, (root_idx, group) in enumerate(groups.items(), 1):
                 try:
-                    logger.debug(
-                        f"Processing group {idx}/{len(groups)} ({len(group)} doc(s))"
-                    )
-
                     openalex_matches = self.openalex_matcher.find_matches(
                         scielo_group=group,
                         max_candidates=3,
@@ -196,11 +182,12 @@ class OpenSearchETLPipeline:
                             scielo_silver_docs.append(silver_doc)
 
                         except Exception as e:
-                            logger.warning(f"Error standardizing SciELO doc: {e}")
                             result["warning_messages"].append(f"Standardization error: {e}")
 
                     if not scielo_silver_docs:
-                        logger.warning(f"No standardized SciELO docs for group {idx}")
+                        result["warning_messages"].append(
+                            f"No standardized SciELO docs for group {idx}"
+                        )
                         continue
 
                     openalex_silver_matches = []
@@ -218,7 +205,6 @@ class OpenSearchETLPipeline:
                             )
 
                         except Exception as e:
-                            logger.warning(f"Error standardizing OpenAlex doc: {e}")
                             result["warning_messages"].append(
                                 f"OpenAlex standardization error: {e}"
                             )
@@ -232,21 +218,15 @@ class OpenSearchETLPipeline:
                     result["total_merged_docs"] += 1
 
                 except Exception as e:
-                    logger.error(f"Error processing group {idx}: {e}", exc_info=True)
                     result["error_messages"].append(f"Group {idx} processing error: {str(e)}")
 
-            logger.info("\n[Step 4] Indexing to silver indices...")
             indexed_count = self._index_silver_documents(all_merged_docs)
             result["total_indexed_docs"] = indexed_count
             result["total_skipped_docs"] = len(self.skipped_doc_ids)
             result["skipped_doc_ids"] = self.skipped_doc_ids
-            logger.info(f"Indexed {indexed_count} documents to silver indices")
-            if self.skipped_doc_ids:
-                logger.warning(f"Skipped {len(self.skipped_doc_ids)} documents due to missing publication_year")
 
-            logger.info("\n" + "=" * 80)
-            logger.info("PIPELINE EXECUTION COMPLETE")
-            logger.info("=" * 80)
+            removed_count = self._remove_openalex_only_placeholders(all_merged_docs)
+            result["openalex_only_removed_after_merge"] = removed_count
 
         except Exception as e:
             logger.error(f"Pipeline failed: {e}", exc_info=True)
@@ -276,50 +256,22 @@ class OpenSearchETLPipeline:
             "size": page_size,
         }
 
-        logger.info(f"Loading documents from {self.input_scielo_index}...")
-        if year_filter:
-            logger.info(f"  Year filter: {year_filter}")
-        if max_docs:
-            logger.info(f"  Max docs: {max_docs}")
-
         self.loaded_source_ids = set()
-        response = self.client.client.search(
-            index=self.input_scielo_index,
-            body=search_body,
-            scroll="5m",
-        )
-
-        scroll_id = response.get("_scroll_id")
         docs = []
-        try:
-            while True:
-                hits = response["hits"]["hits"]
-                if not hits:
-                    break
+        for hit, normalized in self._scroll_hits(self.input_scielo_index, search_body):
+            if (
+                self.pipeline_config.document_type_for_payload(normalized)
+                != self.pipeline_config.default_document_type
+            ):
+                continue
+            docs.append(normalized)
+            self.loaded_source_ids.update(
+                self._source_identity_values(hit.get("_id"), normalized)
+            )
 
-                for hit in hits:
-                    normalized = clean_source_payload(hit["_source"])
-                    if (
-                        self.pipeline_config.document_type_for_payload(normalized)
-                        != self.pipeline_config.default_document_type
-                    ):
-                        continue
-                    normalized["_os_id"] = hit.get("_id")
-                    docs.append(normalized)
-                    self.loaded_source_ids.update(
-                        self._source_identity_values(hit.get("_id"), normalized)
-                    )
-
-                if max_docs and len(docs) >= max_docs:
-                    docs = docs[:max_docs]
-                    break
-
-                response = self.client.client.scroll(scroll_id=scroll_id, scroll="5m")
-                scroll_id = response.get("_scroll_id")
-
-        finally:
-            if scroll_id:
-                self.client.client.clear_scroll(scroll_id=scroll_id)
+            if max_docs and len(docs) >= max_docs:
+                docs = docs[:max_docs]
+                break
 
         if doc_ids and docs:
             docs = self._expand_scielo_input_context(docs)
@@ -327,7 +279,6 @@ class OpenSearchETLPipeline:
         if max_docs and len(docs) > max_docs:
             docs = docs[:max_docs]
 
-        logger.info(f"Loaded {len(docs)} documents")
         return docs
 
     def _finalize_result(self, result: dict) -> dict:
@@ -351,7 +302,7 @@ class OpenSearchETLPipeline:
 
         return self.scielo_deduplicator.find_duplicates(articles=input_docs)
 
-    def _expand_scielo_input_context(self, docs: List[Dict[str, Any]]    ) -> List[Dict[str, Any]]:
+    def _expand_scielo_input_context(self, docs: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         field_values: dict[str, list] = defaultdict(list)
 
         for doc in docs:
@@ -367,12 +318,16 @@ class OpenSearchETLPipeline:
                     field_values[f"ids.{identity_field}"].append(value)
 
                 monograph = doc.get("monograph") or {}
-                m_ids = monograph.get("ids") or monograph
+                m_ids = monograph.get("ids")
                 if isinstance(m_ids, dict):
                     m_value = m_ids.get(identity_field)
                     if m_value:
                         field_values[f"ids.{identity_field}"].append(m_value)
                         field_values[f"monograph.ids.{identity_field}"].append(m_value)
+                        field_values[f"monograph.{identity_field}"].append(m_value)
+                elif isinstance(monograph, dict):
+                    m_value = monograph.get(identity_field)
+                    if m_value:
                         field_values[f"monograph.{identity_field}"].append(m_value)
 
         should = [
@@ -383,41 +338,18 @@ class OpenSearchETLPipeline:
         if not should:
             return docs
 
-        logger.info(f"Expanding context for {len(docs)} documents...")
         search_body = {
             "query": {"bool": {"should": should, "minimum_should_match": 1}},
             "size": 1000,
         }
 
-        combined = {str(doc): doc for doc in docs}
+        combined = {json.dumps(doc, sort_keys=True, ensure_ascii=True): doc for doc in docs}
 
-        response = self.client.client.search(
-            index=self.input_scielo_index,
-            body=search_body,
-            scroll="5m",
-        )
-        scroll_id = response.get("_scroll_id")
-
-        try:
-            while True:
-                hits = response["hits"]["hits"]
-                if not hits:
-                    break
-
-                for hit in hits:
-                    normalized = clean_source_payload(hit["_source"])
-                    normalized["_os_id"] = hit.get("_id")
-                    self.loaded_source_ids.update(
-                        self._source_identity_values(hit.get("_id"), normalized)
-                    )
-                    combined[str(normalized)] = normalized
-
-                response = self.client.client.scroll(scroll_id=scroll_id, scroll="5m")
-                scroll_id = response.get("_scroll_id")
-
-        finally:
-            if scroll_id:
-                self.client.client.clear_scroll(scroll_id=scroll_id)
+        for hit, normalized in self._scroll_hits(self.input_scielo_index, search_body):
+            self.loaded_source_ids.update(
+                self._source_identity_values(hit.get("_id"), normalized)
+            )
+            combined[json.dumps(normalized, sort_keys=True, ensure_ascii=True)] = normalized
 
         return list(combined.values())
 
@@ -438,12 +370,33 @@ class OpenSearchETLPipeline:
             values.add(ids.get(identity_field))
 
         monograph = source.get("monograph") or {}
-        m_ids = monograph.get("ids") or monograph
+        m_ids = monograph.get("ids")
         if isinstance(m_ids, dict):
             for identity_field in ("scl_preprint_id", "dataset_id", "scl_book_id", "doi", "isbn"):
                 values.add(m_ids.get(identity_field))
+        if isinstance(monograph, dict):
+            for identity_field in ("scl_preprint_id", "dataset_id", "scl_book_id", "doi", "isbn"):
+                values.add(monograph.get(identity_field))
 
         return {str(value) for value in values if value not in (None, "")}
+
+    def _scroll_hits(self, index: str, body: dict, scroll: str = "5m"):
+        response = self.client.client.search(index=index, body=body, scroll=scroll)
+        scroll_id = response.get("_scroll_id")
+        try:
+            while True:
+                hits = response["hits"]["hits"]
+                if not hits:
+                    break
+                for hit in hits:
+                    normalized = clean_source_payload(hit["_source"])
+                    normalized["_os_id"] = hit.get("_id")
+                    yield hit, normalized
+                response = self.client.client.scroll(scroll_id=scroll_id, scroll=scroll)
+                scroll_id = response.get("_scroll_id")
+        finally:
+            if scroll_id:
+                self.client.client.clear_scroll(scroll_id=scroll_id)
 
     def _build_input_document(
         self,
@@ -451,8 +404,8 @@ class OpenSearchETLPipeline:
         source: str = "scielo",
     ):
         if source == "scielo":
-            input_cls = self.pipeline_config.input_document_class()
-            return input_cls.from_raw(
+            doc_cls = self.pipeline_config.input_document_class()
+            return doc_cls.from_raw(
                 raw_data,
                 doc_type_fn=self.pipeline_config.document_type_for_payload,
                 fallback_id_fn=self._stable_fallback_doc_id,
@@ -472,7 +425,6 @@ class OpenSearchETLPipeline:
         docs_to_index = []
         for doc in silver_docs:
             if not doc.publication_year:
-                logger.warning(f"Document missing publication_year: {doc.doc_id}")
                 self.skipped_doc_ids.append(doc.doc_id)
                 continue
             docs_to_index.append(doc)
@@ -480,15 +432,154 @@ class OpenSearchETLPipeline:
         if not docs_to_index:
             return 0
 
-        return self._index_silver_documents_to_rollover_alias(docs_to_index)
+        index_docs = self._prepare_silver_index_documents(docs_to_index)
+        return self._write_silver_documents(index_docs)
 
-    def _index_silver_documents_to_rollover_alias(
+    def _prepare_silver_index_documents(
         self,
         docs_to_index: List[SilverDocument],
+    ) -> list[tuple[str, SilverDocument]]:
+        docs_by_id: dict[str, list[SilverDocument]] = defaultdict(list)
+        for doc in docs_to_index:
+            docs_by_id[doc.doc_id].append(doc)
+
+        index_docs: list[tuple[str, SilverDocument]] = []
+        for doc_id, docs in docs_by_id.items():
+            if len(docs) == 1:
+                index_docs.append((doc_id, docs[0]))
+                continue
+
+            if self._silver_docs_can_share_index_id(docs):
+                merged_doc = self._merge_compatible_silver_docs(docs)
+                index_docs.append((merged_doc.doc_id, merged_doc))
+                continue
+
+            ranked_docs = sorted(
+                enumerate(docs),
+                key=lambda item: (
+                    len(self._openalex_ids_from_silver_doc(item[1])),
+                    len(item[1].title_with_lang or []),
+                    1 if self._normalized_silver_doi(item[1]) else 0,
+                    -item[0],
+                ),
+                reverse=True,
+            )
+            ordered_docs = [doc for _idx, doc in ranked_docs]
+            logger.warning(
+                "Conflicting silver documents share doc_id %s; keeping one on the "
+                "canonical _id and assigning alternate _ids to %s document(s)",
+                doc_id,
+                len(ordered_docs) - 1,
+            )
+            index_docs.append((doc_id, ordered_docs[0]))
+            for doc in ordered_docs[1:]:
+                digest = hashlib.sha256(
+                    json.dumps(
+                        doc.to_index_dict(),
+                        sort_keys=True,
+                        ensure_ascii=True,
+                    ).encode("utf-8")
+                ).hexdigest()
+                index_docs.append((f"{doc.doc_id}__{digest[:12]}", doc))
+
+        return index_docs
+
+    def _silver_docs_can_share_index_id(
+        self,
+        docs: list[SilverDocument],
+    ) -> bool:
+        doc_dois = [self._normalized_silver_doi(doc) for doc in docs]
+        known_dois = {doi for doi in doc_dois if doi}
+
+        if len(known_dois) > 1:
+            return False
+        if len(known_dois) == 1 and all(doc_dois):
+            return True
+
+        title_sets = []
+        for doc in docs:
+            title_values = set()
+            if normalized := normalize_text(doc.title):
+                title_values.add(normalized.lower())
+
+            for item in doc.title_with_lang or []:
+                if not isinstance(item, dict):
+                    continue
+                title = item.get("title") or item.get("text")
+                if normalized := normalize_text(title):
+                    title_values.add(normalized.lower())
+
+            if title_values:
+                title_sets.append(title_values)
+
+        if len(title_sets) < 2:
+            return True
+
+        return bool(set.intersection(*title_sets))
+
+    def _normalized_silver_doi(self, doc: SilverDocument) -> str | None:
+        ids = doc.ids if isinstance(doc.ids, dict) else {}
+        raw_doi = doc.doi or ids.get("doi")
+        if isinstance(raw_doi, list):
+            raw_doi = raw_doi[0] if raw_doi else None
+        return normalize_doi(raw_doi)
+
+    def _merge_compatible_silver_docs(
+        self,
+        docs: list[SilverDocument],
+    ) -> SilverDocument:
+        merged = self.merger.merge(scielo_docs=docs, openalex_matches=[])
+        data = merged.to_dict()
+
+        openalex_ids = []
+        openalex_lang_items = []
+        openalex_match_details = []
+        for doc in docs:
+            indexed = doc.to_index_dict()
+            ids = indexed.get("ids") or {}
+            openalex_ids.extend(self._openalex_ids_from_silver_doc(doc))
+            openalex_lang_items.extend(ids.get("openalex_with_lang") or [])
+            trace = (indexed.get("oca_data") or {}).get("merge_trace") or {}
+            openalex_match_details.extend(trace.get("openalex_matches") or [])
+
+        openalex_ids = list(dict.fromkeys(openalex_ids))
+        if openalex_ids:
+            data.setdefault("ids", {})["openalex"] = openalex_ids
+            data["openalex_id"] = openalex_ids[0]
+            openalex = dict(data.setdefault("oca_data", {}).get("openalex") or {})
+            openalex["ids"] = openalex_ids
+            data["oca_data"]["openalex"] = openalex
+            data["oca_data"]["scope"] = list(
+                dict.fromkeys(
+                    (data["oca_data"].get("scope") or []) + ["scielo", "openalex"]
+                )
+            )
+
+        if openalex_lang_items:
+            keyed_items = {
+                (item.get("language"), item.get("openalex")): item
+                for item in openalex_lang_items
+                if isinstance(item, dict) and item.get("language") and item.get("openalex")
+            }
+            data.setdefault("ids", {})["openalex_with_lang"] = list(keyed_items.values())
+
+        if openalex_match_details:
+            trace = data.setdefault("oca_data", {}).setdefault("merge_trace", {})
+            keyed_matches = {
+                item.get("doc_id"): item
+                for item in openalex_match_details
+                if isinstance(item, dict) and item.get("doc_id")
+            }
+            trace["openalex_matches"] = list(keyed_matches.values())
+
+        return SilverDocument(**data)
+
+    def _write_silver_documents(
+        self,
+        docs_to_index: list[tuple[str, SilverDocument]],
     ) -> int:
         index_prefix = self.silver_index_pattern
         write_alias = self.silver_write_alias
-        logger.info(f"Indexing {len(docs_to_index)} documents to {write_alias}...")
         bootstrap_index = self.client.ensure_rollover_index(
             index_prefix=index_prefix,
             write_alias=write_alias,
@@ -497,41 +588,34 @@ class OpenSearchETLPipeline:
         )
 
         actions = []
-        for doc in docs_to_index:
+        for index_id, doc in docs_to_index:
             actions.append(
                 {
                     "index": {
                         "_index": write_alias,
-                        "_id": doc.doc_id,
+                        "_id": index_id,
                     }
                 }
             )
             actions.append(doc.to_index_dict())
 
-        try:
-            self._bulk_index(actions, len(docs_to_index), write_alias)
-            if bootstrap_index:
-                self.indexed_index_names.add(bootstrap_index)
+        self._execute_bulk_index(actions, write_alias)
+        if bootstrap_index:
+            self.indexed_index_names.add(bootstrap_index)
 
-            rollover_index = self.client.rollover(
-                write_alias=write_alias,
-                public_alias=self.public_alias,
-                max_size=getattr(settings, "ETL_SILVER_ROLLOVER_MAX_SIZE", None),
-            )
-            if rollover_index:
-                self.indexed_index_names.add(rollover_index)
-            if not self.indexed_index_names:
-                self.indexed_index_names.add(write_alias)
-
-        except RuntimeError:
-            raise
-        except Exception as e:
-            logger.error(f"Failed to index to {write_alias}: {e}")
-            raise
+        rollover_index = self.client.rollover(
+            write_alias=write_alias,
+            public_alias=self.public_alias,
+            max_size=getattr(settings, "ETL_SILVER_ROLLOVER_MAX_SIZE", None),
+        )
+        if rollover_index:
+            self.indexed_index_names.add(rollover_index)
+        if not self.indexed_index_names:
+            self.indexed_index_names.add(write_alias)
 
         return len(docs_to_index)
 
-    def _bulk_index(self, actions: list[dict], expected_count: int, target_name: str) -> None:
+    def _execute_bulk_index(self, actions: list[dict], target_name: str) -> None:
         response = self.client.client.bulk(body=actions)
 
         if response.get("errors"):
@@ -541,15 +625,11 @@ class OpenSearchETLPipeline:
                 if item.get("index", {}).get("status", 200) >= 400
             ]
             error_count = len(error_items)
-            logger.error(f"Bulk indexing had {error_count} errors")
-            stats_errors = [item.get("error") for item in error_items]
-            for err in stats_errors[:5]:
-                logger.error(f"  Index error: {err}")
+            first_error = error_items[0].get("error") if error_items else None
             raise RuntimeError(
-                f"Bulk indexing failed for {error_count} documents in {target_name}"
+                f"Bulk indexing failed for {error_count} documents in {target_name}: "
+                f"{first_error}"
             )
-
-        logger.info(f"Successfully indexed {expected_count} documents")
 
     def _stable_fallback_doc_id(self, raw_data: Dict[str, Any]) -> str:
         source_payload = {
@@ -562,3 +642,73 @@ class OpenSearchETLPipeline:
             json.dumps(source_payload, sort_keys=True, ensure_ascii=True).encode("utf-8")
         ).hexdigest()
         return f"doc_{digest[:20]}"
+
+    def _remove_openalex_only_placeholders(
+        self,
+        merged_docs: list[SilverDocument],
+    ) -> int:
+        openalex_only_pattern = getattr(
+            settings,
+            "ETL_OPENALEX_ONLY_INDEX_PATTERN",
+            "silver_openalex",
+        )
+        index_pattern = f"{openalex_only_pattern}-*"
+
+        if not self.client.index_exists(index_pattern):
+            return 0
+
+        oa_ids: set[str] = set()
+        for doc in merged_docs:
+            if doc.doc_id in self.skipped_doc_ids:
+                continue
+            found_ids = self._openalex_ids_from_silver_doc(doc)
+            oa_ids.update(found_ids)
+
+        if not oa_ids:
+            return 0
+
+        ids_list = list(oa_ids)
+        total_removed = 0
+        chunk_size = 10000
+        for i in range(0, len(ids_list), chunk_size):
+            chunk = ids_list[i:i + chunk_size]
+            try:
+                resp = self.client.client.delete_by_query(
+                    index=index_pattern,
+                    body={"query": {"ids": {"values": chunk}}},
+                    refresh=True,
+                )
+                deleted = resp.get("deleted", 0)
+                total_removed += deleted
+            except Exception as e:
+                logger.warning(
+                    "Error removing OpenAlex-only docs from %s: %s",
+                    index_pattern,
+                    e,
+                )
+
+        return total_removed
+
+    def _openalex_ids_from_silver_doc(self, doc: SilverDocument) -> list[str]:
+        oa_ids: list[str] = []
+
+        doc_dict = doc.to_index_dict()
+        ids_field = doc_dict.get("ids", {})
+        oa_field = ids_field.get("openalex") if isinstance(ids_field, dict) else None
+        if oa_field:
+            items = oa_field if isinstance(oa_field, list) else [oa_field]
+            for item in items:
+                if normalized := normalize_openalex_id(item):
+                    if normalized not in oa_ids:
+                        oa_ids.append(normalized)
+
+        oca_data = doc_dict.get("oca_data", {})
+        oca_openalex = oca_data.get("openalex", {})
+        oca_ids_list = oca_openalex.get("ids") if isinstance(oca_openalex, dict) else None
+        if oca_ids_list and isinstance(oca_ids_list, list):
+            for item in oca_ids_list:
+                if normalized := normalize_openalex_id(item):
+                    if normalized not in oa_ids:
+                        oa_ids.append(normalized)
+
+        return oa_ids

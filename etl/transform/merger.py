@@ -16,7 +16,7 @@ class SilverMerger:
         if not scielo_docs:
             raise ValueError("At least one SciELO document is required")
 
-        logger.info(
+        logger.debug(
             "Merging %s SciELO doc(s) with %s OpenAlex match(es)",
             len(scielo_docs),
             len(openalex_matches),
@@ -303,6 +303,11 @@ class SilverMerger:
         all_indexed_in = list(merged_data.get("indexed_in") or [])
         openalex_doi = None
         openalex_doi_with_lang = []
+        openalex_content_url = None
+        openalex_content_url_with_lang = []
+        openalex_is_open_access = None
+        openalex_open_access_status = None
+        openalex_biblio = {}
         all_funders = []
         all_awards = []
         best_primary_topic_score = merged_data.get("primary_topic_score") or 0.0
@@ -315,6 +320,19 @@ class SilverMerger:
                 openalex_doi = oa_data.get("doi") or oa_ids.get("doi")
             if oa_ids.get("doi_with_lang"):
                 openalex_doi_with_lang.extend(oa_ids["doi_with_lang"])
+            if not openalex_content_url and oa_data.get("content_url"):
+                openalex_content_url = oa_data["content_url"]
+            if oa_data.get("content_url_with_lang"):
+                openalex_content_url_with_lang.extend(oa_data["content_url_with_lang"])
+            if openalex_is_open_access is None and oa_data.get("is_open_access") is not None:
+                openalex_is_open_access = oa_data["is_open_access"]
+            if not openalex_open_access_status and oa_data.get("open_access_status"):
+                openalex_open_access_status = oa_data["open_access_status"]
+            oa_biblio = oa_data.get("biblio") or {}
+            for key in ("volume", "issue", "first_page", "last_page"):
+                value = oa_biblio.get(key) or oa_data.get(key)
+                if value and key not in openalex_biblio:
+                    openalex_biblio[key] = value
             if oa_data.get("citation_count") is not None:
                 all_citation_counts.append(oa_data["citation_count"])
             if oa_data.get("referenced_works"):
@@ -397,6 +415,29 @@ class SilverMerger:
             if not merged_ids.get("doi_with_lang"):
                 merged_ids["doi_with_lang"] = openalex_doi_with_lang
 
+        if openalex_content_url and not merged_data.get("content_url"):
+            merged_data["content_url"] = openalex_content_url
+        if openalex_content_url_with_lang:
+            merged_data["content_url_with_lang"] = self._unique_urls_by_language(
+                (merged_data.get("content_url_with_lang") or [])
+                + openalex_content_url_with_lang
+            )
+        if (
+            merged_data.get("is_open_access") is None
+            and openalex_is_open_access is not None
+        ):
+            merged_data["is_open_access"] = openalex_is_open_access
+        if openalex_open_access_status and not merged_data.get("open_access_status"):
+            merged_data["open_access_status"] = openalex_open_access_status
+        if openalex_biblio:
+            merged_biblio = dict(merged_data.get("biblio") or {})
+            for key, value in openalex_biblio.items():
+                if not merged_biblio.get(key) and not merged_data.get(key):
+                    merged_biblio[key] = value
+                    merged_data[key] = value
+            if merged_biblio:
+                merged_data["biblio"] = merged_biblio
+
         all_languages = set(as_list(merged_data.get("language") or []))
         for item in merged_data.get("title_with_lang") or []:
             if (lang := item.get("language")) and (
@@ -418,8 +459,22 @@ class SilverMerger:
                 sc_source = merged_data.get("source") or {}
                 if oa_source.get("id"):
                     sc_source.setdefault("ids", {})["openalex"] = oa_source["id"]
-                for key in ("title", "issn_l", "host_organization", "host_organization_name", "type"):
-                    if not sc_source.get(key) and oa_source.get(key):
+                for key in (
+                    "title",
+                    "issn_l",
+                    "host_organization",
+                    "host_organization_name",
+                    "type",
+                    "landing_page_url",
+                    "is_open_access",
+                ):
+                    if key == "is_open_access":
+                        if (
+                            sc_source.get(key) is None
+                            and oa_source.get(key) is not None
+                        ):
+                            sc_source[key] = oa_source[key]
+                    elif not sc_source.get(key) and oa_source.get(key):
                         sc_source[key] = oa_source[key]
 
                 oa_issns = as_list(oa_source.get("issns"))
