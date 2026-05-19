@@ -4,6 +4,7 @@ from django.urls import path, reverse
 from django.utils.translation import gettext as _
 from wagtail import hooks
 from wagtail.admin import messages
+from wagtail.admin.menu import MenuItem
 from wagtail_modeladmin.helpers import ButtonHelper
 from wagtail_modeladmin.options import (
     ModelAdmin,
@@ -12,6 +13,7 @@ from wagtail_modeladmin.options import (
 )
 from wagtail_modeladmin.views import CreateView
 
+from . import views
 from .bronze_transform import transform_document
 from .models import (
     HarvestedBooks,
@@ -132,4 +134,19 @@ def run_transform_view(request):
 def register_harvest_urls():
     return [
         path("harvest/run-transform/", run_transform_view, name="harvest_run_transform"),
+        path(
+            "harvest/upload-opensearch/",
+            views.upload_opensearch_view,
+            name="harvest_upload_opensearch",
+        ),
     ]
+
+
+@hooks.register("register_admin_menu_item")
+def register_harvest_upload_menu_item():
+    return MenuItem(
+        _("Harvest Upload"),
+        reverse("harvest_upload_opensearch"),
+        icon_name="upload",
+        order=899,
+    )
