@@ -172,3 +172,64 @@ class DocumentRulesTests(TestCase):
 
         self.assertTrue(is_valid)
         self.assertEqual(confidence, "high")
+
+    def test_openalex_doi_match_keeps_language_variants_with_same_normalized_doi(self):
+        matcher = make_matcher("article")
+        matcher.input_openalex_index = "raw_openalex_works"
+        matcher.client = Mock()
+        matcher.client.client.search.return_value = {
+            "hits": {
+                "hits": [
+                    {"_source": self._openalex_article("https://openalex.org/Wen", "en", "")},
+                    {"_source": self._openalex_article("https://openalex.org/Wpt", "pt", "pt")},
+                    {"_source": self._openalex_article("https://openalex.org/Wes", "es", "es")},
+                ]
+            }
+        }
+
+        matches = matcher.find_matches(
+            [
+                {
+                    "type": "article",
+                    "publication_year": 2025,
+                    "ids": {"doi": "10.1590/0034-7167.202578SUPL101"},
+                    "title_with_lang": [
+                        {"language": "en", "title": "Ethical dilemmas in nursing professionals' work"},
+                        {"language": "pt", "title": "Dilemas éticos no trabalho dos profissionais de enfermagem"},
+                        {"language": "es", "title": "Dilemas éticos en el trabajo de los profesionales de enfermería"},
+                    ],
+                    "source_issns": ["0034-7167", "1984-0446"],
+                }
+            ],
+            max_candidates=3,
+        )
+
+        self.assertEqual(
+            {match[0]["id"] for match in matches},
+            {
+                "https://openalex.org/Wen",
+                "https://openalex.org/Wpt",
+                "https://openalex.org/Wes",
+            },
+        )
+        self.assertTrue(all(match[1] == "doi" for match in matches))
+
+    def _openalex_article(self, openalex_id, language, doi_suffix):
+        titles = {
+            "en": "Ethical dilemmas in nursing professionals' work",
+            "pt": "Dilemas éticos no trabalho dos profissionais de enfermagem",
+            "es": "Dilemas éticos en el trabajo de los profesionales de enfermería",
+        }
+        return {
+            "id": openalex_id,
+            "language": language,
+            "doi": f"https://doi.org/10.1590/0034-7167.202578supl101{doi_suffix}",
+            "title": titles[language],
+            "publication_year": 2025,
+            "primary_location": {
+                "source": {
+                    "issn": ["0034-7167", "1984-0446"],
+                    "display_name": "Revista Brasileira de Enfermagem",
+                }
+            },
+        }

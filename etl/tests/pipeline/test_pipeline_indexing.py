@@ -87,6 +87,55 @@ class OrchestratorAliasTests(TestCase):
     @patch("etl.pipeline.OpenAlexMatcher")
     @patch("etl.pipeline.SciELODeduplicator")
     @patch("etl.pipeline.OpenSearchClient")
+    def test_indexing_duplicate_doc_id_with_conflicting_content_uses_alternate_id(
+        self,
+        client_cls,
+        _scielo_deduplicator_cls,
+        _openalex_matcher_cls,
+        _standardizer_for,
+    ):
+        client = Mock()
+        client.client.bulk.return_value = {"errors": False}
+        client.ensure_rollover_index.return_value = "silver_scientific_production-000001"
+        client.rollover.return_value = None
+        client_cls.return_value = client
+        pipeline = OpenSearchETLPipeline(
+            opensearch_url="http://opensearch:9200",
+            public_alias="scientific_production",
+        )
+        scl_doc = SilverDocument(
+            doc_id="S0034-71672025000400101",
+            type="article",
+            publication_year=2025,
+            title="In-person nursing education",
+            doi="10.1590/0034-7167.2025780402",
+            openalex_id="https://openalex.org/W1",
+        )
+        rve_doc = SilverDocument(
+            doc_id="S0034-71672025000400101",
+            type="article",
+            publication_year=2025,
+            title="Ethical dilemmas in nursing professionals' work",
+            doi="10.1590/0034-7167.202578supl101",
+            ids={"openalex": ["https://openalex.org/W2", "https://openalex.org/W3"]},
+            openalex_id="https://openalex.org/W2",
+        )
+
+        with self.assertLogs("etl.pipeline", level="WARNING") as logs:
+            indexed_count = pipeline._index_silver_documents([scl_doc, rve_doc])
+
+        self.assertEqual(indexed_count, 2)
+        self.assertIn("Conflicting silver documents share doc_id", "\n".join(logs.output))
+        bulk_body = client.client.bulk.call_args.kwargs["body"]
+        self.assertEqual(bulk_body[0]["index"]["_id"], "S0034-71672025000400101")
+        self.assertEqual(bulk_body[1]["title"], "Ethical dilemmas in nursing professionals' work")
+        self.assertTrue(bulk_body[2]["index"]["_id"].startswith("S0034-71672025000400101__"))
+        self.assertNotEqual(bulk_body[0]["index"]["_id"], bulk_body[2]["index"]["_id"])
+
+    @patch("etl.pipeline.standardizer_for")
+    @patch("etl.pipeline.OpenAlexMatcher")
+    @patch("etl.pipeline.SciELODeduplicator")
+    @patch("etl.pipeline.OpenSearchClient")
     def test_indexing_skips_documents_without_publication_year(
         self,
         client_cls,
