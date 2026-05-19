@@ -48,7 +48,7 @@ class SciELODeduplicator:
         if len(articles) <= 1:
             return {0: articles} if articles else {}
 
-        logger.info("Starting SciELO deduplication for %s articles...", len(articles))
+        logger.debug("Starting SciELO deduplication for %s articles...", len(articles))
 
         uf = UnionFind(len(articles))
         doi_to_indices: Dict[str, List[int]] = defaultdict(list)
@@ -77,7 +77,7 @@ class SciELODeduplicator:
             components[uf.find(i)].append(articles[i])
 
         merged_count = sum(1 for group in components.values() if len(group) > 1)
-        logger.info(
+        logger.debug(
             "SciELO deduplication complete: %s articles -> %s groups (%s groups with duplicates)",
             len(articles),
             len(components),

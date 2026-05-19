@@ -80,13 +80,6 @@ class OpenSearchETLPipeline:
         self.merger = SilverMerger()
         self.skipped_doc_ids = []
 
-        logger.info("OpenSearchETLPipeline initialized")
-        logger.info("  Input SciELO index: %s", self.input_scielo_index)
-        logger.info("  Input OpenAlex index: %s", self.input_openalex_index)
-        logger.info("  Silver index pattern: %s", self.silver_index_pattern)
-        logger.info("  Silver write alias: %s", self.silver_write_alias)
-        logger.info("  Batch size: %s", self.batch_size)
-
     def run(
         self,
         max_docs: Optional[int] = None,
@@ -115,27 +108,20 @@ class OpenSearchETLPipeline:
             "warnings": 0,
             "error_messages": [],
             "warning_messages": [],
+            "openalex_only_removed_after_merge": 0,
         }
 
-        logger.info("=" * 80)
-        logger.info("STARTING OPENSEARCH ETL PIPELINE")
-        logger.info("=" * 80)
-
         try:
-            logger.info("\n[Step 1] Loading input documents...")
             input_docs = self._load_scielo_input_documents(
                 max_docs=max_docs,
                 year_filter=year_filter,
                 doc_ids=doc_ids,
             )
             result["total_input_docs"] = len(input_docs)
-            logger.info(f"Loaded {len(input_docs)} input documents")
 
             if not input_docs:
-                logger.warning("No documents to process")
                 return self._finalize_result(result)
 
-            logger.info("\n[Step 2] Building SciELO document groups...")
             groups = self._build_scielo_groups(input_docs)
             result["total_groups_formed"] = len(groups)
             result["total_duplicates_found"] = sum(
@@ -156,20 +142,11 @@ class OpenSearchETLPipeline:
                             scielo_dedup_map[os_id] = [pid for pid in group_pids if pid]
             result["scielo_dedup_source_ids"] = scielo_dedup_source_ids
             result["scielo_dedup_map"] = scielo_dedup_map
-            logger.info(
-                f"Grouping complete: {len(input_docs)} docs -> "
-                f"{len(groups)} groups ({result['total_duplicates_found']} duplicates)"
-            )
 
-            logger.info("\n[Step 3] Processing document groups...")
             all_merged_docs = []
 
             for idx, (root_idx, group) in enumerate(groups.items(), 1):
                 try:
-                    logger.debug(
-                        f"Processing group {idx}/{len(groups)} ({len(group)} doc(s))"
-                    )
-
                     openalex_matches = self.openalex_matcher.find_matches(
                         scielo_group=group,
                         max_candidates=3,
@@ -196,11 +173,12 @@ class OpenSearchETLPipeline:
                             scielo_silver_docs.append(silver_doc)
 
                         except Exception as e:
-                            logger.warning(f"Error standardizing SciELO doc: {e}")
                             result["warning_messages"].append(f"Standardization error: {e}")
 
                     if not scielo_silver_docs:
-                        logger.warning(f"No standardized SciELO docs for group {idx}")
+                        result["warning_messages"].append(
+                            f"No standardized SciELO docs for group {idx}"
+                        )
                         continue
 
                     openalex_silver_matches = []
@@ -218,7 +196,6 @@ class OpenSearchETLPipeline:
                             )
 
                         except Exception as e:
-                            logger.warning(f"Error standardizing OpenAlex doc: {e}")
                             result["warning_messages"].append(
                                 f"OpenAlex standardization error: {e}"
                             )
@@ -232,21 +209,15 @@ class OpenSearchETLPipeline:
                     result["total_merged_docs"] += 1
 
                 except Exception as e:
-                    logger.error(f"Error processing group {idx}: {e}", exc_info=True)
                     result["error_messages"].append(f"Group {idx} processing error: {str(e)}")
 
-            logger.info("\n[Step 4] Indexing to silver indices...")
             indexed_count = self._index_silver_documents(all_merged_docs)
             result["total_indexed_docs"] = indexed_count
             result["total_skipped_docs"] = len(self.skipped_doc_ids)
             result["skipped_doc_ids"] = self.skipped_doc_ids
-            logger.info(f"Indexed {indexed_count} documents to silver indices")
-            if self.skipped_doc_ids:
-                logger.warning(f"Skipped {len(self.skipped_doc_ids)} documents due to missing publication_year")
 
-            logger.info("\n" + "=" * 80)
-            logger.info("PIPELINE EXECUTION COMPLETE")
-            logger.info("=" * 80)
+            removed_count = self._remove_openalex_only_placeholders(all_merged_docs)
+            result["openalex_only_removed_after_merge"] = removed_count
 
         except Exception as e:
             logger.error(f"Pipeline failed: {e}", exc_info=True)
@@ -327,7 +298,6 @@ class OpenSearchETLPipeline:
         if max_docs and len(docs) > max_docs:
             docs = docs[:max_docs]
 
-        logger.info(f"Loaded {len(docs)} documents")
         return docs
 
     def _finalize_result(self, result: dict) -> dict:
@@ -472,7 +442,6 @@ class OpenSearchETLPipeline:
         docs_to_index = []
         for doc in silver_docs:
             if not doc.publication_year:
-                logger.warning(f"Document missing publication_year: {doc.doc_id}")
                 self.skipped_doc_ids.append(doc.doc_id)
                 continue
             docs_to_index.append(doc)
@@ -541,15 +510,11 @@ class OpenSearchETLPipeline:
                 if item.get("index", {}).get("status", 200) >= 400
             ]
             error_count = len(error_items)
-            logger.error(f"Bulk indexing had {error_count} errors")
-            stats_errors = [item.get("error") for item in error_items]
-            for err in stats_errors[:5]:
-                logger.error(f"  Index error: {err}")
+            first_error = error_items[0].get("error") if error_items else None
             raise RuntimeError(
-                f"Bulk indexing failed for {error_count} documents in {target_name}"
+                f"Bulk indexing failed for {error_count} documents in {target_name}: "
+                f"{first_error}"
             )
-
-        logger.info(f"Successfully indexed {expected_count} documents")
 
     def _stable_fallback_doc_id(self, raw_data: Dict[str, Any]) -> str:
         source_payload = {

@@ -58,7 +58,7 @@ class OpenAlexMatcher:
                 matches.extend(self._try_openalex_by_title(primary, max_candidates))
 
         matches = self._deduplicate_openalex_matches(matches)
-        logger.info("Found %s validated OpenAlex matches for SciELO group", len(matches))
+        logger.debug("Found %s validated OpenAlex matches for SciELO group", len(matches))
         return matches
 
     def _try_openalex_by_doi(self, primary: dict, max_candidates: int) -> list:

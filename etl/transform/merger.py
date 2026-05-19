@@ -16,7 +16,7 @@ class SilverMerger:
         if not scielo_docs:
             raise ValueError("At least one SciELO document is required")
 
-        logger.info(
+        logger.debug(
             "Merging %s SciELO doc(s) with %s OpenAlex match(es)",
             len(scielo_docs),
             len(openalex_matches),
