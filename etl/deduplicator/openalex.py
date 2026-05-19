@@ -14,6 +14,7 @@ from etl.transform.extractors import (
     extract_isbns,
     extract_issns,
     extract_source,
+    extract_titles,
 )
 
 logger = logging.getLogger(__name__)
@@ -316,9 +317,12 @@ class OpenAlexMatcher:
             if validation_rules["require_source_match"]:
                 return False, "rejected", {"reasons": reasons, "score": confidence_score}
 
-        scl_title = normalize_text(scielo_doc.get("title", "") or "")
-        oa_title = normalize_text(openalex_doc.get("title", "") or "")
-        article_title_sim = calculate_similarity(scl_title, oa_title)
+        scl_titles = extract_titles(scielo_doc)
+        oa_titles = extract_titles(openalex_doc)
+        article_title_sim = max(
+            (calculate_similarity(scl_t, oa_t) for scl_t in scl_titles for oa_t in oa_titles),
+            default=0.0,
+        )
 
         if (
             isbn_intersection
@@ -337,7 +341,12 @@ class OpenAlexMatcher:
             reasons.append(f"article_title_match_{article_title_sim:.2f}")
         else:
             reasons.append(f"article_title_low_sim_{article_title_sim:.2f}")
-            if not doi_match and scl_title and oa_title and article_title_sim < validation_rules["title_reject_threshold"]:
+            if (
+                not doi_match
+                and scl_titles
+                and oa_titles
+                and article_title_sim < validation_rules["title_reject_threshold"]
+            ):
                 return (
                     False,
                     "low_confidence",
