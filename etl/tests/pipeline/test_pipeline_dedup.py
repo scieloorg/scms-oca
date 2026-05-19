@@ -214,6 +214,30 @@ class DocumentRulesTests(TestCase):
         )
         self.assertTrue(all(match[1] == "doi" for match in matches))
 
+    def test_openalex_doi_search_uses_exact_or_prefix_queries(self):
+        matcher = make_matcher("article")
+        matcher.input_openalex_index = "raw_openalex_works"
+        matcher.client = Mock()
+        matcher.client.client.search.return_value = {"hits": {"hits": []}}
+
+        matcher._search_openalex_by_doi(
+            "10.1590/0034-7167.202578SUPL101",
+            {"publication_year": 2025},
+        )
+
+        body = matcher.client.client.search.call_args.kwargs["body"]
+        self.assertNotIn("wildcard", str(body))
+        doi_filter = body["query"]["bool"]["filter"][0]["bool"]
+        self.assertEqual(doi_filter["minimum_should_match"], 1)
+        self.assertIn(
+            {"prefix": {"doi.keyword": "https://doi.org/10.1590/0034-7167.202578supl101"}},
+            doi_filter["should"],
+        )
+        self.assertIn(
+            {"term": {"doi.keyword": "10.1590/0034-7167.202578supl101"}},
+            doi_filter["should"],
+        )
+
     def _openalex_article(self, openalex_id, language, doi_suffix):
         titles = {
             "en": "Ethical dilemmas in nursing professionals' work",

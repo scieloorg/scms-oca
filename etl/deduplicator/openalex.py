@@ -131,7 +131,18 @@ class OpenAlexMatcher:
             logger.warning("Invalid DOI after normalization: %s", doi)
             return []
 
-        query = {"bool": {"filter": [{"wildcard": {"doi.keyword": f"*{normalized_doi}*"}}]}}
+        query = {
+            "bool": {
+                "filter": [
+                    {
+                        "bool": {
+                            "should": self._doi_exact_or_prefix_queries(normalized_doi),
+                            "minimum_should_match": 1,
+                        }
+                    }
+                ]
+            }
+        }
         if year is not None:
             try:
                 year = int(year)
@@ -150,6 +161,23 @@ class OpenAlexMatcher:
         except Exception as exc:
             logger.error("Error searching OpenAlex by DOI: %s", exc)
             return []
+
+    def _doi_exact_or_prefix_queries(self, normalized_doi: str) -> list[dict[str, Any]]:
+        doi_values = [
+            normalized_doi,
+            f"https://doi.org/{normalized_doi}",
+            f"http://doi.org/{normalized_doi}",
+            f"https://dx.doi.org/{normalized_doi}",
+            f"http://dx.doi.org/{normalized_doi}",
+        ]
+        fields = ["doi.keyword", "ids.doi.keyword"]
+
+        queries: list[dict[str, Any]] = []
+        for field in fields:
+            queries.extend({"term": {field: value}} for value in doi_values)
+            queries.extend({"prefix": {field: value}} for value in doi_values)
+
+        return queries
 
     def _search_openalex_by_isbn(
         self,
