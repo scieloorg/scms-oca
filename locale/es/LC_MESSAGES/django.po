@@ -2113,7 +2113,7 @@ msgstr "Arquivo de Indicador"
 #: indicator/templatetags/indicator_filters.py:94
 #: search_gateway/data_sources_with_settings.py:70
 msgid "Scope"
-msgstr "Escopo"
+msgstr "Alcance"
 
 #: indicator/models.py:176
 msgid "Measurement"
@@ -4799,3 +4799,87 @@ msgstr "Subárea"
 
 msgid "articles, preprints, datasets, books"
 msgstr "artículos, preimpresiones, conjuntos de datos, libros"
+
+#: observation/templates/observation/include/table.html
+msgid "Select an observation table"
+msgstr "Seleccione una tabla de observación"
+
+#: observation/templates/observation/include/table.html
+msgid "Use the detail icon next to country name. Use row checkboxes and then Compare selected."
+msgstr "Use el icono de detalles junto al nombre del país. Use las casillas de las filas y luego Comparar seleccionados."
+
+#: observation/templates/observation/include/table.html
+msgid "Processing date"
+msgstr "Fecha de procesamiento"
+
+#: observation/templates/observation/include/table.html
+msgid "Table"
+msgstr "Tabla"
+
+#: observation/templates/observation/include/table.html
+msgid "Downloads"
+msgstr "Descargas"
+
+#: observation/templates/observation/include/table.html
+msgid "Compare selected"
+msgstr "Comparar seleccionados"
+
+#: observation/templates/observation/include/table.html
+msgid "Download CSV (.csv)"
+msgstr "Descargar CSV (.csv)"
+
+#: observation/templates/observation/include/table.html
+msgid "Rows per page"
+msgstr "Filas por página"
+
+#: observation/templates/observation/include/table.html
+msgid "Loading table data..."
+msgstr "Cargando datos de la tabla..."
+
+#: observation/templates/observation/include/table.html
+msgid "Select or deselect all rows"
+msgstr "Seleccionar o deseleccionar todas las filas"
+
+#: observation/templates/observation/include/table.html
+msgid "Select"
+msgstr "Seleccionar"
+
+#: observation/templates/observation/include/table.html
+msgid "Totals"
+msgstr "Totales"
+
+#: observation/templates/observation/include/table.html
+msgid "Rows limit"
+msgstr "Límite de filas"
+
+#: observation/templates/observation/include/table.html
+msgid "Generate all CSVs"
+msgstr "Generar todos los CSV"
+
+#: observation/templates/observation/include/table.html
+msgid "Clear .csv"
+msgstr "Limpiar .csv"
+
+#: observation/templates/observation/include/table.html
+msgid "Single file (.csv)"
+msgstr "Archivo único (.csv)"
+
+#: observation/templates/observation/include/table.html
+msgid "Jobs are persisted in your browser and can be resumed after reload."
+msgstr "Los trabajos se guardan en el navegador y pueden reanudarse después de recargar."
+
+#: observation/templates/observation/include/table.html
+msgid "Country details"
+msgstr "Detalles del país"
+
+#: observation/templates/observation/include/table.html
+msgid "Country comparison"
+msgstr "Comparación de países"
+
+#: observation/templates/observation/include/table.html
+msgid "Documents"
+msgstr "Documentos"
+
+#: observation/templates/observation/include/table.html
+msgid "Clear selection"
+msgstr "Limpiar selección"

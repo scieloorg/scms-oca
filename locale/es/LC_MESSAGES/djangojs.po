@@ -559,3 +559,199 @@ msgstr "Filtros aplicados"
 
 msgid "Search"
 msgstr "Búsqueda"
+
+#: observation/static/observation/js/table.js
+msgid "Disabled while single-file mode is enabled."
+msgstr "Deshabilitado mientras el modo de archivo único está activo."
+
+#: observation/static/observation/js/table.js
+msgid "No export jobs yet."
+msgstr "Aún no hay trabajos de exportación."
+
+#: observation/static/observation/js/table.js
+msgid "Download CSV"
+msgstr "Descargar CSV"
+
+#: observation/static/observation/js/table.js
+msgid "%(count)s files"
+msgstr "%(count)s archivos"
+
+#: observation/static/observation/js/table.js
+msgid "Dimension"
+msgstr "Dimensión"
+
+#: observation/static/observation/js/table.js
+msgid "Status"
+msgstr "Estado"
+
+#: observation/static/observation/js/table.js
+msgid "%(processed)s/%(total)s rows"
+msgstr "%(processed)s/%(total)s filas"
+
+#: observation/static/observation/js/table.js
+msgid "Could not download CSV."
+msgstr "No se pudo descargar el CSV."
+
+#: observation/static/observation/js/table.js
+msgid "Downloaded file is empty."
+msgstr "El archivo descargado está vacío."
+
+#: observation/static/observation/js/table.js
+msgid "Status error"
+msgstr "Error de estado"
+
+#: observation/static/observation/js/table.js
+msgid "Export start failed"
+msgstr "Falló el inicio de la exportación"
+
+#: observation/static/observation/js/table.js
+msgid "Could not start export"
+msgstr "No se pudo iniciar la exportación"
+
+#: observation/static/observation/js/table.js
+msgid "Remove all saved download jobs from this browser?"
+msgstr "¿Eliminar todos los trabajos de descarga guardados en este navegador?"
+
+#: observation/static/observation/js/table.js
+msgid "Enable when there are at least 1000 rows."
+msgstr "Habilitar cuando haya al menos 1000 filas."
+
+#: observation/static/observation/js/table.js
+msgid "Network error"
+msgstr "Error de red"
+
+#: observation/static/observation/js/table.js
+msgid "Error loading table data"
+msgstr "Error al cargar los datos de la tabla"
+
+#: observation/static/observation/js/table.js
+msgid "View details"
+msgstr "Ver detalles"
+
+#: observation/static/observation/js/table.js
+msgid "Copy row"
+msgstr "Copiar fila"
+
+#: observation/static/observation/js/table.js
+msgid "Type to search %(label)s..."
+msgstr "Escriba para buscar %(label)s..."
+
+#: observation/static/observation/js/table.js
+msgid "Showing _START_ to _END_ of _TOTAL_"
+msgstr "Mostrando _START_ a _END_ de _TOTAL_"
+
+#: observation/static/observation/js/table.js
+msgid "First"
+msgstr "Primero"
+
+#: observation/static/observation/js/table.js
+msgid "Previous"
+msgstr "Anterior"
+
+#: observation/static/observation/js/table.js
+msgid "Next"
+msgstr "Siguiente"
+
+#: observation/static/observation/js/table.js
+msgid "Last"
+msgstr "Último"
+
+#: observation/static/observation/js/table.js
+msgid "Showing %(start)s to %(end)s of %(total)s"
+msgstr "Mostrando %(start)s a %(end)s de %(total)s"
+
+#: observation/static/observation/js/table.js
+msgid "Contains"
+msgstr "Contiene"
+
+#: observation/static/observation/js/table.js
+msgid "Starts with"
+msgstr "Empieza con"
+
+#: observation/static/observation/js/table.js
+msgid "Equals"
+msgstr "Igual a"
+
+#: observation/static/observation/js/table.js
+msgid "Search..."
+msgstr "Buscar..."
+
+#: observation/static/observation/js/table.js
+msgid "Sort column"
+msgstr "Ordenar columna"
+
+#: observation/static/observation/js/table.js
+msgid "Sort ascending"
+msgstr "Ordenar ascendente"
+
+#: observation/static/observation/js/table.js
+msgid "Column options"
+msgstr "Opciones de columna"
+
+#: observation/static/observation/js/table.js
+msgid "Sort Ascending"
+msgstr "Orden ascendente"
+
+#: observation/static/observation/js/table.js
+msgid "Sort Descending"
+msgstr "Orden descendente"
+
+#: observation/static/observation/js/table.js
+msgid "Clear sort"
+msgstr "Limpiar ordenación"
+
+#: observation/static/observation/js/table.js
+msgid "Select at least 2 rows using the row checkboxes."
+msgstr "Seleccione al menos 2 filas usando las casillas de las filas."
+
+#: observation/static/observation/js/table.js
+msgid "Comparison"
+msgstr "Comparación"
+
+#: observation/static/observation/js/table.js
+msgid "Processing date"
+msgstr "Fecha de procesamiento"
+
+#: observation/static/observation/js/table.js
+msgid "Source"
+msgstr "Fuente"
+
+#: observation/static/observation/js/table.js
+msgid "Evolution comparison by year"
+msgstr "Comparación de evolución por año"
+
+#: observation/static/observation/js/table.js
+msgid "Download chart"
+msgstr "Descargar gráfico"
+
+#: observation/static/observation/js/table.js
+msgid "Select at least one row using the checkbox in the first column."
+msgstr "Seleccione al menos una fila usando la casilla de la primera columna."
+
+#: observation/static/observation/js/table.js
+msgid "Details"
+msgstr "Detalles"
+
+#: observation/static/observation/js/table.js
+msgid "Evolution by %(label)s"
+msgstr "Evolución por %(label)s"
+
+#: observation/static/observation/js/table.js
+msgid "Peak"
+msgstr "Máximo"
+
+#: observation/static/observation/js/table.js
+msgid "Lowest"
+msgstr "Mínimo"
+
+#: observation/static/observation/js/table.js
+msgid "Average"
+msgstr "Promedio"
+
+#: observation/static/observation/js/table.js
+msgid "Growth (%(start)s-%(end)s)"
+msgstr "Crecimiento (%(start)s-%(end)s)"
+
+#: observation/static/observation/js/table.js
+msgid "Scope"
+msgstr "Alcance"

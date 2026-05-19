@@ -6,7 +6,7 @@ from search_gateway.lookup.base import LookupBuilder, clean_text
 
 class FunderLookupBuilder(LookupBuilder):
     key = "funder"
-    default_index_name = "lookup_funder"
+    default_index_name = "silver_lookup_funder"
     source_fields = ["funders.name", "funders.id", "funders.ror"]
     @property
     def mapping(self) -> dict[str, Any]:
@@ -36,7 +36,7 @@ class FunderLookupBuilder(LookupBuilder):
 
     def iter_actions(self, index_name: str) -> Iterable[dict[str, Any]]:
         for action in super().iter_actions(index_name):
-            entry = self.entries[action["_id"]]
+            entry = self.entries[action["_source"]["value"]]
             action["_source"].update(
                 {
                     "funder_id": entry.get("funder_id", ""),

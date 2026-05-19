@@ -7,9 +7,8 @@ from search_gateway.client import get_opensearch_client
 from search_gateway.lookup import (
     DEFAULT_LOOKUPS,
     LOOKUP_BUILDERS,
-    BuildConfig,
-    build_lookup_indices,
 )
+from search_gateway.lookup.base import LookupIndexBuildService
 from search_gateway.option_normalization import clean_text
 from search_gateway.tasks import build_lookup_indices_task
 
@@ -120,27 +119,23 @@ class Command(BaseCommand):
         except Exception as exc:
             raise CommandError(str(exc)) from exc
 
-        config = BuildConfig(
-            source_index=options["source_index"],
-            batch_size=options["batch_size"],
-            max_docs=options["max_docs"],
-            selected_lookups=options["lookups"] or DEFAULT_LOOKUPS.copy(),
-            lookup_index_overrides=lookup_index_overrides,
-            max_items=max_items,
-        )
+        source_index = options["source_index"]
+        batch_size = options["batch_size"]
+        max_docs = options["max_docs"]
+        selected_lookups = options["lookups"] or DEFAULT_LOOKUPS.copy()
 
         if options["enqueue"]:
             result = build_lookup_indices_task.delay(
-                source_index=config.source_index,
-                batch_size=config.batch_size,
-                max_docs=config.max_docs,
-                selected_lookups=config.selected_lookups,
-                lookup_index_overrides=config.lookup_index_overrides,
-                max_items=config.max_items,
+                source_index=source_index,
+                batch_size=batch_size,
+                max_docs=max_docs,
+                selected_lookups=selected_lookups,
+                lookup_index_overrides=lookup_index_overrides,
+                max_items=max_items,
             )
             self.stdout.write(
                 self.style.SUCCESS(
-                    f"Enqueued lookup build task {result.id} for '{config.source_index}'."
+                    f"Enqueued lookup build task {result.id} for '{source_index}'."
                 )
             )
             return
@@ -148,19 +143,25 @@ class Command(BaseCommand):
         client = get_opensearch_client()
 
         try:
-            counts = build_lookup_indices(
-                client,
-                config,
+            counts = LookupIndexBuildService(
+                client=client,
                 lookup_builders=LOOKUP_BUILDERS,
+                source_index=source_index,
+                batch_size=batch_size,
+                selected_lookups=selected_lookups,
+                max_docs=max_docs,
+                lookup_index_overrides=lookup_index_overrides,
+                max_items=max_items,
                 progress=lambda message: self.stdout.write(message),
-            )
+            ).run()
         except Exception as exc:
             raise CommandError(str(exc)) from exc
 
         processed_docs = counts.pop("_processed_docs", 0)
+        errors_by_lookup = counts.pop("_errors", {})
         self.stdout.write(
             self.style.SUCCESS(
-                f"Processed {processed_docs:,} source document(s) from '{config.source_index}'."
+                f"Processed {processed_docs:,} source document(s) from '{source_index}'."
             )
         )
         for lookup_key, indexed_count in counts.items():
@@ -169,3 +170,10 @@ class Command(BaseCommand):
                     f"Indexed {indexed_count:,} document(s) for lookup '{lookup_key}'."
                 )
             )
+            if lookup_key in errors_by_lookup:
+                self.stdout.write(
+                    self.style.WARNING(
+                        f"Lookup '{lookup_key}' finished with "
+                        f"{errors_by_lookup[lookup_key]:,} indexing error(s)."
+                    )
+                )

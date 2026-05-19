@@ -253,7 +253,7 @@ msgstr ""
 #: journal/models.py:24 policy_directory/models.py:126
 #: search_gateway/data_sources_with_settings.py:363 search_gateway/filters.py:5
 msgid "Source"
-msgstr ""
+msgstr "Fonte"
 
 #: article/models.py:85
 msgid "Concept"
@@ -371,7 +371,7 @@ msgstr ""
 #: search_gateway/data_sources_with_settings.py:305 usefulmodels/models.py:189
 #: usefulmodels/wagtail_hooks.py:99
 msgid "Country"
-msgstr ""
+msgstr "País"
 
 #: article/models.py:840
 #, python-format
@@ -1400,7 +1400,7 @@ msgstr ""
 #: search_gateway/data_sources_with_settings.py:1562 usefulmodels/models.py:431
 #: usefulmodels/models.py:466 usefulmodels/wagtail_hooks.py:186
 msgid "Action"
-msgstr ""
+msgstr "Ação"
 
 #: education_directory/models.py:120 event_directory/models.py:119
 #: indicator/templates/filters/soc_prod.html:11
@@ -1993,7 +1993,7 @@ msgstr ""
 #: indicator/templatetags/indicator_filters.py:94
 #: search_gateway/data_sources_with_settings.py:70
 msgid "Scope"
-msgstr ""
+msgstr "Escopo"
 
 #: indicator/models.py:176
 msgid "Measurement"
@@ -2748,7 +2748,7 @@ msgstr ""
 
 #: indicator/templates/menu.html:17 indicator/templates/menu_ranking.html:13
 msgid "Generate"
-msgstr ""
+msgstr "Gerar"
 
 #: indicator/templates/ranking.html:25
 msgid "Ranking Overview"
@@ -4593,3 +4593,87 @@ msgstr "Lista de campos retornados do ES, ex: ['_id', 'title']"
 
 msgid "Fonte de dados OpenSearch associada a esta página de busca."
 msgstr "Fonte de dados OpenSearch associada a esta página de busca."
+
+#: observation/templates/observation/include/table.html
+msgid "Select an observation table"
+msgstr "Selecione uma tabela de observação"
+
+#: observation/templates/observation/include/table.html
+msgid "Use the detail icon next to country name. Use row checkboxes and then Compare selected."
+msgstr "Use o ícone de detalhes ao lado do nome do país. Use as caixas de seleção das linhas e depois Comparar selecionados."
+
+#: observation/templates/observation/include/table.html
+msgid "Processing date"
+msgstr "Data de processamento"
+
+#: observation/templates/observation/include/table.html
+msgid "Table"
+msgstr "Tabela"
+
+#: observation/templates/observation/include/table.html
+msgid "Downloads"
+msgstr "Transferências"
+
+#: observation/templates/observation/include/table.html
+msgid "Compare selected"
+msgstr "Comparar selecionados"
+
+#: observation/templates/observation/include/table.html
+msgid "Download CSV (.csv)"
+msgstr "Transferir CSV (.csv)"
+
+#: observation/templates/observation/include/table.html
+msgid "Rows per page"
+msgstr "Linhas por página"
+
+#: observation/templates/observation/include/table.html
+msgid "Loading table data..."
+msgstr "A carregar dados da tabela..."
+
+#: observation/templates/observation/include/table.html
+msgid "Select or deselect all rows"
+msgstr "Selecionar ou desmarcar todas as linhas"
+
+#: observation/templates/observation/include/table.html
+msgid "Select"
+msgstr "Selecionar"
+
+#: observation/templates/observation/include/table.html
+msgid "Totals"
+msgstr "Totais"
+
+#: observation/templates/observation/include/table.html
+msgid "Rows limit"
+msgstr "Limite de linhas"
+
+#: observation/templates/observation/include/table.html
+msgid "Generate all CSVs"
+msgstr "Gerar todos os CSVs"
+
+#: observation/templates/observation/include/table.html
+msgid "Clear .csv"
+msgstr "Limpar .csv"
+
+#: observation/templates/observation/include/table.html
+msgid "Single file (.csv)"
+msgstr "Ficheiro único (.csv)"
+
+#: observation/templates/observation/include/table.html
+msgid "Jobs are persisted in your browser and can be resumed after reload."
+msgstr "Os trabalhos ficam guardados no navegador e podem ser retomados após recarregar."
+
+#: observation/templates/observation/include/table.html
+msgid "Country details"
+msgstr "Detalhes do país"
+
+#: observation/templates/observation/include/table.html
+msgid "Country comparison"
+msgstr "Comparação de países"
+
+#: observation/templates/observation/include/table.html
+msgid "Documents"
+msgstr "Documentos"
+
+#: observation/templates/observation/include/table.html
+msgid "Clear selection"
+msgstr "Limpar seleção"

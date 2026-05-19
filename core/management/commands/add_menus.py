@@ -220,5 +220,7 @@ class Command(BaseCommand):
         return queryset.first()
 
     def find_child_page(self, parent_page, slug, locale):
-        child = parent_page.get_children().get(locale=locale, slug=slug)
-        return child.specific
+        child = parent_page.get_children().filter(locale=locale, slug=slug).first()
+        if child:
+            return child.specific
+        return None

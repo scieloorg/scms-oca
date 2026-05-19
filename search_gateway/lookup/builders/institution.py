@@ -6,7 +6,7 @@ from search_gateway.lookup.base import LookupBuilder, clean_text
 
 class InstitutionLookupBuilder(LookupBuilder):
     key = "institution"
-    default_index_name = "lookup_institution"
+    default_index_name = "silver_lookup_institution"
     source_fields = [
         "authorships.institutions.name",
         "authorships.institutions.id",
@@ -50,7 +50,7 @@ class InstitutionLookupBuilder(LookupBuilder):
 
     def iter_actions(self, index_name: str) -> Iterable[dict[str, Any]]:
         for action in super().iter_actions(index_name):
-            entry = self.entries[action["_id"]]
+            entry = self.entries[action["_source"]["value"]]
             action["_source"].update(
                 {
                     "institution_id": entry.get("institution_id", ""),

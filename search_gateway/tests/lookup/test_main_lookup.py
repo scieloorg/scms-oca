@@ -6,13 +6,12 @@ from django.test import SimpleTestCase, override_settings
 
 from search_gateway.lookup import (
     LOOKUP_BUILDERS,
-    BuildConfig,
     InstitutionLookupBuilder,
     LookupBuilder,
     PublisherLookupBuilder,
     SourceLookupBuilder,
-    build_lookup_indices,
 )
+from search_gateway.lookup.base import LookupIndexBuildService
 from search_gateway.models import ResolvedField
 from search_gateway.query import build_lookup_hits_body
 from search_gateway.response_parser import parse_lookup_hits
@@ -29,7 +28,7 @@ class LookupBuilderTests(SimpleTestCase):
     def test_publisher_accepts_missing_id_and_counts_once_per_document(self):
         builder = PublisherLookupBuilder()
         source = {
-            "sources": [{"type": "journal"}],
+            "source": [{"type": "journal"}],
             "publishers": [
                 {"name": "SciELO"},
                 {"name": "SciELO"},
@@ -37,7 +36,7 @@ class LookupBuilderTests(SimpleTestCase):
         }
 
         builder.collect(source)
-        builder.collect({"sources": {"type": "journal"}, "publishers": [{"name": "SciELO"}]})
+        builder.collect({"source": {"type": "journal"}, "publishers": [{"name": "SciELO"}]})
 
         actions = list(builder.iter_actions("lookup_publisher"))
 
@@ -50,7 +49,7 @@ class LookupBuilderTests(SimpleTestCase):
         builder = PublisherLookupBuilder()
         builder.collect(
             {
-                "sources": [{"type": "journal"}],
+                "source": [{"type": "journal"}],
                 "publishers": [{"id": "https://openalex.org/P1", "name": "Elsevier BV"}],
             }
         )
@@ -103,8 +102,8 @@ class LookupBuilderTests(SimpleTestCase):
 
     def test_source_accepts_sources_as_list_or_object(self):
         builder = SourceLookupBuilder()
-        builder.collect({"sources": {"id": "j1", "title": "Journal One", "type": "journal"}})
-        builder.collect({"sources": [{"id": "j1", "title": "Journal One", "type": "journal"}]})
+        builder.collect({"source": {"ids": {"openalex": "j1"}, "title": "Journal One", "type": "journal"}})
+        builder.collect({"source": [{"ids": {"openalex": "j1"}, "title": "Journal One", "type": "journal"}]})
 
         actions = list(builder.iter_actions("lookup_source"))
 
@@ -172,7 +171,7 @@ class BuildLookupCommandTests(SimpleTestCase):
         client = Mock()
         client.ping.return_value = True
         client.indices.exists.return_value = False
-        config = BuildConfig(
+        config = dict(
             source_index="scientific_production",
             batch_size=100,
             max_docs=None,
@@ -182,9 +181,146 @@ class BuildLookupCommandTests(SimpleTestCase):
         )
 
         with self.assertRaisesMessage(ValueError, "Source index or alias 'scientific_production' does not exist"):
-            build_lookup_indices(client, config, LOOKUP_BUILDERS)
+            LookupIndexBuildService(client=client, lookup_builders=LOOKUP_BUILDERS, **config).run()
 
-    @patch("search_gateway.management.commands.build_lookup_indices.build_lookup_indices")
+    def test_build_service_rejects_existing_target_index_before_creating_any_index(self):
+        client = Mock()
+        client.ping.return_value = True
+        client.indices.exists.side_effect = lambda index: index in {
+            "scientific_production",
+            "silver_lookup_publisher",
+        }
+        config = dict(
+            source_index="scientific_production",
+            batch_size=100,
+            max_docs=None,
+            selected_lookups=["source", "publisher"],
+            lookup_index_overrides={},
+            max_items={},
+        )
+
+        with self.assertRaisesMessage(ValueError, "Target lookup index 'silver_lookup_publisher' already exists"):
+            LookupIndexBuildService(client=client, lookup_builders=LOOKUP_BUILDERS, **config).run()
+
+        client.indices.create.assert_not_called()
+
+    def test_build_service_rejects_duplicate_target_index_names(self):
+        client = Mock()
+        config = dict(
+            source_index="scientific_production",
+            batch_size=100,
+            max_docs=None,
+            selected_lookups=["source", "publisher"],
+            lookup_index_overrides={"source": "lookup_shared", "publisher": "lookup_shared"},
+            max_items={},
+        )
+
+        with self.assertRaisesMessage(ValueError, "target the same index 'lookup_shared'"):
+            LookupIndexBuildService(client=client, lookup_builders=LOOKUP_BUILDERS, **config).run()
+
+        client.ping.assert_not_called()
+        client.indices.create.assert_not_called()
+
+    @patch("search_gateway.lookup.base.streaming_bulk")
+    @patch("search_gateway.lookup.base.scan")
+    def test_build_service_verifies_index_count_after_bulk(self, scan_mock, streaming_bulk_mock):
+        client = Mock()
+        client.ping.return_value = True
+        client.indices.exists.side_effect = lambda index: index == "scientific_production"
+        client.count.return_value = {"count": 1}
+        scan_mock.return_value = [
+            {
+                "_source": {
+                    "source": [{"type": "journal"}],
+                    "publishers": [{"name": "SciELO"}],
+                }
+            }
+        ]
+        streaming_bulk_mock.return_value = [(True, {"index": {"_id": "SciELO"}})]
+        config = dict(
+            source_index="scientific_production",
+            batch_size=100,
+            max_docs=None,
+            selected_lookups=["publisher"],
+            lookup_index_overrides={},
+            max_items={},
+        )
+
+        counts = LookupIndexBuildService(client=client, lookup_builders=LOOKUP_BUILDERS, **config).run()
+
+        self.assertEqual(counts["publisher"], 1)
+        client.indices.refresh.assert_called_once_with(index="silver_lookup_publisher")
+        client.count.assert_called_once_with(index="silver_lookup_publisher")
+
+    @patch("search_gateway.lookup.base.streaming_bulk")
+    @patch("search_gateway.lookup.base.scan")
+    def test_build_service_raises_when_index_count_does_not_match_bulk(self, scan_mock, streaming_bulk_mock):
+        client = Mock()
+        client.ping.return_value = True
+        client.indices.exists.side_effect = lambda index: index == "scientific_production"
+        client.count.return_value = {"count": 0}
+        scan_mock.return_value = [
+            {
+                "_source": {
+                    "source": [{"type": "journal"}],
+                    "publishers": [{"name": "SciELO"}],
+                }
+            }
+        ]
+        streaming_bulk_mock.return_value = [(True, {"index": {"_id": "SciELO"}})]
+        config = dict(
+            source_index="scientific_production",
+            batch_size=100,
+            max_docs=None,
+            selected_lookups=["publisher"],
+            lookup_index_overrides={},
+            max_items={},
+        )
+
+        with self.assertRaisesMessage(ValueError, "count mismatch after refresh"):
+            LookupIndexBuildService(client=client, lookup_builders=LOOKUP_BUILDERS, **config).run()
+
+    @patch("search_gateway.lookup.base.streaming_bulk")
+    @patch("search_gateway.lookup.base.scan")
+    def test_build_service_reports_partial_bulk_errors(self, scan_mock, streaming_bulk_mock):
+        client = Mock()
+        client.ping.return_value = True
+        client.indices.exists.side_effect = lambda index: index == "scientific_production"
+        client.count.return_value = {"count": 0}
+        scan_mock.return_value = [
+            {
+                "_source": {
+                    "source": [{"type": "journal"}],
+                    "publishers": [{"name": "SciELO"}],
+                }
+            }
+        ]
+        streaming_bulk_mock.return_value = [
+            (False, {"index": {"_id": "SciELO", "error": "mapping error"}})
+        ]
+        config = dict(
+            source_index="scientific_production",
+            batch_size=100,
+            max_docs=None,
+            selected_lookups=["publisher"],
+            lookup_index_overrides={},
+            max_items={},
+        )
+
+        counts = LookupIndexBuildService(client=client, lookup_builders=LOOKUP_BUILDERS, **config).run()
+
+        self.assertEqual(counts["publisher"], 0)
+        self.assertEqual(counts["_errors"]["publisher"], 1)
+        client.index.assert_called_once()
+        error_body = client.index.call_args.kwargs["body"]
+        self.assertEqual(error_body["component"], "search_gateway.lookup")
+        self.assertEqual(error_body["context"]["lookup_key"], "publisher")
+        self.assertEqual(error_body["context"]["error_count"], 1)
+        self.assertEqual(error_body["context"]["sample_errors"][0]["error"], "mapping error")
+        client.indices.delete.assert_not_called()
+
+
+    @patch("search_gateway.management.commands.build_lookup_indices.LookupIndexBuildService")
     @patch("search_gateway.management.commands.build_lookup_indices.get_opensearch_client")
     def test_command_validates_batch_size(self, get_client_mock, build_mock):
         with self.assertRaises(CommandError):
@@ -203,6 +339,8 @@ class BuildLookupCommandTests(SimpleTestCase):
             "scientific_production",
             "--lookup",
             "source",
+            "--batch-size",
+            "500",
             "--lookup-index",
             "source=lookup_source_v2",
             "--enqueue",

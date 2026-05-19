@@ -8,12 +8,13 @@ from search_gateway.option_normalization import normalize_text
 class LookupBuilderNormalizationTests(SimpleTestCase):
     def test_lookup_builder_mapping_configuration(self):
         mapping = LookupBuilder.build_mapping()
+        properties = mapping["mappings"]["properties"]
         
         analyzer_config = mapping['settings']['analysis']['analyzer']
         multilingual_filter = analyzer_config['multilingual']['filter']
         
         # Verify that asciifolding is not present in the filter
-        self.assertNotIn('asciifolding', multilingual_filter)
+        self.assertIn('asciifolding', multilingual_filter)
         
         # Verify that lowercase is still present
         self.assertIn('lowercase', multilingual_filter)
@@ -23,6 +24,8 @@ class LookupBuilderNormalizationTests(SimpleTestCase):
                          getattr(settings, 'SEARCH_GATEWAY_LOOKUP_NUMBER_OF_SHARDS', 5))
         self.assertEqual(mapping['settings']['index']['number_of_replicas'], 
                          getattr(settings, 'SEARCH_GATEWAY_LOOKUP_NUMBER_OF_REPLICAS', 0))
+        self.assertEqual(properties["label"]["copy_to"], "label_search")
+        self.assertEqual(properties["label_search"]["type"], "search_as_you_type")
 
     def test_normalized_values_preserve_accents_and_capitalization(self):
         test_cases = [
@@ -89,9 +92,9 @@ class LookupBuilderNormalizationTests(SimpleTestCase):
         for value, label in test_entries:
             result = builder.add_entry(value, label, set())
             if result:
-                # Verify that normalized_value and label_search are the same after normalization
-                self.assertEqual(result['normalized_value'], result['label_search'])
-                
                 # Verify that normalization preserves capitalization and accents
                 expected_normalized = normalize_text(label)
                 self.assertEqual(result['normalized_value'], expected_normalized)
+
+        action = list(builder.iter_actions("test_index"))[0]
+        self.assertNotIn("label_search", action["_source"])

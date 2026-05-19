@@ -1,0 +1,217 @@
+[
+    {
+        "model": "etl.etlpipelineconfig",
+        "fields": {
+            "name": "article",
+            "enabled": true,
+            "input_index": "bronze_scielo_articles*",
+            "input_document_kind": "article",
+            "default_document_type": "article",
+            "infer_document_type_from_payload": true,
+            "deduplicate_scielo": true,
+            "openalex_index": "raw_openalex_works",
+            "rules": {
+                "scielo_dedup_strategies": ["doi", "pid", "fuzzy"],
+                "openalex_match_strategies": ["doi", "isbn", "title"],
+                "doi_requires_title_overlap": true,
+                "pid_requires_year_match": true,
+                "pid_requires_source_match": true,
+                "pid_requires_title_overlap": true,
+                "fuzzy_min_similarity": 0.85,
+                "fuzzy_year_tolerance": 1,
+                "fuzzy_requires_source_match": true,
+                "openalex_validation": {
+                    "year_tolerance": 1,
+                    "require_openalex_year": true,
+                    "require_source_match": false,
+                    "source_similarity_threshold": 0.80,
+                    "title_match_threshold": 0.85,
+                    "title_reject_threshold": 0.80,
+                    "min_score": 50,
+                    "strict_min_score": 60,
+                    "doi_score": 50,
+                    "year_exact_score": 30,
+                    "year_close_score": 20,
+                    "isbn_score": 35,
+                    "source_id_score": 40,
+                    "source_title_score": 30,
+                    "title_score": 30,
+                    "isbn_requires_title_match": false,
+                    "isbn_title_threshold": 0.80
+                }
+            }
+        }
+    },
+    {
+        "model": "etl.etlpipelineconfig",
+        "fields": {
+            "name": "book",
+            "enabled": true,
+            "input_index": "bronze_scielo_books",
+            "input_document_kind": "book",
+            "default_document_type": "book",
+            "infer_document_type_from_payload": true,
+            "deduplicate_scielo": false,
+            "openalex_index": "raw_openalex_works",
+            "rules": {
+                "scielo_dedup_strategies": [],
+                "openalex_match_strategies": ["doi", "isbn", "title"],
+                "doi_requires_title_overlap": true,
+                "pid_requires_year_match": true,
+                "pid_requires_source_match": false,
+                "pid_requires_title_overlap": true,
+                "fuzzy_min_similarity": 0.88,
+                "fuzzy_year_tolerance": 1,
+                "fuzzy_requires_source_match": false,
+                "openalex_validation": {
+                    "year_tolerance": 1,
+                    "require_openalex_year": true,
+                    "require_source_match": false,
+                    "source_similarity_threshold": 0.80,
+                    "title_match_threshold": 0.85,
+                    "title_reject_threshold": 0.80,
+                    "min_score": 50,
+                    "strict_min_score": 60,
+                    "doi_score": 50,
+                    "year_exact_score": 30,
+                    "year_close_score": 20,
+                    "isbn_score": 35,
+                    "source_id_score": 40,
+                    "source_title_score": 30,
+                    "title_score": 30,
+                    "isbn_requires_title_match": false,
+                    "isbn_title_threshold": 0.80
+                }
+            }
+        }
+    },
+    {
+        "model": "etl.etlpipelineconfig",
+        "fields": {
+            "name": "book-chapter",
+            "enabled": true,
+            "input_index": "bronze_scielo_books",
+            "input_document_kind": "book",
+            "default_document_type": "book-chapter",
+            "infer_document_type_from_payload": true,
+            "deduplicate_scielo": false,
+            "openalex_index": "raw_openalex_works",
+            "rules": {
+                "scielo_dedup_strategies": [],
+                "openalex_match_strategies": ["doi", "isbn", "title"],
+                "doi_requires_title_overlap": true,
+                "pid_requires_year_match": true,
+                "pid_requires_source_match": false,
+                "pid_requires_title_overlap": true,
+                "fuzzy_min_similarity": 0.90,
+                "fuzzy_year_tolerance": 1,
+                "fuzzy_requires_source_match": false,
+                "openalex_validation": {
+                    "year_tolerance": 1,
+                    "require_openalex_year": true,
+                    "require_source_match": false,
+                    "source_similarity_threshold": 0.80,
+                    "title_match_threshold": 0.85,
+                    "title_reject_threshold": 0.80,
+                    "min_score": 50,
+                    "strict_min_score": 60,
+                    "doi_score": 50,
+                    "year_exact_score": 30,
+                    "year_close_score": 20,
+                    "isbn_score": 35,
+                    "source_id_score": 40,
+                    "source_title_score": 30,
+                    "title_score": 30,
+                    "isbn_requires_title_match": true,
+                    "isbn_title_threshold": 0.80
+                }
+            }
+        }
+    },
+    {
+        "model": "etl.etlpipelineconfig",
+        "fields": {
+            "name": "preprint",
+            "enabled": true,
+            "input_index": "bronze_scielo_preprint",
+            "input_document_kind": "preprint",
+            "default_document_type": "preprint",
+            "infer_document_type_from_payload": false,
+            "deduplicate_scielo": false,
+            "openalex_index": "raw_openalex_works",
+            "rules": {
+                "scielo_dedup_strategies": [],
+                "openalex_match_strategies": ["doi", "title"],
+                "doi_requires_title_overlap": true,
+                "pid_requires_year_match": true,
+                "pid_requires_source_match": false,
+                "pid_requires_title_overlap": true,
+                "fuzzy_min_similarity": 0.88,
+                "fuzzy_year_tolerance": 1,
+                "fuzzy_requires_source_match": false,
+                "openalex_validation": {
+                    "year_tolerance": 1,
+                    "require_openalex_year": true,
+                    "require_source_match": false,
+                    "source_similarity_threshold": 0.80,
+                    "title_match_threshold": 0.88,
+                    "title_reject_threshold": 0.82,
+                    "min_score": 50,
+                    "strict_min_score": 60,
+                    "doi_score": 50,
+                    "year_exact_score": 30,
+                    "year_close_score": 20,
+                    "isbn_score": 35,
+                    "source_id_score": 40,
+                    "source_title_score": 30,
+                    "title_score": 30,
+                    "isbn_requires_title_match": false,
+                    "isbn_title_threshold": 0.80
+                }
+            }
+        }
+    },
+    {
+        "model": "etl.etlpipelineconfig",
+        "fields": {
+            "name": "dataset",
+            "enabled": true,
+            "input_index": "bronze_scielo_dataset",
+            "input_document_kind": "dataset",
+            "default_document_type": "dataset",
+            "infer_document_type_from_payload": false,
+            "deduplicate_scielo": false,
+            "openalex_index": "raw_openalex_works",
+            "rules": {
+                "scielo_dedup_strategies": [],
+                "openalex_match_strategies": ["doi"],
+                "doi_requires_title_overlap": true,
+                "pid_requires_year_match": true,
+                "pid_requires_source_match": false,
+                "pid_requires_title_overlap": true,
+                "fuzzy_min_similarity": 0.95,
+                "fuzzy_year_tolerance": 0,
+                "fuzzy_requires_source_match": false,
+                "openalex_validation": {
+                    "year_tolerance": 1,
+                    "require_openalex_year": true,
+                    "require_source_match": false,
+                    "source_similarity_threshold": 0.80,
+                    "title_match_threshold": 0.90,
+                    "title_reject_threshold": 0.85,
+                    "min_score": 60,
+                    "strict_min_score": 70,
+                    "doi_score": 50,
+                    "year_exact_score": 30,
+                    "year_close_score": 20,
+                    "isbn_score": 35,
+                    "source_id_score": 40,
+                    "source_title_score": 30,
+                    "title_score": 30,
+                    "isbn_requires_title_match": false,
+                    "isbn_title_threshold": 0.80
+                }
+            }
+        }
+    }
+]

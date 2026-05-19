@@ -1,0 +1,61 @@
+{% extends "wagtailadmin/generic/listing.html" %}
+
+{% block listing %}
+<div id="listing-results">
+    <table class="listing">
+        <thead>
+            <tr>
+                <th>Type</th>
+                <th>Total</th>
+                <th>Pending</th>
+                <th>Processing</th>
+                <th>Success</th>
+                <th>Failed</th>
+                <th>Skipped</th>
+                <th>SciELO dedup</th>
+                <th>OpenAlex match</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in stats.by_type_rows %}
+                <tr>
+                    <td>
+                        <a href="{{ list_url }}?document_type={{ row.key }}">
+                            {{ row.label }}
+                        </a>
+                    </td>
+                    <td>{{ row.total }}</td>
+                    <td>{{ row.pending }}</td>
+                    <td>{{ row.processing }}</td>
+                    <td>{{ row.success }}</td>
+                    <td>{{ row.failed }}</td>
+                    <td>{{ row.skipped }}</td>
+                    <td>{{ row.scielo_dedup }}</td>
+                    <td>{{ row.openalex }}</td>
+                    <td>
+                        <div style="display:flex; flex-direction:column; gap:4px;">
+                            <form method="post" action="{{ trigger_pending_by_type_url }}">
+                                {% csrf_token %}
+                                <input type="hidden" name="type" value="{{ row.key }}">
+                                <button type="submit" class="button button-small button-secondary" title="Process pending items for {{ row.label }}"
+                                        onclick="return confirm('Process pending items for {{ row.label|escapejs }}?')">
+                                    Run Pending
+                                </button>
+                            </form>
+                            <form method="post" action="{{ retry_failed_by_type_url }}">
+                                {% csrf_token %}
+                                <input type="hidden" name="type" value="{{ row.key }}">
+                                <button type="submit" class="button button-small button-secondary" title="Retry failed items for {{ row.label }}"
+                                        onclick="return confirm('Retry failed items for {{ row.label|escapejs }}?')">
+                                    Retry Failed
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

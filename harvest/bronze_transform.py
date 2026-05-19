@@ -4,9 +4,13 @@ Utiliza scripts Painless configurados via interface.
 """
 import json
 import logging
-from typing import Any, Optional
 
+from django.utils import timezone
+from etl.models import EtlPipelineConfig
+from etl.services import enqueue_etl_item
 from search_gateway.client import get_opensearch_client
+
+from .utils import source_hash
 
 logger = logging.getLogger(__name__)
 
@@ -161,8 +165,41 @@ def transform_document(script, identifier=None):
         error_context=str(identifier),
     )
     if result.get("status") == "success":
+        _enqueue_transformed_bronze(script.dest_index, identifier)
         result["message"] = f"Documento {identifier} transformado: {result.get('message', '')}"
     return result
+
+
+def _enqueue_transformed_bronze(index_name, identifier):
+    try:
+        response = client.get(index=index_name, id=identifier)
+        source = response.get("_source") or {}
+        if not EtlPipelineConfig.objects.select_for_source(index_name, source):
+            return
+        payload_hash = source_hash(source)
+        client.update(
+            index=index_name,
+            id=identifier,
+            body={
+                "doc": {
+                    "oca_indexed_at": timezone.now().isoformat(),
+                    "oca_source_hash": payload_hash,
+                }
+            },
+            refresh=False,
+        )
+        enqueue_etl_item(
+            source_index=index_name,
+            external_id=identifier,
+            source_payload=source,
+        )
+    except Exception as exc:
+        logger.warning(
+            "Falha ao enfileirar ETL silver para %s/%s: %s",
+            index_name,
+            identifier,
+            exc,
+        )
 
 
 def transform_after_indexing(instance, model_name):

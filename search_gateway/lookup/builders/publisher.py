@@ -6,8 +6,8 @@ from search_gateway.lookup.base import LookupBuilder, clean_text
 
 class PublisherLookupBuilder(LookupBuilder):
     key = "publisher"
-    default_index_name = "lookup_publisher"
-    source_fields = ["sources.type", "publishers.name", "publishers.id"]
+    default_index_name = "silver_lookup_publisher"
+    source_fields = ["source.type", "publishers.name", "publishers.id"]
     @property
     def mapping(self) -> dict[str, Any]:
         return self.build_mapping({"publisher_id": {"type": "keyword"}})
@@ -15,7 +15,7 @@ class PublisherLookupBuilder(LookupBuilder):
     def collect(self, source: dict[str, Any], max_items: int | None = None) -> None:
         if not any(
             clean_text(src.get("type")).lower() == "journal"
-            for src in self.iter_objects(source.get("sources"))
+            for src in self.iter_objects(source.get("source"))
         ):
             return
 
@@ -32,6 +32,6 @@ class PublisherLookupBuilder(LookupBuilder):
 
     def iter_actions(self, index_name: str) -> Iterable[dict[str, Any]]:
         for action in super().iter_actions(index_name):
-            entry = self.entries[action["_id"]]
+            entry = self.entries[action["_source"]["value"]]
             action["_source"].update({"publisher_id": entry.get("publisher_id", "")})
             yield action

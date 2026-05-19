@@ -131,9 +131,11 @@ LOCAL_APPS = [
     "journal",
     "chart",
     "search_gateway",
+    "etl",
     "harvest",
     "observation",
     'wagtail_json_widget',
+    "indicator_journal",
 ]
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
@@ -485,13 +487,73 @@ HARVEST_UPLOAD_BULK_CHUNK_SIZE = env.int(
 # OpenSearch Index Names
 OP_INDEX_SOCIAL_PRODUCTION = env.str("OP_INDEX_SOCIAL_PRODUCTION", "social_production")
 OP_INDEX_SCIENTIFIC_PRODUCTION = env.str("OP_INDEX_SCIENTIFIC_PRODUCTION", "scientific_production")
+
+# SearchGateway Settings
 SEARCH_GATEWAY_LOOKUP_SOURCE_INDEX = env.str(
     "SEARCH_GATEWAY_LOOKUP_SOURCE_INDEX",
     OP_INDEX_SCIENTIFIC_PRODUCTION,
 )
-SEARCH_GATEWAY_LOOKUP_BATCH_SIZE = env.int("SEARCH_GATEWAY_LOOKUP_BATCH_SIZE", 500)
+SEARCH_GATEWAY_LOOKUP_BATCH_SIZE = env.int("SEARCH_GATEWAY_LOOKUP_BATCH_SIZE", 10000)
 SEARCH_GATEWAY_LOOKUP_NUMBER_OF_SHARDS = env.int("SEARCH_GATEWAY_LOOKUP_NUMBER_OF_SHARDS", 5)
 SEARCH_GATEWAY_LOOKUP_NUMBER_OF_REPLICAS = env.int("SEARCH_GATEWAY_LOOKUP_NUMBER_OF_REPLICAS", 0)
+SEARCH_GATEWAY_ERROR_INDEX = env.str("SEARCH_GATEWAY_ERROR_INDEX", "search_gateway_errors")
+
+# ETL Settings
+ETL_PUBLIC_ALIAS = env.str("ETL_PUBLIC_ALIAS", "silver_scientific_production")
+ETL_ERROR_INDEX = env.str("ETL_ERROR_INDEX", "etl_errors")
+ETL_DEFAULT_BATCH_SIZE = env.int("ETL_DEFAULT_BATCH_SIZE", 5000)
+ETL_DB_CONNECTION_REFRESH_INTERVAL = env.int("ETL_DB_CONNECTION_REFRESH_INTERVAL", 100)
+ETL_DOCUMENT_TYPE_ALIAS = env.json(
+    "ETL_DOCUMENT_TYPE_ALIAS",
+    default={
+        "research-article": "article",
+        "review": "article",
+        "review-article": "article",
+        "abstract": "article",
+        "addendum": "article",
+        "article-commentary": "article",
+        "book-review": "article",
+        "brief-report": "article",
+        "case-report": "article",
+        "letter": "article",
+        "editorial": "article",
+        "correction": "article",
+        "erratum": "article",
+        "news": "article",
+        "oration": "article",
+        "press-release": "article",
+        "rapid-communication": "article",
+        "undefined": "article",
+        "book-part": "book-chapter",
+        "chapter": "book-chapter",
+    },
+)
+ETL_OPENACCESS_STATUSES = env.json(
+    "ETL_OPENACCESS_STATUSES",
+    default={
+        "gold",
+        "green",
+        "hybrid",
+        "bronze",
+        "closed",
+        "diamond"
+     })
+
+# ETL Bronze Index Names
+ETL_INPUT_SCIELO_ARTICLES = env.str("ETL_INPUT_SCIELO_ARTICLES", "bronze_scielo_articles-000001")
+ETL_INPUT_SCIELO_BOOKS = env.str("ETL_INPUT_SCIELO_BOOKS", "bronze_scielo_books")
+ETL_INPUT_SCIELO_PREPRINT = env.str("ETL_INPUT_SCIELO_PREPRINT", "bronze_scielo_preprint")
+ETL_INPUT_SCIELO_DATASET = env.str("ETL_INPUT_SCIELO_DATASET", "bronze_scielo_dataset")
+ETL_INPUT_OPENALEX_WORKS = env.str("ETL_INPUT_OPENALEX_WORKS", "raw_openalex_works")
+
+# ETL Silver Index Pattern
+ETL_SILVER_INDEX_PATTERN = env.str("ETL_SILVER_INDEX_PATTERN", "silver_scientific_production")
+ETL_SILVER_WRITE_ALIAS = env.str("ETL_SILVER_WRITE_ALIAS", "silver_write")
+ETL_SILVER_ROLLOVER_MAX_SIZE = env.str("ETL_SILVER_ROLLOVER_MAX_SIZE", default="30gb")
+
+# ETL OpenAlex-only Backfill
+ETL_OPENALEX_ONLY_INDEX_PATTERN = env.str("ETL_OPENALEX_ONLY_INDEX_PATTERN", "silver_openalex")
+ETL_OPENALEX_ONLY_WRITE_ALIAS = env.str("ETL_OPENALEX_ONLY_WRITE_ALIAS", "silver_openalex_write")
 
 # OpenSearch Raw Index Names
 OS_INDEX_RAW_PREPRINT = env.str("OS_INDEX_RAW_PREPRINT", "raw_scielo_preprint")

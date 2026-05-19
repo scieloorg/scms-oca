@@ -91,6 +91,7 @@ class TransformationScriptAdmin(ModelAdmin):
 class HarvestModelAdminGroup(ModelAdminGroup):
     menu_label = "Harvest"
     menu_icon = "download"
+    menu_order = 84
     items = (
         HarvestedPreprintAdmin,
         HarvestedSciELODataAdmin,
