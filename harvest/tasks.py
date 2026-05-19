@@ -2,6 +2,7 @@ import logging
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.core.files.storage import default_storage
 
 from config import celery_app
 from harvest.exception_logs import ExceptionContext
@@ -13,6 +14,7 @@ from harvest.harvests.harvest_books import (
 from harvest.harvests.harvest_data import harvest_data, harvest_single_scielo_data
 from harvest.harvests.harvest_preprint import harvest_preprint
 from harvest.indexing import index_harvested_instance
+from harvest.upload_indexing import index_file_obj
 
 from .models import (
     HarvestedBooks,
@@ -208,3 +210,30 @@ def reindex_failed_scielo_data(user_id=None):
     failed = HarvestedSciELOData.objects.filter(index_status=IndexStatus.FAILED)
     for obj in failed.iterator():
         index_harvested_instance(instance=obj, index_name=obj.index_name)
+
+
+@celery_app.task(name="Harvest upload OpenSearch")
+def import_harvest_upload_opensearch(storage_path, file_name, index_name=None, chunk_size=None):
+    try:
+        with default_storage.open(storage_path, "rb") as file_obj:
+            stats = index_file_obj(
+                file_obj=file_obj,
+                file_name=file_name,
+                index_name=index_name
+            )
+        logging.info(
+            "Upload harvest indexado em %s: %s linhas lidas, %s indexadas, %s falhas.",
+            index_name or settings.HARVEST_UPLOAD_OPENSEARCH_INDEX,
+            stats.rows_read,
+            stats.indexed,
+            stats.failed,
+        )
+        return {
+            "rows_read": stats.rows_read,
+            "indexed": stats.indexed,
+            "failed": stats.failed,
+            "errors": stats.errors,
+        }
+    finally:
+        if default_storage.exists(storage_path):
+            default_storage.delete(storage_path)
