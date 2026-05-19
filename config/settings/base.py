@@ -543,6 +543,10 @@ ETL_SILVER_INDEX_PATTERN = env.str("ETL_SILVER_INDEX_PATTERN", "silver_scientifi
 ETL_SILVER_WRITE_ALIAS = env.str("ETL_SILVER_WRITE_ALIAS", "silver_write")
 ETL_SILVER_ROLLOVER_MAX_SIZE = env.str("ETL_SILVER_ROLLOVER_MAX_SIZE", default="30gb")
 
+# ETL OpenAlex-only Backfill
+ETL_OPENALEX_ONLY_INDEX_PATTERN = env.str("ETL_OPENALEX_ONLY_INDEX_PATTERN", "silver_openalex")
+ETL_OPENALEX_ONLY_WRITE_ALIAS = env.str("ETL_OPENALEX_ONLY_WRITE_ALIAS", "silver_openalex_write")
+
 # OpenSearch Raw Index Names
 OS_INDEX_RAW_PREPRINT = env.str("OS_INDEX_RAW_PREPRINT", "raw_scielo_preprint")
 OS_INDEX_RAW_BOOK = env.str("OS_INDEX_RAW_BOOK", "raw_scielo_book")
