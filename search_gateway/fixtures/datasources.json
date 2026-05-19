@@ -751,6 +751,21 @@
               "group_order": 0
             }
           },
+          "collection": {
+            "kind": "index",
+            "index_field_name": "oca_data.scielo.collection",
+            "filter": {
+              "size": 100,
+              "order": { "_key": "asc" }
+            },
+            "settings": {
+              "label": "SciELO Collection",
+              "widget": "select",
+              "multiple_selection": true,
+              "group": "coverage",
+              "group_order": 0
+            }
+          },
 
           "publication_year": {
             "kind": "index",
@@ -1248,6 +1263,7 @@
                 { "value": "scope", "label": "Dataset Coverage" },
                 { "value": "source_indexed_in", "label": "Indexed In (OpenAlex)" },
                 { "value": "source_scielo_indexed_in", "label": "Indexed In (SciELO)" },
+                { "value": "collection", "label": "SciELO Collection" },
                 { "value": "document_type", "label": "Document Type" },
                 { "value": "document_language", "label": "Document Language" },
                 { "value": "open_access", "label": "Open Access" },
@@ -1281,6 +1297,7 @@
               "scope",
               "source_indexed_in",
               "source_scielo_indexed_in",
+              "collection",
 
               "publication_year",
               "document_type",
@@ -1366,6 +1383,7 @@
               "scope",
               "source_indexed_in",
               "source_scielo_indexed_in",
+              "collection",
 
               "publication_year",
               "document_type",
