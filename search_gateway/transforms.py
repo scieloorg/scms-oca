@@ -51,11 +51,70 @@ def _get_category_level_display(value):
     }.get(clean_text(value).lower(), value)
 
 
+def _get_scielo_collection_display(value):
+    return {
+        "arg": _("Argentina"),
+        "bol": _("Bolivia"),
+        "chl": _("Chile"),
+        "cic": _("Science and Culture"),
+        "col": _("Colombia"),
+        "cri": _("Costa Rica"),
+        "cub": _("Cuba"),
+        "dom": _("Dominican Republic"),
+        "ecu": _("Ecuador"),
+        "esp": _("Spain"),
+        "mex": _("Mexico"),
+        "per": _("Peru"),
+        "prt": _("Portugal"),
+        "pry": _("Paraguay"),
+        "psi": _("PEPSIC"),
+        "rve": _("REVENF"),
+        "scl": _("Brazil"),
+        "spa": _("Public Health"),
+        "sza": _("South Africa"),
+        "ury": _("Uruguay"),
+        "ven": _("Venezuela"),
+        "wid": _("West Indies"),
+    }.get(clean_text(value).lower(), value)
+
+
+def _get_scope_display(value):
+    return {
+        "openalex": "OpenAlex",
+        "scielo": "SciELO",
+    }.get(clean_text(value).lower(), value)
+
+
+def _get_document_type_display(value):
+    return {
+        "article": _("Article"),
+        "book": _("Book"),
+        "book-chapter": _("Book chapter"),
+        "dataset": _("Dataset"),
+        "preprint": _("Preprint"),
+    }.get(clean_text(value).lower(), value)
+
+
+def _get_source_type_display(value):
+    return {
+        "book": _("Book"),
+        "book series": _("Book series"),
+        "conference": _("Conference"),
+        "ebook platform": _("eBook platform"),
+        "journal": _("Journal"),
+        "repository": _("Repository"),
+    }.get(clean_text(value).lower(), value)
+
+
 TRANSFORMS = {
     "language": _get_language_name,
     "country": _get_country_name,
     "boolean": _get_boolean_display,
     "category_level": _get_category_level_display,
+    "scielo_collection": _get_scielo_collection_display,
+    "scope": _get_scope_display,
+    "document_type": _get_document_type_display,
+    "source_type": _get_source_type_display,
 }
 
 
