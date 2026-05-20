@@ -5,15 +5,15 @@
 {% block item_title_href %}
     {% if doc.source.content_url|first %}
         {{ doc.source.content_url|first }}
-    {% elif doc.source.locations and doc.source.locations.0.landing_page_url %}
-        {{ doc.source.locations.0.landing_page_url }}
+    {% elif doc.source.source.landing_page_url %}
+        {{ doc.source.source.landing_page_url }}
     {% else %}
         {{ pageurl }}
     {% endif %}
 {% endblock %}
 
 {% block item_footer %}
-    {% firstof doc.source.ids.doi doc.source.primary_location.doi as display_doi %}
+    {% firstof doc.source.ids.doi as display_doi %}
     <div class="result-card__footer">
         <div class="result-card__actions">
             {% block item_footer_actions %}
