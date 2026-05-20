@@ -23,7 +23,8 @@
               "widget": "select",
               "multiple_selection": true,
               "group": "scope",
-              "group_order": 0
+              "group_order": 0,
+              "display_transform": "scope"
             }
           },
           "source_indexed_in": {
@@ -716,7 +717,8 @@
               "widget": "select",
               "multiple_selection": true,
               "group": "coverage",
-              "group_order": 0
+              "group_order": 0,
+              "display_transform": "scope"
             }
           },
           "source_indexed_in": {
