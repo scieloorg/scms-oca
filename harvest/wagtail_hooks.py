@@ -4,18 +4,17 @@ from django.urls import path, reverse
 from django.utils.translation import gettext as _
 from wagtail import hooks
 from wagtail.admin import messages
-from wagtail.admin.menu import MenuItem
 from wagtail_modeladmin.helpers import ButtonHelper
 from wagtail_modeladmin.options import (
     ModelAdmin,
     ModelAdminGroup,
     modeladmin_register,
 )
-from wagtail_modeladmin.views import CreateView
+from wagtail_modeladmin.views import CreateView, EditView
 
-from . import views
 from .bronze_transform import transform_document
 from .models import (
+    GlobalMetricsUploadFile,
     HarvestedBooks,
     HarvestedPreprint,
     HarvestedSciELOData,
@@ -56,6 +55,18 @@ class TransformationScriptCreateView(CreateView):
         return HttpResponseRedirect(self.get_success_url())
 
 
+class GlobalMetricsUploadFileCreateView(CreateView):
+    def form_valid(self, form):
+        self.object = form.save_all(self.request.user)
+        return HttpResponseRedirect(self.get_success_url())
+
+
+class GlobalMetricsUploadFileEditView(EditView):
+    def form_valid(self, form):
+        self.object = form.save_all(self.request.user)
+        return HttpResponseRedirect(self.get_success_url())
+
+
 class TransformationScriptButtonHelper(ButtonHelper):
     """ButtonHelper para adicionar botão de executar transformação."""
 
@@ -88,6 +99,17 @@ class TransformationScriptAdmin(ModelAdmin):
     list_filter = ("is_active",)
 
 
+class GlobalMetricsUploadFileAdmin(ModelAdmin):
+    model = GlobalMetricsUploadFile
+    menu_label = "Arquivos de Métricas Globais"
+    menu_icon = "upload"
+    create_view_class = GlobalMetricsUploadFileCreateView
+    edit_view_class = GlobalMetricsUploadFileEditView
+    list_display = ("file", "status", "created", "updated")
+    list_filter = ("status", "created")
+    search_fields = ("file",)
+
+
 class HarvestModelAdminGroup(ModelAdminGroup):
     menu_label = "Harvest"
     menu_icon = "download"
@@ -96,7 +118,8 @@ class HarvestModelAdminGroup(ModelAdminGroup):
         HarvestedPreprintAdmin,
         HarvestedSciELODataAdmin,
         HarvestedBooksAdmin,
-        TransformationScriptAdmin
+        TransformationScriptAdmin,
+        GlobalMetricsUploadFileAdmin,
     )
 
 modeladmin_register(HarvestModelAdminGroup)
@@ -135,19 +158,4 @@ def run_transform_view(request):
 def register_harvest_urls():
     return [
         path("harvest/run-transform/", run_transform_view, name="harvest_run_transform"),
-        path(
-            "harvest/upload-opensearch/",
-            views.upload_opensearch_view,
-            name="harvest_upload_opensearch",
-        ),
     ]
-
-
-@hooks.register("register_admin_menu_item")
-def register_harvest_upload_menu_item():
-    return MenuItem(
-        _("Harvest Upload"),
-        reverse("harvest_upload_opensearch"),
-        icon_name="upload",
-        order=899,
-    )

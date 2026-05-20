@@ -1,4 +1,5 @@
 import logging
+from pathlib import Path
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -17,6 +18,7 @@ from harvest.indexing import index_harvested_instance
 from harvest.upload_indexing import index_file_obj
 
 from .models import (
+    GlobalMetricsUploadFile,
     HarvestedBooks,
     HarvestedPreprint,
     HarvestedSciELOData,
@@ -219,7 +221,8 @@ def import_harvest_upload_opensearch(storage_path, file_name, index_name=None, c
             stats = index_file_obj(
                 file_obj=file_obj,
                 file_name=file_name,
-                index_name=index_name
+                index_name=index_name,
+                chunk_size=chunk_size,
             )
         logging.info(
             "Upload harvest indexado em %s: %s linhas lidas, %s indexadas, %s falhas.",
@@ -237,3 +240,32 @@ def import_harvest_upload_opensearch(storage_path, file_name, index_name=None, c
     finally:
         if default_storage.exists(storage_path):
             default_storage.delete(storage_path)
+
+
+@celery_app.task(name="Process global metrics upload file")
+def process_global_metrics_upload_file(upload_file_id, index_name=None, chunk_size=None):
+    upload_file = GlobalMetricsUploadFile.objects.get(pk=upload_file_id)
+
+    with upload_file.file.open("rb") as file_obj:
+        stats = index_file_obj(
+            file_obj=file_obj,
+            file_name=Path(upload_file.file.name).name,
+            index_name=index_name,
+            chunk_size=chunk_size,
+        )
+
+    upload_file.mark_processed()
+    logging.info(
+        "Arquivo de métricas globais %s indexado em %s: %s linhas lidas, %s indexadas, %s falhas.",
+        upload_file.pk,
+        index_name or settings.HARVEST_UPLOAD_OPENSEARCH_INDEX,
+        stats.rows_read,
+        stats.indexed,
+        stats.failed,
+    )
+    return {
+        "rows_read": stats.rows_read,
+        "indexed": stats.indexed,
+        "failed": stats.failed,
+        "errors": stats.errors,
+    }

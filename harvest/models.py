@@ -1,7 +1,11 @@
 """
 Modelos para coleta e armazenamento de dados de múltiplos endpoints.
 """
+from pathlib import Path
+
+from django.core.exceptions import ValidationError
 from django.db import models
+from django.db import transaction
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from modelcluster.models import ClusterableModel
@@ -10,6 +14,7 @@ from wagtail.models import ParentalKey
 
 from core.forms import CoreAdminModelForm
 from core.models import CommonControlField
+from harvest.upload_indexing import SUPPORTED_EXTENSIONS
 
 
 class HarvestStatus(models.TextChoices):
@@ -37,6 +42,82 @@ class HarvestModelChoice(models.TextChoices):
     BOOKS = "HarvestedBooks", "Books"
     SCIELO_DATA_DATASET = "HarvestedSciELOData_dataset", "SciELO Data - Dataset"
     SCIELO_DATA_DATAVERSE = "HarvestedSciELOData_dataverse", "SciELO Data - Dataverse"
+
+
+class GlobalMetricsUploadFile(CommonControlField):
+    file = models.FileField(
+        _("Arquivo"),
+        upload_to="global_metrics_uploads/%Y/%m/%d/",
+        help_text=_("Arquivo CSV ou XLSX com dados de métricas globais."),
+    )
+    status = models.BooleanField(
+        _("Processado"),
+        default=False,
+        db_index=True,
+        editable=False,
+        help_text=_("Indica se o arquivo já foi processado com sucesso."),
+    )
+
+    panels = [
+        FieldPanel("file"),
+    ]
+
+    class Meta:
+        verbose_name = _("Arquivo de métricas globais")
+        verbose_name_plural = _("Arquivos de métricas globais")
+
+    base_form_class = CoreAdminModelForm
+
+    def __str__(self):
+        return Path(self.file.name).name if self.file else str(self.pk)
+
+    def clean(self):
+        super().clean()
+        if not self.file:
+            return
+
+        extension = Path(self.file.name).suffix.lower()
+        if extension not in SUPPORTED_EXTENSIONS:
+            raise ValidationError(
+                {"file": _("Envie um arquivo com extensão .csv ou .xlsx.")}
+            )
+        if self.file.size == 0:
+            raise ValidationError({"file": _("O arquivo enviado está vazio.")})
+
+    def save(self, *args, **kwargs):
+        should_process = self._should_enqueue_processing()
+        if should_process:
+            self.status = False
+
+        super().save(*args, **kwargs)
+
+        if should_process:
+            upload_file_id = self.pk
+
+            def enqueue_processing():
+                from .tasks import process_global_metrics_upload_file
+
+                process_global_metrics_upload_file.delay(upload_file_id)
+
+            transaction.on_commit(enqueue_processing)
+
+    def mark_processed(self):
+        self.status = True
+        self.save(update_fields=["status", "updated"])
+
+    def _should_enqueue_processing(self):
+        if not self.file:
+            return False
+        if self._state.adding:
+            return True
+
+        stored_file_name = (
+            type(self)
+            .objects.filter(pk=self.pk)
+            .values_list("file", flat=True)
+            .first()
+        )
+        return stored_file_name != self.file.name
 
 
 class BaseHarvestedData(CommonControlField):
@@ -385,5 +466,5 @@ class TransformationScript(CommonControlField):
 
     def __str__(self):
         return f"{self.name} ({self.source_index})"
-    
+
     base_form_class = CoreAdminModelForm
