@@ -6,8 +6,8 @@
 {% block item_title_href %}
     {% if doc.source.content_url|first %}
         {{ doc.source.content_url|first }}
-    {% elif doc.source.locations %}
-        {{ doc.source.locations.0.landing_page_url }}
+    {% elif doc.source.source.landing_page_url %}
+        {{ doc.source.source.landing_page_url }}
     {% else %}
         {{ pageurl }}
     {% endif %}
