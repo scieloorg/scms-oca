@@ -88,9 +88,8 @@
 
       groups.forEach(nodes => {
         const hasMatch = nodes.some(n => n.dataset.resultLangVariant === languageCode);
-        if (!hasMatch) return;
         nodes.forEach(n => {
-          n.hidden = n.dataset.resultLangVariant !== languageCode;
+          n.hidden = !hasMatch || n.dataset.resultLangVariant !== languageCode;
         });
       });
     }
