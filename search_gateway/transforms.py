@@ -51,11 +51,19 @@ def _get_category_level_display(value):
     }.get(clean_text(value).lower(), value)
 
 
+def _get_scope_display(value):
+    return {
+        "openalex_works": _("OpenAlex"),
+        "scielo": _("SciELO"),
+    }.get(clean_text(value).lower(), value)
+
+
 TRANSFORMS = {
     "language": _get_language_name,
     "country": _get_country_name,
     "boolean": _get_boolean_display,
     "category_level": _get_category_level_display,
+    "scope": _get_scope_display,
 }
 
 

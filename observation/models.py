@@ -14,6 +14,12 @@ from search_gateway.models import DataSource
 from search_gateway.request_filters import extract_applied_filters
 from search_gateway.service import SearchGatewayService
 
+from observation.dimension_i18n import (
+    fallback_dimension_for_index,
+    localize_dimension,
+    observation_dimension_select_label,
+)
+
 logger = logging.getLogger(__name__)
 
 OBSERVATION_SEARCH_FORM_KEY = "search"
@@ -66,38 +72,30 @@ class ObservationPage(Page):
         return None
 
     def _fallback_dimension(self):
-        return {
-            "slug": "documents-by-country",
-            "menu_label": _("Evolution of Scientific Production - World - number of documents by Country"),
-            "row_field_name": "country",
-            "col_field_name": "publication_year",
-            "row_bucket_size": 500,
-            "col_bucket_size": 300,
-            "table_title": _("Evolution of Scientific Production - World - number of documents by Year"),
-            "kpi_label": _("Documents"),
-            "row_label": _("Country"),
-            "col_label": _("Year"),
-            "value_label": _("Documents"),
-        }
+        data_source = self._effective_data_source()
+        index_name = data_source.index_name if data_source else ""
+        return fallback_dimension_for_index(index_name)
 
     def _serialize_dimensions(self, source_page):
         dimensions = []
         for item in source_page.dimensions.all():
             dimensions.append(
-                {
-                    "slug": item.slug,
-                    "menu_label": item.menu_label,
-                    "row_field_name": item.row_field_name,
-                    "col_field_name": item.col_field_name,
-                    "row_bucket_size": item.row_bucket_size,
-                    "col_bucket_size": item.col_bucket_size,
-                    "table_title": item.table_title,
-                    "kpi_label": item.kpi_label,
-                    "row_label": item.row_label,
-                    "col_label": item.col_label,
-                    "value_label": item.value_label,
-                    "is_default": item.is_default,
-                }
+                localize_dimension(
+                    {
+                        "slug": item.slug,
+                        "menu_label": item.menu_label,
+                        "row_field_name": item.row_field_name,
+                        "col_field_name": item.col_field_name,
+                        "row_bucket_size": item.row_bucket_size,
+                        "col_bucket_size": item.col_bucket_size,
+                        "table_title": item.table_title,
+                        "kpi_label": item.kpi_label,
+                        "row_label": item.row_label,
+                        "col_label": item.col_label,
+                        "value_label": item.value_label,
+                        "is_default": item.is_default,
+                    }
+                )
             )
         return dimensions
 
@@ -139,6 +137,9 @@ class ObservationPage(Page):
                 "observation_page_id": self.id,
                 "observation_dimensions": dimensions,
                 "observation_default_dimension": default_dimension,
+                "observation_dimension_select_label": observation_dimension_select_label(
+                    data_source.index_name if data_source else ""
+                ),
             }
         )
 
@@ -197,6 +198,9 @@ class ObservationPage(Page):
                     "observation_page_id": self.id,
                     "observation_dimensions": dimensions,
                     "observation_default_dimension": default_dimension,
+                    "observation_dimension_select_label": observation_dimension_select_label(
+                        data_source.index_name
+                    ),
                 }
             )
         except Exception as exc:
@@ -224,7 +228,9 @@ class ObservationDimension(Orderable):
     menu_label = models.CharField(
         max_length=255,
         verbose_name=_("Menu label"),
-        help_text=_("Label shown in the dimension selector above the table."),
+        help_text=_(
+            "Short label shown in the dimension selector (e.g. Institution, Events)."
+        ),
     )
     row_field_name = models.CharField(
         max_length=100,
@@ -239,7 +245,13 @@ class ObservationDimension(Orderable):
     )
     row_bucket_size = models.PositiveIntegerField(default=500, verbose_name=_("Row bucket size"))
     col_bucket_size = models.PositiveIntegerField(default=300, verbose_name=_("Column bucket size"))
-    table_title = models.CharField(max_length=255, verbose_name=_("Table title"))
+    table_title = models.CharField(
+        max_length=255,
+        verbose_name=_("Table title"),
+        help_text=_(
+            "Full title displayed above the table and KPI; can be longer than the menu label."
+        ),
+    )
     kpi_label = models.CharField(max_length=100, default="Documents", verbose_name=_("KPI label"))
     row_label = models.CharField(max_length=100, default="Country", verbose_name=_("Row label"))
     col_label = models.CharField(max_length=100, default="Year", verbose_name=_("Column label"))
