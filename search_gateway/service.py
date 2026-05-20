@@ -230,7 +230,10 @@ class SearchGatewayService:
         )
         options = parse_lookup_hits(response, lookup_config)
         option_map = {opt["value"]: opt for opt in options}
-        return [option_map.get(v) or {"value": v, "label": v} for v in normalized]
+        return (
+            [option_map.get(v) or {"value": v, "label": v} for v in normalized],
+            None,
+        )
 
     def get_field_options(self, field_name, query_text="", filters=None):
         field, error = self._resolve_field(field_name)
