@@ -14,7 +14,8 @@ from wagtail.models import ParentalKey
 
 from core.forms import CoreAdminModelForm
 from core.models import CommonControlField
-from harvest.upload_indexing import SUPPORTED_EXTENSIONS
+from harvest.storage import global_metrics_upload_path, overwrite_media_storage
+from harvest.global_metrics.constants import SUPPORTED_EXTENSIONS
 
 
 class HarvestStatus(models.TextChoices):
@@ -47,7 +48,8 @@ class HarvestModelChoice(models.TextChoices):
 class GlobalMetricsUploadFile(CommonControlField):
     file = models.FileField(
         _("Arquivo"),
-        upload_to="global_metrics_uploads/%Y/%m/%d/",
+        upload_to=global_metrics_upload_path,
+        storage=overwrite_media_storage,
         help_text=_("Arquivo CSV ou XLSX com dados de métricas globais."),
     )
     status = models.BooleanField(
@@ -85,13 +87,14 @@ class GlobalMetricsUploadFile(CommonControlField):
             raise ValidationError({"file": _("O arquivo enviado está vazio.")})
 
     def save(self, *args, **kwargs):
+        replaced_existing = self._reuse_existing_by_filename()
         should_process = self._should_enqueue_processing()
-        if should_process:
+        if should_process or replaced_existing:
             self.status = False
 
         super().save(*args, **kwargs)
 
-        if should_process:
+        if should_process or replaced_existing:
             upload_file_id = self.pk
 
             def enqueue_processing():
@@ -100,6 +103,28 @@ class GlobalMetricsUploadFile(CommonControlField):
                 process_global_metrics_upload_file.delay(upload_file_id)
 
             transaction.on_commit(enqueue_processing)
+
+    def _reuse_existing_by_filename(self):
+        if not self.file or not self._state.adding:
+            return False
+
+        basename = Path(self.file.name).name
+        storage_path = global_metrics_upload_path(self, basename)
+        existing = (
+            type(self)
+            .objects.filter(models.Q(file=storage_path) | models.Q(file__endswith=f"/{basename}"))
+            .order_by("-updated")
+            .first()
+        )
+        if existing is None:
+            return False
+
+        if existing.file and existing.file.name != storage_path:
+            existing.file.delete(save=False)
+
+        self.pk = existing.pk
+        self._state.adding = False
+        return True
 
     def mark_processed(self):
         self.status = True
@@ -125,6 +150,8 @@ class BaseHarvestedData(CommonControlField):
     Modelo base abstrato para armazenar dados coletados de diferentes endpoints.
     Contém campos comuns a todos os tipos de dados.
     """
+
+    base_form_class = CoreAdminModelForm
 
     identifier = models.CharField(
         _("ID Externo"),
