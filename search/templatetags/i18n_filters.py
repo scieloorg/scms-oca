@@ -3,7 +3,12 @@ import re
 from datetime import date, datetime
 
 from django import template
-from search.normalize import split_lang_code, as_list, unique
+from search.normalize import (
+    as_list,
+    deduplicate_variants_by_value,
+    split_lang_code,
+    unique,
+)
 
 
 register = template.Library()
@@ -78,6 +83,11 @@ def field_variants(context, source, field_name, value_key=None, output="scalar")
         return []
 
     preferred_full, preferred_base = split_lang_code(context.get("LANGUAGE_CODE", ""))
+    explicit_languages = {
+        split_lang_code(language)[1]
+        for language in as_list(source.get("language"))
+        if split_lang_code(language)[1]
+    }
     grouped = {}
 
     for item in items:
@@ -103,4 +113,8 @@ def field_variants(context, source, field_name, value_key=None, output="scalar")
         elif preferred_base and base == preferred_base and code == base:
             grouped[base] = candidate
 
-    return list(grouped.values())
+    return deduplicate_variants_by_value(
+        grouped.values(),
+        explicit_languages=explicit_languages,
+        preferred_language=preferred_base,
+    )

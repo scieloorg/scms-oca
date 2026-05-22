@@ -1,7 +1,13 @@
 from django import template
 
 from harvest.language_normalizer import normalize_language_field
-from search.normalize import as_list, orcid_url as build_orcid_url, split_lang_code, unique
+from search.normalize import (
+    as_list,
+    deduplicate_variants_by_value,
+    orcid_url as build_orcid_url,
+    split_lang_code,
+    unique,
+)
 
 
 register = template.Library()
@@ -9,15 +15,37 @@ register = template.Library()
 
 def _language_codes_from_translations(source):
     codes = []
+    explicit = set(_normalize_language_codes(source.get("language")))
+
     for key, value in source.items():
         if not str(key).endswith("_with_lang") or not isinstance(value, list):
             continue
 
+        value_key = str(key)[: -len("_with_lang")]
+        variants = []
+
         for item in value:
+            if not isinstance(item, dict):
+                continue
+
+            raw_value = item.get(value_key)
+            if raw_value in (None, "", []):
+                continue
+
             for code in as_list(normalize_language_field(item.get("language"))):
                 _, base = split_lang_code(code)
-                if base and base not in codes:
-                    codes.append(base)
+                if not base:
+                    continue
+
+                variants.append({"language": base, "value": raw_value})
+
+        for variant in deduplicate_variants_by_value(
+            variants,
+            explicit_languages=explicit,
+        ):
+            base = variant["language"]
+            if base not in codes:
+                codes.append(base)
 
     return codes
 

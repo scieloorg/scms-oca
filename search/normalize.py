@@ -43,21 +43,48 @@ def as_list(value):
     return unique(normalized)
 
 
-_ORCID_PREFIXES = (
-    "https://orcid.org/",
-    "http://orcid.org/",
-    "orcid.org/",
-)
+def deduplicate_variants_by_value(
+    variants,
+    explicit_languages=None,
+    preferred_language=None,
+):
+    def normalized_value_key(value):
+        if isinstance(value, (list, tuple)):
+            return tuple(normalized_value_key(item) for item in value)
+
+        return " ".join(str(value or "").strip().split()).lower()
+
+    explicit_languages = set(explicit_languages or [])
+    preferred_language = preferred_language or ""
+    unique_variants = {}
+
+    for position, variant in enumerate(variants):
+        marker = normalized_value_key(variant["value"])
+        priority = (
+            0 if variant["language"] in explicit_languages else 1,
+            0 if preferred_language and variant["language"] == preferred_language else 1,
+            position,
+        )
+        current = unique_variants.get(marker)
+        if current is None or priority < current[0]:
+            unique_variants[marker] = (priority, variant)
+
+    return [item[1] for item in sorted(unique_variants.values(), key=lambda item: item[0])]
 
 
 def normalize_orcid(value):
+    orcid_prefixes = (
+        "https://orcid.org/",
+        "http://orcid.org/",
+        "orcid.org/",
+    )
     items = as_list(value)
     if not items:
         return ""
 
     orcid = str(items[0]).strip()
     lower_orcid = orcid.lower()
-    for prefix in _ORCID_PREFIXES:
+    for prefix in orcid_prefixes:
         if lower_orcid.startswith(prefix):
             return orcid[len(prefix):]
 
