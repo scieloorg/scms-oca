@@ -112,21 +112,29 @@
     {% block item_meta %}{% endblock %}
 
     {% block item_extra %}
-        {% if doc.source.primary_topic_name or doc.source.primary_topic_field or doc.source.primary_topic_domain %}
-        <p class="result-card__meta-row result-card__meta-row--topic-inline">
-            <span class="result-card__topic-inline-text">
-                {{ doc.source.primary_topic_name|default:"" }}
-                {% if doc.source.primary_topic_name and doc.source.primary_topic_field %} - {% endif %}
-                {{ doc.source.primary_topic_field|default:"" }}
-                {% if doc.source.primary_topic_domain %}
-                    {% if doc.source.primary_topic_name or doc.source.primary_topic_field %} ({% endif %}
-                    {{ doc.source.primary_topic_domain }}
-                    {% if doc.source.primary_topic_name or doc.source.primary_topic_field %}){% endif %}
-                {% endif %}
-            </span>
-        </p>
+        {% if doc.source.primary_topic_domain %}
+            <p class="result-card__meta-row result-card__meta-row--topic-inline">
+                <span class="result-card__topic-inline-text">
+                    <span class="result-card__topic-domain">
+                        {{ doc.source.primary_topic_domain }}
+                    </span>
+
+                    {% if doc.source.primary_topic_field %}
+                        <span class="result-card__topic-segment">{{ doc.source.primary_topic_field }}</span>
+                    {% endif %}
+
+                    {% if doc.source.primary_topic_subfield %}
+                        <span class="result-card__topic-segment">{{ doc.source.primary_topic_subfield }}</span>
+                    {% endif %}
+
+                    {% if doc.source.primary_topic_name %}
+                        <span class="result-card__topic-segment">{{ doc.source.primary_topic_name }}</span>
+                    {% endif %}
+                </span>
+            </p>
         {% endif %}
     {% endblock %}
+
 {% endblock %}
 
 {% block item_footer %}
