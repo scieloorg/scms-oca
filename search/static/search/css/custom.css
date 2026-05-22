@@ -1307,6 +1307,17 @@
   line-clamp: 1;
 }
 
+.result-card__topic-domain {
+  color: #53647c;
+  font-weight: 800;
+}
+
+.result-card__topic-segment::before {
+  content: "•";
+  color: #b7c2d0;
+  margin: 0 0.34rem;
+}
+
 .result-card__source-meta--accent {
   color: #2f4ea1;
   font-weight: 800;
@@ -1782,6 +1793,7 @@
 }
 
 .results-list--lean .result-card__abstract,
+.results-list--lean .result-card__meta-row--topic-inline,
 .results-list--lean .result-card__meta-list--chips,
 .results-list--lean .result-card__meta-list--trailing,
 .results-list--lean .result-card__footer,
