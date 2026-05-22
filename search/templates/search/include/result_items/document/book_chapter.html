@@ -38,7 +38,9 @@
 
 {% block item_meta %}{% endblock %}
 
-{% block item_extra %}{% endblock %}
+{% block item_extra %}
+    {{ block.super }}
+{% endblock %}
 
 {% block item_footer_actions %}
     {{ block.super }}
