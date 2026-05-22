@@ -1,12 +1,16 @@
 import logging
-from pathlib import Path
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.core.files.storage import default_storage
 
 from config import celery_app
 from harvest.exception_logs import ExceptionContext
+from harvest.global_metrics.apply import (
+    apply_global_metrics_upload_to_silver as run_apply_global_metrics_upload_to_silver,
+)
+from harvest.global_metrics.process import (
+    process_global_metrics_upload_file as run_process_global_metrics_upload_file,
+)
 from harvest.harvests.harvest_books import (
     harvest_books,
     harvest_single_book,
@@ -15,10 +19,8 @@ from harvest.harvests.harvest_books import (
 from harvest.harvests.harvest_data import harvest_data, harvest_single_scielo_data
 from harvest.harvests.harvest_preprint import harvest_preprint
 from harvest.indexing import index_harvested_instance
-from harvest.upload_indexing import index_file_obj
 
 from .models import (
-    GlobalMetricsUploadFile,
     HarvestedBooks,
     HarvestedPreprint,
     HarvestedSciELOData,
@@ -29,7 +31,6 @@ from .models import (
 from .service import service_oai_pmh_get_record, service_oai_pmh_scythe
 
 User = get_user_model()
-
 
 ENDPOINT_PREPRINT = getattr(settings, "ENDPOINT_OAI_PMH_PREPRINT", None)
 
@@ -214,58 +215,23 @@ def reindex_failed_scielo_data(user_id=None):
         index_harvested_instance(instance=obj, index_name=obj.index_name)
 
 
-@celery_app.task(name="Harvest upload OpenSearch")
-def import_harvest_upload_opensearch(storage_path, file_name, index_name=None, chunk_size=None):
-    try:
-        with default_storage.open(storage_path, "rb") as file_obj:
-            stats = index_file_obj(
-                file_obj=file_obj,
-                file_name=file_name,
-                index_name=index_name,
-                chunk_size=chunk_size,
-            )
-        logging.info(
-            "Upload harvest indexado em %s: %s linhas lidas, %s indexadas, %s falhas.",
-            index_name or settings.HARVEST_UPLOAD_OPENSEARCH_INDEX,
-            stats.rows_read,
-            stats.indexed,
-            stats.failed,
-        )
-        return {
-            "rows_read": stats.rows_read,
-            "indexed": stats.indexed,
-            "failed": stats.failed,
-            "errors": stats.errors,
-        }
-    finally:
-        if default_storage.exists(storage_path):
-            default_storage.delete(storage_path)
-
-
 @celery_app.task(name="Process global metrics upload file")
 def process_global_metrics_upload_file(upload_file_id, index_name=None, chunk_size=None):
-    upload_file = GlobalMetricsUploadFile.objects.get(pk=upload_file_id)
-
-    with upload_file.file.open("rb") as file_obj:
-        stats = index_file_obj(
-            file_obj=file_obj,
-            file_name=Path(upload_file.file.name).name,
-            index_name=index_name,
-            chunk_size=chunk_size,
-        )
-
-    upload_file.mark_processed()
-    logging.info(
-        "Arquivo de métricas globais %s indexado em %s: %s linhas lidas, %s indexadas, %s falhas.",
-        upload_file.pk,
-        index_name or settings.HARVEST_UPLOAD_OPENSEARCH_INDEX,
-        stats.rows_read,
-        stats.indexed,
-        stats.failed,
+    return run_process_global_metrics_upload_file(
+        upload_file_id=upload_file_id,
+        index_name=index_name,
+        chunk_size=chunk_size,
     )
-    return {
-        "rows_read": stats.rows_read,
-        "indexed": stats.indexed,
-        "failed": stats.failed,
-        "errors": stats.errors,
-    }
+
+
+@celery_app.task(name="Apply global metrics upload to silver")
+def apply_global_metrics_upload_to_silver(
+    upload_file_id,
+    harvest_index=None,
+    silver_index=None,
+):
+    return run_apply_global_metrics_upload_to_silver(
+        upload_file_id=upload_file_id,
+        harvest_index=harvest_index,
+        silver_index=silver_index,
+    )
