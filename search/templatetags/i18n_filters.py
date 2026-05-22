@@ -6,41 +6,13 @@ from django import template
 from search.normalize import (
     as_list,
     deduplicate_variants_by_value,
+    match_language,
     split_lang_code,
     unique,
 )
 
 
 register = template.Library()
-
-
-def _match_language(items, lang_code, key):
-    """Pick values from items matching the preferred language (exact or base)."""
-    requested, requested_base = split_lang_code(lang_code)
-    if not requested:
-        return []
-
-    exact = []
-    base = []
-
-    for item in items:
-        if not isinstance(item, dict):
-            continue
-
-        value = item.get(key)
-        if value in (None, ""):
-            continue
-
-        item_code, item_base = split_lang_code(item.get("language"))
-        if not item_code:
-            continue
-
-        if item_code == requested:
-            exact.append(value)
-        elif item_base == requested_base:
-            base.append(value)
-
-    return exact or base
 
 
 @register.filter
@@ -64,7 +36,7 @@ def localized_field(context, source, field_name, value_key=None, output="scalar"
     """Return localized value from `<field>_with_lang` using the request language."""
     key = (value_key.strip() if value_key and value_key.strip() else None) or field_name
     items = source.get(f"{field_name}_with_lang") or []
-    localized = _match_language(items, context.get("LANGUAGE_CODE", ""), key)
+    localized = match_language(items, context.get("LANGUAGE_CODE", ""), key)
 
     if str(output).strip().lower() == "list":
         return as_list(unique(localized) if localized else source.get(field_name))
