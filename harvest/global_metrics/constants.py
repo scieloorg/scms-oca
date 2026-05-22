@@ -1,6 +1,7 @@
 SUPPORTED_EXTENSIONS = {".csv", ".xlsx"}
 
 GLOBAL_METRICS_REQUIRED_COLUMNS = {
+    "baseid",
     "issns",
     "year",
     "country",
