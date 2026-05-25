@@ -2,12 +2,11 @@ import logging
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.utils.translation import gettext as _
 
-from journal import models
 from config import celery_app
 from core.models import Source
 from core.utils import utils as core_utils
+from journal import models
 
 logger = logging.getLogger(__name__)
 
@@ -96,10 +95,10 @@ def load_journal_openalex(user_id, country="BR", length=None):
             "apc_usd": 1600,
             "country_code": "BR",
             "societies": [
-              
+
             ],
             "alternate_titles": [
-              
+
             ],
             "abbreviated_title": null,
             "type": "journal",
@@ -176,8 +175,7 @@ def load_journal_openalex(user_id, country="BR", length=None):
           }
         ]
       }
-    
-    
+
     """
     url = (
         settings.URL_API_OPENALEX_JOURNALS
