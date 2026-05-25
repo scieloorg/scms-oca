@@ -12,7 +12,7 @@ from django.utils.translation import gettext
 TRUE_VALUES = {"true", "1", "yes", "y", "sim", "on"}
 FALSE_VALUES = {"false", "0", "no", "n", "nao"}
 
-SEARCH_RESULT_SORT_VALUES = frozenset({"desc", "asc", "cited_by_count"})
+SEARCH_RESULT_SORT_VALUES = frozenset({"desc", "asc", "most_cited"})
 
 
 # ---------------------------------------------------------------------------

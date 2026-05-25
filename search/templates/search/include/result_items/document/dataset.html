@@ -68,6 +68,11 @@
     <div class="result-card__footer">
         <div class="result-card__actions">
             {% block item_footer_actions %}
+                {% if doc.source.files %}
+                    {% for file in doc.source.files %}
+                        <a href="{{ file.pid_url }}" target="_blank" rel="noopener noreferrer" class="result-card__action">{{ file.label }}</a>
+                    {% endfor %}
+                {% endif %}
                 {{ block.super }}
             {% endblock %}
         </div>

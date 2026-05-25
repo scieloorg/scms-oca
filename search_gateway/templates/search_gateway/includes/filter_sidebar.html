@@ -56,6 +56,9 @@
     {% if sidebar_form_method|default:'get'|lower != 'get' %}
       {% csrf_token %}
     {% endif %}
+    {% for name, value in hidden_fields.items %}
+      <input type="hidden" name="{{ name }}" value="{{ value }}" class="data-source-field">
+    {% endfor %}
     {% include "search_gateway/forms/form_groups.html" with form_groups=form_groups %}
   </form>
 </aside>
