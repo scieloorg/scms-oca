@@ -25,15 +25,14 @@ from .models import (
     HarvestErrorLogPreprint,
     HarvestErrorLogSciELOData,
 )
-from .global_metrics import (
-    GLOBAL_METRICS_REQUIRED_COLUMNS,
-    GlobalMetricsIndexingError,
+from .global_metrics.constants import GLOBAL_METRICS_REQUIRED_COLUMNS
+from .global_metrics.indexing import GlobalMetricsIndexingError, index_prepared_rows, iter_file_rows
+from .global_metrics.opensearch import (
     build_global_metrics_update_by_query_body,
     build_harvest_metric_lookup_body,
-    global_metric_row_from_hit,
-    iter_file_rows,
     iter_silver_issn_year_groups,
 )
+from .global_metrics.parsing import global_metric_row_from_hit
 from .parse_info_oai_pmh import (
     get_date,
     get_identifier_source,
@@ -112,8 +111,8 @@ class GlobalMetricsUploadTaskTests(SimpleTestCase):
 
     def test_global_metrics_upload_requires_columns_used_by_processing(self):
         file_obj = io.BytesIO(
-            b"issns,year,country,scopus_active_in_the_year,wos_active_in_the_year\n"
-            b"1234-5678,2024,Brasil,1,0\n"
+            b"issns;year;country;scopus_active_in_the_year;wos_active_in_the_year\n"
+            b"1234-5678;2024;Brasil;1;0\n"
         )
 
         with self.assertRaisesMessage(
@@ -130,9 +129,9 @@ class GlobalMetricsUploadTaskTests(SimpleTestCase):
 
     def test_global_metrics_upload_accepts_required_columns(self):
         file_obj = io.BytesIO(
-            b"issns,year,country,scopus_active_in_the_year,wos_active_in_the_year,"
+            b"baseid;issns;year;country;scopus_active_in_the_year;wos_active_in_the_year;"
             b"scielo_active_and_valid_in_the_year\n"
-            b"1234-5678,2024,Brasil,1,0,1\n"
+            b"B1;1234-5678;2024;Brasil;1;0;1\n"
         )
 
         rows = list(
@@ -206,6 +205,116 @@ class GlobalMetricsUploadTaskTests(SimpleTestCase):
         self.assertEqual(params["indexed_in"], ["Scopus", "WoS"])
         self.assertEqual(params["country_codes"], ["BR"])
         self.assertIn("oca_data.scielo.source", body["script"]["source"])
+
+    @override_settings(GLOBAL_METRICS_UPLOAD_ERROR_INDEX="global_metrics_upload_errors")
+    @patch("harvest.global_metrics.indexing.OpenSearchIndexClient")
+    @patch("harvest.global_metrics.indexing.streaming_bulk")
+    @patch("harvest.global_metrics.indexing.get_opensearch_client")
+    def test_bulk_failure_is_indexed_in_upload_error_index(
+        self,
+        mock_get_client,
+        mock_streaming_bulk,
+        mock_index_client,
+    ):
+        client = object()
+        mock_get_client.return_value = client
+        bulk_result = {
+            "index": {
+                "_id": "B123-2024",
+                "error": {
+                    "type": "mapper_parsing_exception",
+                    "reason": "failed to parse field",
+                },
+            }
+        }
+
+        def fake_streaming_bulk(client, actions, **kwargs):
+            list(actions)
+            yield False, bulk_result
+
+        mock_streaming_bulk.side_effect = fake_streaming_bulk
+
+        stats = index_prepared_rows(
+            rows=iter([(2, {"baseid": "B123", "year": "2024"})]),
+            file_name="metrics.csv",
+            extension=".csv",
+            index_name="global_metrics_upload_file",
+            chunk_size=1,
+        )
+
+        self.assertEqual(stats.rows_read, 1)
+        self.assertEqual(stats.failed, 1)
+        mock_index_client.assert_called_once_with(client=client)
+        mock_index_client.return_value.index_error.assert_called_once()
+        kwargs = mock_index_client.return_value.index_error.call_args.kwargs
+        self.assertEqual(kwargs["component"], "harvest.global_metrics")
+        self.assertEqual(kwargs["operation"], "upload_indexing")
+        self.assertEqual(kwargs["error_type"], "BulkIndexFailure")
+        self.assertEqual(kwargs["error_index_name"], "global_metrics_upload_errors")
+        self.assertEqual(kwargs["context"]["source_file"], "metrics.csv")
+        self.assertEqual(kwargs["context"]["source_format"], "csv")
+        self.assertEqual(kwargs["context"]["target_index"], "global_metrics_upload_file")
+        self.assertEqual(kwargs["context"]["document_id"], "B123-2024")
+        self.assertEqual(kwargs["context"]["bulk_result"], bulk_result)
+
+    @patch("harvest.global_metrics.indexing.OpenSearchIndexClient")
+    @patch("harvest.global_metrics.indexing.streaming_bulk")
+    @patch("harvest.global_metrics.indexing.get_opensearch_client")
+    def test_upload_error_index_failure_does_not_interrupt_import(
+        self,
+        mock_get_client,
+        mock_streaming_bulk,
+        mock_index_client,
+    ):
+        mock_get_client.return_value = object()
+        mock_index_client.return_value.index_error.side_effect = RuntimeError("index unavailable")
+
+        def fake_streaming_bulk(client, actions, **kwargs):
+            list(actions)
+            yield False, {"index": {"_id": "B123-2024", "error": "boom"}}
+
+        mock_streaming_bulk.side_effect = fake_streaming_bulk
+
+        stats = index_prepared_rows(
+            rows=iter([(2, {"baseid": "B123", "year": "2024"})]),
+            file_name="metrics.csv",
+            extension=".csv",
+            index_name="global_metrics_upload_file",
+            chunk_size=1,
+        )
+
+        self.assertEqual(stats.failed, 1)
+        self.assertEqual(len(stats.errors), 1)
+
+    @patch("harvest.global_metrics.indexing.OpenSearchIndexClient")
+    @patch("harvest.global_metrics.indexing.streaming_bulk")
+    @patch("harvest.global_metrics.indexing.get_opensearch_client")
+    def test_bulk_error_samples_are_limited(
+        self,
+        mock_get_client,
+        mock_streaming_bulk,
+        mock_index_client,
+    ):
+        mock_get_client.return_value = object()
+
+        def fake_streaming_bulk(client, actions, **kwargs):
+            for action in actions:
+                yield False, {"index": {"_id": action["_id"], "error": "boom"}}
+
+        mock_streaming_bulk.side_effect = fake_streaming_bulk
+        rows = ((row_number, {"baseid": f"B{row_number}", "year": "2024"}) for row_number in range(2, 14))
+
+        stats = index_prepared_rows(
+            rows=rows,
+            file_name="metrics.csv",
+            extension=".csv",
+            index_name="global_metrics_upload_file",
+            chunk_size=1,
+        )
+
+        self.assertEqual(stats.failed, 12)
+        self.assertEqual(len(stats.errors), 10)
+        self.assertEqual(mock_index_client.return_value.index_error.call_count, 12)
 
 
 class DummyOpenSearchClient:
