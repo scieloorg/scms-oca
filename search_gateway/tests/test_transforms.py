@@ -5,7 +5,7 @@ from search_gateway.transforms import apply_display_transform
 
 class ScopeDisplayTransformTests(SimpleTestCase):
     def test_openalex_works_label(self):
-        self.assertEqual(apply_display_transform("scope", "openalex_works"), "OpenAlex")
+        self.assertEqual(apply_display_transform("scope", "openalex"), "OpenAlex")
 
     def test_scielo_label(self):
         self.assertEqual(apply_display_transform("scope", "scielo"), "SciELO")
