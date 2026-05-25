@@ -70,7 +70,6 @@ drf-yasg==1.21.14  # https://pypi.org/project/drf-yasg2/
 numpy==2.4.1  # https://numpy.org/
 pandas==3.0.0 # https://pandas.pydata.org/
 python-calamine==0.6.2  # https://github.com/dimastbk/python-calamine
-openpyxl==3.1.5  # https://openpyxl.readthedocs.io/
 
 # Langcode
 # ------------------------------------------------------------------------------
