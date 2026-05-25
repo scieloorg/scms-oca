@@ -1,12 +1,11 @@
 from unittest.mock import Mock
 
-from django.test import TestCase
-
 from etl.deduplicator.helpers import can_compare, rules_for_pair
 from etl.deduplicator.openalex import OpenAlexMatcher
 from etl.deduplicator.scielo import SciELODeduplicator
 from etl.models import EtlPipelineConfig
 from etl.pipeline import OpenSearchETLPipeline
+from etl.tests.base import EtlTestCase
 
 
 def make_deduplicator(document_type):
@@ -19,7 +18,7 @@ def make_matcher(document_type):
     return matcher
 
 
-class DocumentRulesTests(TestCase):
+class DocumentRulesTests(EtlTestCase):
     def test_can_compare_rejects_doc_type_outside_pipeline_config_rules(self):
         rules = EtlPipelineConfig.objects.get_enabled_by_name("book").to_rules()
 
@@ -229,6 +228,14 @@ class DocumentRulesTests(TestCase):
         self.assertNotIn("wildcard", str(body))
         doi_filter = body["query"]["bool"]["filter"][0]["bool"]
         self.assertEqual(doi_filter["minimum_should_match"], 1)
+        self.assertEqual(
+            body["query"]["bool"]["must_not"],
+            [{"term": {"is_xpac": True}}],
+        )
+        self.assertIn(
+            {"range": {"publication_year": {"gte": 2024, "lte": 2026}}},
+            body["query"]["bool"]["filter"],
+        )
         self.assertIn(
             {"prefix": {"doi.keyword": "https://doi.org/10.1590/0034-7167.202578supl101"}},
             doi_filter["should"],
@@ -237,6 +244,62 @@ class DocumentRulesTests(TestCase):
             {"term": {"doi.keyword": "10.1590/0034-7167.202578supl101"}},
             doi_filter["should"],
         )
+
+    def test_openalex_match_skips_year_outside_configured_raw_range(self):
+        matcher = make_matcher("article")
+        matcher.input_openalex_index = "raw_openalex_works"
+        matcher.client = Mock()
+
+        matches = matcher.find_matches(
+            [
+                {
+                    "type": "article",
+                    "publication_year": 2017,
+                    "ids": {"doi": "10.1590/0034-7167.202578SUPL101"},
+                }
+            ],
+            max_candidates=3,
+        )
+
+        self.assertEqual(matches, [])
+        matcher.client.client.search.assert_not_called()
+
+    def test_openalex_match_keeps_year_adjacent_to_configured_raw_range(self):
+        matcher = make_matcher("article")
+        matcher.input_openalex_index = "raw_openalex_works"
+        matcher.client = Mock()
+        matcher.client.client.search.return_value = {"hits": {"hits": []}}
+
+        matcher.find_matches(
+            [
+                {
+                    "type": "article",
+                    "publication_year": 2018,
+                    "ids": {"doi": "10.1590/0034-7167.202578SUPL101"},
+                }
+            ],
+            max_candidates=3,
+        )
+
+        matcher.client.client.search.assert_called_once()
+
+    def test_openalex_match_skips_missing_scielo_publication_year(self):
+        matcher = make_matcher("article")
+        matcher.input_openalex_index = "raw_openalex_works"
+        matcher.client = Mock()
+
+        matches = matcher.find_matches(
+            [
+                {
+                    "type": "article",
+                    "ids": {"doi": "10.1590/0034-7167.202578SUPL101"},
+                }
+            ],
+            max_candidates=3,
+        )
+
+        self.assertEqual(matches, [])
+        matcher.client.client.search.assert_not_called()
 
     def _openalex_article(self, openalex_id, language, doi_suffix):
         titles = {
