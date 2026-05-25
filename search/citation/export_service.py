@@ -5,21 +5,21 @@ from django.utils.translation import gettext as _
 from ..export_service import BadRequestError
 from ..ris_export import render_ris_lines
 from .constants import CITATION_PRESET_STYLES
-from .render import build_csl_payload, render_bibtex, render_citation
+from .render import build_citation_items, render_bibtex, render_citation
 
 
-def _to_csl_json(inputs):
-    csl_json = build_csl_payload(
+def _to_citation_items(inputs):
+    citation_items = build_citation_items(
         inputs.documents,
         language=inputs.language_code,
     )
-    if len(csl_json) != len(inputs.documents):
+    if len(citation_items) != len(inputs.documents):
         raise BadRequestError(_("Could not map documents to citations."))
-    return csl_json
+    return citation_items
 
 
 def _render_bib(inputs):
-    content = render_bibtex(_to_csl_json(inputs))
+    content = render_bibtex(_to_citation_items(inputs))
     if not content.strip():
         raise BadRequestError(
             _("Could not generate BibTeX for the selection."),
@@ -29,7 +29,7 @@ def _render_bib(inputs):
 
 
 def _render_ris(inputs):
-    content = render_ris_lines(_to_csl_json(inputs))
+    content = render_ris_lines(_to_citation_items(inputs))
     return content, "application/x-research-info-systems", "ris"
 
 
@@ -52,25 +52,28 @@ def _render_style(csl_json, style):
     return "\n\n".join(r.strip() for r in rendered if r and r.strip())
 
 
-def set_presets_cited(csl_json):
-    presets = [
+def _render_items_style(citation_items, style):
+    return _render_style(citation_items, style)
+
+
+def _build_presets(citation_items):
+    return [
         {
             "id": style_id,
             "label": str(label),
-            "citation": _render_style(csl_json, style_id),
+            "citation": _render_items_style(citation_items, style_id),
         }
         for style_id, label in CITATION_PRESET_STYLES.items()
     ]
-    return presets
 
 
 def build_citation_preview(inputs):
     """Citação predefinida (vancouver e apa)."""
-    csl_json = _to_csl_json(inputs)
-    return {"presets": set_presets_cited(csl_json)}
+    citation_items = _to_citation_items(inputs)
+    return {"presets": _build_presets(citation_items)}
 
 
 def build_custom_citation(inputs, style):
     """Constroi citação baseado no input do usuário."""
-    csl_json = _to_csl_json(inputs)
-    return {"id": style, "citation": _render_style(csl_json, style)}
+    citation_items = _to_citation_items(inputs)
+    return {"id": style, "citation": _render_items_style(citation_items, style)}
