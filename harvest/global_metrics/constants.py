@@ -1,5 +1,7 @@
 SUPPORTED_EXTENSIONS = {".csv", ".xlsx"}
 
+GLOBAL_METRICS_CSV_DELIMITER = ";"
+
 GLOBAL_METRICS_REQUIRED_COLUMNS = {
     "baseid",
     "issns",
