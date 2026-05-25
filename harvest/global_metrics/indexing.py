@@ -13,6 +13,7 @@ from slugify import slugify
 
 from harvest.global_metrics.constants import GLOBAL_METRICS_REQUIRED_COLUMNS
 from search_gateway.client import get_opensearch_client
+from search_gateway.opensearch import OpenSearchIndexClient
 
 logger = logging.getLogger(__name__)
 
@@ -93,7 +94,16 @@ def index_prepared_rows(
             continue
 
         stats.failed += 1
-        _append_error(stats=stats, error=_format_bulk_error(result))
+        error = _format_bulk_error(result)
+        _append_error(stats=stats, error=error)
+        _index_upload_error(
+            client=client,
+            source_file=file_name,
+            source_format=extension,
+            target_index=index_name,
+            result=result,
+            message=error,
+        )
 
     return stats
 
@@ -276,6 +286,35 @@ def _format_bulk_error(result):
         return f"{document_id}: {error}"
     except Exception:
         return str(result)
+
+
+def _index_upload_error(
+    *,
+    client,
+    source_file,
+    source_format,
+    target_index,
+    result,
+    message,
+):
+    try:
+        action_result = next(iter(result.values())) if isinstance(result, dict) else {}
+        OpenSearchIndexClient(client=client).index_error(
+            component="harvest.global_metrics",
+            operation="upload_indexing",
+            message=message,
+            error_type="BulkIndexFailure",
+            context={
+                "source_file": source_file,
+                "source_format": source_format,
+                "target_index": target_index,
+                "document_id": action_result.get("_id"),
+                "bulk_result": result,
+            },
+            error_index_name=settings.GLOBAL_METRICS_UPLOAD_ERROR_INDEX,
+        )
+    except Exception:
+        logger.exception("Falha ao registrar erro de upload de métricas globais no OpenSearch")
 
 
 def _append_error(stats, error):
