@@ -84,38 +84,71 @@ def _get_scope_display(value):
         "scielo": "SciELO",
     }.get(clean_text(value).lower(), value)
 
+def _get_indexed_in_openalex(value):
+    return {
+        "arxiv": _("ArXiv"),
+        "crossref": _("Crossref"),
+        "datacite": _("Datacite"),
+        "doaj": _("DOAJ"),
+        "pubmed": _("PubMed")
+    }.get(clean_text(value).lower(), value)
+
+def _get_open_access_status_display(value):
+    return {
+        "bronze": _("Bronze"),
+        "closed": _("Closed"),
+        "diamond": _("Diamond"),
+        "gold": _("Gold"),
+        "green": _("Green"),
+        "hybrid": _("Hybrid"),
+    }.get(clean_text(value).lower(), value)
 
 def _get_document_type_display(value):
     return {
         "article": _("Article"),
-        "book": _("Book"),
         "book-chapter": _("Book chapter"),
+        "book": _("Book"),
+        "database": _("Database"),
         "dataset": _("Dataset"),
+        "dissertation": _("Dissertation"),
+        "libguides": _("LibGuides"),
+        "other": _("Other"),
+        "paratext": _("Paratext"),
+        "peer-review": _("Peer review"),
         "preprint": _("Preprint"),
+        "reference-entry": _("Reference entry"),
+        "report": _("Report"),
+        "retraction": _("Retraction"),
+        "software": _("Software"),
+        "standard": _("Standard"),
+        "supplementary-materials": _("Supplementary material")
     }.get(clean_text(value).lower(), value)
 
 
 def _get_source_type_display(value):
     return {
-        "book": _("Book"),
         "book series": _("Book series"),
+        "book": _("Book"),
         "conference": _("Conference"),
         "ebook platform": _("eBook platform"),
+        "igsncatalog": _("IGSN Catalog"),
         "journal": _("Journal"),
+        "other": _("Other"),
         "repository": _("Repository"),
     }.get(clean_text(value).lower(), value)
 
 
 TRANSFORMS = {
-    "language": _get_language_name,
-    "country": _get_country_name,
+    "open_access_status": _get_open_access_status_display,
     "boolean": _get_boolean_display,
     "category_level": _get_category_level_display,
+    "country": _get_country_name,
+    "document_type": _get_document_type_display,
+    "indexed_in_openalex": _get_indexed_in_openalex,
+    "language": _get_language_name,
     "scielo_collection": _get_scielo_collection_display,
     "scope": _get_scope_display,
-    "document_type": _get_document_type_display,
-    "source_type": _get_source_type_display,
-    "scope": _get_scope_display,
+    "source_type": _get_source_type_display
 }
 
 
