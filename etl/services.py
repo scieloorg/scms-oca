@@ -4,6 +4,7 @@ from collections import defaultdict
 
 from django.conf import settings
 from django.db import transaction
+from django.utils import timezone
 
 from core.utils.db import refresh_db_connections
 from etl.client import OpenSearchClient
@@ -81,10 +82,14 @@ def enqueue_etl_item(
         item.isbn = isbn
         item.preprint_id = preprint_id
         item.dataset_id = dataset_id
-        item.status = EtlStatus.PENDING
-        item.result = ""
+        item.status = initial_status
+        item.result = EtlResult.UNCHANGED if initial_status == EtlStatus.SUCCESS else ""
+        item.has_openalex_match = False
+        item.has_scielo_dedup = False
+        item.scielo_dedup_ids = []
+        item.openalex_match_ids = []
         item.error = None
-        item.processed_at = None
+        item.processed_at = timezone.now() if initial_status == EtlStatus.SUCCESS else None
         item.save(
             update_fields=[
                 "document_type",
@@ -97,6 +102,48 @@ def enqueue_etl_item(
                 "dataset_id",
                 "status",
                 "result",
+                "has_openalex_match",
+                "has_scielo_dedup",
+                "scielo_dedup_ids",
+                "openalex_match_ids",
+                "error",
+                "processed_at",
+                "updated_at",
+            ]
+        )
+        return item
+
+    if initial_status == EtlStatus.SUCCESS:
+        item.document_type = resolved_type
+        item.publication_year = resolved_year
+        item.pid_v2 = pid_v2
+        item.doi = doi
+        item.isbn = isbn
+        item.preprint_id = preprint_id
+        item.dataset_id = dataset_id
+        item.status = EtlStatus.SUCCESS
+        item.result = EtlResult.UNCHANGED
+        item.has_openalex_match = False
+        item.has_scielo_dedup = False
+        item.scielo_dedup_ids = []
+        item.openalex_match_ids = []
+        item.error = None
+        item.processed_at = timezone.now()
+        item.save(
+            update_fields=[
+                "document_type",
+                "publication_year",
+                "pid_v2",
+                "doi",
+                "isbn",
+                "preprint_id",
+                "dataset_id",
+                "status",
+                "result",
+                "has_openalex_match",
+                "has_scielo_dedup",
+                "scielo_dedup_ids",
+                "openalex_match_ids",
                 "error",
                 "processed_at",
                 "updated_at",
