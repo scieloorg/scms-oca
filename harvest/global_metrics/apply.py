@@ -8,6 +8,7 @@ from harvest.global_metrics.opensearch import (
     iter_silver_issn_year_groups,
     update_silver_group_by_query,
 )
+from harvest.models import GlobalMetricsUploadFile
 from search_gateway.client import get_opensearch_client
 
 
@@ -16,7 +17,6 @@ def apply_global_metrics_upload_to_silver(
     harvest_index=None,
     silver_index=None
 ):
-    from harvest.models import GlobalMetricsUploadFile
 
     upload_file = GlobalMetricsUploadFile.objects.get(pk=upload_file_id)
     client = get_opensearch_client()
