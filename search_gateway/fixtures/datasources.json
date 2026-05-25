@@ -713,6 +713,7 @@
             },
             "settings": {
               "label": "Dataset Coverage",
+              "display_transform": "scope",
               "support_query_operator": false,
               "widget": "select",
               "multiple_selection": true,
@@ -762,6 +763,7 @@
             },
             "settings": {
               "label": "SciELO Collection",
+              "display_transform": "scielo_collection",
               "widget": "select",
               "multiple_selection": true,
               "group": "coverage",
@@ -855,6 +857,7 @@
             },
             "settings": {
               "label": "Document Type",
+              "display_transform": "document_type",
               "support_query_operator": false,
               "widget": "select",
               "multiple_selection": true,
@@ -950,6 +953,7 @@
             },
             "settings": {
               "label": "Source Type",
+              "display_transform": "source_type",
               "support_query_operator": false,
               "widget": "select",
               "multiple_selection": true,

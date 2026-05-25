@@ -225,7 +225,7 @@ def _build_advanced_query(query_text):
     return {
         "query_string": {
             "query": rewritten,
-            "fields": ["title_search"],
+            "fields": ["search_all_text"],
             "default_operator": "AND",
             "lenient": True,
         }
@@ -420,13 +420,7 @@ def build_bool_query_from_search_params(
         bool_query = {"must": []}
         if query_text:
             bool_query["must"].append(
-                {
-                    "multi_match": {
-                        "query": query_text,
-                        "fields": sum(SEARCH_FIELD_MAPPING.values(), []),
-                        "operator": "and",
-                    },
-                }
+                _build_clause_query("all", query_text)
             )
         else:
             bool_query["must"].append({"match_all": {}})

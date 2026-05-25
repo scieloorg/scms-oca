@@ -20,7 +20,7 @@ def _text(
 
 SILVER_SETTINGS = {
     "index": {
-        "number_of_shards": 5,
+        "number_of_shards": 1,
         "number_of_replicas": 0,
         "refresh_interval": "30s",
         "mapping.nested_objects.limit": 50000,

@@ -8,18 +8,18 @@ _DOI_PREFIXES = (
 )
 
 _WORK_TYPE_MAP = {
-    "article": "article",
+    "article": "article-journal",
     "book": "book",
     "book-chapter": "chapter",
     "chapter": "chapter",
     "dataset": "dataset",
-    "preprint": "article",
-    "review": "article",
-    "editorial": "article",
-    "letter": "article",
-    "paratext": "article",
+    "preprint": "article-journal",
+    "review": "article-journal",
+    "editorial": "article-journal",
+    "letter": "article-journal",
+    "paratext": "article-journal",
     "other": "other",
-    "journal": "article",
+    "journal": "article-journal",
 }
 
 _NAME_PARTICLES = frozenset({
@@ -252,7 +252,8 @@ class CSLSourceExtractor:
         return _pick_localized(self.source, "title", self.language) or "Untitled"
 
     def csl_type(self):
-        return self.source.get("type")
+        raw_type = _str_or_none(self.source.get("type"))
+        return _WORK_TYPE_MAP.get(raw_type, raw_type or "article-journal")
 
     def publication_year(self):
         return self.source.get("publication_year")
@@ -287,15 +288,10 @@ class CSLSourceExtractor:
         url = self.source.get("content_url")
         if isinstance(url, list) and url:
             url = url[0]
-        return _str_or_none(url) or _str_or_none(_deep_get(self.source, "sources", "url"))
+        return _str_or_none(url)
 
     def source_title(self):
-        sources_list = self.source.get("sources")
-        if isinstance(sources_list, list) and sources_list:
-            title = _deep_get(sources_list[0], "title")
-            if title:
-                return str(title)
-        return ""
+        return _str_or_none(_deep_get(self.source, "source", "title"))
 
     def volume(self):
         bib = self.source.get("biblio") or {}
@@ -314,18 +310,20 @@ class CSLSourceExtractor:
         if not isinstance(bib, dict):
             return None
 
-        if bib.get("pages"):
-            return str(bib["pages"])
-
         first, last = _str_or_none(bib.get("first_page")), _str_or_none(bib.get("last_page"))
         if first and last:
             return f"{first}-{last}"
         return first or last
 
     def publisher(self):
-        return _str_or_none(
-            _deep_get(self.source, "primary_location", "source", "host_organization_name"),
-        )
+        for publisher in self.source.get("publishers") or []:
+            if isinstance(publisher, dict):
+                name = _str_or_none(publisher.get("name"))
+                if name:
+                    return name
+            elif name := _str_or_none(publisher):
+                return name
+        return None
 
     def source_language(self):
         return _str_or_none(self.source.get("language"))
