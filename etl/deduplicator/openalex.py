@@ -47,6 +47,12 @@ class OpenAlexMatcher:
 
         primary = select_primary_scielo_doc(scielo_group)
         rules = self.rules
+        if not self._can_search_openalex(primary):
+            logger.debug(
+                "Skipping OpenAlex match lookup for SciELO doc outside configured query scope"
+            )
+            return []
+
         matches = []
 
         for strategy in rules["openalex_match_strategies"]:
@@ -119,13 +125,71 @@ class OpenAlexMatcher:
                 deduped.append(match)
         return deduped
 
+    def _can_search_openalex(self, scielo_doc: dict) -> bool:
+        year = self._publication_year(scielo_doc)
+        if year is None:
+            return False
+
+        query_rules = self.rules.get("openalex_query") or {}
+        min_year = query_rules.get("publication_year_min")
+        max_year = query_rules.get("publication_year_max")
+        if min_year is None and max_year is None:
+            return True
+
+        tolerance = self._year_tolerance()
+        lower = year - tolerance
+        upper = year + tolerance
+
+        try:
+            if min_year is not None and upper < int(min_year):
+                return False
+            if max_year is not None and lower > int(max_year):
+                return False
+        except (TypeError, ValueError):
+            logger.warning("Invalid OpenAlex publication year query bounds: %s", query_rules)
+            return True
+
+        return True
+
+    def _publication_year(self, doc: dict) -> int | None:
+        try:
+            return int(doc.get("publication_year"))
+        except (TypeError, ValueError):
+            return None
+
+    def _year_tolerance(self) -> int:
+        validation_rules = self.rules.get("openalex_validation") or {}
+        try:
+            return int(validation_rules.get("year_tolerance", 0) or 0)
+        except (TypeError, ValueError):
+            return 0
+
+    def _apply_openalex_query_constraints(
+        self,
+        query: dict[str, Any],
+        scielo_doc: dict[str, Any],
+    ) -> dict[str, Any]:
+        bool_query = query.setdefault("bool", {})
+        query_rules = self.rules.get("openalex_query") or {}
+
+        if query_rules.get("exclude_is_xpac"):
+            bool_query.setdefault("must_not", []).append({"term": {"is_xpac": True}})
+
+        year = self._publication_year(scielo_doc)
+        if year is not None:
+            tolerance = self._year_tolerance()
+            bool_query.setdefault("filter", []).append(
+                {"range": {"publication_year": {"gte": year - tolerance, "lte": year + tolerance}}}
+            )
+
+        return query
+
     def _search_openalex_by_doi(
         self,
         doi: str,
         scielo_doc: Dict[str, Any],
         size: int = 10,
     ) -> List[Dict[str, Any]]:
-        year = scielo_doc.get("publication_year")
         normalized_doi = normalize_doi(doi)
         if not normalized_doi:
             logger.warning("Invalid DOI after normalization: %s", doi)
@@ -143,14 +207,7 @@ class OpenAlexMatcher:
                 ]
             }
         }
-        if year is not None:
-            try:
-                year = int(year)
-                query["bool"]["filter"].append(
-                    {"range": {"publication_year": {"gte": year - 1, "lte": year + 1}}}
-                )
-            except (ValueError, TypeError):
-                pass
+        self._apply_openalex_query_constraints(query, scielo_doc)
 
         try:
             response = self.client.client.search(
@@ -185,7 +242,6 @@ class OpenAlexMatcher:
         scielo_doc: Dict[str, Any],
         size: int = 10,
     ) -> List[Dict[str, Any]]:
-        year = scielo_doc.get("publication_year")
         query = {
             "bool": {
                 "should": [
@@ -201,15 +257,7 @@ class OpenAlexMatcher:
                 "minimum_should_match": 1,
             }
         }
-
-        if year is not None:
-            try:
-                year = int(year)
-                query["bool"]["filter"] = [
-                    {"range": {"publication_year": {"gte": year - 1, "lte": year + 1}}}
-                ]
-            except (ValueError, TypeError):
-                pass
+        self._apply_openalex_query_constraints(query, scielo_doc)
 
         try:
             response = self.client.client.search(
@@ -227,7 +275,6 @@ class OpenAlexMatcher:
         size: int = 10,
     ) -> List[Dict[str, Any]]:
         title = scielo_doc.get("title", "")
-        year = scielo_doc.get("publication_year")
         issns = scielo_doc.get("source_issns", [])
         if not title:
             return []
@@ -247,16 +294,7 @@ class OpenAlexMatcher:
                 ]
             }
         }
-
-        if year:
-            try:
-                year_int = int(year)
-            except (TypeError, ValueError):
-                logger.warning("Invalid year value: %s, skipping range filter", year)
-                return []
-            query["bool"]["filter"] = [
-                {"range": {"publication_year": {"gte": year_int - 1, "lte": year_int + 1}}}
-            ]
+        self._apply_openalex_query_constraints(query, scielo_doc)
 
         if issns:
             query["bool"]["should"] = [{"terms": {"source.issns": issns}}]
