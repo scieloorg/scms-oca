@@ -483,6 +483,10 @@ GLOBAL_METRICS_FILE_UPLOAD_BULK_CHUNK_SIZE = env.int(
     "GLOBAL_METRICS_FILE_UPLOAD_BULK_CHUNK_SIZE",
     default=100,
 )
+GLOBAL_METRICS_UPLOAD_ERROR_INDEX = env.str(
+    "GLOBAL_METRICS_UPLOAD_ERROR_INDEX",
+    "global_metrics_upload_errors",
+)
 
 # OpenSearch Index Names
 OP_INDEX_SOCIAL_PRODUCTION = env.str("OP_INDEX_SOCIAL_PRODUCTION", "social_production")
