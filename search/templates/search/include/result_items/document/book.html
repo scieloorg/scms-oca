@@ -17,6 +17,16 @@
         {% if doc.source.publication_year %}
         <span class="result-card__source-meta">{{ doc.source.publication_year }}</span>
         {% endif %}
+        {% if doc.source.biblio.pages %}
+            <span class="result-card__source-meta">{% trans "Pages" %} {{ doc.source.biblio.pages }}</span>
+        {% endif %}
+        {% if doc.source.biblio.city or doc.source.biblio.country %}
+            <span class="result-card__source-meta">
+                {% if doc.source.biblio.city %}{{ doc.source.biblio.city }}{% endif %}
+                {% if doc.source.biblio.city and doc.source.biblio.country %} - {% endif %}
+                {% if doc.source.biblio.country %}{{ doc.source.biblio.country }}{% endif %}
+            </span>
+        {% endif %}
         {% if doc.source.metrics.received_citations.total %}
             <span class="result-card__source-meta result-card__source-meta--accent">{% trans "Citations" %}: {{ doc.source.metrics.received_citations.total }}</span>
         {% endif %}
@@ -26,7 +36,13 @@
     <p class="result-card__source-line">
         {% include "search/include/result_items/partials/publishers.html" with publishers=doc.source.publishers only %}
         {% if doc.source.ids.isbn %}
-        <span class="result-card__source-meta">ISBN {{ doc.source.ids.isbn }}</span>
+            <span class="result-card__source-meta">ISBN {{ doc.source.ids.isbn }}</span>
+        {% endif %}
+        {% if doc.source.ids.eisbn %}
+            <span class="result-card__source-meta">eISBN {{ doc.source.ids.eisbn }}</span>
+        {% endif %}
+        {% if doc.source.ids.bisac_code %}
+            <span class="result-card__source-meta">BISAC {% for code in doc.source.ids.bisac_code %}{{ code }}{% if not forloop.last %}, {% endif %}{% endfor %}</span>
         {% endif %}
     </p>
     {% endif %}
