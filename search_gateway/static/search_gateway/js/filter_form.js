@@ -225,6 +225,7 @@
     const allOptions = normalizeOptionList(initialOptions);
     const baseOptions = allOptions.slice();
     const baseValues = new Set(baseOptions.map(item => item.value));
+    const allOption = (initialOptions || []).find(item => item.isAllOption) || null;
     const selected = new Set(
       (initialOptions || [])
         .filter(item => !!item.checked)
@@ -248,6 +249,7 @@
       query: '',
       searchResults: [],
       multipleSelection: multipleSelection !== false,
+      allOptionLabel: allOption ? String(allOption.label || translateText('All')).trim() : '',
     };
   }
 
@@ -274,6 +276,16 @@
   }
 
   function updatePinnedSelection(state, option, checked) {
+    if (option?.isAllOption) {
+      if (checked) {
+        state.selected.clear();
+        state.pinned.clear();
+        state.query = '';
+        state.searchResults = [];
+      }
+      return;
+    }
+
     if (!option?.value) return;
 
     if (checked) {
@@ -299,28 +311,33 @@
       .map(input => {
         const value = String(input.value || '').trim();
         const label = String(input.closest('label')?.querySelector('span')?.textContent || value).trim();
+        const isAllOption = String(input.dataset.allOption || '').toLowerCase() === 'true';
         return {
           value,
           label,
           checked: !!input.checked,
+          isAllOption,
         };
       })
-      .filter(item => item.value);
+      .filter(item => item.value || item.isAllOption);
   }
 
-  function createCheckboxNode({ fieldName, option, index, checked, multipleSelection, itemClass }) {
+  function createCheckboxNode({ fieldName, option, index, checked, multipleSelection, itemClass, isAllOption = false }) {
     const labelElement = document.createElement('label');
     labelElement.className = itemClass;
 
     const inputElement = document.createElement('input');
-    inputElement.id = buildCheckboxId(fieldName, option.value, index);
+    inputElement.id = isAllOption ? `${fieldName}_all` : buildCheckboxId(fieldName, option.value, index);
     inputElement.type = 'checkbox';
     inputElement.name = fieldName;
-    inputElement.value = option.value;
+    inputElement.value = isAllOption ? '' : option.value;
     inputElement.className = 'data-source-field data-source-field--checkbox';
     inputElement.dataset.fieldName = fieldName;
     inputElement.dataset.fieldWidget = 'checkbox';
     inputElement.dataset.multipleSelection = multipleSelection ? 'true' : 'false';
+    if (isAllOption) {
+      inputElement.dataset.allOption = 'true';
+    }
     inputElement.checked = !!checked;
 
     const textElement = document.createElement('span');
@@ -339,8 +356,9 @@
     const state = wrapper.__checkboxState;
     if (!searchInput || !state) return;
 
-    // Keep the search affordance stable once the field has options.
-    const shouldShowSearch = Array.isArray(state.allOptions) && state.allOptions.length > 0;
+    const configuredThreshold = Number.parseInt(wrapper.dataset.searchThreshold || '10', 10);
+    const threshold = Number.isFinite(configuredThreshold) ? configuredThreshold : 10;
+    const shouldShowSearch = Array.isArray(state.allOptions) && state.allOptions.length > threshold;
 
     searchInput.hidden = !shouldShowSearch;
     wrapper.classList.toggle('checkbox-field--search-hidden', !shouldShowSearch);
@@ -372,7 +390,7 @@
     if (!hiddenInput) return;
 
     const hasCheckedCheckbox = Array.from(row.querySelectorAll('input.data-source-field--checkbox[type="checkbox"]'))
-      .some(input => input.checked);
+      .some(input => input.checked && String(input.value || '').trim());
     const hasCheckedRadio = Array.from(row.querySelectorAll('input.data-source-field[type="radio"]'))
       .some(input => input.checked && String(input.value || '').trim() !== '');
     const hasSelectedOption = Array.from(
@@ -436,7 +454,7 @@
 
       const checkedInputs = Array.from(
         row.querySelectorAll('input.data-source-field--checkbox[type="checkbox"]:checked')
-      );
+      ).filter(input => String(input.value || '').trim());
       if (checkedInputs.length) {
         checkedInputs.forEach(input => {
           const displayValue = String(
@@ -767,6 +785,20 @@
     const visibleOptions = buildVisibleOptions(state);
     optionsContainer.innerHTML = '';
 
+    if (state.allOptionLabel) {
+      optionsContainer.appendChild(
+        createCheckboxNode({
+          fieldName,
+          option: { value: '', label: state.allOptionLabel },
+          index: -1,
+          checked: state.selected.size === 0,
+          multipleSelection: state.multipleSelection,
+          itemClass,
+          isAllOption: true,
+        })
+      );
+    }
+
     visibleOptions.forEach((option, index) => {
       optionsContainer.appendChild(
         createCheckboxNode({
@@ -872,7 +904,11 @@
         if (!checkbox || checkbox.type !== 'checkbox') return;
         const value = String(checkbox.value || '').trim();
         const label = String(checkbox.closest('label')?.querySelector('span')?.textContent || value).trim();
-        updatePinnedSelection(state, { value, label }, checkbox.checked);
+        const isAllOption = String(checkbox.dataset.allOption || '').toLowerCase() === 'true';
+        updatePinnedSelection(state, { value, label, isAllOption }, checkbox.checked);
+        if (isAllOption && checkbox.checked && searchInput) {
+          searchInput.value = '';
+        }
         render();
       });
 
@@ -914,7 +950,11 @@
         if (!checkbox || checkbox.type !== 'checkbox') return;
         const value = String(checkbox.value || '').trim();
         const label = String(checkbox.closest('label')?.querySelector('span')?.textContent || value).trim();
-        updatePinnedSelection(state, { value, label }, checkbox.checked);
+        const isAllOption = String(checkbox.dataset.allOption || '').toLowerCase() === 'true';
+        updatePinnedSelection(state, { value, label, isAllOption }, checkbox.checked);
+        if (isAllOption && checkbox.checked && searchInput) {
+          searchInput.value = '';
+        }
         render();
       });
 

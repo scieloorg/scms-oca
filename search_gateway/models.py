@@ -176,6 +176,18 @@ class ResolvedField:
         return self.ui_settings.get("allow_clear", True)
 
     @property
+    def include_all_option(self):
+        return bool(self.ui_settings.get("include_all_option"))
+
+    @property
+    def all_option_label(self):
+        return self.ui_settings.get("all_option_label") or _("All")
+
+    @property
+    def search_threshold(self):
+        return self.ui_settings.get("search_threshold")
+
+    @property
     def display_transform(self):
         return self.ui_settings.get("display_transform")
 
