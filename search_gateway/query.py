@@ -28,6 +28,20 @@ def build_terms_clause(field_name, values):
     return {"terms": {field_name: cleaned_values}}
 
 
+def build_range_clause(field_name, value):
+    if field_name in (None, "") or not isinstance(value, dict):
+        return None
+
+    range_values = {
+        operator: value.get(operator)
+        for operator in ("gt", "gte", "lt", "lte")
+        if value.get(operator) not in (None, "")
+    }
+    if not range_values:
+        return None
+    return {"range": {field_name: range_values}}
+
+
 def query_filters(filters):
     """
     Build filter clauses for opensearch query.
@@ -46,7 +60,9 @@ def query_filters(filters):
 
     filters_clauses = []
     for f_field, f_value in filters.items():
-        if isinstance(f_value, list):
+        if isinstance(f_value, dict):
+            clause = build_range_clause(f_field, f_value)
+        elif isinstance(f_value, list):
             clause = build_terms_clause(f_field, f_value)
         else:
             clause = build_term_clause(f_field, f_value)

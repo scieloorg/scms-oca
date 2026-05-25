@@ -2,16 +2,87 @@ from .query import query_filters
 from .option_normalization import normalize_boolean
 
 
-def _build_year_range_values(start_value, end_value):
-    try:
-        start_year = int(start_value) if start_value not in (None, "") else None
-    except (TypeError, ValueError):
-        start_year = None
+DEFAULT_YEAR_MIN = 1800
+DEFAULT_YEAR_MAX = 2100
 
+
+def _parse_number_bound(value):
     try:
-        end_year = int(end_value) if end_value not in (None, "") else None
+        return int(value) if value not in (None, "") else None
     except (TypeError, ValueError):
-        end_year = None
+        return None
+
+
+def _parse_numeric_value(value, *, min_value=None, max_value=None):
+    try:
+        numeric_value = int(value) if value not in (None, "") else None
+    except (TypeError, ValueError):
+        return None
+
+    if numeric_value is None:
+        return None
+    if min_value is not None and numeric_value < min_value:
+        return None
+    if max_value is not None and numeric_value > max_value:
+        return None
+    return numeric_value
+
+
+def _build_numeric_range_value(start_value, end_value, *, min_value=None, max_value=None):
+    start_number = _parse_numeric_value(
+        start_value,
+        min_value=min_value,
+        max_value=max_value,
+    )
+    end_number = _parse_numeric_value(
+        end_value,
+        min_value=min_value,
+        max_value=max_value,
+    )
+
+    if start_number is None and end_number is None:
+        return {}
+
+    if start_number is not None and end_number is not None and start_number > end_number:
+        start_number, end_number = end_number, start_number
+
+    range_value = {}
+    if start_number is not None:
+        range_value["gte"] = start_number
+    if end_number is not None:
+        range_value["lte"] = end_number
+    return range_value
+
+
+def _parse_year_value(value, *, min_year=None, max_year=None):
+    try:
+        year = int(value) if value not in (None, "") else None
+    except (TypeError, ValueError):
+        return None
+
+    if year is None:
+        return None
+    min_year = DEFAULT_YEAR_MIN if min_year is None else min_year
+    max_year = DEFAULT_YEAR_MAX if max_year is None else max_year
+    if len(str(abs(year))) != 4:
+        return None
+    if min_year is not None and year < min_year:
+        return None
+    if max_year is not None and year > max_year:
+        return None
+    return year
+
+
+def _parse_year_bound(value):
+    try:
+        return int(value) if value not in (None, "") else None
+    except (TypeError, ValueError):
+        return None
+
+
+def _build_year_range_values(start_value, end_value, *, min_year=None, max_year=None):
+    start_year = _parse_year_value(start_value, min_year=min_year, max_year=max_year)
+    end_year = _parse_year_value(end_value, min_year=min_year, max_year=max_year)
 
     if start_year is None and end_year is None:
         return []
@@ -49,7 +120,7 @@ def _map_transformed_filter(field_name, field_info, filters):
             return (real_field_name, normalized_value), handled_fields
         return None, handled_fields
 
-    if transform_type != "year_range":
+    if transform_type not in {"year_range", "numeric_range"}:
         return None, set()
 
     source_names = list(transform.get("sources") or [])
@@ -59,9 +130,28 @@ def _map_transformed_filter(field_name, field_info, filters):
     if len(source_names) != 2:
         return None, handled_fields
 
+    settings = field_info.get("settings") or {}
+    if transform_type == "numeric_range":
+        min_value = _parse_number_bound(settings.get("min"))
+        max_value = _parse_number_bound(settings.get("max"))
+        numeric_range = _build_numeric_range_value(
+            filters.get(source_names[0]),
+            filters.get(source_names[1]),
+            min_value=min_value,
+            max_value=max_value,
+        )
+        if numeric_range:
+            return (real_field_name, numeric_range), handled_fields
+        return None, handled_fields
+
+    min_year = _parse_year_bound(settings.get("min"))
+    max_year = _parse_year_bound(settings.get("max"))
+
     year_values = _build_year_range_values(
         filters.get(source_names[0]),
         filters.get(source_names[1]),
+        min_year=min_year,
+        max_year=max_year,
     )
     if year_values:
         return (real_field_name, year_values), handled_fields
