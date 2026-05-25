@@ -11,7 +11,10 @@ from django.conf import settings
 from opensearchpy.helpers import streaming_bulk
 from slugify import slugify
 
-from harvest.global_metrics.constants import GLOBAL_METRICS_REQUIRED_COLUMNS
+from harvest.global_metrics.constants import (
+    GLOBAL_METRICS_CSV_DELIMITER,
+    GLOBAL_METRICS_REQUIRED_COLUMNS,
+)
 from search_gateway.client import get_opensearch_client
 from search_gateway.opensearch import OpenSearchIndexClient
 
@@ -121,17 +124,17 @@ def _iter_rows(file_obj, extension, required_columns=None):
     file_obj.seek(0)
     if extension == ".csv":
         yield from _iter_csv_rows(file_obj, required_columns=required_columns)
-        return
-    if extension == ".xlsx":
+    elif extension == ".xlsx":
         yield from _iter_xlsx_rows(file_obj, required_columns=required_columns)
-        return
+    else:
+        raise GlobalMetricsIndexingError("Formato não suportado.")
 
 
 def _iter_csv_rows(file_obj, required_columns=None):
     file_obj.seek(0)
     wrapper = io.TextIOWrapper(file_obj, encoding="utf-8-sig", newline="")
 
-    reader = csv.reader(wrapper, delimiter=settings.DIRECTORY_IMPORT_DELIMITER)
+    reader = csv.reader(wrapper, delimiter=GLOBAL_METRICS_CSV_DELIMITER)
     try:
         headers = next(reader)
     except StopIteration as exc:
