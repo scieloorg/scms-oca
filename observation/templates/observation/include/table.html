@@ -3,7 +3,7 @@
 {# Table card fragment - included in search_page search_content #}
 <div class="observation-card">
   <div class="mb-3">
-    <label class="form-label" for="observation-dimension-select">{% trans "Select an observation table" %}</label>
+    <label class="form-label" for="observation-dimension-select">{% firstof observation_dimension_select_label _("Select an observation table") %}</label>
     <select id="observation-dimension-select" class="form-select">
       {% for dimension in observation_dimensions %}
       <option value="{{ dimension.slug }}" {% if dimension.slug == observation_default_dimension.slug %}selected{% endif %}>{{ dimension.menu_label }}</option>

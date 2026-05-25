@@ -1,85 +1,7 @@
 from django.core.management.base import BaseCommand, CommandError
 
-from observation.models import ObservationDimension, ObservationPage
-
-
-DIMENSION_SPECS_BY_INDEX = {
-    "scientific_production": [
-        {
-            "slug": "documents-by-institution",
-            "menu_label": "Evolution of Scientific Production - World - number of documents by Institution",
-            "row_label": "Institution",
-            "row_field_candidates": ["institutions", "institution"],
-            "is_default": False,
-        },
-        {
-            "slug": "documents-by-journal",
-            "menu_label": "Evolution of Scientific Production - World - number of documents by Journal",
-            "row_label": "Journal",
-            "row_field_candidates": ["source_name", "journal_title", "primary_source_title"],
-            "is_default": False,
-        },
-        {
-            "slug": "documents-by-thematic-area",
-            "menu_label": "Evolution of Scientific Production - World - number of documents by Thematic Area",
-            "row_label": "Thematic Area",
-            "row_field_candidates": ["subject_area_level_1", "topic_fields", "primary_topic_field"],
-            "is_default": False,
-        },
-        {
-            "slug": "documents-by-type-of-access",
-            "menu_label": "Evolution of Scientific Production - World - number of documents by Type of Access",
-            "row_label": "Type of Access",
-            "row_field_candidates": ["open_access_status", "open_access"],
-            "is_default": False,
-        },
-        {
-            "slug": "documents-by-publisher",
-            "menu_label": "Evolution of Scientific Production - World - number of documents by Publisher",
-            "row_label": "Publisher",
-            "row_field_candidates": ["publisher"],
-            "is_default": False,
-        },
-        {
-            "slug": "documents-by-country-region-affiliation",
-            "menu_label": "Evolution of Scientific Production - World - number of documents by Country and Region of Affiliation",
-            "row_label": "Country and Region of Affiliation",
-            "row_field_candidates": ["country", "author_country_codes"],
-            "is_default": True,
-        },
-    ],
-    "social_production": [
-        {
-            "slug": "documents-by-events",
-            "menu_label": "Brazil - Social Production - Country - Documents - Events",
-            "row_label": "Types",
-            "row_field_candidates": ["directory_type", "type"],
-            "is_default": True,
-        },
-        {
-            "slug": "documents-by-institutions",
-            "menu_label": "Brazil - Social Production - Country - Documents - Institutions",
-            "row_label": "Institutions",
-            "row_field_candidates": ["institutions"],
-            "is_default": False,
-        },
-        {
-            "slug": "documents-by-states",
-            "menu_label": "Brazil - Social Production - Country - Documents - States",
-            "row_label": "States",
-            "row_field_candidates": ["states"],
-            "is_default": False,
-        },
-        {
-            "slug": "documents-by-regions",
-            "menu_label": "Brazil - Social Production - Country - Documents - Regions",
-            "row_label": "Regions",
-            "row_field_candidates": ["regions"],
-            "row_field_fallback": "regions",
-            "is_default": False,
-        },
-    ],
-}
+from observation.models import ObservationPage
+from observation.seed_dimensions import seed_all_observation_pages, seed_observation_page_dimensions
 
 
 class Command(BaseCommand):
@@ -93,8 +15,12 @@ class Command(BaseCommand):
         )
         parser.add_argument(
             "--index-name",
-            default="scientific_production",
-            help="Filter pages by DataSource index_name (default: scientific_production).",
+            default=None,
+            help=(
+                "Filter pages by DataSource index_name "
+                "(e.g. scientific_production, social_production). "
+                "If omitted, all observation pages are processed."
+            ),
         )
 
     def handle(self, *args, **options):
@@ -112,100 +38,12 @@ class Command(BaseCommand):
             raise CommandError("No ObservationPage found for provided filters.")
 
         for page in pages:
-            self._seed_page(page)
+            seed_observation_page_dimensions(
+                page,
+                stdout=self.stdout,
+                style=self.style,
+            )
 
         self.stdout.write(
             self.style.SUCCESS(f"Processed {len(pages)} observation page(s).")
         )
-
-    def _seed_page(self, page):
-        if not page.data_source:
-            self.stdout.write(
-                self.style.WARNING(
-                    f"[page={page.id}] skipped: page has no data_source."
-                )
-            )
-            return
-
-        field_settings = page.data_source.field_settings_dict or {}
-        existing_slugs = set(
-            page.dimensions.values_list("slug", flat=True)
-        )
-
-        created_or_updated = 0
-        default_slug = None
-
-        dimension_specs = DIMENSION_SPECS_BY_INDEX.get(page.data_source.index_name)
-        if dimension_specs is None:
-            dimension_specs = DIMENSION_SPECS_BY_INDEX["scientific_production"]
-
-        for spec in dimension_specs:
-            row_field_name = self._pick_row_field(field_settings, spec["row_field_candidates"])
-            if not row_field_name:
-                row_field_name = spec.get("row_field_fallback")
-            if not row_field_name:
-                self.stdout.write(
-                    self.style.WARNING(
-                        f"[page={page.id}] skipped dimension '{spec['slug']}': "
-                        f"none of {spec['row_field_candidates']} exists in DataSource."
-                    )
-                )
-                continue
-
-            col_field_name = "publication_year"
-            if col_field_name not in field_settings:
-                self.stdout.write(
-                    self.style.WARNING(
-                        f"[page={page.id}] skipped dimension '{spec['slug']}': "
-                        "publication_year not configured in DataSource."
-                    )
-                )
-                continue
-
-            defaults = {
-                "menu_label": spec["menu_label"],
-                "row_field_name": row_field_name,
-                "col_field_name": col_field_name,
-                "row_bucket_size": 500,
-                "col_bucket_size": 300,
-                "table_title": spec["menu_label"],
-                "kpi_label": "Documents",
-                "row_label": spec["row_label"],
-                "col_label": "Year",
-                "value_label": "Documents",
-                "is_default": False,
-            }
-            _, _created = ObservationDimension.objects.update_or_create(
-                page=page,
-                slug=spec["slug"],
-                defaults=defaults,
-            )
-            created_or_updated += 1
-            if spec.get("is_default"):
-                default_slug = spec["slug"]
-
-        if default_slug:
-            page.dimensions.exclude(slug=default_slug).update(is_default=False)
-            page.dimensions.filter(slug=default_slug).update(is_default=True)
-        elif existing_slugs:
-            first_slug = (
-                page.dimensions.order_by("sort_order", "id")
-                .values_list("slug", flat=True)
-                .first()
-            )
-            if first_slug:
-                page.dimensions.exclude(slug=first_slug).update(is_default=False)
-                page.dimensions.filter(slug=first_slug).update(is_default=True)
-
-        self.stdout.write(
-            self.style.SUCCESS(
-                f"[page={page.id}] dimensions created/updated: {created_or_updated}"
-            )
-        )
-
-    @staticmethod
-    def _pick_row_field(field_settings, candidates):
-        for candidate in candidates:
-            if candidate in field_settings:
-                return candidate
-        return None

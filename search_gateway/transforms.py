@@ -115,6 +115,7 @@ TRANSFORMS = {
     "scope": _get_scope_display,
     "document_type": _get_document_type_display,
     "source_type": _get_source_type_display,
+    "scope": _get_scope_display,
 }
 
 
