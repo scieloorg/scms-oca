@@ -1,4 +1,3 @@
-import gettext
 import re
 import unicodedata
 
