@@ -20,7 +20,7 @@ def iter_silver_issn_year_groups(client, silver_index):
             }
         },
         "_source": ["publication_year", "source.issns"],
-        "size": 1000,
+        "size": 5000,
     }
     processed = set()
     for hit in scroll_hits(client, silver_index, body):
