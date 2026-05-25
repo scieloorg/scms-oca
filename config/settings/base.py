@@ -403,10 +403,6 @@ STATICFILES_FINDERS += ["compressor.finders.CompressorFinder"]
 # Your stuff...
 WAGTAIL_SITE_NAME = "OCABR"
 BASE_URL = env.str("DJANGO_BASE_URL", default="https://ocabr")
-URL_API_CROSSREF = env.str("API_CROSSREF", default="https://api.crossref.org/works")
-URL_API_OPENALEX = env.str("API_OPENALEX", default="https://api.openalex.org/works")
-URL_API_OPENALEX_INSTITUTIONS = env.str("URL_API_OPENALEX_INSTITUTIONS", default="https://api.openalex.org/institutions")
-URL_API_OPENALEX_JOURNALS = env.str("URL_API_OPENALEX_JOURNALS", default="https://api.openalex.org/sources")
 
 LANGUAGES = [
     ("pt-BR", _('Português (Brasil)')),
@@ -463,114 +459,14 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': env.int("DRF_PAGE_SIZE", default=10)
 }
 
-DIRECTORY_DEFAULT_CONTRIBUTOR = env.str("DIRECTORY_DEFAULT_CONTRIBUTOR", default="SciELO")
-
-INSTITUTION_INDEX = env.str("INSTITUTION_INDEX", "opinstitutions")
-REGION_INDEX = env.str("REGION_INDEX", "regionsbra")
-COUNTRY_INDEX = env.str("COUNTRY_INDEX", "regionscon")
-THEMATIC_AREA_INDEX = env.str("THEMATIC_AREA_INDEX", "thematicareas")
-
-DIRECTORY_IMPORT_DELIMITER = env.str("DIRECTORY_IMPORT_DELIMITER", default=",")
-
-# Opensearch Base Settings
-OS_URL = env("OS_URL", default="http://opensearch:9200")
-OS_REQUEST_TIMEOUT = env.int("OS_REQUEST_TIMEOUT", default=40)
-GLOBAL_METRICS_FILE_UPLOAD_OPENSEARCH_INDEX = env.str(
-    "GLOBAL_METRICS_FILE_UPLOAD_OPENSEARCH_INDEX",
-    "global_metrics_upload_file",
-)
-GLOBAL_METRICS_FILE_UPLOAD_BULK_CHUNK_SIZE = env.int(
-    "GLOBAL_METRICS_FILE_UPLOAD_BULK_CHUNK_SIZE",
-    default=100,
-)
-GLOBAL_METRICS_UPLOAD_ERROR_INDEX = env.str(
-    "GLOBAL_METRICS_UPLOAD_ERROR_INDEX",
-    "global_metrics_upload_errors",
-)
-
-# OpenSearch Index Names
-OP_INDEX_SOCIAL_PRODUCTION = env.str("OP_INDEX_SOCIAL_PRODUCTION", "social_production")
-OP_INDEX_SCIENTIFIC_PRODUCTION = env.str("OP_INDEX_SCIENTIFIC_PRODUCTION", "scientific_production")
-
-# SearchGateway Settings
-SEARCH_GATEWAY_LOOKUP_SOURCE_INDEX = env.str(
-    "SEARCH_GATEWAY_LOOKUP_SOURCE_INDEX",
-    OP_INDEX_SCIENTIFIC_PRODUCTION,
-)
-SEARCH_GATEWAY_LOOKUP_BATCH_SIZE = env.int("SEARCH_GATEWAY_LOOKUP_BATCH_SIZE", 10000)
-SEARCH_GATEWAY_LOOKUP_NUMBER_OF_SHARDS = env.int("SEARCH_GATEWAY_LOOKUP_NUMBER_OF_SHARDS", 5)
-SEARCH_GATEWAY_LOOKUP_NUMBER_OF_REPLICAS = env.int("SEARCH_GATEWAY_LOOKUP_NUMBER_OF_REPLICAS", 0)
-SEARCH_GATEWAY_ERROR_INDEX = env.str("SEARCH_GATEWAY_ERROR_INDEX", "search_gateway_errors")
-
-# ETL Settings
-ETL_PUBLIC_ALIAS = env.str("ETL_PUBLIC_ALIAS", "silver_scientific_production")
-ETL_ERROR_INDEX = env.str("ETL_ERROR_INDEX", "etl_errors")
-ETL_DEFAULT_BATCH_SIZE = env.int("ETL_DEFAULT_BATCH_SIZE", 5000)
-ETL_DB_CONNECTION_REFRESH_INTERVAL = env.int("ETL_DB_CONNECTION_REFRESH_INTERVAL", 100)
-ETL_DOCUMENT_TYPE_ALIAS = env.json(
-    "ETL_DOCUMENT_TYPE_ALIAS",
-    default={
-        "research-article": "article",
-        "review": "article",
-        "review-article": "article",
-        "abstract": "article",
-        "addendum": "article",
-        "article-commentary": "article",
-        "book-review": "article",
-        "brief-report": "article",
-        "case-report": "article",
-        "letter": "article",
-        "editorial": "article",
-        "correction": "article",
-        "erratum": "article",
-        "news": "article",
-        "oration": "article",
-        "press-release": "article",
-        "rapid-communication": "article",
-        "undefined": "article",
-        "book-part": "book-chapter",
-        "chapter": "book-chapter",
-    },
-)
-ETL_OPENACCESS_STATUSES = env.json(
-    "ETL_OPENACCESS_STATUSES",
-    default={
-        "gold",
-        "green",
-        "hybrid",
-        "bronze",
-        "closed",
-        "diamond"
-     })
-
-# ETL Bronze Index Names
-ETL_INPUT_SCIELO_ARTICLES = env.str("ETL_INPUT_SCIELO_ARTICLES", "bronze_scielo_articles-000001")
-ETL_INPUT_SCIELO_BOOKS = env.str("ETL_INPUT_SCIELO_BOOKS", "bronze_scielo_books")
-ETL_INPUT_SCIELO_PREPRINT = env.str("ETL_INPUT_SCIELO_PREPRINT", "bronze_scielo_preprint")
-ETL_INPUT_SCIELO_DATASET = env.str("ETL_INPUT_SCIELO_DATASET", "bronze_scielo_dataset")
-ETL_INPUT_OPENALEX_WORKS = env.str("ETL_INPUT_OPENALEX_WORKS", "raw_openalex_works")
-
-# ETL Silver Index Pattern
-ETL_SILVER_INDEX_PATTERN = env.str("ETL_SILVER_INDEX_PATTERN", "silver_scientific_production")
-ETL_SILVER_WRITE_ALIAS = env.str("ETL_SILVER_WRITE_ALIAS", "silver_write")
-ETL_SILVER_ROLLOVER_MAX_SIZE = env.str("ETL_SILVER_ROLLOVER_MAX_SIZE", default="30gb")
-
-# ETL OpenAlex-only Backfill
-ETL_OPENALEX_ONLY_INDEX_PATTERN = env.str("ETL_OPENALEX_ONLY_INDEX_PATTERN", "silver_openalex")
-ETL_OPENALEX_ONLY_WRITE_ALIAS = env.str("ETL_OPENALEX_ONLY_WRITE_ALIAS", "silver_openalex_write")
-
-# OpenSearch Raw Index Names
-OS_INDEX_RAW_PREPRINT = env.str("OS_INDEX_RAW_PREPRINT", "raw_scielo_preprint")
-OS_INDEX_RAW_BOOK = env.str("OS_INDEX_RAW_BOOK", "raw_scielo_book")
-OS_INDEX_RAW_SCIELO_DATA_DATASET = env.str("OS_INDEX_RAW_SCIELO_DATA_DATASET", "raw_scielo_data_dataset")
-OS_INDEX_RAW_SCIELO_DATA_DATAVERSE = env.str("OS_INDEX_RAW_SCIELO_DATA_DATAVERSE", "raw_scielo_data_comunities_dataverse")
-OS_INDEX_RAW_SCIELO_DATA = env.str("OS_INDEX_RAW_SCIELO_DATA", "raw_scielo_data")
-
-# HARVEST Books, Preprint, SciELO Data
-SCIELO_BOOKS_BASE_URL = env("SCIELO_BOOKS_BASE_URL", default=None)
-SITE_SCIELO_DATA = env("SITE_SCIELO_DATA", default="https://data.scielo.org")
-USER_AGENT = env(
-    "USER_AGENT",
-    default="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
-)
-ENDPOINT_OAI_PMH_PREPRINT = env("ENDPOINT_OAI_PMH_PREPRINT", default="https://preprints.scielo.org/index.php/scielo/oai")
+# APP-SPECIFIC SETTINGS
+# ------------------------------------------------------------------------------
+# Keep app-owned environment settings exposed through django.conf.settings.
+from article.settings import *  # noqa: E402,F403
+from core.settings import *  # noqa: E402,F403
+from etl.settings import *  # noqa: E402,F403
+from harvest.settings import *  # noqa: E402,F403
+from institution.settings import *  # noqa: E402,F403
+from journal.settings import *  # noqa: E402,F403
+from scholarly_articles.settings import *  # noqa: E402,F403
+from search_gateway.settings import *  # noqa: E402,F403
