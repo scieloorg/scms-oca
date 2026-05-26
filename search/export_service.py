@@ -6,7 +6,11 @@ from typing import Optional
 
 from django.utils.translation import gettext as _
 
-from .csv_export import stream_csv
+from .csv_export import stream_csv_rows
+from .citation.render import (
+    build_citation_items,
+    citation_csv_columns,
+)
 from .citation.constants import CITATION_EXPORT_FORMATS
 
 class BadRequestError(Exception):
@@ -85,4 +89,19 @@ def extract_preview_inputs(body, request):
 
 def build_csv_file(inputs):
     """Return ``(content_iterable, mime_type, file_extension)`` for CSV export."""
-    return stream_csv(inputs.documents, language=inputs.language_code), "text/csv", "csv"
+    citation_items = build_citation_items(
+        inputs.documents,
+        language=inputs.language_code,
+    )
+    if len(citation_items) != len(inputs.documents):
+        raise BadRequestError(_("Could not map documents to citations."))
+    rows = [
+        row
+        for item in citation_items
+        if isinstance((row := item.get("csv_row")), dict)
+    ]
+    content = stream_csv_rows(
+        rows,
+        columns=citation_csv_columns(rows),
+    )
+    return content, "text/csv", "csv"

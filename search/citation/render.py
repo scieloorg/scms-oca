@@ -12,70 +12,95 @@ from citeproc import (
 )
 from citeproc.source.json import CiteProcJSON
 
-from ..csl_json import CSLSourceExtractor
+from .scientific_production import (
+    SCIENTIFIC_PRODUCTION_CSV_COLUMNS,
+    build_scientific_production_citation_item,
+)
+from .social_production import (
+    build_social_production_citation_item,
+    is_social_production_document,
+)
 
-_CONTAINER_TITLE_TYPES = frozenset({"article-journal", "article", "chapter", "review"})
-_PUBLISHER_TYPES = frozenset({"book", "chapter", "dataset"})
-
-
-def _add_if(item, key, value):
-    """Set ``item[key] = value`` only when value is truthy."""
-    if value:
-        item[key] = value
-
-
-def build_csl_item(source, doc_id, *, language=None):
-    """Build a CSL-JSON item (citation payload) from an indexed document source."""
-    extractor = CSLSourceExtractor(source, language=language)
-    csl_type = extractor.csl_type()
-
-    item = {
-        "id": str(doc_id),
-        "type": csl_type,
-        "title": extractor.title(),
+_CSL_ITEM_KEYS = frozenset(
+    {
+        "id",
+        "type",
+        "title",
+        "issued",
+        "author",
+        "DOI",
+        "URL",
+        "container-title",
+        "volume",
+        "issue",
+        "page",
+        "publisher",
+        "language",
     }
-    _add_if(item, "issued", extractor.issued())
-    _add_if(item, "author", extractor.authors_with_given_family())
-
-    doi = extractor.doi()
-    _add_if(item, "DOI", doi)
-    _add_if(item, "URL", extractor.url(doi=doi))
-
-    if csl_type in _CONTAINER_TITLE_TYPES:
-        _add_if(item, "container-title", extractor.source_title())
-
-    _add_if(item, "volume", extractor.volume())
-    _add_if(item, "issue", extractor.issue())
-    _add_if(item, "page", extractor.pages())
-
-    if csl_type in _PUBLISHER_TYPES:
-        _add_if(item, "publisher", extractor.publisher())
-
-    _add_if(item, "language", extractor.source_language())
-
-    return item
+)
+_BIBTEX_TYPE_MAP = {
+    "article": "article",
+    "article-journal": "article",
+    "book": "book",
+    "chapter": "incollection",
+    "dataset": "misc",
+    "entry": "misc",
+}
 
 
-def build_csl_payload(documents, *, language=None):
-    """Build a list of CSL-JSON items from a payload of ``{id, source, language_code}`` entries."""
+def _year_from_issued(issued):
+    date_parts = (issued or {}).get("date-parts")
+    if isinstance(date_parts, list) and date_parts and isinstance(date_parts[0], list) and date_parts[0]:
+        return date_parts[0][0]
+    return None
+
+
+def build_citation_items(documents, *, language=None):
+    """Build normalized citation dicts from indexed document payload entries."""
     items = []
-    for entry in documents:
+    position = 0
+    for entry in documents or []:
         if not isinstance(entry, dict):
             continue
         doc_id = entry.get("id")
         source = entry.get("source")
         if doc_id is None or not isinstance(source, dict):
             continue
-        entry_lang = entry.get("language_code")
-        entry_lang = str(entry_lang).strip() if entry_lang not in (None, "") else None
-        items.append(
-            build_csl_item(
-                source,
-                doc_id=str(doc_id),
-                language=entry_lang or language,
+        position += 1
+        if is_social_production_document(entry):
+            items.append(
+                build_social_production_citation_item(
+                    entry,
+                    language=language,
+                    position=position,
+                )
             )
-        )
+        else:
+            items.append(
+                build_scientific_production_citation_item(
+                    entry,
+                    language=language,
+                    position=position,
+                )
+            )
     return items
+
+
+def build_csl_payload(documents, *, language=None):
+    """Build a list of CSL-JSON items from a payload of ``{id, source, language_code}`` entries."""
+    return [
+        {key: value for key, value in item.items() if key in _CSL_ITEM_KEYS}
+        for item in build_citation_items(documents, language=language)
+    ]
+
+
+def citation_csv_columns(rows):
+    columns = []
+    for row in rows:
+        for key in row:
+            if key not in columns:
+                columns.append(key)
+    return tuple(columns) or SCIENTIFIC_PRODUCTION_CSV_COLUMNS
 
 
 def _styles_dir():
@@ -129,7 +154,11 @@ def render_citation(
     if not csl_json:
         return []
 
-    bib_source = CiteProcJSON(csl_json)
+    citeproc_items = [
+        {key: value for key, value in item.items() if key in _CSL_ITEM_KEYS}
+        for item in csl_json
+    ]
+    bib_source = CiteProcJSON(citeproc_items)
     style_path = get_style_filepath(style)
     bib_style = CitationStylesStyle(style_path, validate=validate)
     bibliography = CitationStylesBibliography(bib_style, bib_source, fmt)
@@ -137,7 +166,7 @@ def render_citation(
     def warn(_citation_item):
         pass
 
-    for entry in csl_json:
+    for entry in citeproc_items:
         cid = entry.get("id")
         if cid is None:
             continue
@@ -148,7 +177,60 @@ def render_citation(
     return [str(item) for item in bibliography.bibliography()]
 
 
+def _bibtex_escape(value):
+    return str(value).replace("\\", "\\textbackslash{}").replace("{", "\\{").replace("}", "\\}")
+
+
+def _bibtex_key(item):
+    return re.sub(r"[^\w]", "", str(item.get("bibtex_key") or "")) or "item"
+
+
+def _bibtex_authors(authors):
+    if not isinstance(authors, list):
+        return ""
+    names = []
+    for author in authors:
+        if not isinstance(author, dict):
+            continue
+        if author.get("literal"):
+            names.append(str(author["literal"]))
+            continue
+        family = author.get("family") or ""
+        given = author.get("given") or ""
+        name = f"{given} {family}".strip()
+        if name:
+            names.append(name)
+    return " and ".join(names)
+
+
+def _bibtex_fields(item):
+    year = _year_from_issued(item.get("issued"))
+    fields = [
+        ("title", item.get("title")),
+        ("author", _bibtex_authors(item.get("author"))),
+        ("year", year),
+        ("journal", item.get("container-title")),
+        ("volume", item.get("volume")),
+        ("number", item.get("issue")),
+        ("pages", item.get("page")),
+        ("publisher", item.get("publisher")),
+        ("doi", item.get("DOI")),
+        ("url", item.get("URL")),
+        ("note", item.get("citation_text")),
+    ]
+    return [(key, value) for key, value in fields if value not in (None, "", [])]
+
+
 def render_bibtex(csl_json):
-    parts = render_citation(csl_json, style="bibtex", fmt=formatter.plain, validate=False)
-    return "\n\n".join(p.strip() for p in parts if p and str(p).strip())
+    blocks = []
+    for item in csl_json:
+        entry_type = item.get("bibtex_type") or _BIBTEX_TYPE_MAP.get(item.get("type"), "misc")
+        lines = [f"@{entry_type}{{{_bibtex_key(item)},"]
+        lines.extend(
+            f"  {key} = {{{_bibtex_escape(value)}}},"
+            for key, value in _bibtex_fields(item)
+        )
+        lines.append("}")
+        blocks.append("\n".join(lines))
+    return "\n\n".join(blocks)
 

@@ -12,7 +12,12 @@
             "openalex_index": "raw_openalex_works",
             "rules": {
                 "scielo_dedup_strategies": ["doi", "pid", "fuzzy"],
-                "openalex_match_strategies": ["doi", "isbn", "title"],
+                "openalex_match_strategies": ["doi", "title"],
+                "openalex_query": {
+                    "exclude_is_xpac": true,
+                    "publication_year_min": 2019,
+                    "publication_year_max": 2025
+                },
                 "doi_requires_title_overlap": true,
                 "pid_requires_year_match": true,
                 "pid_requires_source_match": true,

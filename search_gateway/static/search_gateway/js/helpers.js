@@ -431,6 +431,15 @@ function standardizeFieldValue(field, value) {
         return standardizeCategoryLevel(value);
     }
 
+    if (field === 'scope' || field === 'Scope') {
+        const scopeLabels = {
+            openalex_works: gettext('OpenAlex'),
+            scielo: gettext('SciELO'),
+        };
+        const normalized = String(value || '').trim().toLowerCase();
+        return scopeLabels[normalized] || value;
+    }
+
     return value;
 }
 

@@ -371,7 +371,12 @@ def build_form_field_definition(field, applied_filters=None, options_by_field=No
         "min_value": field.min_value,
         "max_value": field.max_value,
         "step": field.step,
+        "range_start_placeholder": field.ui_settings.get("range_start_placeholder", ""),
+        "range_end_placeholder": field.ui_settings.get("range_end_placeholder", ""),
         "allow_clear": field.allow_clear,
+        "include_all_option": field.include_all_option,
+        "all_option_label": gettext(field.all_option_label),
+        "search_threshold": field.search_threshold,
     }
 
 
@@ -441,6 +446,7 @@ def render_filter_sidebar(
     reset_id="search-gateway-filter-reset",
     reset_type="button",
     filters_error="",
+    hidden_fields=None,
 ):
     payload = build_data_source_form_payload(
         data_source,
@@ -460,6 +466,7 @@ def render_filter_sidebar(
         "reset_id": reset_id,
         "reset_type": reset_type,
         "filters_error": filters_error or " ".join(payload["errors"]).strip(),
+        "hidden_fields": hidden_fields or {},
     }
     html = render_to_string(
         "search_gateway/includes/filter_sidebar.html",

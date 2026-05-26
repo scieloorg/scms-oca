@@ -5,9 +5,8 @@
     <div class="advanced-search-row search-input-card__row" data-row-index="0">
         <select id="search-field-0" name="search_field_0" class="form-select search-field-select"
             aria-label="{% trans 'Campo de busca' %}">
-            <option value="all" selected>{% trans "Todos os campos" %}</option>
             {% for value, label in searchable_fields %}
-            <option value="{{ value }}">{{ label }}</option>
+            <option value="{{ value }}"{% if value == "all" %} selected{% endif %}>{{ label }}</option>
             {% endfor %}
         </select>
         <input type="search" name="search_text_0" id="search-input-0" class="search-input-card__input search-text-input"

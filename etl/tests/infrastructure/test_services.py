@@ -55,6 +55,52 @@ class IncrementalEtlTests(TestCase):
         self.assertIsNone(changed.processed_at)
         self.assertEqual(EtlItemProcess.objects.count(), 1)
 
+    def test_enqueue_marks_existing_same_hash_success_when_backfilling_processed_items(self):
+        item = enqueue_etl_item(
+            source_index="bronze_scielo_books",
+            external_id="p1",
+            source_payload={"type": "book", "publication_year": 2024, "title": "A"},
+        )
+        item.mark_failed("old failure")
+        item.has_openalex_match = True
+        item.openalex_match_ids = ["W1"]
+        item.save(update_fields=["has_openalex_match", "openalex_match_ids", "updated_at"])
+
+        updated = enqueue_etl_item(
+            source_index="bronze_scielo_books",
+            external_id="p1",
+            source_payload={"type": "book", "publication_year": 2024, "title": "A"},
+            initial_status=EtlStatus.SUCCESS,
+        )
+
+        self.assertEqual(updated.status, EtlStatus.SUCCESS)
+        self.assertEqual(updated.result, EtlResult.UNCHANGED)
+        self.assertFalse(updated.has_openalex_match)
+        self.assertEqual(updated.openalex_match_ids, [])
+        self.assertIsNone(updated.error)
+        self.assertIsNotNone(updated.processed_at)
+
+    def test_enqueue_marks_existing_changed_hash_success_when_backfilling_processed_items(self):
+        item = enqueue_etl_item(
+            source_index="bronze_scielo_books",
+            external_id="p1",
+            source_payload={"type": "book", "publication_year": 2024, "title": "A"},
+        )
+        item.mark_failed("old failure")
+
+        updated = enqueue_etl_item(
+            source_index="bronze_scielo_books",
+            external_id="p1",
+            source_payload={"type": "book", "publication_year": 2024, "title": "B"},
+            initial_status=EtlStatus.SUCCESS,
+        )
+
+        self.assertEqual(updated.status, EtlStatus.SUCCESS)
+        self.assertEqual(updated.result, EtlResult.UNCHANGED)
+        self.assertEqual(updated.source_hash, source_hash({"type": "book", "publication_year": 2024, "title": "B"}))
+        self.assertIsNone(updated.error)
+        self.assertIsNotNone(updated.processed_at)
+
     @patch("etl.services.log_etl_error")
     @patch("etl.services.OpenSearchETLPipeline")
     def test_process_pending_marks_success(self, pipeline_cls, _log_etl_error):

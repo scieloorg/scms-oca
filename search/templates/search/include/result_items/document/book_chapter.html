@@ -11,10 +11,10 @@
 {% endblock %}
 
 {% block item_source_line %}
-    {% if doc.source.monograph.title or doc.source.publication_year or doc.source.biblio.first_page or doc.source.biblio.last_page %}
+    {% if doc.source.parent_book.title or doc.source.publication_year or doc.source.biblio.first_page or doc.source.biblio.last_page %}
     <p class="result-card__source-line">
-        {% if doc.source.monograph.title %}
-        <span class="result-card__source-name">{{ doc.source.monograph.title }}</span>
+        {% if doc.source.parent_book.title %}
+        <span class="result-card__source-name">{{ doc.source.parent_book.title }}</span>
         {% endif %}
         {% if doc.source.publication_year %}
         <span class="result-card__source-meta">{{ doc.source.publication_year }}</span>
@@ -38,7 +38,9 @@
 
 {% block item_meta %}{% endblock %}
 
-{% block item_extra %}{% endblock %}
+{% block item_extra %}
+    {{ block.super }}
+{% endblock %}
 
 {% block item_footer_actions %}
     {{ block.super }}

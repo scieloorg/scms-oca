@@ -6,8 +6,8 @@
 {% block item_title_href %}
     {% if doc.source.content_url|first %}
         {{ doc.source.content_url|first }}
-    {% elif doc.source.sources.url %}
-        {{ doc.source.sources.url }}
+    {% elif doc.source.source.landing_page_url %}
+        {{ doc.source.source.landing_page_url }}
     {% else %}
         {{ pageurl }}
     {% endif %}
@@ -60,7 +60,9 @@
     {% endif %}
 {% endblock %}
 
-{% block item_extra %}{% endblock %}
+{% block item_extra %}
+    {{ block.super }}
+{% endblock %}
 
 {% block item_footer %}
     <div class="result-card__footer">
@@ -68,7 +70,7 @@
             {% block item_footer_actions %}
                 {% if doc.source.files %}
                     {% for file in doc.source.files %}
-                    <a href="{{ file.pid_url }}" target="_blank" rel="noopener noreferrer" class="result-card__action">{{ file.label }}</a>
+                        <a href="{{ file.pid_url }}" target="_blank" rel="noopener noreferrer" class="result-card__action">{{ file.label }}</a>
                     {% endfor %}
                 {% endif %}
                 {{ block.super }}

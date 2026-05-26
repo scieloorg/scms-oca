@@ -41,24 +41,24 @@
         <span class="result-card__source-name">{% for org in doc.source.organization %}{{ org }}{% if not forloop.last %}, {% endif %}{% endfor %}</span>
         {% endif %}
         {% if doc.source.start_date_year %}
-        <span class="result-card__source-meta">{% trans "Registro" %}: {{ doc.source.start_date_year }}</span>
+        <span class="result-card__source-meta">{% trans "Ano" %}: {{ doc.source.start_date_year }}</span>
         {% endif %}
     </p>
     {% endif %}
 
-    {% if doc.source.institutions or doc.source.created or doc.source.cities or doc.source.states %}
+    {% if doc.source.institutions or doc.source.cities or doc.source.states or doc.source.created %}
     <p class="result-card__source-line">
         {% if doc.source.institutions %}
         <span class="result-card__source-name">{% for inst in doc.source.institutions %}{{ inst }}{% if not forloop.last %}, {% endif %}{% endfor %}</span>
-        {% endif %}
-        {% if doc.source.created %}
-        <span class="result-card__source-meta">{{ doc.source.created|format_date_br }}</span>
         {% endif %}
         {% if doc.source.cities %}
         <span class="result-card__source-meta">{% for city in doc.source.cities %}{{ city }}{% if not forloop.last %}, {% endif %}{% endfor %}</span>
         {% endif %}
         {% if doc.source.states %}
         <span class="result-card__source-meta">{% for state in doc.source.states %}{{ state }}{% if not forloop.last %}, {% endif %}{% endfor %}</span>
+        {% endif %}
+        {% if doc.source.created %}
+        <span class="result-card__source-meta">{% trans "Registro" %}: {{ doc.source.created|format_date_br }}</span>
         {% endif %}
     </p>
     {% endif %}

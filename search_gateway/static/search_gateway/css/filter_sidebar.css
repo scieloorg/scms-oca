@@ -321,7 +321,7 @@
   border: 0;
   background: transparent;
   padding: 0;
-  margin: 0 0 0.75rem;
+  margin: 0 0 0.5rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -392,12 +392,13 @@
 
 .sg-filter-sidebar .form-control,
 .sg-filter-sidebar .form-select {
-  min-height: 2.7rem;
+  min-height: 1.95rem;
   border: 1px solid #dbe5ef;
   border-radius: 4px;
   background: #f3f7fb;
   color: #29415d;
-  font-size: 0.88rem;
+  font-size: 0.84rem;
+  line-height: 1.15;
   box-shadow: none;
 }
 
@@ -556,12 +557,12 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.75rem;
+  padding-bottom: 0.5rem
 }
 
 .year-range-field__group {
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
 }
 
 .year-range-field__label {
@@ -573,9 +574,8 @@
 }
 
 .year-range-field__input {
-  min-height: 2.05rem !important;
-  padding: 0.22rem 0.72rem;
-  border-radius: 8px !important;
+  height: 1.95rem;
+  padding: 0.1rem 0.55rem;
 }
 
 .sg-field-shell__operator {

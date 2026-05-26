@@ -22,7 +22,7 @@ class IdentifierExtractorTests(SimpleTestCase):
             "10.1590/c",
         )
 
-    def test_extract_isbns_reads_document_parent_and_location_values(self):
+    def test_extract_isbns_reads_document_and_parent_values(self):
         doc = {
             "isbn": "978-65-00-00000-1",
             "parent_book": {"ids": {"isbn": "85-359-0277-5"}},
@@ -31,7 +31,7 @@ class IdentifierExtractorTests(SimpleTestCase):
 
         self.assertEqual(
             extract_isbns(doc),
-            ["8535902775", "9786500000001", "9788500000002"],
+            ["8535902775", "9786500000001"],
         )
 
     def test_extract_issns_normalizes_source_values(self):

@@ -5,12 +5,15 @@
     <input
       id="{{ field.range_start_name }}"
       name="{{ field.range_start_name }}"
-      type="text"
+      type="number"
       inputmode="numeric"
+      {% if field.step != None %}step="{{ field.step }}"{% else %}step="1"{% endif %}
+      {% if field.min_value != None %}min="{{ field.min_value }}"{% endif %}
+      {% if field.max_value != None %}max="{{ field.max_value }}"{% endif %}
       autocomplete="off"
       class="form-control data-source-field year-range-field__input"
       value="{{ field.range_start_value }}"
-      placeholder="{% trans 'Ano inicial' %}"
+      placeholder="{% if field.range_start_placeholder %}{{ field.range_start_placeholder }}{% else %}{% trans 'Start year' %}{% endif %}"
     />
   </div>
   <div class="year-range-field__group">
@@ -18,12 +21,15 @@
     <input
       id="{{ field.range_end_name }}"
       name="{{ field.range_end_name }}"
-      type="text"
+      type="number"
       inputmode="numeric"
+      {% if field.step != None %}step="{{ field.step }}"{% else %}step="1"{% endif %}
+      {% if field.min_value != None %}min="{{ field.min_value }}"{% endif %}
+      {% if field.max_value != None %}max="{{ field.max_value }}"{% endif %}
       autocomplete="off"
       class="form-control data-source-field year-range-field__input"
       value="{{ field.range_end_value }}"
-      placeholder="{% trans 'Ano final' %}"
+      placeholder="{% if field.range_end_placeholder %}{{ field.range_end_placeholder }}{% else %}{% trans 'End year' %}{% endif %}"
     />
   </div>
 </div>

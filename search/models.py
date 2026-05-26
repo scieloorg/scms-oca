@@ -107,11 +107,9 @@ class SearchPage(Page):
 
     @classmethod
     def _resolve_search_sort(cls, data_source, current_sort):
-        if current_sort == "cited_by_count":
+        if current_sort == "most_cited":
             return (
-                data_source.get_index_field_name("cited_by_count")
-                if data_source
-                else "metrics.received_citations.total",
+                "metrics.received_citations.total",
                 "desc",
             )
         return (

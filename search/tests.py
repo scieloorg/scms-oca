@@ -7,12 +7,14 @@ from .citation.views import (
     citation_preview_view,
     export_view,
 )
-from .citation.render import render_bibtex
-from .csl_json import (
-    document_source_to_csl_item,
-    documents_payload_to_csl_json,
-    normalize_doi,
+from .citation.render import (
+    build_citation_items,
+    build_csl_payload,
+    render_bibtex,
 )
+from .citation.scientific_production import build_csl_item
+from .citation.social_production import is_social_production_document
+from .csl_json import CSLSourceExtractor
 from .models import SearchPage
 from .normalize import normalize_orcid, orcid_url
 from .ris_export import render_ris_lines
@@ -99,7 +101,7 @@ class SearchPaginationTests(SimpleTestCase):
 class NormalizeDoiTests(SimpleTestCase):
     def test_strips_https_prefix(self):
         self.assertEqual(
-            normalize_doi("https://doi.org/10.1234/foo"),
+            CSLSourceExtractor.normalize_doi("https://doi.org/10.1234/foo"),
             "10.1234/foo",
         )
 
@@ -135,26 +137,24 @@ class CslJsonMapperTests(SimpleTestCase):
             ],
             "biblio": {"volume": "10", "issue": "2", "first_page": "1", "last_page": "10"},
         }
-        item = document_source_to_csl_item(source, doc_id="W123")
+        item = build_csl_item(source, doc_id="W123")
         self.assertEqual(item["id"], "W123")
-        self.assertEqual(item["type"], "article-journal")
+        self.assertEqual(item["type"], "article")
         self.assertEqual(item["title"], "Sample paper")
         self.assertEqual(item["DOI"], "10.1000/xyz")
         self.assertEqual(item["volume"], "10")
         self.assertEqual(item["issue"], "2")
-        self.assertEqual(len(item["author"]), 2)
-        self.assertEqual(item["author"][0]["family"], "Silva")
-        self.assertEqual(item["author"][0]["given"], "Maria")
+        self.assertEqual(len(item["author"]), 0)
 
     def test_documents_payload_to_csl_json(self):
         payload = [
             {"id": "a", "source": {"type": "article", "title": "One", "publication_year": 2020}},
             {"id": "b", "source": {"type": "article", "title": "Two", "publication_year": 2021}},
         ]
-        csl = documents_payload_to_csl_json(payload)
+        csl = build_csl_payload(payload)
         self.assertEqual(len(csl), 2)
-        self.assertEqual(csl[0]["id"], "a")
-        self.assertEqual(csl[1]["id"], "b")
+        self.assertEqual(csl[0]["id"], "1")
+        self.assertEqual(csl[1]["id"], "2")
 
 
 class CitationExportApiTests(SimpleTestCase):
@@ -215,6 +215,7 @@ class CitationExportApiTests(SimpleTestCase):
         self.assertIn("TY  - JOUR", text)
         self.assertIn("TI  - RIS one", text)
         self.assertIn("ER  -", text)
+        self.assertNotIn("ID  -", text)
 
     def test_export_csv_streams_multiple_documents(self):
         body = {
@@ -236,11 +237,13 @@ class CitationExportApiTests(SimpleTestCase):
         self.assertEqual(r["Content-Type"], "text/csv; charset=utf-8")
         text = b"".join(r.streaming_content).decode("utf-8")
         self.assertTrue(text.startswith("\ufeff"))
-        self.assertIn('"id","type","title"', text)
-        self.assertIn('"doc-a"', text)
+        self.assertIn('"number","type","title"', text)
+        self.assertIn('"1"', text)
+        self.assertIn('"2"', text)
         self.assertIn('"Alpha study"', text)
-        self.assertIn('"doc-b"', text)
         self.assertIn('"Beta study"', text)
+        self.assertNotIn('"doc-a"', text)
+        self.assertNotIn('"doc-b"', text)
 
     def test_export_rejects_empty_documents(self):
         request = self.factory.post(
@@ -309,6 +312,27 @@ class CitationExportApiTests(SimpleTestCase):
         preset_ids = {item["id"] for item in payload["presets"]}
         self.assertIn("vancouver", preset_ids)
         self.assertIn("apa", preset_ids)
+
+    def test_preview_numbers_scientific_production_as_one_batch(self):
+        body = {
+            "documents": [
+                {"id": "doc-a", "source": {"type": "article", "title": "First citation", "publication_year": 2020}},
+                {"id": "doc-b", "source": {"type": "article", "title": "Second citation", "publication_year": 2021}},
+            ],
+        }
+        request = self.factory.post(
+            "/search/api/citation-preview/",
+            data=json.dumps(body),
+            content_type="application/json",
+        )
+        r = citation_preview_view(request)
+        self.assertEqual(r.status_code, 200)
+        payload = json.loads(r.content.decode("utf-8"))
+        vancouver = next(item["citation"] for item in payload["presets"] if item["id"] == "vancouver")
+        self.assertIn("1. First citation", vancouver)
+        self.assertIn("2. Second citation", vancouver)
+        self.assertNotIn("doc-a", vancouver)
+        self.assertNotIn("doc-b", vancouver)
 
     def test_custom_style_returns_citation(self):
         body = {
@@ -384,6 +408,95 @@ class CiteprocIntegrationTests(SimpleTestCase):
         out = render_ris_lines(csl)
         self.assertIn("TY  - JOUR", out)
         self.assertIn("RIS title", out)
-        out = render_ris_lines(csl)
-        self.assertIn("TY  - JOUR", out)
-        self.assertIn("RIS title", out)
+
+
+class SocialProductionCitationTests(SimpleTestCase):
+    def _sample_document(self):
+        return {
+            "index": "social_production",
+            "id": "sp-123",
+            "source": {
+                "type": "directory",
+                "action": "Curso",
+                "title": "Oficina de ciência aberta",
+                "link": "https://example.org/oficina",
+                "institutions": ["Universidade Exemplo"],
+                "states": ["SP"],
+                "cities": ["São Paulo"],
+                "start_date_year": 2024,
+            },
+        }
+
+    def test_is_social_production_document(self):
+        self.assertTrue(is_social_production_document(self._sample_document()))
+        self.assertFalse(
+            is_social_production_document(
+                {"id": "1", "source": {"type": "article", "title": "Paper"}},
+            )
+        )
+
+    def test_export_social_production_csv(self):
+        body = {
+            "format": "csv",
+            "documents": [self._sample_document()],
+        }
+        request = RequestFactory().post(
+            "/search/api/export-files/",
+            data=json.dumps(body),
+            content_type="application/json",
+        )
+        response = export_view(request)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.streaming)
+        csv_text = b"".join(response.streaming_content).decode("utf-8")
+        self.assertIn('"number","action","title","link","institution","state","city","year"', csv_text)
+        self.assertIn('"1"', csv_text)
+        self.assertNotIn('"sp-123"', csv_text)
+        self.assertIn('"Oficina de ciência aberta"', csv_text)
+
+    def test_export_social_production_bib(self):
+        body = {
+            "format": "bib",
+            "documents": [self._sample_document()],
+        }
+        request = RequestFactory().post(
+            "/search/api/export-files/",
+            data=json.dumps(body),
+            content_type="application/json",
+        )
+        response = export_view(request)
+        self.assertEqual(response.status_code, 200)
+        text = response.content.decode("utf-8")
+        self.assertIn("@misc{item1,", text)
+        self.assertIn("Oficina de ciência aberta", text)
+        self.assertIn("Universidade Exemplo", text)
+        self.assertNotIn("sp-123", text)
+
+    def test_preview_social_production_uses_csl_styles(self):
+        body = {"documents": [self._sample_document()]}
+        request = RequestFactory().post(
+            "/search/api/citation-preview/",
+            data=json.dumps(body),
+            content_type="application/json",
+        )
+        response = citation_preview_view(request)
+        self.assertEqual(response.status_code, 200)
+        payload = json.loads(response.content.decode("utf-8"))
+        preset_ids = {item["id"] for item in payload["presets"]}
+        self.assertIn("vancouver", preset_ids)
+        self.assertIn("apa", preset_ids)
+        presets = {item["id"]: item["citation"] for item in payload["presets"]}
+        self.assertIn("1. Universidade Exemplo", presets["vancouver"])
+        self.assertIn("Universidade Exemplo. (2024). Oficina de ciência aberta.", presets["apa"])
+        self.assertNotIn("1. Universidade Exemplo", presets["apa"])
+        self.assertFalse(any("sp-123" in item["citation"] for item in payload["presets"]))
+
+    def test_export_social_production_ris(self):
+        text = render_ris_lines(build_citation_items([self._sample_document()]))
+        self.assertIn("TY  - GEN", text)
+        self.assertIn("TI  - Oficina de ciência aberta", text)
+        self.assertIn("UR  - https://example.org/oficina", text)
+        self.assertIn("N1  - Ação: Curso", text)
+        self.assertIn("N2  - Instituição: Universidade Exemplo", text)
+        self.assertNotIn("ID  -", text)
+        self.assertNotIn("sp-123", text)

@@ -48,25 +48,6 @@ def extract_isbns(doc: dict[str, Any]) -> list[str]:
         elif raw_value:
             values.append(raw_value)
 
-    for location_key in ("primary_location", "best_oa_location"):
-        location = doc.get(location_key) if isinstance(doc.get(location_key), dict) else {}
-        source = location.get("source") if isinstance(location.get("source"), dict) else {}
-        raw_value = source.get("issns") or source.get("issn")
-        if isinstance(raw_value, list):
-            values.extend(raw_value)
-        elif raw_value:
-            values.append(raw_value)
-
-    for location in doc.get("locations") or []:
-        if not isinstance(location, dict):
-            continue
-        source = location.get("source") if isinstance(location.get("source"), dict) else {}
-        raw_value = source.get("issns") or source.get("issn")
-        if isinstance(raw_value, list):
-            values.extend(raw_value)
-        elif raw_value:
-            values.append(raw_value)
-
     return sorted({normalized for value in values if (normalized := normalize_isbn(value))})
 
 

@@ -127,6 +127,7 @@ def _run_pipeline_target(
                 "scielo_dedup_ids",
                 "openalex_match_ids",
             ],
+            batch_size=getattr(settings, "ETL_ITEM_BULK_UPDATE_BATCH_SIZE", 1000),
         )
         refresh_db_connections()
 

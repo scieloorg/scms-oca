@@ -4,7 +4,7 @@
 
 {% if authorships %}
 <p class="result-card__authors">
-    {% for auth in authorships %}
+    {% for auth in authorships|unique_authorships %}
         <span class="result-card__author-block">
             {% firstof auth.author.display_name auth.name as author_name %}
             {% firstof auth.author.orcid auth.orcid as author_orcid %}

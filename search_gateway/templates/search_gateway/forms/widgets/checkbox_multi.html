@@ -2,6 +2,7 @@
   class="checkbox-field"
   id="checkbox-{{ field.name }}"
   data-field-name="{{ field.name }}"
+  data-search-threshold="{{ field.search_threshold|default:10 }}"
 >
   <input
     id="{{ field.name }}_search"
@@ -11,6 +12,23 @@
     autocomplete="off"
   />
   <div class="checkbox-field__options" id="{{ field.name }}_options">
+    {% if field.include_all_option %}
+      <label class="checkbox-field__item" for="{{ field.name }}_all">
+        <input
+          id="{{ field.name }}_all"
+          type="checkbox"
+          name="{{ field.name }}"
+          value=""
+          class="data-source-field data-source-field--checkbox"
+          data-field-name="{{ field.name }}"
+          data-field-widget="checkbox"
+          data-multiple-selection="true"
+          data-all-option="true"
+          {% if not field.is_active %}checked{% endif %}
+        />
+        <span>{{ field.all_option_label }}</span>
+      </label>
+    {% endif %}
     {% for option_group in field.option_groups %}
       {% if option_group.label %}
         <div class="checkbox-field__group-label">{{ option_group.label }}</div>

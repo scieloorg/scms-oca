@@ -54,6 +54,12 @@ DEFAULT_OPENALEX_VALIDATION_RULES = {
     "isbn_title_threshold": 0.80,
 }
 
+DEFAULT_OPENALEX_QUERY_RULES = {
+    "exclude_is_xpac": False,
+    "publication_year_min": None,
+    "publication_year_max": None,
+}
+
 
 class EtlStatus(models.TextChoices):
     PENDING = "pending", "Pending"
@@ -240,6 +246,7 @@ class EtlPipelineConfig(models.Model):
         self.clean()
         rules = self.rules or {}
         oa_val = rules.get("openalex_validation", {})
+        oa_query = rules.get("openalex_query", {})
         return {
             "document_type": normalize_document_type_for_etl(self.default_document_type),
             "scielo_dedup_strategies": list(rules.get("scielo_dedup_strategies", [])),
@@ -254,6 +261,10 @@ class EtlPipelineConfig(models.Model):
             "openalex_validation": {
                 **DEFAULT_OPENALEX_VALIDATION_RULES,
                 **oa_val,
+            },
+            "openalex_query": {
+                **DEFAULT_OPENALEX_QUERY_RULES,
+                **oa_query,
             },
         }
 
