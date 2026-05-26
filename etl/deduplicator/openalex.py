@@ -97,7 +97,7 @@ class OpenAlexMatcher:
         return matches
 
     def _try_openalex_by_title(self, primary: dict, max_candidates: int) -> list:
-        if extract_doi(primary) or extract_isbns(primary):
+        if extract_isbns(primary):
             return []
 
         matches = []
@@ -251,8 +251,6 @@ class OpenAlexMatcher:
                     {"terms": {"ids.eisbns.keyword": isbns}},
                     {"terms": {"biblio.isbn.keyword": isbns}},
                     {"terms": {"biblio.isbns.keyword": isbns}},
-                    {"terms": {"primary_location.source.issns.keyword": isbns}},
-                    {"terms": {"locations.source.issns.keyword": isbns}},
                 ],
                 "minimum_should_match": 1,
             }
@@ -275,7 +273,7 @@ class OpenAlexMatcher:
         size: int = 10,
     ) -> List[Dict[str, Any]]:
         title = scielo_doc.get("title", "")
-        issns = scielo_doc.get("source_issns", [])
+        issns = scielo_doc.get("source_issns") or []
         if not title:
             return []
 
@@ -297,7 +295,7 @@ class OpenAlexMatcher:
         self._apply_openalex_query_constraints(query, scielo_doc)
 
         if issns:
-            query["bool"]["should"] = [{"terms": {"source.issns": issns}}]
+            query["bool"]["should"] = self._source_issn_queries(issns)
             query["bool"]["minimum_should_match"] = 1
 
         try:
@@ -309,6 +307,16 @@ class OpenAlexMatcher:
         except Exception as exc:
             logger.error("Error searching OpenAlex by title: %s", exc)
             return []
+
+    def _source_issn_queries(self, issns: list[str]) -> list[dict[str, Any]]:
+        return [
+            {"terms": {"source.issn.keyword": issns}},
+            {"terms": {"source.issns.keyword": issns}},
+            {"terms": {"primary_location.source.issn.keyword": issns}},
+            {"terms": {"primary_location.source.issns.keyword": issns}},
+            {"terms": {"locations.source.issn.keyword": issns}},
+            {"terms": {"locations.source.issns.keyword": issns}},
+        ]
 
     def _validate_openalex_match(
         self,

@@ -1,5 +1,6 @@
 from datetime import timedelta
 
+from django.core.exceptions import ValidationError
 from django.test import TestCase
 from django.utils import timezone
 
@@ -134,3 +135,15 @@ class EtlItemProcessModelTests(TestCase):
         self.assertEqual(rules["fuzzy_min_similarity"], 0.90)
         self.assertEqual(rules["openalex_validation"]["min_score"], 70)
         self.assertEqual(rules["doi_requires_title_overlap"], True)
+
+    def test_pipeline_config_rejects_issn_openalex_strategy(self):
+        config = EtlPipelineConfig(
+            name="article",
+            input_index="bronze_scielo_articles",
+            input_document_kind="article",
+            default_document_type="article",
+            rules={"openalex_match_strategies": ["doi", "issn", "title"]},
+        )
+
+        with self.assertRaises(ValidationError):
+            config.to_rules()
