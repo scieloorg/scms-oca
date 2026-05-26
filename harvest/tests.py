@@ -1,6 +1,9 @@
+import io
+import tempfile
 from unittest.mock import patch
 
-from django.test import SimpleTestCase, TestCase
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.test import SimpleTestCase, TestCase, override_settings
 from django.utils import timezone
 from lxml import etree
 
@@ -14,6 +17,7 @@ from .exception_logs import ExceptionContext
 from .harvests.harvest_data import harvest_data
 from .harvests.harvest_preprint import NODES, harvest_preprint
 from .models import (
+    GlobalMetricsUploadFile,
     HarvestedBooks,
     HarvestedPreprint,
     HarvestedSciELOData,
@@ -21,12 +25,310 @@ from .models import (
     HarvestErrorLogPreprint,
     HarvestErrorLogSciELOData,
 )
+from .global_metrics.constants import GLOBAL_METRICS_REQUIRED_COLUMNS
+from .global_metrics.indexing import GlobalMetricsIndexingError, index_prepared_rows, iter_file_rows
+from .global_metrics.opensearch import (
+    build_global_metrics_update_by_query_body,
+    build_harvest_metric_lookup_body,
+    iter_silver_issn_year_groups,
+)
+from .global_metrics.parsing import global_metric_row_from_hit
 from .parse_info_oai_pmh import (
     get_date,
     get_identifier_source,
     get_info_article,
     parse_author_name,
 )
+from .storage import global_metrics_upload_path, overwrite_media_storage
+
+
+class GlobalMetricsUploadFileTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="metrics-user", password="test")
+
+    def test_upload_path_uses_flat_directory_and_original_filename(self):
+        path = global_metrics_upload_path(None, "metrics.xlsx")
+        self.assertEqual(path, "global_metrics_uploads/metrics.xlsx")
+
+    @patch("harvest.tasks.process_global_metrics_upload_file.delay")
+    def test_same_filename_reuses_existing_record_and_overwrites_file(self, mock_delay):
+        with tempfile.TemporaryDirectory() as media_root:
+            with override_settings(MEDIA_ROOT=media_root):
+                first_file = SimpleUploadedFile(
+                    "metrics.xlsx",
+                    b"first-version",
+                    content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                )
+                first = GlobalMetricsUploadFile(creator=self.user)
+                first.file = first_file
+                first.save()
+
+                second_file = SimpleUploadedFile(
+                    "metrics.xlsx",
+                    b"second-version",
+                    content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                )
+                second = GlobalMetricsUploadFile(creator=self.user)
+                second.file = second_file
+                second.save()
+
+                self.assertEqual(GlobalMetricsUploadFile.objects.count(), 1)
+                self.assertEqual(first.pk, second.pk)
+                self.assertEqual(second.file.name, "global_metrics_uploads/metrics.xlsx")
+                with second.file.open("rb") as stored_file:
+                    self.assertEqual(stored_file.read(), b"second-version")
+                self.assertEqual(mock_delay.call_count, 2)
+
+    def test_overwrite_storage_does_not_add_suffix(self):
+        storage_path = "global_metrics_uploads/metrics.xlsx"
+        overwrite_media_storage.save(storage_path, SimpleUploadedFile("metrics.xlsx", b"v1"))
+        available_name = overwrite_media_storage.get_available_name(storage_path)
+        self.assertEqual(available_name, storage_path)
+
+
+class GlobalMetricsUploadTaskTests(SimpleTestCase):
+    def test_global_metric_row_normalizes_issns_flags_and_country(self):
+        hit = {
+            "_source": {
+                "raw_data": {
+                    "issns": "12345678, 8765-4321",
+                    "year": "2024",
+                    "scopus_active_in_the_year": "1",
+                    "wos_active_in_the_year": 0,
+                    "scielo_active_and_valid_in_the_year": 1,
+                    "country": "Brasil",
+                }
+            }
+        }
+
+        row = global_metric_row_from_hit(hit)
+
+        self.assertEqual(row["issns"], ["12345678", "1234-5678", "8765-4321"])
+        self.assertEqual(row["year"], 2024)
+        self.assertEqual(row["indexed_in"], ["Scopus", "SciELO"])
+        self.assertEqual(row["country"], "Brasil")
+        self.assertEqual(row["country_code"], "BR")
+
+    def test_global_metrics_upload_requires_columns_used_by_processing(self):
+        file_obj = io.BytesIO(
+            b"issns;year;country;scopus_active_in_the_year;wos_active_in_the_year\n"
+            b"1234-5678;2024;Brasil;1;0\n"
+        )
+
+        with self.assertRaisesMessage(
+            GlobalMetricsIndexingError,
+            "scielo_active_and_valid_in_the_year",
+        ):
+            list(
+                iter_file_rows(
+                    file_obj=file_obj,
+                    file_name="metrics.csv",
+                    required_columns=GLOBAL_METRICS_REQUIRED_COLUMNS,
+                )
+            )
+
+    def test_global_metrics_upload_accepts_required_columns(self):
+        file_obj = io.BytesIO(
+            b"baseid;issns;year;country;scopus_active_in_the_year;wos_active_in_the_year;"
+            b"scielo_active_and_valid_in_the_year\n"
+            b"B1;1234-5678;2024;Brasil;1;0;1\n"
+        )
+
+        rows = list(
+            iter_file_rows(
+                file_obj=file_obj,
+                file_name="metrics.csv",
+                required_columns=GLOBAL_METRICS_REQUIRED_COLUMNS,
+            )
+        )
+
+        self.assertEqual(rows[0][1]["scielo_active_and_valid_in_the_year"], "1")
+
+    def test_iter_silver_issn_year_groups_deduplicates_combinations(self):
+        client = DummyOpenSearchClient(
+            [
+                {
+                    "_source": {
+                        "publication_year": 2024,
+                        "source": {"issns": ["12345678", "8765-4321"]},
+                    }
+                },
+                {
+                    "_source": {
+                        "publication_year": 2024,
+                        "source": {"issns": ["1234-5678"]},
+                    }
+                },
+            ]
+        )
+
+        groups = list(iter_silver_issn_year_groups(client, "silver_scientific_production"))
+
+        self.assertEqual(
+            groups,
+            [
+                {"year": 2024, "issns": ["12345678", "1234-5678"]},
+                {"year": 2024, "issns": ["8765-4321"]},
+            ],
+        )
+
+    def test_build_harvest_metric_lookup_body_filters_upload_issn_and_year(self):
+        body = build_harvest_metric_lookup_body(
+            source_file="metrics.csv",
+            year=2024,
+            issns=["12345678", "1234-5678"],
+        )
+
+        query = body["query"]["bool"]
+        self.assertEqual(query["filter"][0]["bool"]["minimum_should_match"], 1)
+        self.assertIn({"term": {"raw_data.year": 2024}}, query["filter"][1]["bool"]["should"])
+        self.assertIn(
+            {"match_phrase": {"raw_data.issns": "1234-5678"}},
+            query["must"][0]["bool"]["should"],
+        )
+
+    def test_build_global_metrics_update_by_query_body_preserves_params(self):
+        body = build_global_metrics_update_by_query_body(
+            {
+                "year": 2024,
+                "issns": ["12345678", "1234-5678"],
+                "indexed_in": {"WoS", "Scopus"},
+                "country_codes": ["BR"],
+                "countries": ["Brasil"],
+            }
+        )
+
+        filters = body["query"]["bool"]["filter"]
+        self.assertEqual(filters[0], {"term": {"publication_year": 2024}})
+        self.assertEqual(filters[1], {"terms": {"source.issns": ["12345678", "1234-5678"]}})
+        params = body["script"]["params"]
+        self.assertEqual(params["indexed_in"], ["Scopus", "WoS"])
+        self.assertEqual(params["country_codes"], ["BR"])
+        self.assertIn("oca_data.scielo.source", body["script"]["source"])
+
+    @override_settings(GLOBAL_METRICS_UPLOAD_ERROR_INDEX="global_metrics_upload_errors")
+    @patch("harvest.global_metrics.indexing.OpenSearchIndexClient")
+    @patch("harvest.global_metrics.indexing.streaming_bulk")
+    @patch("harvest.global_metrics.indexing.get_opensearch_client")
+    def test_bulk_failure_is_indexed_in_upload_error_index(
+        self,
+        mock_get_client,
+        mock_streaming_bulk,
+        mock_index_client,
+    ):
+        client = object()
+        mock_get_client.return_value = client
+        bulk_result = {
+            "index": {
+                "_id": "B123-2024",
+                "error": {
+                    "type": "mapper_parsing_exception",
+                    "reason": "failed to parse field",
+                },
+            }
+        }
+
+        def fake_streaming_bulk(client, actions, **kwargs):
+            list(actions)
+            yield False, bulk_result
+
+        mock_streaming_bulk.side_effect = fake_streaming_bulk
+
+        stats = index_prepared_rows(
+            rows=iter([(2, {"baseid": "B123", "year": "2024"})]),
+            file_name="metrics.csv",
+            extension=".csv",
+            index_name="global_metrics_upload_file",
+            chunk_size=1,
+        )
+
+        self.assertEqual(stats.rows_read, 1)
+        self.assertEqual(stats.failed, 1)
+        mock_index_client.assert_called_once_with(client=client)
+        mock_index_client.return_value.index_error.assert_called_once()
+        kwargs = mock_index_client.return_value.index_error.call_args.kwargs
+        self.assertEqual(kwargs["component"], "harvest.global_metrics")
+        self.assertEqual(kwargs["operation"], "upload_indexing")
+        self.assertEqual(kwargs["error_type"], "BulkIndexFailure")
+        self.assertEqual(kwargs["error_index_name"], "global_metrics_upload_errors")
+        self.assertEqual(kwargs["context"]["source_file"], "metrics.csv")
+        self.assertEqual(kwargs["context"]["source_format"], "csv")
+        self.assertEqual(kwargs["context"]["target_index"], "global_metrics_upload_file")
+        self.assertEqual(kwargs["context"]["document_id"], "B123-2024")
+        self.assertEqual(kwargs["context"]["bulk_result"], bulk_result)
+
+    @patch("harvest.global_metrics.indexing.OpenSearchIndexClient")
+    @patch("harvest.global_metrics.indexing.streaming_bulk")
+    @patch("harvest.global_metrics.indexing.get_opensearch_client")
+    def test_upload_error_index_failure_does_not_interrupt_import(
+        self,
+        mock_get_client,
+        mock_streaming_bulk,
+        mock_index_client,
+    ):
+        mock_get_client.return_value = object()
+        mock_index_client.return_value.index_error.side_effect = RuntimeError("index unavailable")
+
+        def fake_streaming_bulk(client, actions, **kwargs):
+            list(actions)
+            yield False, {"index": {"_id": "B123-2024", "error": "boom"}}
+
+        mock_streaming_bulk.side_effect = fake_streaming_bulk
+
+        stats = index_prepared_rows(
+            rows=iter([(2, {"baseid": "B123", "year": "2024"})]),
+            file_name="metrics.csv",
+            extension=".csv",
+            index_name="global_metrics_upload_file",
+            chunk_size=1,
+        )
+
+        self.assertEqual(stats.failed, 1)
+        self.assertEqual(len(stats.errors), 1)
+
+    @patch("harvest.global_metrics.indexing.OpenSearchIndexClient")
+    @patch("harvest.global_metrics.indexing.streaming_bulk")
+    @patch("harvest.global_metrics.indexing.get_opensearch_client")
+    def test_bulk_error_samples_are_limited(
+        self,
+        mock_get_client,
+        mock_streaming_bulk,
+        mock_index_client,
+    ):
+        mock_get_client.return_value = object()
+
+        def fake_streaming_bulk(client, actions, **kwargs):
+            for action in actions:
+                yield False, {"index": {"_id": action["_id"], "error": "boom"}}
+
+        mock_streaming_bulk.side_effect = fake_streaming_bulk
+        rows = ((row_number, {"baseid": f"B{row_number}", "year": "2024"}) for row_number in range(2, 14))
+
+        stats = index_prepared_rows(
+            rows=rows,
+            file_name="metrics.csv",
+            extension=".csv",
+            index_name="global_metrics_upload_file",
+            chunk_size=1,
+        )
+
+        self.assertEqual(stats.failed, 12)
+        self.assertEqual(len(stats.errors), 10)
+        self.assertEqual(mock_index_client.return_value.index_error.call_count, 12)
+
+
+class DummyOpenSearchClient:
+    def __init__(self, hits):
+        self.hits = hits
+
+    def search(self, index, body, scroll):
+        return {"_scroll_id": "scroll-1", "hits": {"hits": self.hits}}
+
+    def scroll(self, scroll_id, scroll):
+        return {"_scroll_id": scroll_id, "hits": {"hits": []}}
+
+    def clear_scroll(self, scroll_id):
+        return None
 
 
 class DummyHeader:

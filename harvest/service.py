@@ -5,7 +5,6 @@ import httpx
 from django.conf import settings
 from httpx._types import AuthTypes
 from oaipmh_scythe import Scythe
-from oaipmh_scythe.__about__ import __version__
 from oaipmh_scythe.iterator import BaseOAIIterator, OAIItemIterator
 from oaipmh_scythe.models import OAIItem
 from oaipmh_scythe.utils import log_response

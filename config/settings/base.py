@@ -475,6 +475,18 @@ DIRECTORY_IMPORT_DELIMITER = env.str("DIRECTORY_IMPORT_DELIMITER", default=",")
 # Opensearch Base Settings
 OS_URL = env("OS_URL", default="http://opensearch:9200")
 OS_REQUEST_TIMEOUT = env.int("OS_REQUEST_TIMEOUT", default=40)
+GLOBAL_METRICS_FILE_UPLOAD_OPENSEARCH_INDEX = env.str(
+    "GLOBAL_METRICS_FILE_UPLOAD_OPENSEARCH_INDEX",
+    "global_metrics_upload_file",
+)
+GLOBAL_METRICS_FILE_UPLOAD_BULK_CHUNK_SIZE = env.int(
+    "GLOBAL_METRICS_FILE_UPLOAD_BULK_CHUNK_SIZE",
+    default=100,
+)
+GLOBAL_METRICS_UPLOAD_ERROR_INDEX = env.str(
+    "GLOBAL_METRICS_UPLOAD_ERROR_INDEX",
+    "global_metrics_upload_errors",
+)
 
 # OpenSearch Index Names
 OP_INDEX_SOCIAL_PRODUCTION = env.str("OP_INDEX_SOCIAL_PRODUCTION", "social_production")

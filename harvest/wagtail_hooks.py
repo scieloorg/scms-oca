@@ -1,19 +1,19 @@
-from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import path, reverse
 from django.utils.translation import gettext as _
 from wagtail import hooks
 from wagtail.admin import messages
-from wagtail_modeladmin.helpers import ButtonHelper
-from wagtail_modeladmin.options import (
-    ModelAdmin,
-    ModelAdminGroup,
-    modeladmin_register,
-)
-from wagtail_modeladmin.views import CreateView
+from wagtail.admin.ui.tables import BooleanColumn
+from wagtail.admin.widgets.button import Button
+from wagtail.log_actions import log
+from wagtail.snippets.models import register_snippet
+from wagtail.snippets.views.snippets import CreateView as SnippetCreateView
+from wagtail.snippets.views.snippets import EditView as SnippetEditView
+from wagtail.snippets.views.snippets import SnippetViewSet, SnippetViewSetGroup
 
 from .bronze_transform import transform_document
 from .models import (
+    GlobalMetricsUploadFile,
     HarvestedBooks,
     HarvestedPreprint,
     HarvestedSciELOData,
@@ -21,83 +21,152 @@ from .models import (
 )
 
 
-class HarvestedPreprintAdmin(ModelAdmin):
+class CommonControlFieldCreateView(SnippetCreateView):
+    def save_instance(self):
+        instance = self.form.save_all(self.request.user)
+        log(instance=instance, action="wagtail.create", content_changed=True)
+        return instance
+
+
+class CommonControlFieldEditView(SnippetEditView):
+    def save_instance(self):
+        instance = self.form.save_all(self.request.user)
+        self.has_content_changes = self.form.has_changed()
+        log(
+            instance=instance,
+            action="wagtail.edit",
+            content_changed=self.has_content_changes,
+        )
+        return instance
+
+
+class HarvestedPreprintViewSet(SnippetViewSet):
     model = HarvestedPreprint
-    menu_label = "Preprint"
-    menu_icon = "doc-full"
+    icon = "doc-full"
+    menu_label = _("Preprint")
+    add_to_admin_menu = False
+    add_view_class = CommonControlFieldCreateView
+    edit_view_class = CommonControlFieldEditView
     list_display = ("identifier", "harvest_status", "datestamp", "created")
     search_fields = ("identifier", "source_url")
     list_filter = ("harvest_status", "index_status")
+    ordering = ("-created",)
 
 
-class HarvestedSciELODataAdmin(ModelAdmin):
+class HarvestedSciELODataViewSet(SnippetViewSet):
     model = HarvestedSciELOData
-    menu_label = "SciELO Data"
-    menu_icon = "doc-full"
+    icon = "doc-full"
+    menu_label = _("SciELO Data")
+    add_to_admin_menu = False
+    add_view_class = CommonControlFieldCreateView
+    edit_view_class = CommonControlFieldEditView
     list_display = ("identifier", "harvest_status", "datestamp", "created")
     search_fields = ("identifier", "source_url")
     list_filter = ("harvest_status", "index_status", "type_data")
+    ordering = ("-created",)
 
 
-class HarvestedBooksAdmin(ModelAdmin):
+class HarvestedBooksViewSet(SnippetViewSet):
     model = HarvestedBooks
-    menu_label = "Books"
-    menu_icon = "doc-full"
-    list_display = ("identifier","type_data", "harvest_status", "datestamp", "created")
+    icon = "doc-full"
+    menu_label = _("Books")
+    add_to_admin_menu = False
+    add_view_class = CommonControlFieldCreateView
+    edit_view_class = CommonControlFieldEditView
+    list_display = ("identifier", "type_data", "harvest_status", "datestamp", "created")
     search_fields = ("identifier", "source_url")
     list_filter = ("harvest_status", "index_status", "type_data")
+    ordering = ("-created",)
 
 
-class TransformationScriptCreateView(CreateView):
-    def form_valid(self, form):
-        self.object = form.save_all(self.request.user)
-        return HttpResponseRedirect(self.get_success_url())
-
-
-class TransformationScriptButtonHelper(ButtonHelper):
-    """ButtonHelper para adicionar botão de executar transformação."""
-
-    run_button_classnames = ["button-small", "button-secondary", "icon", "icon-download"]
-
-    def run_transform_button(self, obj):
-        text = _("Executar Transformação")
-        return {
-            "url": reverse("harvest_run_transform") + f"?script_id={obj.id}",
-            "label": text,
-            "classname": self.finalise_classname(self.run_button_classnames),
-            "title": text,
-        }
-
-    def get_buttons_for_obj(self, obj, exclude=None, classnames_add=None, classnames_exclude=None):
-        btns = super().get_buttons_for_obj(obj, exclude, classnames_add, classnames_exclude)
-        if "run_transform" not in (exclude or []):
-            btns.append(self.run_transform_button(obj))
-        return btns
-
-
-class TransformationScriptAdmin(ModelAdmin):
+class TransformationScriptViewSet(SnippetViewSet):
     model = TransformationScript
-    menu_label = "Scripts de Transformação"
-    menu_icon = "code"
-    create_view_class = TransformationScriptCreateView
-    button_helper_class = TransformationScriptButtonHelper
+    icon = "code"
+    menu_label = _("Scripts de Transformação")
+    add_to_admin_menu = False
+    add_view_class = CommonControlFieldCreateView
+    edit_view_class = CommonControlFieldEditView
     list_display = ("name", "source_index", "dest_index", "is_active", "updated")
     search_fields = ("name", "description", "source_index", "dest_index")
     list_filter = ("is_active",)
+    ordering = ("name",)
 
 
-class HarvestModelAdminGroup(ModelAdminGroup):
-    menu_label = "Harvest"
+class GlobalMetricsUploadFileViewSet(SnippetViewSet):
+    model = GlobalMetricsUploadFile
+    icon = "upload"
+    menu_label = _("Arquivos de Métricas Globais")
+    add_to_admin_menu = False
+    add_view_class = CommonControlFieldCreateView
+    edit_view_class = CommonControlFieldEditView
+    list_display = (
+        "file",
+        BooleanColumn("status", label=_("Processado")),
+        "created",
+        "updated",
+    )
+    list_filter = ("status", "created")
+    search_fields = ("file",)
+    ordering = ("-created",)
+
+
+class HarvestViewSetGroup(SnippetViewSetGroup):
+    menu_label = _("Harvest")
     menu_icon = "download"
     menu_order = 84
     items = (
-        HarvestedPreprintAdmin,
-        HarvestedSciELODataAdmin,
-        HarvestedBooksAdmin,
-        TransformationScriptAdmin
+        HarvestedPreprintViewSet,
+        HarvestedSciELODataViewSet,
+        HarvestedBooksViewSet,
+        TransformationScriptViewSet,
+        GlobalMetricsUploadFileViewSet,
     )
 
-modeladmin_register(HarvestModelAdminGroup)
+
+register_snippet(HarvestViewSetGroup)
+
+
+@hooks.register("register_snippet_listing_buttons")
+def register_transformation_script_listing_buttons(snippet, user, next_url=None):
+    if isinstance(snippet, GlobalMetricsUploadFile):
+        yield Button(
+            _("Aplicar métricas globais"),
+            reverse("harvest_apply_global_metrics_upload", args=[snippet.pk]),
+            icon_name="tasks",
+            attrs={"title": _("Aplicar métricas globais no índice silver")},
+            priority=20,
+        )
+        return
+
+    if not isinstance(snippet, TransformationScript):
+        return
+
+    yield Button(
+        _("Executar Transformação"),
+        reverse("harvest_run_transform") + f"?script_id={snippet.pk}",
+        icon_name="download",
+        attrs={"title": _("Executar Transformação")},
+        priority=20,
+    )
+
+
+def apply_global_metrics_upload_view(request, upload_file_id):
+    upload_file = get_object_or_404(GlobalMetricsUploadFile, pk=upload_file_id)
+    if not upload_file.status:
+        messages.warning(
+            request,
+            "O arquivo ainda não foi processado. Aguarde a indexação do upload antes de aplicar as métricas. Atualize a página e verifique a coluna 'Processado'.",
+        )
+        return redirect(request.META.get("HTTP_REFERER", "/admin/"))
+
+    from .tasks import apply_global_metrics_upload_to_silver
+
+    result = apply_global_metrics_upload_to_silver.delay(upload_file.pk)
+    messages.success(
+        request,
+        f"Aplicação de métricas globais enfileirada para {upload_file}. Tarefa: {result.id}.",
+    )
+    return redirect(request.META.get("HTTP_REFERER", "/admin/"))
 
 
 def run_transform_view(request):
@@ -133,4 +202,9 @@ def run_transform_view(request):
 def register_harvest_urls():
     return [
         path("harvest/run-transform/", run_transform_view, name="harvest_run_transform"),
+        path(
+            "harvest/global-metrics-upload/<int:upload_file_id>/apply/",
+            apply_global_metrics_upload_view,
+            name="harvest_apply_global_metrics_upload",
+        ),
     ]

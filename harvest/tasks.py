@@ -5,6 +5,12 @@ from django.contrib.auth import get_user_model
 
 from config import celery_app
 from harvest.exception_logs import ExceptionContext
+from harvest.global_metrics.apply import (
+    apply_global_metrics_upload_to_silver as run_apply_global_metrics_upload_to_silver,
+)
+from harvest.global_metrics.process import (
+    process_global_metrics_upload_file as run_process_global_metrics_upload_file,
+)
 from harvest.harvests.harvest_books import (
     harvest_books,
     harvest_single_book,
@@ -25,7 +31,6 @@ from .models import (
 from .service import service_oai_pmh_get_record, service_oai_pmh_scythe
 
 User = get_user_model()
-
 
 ENDPOINT_PREPRINT = getattr(settings, "ENDPOINT_OAI_PMH_PREPRINT", None)
 
@@ -208,3 +213,25 @@ def reindex_failed_scielo_data(user_id=None):
     failed = HarvestedSciELOData.objects.filter(index_status=IndexStatus.FAILED)
     for obj in failed.iterator():
         index_harvested_instance(instance=obj, index_name=obj.index_name)
+
+
+@celery_app.task(name="Process global metrics upload file")
+def process_global_metrics_upload_file(upload_file_id, index_name=None, chunk_size=None):
+    return run_process_global_metrics_upload_file(
+        upload_file_id=upload_file_id,
+        index_name=index_name,
+        chunk_size=chunk_size,
+    )
+
+
+@celery_app.task(name="Apply global metrics upload to silver")
+def apply_global_metrics_upload_to_silver(
+    upload_file_id,
+    harvest_index=None,
+    silver_index=None,
+):
+    return run_apply_global_metrics_upload_to_silver(
+        upload_file_id=upload_file_id,
+        harvest_index=harvest_index,
+        silver_index=silver_index,
+    )
