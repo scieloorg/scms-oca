@@ -67,6 +67,8 @@ class OpenSearchETLPipeline:
             "silver_scientific_production",
         )
         self.silver_write_alias = getattr(settings, "ETL_SILVER_WRITE_ALIAS", "silver_write")
+        self.silver_bulk_max_docs = getattr(settings, "ETL_SILVER_BULK_MAX_DOCS", 1000)
+        self.silver_bulk_max_bytes = getattr(settings, "ETL_SILVER_BULK_MAX_BYTES", 50 * 1024 * 1024)
         self.rules = self.pipeline_config.to_rules()
 
         self.client = OpenSearchClient(
@@ -587,19 +589,8 @@ class OpenSearchETLPipeline:
             mapping=SILVER_MAPPING,
         )
 
-        actions = []
-        for index_id, doc in docs_to_index:
-            actions.append(
-                {
-                    "index": {
-                        "_index": write_alias,
-                        "_id": index_id,
-                    }
-                }
-            )
-            actions.append(doc.to_index_dict())
-
-        self._execute_bulk_index(actions, write_alias)
+        for actions in self._silver_bulk_action_chunks(docs_to_index, write_alias):
+            self._execute_bulk_index(actions, write_alias)
         if bootstrap_index:
             self.indexed_index_names.add(bootstrap_index)
 
@@ -614,6 +605,48 @@ class OpenSearchETLPipeline:
             self.indexed_index_names.add(write_alias)
 
         return len(docs_to_index)
+
+    def _silver_bulk_action_chunks(
+        self,
+        docs_to_index: list[tuple[str, SilverDocument]],
+        write_alias: str,
+    ):
+        max_docs = max(int(self.silver_bulk_max_docs or 1), 1)
+        max_bytes = max(int(self.silver_bulk_max_bytes or 1), 1)
+
+        actions = []
+        chunk_docs = 0
+        chunk_bytes = 0
+
+        for index_id, doc in docs_to_index:
+            action = {
+                "index": {
+                    "_index": write_alias,
+                    "_id": index_id,
+                }
+            }
+            source = doc.to_index_dict()
+            action_bytes = self._bulk_action_size_bytes(action, source)
+
+            if actions and (chunk_docs >= max_docs or chunk_bytes + action_bytes > max_bytes):
+                yield actions
+                actions = []
+                chunk_docs = 0
+                chunk_bytes = 0
+
+            actions.extend([action, source])
+            chunk_docs += 1
+            chunk_bytes += action_bytes
+
+        if actions:
+            yield actions
+
+    def _bulk_action_size_bytes(self, action: dict, source: dict) -> int:
+        return (
+            len(json.dumps(action, ensure_ascii=False, separators=(",", ":")).encode("utf-8"))
+            + len(json.dumps(source, ensure_ascii=False, separators=(",", ":")).encode("utf-8"))
+            + 2
+        )
 
     def _execute_bulk_index(self, actions: list[dict], target_name: str) -> None:
         response = self.client.client.bulk(body=actions)
