@@ -30,6 +30,7 @@ def csl_items_to_ris_context(csl_json):
 
         rows.append(
             {
+                "type": item.get("ris_type") or "JOUR",
                 "title": item.get("title"),
                 "authors": authors,
                 "container_title": item.get("container-title"),
@@ -39,6 +40,10 @@ def csl_items_to_ris_context(csl_json):
                 "page": item.get("page"),
                 "doi": item.get("DOI"),
                 "url": item.get("URL"),
+                "notes": item.get("ris_notes") or [],
+                "city": item.get("ris_city"),
+                "place": item.get("ris_place"),
+                "citation_text": item.get("citation_text"),
             }
         )
     return rows
@@ -47,7 +52,7 @@ def csl_items_to_ris_context(csl_json):
 def render_ris_lines(csl_json):
     blocks = []
     for row in csl_items_to_ris_context(csl_json):
-        lines = ["TY  - JOUR"]
+        lines = [f"TY  - {_ris_escape_line(row['type'])}"]
         if row["title"]:
             lines.append(f"TI  - {_ris_escape_line(row['title'])}")
         for author in row["authors"]:
@@ -76,6 +81,19 @@ def render_ris_lines(csl_json):
             lines.append(f"DO  - {_ris_escape_line(row['doi'])}")
         if row["url"]:
             lines.append(f"UR  - {_ris_escape_line(row['url'])}")
+        for idx, note in enumerate(row["notes"], start=1):
+            if not isinstance(note, (list, tuple)) or len(note) != 2:
+                continue
+            label, value = note
+            if value:
+                tag = "N1" if idx == 1 else "N2"
+                lines.append(f"{tag}  - {_ris_escape_line(label)}: {_ris_escape_line(value)}")
+        if row["city"]:
+            lines.append(f"CY  - {_ris_escape_line(row['city'])}")
+        if row["place"]:
+            lines.append(f"PP  - {_ris_escape_line(row['place'])}")
+        if row["citation_text"]:
+            lines.append(f"N3  - {_ris_escape_line(row['citation_text'])}")
         lines.append("ER  -")
         blocks.append("\n".join(lines))
     return "\n\n".join(blocks) + ("\n" if blocks else "")
