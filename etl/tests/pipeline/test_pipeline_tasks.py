@@ -15,8 +15,10 @@ class PipelineConfigTaskTests(TestCase):
     @patch("etl.tasks.backfill_input_items")
     @patch("etl.tasks.refresh_db_connections")
     @patch("etl.tasks.OpenSearchETLPipeline")
+    @patch("etl.tasks.EtlItemProcess.objects.bulk_update")
     def test_run_pipeline_target_builds_django_configured_pipeline(
         self,
+        bulk_update,
         pipeline_cls,
         refresh_db_connections,
         backfill_input_items,
@@ -50,4 +52,5 @@ class PipelineConfigTaskTests(TestCase):
         self.assertEqual(result["target"], "article")
         self.assertEqual(result["public_alias"], "scientific_production")
         self.assertEqual(result["indexed_indices"], ["silver"])
+        self.assertEqual(bulk_update.call_args.kwargs["batch_size"], 1000)
         self.assertGreaterEqual(refresh_db_connections.call_count, 4)
