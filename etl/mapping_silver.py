@@ -46,7 +46,38 @@ SILVER_PROPERTIES = {
             "match_status": {"type": "keyword"},
             "match_strategy": {"type": "keyword"},
             "match_confidence": {"type": "keyword"},
-            "merge_trace": {"type": "object", "dynamic": True},
+            "merge_trace": {
+                "type": "object",
+                "properties": {
+                    "scielo_matches": {
+                        "type": "object",
+                        "properties": {
+                            "doc_ids": {"type": "keyword"},
+                            "collections": {"type": "keyword"},
+                        },
+                    },
+                    "openalex_matches": {
+                        "type": "object",
+                        "properties": {
+                            "doc_id": {"type": "keyword"},
+                            "match_strategy": {"type": "keyword"},
+                            "confidence": {"type": "keyword"},
+                            "validation": {
+                                "type": "object",
+                                "properties": {
+                                    "reasons": {"type": "keyword"},
+                                    "score": {"type": "long"},
+                                    "year_check": {"type": "keyword"},
+                                    "doi_check": {"type": "keyword"},
+                                    "journal_check": {"type": "keyword"},
+                                    "isbn_check": {"type": "keyword"},
+                                    "title_similarity": {"type": "float"},
+                                },
+                            },
+                        },
+                    },
+                },
+            },
             "scielo": {
                 "type": "object",
                 "properties": {
