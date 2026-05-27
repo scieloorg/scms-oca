@@ -4,7 +4,7 @@
 
 {% block item_title_href %}
     {% if doc.source.content_url|first %}
-        {{ doc.source.content_url|first }}
+        {{ doc.source.content_url|first|get_url_from_content_url }}
     {% elif doc.source.source.landing_page_url %}
         {{ doc.source.source.landing_page_url }}
     {% else %}

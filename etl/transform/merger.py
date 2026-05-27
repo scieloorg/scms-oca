@@ -190,6 +190,7 @@ class SilverMerger:
         all_abstracts = {}
         all_keywords = {}
         all_urls = []
+        all_content_urls: list[dict] = []
 
         for doc in scielo_docs:
             data = doc.to_dict()
@@ -236,6 +237,8 @@ class SilverMerger:
 
             if data.get("content_url_with_lang"):
                 all_urls.extend(data["content_url_with_lang"])
+            if data.get("content_url"):
+                all_content_urls.extend(data["content_url"])
 
         base_data.setdefault("oca_data", {}).setdefault("scielo", {})
         base_data["oca_data"]["scielo"]["collection"] = scalar_or_list(
@@ -261,6 +264,8 @@ class SilverMerger:
             ]
         if all_urls:
             base_data["content_url_with_lang"] = self._unique_urls_by_language(all_urls)
+        if all_content_urls:
+            base_data["content_url"] = self._unique_content_urls(all_content_urls)
 
         try:
             return SilverDocument(**base_data)
@@ -281,6 +286,18 @@ class SilverMerger:
             elif not lang:
                 unique_urls.append(url_item)
         return unique_urls
+
+    def _unique_content_urls(self, url_items: list) -> list:
+        seen = set()
+        unique = []
+        for item in url_items:
+            if not isinstance(item, dict):
+                continue
+            key = item.get("url")
+            if key and key not in seen:
+                unique.append(item)
+                seen.add(key)
+        return unique
 
     def _enrich_scielo_with_openalex(
         self,
@@ -303,8 +320,8 @@ class SilverMerger:
         all_indexed_in = list(merged_data.get("indexed_in") or [])
         openalex_doi = None
         openalex_doi_with_lang = []
-        openalex_content_url = None
         openalex_content_url_with_lang = []
+        all_content_urls: list[dict] = list(merged_data.get("content_url") or [])
         openalex_is_open_access = None
         openalex_open_access_status = None
         openalex_biblio = {}
@@ -320,10 +337,13 @@ class SilverMerger:
                 openalex_doi = oa_data.get("doi") or oa_ids.get("doi")
             if oa_ids.get("doi_with_lang"):
                 openalex_doi_with_lang.extend(oa_ids["doi_with_lang"])
-            if not openalex_content_url and oa_data.get("content_url"):
-                openalex_content_url = oa_data["content_url"]
+            
             if oa_data.get("content_url_with_lang"):
                 openalex_content_url_with_lang.extend(oa_data["content_url_with_lang"])
+            
+            if oa_data.get("content_urls"):
+                all_content_urls.extend(oa_data["content_url"])
+            
             if openalex_is_open_access is None and oa_data.get("is_open_access") is not None:
                 openalex_is_open_access = oa_data["is_open_access"]
             if not openalex_open_access_status and oa_data.get("open_access_status"):
@@ -415,13 +435,14 @@ class SilverMerger:
             if not merged_ids.get("doi_with_lang"):
                 merged_ids["doi_with_lang"] = openalex_doi_with_lang
 
-        if openalex_content_url and not merged_data.get("content_url"):
-            merged_data["content_url"] = openalex_content_url
         if openalex_content_url_with_lang:
             merged_data["content_url_with_lang"] = self._unique_urls_by_language(
                 (merged_data.get("content_url_with_lang") or [])
                 + openalex_content_url_with_lang
             )
+        if all_content_urls:
+            merged_data["content_url"] = self._unique_content_urls(all_content_urls)
+        
         if (
             merged_data.get("is_open_access") is None
             and openalex_is_open_access is not None

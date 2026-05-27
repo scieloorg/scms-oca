@@ -46,6 +46,14 @@ def first(value):
 
 
 @register.filter
+def get_url_from_content_url(content_url):
+    if isinstance(content_url, dict):
+        return content_url.get("url", "") 
+
+    return content_url
+
+
+@register.filter
 def normalize_doi(value):
     doi = first(value)
     if not doi:

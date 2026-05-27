@@ -228,7 +228,14 @@ SILVER_PROPERTIES = {
     "publication_year": {"type": "long"},
     "is_open_access": {"type": "boolean"},
     "open_access_status": {"type": "keyword"},
-    "content_url": {"type": "keyword"},
+    "content_url": {
+        "type": "object",
+        "properties": {
+            "url": {"type": "keyword"},
+            "type": {"type": "keyword"},
+            "language": {"type": "keyword"},
+        },
+    },
     "content_url_with_lang": {
         "type": "object",
         "properties": {
