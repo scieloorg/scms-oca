@@ -2,6 +2,8 @@
   class="checkbox-field"
   id="checkbox-{{ field.name }}"
   data-field-name="{{ field.name }}"
+  data-data-source="{{ data_source }}"
+  data-dependencies="{{ field.dependencies|join:',' }}"
   data-search-threshold="{{ field.search_threshold|default:10 }}"
 >
   <input

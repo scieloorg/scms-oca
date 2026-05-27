@@ -390,6 +390,11 @@
   padding-left: var(--sg-field-indent);
 }
 
+.sg-filter-sidebar .form-group__body.is-facet-refreshing {
+  transition: height 0.22s ease, opacity 0.18s ease;
+  will-change: height;
+}
+
 .sg-filter-sidebar .form-control,
 .sg-filter-sidebar .form-select {
   min-height: 1.95rem;
@@ -518,6 +523,14 @@
   border-radius: 12px;
   padding: 0.12rem 0 0 0;
   background: transparent;
+  transition: opacity 0.18s ease;
+}
+
+.sg-filter-sidebar .form-group__body.is-facet-refreshing .lookup-checkbox-field__options,
+.sg-filter-sidebar .form-group__body.is-facet-refreshing .checkbox-field__options,
+.lookup-checkbox-field__options.is-refreshing,
+.checkbox-field__options.is-refreshing {
+  opacity: 0.58;
 }
 
 .lookup-checkbox-field__group-label,
