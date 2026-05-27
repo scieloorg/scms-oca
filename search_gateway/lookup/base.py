@@ -43,7 +43,7 @@ class LookupBuilder:
         return {
             "settings": {
                 "index": {
-                    "number_of_shards": getattr(settings, "SEARCH_GATEWAY_LOOKUP_NUMBER_OF_SHARDS", 5),
+                    "number_of_shards": getattr(settings, "SEARCH_GATEWAY_LOOKUP_NUMBER_OF_SHARDS", 1),
                     "number_of_replicas": getattr(settings, "SEARCH_GATEWAY_LOOKUP_NUMBER_OF_REPLICAS", 0),
                     "refresh_interval": "-1",
                 },

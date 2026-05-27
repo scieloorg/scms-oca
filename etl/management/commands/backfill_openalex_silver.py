@@ -271,7 +271,7 @@ class Command(BaseCommand):
                                 write_alias=write_alias,
                                 public_alias=public_alias,
                                 mapping=SILVER_MAPPING,
-                                max_size=rollover_max_size,
+                                max_size=rollover_max_size
                             )
                             if rollover_index:
                                 rollovers += 1

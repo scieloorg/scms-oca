@@ -83,7 +83,7 @@ class OpenSearchClientTests(SimpleTestCase):
         new_index = client.rollover(
             write_alias="silver_write",
             public_alias="scientific_production",
-            mapping={"settings": {"number_of_shards": 5}, "mappings": {"dynamic": "strict"}},
+            mapping={"settings": {"number_of_shards": 1}, "mappings": {"dynamic": "strict"}},
             max_size="10gb",
         )
 
@@ -91,8 +91,8 @@ class OpenSearchClientTests(SimpleTestCase):
         mock_client.indices.rollover.assert_called_once_with(
             alias="silver_write",
             body={
-                "conditions": {"max_size": "10gb"},
-                "settings": {"number_of_shards": 5},
+                "conditions": {"max_size": "10gb", "max_docs": 500},
+                "settings": {"number_of_shards": 1},
                 "mappings": {"dynamic": "strict"},
             },
         )
