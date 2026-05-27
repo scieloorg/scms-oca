@@ -190,6 +190,7 @@ class SilverMerger:
         all_abstracts = {}
         all_keywords = {}
         all_urls = []
+        all_content_urls: list[dict] = []
 
         for doc in scielo_docs:
             data = doc.to_dict()
@@ -236,6 +237,8 @@ class SilverMerger:
 
             if data.get("content_url_with_lang"):
                 all_urls.extend(data["content_url_with_lang"])
+            if data.get("content_url"):
+                all_content_urls.extend(data["content_url"])
 
         base_data.setdefault("oca_data", {}).setdefault("scielo", {})
         base_data["oca_data"]["scielo"]["collection"] = scalar_or_list(
@@ -261,6 +264,8 @@ class SilverMerger:
             ]
         if all_urls:
             base_data["content_url_with_lang"] = self._unique_urls_by_language(all_urls)
+        if all_content_urls:
+            base_data["content_url"] = self._unique_content_urls(all_content_urls)
 
         try:
             return SilverDocument(**base_data)
@@ -281,6 +286,18 @@ class SilverMerger:
             elif not lang:
                 unique_urls.append(url_item)
         return unique_urls
+
+    def _unique_content_urls(self, url_items: list) -> list:
+        seen = set()
+        unique = []
+        for item in url_items:
+            if not isinstance(item, dict):
+                continue
+            key = item.get("url")
+            if key and key not in seen:
+                unique.append(item)
+                seen.add(key)
+        return unique
 
     def _enrich_scielo_with_openalex(
         self,
@@ -303,56 +320,75 @@ class SilverMerger:
         all_indexed_in = list(merged_data.get("indexed_in") or [])
         openalex_doi = None
         openalex_doi_with_lang = []
-        openalex_content_url = None
         openalex_content_url_with_lang = []
+        all_content_urls: list[dict] = list(merged_data.get("content_url") or [])
         openalex_is_open_access = None
         openalex_open_access_status = None
         openalex_biblio = {}
         all_funders = []
         all_awards = []
+        all_topics: dict[str, dict] = {}
         best_primary_topic_score = merged_data.get("primary_topic_score") or 0.0
         merged_apc = merged_data.get("apc") or {}
 
         for oa_doc in openalex_docs:
             oa_data = oa_doc.to_dict()
             oa_ids = oa_data.get("ids") or {}
+            
             if not openalex_doi:
                 openalex_doi = oa_data.get("doi") or oa_ids.get("doi")
+            
             if oa_ids.get("doi_with_lang"):
                 openalex_doi_with_lang.extend(oa_ids["doi_with_lang"])
-            if not openalex_content_url and oa_data.get("content_url"):
-                openalex_content_url = oa_data["content_url"]
+            
             if oa_data.get("content_url_with_lang"):
                 openalex_content_url_with_lang.extend(oa_data["content_url_with_lang"])
+            
+            if oa_data.get("content_urls"):
+                all_content_urls.extend(oa_data["content_url"])
+            
             if openalex_is_open_access is None and oa_data.get("is_open_access") is not None:
                 openalex_is_open_access = oa_data["is_open_access"]
+            
             if not openalex_open_access_status and oa_data.get("open_access_status"):
                 openalex_open_access_status = oa_data["open_access_status"]
+            
             oa_biblio = oa_data.get("biblio") or {}
             for key in ("volume", "issue", "first_page", "last_page"):
                 value = oa_biblio.get(key) or oa_data.get(key)
                 if value and key not in openalex_biblio:
                     openalex_biblio[key] = value
+            
             if oa_data.get("citation_count") is not None:
                 all_citation_counts.append(oa_data["citation_count"])
+            
             if oa_data.get("referenced_works"):
                 all_referenced_works.extend(oa_data["referenced_works"])
+            
             if oa_data.get("authorships"):
                 all_authorships.extend(oa_data["authorships"])
+            
             if oa_data.get("author_country_codes"):
                 all_country_codes.update(oa_data["author_country_codes"])
+            
             if oa_data.get("institutions"):
                 all_institutions.extend(oa_data["institutions"])
+            
             if oa_data.get("metrics"):
                 all_metrics.update(oa_data["metrics"])
+            
             if oa_data.get("sustainable_development_goals"):
                 all_sdgs.extend(oa_data["sustainable_development_goals"])
+            
             if oa_data.get("indexed_in"):
                 all_indexed_in.extend(as_list(oa_data["indexed_in"]))
+            
             if oa_data.get("funders"):
                 all_funders.extend(oa_data["funders"])
+            
             if oa_data.get("awards"):
                 all_awards.extend(oa_data["awards"])
+            
             if oa_data.get("primary_topic_name") and oa_data.get("primary_topic_score"):
                 oa_score = float(oa_data["primary_topic_score"])
                 if oa_score > best_primary_topic_score:
@@ -362,13 +398,29 @@ class SilverMerger:
                     merged_data["primary_topic_field"] = oa_data["primary_topic_field"]
                     merged_data["primary_topic_subfield"] = oa_data["primary_topic_subfield"]
                     merged_data["primary_topic_score"] = oa_data["primary_topic_score"]
+            
+            if oa_data.get("topics"):
+                for topic in oa_data["topics"]:
+                    name = topic.get("name")
+                    if not name:
+                        continue
+                    if name not in all_topics or topic.get("score", 0) > all_topics[name].get("score", 0):
+                        all_topics[name] = topic
+            
             if not merged_apc and oa_data.get("apc"):
                 merged_apc = oa_data["apc"]
 
+        if all_topics:
+            merged_data["topics"] = sorted(
+                all_topics.values(), key=lambda t: t.get("score", 0), reverse=True
+            )
+
         if merged_data.get("citation_count") is not None:
             all_citation_counts.insert(0, merged_data["citation_count"])
+        
         if all_citation_counts:
             merged_data["citation_count"] = sum(all_citation_counts)
+        
         if all_referenced_works:
             merged_data["referenced_works"] = unique(
                 (merged_data.get("referenced_works") or []) + all_referenced_works
@@ -393,42 +445,52 @@ class SilverMerger:
 
         if all_metrics:
             merged_data["metrics"] = {**(merged_data.get("metrics") or {}), **all_metrics}
+        
         if all_sdgs:
             merged_data["sustainable_development_goals"] = self._unique_sdgs_by_score(
                 (merged_data.get("sustainable_development_goals") or []) + all_sdgs
             )
+        
         if all_funders:
             existing_funders = merged_data.get("funders") or []
             merged_data["funders"] = self._unique_funders(existing_funders + all_funders)
+        
         if all_awards:
             existing_awards = merged_data.get("awards") or []
             merged_data["awards"] = self._unique_awards(existing_awards + all_awards)
+        
         if merged_apc:
             merged_data["apc"] = merged_apc
+        
         if all_indexed_in:
             merged_data["indexed_in"] = sorted(set(all_indexed_in))
+        
         if openalex_doi and not merged_data.get("doi"):
             merged_data["doi"] = openalex_doi
             merged_data.setdefault("ids", {}).setdefault("doi", openalex_doi)
+        
         if openalex_doi_with_lang:
             merged_ids = merged_data.setdefault("ids", {})
             if not merged_ids.get("doi_with_lang"):
                 merged_ids["doi_with_lang"] = openalex_doi_with_lang
 
-        if openalex_content_url and not merged_data.get("content_url"):
-            merged_data["content_url"] = openalex_content_url
         if openalex_content_url_with_lang:
             merged_data["content_url_with_lang"] = self._unique_urls_by_language(
                 (merged_data.get("content_url_with_lang") or [])
                 + openalex_content_url_with_lang
             )
+        if all_content_urls:
+            merged_data["content_url"] = self._unique_content_urls(all_content_urls)
+        
         if (
             merged_data.get("is_open_access") is None
             and openalex_is_open_access is not None
         ):
             merged_data["is_open_access"] = openalex_is_open_access
+        
         if openalex_open_access_status and not merged_data.get("open_access_status"):
             merged_data["open_access_status"] = openalex_open_access_status
+        
         if openalex_biblio:
             merged_biblio = dict(merged_data.get("biblio") or {})
             for key, value in openalex_biblio.items():

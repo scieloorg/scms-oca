@@ -24,7 +24,7 @@ from etl.transform.normalizers import (
     normalize_openalex_id,
     normalize_text,
 )
-from etl.transform.utils import as_list, first_value, int_or_none
+from etl.transform.utils import as_list, int_or_none
 
 logger = logging.getLogger(__name__)
 
@@ -282,6 +282,26 @@ class BaseStandardizer:
             "primary_topic_score": primary_topic.get("score") or 0.0,
         }
 
+    def _build_topics(self, raw_data: dict[str, Any]) -> list[dict[str, Any]]:
+        topics = raw_data.get("topics") or []
+        if not isinstance(topics, list):
+            return []
+        result = []
+        for topic in topics:
+            if not isinstance(topic, dict):
+                continue
+            name = topic.get("display_name") or topic.get("name") or ""
+            if not name:
+                continue
+            result.append({
+                "name": name,
+                "domain": extract_display_name(topic.get("domain")) or "",
+                "field": extract_display_name(topic.get("field")) or "",
+                "subfield": extract_display_name(topic.get("subfield")) or "",
+                "score": topic.get("score") or 0.0,
+            })
+        return result
+
     def _build_apc_field(self, raw_data: dict[str, Any]) -> dict[str, Any]:
         apc = {}
         if raw_data.get("apc_list"):
@@ -345,13 +365,57 @@ class BaseStandardizer:
 
         return publishers
 
-    def _build_content_url_field(self, raw_data: dict[str, Any]) -> Any:
-        return first_value(
-            raw_data.get("content_url")
-            or (raw_data.get("open_access") or {}).get("oa_url")
-            or (raw_data.get("primary_location") or {}).get("pdf_url")
-            or (raw_data.get("primary_location") or {}).get("landing_page_url")
-        )
+    def _build_content_url_field(
+        self, raw_data: dict[str, Any], url_with_lang: list[dict[str, Any]] | None = None
+    ) -> list[dict[str, Any]]:
+        urls: list[dict[str, Any]] = []
+
+        lang_by_url: dict[str, str] = {}
+        for item in url_with_lang or []:
+            if isinstance(item, dict) and item.get("content_url") and item.get("language"):
+                lang_by_url[item["content_url"]] = item["language"]
+
+        raw_url = raw_data.get("content_url")
+        if raw_url:
+            if isinstance(raw_url, list):
+                for item in raw_url:
+                    if isinstance(item, str):
+                        urls.append(self._url_entry(item, "other", lang_by_url.get(item)))
+            elif isinstance(raw_url, str):
+                urls.append(self._url_entry(raw_url, "other", lang_by_url.get(raw_url)))
+
+        location = raw_data.get("primary_location") or {}
+        if landing_url := location.get("landing_page_url"):
+            if isinstance(landing_url, str):
+                urls.append(self._url_entry(landing_url, "html", lang_by_url.get(landing_url)))
+        if pdf_url := location.get("pdf_url"):
+            if isinstance(pdf_url, str):
+                urls.append(self._url_entry(pdf_url, "pdf", lang_by_url.get(pdf_url)))
+
+        oa = raw_data.get("open_access") or {}
+        if oa_url := oa.get("oa_url"):
+            if isinstance(oa_url, str):
+                urls.append(self._url_entry(oa_url, "oa", lang_by_url.get(oa_url)))
+
+        seen = {u["url"] for u in urls}
+        for item in url_with_lang or []:
+            if not isinstance(item, dict):
+                continue
+            u = item.get("content_url")
+            if not u or u in seen:
+                continue
+            url_type = "pdf" if "/pdf/" in u.lower() or u.lower().endswith(".pdf") else "html"
+            urls.append(self._url_entry(u, url_type, item.get("language")))
+            seen.add(u)
+
+        return urls
+
+    @staticmethod
+    def _url_entry(url: str, url_type: str, language: str | None = None) -> dict[str, Any]:
+        entry: dict[str, Any] = {"url": url, "type": url_type}
+        if language:
+            entry["language"] = language
+        return entry
 
     def _build_is_open_access_field(self, raw_data: dict[str, Any]) -> Any:
         if "is_open_access" in raw_data:
@@ -411,8 +475,8 @@ class SciELOStandardizer(BaseStandardizer):
         data["description_with_lang"] = self._build_description_with_lang_field(raw)
         data["keywords_with_lang"] = raw.get("keywords_with_lang") or []
         data["subjects_with_lang"] = self._build_subjects_with_lang_field(raw)
-        data["content_url"] = self._build_content_url_field(raw)
         data["content_url_with_lang"] = self._build_content_url_with_lang_field(raw)
+        data["content_url"] = self._build_content_url_field(raw, data["content_url_with_lang"])
         data["is_open_access"] = self._build_is_open_access_field(raw)
         data["open_access_status"] = self._build_open_access_status_field(raw)
         data.update(self._build_biblio_fields(raw))
@@ -436,6 +500,7 @@ class SciELOStandardizer(BaseStandardizer):
         data.update(self._build_source_summary_fields(data["source"]))
 
         data.update(self._build_primary_topic_fields(raw))
+        data["topics"] = self._build_topics(raw)
         data["sustainable_development_goals"] = self._build_sdgs_field(raw)
         data["referenced_works"] = self._build_referenced_works_field(raw)
         data["references_count"] = len(data["referenced_works"])
@@ -495,7 +560,9 @@ class SciELOStandardizer(BaseStandardizer):
             if item.get("language") and item.get("content_url")
         }
         if raw_data.get("content_url") and not urls_map:
-            urls_map[self._fallback_language_code(raw_data)] = self._build_content_url_field(raw_data)
+            content_urls = self._build_content_url_field(raw_data)
+            if content_urls and content_urls[0].get("url"):
+                urls_map[self._fallback_language_code(raw_data)] = content_urls[0]["url"]
 
         return [
             {"language": l, "content_url": u} for l, u in sorted(urls_map.items())
@@ -578,8 +645,8 @@ class OpenAlexStandardizer(BaseStandardizer):
         data["description_with_lang"] = []
         data["keywords_with_lang"] = []
         data["subjects_with_lang"] = []
-        data["content_url"] = self._build_content_url_field(raw)
         data["content_url_with_lang"] = self._build_content_url_with_lang_field(input_doc)
+        data["content_url"] = self._build_content_url_field(raw, data["content_url_with_lang"])
         data["is_open_access"] = self._build_is_open_access_field(raw)
         data["open_access_status"] = self._build_open_access_status_field(raw)
         data.update(self._build_biblio_fields(raw))
@@ -603,6 +670,7 @@ class OpenAlexStandardizer(BaseStandardizer):
         data.update(self._build_source_summary_fields(data["source"]))
 
         data.update(self._build_primary_topic_fields(raw))
+        data["topics"] = self._build_topics(raw)
         data["sustainable_development_goals"] = self._build_sdgs_field(raw)
         data["referenced_works"] = raw.get("referenced_works") or []
         data["references_count"] = len(data["referenced_works"])
@@ -639,8 +707,9 @@ class OpenAlexStandardizer(BaseStandardizer):
         for oa in input_doc.enrichment_payloads():
             lang = oa.get("language", "und")
             if lang not in urls_map:
-                if oa_url := self._build_content_url_field(oa):
-                    urls_map[lang] = oa_url
+                oa_urls = self._build_content_url_field(oa)
+                if oa_urls and oa_urls[0].get("url"):
+                    urls_map[lang] = oa_urls[0]["url"]
         return [
             {"language": l, "content_url": u} for l, u in sorted(urls_map.items())
         ]

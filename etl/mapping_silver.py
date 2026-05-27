@@ -46,7 +46,38 @@ SILVER_PROPERTIES = {
             "match_status": {"type": "keyword"},
             "match_strategy": {"type": "keyword"},
             "match_confidence": {"type": "keyword"},
-            "merge_trace": {"type": "object", "dynamic": True},
+            "merge_trace": {
+                "type": "object",
+                "properties": {
+                    "scielo_matches": {
+                        "type": "object",
+                        "properties": {
+                            "doc_ids": {"type": "keyword"},
+                            "collections": {"type": "keyword"},
+                        },
+                    },
+                    "openalex_matches": {
+                        "type": "object",
+                        "properties": {
+                            "doc_id": {"type": "keyword"},
+                            "match_strategy": {"type": "keyword"},
+                            "confidence": {"type": "keyword"},
+                            "validation": {
+                                "type": "object",
+                                "properties": {
+                                    "reasons": {"type": "keyword"},
+                                    "score": {"type": "long"},
+                                    "year_check": {"type": "keyword"},
+                                    "doi_check": {"type": "keyword"},
+                                    "journal_check": {"type": "keyword"},
+                                    "isbn_check": {"type": "keyword"},
+                                    "title_similarity": {"type": "float"},
+                                },
+                            },
+                        },
+                    },
+                },
+            },
             "scielo": {
                 "type": "object",
                 "properties": {
@@ -197,7 +228,14 @@ SILVER_PROPERTIES = {
     "publication_year": {"type": "long"},
     "is_open_access": {"type": "boolean"},
     "open_access_status": {"type": "keyword"},
-    "content_url": {"type": "keyword"},
+    "content_url": {
+        "type": "object",
+        "properties": {
+            "url": {"type": "keyword"},
+            "type": {"type": "keyword"},
+            "language": {"type": "keyword"},
+        },
+    },
     "content_url_with_lang": {
         "type": "object",
         "properties": {
@@ -334,16 +372,34 @@ SILVER_PROPERTIES = {
     "primary_topic_field": {"type": "keyword"},
     "primary_topic_subfield": {"type": "keyword"},
     "primary_topic_score": {"type": "float"},
+    "topics": {
+        "type": "nested",
+        "properties": {
+            "name": {"type": "keyword"},
+            "domain": {"type": "keyword"},
+            "field": {"type": "keyword"},
+            "subfield": {"type": "keyword"},
+            "score": {"type": "float"},
+        },
+    },
     "apc": {
         "type": "object",
         "properties": {
             "apc_list": {
                 "type": "object",
-                "dynamic": True,
+                "properties": {
+                    "currency": {"type": "keyword"},
+                    "value": {"type": "long"},
+                    "value_usd": {"type": "long"},
+                },
             },
             "apc_paid": {
                 "type": "object",
-                "dynamic": True,
+                "properties": {
+                    "currency": {"type": "keyword"},
+                    "value": {"type": "long"},
+                    "value_usd": {"type": "long"},
+                },
             },
         },
     },

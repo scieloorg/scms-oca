@@ -597,7 +597,8 @@ class OpenSearchETLPipeline:
         rollover_index = self.client.rollover(
             write_alias=write_alias,
             public_alias=self.public_alias,
-            max_size=getattr(settings, "ETL_SILVER_ROLLOVER_MAX_SIZE", None),
+            mapping=SILVER_MAPPING,
+            max_size=getattr(settings, "ETL_SILVER_ROLLOVER_MAX_SIZE", None)
         )
         if rollover_index:
             self.indexed_index_names.add(rollover_index)

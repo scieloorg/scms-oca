@@ -32,6 +32,12 @@ class OpenSearchClient:
         public_alias: str,
         mapping: Dict[str, Any],
     ) -> str | None:
+        self.ensure_rollover_template(
+            index_prefix=index_prefix,
+            public_alias=public_alias,
+            mapping=mapping,
+        )
+
         if self.index_exists(write_alias):
             return None
 
@@ -51,11 +57,32 @@ class OpenSearchClient:
         logger.info("Rollover bootstrap index '%s' created successfully.", index_name)
         return index_name
 
+    def ensure_rollover_template(
+        self,
+        *,
+        index_prefix: str,
+        public_alias: str,
+        mapping: Dict[str, Any],
+    ) -> str:
+        template_name = f"{index_prefix}_rollover_template"
+        template_body = {
+            "index_patterns": [f"{index_prefix}-*"],
+            "template": self._template_from_mapping(mapping, public_alias=public_alias),
+        }
+        logger.info(
+            "Ensuring rollover index template '%s' for pattern '%s-*'...",
+            template_name,
+            index_prefix,
+        )
+        self.client.indices.put_index_template(name=template_name, body=template_body)
+        return template_name
+
     def rollover(
         self,
         *,
         write_alias: str,
         public_alias: str,
+        mapping: Dict[str, Any] | None = None,
         max_size: str | None = None,
     ) -> str | None:
         conditions: dict[str, Any] = {}
@@ -64,9 +91,13 @@ class OpenSearchClient:
         if not conditions:
             return None
 
+        body: dict[str, Any] = {"conditions": conditions}
+        if mapping:
+            body.update(self._rollover_mapping_body(mapping))
+
         response = self.client.indices.rollover(
             alias=write_alias,
-            body={"conditions": conditions},
+            body=body,
         )
         if not response.get("rolled_over"):
             return None
@@ -87,3 +118,19 @@ class OpenSearchClient:
 
     def add_alias(self, index_name: str, alias_name: str) -> None:
         self.client.indices.put_alias(index=index_name, name=alias_name)
+
+    def _template_from_mapping(
+        self,
+        mapping: Dict[str, Any],
+        *,
+        public_alias: str,
+    ) -> Dict[str, Any]:
+        template = self._rollover_mapping_body(mapping)
+        aliases = template.setdefault("aliases", {})
+        aliases[public_alias] = {}
+        return template
+
+    def _rollover_mapping_body(self, mapping: Dict[str, Any]) -> Dict[str, Any]:
+        body = deepcopy(mapping)
+        body.pop("aliases", None)
+        return body

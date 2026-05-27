@@ -270,7 +270,8 @@ class Command(BaseCommand):
                             rollover_index = client.rollover(
                                 write_alias=write_alias,
                                 public_alias=public_alias,
-                                max_size=rollover_max_size,
+                                mapping=SILVER_MAPPING,
+                                max_size=rollover_max_size
                             )
                             if rollover_index:
                                 rollovers += 1

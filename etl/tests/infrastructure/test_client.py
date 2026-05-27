@@ -22,6 +22,17 @@ class OpenSearchClientTests(SimpleTestCase):
         )
 
         self.assertEqual(index_name, "silver_scientific_production-000001")
+        mock_client.indices.put_index_template.assert_called_once_with(
+            name="silver_scientific_production_rollover_template",
+            body={
+                "index_patterns": ["silver_scientific_production-*"],
+                "template": {
+                    "settings": {},
+                    "mappings": {"properties": {}},
+                    "aliases": {"scientific_production": {}},
+                },
+            },
+        )
         mock_client.indices.create.assert_called_once_with(
             index="silver_scientific_production-000001",
             body={
@@ -50,10 +61,17 @@ class OpenSearchClientTests(SimpleTestCase):
         )
 
         self.assertIsNone(index_name)
+        mock_client.indices.put_index_template.assert_called_once_with(
+            name="silver_scientific_production_rollover_template",
+            body={
+                "index_patterns": ["silver_scientific_production-*"],
+                "template": {"aliases": {"scientific_production": {}}},
+            },
+        )
         mock_client.indices.create.assert_not_called()
 
     @patch("etl.client.get_opensearch_client")
-    def test_rollover_adds_public_alias_to_new_index(self, get_client):
+    def test_rollover_applies_mapping_and_adds_public_alias_to_new_index(self, get_client):
         mock_client = Mock()
         mock_client.indices.rollover.return_value = {
             "rolled_over": True,
@@ -65,13 +83,18 @@ class OpenSearchClientTests(SimpleTestCase):
         new_index = client.rollover(
             write_alias="silver_write",
             public_alias="scientific_production",
+            mapping={"settings": {"number_of_shards": 1}, "mappings": {"dynamic": "strict"}},
             max_size="10gb",
         )
 
         self.assertEqual(new_index, "silver_scientific_production-000002")
         mock_client.indices.rollover.assert_called_once_with(
             alias="silver_write",
-            body={"conditions": {"max_size": "10gb"}},
+            body={
+                "conditions": {"max_size": "10gb", "max_docs": 500},
+                "settings": {"number_of_shards": 1},
+                "mappings": {"dynamic": "strict"},
+            },
         )
         mock_client.indices.put_alias.assert_called_once_with(
             index="silver_scientific_production-000002",
