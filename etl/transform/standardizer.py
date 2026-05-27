@@ -24,7 +24,7 @@ from etl.transform.normalizers import (
     normalize_openalex_id,
     normalize_text,
 )
-from etl.transform.utils import as_list, first_value, int_or_none
+from etl.transform.utils import as_list, int_or_none
 
 logger = logging.getLogger(__name__)
 
@@ -282,6 +282,26 @@ class BaseStandardizer:
             "primary_topic_score": primary_topic.get("score") or 0.0,
         }
 
+    def _build_topics(self, raw_data: dict[str, Any]) -> list[dict[str, Any]]:
+        topics = raw_data.get("topics") or []
+        if not isinstance(topics, list):
+            return []
+        result = []
+        for topic in topics:
+            if not isinstance(topic, dict):
+                continue
+            name = topic.get("display_name") or topic.get("name") or ""
+            if not name:
+                continue
+            result.append({
+                "name": name,
+                "domain": extract_display_name(topic.get("domain")) or "",
+                "field": extract_display_name(topic.get("field")) or "",
+                "subfield": extract_display_name(topic.get("subfield")) or "",
+                "score": topic.get("score") or 0.0,
+            })
+        return result
+
     def _build_apc_field(self, raw_data: dict[str, Any]) -> dict[str, Any]:
         apc = {}
         if raw_data.get("apc_list"):
@@ -480,6 +500,7 @@ class SciELOStandardizer(BaseStandardizer):
         data.update(self._build_source_summary_fields(data["source"]))
 
         data.update(self._build_primary_topic_fields(raw))
+        data["topics"] = self._build_topics(raw)
         data["sustainable_development_goals"] = self._build_sdgs_field(raw)
         data["referenced_works"] = self._build_referenced_works_field(raw)
         data["references_count"] = len(data["referenced_works"])
@@ -624,7 +645,6 @@ class OpenAlexStandardizer(BaseStandardizer):
         data["description_with_lang"] = []
         data["keywords_with_lang"] = []
         data["subjects_with_lang"] = []
-        data["content_url"] = self._build_content_url_field(raw)
         data["content_url_with_lang"] = self._build_content_url_with_lang_field(input_doc)
         data["content_url"] = self._build_content_url_field(raw, data["content_url_with_lang"])
         data["is_open_access"] = self._build_is_open_access_field(raw)
@@ -650,6 +670,7 @@ class OpenAlexStandardizer(BaseStandardizer):
         data.update(self._build_source_summary_fields(data["source"]))
 
         data.update(self._build_primary_topic_fields(raw))
+        data["topics"] = self._build_topics(raw)
         data["sustainable_development_goals"] = self._build_sdgs_field(raw)
         data["referenced_works"] = raw.get("referenced_works") or []
         data["references_count"] = len(data["referenced_works"])

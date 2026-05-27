@@ -372,6 +372,16 @@ SILVER_PROPERTIES = {
     "primary_topic_field": {"type": "keyword"},
     "primary_topic_subfield": {"type": "keyword"},
     "primary_topic_score": {"type": "float"},
+    "topics": {
+        "type": "nested",
+        "properties": {
+            "name": {"type": "keyword"},
+            "domain": {"type": "keyword"},
+            "field": {"type": "keyword"},
+            "subfield": {"type": "keyword"},
+            "score": {"type": "float"},
+        },
+    },
     "apc": {
         "type": "object",
         "properties": {

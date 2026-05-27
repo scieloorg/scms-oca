@@ -116,6 +116,7 @@ class BronzeInputDocument(InputDocument, ABC):
             or raw_data.get("doc_id")
             or ids.get("scl_preprint_id")
             or ids.get("dataset_id")
+            or ids.get("scl_book_id")
         )
         if doc_id:
             return str(doc_id)
@@ -318,7 +319,7 @@ class SilverDocument(OcaModel):
     source_title: str | None = None
     source_issns: list = field(default_factory=list)
     source_type: str | None = None
-    content_url: str | None = None
+    content_url: list = field(default_factory=list)
     content_url_with_lang: list = field(default_factory=list)
     is_open_access: bool | None = None
     open_access_status: str | None = None
@@ -339,6 +340,7 @@ class SilverDocument(OcaModel):
     primary_topic_field: str = ""
     primary_topic_subfield: str = ""
     primary_topic_score: float = 0.0
+    topics: list = field(default_factory=list)
     apc: dict = field(default_factory=dict)
     authors_count: int = 0
     references_count: int = 0
@@ -383,7 +385,7 @@ class SilverDocument(OcaModel):
             "publication_year": self.publication_year,
             "is_open_access": self.is_open_access,
             "open_access_status": self.open_access_status,
-            "content_url": self.content_url,
+            "content_url": self._index_content_urls(),
             "content_url_with_lang": self._index_lang_items(self.content_url_with_lang, "content_url", aliases=("url", "text")),
             "biblio": self._index_biblio(),
             "parent_book": self._index_parent_book(),
@@ -402,6 +404,7 @@ class SilverDocument(OcaModel):
             "metrics": self._index_metrics(),
         }
         data.update(self._index_primary_topic())
+        data.update(self._index_topics())
         data.update(self._index_apc())
         return self._clean_dict(data)
 
@@ -564,6 +567,22 @@ class SilverDocument(OcaModel):
             "primary_topic_score": self.primary_topic_score,
         }
 
+    def _index_topics(self) -> dict:
+        if not self.topics:
+            return {}
+        return {
+            "topics": [
+                {
+                    "name": t.get("name", ""),
+                    "domain": t.get("domain", ""),
+                    "field": t.get("field", ""),
+                    "subfield": t.get("subfield", ""),
+                    "score": t.get("score", 0.0),
+                }
+                for t in self.topics
+            ]
+        }
+
     def _index_apc(self) -> dict:
         if not self.apc:
             return {}
@@ -598,6 +617,20 @@ class SilverDocument(OcaModel):
         if not openalex_ids:
             return {}
         return {"ids": {"openalex": openalex_ids}}
+
+    def _index_content_urls(self) -> list:
+        return [
+            self._only(item, {"url", "type", "language"})
+            for item in self.content_url
+            if isinstance(item, dict) and item.get("url")
+        ]
+
+    @property
+    def primary_url(self) -> str | None:
+        for item in self.content_url:
+            if isinstance(item, dict) and item.get("url"):
+                return item["url"]
+        return None
 
     def _index_lang_items(self, items: list, value_key: str, aliases: tuple[str, ...] = ()) -> list:
         indexed = []
