@@ -370,11 +370,19 @@ SILVER_PROPERTIES = {
         "properties": {
             "apc_list": {
                 "type": "object",
-                "dynamic": True,
+                "properties": {
+                    "currency": {"type": "keyword"},
+                    "value": {"type": "long"},
+                    "value_usd": {"type": "long"},
+                },
             },
             "apc_paid": {
                 "type": "object",
-                "dynamic": True,
+                "properties": {
+                    "currency": {"type": "keyword"},
+                    "value": {"type": "long"},
+                    "value_usd": {"type": "long"},
+                },
             },
         },
     },
