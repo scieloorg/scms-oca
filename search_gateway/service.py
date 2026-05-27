@@ -303,6 +303,8 @@ class SearchGatewayService:
         if not field_settings:
             return {}, None
 
+        filter_mapping_field_settings = self._get_filterable_field_settings()
+
         cache_key = build_filters_cache_key(
             data_source_name=self.index_name,
             index_name=self.index_name,
@@ -317,7 +319,7 @@ class SearchGatewayService:
             return cached_data, None
 
         aggs = build_filters_aggs(field_settings, exclude_fields)
-        mapped_filters = get_mapped_filters(filters or {}, field_settings)
+        mapped_filters = get_mapped_filters(filters or {}, filter_mapping_field_settings)
         body = build_filters_body(aggs, mapped_filters=mapped_filters)
 
         try:

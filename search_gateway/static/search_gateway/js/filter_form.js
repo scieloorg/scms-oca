@@ -1,5 +1,6 @@
 (function () {
   const lookupInitialOptionsCache = new Map();
+  const FACET_REFRESH_ANIMATION_MS = 220;
 
   function translateText(msgid) {
     if (typeof window !== 'undefined' && typeof window.gettext === 'function') {
@@ -189,6 +190,24 @@
 
   function collectRelatedFiltersFromForm(form, excludedFieldName) {
     const filters = serializeForm(form);
+
+    getFilterForms(form || document).forEach(filterForm => {
+      filterForm.querySelectorAll('.lookup-checkbox-field, .checkbox-field').forEach(wrapper => {
+        const name = String(wrapper.dataset.fieldName || '').trim();
+        if (!name || name === excludedFieldName) return;
+
+        const state = wrapper.__checkboxState;
+        if (!state) return;
+
+        const selected = Array.from(state.selected || []).filter(Boolean);
+        if (!selected.length) {
+          delete filters[name];
+          return;
+        }
+        filters[name] = selected.length > 1 ? selected : selected[0];
+      });
+    });
+
     Object.keys(filters).forEach(key => {
       if (key === excludedFieldName) delete filters[key];
       if (key.endsWith('_operator') || key.endsWith('_bool_not')) delete filters[key];
@@ -221,7 +240,7 @@
     return `${fieldName}-${safeValue || 'item'}-${index + 1}`;
   }
 
-  function createCheckboxState(initialOptions, multipleSelection) {
+  function createCheckboxState(initialOptions, multipleSelection, promoteSelected = false) {
     const allOptions = normalizeOptionList(initialOptions);
     const baseOptions = allOptions.slice();
     const baseValues = new Set(baseOptions.map(item => item.value));
@@ -250,6 +269,7 @@
       searchResults: [],
       multipleSelection: multipleSelection !== false,
       allOptionLabel: allOption ? String(allOption.label || translateText('All')).trim() : '',
+      promoteSelected: promoteSelected || selected.size > 0,
     };
   }
 
@@ -266,11 +286,23 @@
         seen.add(item.value);
       });
 
-    sourceList.forEach(item => {
-      if (seen.has(item.value)) return;
-      merged.push(item);
-      seen.add(item.value);
-    });
+    if (state.promoteSelected) {
+      sourceList
+        .filter(item => state.selected.has(item.value))
+        .forEach(item => {
+          if (seen.has(item.value)) return;
+          merged.push(item);
+          seen.add(item.value);
+        });
+    }
+
+    sourceList
+      .filter(item => !state.promoteSelected || !state.selected.has(item.value))
+      .forEach(item => {
+        if (seen.has(item.value)) return;
+        merged.push(item);
+        seen.add(item.value);
+      });
 
     return merged;
   }
@@ -282,6 +314,7 @@
         state.pinned.clear();
         state.query = '';
         state.searchResults = [];
+        state.promoteSelected = false;
       }
       return;
     }
@@ -303,6 +336,9 @@
     state.selected.delete(option.value);
     if (!state.baseValues.has(option.value)) {
       state.pinned.delete(option.value);
+    }
+    if (!state.selected.size) {
+      state.promoteSelected = false;
     }
   }
 
@@ -362,6 +398,34 @@
 
     searchInput.hidden = !shouldShowSearch;
     wrapper.classList.toggle('checkbox-field--search-hidden', !shouldShowSearch);
+  }
+
+  function promoteSelectedCheckboxOptions(form) {
+    if (!form) return;
+
+    form.querySelectorAll('.lookup-checkbox-field, .checkbox-field').forEach(wrapper => {
+      const state = wrapper.__checkboxState;
+      if (!state || !state.selected?.size) return;
+
+      state.promoteSelected = true;
+      renderCheckboxOptions(
+        wrapper,
+        wrapper.classList.contains('lookup-checkbox-field') ? '.lookup-checkbox-field__options' : '.checkbox-field__options',
+        wrapper.classList.contains('lookup-checkbox-field') ? 'lookup-checkbox-field__item' : 'checkbox-field__item'
+      );
+    });
+  }
+
+  function bindPromoteSelectedOnSubmit(root) {
+    getFilterForms(root).forEach(form => {
+      if (form.dataset.promoteSelectedBound === 'true') return;
+
+      form.addEventListener('submit', () => {
+        promoteSelectedCheckboxOptions(form);
+      });
+
+      form.dataset.promoteSelectedBound = 'true';
+    });
   }
 
   function getSidebarSummary(form) {
@@ -856,6 +920,212 @@
     }
   }
 
+  async function fetchFilterOptions(element) {
+    const dataSource = String(element.dataset.dataSource || '').trim();
+    const fieldName = String(element.dataset.fieldName || '').trim();
+    if (!dataSource || !fieldName) return [];
+
+    const params = new URLSearchParams({
+      data_source: dataSource,
+      fields: fieldName,
+    });
+
+    const form = getFormFromNode(element);
+    const relatedFilters = collectRelatedFiltersFromForm(form, fieldName);
+    Object.entries(relatedFilters).forEach(([key, value]) => {
+      if (value === null || value === undefined) {
+        return;
+      }
+      if (Array.isArray(value)) {
+        value.forEach(item => {
+          if (item !== null && item !== undefined) {
+            params.append(key, item);
+          }
+        });
+      } else {
+        params.append(key, value);
+      }
+    });
+
+    try {
+      const response = await fetch(`/search-gateway/filters/?${params.toString()}`);
+      if (!response.ok) return [];
+      const data = await response.json();
+      return normalizeOptionList(Array.isArray(data?.[fieldName]) ? data[fieldName] : []);
+    } catch (error) {
+      console.error('Error loading filter options', error);
+      return [];
+    }
+  }
+
+  function parseDependencyNames(element) {
+    const fieldName = String(element?.dataset?.fieldName || '').trim();
+    const dependencyNames = String(element?.dataset?.dependencies || '')
+      .split(',')
+      .map(item => item.trim())
+      .filter(Boolean)
+      .filter(dependencyName => dependencyName !== fieldName);
+    return new Set(dependencyNames);
+  }
+
+  function setsHaveSameValues(left, right) {
+    if (left.size !== right.size) return false;
+    return Array.from(left).every(value => right.has(value));
+  }
+
+  function getCurrentFieldValue(element, fieldName) {
+    if (!element) return '';
+
+    if (element.name === fieldName) {
+      return String(element.value || '').trim();
+    }
+
+    const checkedInput = Array.from(element.querySelectorAll('input[name]'))
+      .find(input => input.name === fieldName && input.checked);
+    if (checkedInput) {
+      return String(checkedInput.value || '').trim();
+    }
+
+    const select = Array.from(element.querySelectorAll('select[name]'))
+      .find(item => item.name === fieldName);
+    if (select) {
+      return String(select.value || '').trim();
+    }
+
+    return '';
+  }
+
+  function dispatchFieldChange(element, fieldName) {
+    if (!element || !fieldName) return;
+
+    const target = element.name === fieldName
+      ? element
+      : Array.from(element.querySelectorAll('input[name], select[name], textarea[name]'))
+        .find(input => input.name === fieldName && !input.disabled);
+
+    if (!target) return;
+    target.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+
+  function rebuildSelectOptions(select, options) {
+    if (!select) return false;
+
+    const selectedValue = String(select.value || '').trim();
+    const allowClear = String(select.dataset.allowClear || '').toLowerCase() === 'true';
+    const placeholder = String(select.dataset.placeholder || '').trim();
+    const availableValues = new Set((options || []).map(option => option.value));
+
+    select.innerHTML = '';
+
+    if (allowClear) {
+      const placeholderOption = document.createElement('option');
+      placeholderOption.value = '';
+      placeholderOption.textContent = placeholder;
+      select.appendChild(placeholderOption);
+    }
+
+    (options || []).forEach(option => {
+      const optionElement = document.createElement('option');
+      optionElement.value = option.value;
+      optionElement.textContent = option.label;
+      select.appendChild(optionElement);
+    });
+
+    if (selectedValue && availableValues.has(selectedValue)) {
+      select.value = selectedValue;
+    } else {
+      select.value = allowClear ? '' : (options?.[0]?.value || '');
+    }
+
+    syncSelectPlaceholderState(select);
+    return selectedValue !== String(select.value || '').trim();
+  }
+
+  async function refreshDependentSelectOptions(select, { notifyChange = true } = {}) {
+    if (!select) return false;
+
+    const refreshId = (select.__dependentRefreshId || 0) + 1;
+    select.__dependentRefreshId = refreshId;
+    const options = await fetchFilterOptions(select);
+    if (select.__dependentRefreshId !== refreshId) return false;
+
+    const changed = animateFacetRefresh(select, () => rebuildSelectOptions(select, options));
+    if (changed && notifyChange) {
+      dispatchFieldChange(select, String(select.dataset.fieldName || '').trim());
+    }
+    return changed;
+  }
+
+  function normalizeBooleanOptionValue(value) {
+    const normalized = String(value || '').trim().toLowerCase();
+    if (['true', '1', 'yes', 'y', 'sim'].includes(normalized)) return 'true';
+    if (['false', '0', 'no', 'n', 'nao', 'não'].includes(normalized)) return 'false';
+    return normalized;
+  }
+
+  async function refreshDependentBooleanOptions(fieldset, { notifyChange = true } = {}) {
+    if (!fieldset) return false;
+
+    const fieldName = String(fieldset.dataset.fieldName || '').trim();
+    const previousValue = getCurrentFieldValue(fieldset, fieldName);
+    const refreshId = (fieldset.__dependentRefreshId || 0) + 1;
+    fieldset.__dependentRefreshId = refreshId;
+    const options = await fetchFilterOptions(fieldset);
+    if (fieldset.__dependentRefreshId !== refreshId) return false;
+
+    const availableValues = new Set(
+      (options || []).map(option => normalizeBooleanOptionValue(option.value)).filter(Boolean)
+    );
+    const shouldRestrictOptions = availableValues.size > 0;
+
+    animateFacetRefresh(fieldset, () => {
+      let hasCheckedAvailable = false;
+      fieldset.querySelectorAll('input[type="radio"]').forEach(radio => {
+        const value = String(radio.value || '').trim();
+        const isClearOption = !value;
+        const normalizedValue = normalizeBooleanOptionValue(value);
+        const isAvailable = !shouldRestrictOptions || isClearOption || availableValues.has(normalizedValue);
+
+        radio.disabled = !isAvailable;
+
+        if (radio.checked && !isAvailable) {
+          radio.checked = false;
+        } else if (radio.checked && isAvailable) {
+          hasCheckedAvailable = true;
+        }
+      });
+
+      if (!hasCheckedAvailable) {
+        const clearRadio = fieldset.querySelector('input[type="radio"][value=""]:not([disabled])');
+        if (clearRadio) {
+          clearRadio.checked = true;
+        }
+      }
+    });
+
+    const changed = previousValue !== getCurrentFieldValue(fieldset, fieldName);
+    if (changed && notifyChange) {
+      dispatchFieldChange(fieldset, fieldName);
+    }
+    return changed;
+  }
+
+  async function refreshDependentElement(element, state, options = {}) {
+    if (!element) return false;
+
+    if (element.classList.contains('lookup-checkbox-field') || element.classList.contains('checkbox-field')) {
+      if (!state) return false;
+      return refreshDependentFieldOptions(element, state, options);
+    }
+    if (element.matches('select.data-source-field--select[data-dependencies]')) {
+      return refreshDependentSelectOptions(element, options);
+    }
+    if (element.matches('fieldset.sg-radio-group--boolean[data-dependencies]')) {
+      return refreshDependentBooleanOptions(element, options);
+    }
+    return false;
+  }
+
   function buildLookupInitialOptionsCacheKey(wrapper) {
     const dataSource = String(wrapper?.dataset?.dataSource || '').trim();
     const fieldName = String(wrapper?.dataset?.fieldName || '').trim();
@@ -1011,41 +1281,169 @@
     return Promise.all(pending);
   }
 
+  function pruneSelectedOptions(state, availableValues) {
+    const available = availableValues instanceof Set
+      ? availableValues
+      : new Set(availableValues || []);
+
+    Array.from(state.selected).forEach(value => {
+      if (available.has(value)) {
+        return;
+      }
+      state.selected.delete(value);
+      if (!state.baseValues.has(value)) {
+        state.pinned.delete(value);
+      }
+    });
+  }
+
+  function getFacetRefreshAnimationElement(element) {
+    return element?.closest?.('.form-group__body') || element || null;
+  }
+
+  function shouldReduceMotion() {
+    return window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+  }
+
+  function animateFacetRefresh(element, renderCallback) {
+    const animatedElement = getFacetRefreshAnimationElement(element);
+    if (!animatedElement || shouldReduceMotion()) {
+      return renderCallback();
+    }
+
+    const token = (animatedElement.__facetRefreshToken || 0) + 1;
+    animatedElement.__facetRefreshToken = token;
+    if (animatedElement.__facetRefreshTimer) {
+      window.clearTimeout(animatedElement.__facetRefreshTimer);
+    }
+
+    const previousHeight = animatedElement.getBoundingClientRect().height;
+    const previousHeightStyle = animatedElement.style.height;
+    animatedElement.style.height = `${previousHeight}px`;
+    animatedElement.style.overflow = 'hidden';
+    animatedElement.classList.add('is-facet-refreshing');
+
+    const result = renderCallback();
+
+    // Measure the natural post-render height. When shrinking, scrollHeight can
+    // report the locked old height unless the element is briefly released.
+    animatedElement.style.height = 'auto';
+    const nextHeight = animatedElement.getBoundingClientRect().height;
+    animatedElement.style.height = `${previousHeight}px`;
+
+    const cleanup = () => {
+      if (animatedElement.__facetRefreshToken !== token) return;
+      animatedElement.classList.remove('is-facet-refreshing');
+      animatedElement.style.height = previousHeightStyle;
+      animatedElement.style.overflow = '';
+      animatedElement.__facetRefreshTimer = null;
+    };
+
+    if (Math.abs(previousHeight - nextHeight) < 1) {
+      window.requestAnimationFrame(cleanup);
+      return result;
+    }
+
+    animatedElement.getBoundingClientRect();
+    window.requestAnimationFrame(() => {
+      if (animatedElement.__facetRefreshToken !== token) return;
+      animatedElement.style.height = `${nextHeight}px`;
+    });
+
+    const onTransitionEnd = event => {
+      if (event.target !== animatedElement || event.propertyName !== 'height') return;
+      animatedElement.removeEventListener('transitionend', onTransitionEnd);
+      cleanup();
+    };
+    animatedElement.addEventListener('transitionend', onTransitionEnd);
+    animatedElement.__facetRefreshTimer = window.setTimeout(() => {
+      animatedElement.removeEventListener('transitionend', onTransitionEnd);
+      cleanup();
+    }, FACET_REFRESH_ANIMATION_MS + 80);
+
+    return result;
+  }
+
+  function animateOptionsRefresh(wrapper, renderCallback) {
+    return animateFacetRefresh(wrapper, renderCallback);
+  }
+
+  async function refreshDependentFieldOptions(wrapper, state, { clearSearch = true, notifyChange = true } = {}) {
+    const isLookupField = wrapper.classList.contains('lookup-checkbox-field');
+    const optionsContainerSelector = isLookupField
+      ? '.lookup-checkbox-field__options'
+      : '.checkbox-field__options';
+    const itemClass = isLookupField ? 'lookup-checkbox-field__item' : 'checkbox-field__item';
+    const fieldName = String(wrapper.dataset.fieldName || '').trim();
+    const previousSelected = new Set(state.selected || []);
+    const refreshId = (wrapper.__dependentRefreshId || 0) + 1;
+    wrapper.__dependentRefreshId = refreshId;
+
+    if (clearSearch) {
+      state.query = '';
+      state.searchResults = [];
+      const searchInput = wrapper.querySelector(
+        isLookupField ? '.lookup-checkbox-field__search' : '.checkbox-field__search'
+      );
+      if (searchInput) searchInput.value = '';
+    }
+
+    const firstBatch = isLookupField
+      ? await fetchLookupOptions(wrapper, clearSearch ? '' : state.query)
+      : await fetchFilterOptions(wrapper);
+    if (wrapper.__dependentRefreshId !== refreshId) return false;
+
+    state.allOptions = firstBatch;
+    state.baseOptions = firstBatch.slice();
+    state.baseValues = new Set(state.baseOptions.map(item => item.value));
+    pruneSelectedOptions(state, state.baseValues);
+    animateOptionsRefresh(wrapper, () => {
+      renderCheckboxOptions(wrapper, optionsContainerSelector, itemClass);
+    });
+
+    const changed = !setsHaveSameValues(previousSelected, state.selected);
+    if (changed && notifyChange) {
+      dispatchFieldChange(wrapper, fieldName);
+    }
+    return changed;
+  }
+
   function bindDependentFields(root) {
-    (root || document).querySelectorAll('.lookup-checkbox-field').forEach(wrapper => {
-      if (wrapper.dataset.dependenciesBound === 'true') return;
+    const dependentSelectors = [
+      '.lookup-checkbox-field',
+      '.checkbox-field',
+      'select.data-source-field--select[data-dependencies]',
+      'fieldset.sg-radio-group--boolean[data-dependencies]',
+    ].join(', ');
 
-      const dependencies = String(wrapper.dataset.dependencies || '')
-        .split(',')
-        .map(item => item.trim())
-        .filter(Boolean);
+    (root || document).querySelectorAll(dependentSelectors).forEach(element => {
+      if (element.dataset.dependenciesBound === 'true') return;
 
-      const form = getFormFromNode(wrapper);
-      dependencies.forEach(dependencyName => {
-        const dependencyElements = Array.from((form || document).querySelectorAll(`[name="${dependencyName}"]`));
-        dependencyElements.forEach(dependencyElement => {
-          dependencyElement.addEventListener('change', async () => {
-            const state = wrapper.__checkboxState;
-            if (!state) return;
+      const dependencyNames = parseDependencyNames(element);
+      if (!dependencyNames.size) {
+        element.dataset.dependenciesBound = 'true';
+        return;
+      }
 
-            state.selected.clear();
-            state.pinned.clear();
-            state.query = '';
-            state.searchResults = [];
+      const form = getFormFromNode(element);
+      const fieldName = String(element.dataset.fieldName || '').trim();
 
-            const searchInput = wrapper.querySelector('.lookup-checkbox-field__search');
-            if (searchInput) searchInput.value = '';
+      (form || document).addEventListener('change', event => {
+        const dependencyElement = event?.target;
+        if (
+          !dependencyElement?.name
+          || dependencyElement.name === fieldName
+          || !dependencyNames.has(dependencyElement.name)
+        ) {
+          return;
+        }
 
-            const firstBatch = await fetchLookupOptions(wrapper, '');
-            state.allOptions = firstBatch;
-            state.baseOptions = firstBatch.slice();
-            state.baseValues = new Set(state.baseOptions.map(item => item.value));
-            renderCheckboxOptions(wrapper, '.lookup-checkbox-field__options', 'lookup-checkbox-field__item');
-          });
+        queueMicrotask(() => {
+          void refreshDependentElement(element, element.__checkboxState);
         });
       });
 
-      wrapper.dataset.dependenciesBound = 'true';
+      element.dataset.dependenciesBound = 'true';
     });
   }
 
@@ -1211,7 +1609,42 @@
     });
   }
 
-  function clearCustomFormState(form) {
+  function clearLookupInitialOptionsCache(form) {
+    if (!form) return;
+    form.querySelectorAll('.lookup-checkbox-field').forEach(wrapper => {
+      const cacheKey = buildLookupInitialOptionsCacheKey(wrapper);
+      if (cacheKey) {
+        lookupInitialOptionsCache.delete(cacheKey);
+      }
+    });
+  }
+
+  async function refreshAllFieldOptions(form) {
+    if (!form) return;
+
+    const refreshTasks = [];
+
+    form.querySelectorAll('.lookup-checkbox-field[data-dependencies], .checkbox-field[data-dependencies]').forEach(wrapper => {
+      if (!parseDependencyNames(wrapper).size) return;
+      const state = wrapper.__checkboxState;
+      if (!state) return;
+      refreshTasks.push(refreshDependentFieldOptions(wrapper, state, { notifyChange: false }));
+    });
+
+    form.querySelectorAll('select.data-source-field--select[data-dependencies]').forEach(select => {
+      if (!parseDependencyNames(select).size) return;
+      refreshTasks.push(refreshDependentSelectOptions(select, { notifyChange: false }));
+    });
+
+    form.querySelectorAll('fieldset.sg-radio-group--boolean[data-dependencies]').forEach(fieldset => {
+      if (!parseDependencyNames(fieldset).size) return;
+      refreshTasks.push(refreshDependentBooleanOptions(fieldset, { notifyChange: false }));
+    });
+
+    await Promise.all(refreshTasks);
+  }
+
+  function clearCustomFormState(form, { skipRender = false } = {}) {
     if (!form) return;
     form.querySelectorAll('.lookup-checkbox-field, .checkbox-field').forEach(wrapper => {
       const state = wrapper.__checkboxState;
@@ -1220,6 +1653,7 @@
       state.pinned.clear();
       state.query = '';
       state.searchResults = [];
+      state.promoteSelected = false;
 
       const searchInput = wrapper.querySelector('input[type="text"]');
       const isSearchInput = searchInput
@@ -1231,11 +1665,13 @@
         searchInput.value = '';
       }
 
-      renderCheckboxOptions(
-        wrapper,
-        wrapper.classList.contains('lookup-checkbox-field') ? '.lookup-checkbox-field__options' : '.checkbox-field__options',
-        wrapper.classList.contains('lookup-checkbox-field') ? 'lookup-checkbox-field__item' : 'checkbox-field__item'
-      );
+      if (!skipRender) {
+        renderCheckboxOptions(
+          wrapper,
+          wrapper.classList.contains('lookup-checkbox-field') ? '.lookup-checkbox-field__options' : '.checkbox-field__options',
+          wrapper.classList.contains('lookup-checkbox-field') ? 'lookup-checkbox-field__item' : 'checkbox-field__item'
+        );
+      }
     });
 
     form.querySelectorAll('input[data-meta-field="bool_not"]').forEach(input => {
@@ -1251,14 +1687,15 @@
     if (!form) return;
     form.dataset.sgInternalReset = 'true';
     form.reset();
-    clearCustomFormState(form);
-    window.setTimeout(() => {
+    clearLookupInitialOptionsCache(form);
+    clearCustomFormState(form, { skipRender: true });
+    void refreshAllFieldOptions(form).finally(() => {
       bindSelectPlaceholderState(form);
       initBooleanToggleFields(form);
       syncMetaStateFromDom(form);
       commitAppliedFilters(form);
       delete form.dataset.sgInternalReset;
-    }, 0);
+    });
   }
 
   function bindNativeResetHandling(root) {
@@ -1268,10 +1705,13 @@
       form.addEventListener('reset', () => {
         if (form.dataset.sgInternalReset === 'true') return;
         window.setTimeout(() => {
+          clearLookupInitialOptionsCache(form);
           rebuildCheckboxStateFromDom(form);
-          syncMetaStateFromDom(form);
-          bindSelectPlaceholderState(form);
-          initBooleanToggleFields(form);
+          void refreshAllFieldOptions(form).finally(() => {
+            syncMetaStateFromDom(form);
+            bindSelectPlaceholderState(form);
+            initBooleanToggleFields(form);
+          });
         }, 0);
       });
 
@@ -1340,6 +1780,7 @@
     initLocalCheckboxFields(container);
     const lookupPromise = initLookupCheckboxFields(container);
     bindDependentFields(container);
+    bindPromoteSelectedOnSubmit(container);
     bindNativeResetHandling(container);
     bindAppliedFiltersSummary(container);
     bindSelectPlaceholderState(container);

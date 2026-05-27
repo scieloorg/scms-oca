@@ -1,4 +1,9 @@
-<fieldset class="sg-radio-group sg-radio-group--boolean">
+<fieldset
+  class="sg-radio-group sg-radio-group--boolean"
+  data-field-name="{{ field.name }}"
+  data-data-source="{{ data_source }}"
+  data-dependencies="{{ field.dependencies|join:',' }}"
+>
   <legend class="visually-hidden">{{ field.label }}</legend>
   {% if field.allow_clear %}
     <label class="sg-radio-option" for="{{ field.name }}_all">

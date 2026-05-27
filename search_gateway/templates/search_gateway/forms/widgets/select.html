@@ -4,6 +4,8 @@
   class="form-control data-source-field data-source-field--select{% if field.allow_clear and not field.value %} data-source-field--placeholder{% endif %}"
   data-field-name="{{ field.name }}"
   data-field-widget="{{ field.widget }}"
+  data-data-source="{{ data_source }}"
+  data-dependencies="{{ field.dependencies|join:',' }}"
   data-placeholder="{{ field.placeholder|default:default_option_placeholder }}"
   data-allow-clear="{{ field.allow_clear|yesno:'true,false' }}"
 >
