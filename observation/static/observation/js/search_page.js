@@ -327,9 +327,13 @@ class SearchPageManager {
         if (resetBtn) {
             resetBtn.addEventListener('click', (e) => {
                 e.preventDefault();
+                this.searchQuery = '';
+                this.searchClauses = [];
+                let isSearchGatewayReset = false;
                 if (filterForm) {
                     if (window.SearchGatewayFilterForm) {
                         window.SearchGatewayFilterForm.resetForm(filterForm);
+                        isSearchGatewayReset = true;
                     } else {
                         filterForm.reset();
                     }
@@ -337,10 +341,10 @@ class SearchPageManager {
                     this.restoreSelectedFilters({});
                     document.querySelectorAll('.range-filter').forEach(el => { el.value = ''; });
                 }
-                this.searchQuery = '';
-                this.searchClauses = [];
                 this.updateActiveFilters();
-                this.applyFiltersAjax();
+                if (!isSearchGatewayReset) {
+                    this.applyFiltersAjax();
+                }
             });
         }
         if (generateBtn) {

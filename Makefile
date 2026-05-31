@@ -95,6 +95,9 @@ django_add_menus: ## Run manage.py add_menus with core fixtures using $(compose)
 django_add_sources: ## Run manage.py add_sources from django container using $(compose)
 	@docker compose -f $(compose) run --rm django python manage.py add_sources
 
+django_add_dimensions: ## Run manage.py add_dimensions from django container using $(compose)
+	@docker compose -f $(compose) run --rm django python manage.py add_dimensions
+
 django_makemessages: ## Run ./manage.py makemessages $(compose)
 	@docker compose -f $(compose) run --rm django python manage.py makemessages --all
 
