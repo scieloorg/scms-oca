@@ -15,42 +15,43 @@
     <div class="card mb-3 shadow-sm indicator-chart-card">
         <div class="card-body p-2 p-lg-3">
             <div class="box is-invisible" id="ranking-container">
-                <table id="ranking-table" class="table table-striped display nowrap">
+                <table id="ranking-table" class="table table-striped display nowrap journal-ranking-table">
                     <thead>
                         <tr>
-                            <th scope="col">{% trans "Rank" %}</th>
-                            <th scope="col" class="ranking-metric-header">{{ ranking_data.ranking_metric|ui_value:"ranking_metric" }}</th>
-                            <th scope="col">{% trans "Journal" %}</th>
-                            <th scope="col">{% trans "ISSN" %}</th>
-                            <th scope="col">{% trans "Country" %}</th>
-                            <th scope="col">{% trans "Publisher" %}</th>
-                            <th scope="col">{% trans "Is Open Access" %}</th>
-                            <th scope="col">{% trans "Publication Year" %}</th>
-                            <th scope="col">{% trans "Total Publications" %}</th>
-                            <th scope="col">{% trans "Total Citations" %}</th>
-                            <th scope="col">{% trans "Consistency Score" %}</th>
-                            <th scope="col">{% trans "Observations" %}</th>
+                            {% for column in ranking_columns %}
+                            <th scope="col"{% if column.ranking_metric %} class="ranking-metric-header"{% endif %}>{{ column.label }}</th>
+                            {% endfor %}
                         </tr>
                     </thead>
                     <tbody id="ranking-table-body">
                         {% for entry in ranking_data.journals %}
                         <tr>
-                            <td data-order="{{ forloop.counter }}">{{ forloop.counter }}</td>
-                            {% with metric_value=entry|get_attr:ranking_data.ranking_metric %}
-                            <td data-order="{{ metric_value|default_if_none:''|unlocalize }}">
-                                {{ metric_value|floatformat:"2g" }}
-                            </td>
-                            {% endwith %}
-                            <td>{{ entry.title }}</td>
-                            <td>{{ entry.issn|default:"-" }}</td>
-                            <td>{{ entry.country|default:"-" }}</td>
-                            <td>{{ entry.publisher_name|default:"-" }}</td>
-                            <td>{{ entry.is_journal_oa|ui_value }}</td>
-                            <td data-order="{{ entry.publication_year|default_if_none:''|unlocalize }}">{{ entry.publication_year }}</td>
-                            <td data-order="{{ entry.global_total_publications|default_if_none:''|unlocalize }}">{{ entry.global_total_publications|floatformat:"0g" }}</td>
-                            <td data-order="{{ entry.global_total_citations|default_if_none:''|unlocalize }}">{{ entry.global_total_citations|floatformat:"0g" }}</td>
-                            <td data-order="{{ entry.global_consistency_score|default_if_none:''|unlocalize }}">{{ entry.global_consistency_score|floatformat:"2g" }}</td>
-                            <td data-order="{{ entry.global_num_observations|default_if_none:''|unlocalize }}">{{ entry.global_num_observations|floatformat:"0g" }}</td>
+                            {% for column in ranking_columns %}
+                                {% if column.field == "__rank__" %}
+                                    <td data-order="{{ forloop.parentloop.counter }}">{{ forloop.parentloop.counter }}</td>
+                                {% else %}
+                                    {% with cell_value=entry|get_attr:column.field %}
+                                    <td data-order="{{ cell_value|default_if_none:''|unlocalize }}">
+                                        {% if column.link_profile and entry.profile_url %}
+                                        <a
+                                            href="{{ entry.profile_url }}"
+                                            target="_blank"
+                                            rel="noopener"
+                                            class="journal-ranking-link"
+                                            title="{% trans 'Open journal page' %}">
+                                            {{ cell_value|default:"-" }}
+                                        </a>
+                                        {% elif column.transform %}
+                                            {{ cell_value|ui_value:column.transform }}
+                                        {% elif column.decimals != None %}
+                                            {{ cell_value|floatformat:column.decimals }}
+                                        {% else %}
+                                            {{ cell_value|default:"-" }}
+                                        {% endif %}
+                                    </td>
+                                    {% endwith %}
+                                {% endif %}
+                            {% endfor %}
                         </tr>
                         {% endfor %}
                     </tbody>
