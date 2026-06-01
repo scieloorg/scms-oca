@@ -861,6 +861,7 @@
               "value": "journal_global_metrics",
               "label": "Journal Global Metrics",
               "url_context_key": "journal_global_url",
+              "enabled": false,
               "target_data_source": "journal_global_metrics"
             }
           ]
@@ -2577,6 +2578,7 @@
               "value": "journal_global_metrics",
               "label": "Journal Global Metrics",
               "url_context_key": "journal_global_url",
+              "enabled": false,
               "target_data_source": "journal_global_metrics"
             }
           ]
@@ -4776,6 +4778,7 @@
               "value": "journal_global_metrics",
               "label": "Journal Global Metrics",
               "url_context_key": "journal_global_url",
+              "enabled": false,
               "target_data_source": "journal_global_metrics"
             }
           ]
