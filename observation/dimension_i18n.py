@@ -48,6 +48,8 @@ FALLBACK_DIMENSION_BY_INDEX = {
         "is_default": True,
     },
 }
+FALLBACK_DIMENSION_BY_INDEX["silver_scientific_production"] = FALLBACK_DIMENSION_BY_INDEX["scientific_production"]
+
 
 # Slug → lazy msgids (extracted by makemessages). DB seed values must match these msgids.
 DIMENSION_I18N = {
@@ -234,7 +236,7 @@ _LABEL_FIELDS = (
 
 
 def observation_dimension_select_label(index_name):
-    if index_name == "scientific_production":
+    if index_name in ("scientific_production", "silver_scientific_production"):
         return gettext(OBSERVATION_SELECT_LABEL_SCIENTIFIC)
     if index_name == "social_production":
         return gettext(OBSERVATION_SELECT_LABEL_SOCIAL)

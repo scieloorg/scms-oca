@@ -107,16 +107,17 @@ class SearchPage(Page):
 
     @classmethod
     def _resolve_search_sort(cls, data_source, current_sort):
-        if current_sort == "most_cited":
+        if current_sort == "most_cited" and data_source and data_source.get_field("cited_by_count_range"):
+            received_citations_field = data_source.get_index_field_name("metrics.received_citations.total")
             return (
-                "metrics.received_citations.total",
+                received_citations_field,
                 "desc",
             )
         return (
             data_source.get_index_field_name("publication_year")
             if data_source
             else "publication_year",
-            current_sort,
+            "desc" if current_sort == "most_cited" else current_sort,
         )
 
     @staticmethod
@@ -210,6 +211,7 @@ class SearchPage(Page):
         search_sidebar_html="",
         results_data=None,
         advanced_search_error="",
+        has_citations_field=False,
     ):
         scientific_index = getattr(settings, "OP_INDEX_SCIENTIFIC_PRODUCTION", "scientific_production")
         payload = {"search_results": [], "total_results": 0} if results_data is None else results_data
@@ -224,6 +226,7 @@ class SearchPage(Page):
             "search_sidebar_html": search_sidebar_html,
             "results_data": payload,
             "citation_documents": cls.build_citation_documents(payload.get("search_results")),
+            "has_citations_field": has_citations_field,
         }
 
     def render_search_filter_sidebar_html(self, request, data_source, applied_filters):
@@ -276,6 +279,7 @@ class SearchPage(Page):
                 search_sidebar_html=sidebar_html,
                 results_data=results_data,
                 advanced_search_error=advanced_search_error,
+                has_citations_field=bool(data_source.get_field("cited_by_count_range")),
             )
         )
         return context

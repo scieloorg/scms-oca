@@ -235,6 +235,7 @@ DIMENSION_SPECS_BY_INDEX = {
         },
     ],
 }
+DIMENSION_SPECS_BY_INDEX["silver_scientific_production"] = DIMENSION_SPECS_BY_INDEX["scientific_production"]
 
 
 def _pick_row_field(field_settings, candidates):
