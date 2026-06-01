@@ -363,6 +363,9 @@ class IndicatorDirectoryEditView(EditView):
 
 
 class IndicatorDirectoryCreateView(CreateView):
+    """
+    DEPRECATED
+    """
     def get_moderation(self):
         if Moderation.objects.filter(model=self.model.__name__, status=True).exists():
             return Moderation.objects.get(model=self.model.__name__)
