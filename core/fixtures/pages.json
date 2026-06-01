@@ -92,13 +92,15 @@
           "key": "observation_scientific_production",
           "title": "Produção Científica",
           "type": "ObservationPage",
-          "slug": "producao-cientifica"
+          "slug": "producao-cientifica",
+          "data_source": "silver_scientific_production"
         },
         {
           "key": "observation_social_production",
           "title": "Produção Social",
           "type": "ObservationPage",
-          "slug": "producao-social"
+          "slug": "producao-social",
+          "data_source": "social_production"
         }
       ]
     },
@@ -249,13 +251,15 @@
           "key": "observation_scientific_production",
           "title": "Scientific Production",
           "type": "ObservationPage",
-          "slug": "scientific-production"
+          "slug": "scientific-production",
+          "data_source": "silver_scientific_production"
         },
         {
           "key": "observation_social_production",
           "title": "Social Production",
           "type": "ObservationPage",
-          "slug": "social-production"
+          "slug": "social-production",
+          "data_source": "social_production"
         }
       ]
     },
@@ -406,13 +410,15 @@
           "key": "observation_scientific_production",
           "title": "Producción Científica",
           "type": "ObservationPage",
-          "slug": "produccion-cientifica"
+          "slug": "produccion-cientifica",
+          "data_source": "silver_scientific_production"
         },
         {
           "key": "observation_social_production",
           "title": "Producción Social",
           "type": "ObservationPage",
-          "slug": "produccion-social"
+          "slug": "produccion-social",
+          "data_source": "social_production"
         }
       ]
     },
