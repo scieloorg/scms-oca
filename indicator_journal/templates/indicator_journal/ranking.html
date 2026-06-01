@@ -1,0 +1,71 @@
+{% load i18n static %}
+{% load l10n %}
+{% load indicator_filters %}
+
+<div class="col-lg-9 mx-0 ps-3 pe-0 indicator-results-col sg-layout__content-col sg-layout__content">
+    {% if error %}
+    <div class="alert alert-danger shadow-sm mb-3" role="alert">
+        {{ error }}
+    </div>
+    {% endif %}
+
+    {% include "partials/warning_banner.html" %}
+    {% include "controls_bar.html" %}
+
+    {% if ranking_data %}
+    <div class="card mb-3 shadow-sm indicator-chart-card">
+        <div class="card-body p-2 p-lg-3">
+            <div class="box is-invisible" id="ranking-container">
+                <table id="ranking-table" class="table table-striped display nowrap journal-ranking-table">
+                    <thead>
+                        <tr>
+                            {% for column in ranking_columns %}
+                            <th scope="col"{% if column.ranking_metric %} class="ranking-metric-header"{% endif %}>{{ column.label }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody id="ranking-table-body">
+                        {% for entry in ranking_data.journals %}
+                        <tr>
+                            {% for column in ranking_columns %}
+                                {% if column.field == "__rank__" %}
+                                    <td data-order="{{ forloop.parentloop.counter }}">{{ forloop.parentloop.counter }}</td>
+                                {% else %}
+                                    {% with cell_value=entry|get_attr:column.field %}
+                                    <td data-order="{{ cell_value|default_if_none:''|unlocalize }}">
+                                        {% if column.link_profile and entry.profile_url %}
+                                        <a
+                                            href="{{ entry.profile_url }}"
+                                            target="_blank"
+                                            rel="noopener"
+                                            class="journal-ranking-link"
+                                            title="{% trans 'Open journal page' %}">
+                                            {{ cell_value|default:"-" }}
+                                        </a>
+                                        {% elif column.transform %}
+                                            {{ cell_value|ui_value:column.transform }}
+                                        {% elif column.decimals != None %}
+                                            {{ cell_value|floatformat:column.decimals }}
+                                        {% else %}
+                                            {{ cell_value|default:"-" }}
+                                        {% endif %}
+                                    </td>
+                                    {% endwith %}
+                                {% endif %}
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% elif not error %}
+    <div class="card p-3 shadow-sm bg-oca-light">
+        <p class="mb-2">{% trans "Select filters and click Filtrar to load the journal metrics ranking." %}</p>
+        <p class="mb-0 text-muted small">
+            {% trans "Cohort Impact ranks journals by citations received by documents published in the selected year and category, considering windows (2y, 3y, 5y) or total accumulation." %}
+        </p>
+    </div>
+    {% endif %}
+</div>
