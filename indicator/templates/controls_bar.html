@@ -9,17 +9,23 @@
       <div
         id="scope-controls"
         class="indicator-controls-bar__item indicator-controls-bar__item--study-unit"
-        data-data-source="{{ data_source|default:'scientific_production'|escape }}"
-        data-study-unit="{{ study_unit|default:'document'|escape }}"
-        data-indicator-home-url="{% url 'indicator_home' %}"
-        data-journal-metrics-url="{% url 'indicator_journal_metrics' %}"
+        data-data-source="{{ data_source|escape }}"
+        data-study-unit="{{ study_unit|escape }}"
+        data-indicator-home-url="{{ indicator_home_url|escape }}"
       >
         <form id="study-unit-form" class="indicator-controls-bar__form" autocomplete="off">
           <label class="indicator-controls-bar__section-title indicator-controls-bar__section-title--label" for="selectStudyUnit">{% trans "Study unit" %}</label>
           <select class="form-select indicator-controls-bar__select" id="selectStudyUnit" name="study_unit">
-            <option selected value="document">{% trans "Document" %}</option>
-            <option value="source">{% trans "Source" %}</option>
-            <option value="journal_metrics_by_*">{% trans "Journal Metrics" %}</option>
+            {% for option in analysis_unit_options %}
+              <option
+                value="{{ option.value }}"
+                {% if option.url %}data-target-url="{{ option.url|escape }}"{% endif %}
+                data-return-to-source="{{ option.return_to_source|yesno:'true,false' }}"
+                {% if option.selected %}selected{% endif %}
+              >
+                {{ option.label }}
+              </option>
+            {% endfor %}
           </select>
         </form>
       </div>
@@ -73,7 +79,12 @@
   </div>
 
   {% if indicator_config_fields %}
-      <div class="indicator-controls-bar__config" data-journal-metrics-config data-data-source="{{ data_source|default:'journal_metrics_by_*'|escape }}">
+      <div
+        class="indicator-controls-bar__config"
+        data-indicator-config
+        data-data-source="{{ data_source|escape }}"
+        data-config-form-id="{{ indicator_config_form_id|escape }}"
+      >
       <div class="indicator-controls-bar__config-head">
         <div class="indicator-controls-bar__config-intro">
           <div class="indicator-controls-bar__section-title indicator-controls-bar__config-title">{% trans "Ranking setup" %}</div>
@@ -83,7 +94,7 @@
         </div>
         <button
           type="submit"
-          form="{{ indicator_config_form_id|default:'journal-metrics-filter-form' }}"
+          form="{{ indicator_config_form_id }}"
           class="btn btn-primary indicator-controls-bar__submit indicator-controls-bar__submit--head"
         >
           {{ indicator_config_submit_label|default:default_apply_label }}
@@ -102,7 +113,7 @@
                 id="indicator-config-{{ field.name }}"
                 class="form-control indicator-controls-bar__input data-source-field"
                 name="{{ field.name }}"
-                form="{{ indicator_config_form_id|default:'journal-metrics-filter-form' }}"
+                form="{{ indicator_config_form_id }}"
                 data-field-name="{{ field.name }}"
                 data-field-widget="{{ field.widget }}"
                 type="{{ field.input_type }}"
@@ -117,7 +128,7 @@
                 id="indicator-config-{{ field.name }}"
                 name="{{ field.name }}"
                 class="form-select indicator-controls-bar__select data-source-field{% if field.allow_clear and not field.value %} indicator-controls-bar__select--placeholder{% endif %}"
-                form="{{ indicator_config_form_id|default:'journal-metrics-filter-form' }}"
+                form="{{ indicator_config_form_id }}"
                 data-field-name="{{ field.name }}"
                 data-field-widget="{{ field.widget }}"
                 data-dependencies="{{ field.dependencies|join:',' }}"
