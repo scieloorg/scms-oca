@@ -7,7 +7,8 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("indicator", "0025_indicatorfile_description_indicatorfile_label"),
-        ("wagtailcore", "0096_referenceindex_referenceindex_source_object_and_more")
+        ("search_gateway", "0005_datasource_metric_config"),
+        ("wagtailcore", "0096_referenceindex_referenceindex_source_object_and_more"),
     ]
 
     operations = [
@@ -91,7 +92,7 @@ class Migration(migrations.Migration):
                             ("document", "Document"),
                             ("source", "Source"),
                         ],
-                        default="document",
+                        default="source",
                         help_text="Study unit for data aggregation.",
                         max_length=50,
                         verbose_name="Study Unit",
