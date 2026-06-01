@@ -1,0 +1,84 @@
+{% extends "wagtailadmin/base.html" %}
+{% load i18n %}
+
+{% block titletag %}{% trans "Metric preview" %}: {{ data_source }}{% endblock %}
+
+{% block content %}
+  {% trans "Metric preview" as preview_title %}
+  {% include "wagtailadmin/shared/header.html" with title=preview_title subtitle=data_source %}
+
+  <div class="nice-padding">
+    <p>
+      <strong>{% trans "Index" %}:</strong> {{ data_source.index_name }}
+      <br>
+      <strong>{% trans "Study unit" %}:</strong> {{ preview.study_unit|default:"-" }}
+    </p>
+
+    {% if preview.mapping_error %}
+      <div class="help-block help-critical">{{ preview.mapping_error }}</div>
+    {% endif %}
+
+    {% if preview.data_error %}
+      <div class="help-block help-critical">{{ preview.data_error }}</div>
+    {% endif %}
+
+    <h2>{% trans "Metric fields" %}</h2>
+    <table class="listing">
+      <thead>
+        <tr>
+          <th>{% trans "Metric" %}</th>
+          <th>{% trans "Aggregation" %}</th>
+          <th>{% trans "Configured field" %}</th>
+          <th>{% trans "Resolved OpenSearch field" %}</th>
+          <th>{% trans "Status" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for metric in preview.metrics %}
+          <tr>
+            <td><code>{{ metric.key }}</code></td>
+            <td><code>{{ metric.agg }}</code></td>
+            <td><code>{{ metric.configured_field|default:"-" }}</code></td>
+            <td><code>{{ metric.resolved_field|default:"-" }}</code></td>
+            <td>
+              <strong>{{ metric.status }}</strong>
+              <br>
+              {{ metric.message }}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <h2>{% trans "Chart data sample" %}</h2>
+    {% for chart in preview.charts %}
+      <section>
+        <h3>{{ chart.title }} <code>{{ chart.id }}</code></h3>
+        <table class="listing">
+          <thead>
+            <tr>
+              <th>{% trans "Series" %}</th>
+              <th>{% trans "Total" %}</th>
+              <th>{% trans "Sample" %}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for series in chart.series %}
+              <tr>
+                <td>{{ series.name }}</td>
+                <td>{{ series.total|floatformat:"0" }}</td>
+                <td>
+                  {% for row in series.preview %}
+                    {{ row.year }}: {{ row.value }}{% if not forloop.last %}, {% endif %}
+                  {% endfor %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </section>
+    {% empty %}
+      <p>{% trans "No chart data returned." %}</p>
+    {% endfor %}
+  </div>
+{% endblock %}
