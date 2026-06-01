@@ -13,18 +13,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name="indicatorbycategorypage",
-            name="default_category_level",
-        ),
-        migrations.RemoveField(
-            model_name="indicatorbycategorypage",
-            name="default_publication_year",
-        ),
-        migrations.RemoveField(
-            model_name="indicatorbycategorypage",
-            name="default_ranking_metric",
-        ),
         migrations.CreateModel(
             name="JournalProfilePage",
             fields=[
@@ -43,7 +31,10 @@ class Migration(migrations.Migration):
                     "show_global_metrics",
                     models.BooleanField(
                         default=False,
-                        help_text="Enable the Global Metrics tab on the profile page. Only turn on when the global index is ready.",
+                        help_text=(
+                            "Enable the Global Metrics tab on the profile page. "
+                            "Only turn on when the global index is ready."
+                        ),
                     ),
                 ),
                 (
