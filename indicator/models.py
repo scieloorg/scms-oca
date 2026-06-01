@@ -16,12 +16,17 @@ from django.dispatch.dispatcher import receiver
 from django.utils.text import slugify
 from django.utils.translation import get_language, gettext_lazy as _
 from wagtail.admin.panels import FieldPanel
+from wagtail.fields import RichTextField
+from wagtail.models import Page
 from wagtailautocomplete.edit_handlers import AutocompletePanel
 
 from core.models import CommonControlField, Source
 from core.utils import utils
+from indicator.metrics.config import ComputedMetric, MetricGroup, PhysicalMetric
 from institution.models import Institution
 from location.models import Location
+from search_gateway.filter_ui import build_data_source_form_payload, render_filter_sidebar
+from search_gateway.request_filters import extract_applied_filters
 from usefulmodels.models import ActionAndPractice, ThematicArea
 
 
@@ -881,3 +886,212 @@ class IndicatorData(models.Model):
 
     def __str__(self):
         return str("%s") % (self.source)
+
+
+class ChartBasePage(Page):
+    is_creatable = True
+
+    data_source = models.ForeignKey(
+        "search_gateway.DataSource",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        help_text=_("OpenSearch data source linked to this chart."),
+    )
+
+    intro = RichTextField(
+        blank=True,
+        help_text=_("Introductory text displayed above the charts.")
+    )
+
+    study_unit = models.CharField(
+        _("Study Unit"),
+        max_length=50,
+        choices=[
+            ("document", _("Document")),
+            ("source", _("Source")),
+        ],
+        default="document",
+        help_text=_("Study unit for data aggregation."),
+    )
+
+    content_panels = Page.content_panels + [
+        FieldPanel("data_source"),
+        FieldPanel("study_unit"),
+        FieldPanel("intro"),
+    ]
+
+    class Meta:
+        abstract = True
+
+    def get_indicator_nav_urls(self):
+        return {"indicator_home_url": self.url}
+
+    def build_analysis_unit_options(self, study_unit):
+        navigation = (self.data_source.metric_config_schema or {}).get("navigation") or {}
+        configured_units = navigation.get("analysis_units") or []
+        if not configured_units:
+            configured_units = [
+                {"value": key, "label": key.replace("_", " ").title()}
+                for key in (self.data_source.metric_config_schema.get("study_units") or {})
+            ]
+
+        url_context = self.get_indicator_nav_urls()
+        options = []
+        for unit in configured_units:
+            if not isinstance(unit, dict) or unit.get("enabled", True) is False:
+                continue
+            value = str(unit.get("value") or "").strip()
+            if not value:
+                continue
+            label = unit.get("label")
+            if isinstance(label, dict):
+                lang = (get_language() or "pt").split("-")[0]
+                label = label.get(lang) or label.get("pt") or label.get("en")
+            url_key = str(unit.get("url_context_key") or "").strip()
+            options.append({
+                "value": value,
+                "label": label or value.replace("_", " ").title(),
+                "url": url_context.get(url_key, ""),
+                "selected": value == study_unit,
+                "return_to_source": bool(unit.get("return_to_source")),
+            })
+        return options
+
+    def get_context(self, request, *args, **kwargs):
+        context = super().get_context(request, *args, **kwargs)
+        if not self.data_source:
+            return context
+
+        data_source_name = self.data_source.index_name
+
+        applied_filters = extract_applied_filters(
+            request.GET, self.data_source, form_key="indicator"
+        )
+
+        breakdown_payload = build_data_source_form_payload(
+            self.data_source,
+            form_key="indicator",
+            applied_filters=applied_filters,
+            include_fields=["breakdown_variable"],
+        )
+        breakdown_field = None
+        for group in breakdown_payload.get("form_groups") or []:
+            fields = group.get("fields") or []
+            if fields:
+                breakdown_field = fields[0]
+                break
+
+        sidebar_payload = render_filter_sidebar(
+            request,
+            data_source=self.data_source,
+            form_key="indicator",
+            applied_filters=applied_filters,
+            exclude_fields=["breakdown_variable"],
+            sidebar_form_id="indicator-filter-form",
+            sidebar_form_method="post",
+            submit_id="menu-submit",
+            reset_id="menu-reset",
+            reset_type="button",
+        )
+
+        metric_config = self.data_source.metric_config_schema or {}
+        study_units = metric_config.get("study_units") or {}
+        study_unit = request.GET.get("study_unit") or self.study_unit or "document"
+        if study_unit not in study_units and study_units:
+            study_unit = next(iter(study_units.keys()))
+
+        displays = metric_config.get("displays") or {}
+        charts_config = displays.get("charts") or {}
+
+        group_config = study_units.get(study_unit) or {}
+        metric_group = MetricGroup.from_config(
+            group_key=study_unit,
+            group_dict=group_config,
+        )
+
+        lang = get_language() or "pt"
+        charts = []
+        chart_items = sorted(
+            charts_config.items(),
+            key=lambda item: (item[1].get("order", 999), item[0]),
+        )
+        for chart_id, cfg in chart_items:
+            chart_study_units = cfg.get("study_units")
+            if isinstance(chart_study_units, str):
+                chart_study_units = [chart_study_units]
+            if chart_study_units and study_unit not in set(chart_study_units):
+                continue
+
+            title_dict = cfg.get("title") or {}
+            title = title_dict.get(lang) or title_dict.get("pt") or chart_id
+
+            charts.append({
+                "id": chart_id,
+                "title": title,
+                "is_relative": False,
+            })
+
+            metric_keys = cfg.get("metrics") or cfg.get("metric")
+            if isinstance(metric_keys, str):
+                metric_keys = [metric_keys]
+            metric_keys = [key for key in (metric_keys or []) if key]
+
+            is_relative_supported = True
+            for key in metric_keys:
+                metric_def = metric_group.get_metric(key)
+                if metric_def:
+                    if isinstance(metric_def, ComputedMetric):
+                        is_relative_supported = False
+                        break
+                    if isinstance(metric_def, PhysicalMetric) and metric_def.agg == "avg":
+                        is_relative_supported = False
+                        break
+
+            if is_relative_supported:
+                charts.append({
+                    "id": f"{chart_id}_share",
+                    "title": f"{title} (%)",
+                    "is_relative": True,
+                })
+
+        analysis_unit_options = self.build_analysis_unit_options(study_unit)
+
+        context.update({
+            "data_source": data_source_name,
+            "data_source_name": data_source_name,
+            "data_source_display_name": self.data_source.display_name,
+            "applied_filters": applied_filters,
+            "indicator_sidebar_html": sidebar_payload["form_html"],
+            "indicator_breakdown_field": breakdown_field,
+            "indicator_has_study_unit_control": bool(analysis_unit_options),
+            "analysis_unit_options": analysis_unit_options,
+            "study_unit": study_unit,
+            "charts": charts,
+        })
+        context.update(self.get_indicator_nav_urls())
+        context["applied_filters_json"] = json.dumps(context["applied_filters"])
+        return context
+
+
+class DocumentChartPage(ChartBasePage):
+    template = "indicator.html"
+
+    parent_page_types = ["freepage.FreePage"]
+    subpage_types = []
+
+    class Meta:
+        verbose_name = _("Document Chart Page")
+        verbose_name_plural = _("Document Chart Pages")
+
+
+class SourceChartPage(ChartBasePage):
+    template = "indicator.html"
+
+    parent_page_types = ["freepage.FreePage"]
+    subpage_types = []
+
+    class Meta:
+        verbose_name = _("Source Chart Page")
+        verbose_name_plural = _("Source Chart Pages")
