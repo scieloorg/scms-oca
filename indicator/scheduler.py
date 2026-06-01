@@ -1,3 +1,7 @@
+"""
+DEPRECATED: This class will be removed in a future version.
+"""
+
 from datetime import datetime
 import logging
 import json

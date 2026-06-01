@@ -1,3 +1,10 @@
+import warnings
+warnings.warn(
+    "indicator.indicatorOA is deprecated.",
+    DeprecationWarning,
+    stacklevel=2
+)
+
 import logging
 
 from pyalex import Works
