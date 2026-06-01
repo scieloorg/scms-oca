@@ -341,6 +341,9 @@ class Command(BaseCommand):
                 if translated.title != title:
                     translated.title = title
                     changed = True
+                if getattr(translated, "data_source_id", None) != ds.pk:
+                    translated.data_source = ds
+                    changed = True
                 if changed:
                     translated.save()
                     if publish:
@@ -359,6 +362,9 @@ class Command(BaseCommand):
 
         sibling = parent.get_children().specific().filter(locale=locale, slug=slug).first()
         if sibling:
+            if getattr(sibling, "data_source_id", None) != ds.pk:
+                sibling.data_source = ds
+                sibling.save()
             self.remember_page(page_key, locale, sibling)
             return self.apply_publish_state(sibling, publish)
 
@@ -400,6 +406,9 @@ class Command(BaseCommand):
                 if translated.title != title:
                     translated.title = title
                     changed = True
+                if ds and getattr(translated, "data_source_id", None) != ds.pk:
+                    translated.data_source = ds
+                    changed = True
                 if changed:
                     translated.save()
                     if publish:
@@ -418,6 +427,9 @@ class Command(BaseCommand):
 
         sibling = parent.get_children().specific().filter(locale=locale, slug=slug).first()
         if sibling:
+            if ds and getattr(sibling, "data_source_id", None) != ds.pk:
+                sibling.data_source = ds
+                sibling.save()
             self.remember_page(page_key, locale, sibling)
             return self.apply_publish_state(sibling, publish)
 
