@@ -231,10 +231,11 @@
           global.SearchGatewayFilterForm.resetForm(sidebarForm);
         } else {
           sidebarForm.reset();
+          this.ctx.resultsApi.applyFiltersAjax();
         }
+      } else {
+        this.ctx.resultsApi.applyFiltersAjax();
       }
-
-      this.ctx.resultsApi.applyFiltersAjax();
     }
   }
 
