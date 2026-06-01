@@ -1,7 +1,5 @@
-// Namespace to avoid polluting the global scope
 const Indicators = {};
 
-// Builds a tooltip configuration
 function buildTooltip(overrides) {
     return {
         confine: true,
@@ -11,7 +9,6 @@ function buildTooltip(overrides) {
     };
 }
 
-// Builds a grid configuration
 function buildGrid(overrides) {
     return {
         top: 86,
@@ -23,7 +20,6 @@ function buildGrid(overrides) {
     };
 }
 
-// Builds the chart toolbox
 function buildToolbox(magicTypes, dataViewOptions = {}) {
   const feature = {
     dataView: {
@@ -50,7 +46,6 @@ function buildToolbox(magicTypes, dataViewOptions = {}) {
   };
 }
 
-// Builds the chart legend
 function buildLegend(keys, overrides) {
     if (!Array.isArray(keys) || !keys.length) return null;
 
@@ -449,7 +444,6 @@ function buildBreakdownTooltipFormatter(forcePercentAxis = false) {
     };
 }
 
-// Ensures old chart instances are destroyed
 function destroyChartInstance(container) {
     if (container && container._chartInstance) {
         container._chartInstance.dispose();
@@ -457,7 +451,6 @@ function destroyChartInstance(container) {
     }
 }
 
-// Clears the charts container and destroys chart instances
 function clearGraphsContainer() {
     const chartDivs = [
         'periodicals-chart-div',
