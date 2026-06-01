@@ -1,695 +1,6 @@
 [
   {
     "model": "search_gateway.datasource",
-    "pk": 1,
-    "fields": {
-      "index_name": "scientific_production",
-      "display_name": "Scientific Production",
-      "source_fields": [],
-      "field_settings": {
-        "fields": {
-          "scope": {
-            "kind": "index",
-            "index_field_name": "oca_data.scope",
-            "filter": {
-              "size": 4,
-              "order": {
-                "_key": "asc"
-              }
-            },
-            "settings": {
-              "label": "Scope",
-              "support_query_operator": false,
-              "widget": "select",
-              "multiple_selection": true,
-              "group": "scope",
-              "group_order": 0,
-              "display_transform": "scope"
-            }
-          },
-          "source_indexed_in": {
-            "kind": "index",
-            "index_field_name": "indexed_in",
-            "filter": {
-              "size": 10,
-              "order": {
-                "_key": "asc"
-              }
-            },
-            "settings": {
-              "label": "Indexed In",
-              "support_query_operator": false,
-              "widget": "select",
-              "multiple_selection": true,
-              "group": "source_coverage",
-              "group_order": 20
-            }
-          },
-          "publisher": {
-            "kind": "index",
-            "index_field_name": "publishers.name.keyword",
-            "filter": {
-              "size": 10,
-              "order": {
-                "_key": "asc"
-              },
-              "use": false
-            },
-            "settings": {
-              "label": "Publisher",
-              "support_query_operator": true,
-              "widget": "lookup",
-              "multiple_selection": true,
-              "group": "source_identity",
-              "group_order": 10
-            },
-            "lookup": {
-              "index_name": "lookup_publisher_v2",
-              "search_field": "label_search",
-              "sort_field": "size",
-              "value_field": "value",
-              "label_field": "label",
-              "source_value_field": "value",
-              "source_label_field": "label",
-              "size": 10
-            }
-          },
-          "source_name": {
-            "kind": "index",
-            "index_field_name": "sources.id",
-            "filter": {
-              "size": 5,
-              "order": {
-                "_key": "asc"
-              },
-              "use": false
-            },
-            "settings": {
-              "label": "Source",
-              "support_query_operator": true,
-              "widget": "lookup",
-              "multiple_selection": true,
-              "group": "source_identity",
-              "group_order": 10
-            },
-            "lookup": {
-              "index_name": "lookup_source_v2",
-              "search_field": "label_search",
-              "sort_field": "size",
-              "value_field": "value",
-              "label_field": "label",
-              "source_value_field": "value",
-              "source_label_field": "label",
-              "size": 10
-            }
-          },
-          "source_type": {
-            "kind": "index",
-            "index_field_name": "sources.type",
-            "filter": {
-              "size": 30,
-              "order": {
-                "_key": "asc"
-              }
-            },
-            "settings": {
-              "label": "Source Type",
-              "support_query_operator": false,
-              "widget": "select",
-              "multiple_selection": true,
-              "group": "source_identity",
-              "group_order": 10
-            }
-          },
-          "source_country": {
-            "kind": "index",
-            "index_field_name": "oca_data.source.country_search",
-            "filter": {
-              "size": 500,
-              "order": {
-                "_key": "asc"
-              },
-              "use": false
-            },
-            "settings": {
-              "label": "Source Country",
-              "support_query_operator": true,
-              "widget": "lookup",
-              "multiple_selection": true,
-              "display_transform": "country",
-              "group": "source_identity",
-              "group_order": 10
-            },
-            "lookup": {
-              "index_name": "lookup_source_country_v2",
-              "search_field": "label_search",
-              "sort_field": "size",
-              "value_field": "value",
-              "label_field": "label",
-              "source_value_field": "value",
-              "source_label_field": "label",
-              "size": 10
-            }
-          },
-          "publication_year": {
-            "kind": "index",
-            "index_field_name": "publication_year",
-            "filter": {
-              "size": 100,
-              "order": {
-                "_key": "desc"
-              }
-            },
-            "settings": {
-              "label": "Publication Year",
-              "support_query_operator": false,
-              "widget": "select",
-              "multiple_selection": true,
-              "group": "document_identity",
-              "group_order": 30
-            }
-          },
-          "document_publication_year_start": {
-            "kind": "index",
-            "index_field_name": "publication_year",
-            "filter": {
-              "transform": {
-                "type": "year_range",
-                "sources": [
-                  "document_publication_year_start",
-                  "document_publication_year_end"
-                ]
-              },
-              "size": 500,
-              "order": {
-                "_key": "asc"
-              }
-            },
-            "settings": {
-              "widget": "range",
-              "multiple_selection": false
-            }
-          },
-          "document_publication_year_end": {
-            "kind": "index",
-            "index_field_name": "publication_year",
-            "filter": {
-              "transform": {
-                "type": "year_range",
-                "sources": [
-                  "document_publication_year_start",
-                  "document_publication_year_end"
-                ]
-              },
-              "size": 500,
-              "order": {
-                "_key": "asc"
-              }
-            },
-            "settings": {
-              "widget": "range",
-              "multiple_selection": false
-            }
-          },
-          "document_publication_year_range": {
-            "kind": "index",
-            "index_field_name": "publication_year",
-            "filter": {
-              "use": false,
-              "transform": {
-                "type": "year_range",
-                "sources": [
-                  "document_publication_year_start",
-                  "document_publication_year_end"
-                ]
-              }
-            },
-            "settings": {
-              "widget": "range",
-              "label": "Publication Year",
-              "default_value": {
-                "start": "2019",
-                "end": "2025"
-              },
-              "group": "document_identity",
-              "group_order": 30,
-              "support_query_operator": false,
-              "multiple_selection": false
-            }
-          },
-          "document_type": {
-            "kind": "index",
-            "index_field_name": "type",
-            "filter": {
-              "size": 30,
-              "order": {
-                "_key": "asc"
-              }
-            },
-            "settings": {
-              "label": "Document Type",
-              "support_query_operator": false,
-              "widget": "select",
-              "multiple_selection": true,
-              "group": "document_identity",
-              "group_order": 30
-            }
-          },
-          "document_language": {
-            "kind": "index",
-            "index_field_name": "language",
-            "filter": {
-              "size": 500,
-              "order": {
-                "_key": "asc"
-              }
-            },
-            "settings": {
-              "label": "Document Language",
-              "support_query_operator": true,
-              "display_transform": "language",
-              "widget": "select",
-              "multiple_selection": true,
-              "group": "document_identity",
-              "group_order": 30
-            }
-          },
-          "open_access": {
-            "kind": "index",
-            "index_field_name": "is_open_access",
-            "filter": {
-              "transform": {
-                "type": "boolean"
-              },
-              "size": 3,
-              "order": {
-                "_key": "asc"
-              }
-            },
-            "settings": {
-              "label": "Open Access",
-              "support_query_operator": false,
-              "display_transform": "boolean",
-              "multiple_selection": false,
-              "widget": "select",
-              "group": "access",
-              "group_order": 40
-            }
-          },
-          "open_access_status": {
-            "kind": "index",
-            "index_field_name": "open_access_status",
-            "filter": {
-              "size": 10,
-              "order": {
-                "_key": "asc"
-              }
-            },
-            "settings": {
-              "label": "Access Type",
-              "support_query_operator": false,
-              "widget": "select",
-              "multiple_selection": true,
-              "group": "access",
-              "group_order": 40
-            }
-          },
-          "subject_area_level_0": {
-            "kind": "index",
-            "index_field_name": "topic_domains",
-            "filter": {
-              "size": 3,
-              "order": {
-                "_key": "asc"
-              }
-            },
-            "settings": {
-              "label": "Domain",
-              "support_query_operator": false,
-              "widget": "select",
-              "multiple_selection": true,
-              "group": "thematic_scope",
-              "group_order": 50
-            }
-          },
-          "subject_area_level_1": {
-            "kind": "index",
-            "index_field_name": "topic_fields",
-            "filter": {
-              "size": 27,
-              "order": {
-                "_key": "asc"
-              }
-            },
-            "settings": {
-              "label": "Field",
-              "support_query_operator": false,
-              "widget": "select",
-              "multiple_selection": true,
-              "group": "thematic_scope",
-              "group_order": 50
-            }
-          },
-          "subject_area_level_2": {
-            "kind": "index",
-            "index_field_name": "topic_subfields",
-            "filter": {
-              "size": 500,
-              "order": {
-                "_key": "asc"
-              }
-            },
-            "settings": {
-              "label": "Subfield",
-              "support_query_operator": false,
-              "widget": "select",
-              "multiple_selection": true,
-              "group": "thematic_scope",
-              "group_order": 50
-            }
-          },
-          "subjects": {
-            "kind": "index",
-            "index_field_name": "subjects_search.keyword",
-            "filter": {
-              "size": 10,
-              "order": {
-                "_key": "asc"
-              },
-              "use": false
-            },
-            "settings": {
-              "label": "Topic",
-              "support_query_operator": false,
-              "widget": "lookup",
-              "multiple_selection": true,
-              "group": "thematic_scope",
-              "group_order": 50
-            },
-            "lookup": {
-              "index_name": "lookup_topic_v2",
-              "search_field": "label_search",
-              "sort_field": "size",
-              "value_field": "value",
-              "label_field": "label",
-              "source_value_field": "value",
-              "source_label_field": "label",
-              "size": 10
-            }
-          },
-          "institution": {
-            "kind": "index",
-            "index_field_name": "authorships.institutions.name.keyword",
-            "filter": {
-              "size": 10,
-              "order": {
-                "_key": "asc"
-              },
-              "use": false
-            },
-            "settings": {
-              "label": "Institution",
-              "support_query_operator": false,
-              "widget": "lookup",
-              "multiple_selection": true,
-              "group": "affiliation",
-              "group_order": 60
-            },
-            "lookup": {
-              "index_name": "lookup_institution_v2",
-              "search_field": "label_search",
-              "sort_field": "size",
-              "value_field": "value",
-              "label_field": "label",
-              "source_value_field": "value",
-              "source_label_field": "label",
-              "size": 10
-            }
-          },
-          "funder": {
-            "kind": "index",
-            "index_field_name": "funders.id",
-            "filter": {
-              "size": 5,
-              "order": {
-                "_key": "asc"
-              },
-              "use": false
-            },
-            "settings": {
-              "label": "Funder",
-              "support_query_operator": true,
-              "widget": "lookup",
-              "multiple_selection": true,
-              "group": "funding",
-              "group_order": 70
-            },
-            "lookup": {
-              "index_name": "lookup_funder_v2",
-              "search_field": "label_search",
-              "sort_field": "size",
-              "value_field": "value",
-              "label_field": "label",
-              "source_value_field": "value",
-              "source_label_field": "label",
-              "size": 10
-            }
-          },
-          "country": {
-            "kind": "index",
-            "index_field_name": "author_country_codes",
-            "filter": {
-              "size": 500,
-              "order": {
-                "_key": "asc"
-              }
-            },
-            "settings": {
-              "label": "Country",
-              "support_query_operator": true,
-              "widget": "select",
-              "multiple_selection": true,
-              "display_transform": "country",
-              "group": "affiliation",
-              "group_order": 60
-            }
-          },
-          "cited_by_count": {
-            "kind": "index",
-            "index_field_name": "metrics.received_citations.total",
-            "filter": {
-              "size": 10,
-              "order": {
-                "_key": "desc"
-              }
-            },
-            "settings": {
-              "label": "Cited by Count",
-              "support_query_operator": false,
-              "widget": "select",
-              "multiple_selection": true,
-              "group": "other",
-              "group_order": 90
-            }
-          },
-          "breakdown_variable": {
-            "kind": "control",
-            "index_field_name": "",
-            "filter": {},
-            "settings": {
-              "label": "Breakdown Variable",
-              "widget": "select",
-              "multiple_selection": false,
-              "allow_clear": true,
-              "static_options": [
-                {
-                  "value": "scope",
-                  "label": "Scope"
-                },
-                {
-                  "value": "source_type",
-                  "label": "Source Type"
-                },
-                {
-                  "value": "document_type",
-                  "label": "Document Type"
-                },
-                {
-                  "value": "document_language",
-                  "label": "Document Language"
-                },
-                {
-                  "value": "open_access",
-                  "label": "Open Access"
-                },
-                {
-                  "value": "open_access_status",
-                  "label": "Access Type"
-                },
-                {
-                  "value": "subject_area_level_0",
-                  "label": "Domain"
-                },
-                {
-                  "value": "subject_area_level_1",
-                  "label": "Field"
-                },
-                {
-                  "value": "subject_area_level_2",
-                  "label": "Subfield"
-                },
-                {
-                  "value": "subjects",
-                  "label": "Topic"
-                }
-              ],
-              "group": "graph_options",
-              "group_order": 0
-            }
-          }
-        },
-        "forms": {
-          "search": {
-            "group_labels": {
-              "scope": "Scope",
-              "source_identity": "Source Identity",
-              "source_coverage": "Source Coverage",
-              "document_identity": "Document Identity",
-              "access": "Access",
-              "thematic_scope": "Thematic Scope",
-              "funding": "Funding",
-              "affiliation": "Affiliation"
-            },
-            "fields": [
-              "scope",
-              "source_indexed_in",
-              "source_type",
-              {
-                "name": "source_name",
-                "overrides": {
-                  "settings": {
-                    "support_query_operator": false
-                  }
-                }
-              },
-              {
-                "name": "publisher",
-                "overrides": {
-                  "settings": {
-                    "support_query_operator": false
-                  }
-                }
-              },
-              {
-                "name": "source_country",
-                "overrides": {
-                  "settings": {
-                    "support_query_operator": false
-                  }
-                }
-              },
-              "publication_year",
-              "document_type",
-              {
-                "name": "document_language",
-                "overrides": {
-                  "settings": {
-                    "support_query_operator": false
-                  }
-                }
-              },
-              "open_access",
-              "open_access_status",
-              "subject_area_level_0",
-              "subject_area_level_1",
-              "subject_area_level_2",
-              "subjects",
-              {
-                "name": "funder",
-                "overrides": {
-                  "settings": {
-                    "support_query_operator": false
-                  }
-                }
-              },
-              "institution",
-              {
-                "name": "country",
-                "overrides": {
-                  "settings": {
-                    "support_query_operator": false
-                  }
-                }
-              }
-            ]
-          },
-          "indicator": {
-            "group_labels": {
-              "graph_options": "Graph Options",
-              "scope": "Scope",
-              "source_identity": "Source Identity",
-              "source_coverage": "Source Coverage",
-              "document_identity": "Document Identity",
-              "access": "Access",
-              "thematic_scope": "Thematic Scope",
-              "funding": "Funding",
-              "affiliation": "Affiliation"
-            },
-            "fields": [
-              "breakdown_variable",
-              "scope",
-              "source_indexed_in",
-              "source_type",
-              {
-                "name": "source_name",
-                "overrides": {
-                  "settings": {
-                    "multiple_selection": false
-                  }
-                }
-              },
-              {
-                "name": "publisher",
-                "overrides": {
-                  "settings": {
-                    "multiple_selection": false
-                  }
-                }
-              },
-              {
-                "name": "source_country",
-                "overrides": {
-                  "settings": {
-                    "multiple_selection": false
-                  }
-                }
-              },
-              "publication_year",
-              "document_type",
-              "document_language",
-              "open_access",
-              "open_access_status",
-              "subject_area_level_0",
-              "subject_area_level_1",
-              "subject_area_level_2",
-              {
-                "name": "funder",
-                "overrides": {
-                  "settings": {
-                    "multiple_selection": false
-                  }
-                }
-              },
-              "institution",
-              "country"
-            ]
-          }
-        }
-      }
-    }
-  },
-  {
-    "model": "search_gateway.datasource",
     "pk": 5,
     "fields": {
       "index_name": "silver_scientific_production",
@@ -702,7 +13,9 @@
             "index_field_name": "oca_data.scope",
             "filter": {
               "size": 4,
-              "order": { "_key": "asc" }
+              "order": {
+                "_key": "asc"
+              }
             },
             "settings": {
               "group": "coverage",
@@ -722,7 +35,9 @@
             "index_field_name": "indexed_in",
             "filter": {
               "size": 10,
-              "order": { "_key": "asc" }
+              "order": {
+                "_key": "asc"
+              }
             },
             "settings": {
               "label": "Indexed In (OpenAlex)",
@@ -742,7 +57,9 @@
             "index_field_name": "oca_data.scielo.source.indexed_in",
             "filter": {
               "size": 10,
-              "order": { "_key": "asc" }
+              "order": {
+                "_key": "asc"
+              }
             },
             "settings": {
               "label": "Indexed In (SciELO)",
@@ -761,7 +78,9 @@
             "index_field_name": "oca_data.scielo.collection",
             "filter": {
               "size": 100,
-              "order": { "_key": "asc" }
+              "order": {
+                "_key": "asc"
+              }
             },
             "settings": {
               "label": "SciELO Collection",
@@ -775,13 +94,14 @@
               "group_order": 0
             }
           },
-
           "publication_year": {
             "kind": "index",
             "index_field_name": "publication_year",
             "filter": {
               "size": 100,
-              "order": { "_key": "desc" }
+              "order": {
+                "_key": "desc"
+              }
             },
             "settings": {
               "label": "Publication Year",
@@ -804,7 +124,9 @@
                 ]
               },
               "size": 500,
-              "order": { "_key": "asc" }
+              "order": {
+                "_key": "asc"
+              }
             },
             "settings": {
               "widget": "range",
@@ -823,7 +145,9 @@
                 ]
               },
               "size": 500,
-              "order": { "_key": "asc" }
+              "order": {
+                "_key": "asc"
+              }
             },
             "settings": {
               "widget": "range",
@@ -859,7 +183,9 @@
             "index_field_name": "type",
             "filter": {
               "size": 30,
-              "order": { "_key": "asc" }
+              "order": {
+                "_key": "asc"
+              }
             },
             "settings": {
               "label": "Document Type",
@@ -879,7 +205,9 @@
             "index_field_name": "language",
             "filter": {
               "size": 500,
-              "order": { "_key": "asc" }
+              "order": {
+                "_key": "asc"
+              }
             },
             "settings": {
               "label": "Document Language",
@@ -898,9 +226,13 @@
             "kind": "index",
             "index_field_name": "is_open_access",
             "filter": {
-              "transform": { "type": "boolean" },
+              "transform": {
+                "type": "boolean"
+              },
               "size": 3,
-              "order": { "_key": "asc" }
+              "order": {
+                "_key": "asc"
+              }
             },
             "settings": {
               "label": "Open Access",
@@ -917,7 +249,9 @@
             "index_field_name": "open_access_status",
             "filter": {
               "size": 10,
-              "order": { "_key": "asc" }
+              "order": {
+                "_key": "asc"
+              }
             },
             "settings": {
               "label": "Access Type",
@@ -932,13 +266,14 @@
               "search_threshold": 10
             }
           },
-
           "source_name": {
             "kind": "index",
             "index_field_name": "source.title.keyword",
             "filter": {
               "size": 5,
-              "order": { "_key": "asc" },
+              "order": {
+                "_key": "asc"
+              },
               "use": false
             },
             "settings": {
@@ -967,7 +302,9 @@
             "index_field_name": "source.type",
             "filter": {
               "size": 30,
-              "order": { "_key": "asc" }
+              "order": {
+                "_key": "asc"
+              }
             },
             "settings": {
               "label": "Source Type",
@@ -987,7 +324,9 @@
             "index_field_name": "publishers.name.keyword",
             "filter": {
               "size": 10,
-              "order": { "_key": "asc" },
+              "order": {
+                "_key": "asc"
+              },
               "use": false
             },
             "settings": {
@@ -1016,7 +355,9 @@
             "index_field_name": "oca_data.scielo.source.country_code",
             "filter": {
               "size": 200,
-              "order": { "_key": "asc" }
+              "order": {
+                "_key": "asc"
+              }
             },
             "settings": {
               "label": "Source Country",
@@ -1028,13 +369,14 @@
               "group_order": 20
             }
           },
-
           "primary_topic_domain": {
             "kind": "index",
             "index_field_name": "primary_topic_domain",
             "filter": {
               "size": 10,
-              "order": { "_key": "asc" },
+              "order": {
+                "_key": "asc"
+              },
               "use": false
             },
             "settings": {
@@ -1056,7 +398,11 @@
               "source_value_field": "value",
               "source_label_field": "label",
               "size": 10,
-              "filter": { "topic_levels": ["domain"] }
+              "filter": {
+                "topic_levels": [
+                  "domain"
+                ]
+              }
             }
           },
           "primary_topic_field": {
@@ -1064,7 +410,9 @@
             "index_field_name": "primary_topic_field",
             "filter": {
               "size": 10,
-              "order": { "_key": "asc" },
+              "order": {
+                "_key": "asc"
+              },
               "use": false
             },
             "settings": {
@@ -1086,7 +434,11 @@
               "source_value_field": "value",
               "source_label_field": "label",
               "size": 10,
-              "filter": { "topic_levels": ["field"] }
+              "filter": {
+                "topic_levels": [
+                  "field"
+                ]
+              }
             }
           },
           "primary_topic_subfield": {
@@ -1094,7 +446,9 @@
             "index_field_name": "primary_topic_subfield",
             "filter": {
               "size": 10,
-              "order": { "_key": "asc" },
+              "order": {
+                "_key": "asc"
+              },
               "use": false
             },
             "settings": {
@@ -1116,7 +470,11 @@
               "source_value_field": "value",
               "source_label_field": "label",
               "size": 10,
-              "filter": { "topic_levels": ["subfield"] }
+              "filter": {
+                "topic_levels": [
+                  "subfield"
+                ]
+              }
             }
           },
           "primary_topic_name": {
@@ -1124,7 +482,9 @@
             "index_field_name": "primary_topic_name",
             "filter": {
               "size": 10,
-              "order": { "_key": "asc" },
+              "order": {
+                "_key": "asc"
+              },
               "use": false
             },
             "settings": {
@@ -1146,7 +506,11 @@
               "source_value_field": "value",
               "source_label_field": "label",
               "size": 10,
-              "filter": { "topic_levels": ["topic"] }
+              "filter": {
+                "topic_levels": [
+                  "topic"
+                ]
+              }
             }
           },
           "sdg": {
@@ -1154,7 +518,9 @@
             "index_field_name": "sdg_names",
             "filter": {
               "size": 20,
-              "order": { "_key": "asc" }
+              "order": {
+                "_key": "asc"
+              }
             },
             "settings": {
               "label": "Sustainable Development Goals",
@@ -1168,13 +534,14 @@
               "search_threshold": 10
             }
           },
-
           "institution": {
             "kind": "index",
             "index_field_name": "institutions",
             "filter": {
               "size": 10,
-              "order": { "_key": "asc" },
+              "order": {
+                "_key": "asc"
+              },
               "use": false
             },
             "settings": {
@@ -1203,7 +570,9 @@
             "index_field_name": "author_country_codes",
             "filter": {
               "size": 500,
-              "order": { "_key": "asc" }
+              "order": {
+                "_key": "asc"
+              }
             },
             "settings": {
               "label": "Affiliation Country",
@@ -1223,7 +592,9 @@
             "index_field_name": "funders.id",
             "filter": {
               "size": 5,
-              "order": { "_key": "asc" },
+              "order": {
+                "_key": "asc"
+              },
               "use": false
             },
             "settings": {
@@ -1247,7 +618,6 @@
               "size": 10
             }
           },
-
           "cited_by_count_range": {
             "kind": "index",
             "index_field_name": "metrics.received_citations.total",
@@ -1326,7 +696,6 @@
               "range_end_placeholder": "Maximum"
             }
           },
-
           "breakdown_variable": {
             "kind": "control",
             "index_field_name": "",
@@ -1337,18 +706,54 @@
               "multiple_selection": false,
               "allow_clear": true,
               "static_options": [
-                { "label": "Scope", "value": "scope" },
-                { "label": "Indexed In (OpenAlex)", "value": "source_indexed_in" },
-                { "label": "Indexed In (SciELO)", "value": "source_scielo_indexed_in" },
-                { "label": "SciELO Collection", "value": "collection" },
-                { "label": "Document Type", "value": "document_type" },
-                { "label": "Document Language", "value": "document_language" },
-                { "label": "Open Access", "value": "open_access" },
-                { "label": "Access Type", "value": "open_access_status" },
-                { "label": "Source Type", "value": "source_type" },
-                { "label": "Domain", "value": "primary_topic_domain" },
-                { "label": "Field", "value": "primary_topic_field" },
-                { "label": "Sustainable Development Goals", "value": "sdg" }
+                {
+                  "label": "Scope",
+                  "value": "scope"
+                },
+                {
+                  "label": "Indexed In (OpenAlex)",
+                  "value": "source_indexed_in"
+                },
+                {
+                  "label": "Indexed In (SciELO)",
+                  "value": "source_scielo_indexed_in"
+                },
+                {
+                  "label": "SciELO Collection",
+                  "value": "collection"
+                },
+                {
+                  "label": "Document Type",
+                  "value": "document_type"
+                },
+                {
+                  "label": "Document Language",
+                  "value": "document_language"
+                },
+                {
+                  "label": "Open Access",
+                  "value": "open_access"
+                },
+                {
+                  "label": "Access Type",
+                  "value": "open_access_status"
+                },
+                {
+                  "label": "Source Type",
+                  "value": "source_type"
+                },
+                {
+                  "label": "Domain",
+                  "value": "primary_topic_domain"
+                },
+                {
+                  "label": "Field",
+                  "value": "primary_topic_field"
+                },
+                {
+                  "label": "Sustainable Development Goals",
+                  "value": "sdg"
+                }
               ],
               "group": "graph_options",
               "group_order": 0
@@ -1370,28 +775,23 @@
               "source_indexed_in",
               "source_scielo_indexed_in",
               "collection",
-
               "document_publication_year_range",
               "document_type",
               "document_language",
               "open_access",
               "open_access_status",
-
               "source_name",
               "source_type",
               "publisher",
               "source_country",
-
               "primary_topic_domain",
               "primary_topic_field",
               "primary_topic_subfield",
               "primary_topic_name",
               "sdg",
-
               "institution",
               "country",
               "funder",
-
               "cited_by_count_range",
               "authors_count_range",
               "references_count_range"
@@ -1409,37 +809,366 @@
             },
             "fields": [
               "breakdown_variable",
-
               "scope",
               "source_indexed_in",
               "source_scielo_indexed_in",
               "collection",
-
               "document_publication_year_range",
               "document_type",
               "document_language",
               "open_access",
               "open_access_status",
-
               "source_name",
               "source_type",
               "publisher",
               "source_country",
-
               "primary_topic_domain",
               "primary_topic_field",
               "primary_topic_subfield",
               "primary_topic_name",
               "sdg",
-
               "institution",
               "country",
               "funder",
-
               "cited_by_count_range",
               "authors_count_range",
               "references_count_range"
             ]
+          }
+        }
+      },
+      "metric_config": {
+        "navigation": {
+          "analysis_units": [
+            {
+              "value": "document",
+              "label": "Document",
+              "url_context_key": "indicator_home_url"
+            },
+            {
+              "value": "source",
+              "label": "Source",
+              "url_context_key": "indicator_home_url"
+            },
+            {
+              "value": "journal_thematic_metrics",
+              "label": "Journal Thematic Metrics",
+              "url_context_key": "journal_thematic_url",
+              "return_to_source": true,
+              "target_data_source": "journal_thematic_metrics"
+            },
+            {
+              "value": "journal_global_metrics",
+              "label": "Journal Global Metrics",
+              "url_context_key": "journal_global_url",
+              "target_data_source": "journal_global_metrics"
+            }
+          ]
+        },
+        "comparison": {
+          "preserve_filters": [
+            "publication_year"
+          ]
+        },
+        "study_units": {
+          "document": {
+            "time_dimension": {
+              "field": "publication_year",
+              "agg_type": "terms"
+            },
+            "metrics": [
+              {
+                "key": "document_count",
+                "agg": "count",
+                "label": {
+                  "pt": "Documentos",
+                  "en": "Documents"
+                }
+              },
+              {
+                "key": "citations_total",
+                "field": "cited_by_count_range",
+                "agg": "sum",
+                "label": {
+                  "pt": "Citações",
+                  "en": "Citations"
+                }
+              },
+              {
+                "key": "citations_per_document",
+                "type": "computed",
+                "formula": "citations_total / document_count",
+                "precision": 2,
+                "label": {
+                  "pt": "Citações/Documento",
+                  "en": "Citations/Document"
+                }
+              },
+              {
+                "key": "cited_documents_count",
+                "agg": "filter",
+                "filter_query": {
+                  "range": {
+                    "metrics.received_citations.total": {
+                      "gt": 0
+                    }
+                  }
+                },
+                "label": {
+                  "pt": "Documentos citados",
+                  "en": "Cited Documents"
+                },
+                "field": "cited_by_count_range"
+              },
+              {
+                "key": "cited_documents_pct",
+                "type": "computed",
+                "formula": "cited_documents_count / document_count * 100",
+                "precision": 2,
+                "label": {
+                  "pt": "% de Documentos Citados",
+                  "en": "% Cited Documents"
+                }
+              }
+            ]
+          },
+          "source": {
+            "time_dimension": {
+              "field": "publication_year",
+              "agg_type": "terms"
+            },
+            "metrics": [
+              {
+                "key": "source_count",
+                "field": "source_name",
+                "agg": "cardinality",
+                "label": {
+                  "pt": "Fontes",
+                  "en": "Sources"
+                }
+              },
+              {
+                "key": "document_count",
+                "agg": "count",
+                "label": {
+                  "pt": "Documentos",
+                  "en": "Documents"
+                }
+              },
+              {
+                "key": "citations_total",
+                "field": "cited_by_count_range",
+                "agg": "sum",
+                "label": {
+                  "pt": "Citações",
+                  "en": "Citations"
+                }
+              },
+              {
+                "key": "cited_documents_count",
+                "agg": "filter",
+                "filter_query": {
+                  "range": {
+                    "metrics.received_citations.total": {
+                      "gt": 0
+                    }
+                  }
+                },
+                "label": {
+                  "pt": "Documentos citados",
+                  "en": "Cited Documents"
+                },
+                "field": "cited_by_count_range"
+              },
+              {
+                "key": "cited_sources_count",
+                "field": "source_name",
+                "agg": "filter",
+                "filter_query": {
+                  "range": {
+                    "metrics.received_citations.total": {
+                      "gt": 0
+                    }
+                  }
+                },
+                "sub_aggs": {
+                  "sources": {
+                    "cardinality": {
+                      "field": "source_name"
+                    }
+                  }
+                },
+                "path": "cited_sources_count.sources.value",
+                "label": {
+                  "pt": "Fontes citadas",
+                  "en": "Cited Sources"
+                }
+              },
+              {
+                "key": "documents_per_source",
+                "type": "computed",
+                "formula": "document_count / source_count",
+                "precision": 2,
+                "label": {
+                  "pt": "Documentos/Fonte",
+                  "en": "Documents/Source"
+                }
+              },
+              {
+                "key": "citations_per_source",
+                "type": "computed",
+                "formula": "citations_total / source_count",
+                "precision": 2,
+                "label": {
+                  "pt": "Citações/Fonte",
+                  "en": "Citations/Source"
+                }
+              },
+              {
+                "key": "cited_documents_per_source",
+                "type": "computed",
+                "formula": "cited_documents_count / source_count",
+                "precision": 2,
+                "label": {
+                  "pt": "Documentos citados/Fonte",
+                  "en": "Cited Documents/Source"
+                }
+              },
+              {
+                "key": "cited_sources_pct",
+                "type": "computed",
+                "formula": "cited_sources_count / source_count * 100",
+                "precision": 2,
+                "label": {
+                  "pt": "% de Fontes Citadas",
+                  "en": "% Cited Sources"
+                }
+              }
+            ]
+          }
+        },
+        "displays": {
+          "charts": {
+            "document_total_documents": {
+              "metric": "document_count",
+              "title": {
+                "pt": "Total de Documentos por Ano",
+                "en": "Total Documents per Year"
+              },
+              "type": "bar",
+              "order": 10,
+              "study_units": [
+                "document"
+              ]
+            },
+            "document_total_citations": {
+              "metric": "citations_total",
+              "title": {
+                "pt": "Total de Citações por Ano",
+                "en": "Total Citations per Year"
+              },
+              "type": "bar",
+              "order": 20,
+              "study_units": [
+                "document"
+              ]
+            },
+            "document_citations_per_document": {
+              "metric": "citations_per_document",
+              "title": {
+                "pt": "Citações/Documento por Ano",
+                "en": "Citations/Document per Year"
+              },
+              "type": "bar",
+              "order": 30,
+              "study_units": [
+                "document"
+              ]
+            },
+            "document_cited_documents": {
+              "metric": "cited_documents_count",
+              "title": {
+                "pt": "Total de Documentos Citados por Ano",
+                "en": "Total Cited Documents per Year"
+              },
+              "type": "bar",
+              "order": 40,
+              "study_units": [
+                "document"
+              ]
+            },
+            "document_cited_documents_pct": {
+              "metric": "cited_documents_pct",
+              "title": {
+                "pt": "% de Documentos Citados por Ano",
+                "en": "% Cited Documents per Year"
+              },
+              "type": "bar",
+              "order": 50,
+              "study_units": [
+                "document"
+              ]
+            },
+            "source_total_sources": {
+              "metric": "source_count",
+              "title": {
+                "pt": "Total de Fontes por Ano",
+                "en": "Total Sources per Year"
+              },
+              "type": "bar",
+              "order": 110,
+              "study_units": [
+                "source"
+              ]
+            },
+            "source_documents_per_source": {
+              "metric": "documents_per_source",
+              "title": {
+                "pt": "Média de Documentos/Fonte por Ano",
+                "en": "Average Documents/Source per Year"
+              },
+              "type": "bar",
+              "order": 120,
+              "study_units": [
+                "source"
+              ]
+            },
+            "source_citations_per_source": {
+              "metric": "citations_per_source",
+              "title": {
+                "pt": "Média de Citações/Fonte por Ano",
+                "en": "Average Citations/Source per Year"
+              },
+              "type": "bar",
+              "order": 130,
+              "study_units": [
+                "source"
+              ]
+            },
+            "source_cited_documents_per_source": {
+              "metric": "cited_documents_per_source",
+              "title": {
+                "pt": "Média de Documentos Citados por Fonte por Ano",
+                "en": "Average Cited Documents/Source per Year"
+              },
+              "type": "bar",
+              "order": 140,
+              "study_units": [
+                "source"
+              ]
+            },
+            "source_cited_sources_pct": {
+              "metric": "cited_sources_pct",
+              "title": {
+                "pt": "% de Fontes Citadas por Ano",
+                "en": "% Cited Sources per Year"
+              },
+              "type": "bar",
+              "order": 150,
+              "study_units": [
+                "source"
+              ]
+            }
           }
         }
       }
@@ -1458,7 +1187,7 @@
             "kind": "index",
             "index_field_name": "creation_year",
             "filter": {
-              "size": 100,
+              "size": 200,
               "order": {
                 "_key": "desc"
               }
@@ -1468,8 +1197,11 @@
               "support_query_operator": false,
               "widget": "select",
               "multiple_selection": true,
-              "group": "timeline",
-              "group_order": 10
+              "group": "document",
+              "group_order": 10,
+              "include_all_option": true,
+              "all_option_label": "All",
+              "search_threshold": 10
             }
           },
           "action": {
@@ -1487,7 +1219,10 @@
               "widget": "select",
               "multiple_selection": true,
               "group": "activity_profile",
-              "group_order": 20
+              "group_order": 20,
+              "include_all_option": true,
+              "all_option_label": "All",
+              "search_threshold": 10
             }
           },
           "thematic_level_0": {
@@ -1504,8 +1239,11 @@
               "support_query_operator": false,
               "widget": "select",
               "multiple_selection": true,
-              "group": "thematic_scope",
-              "group_order": 30
+              "group": "thematic",
+              "group_order": 30,
+              "include_all_option": true,
+              "all_option_label": "All",
+              "search_threshold": 10
             }
           },
           "thematic_level_1": {
@@ -1522,8 +1260,11 @@
               "support_query_operator": false,
               "widget": "select",
               "multiple_selection": true,
-              "group": "thematic_scope",
-              "group_order": 30
+              "group": "thematic",
+              "group_order": 30,
+              "include_all_option": true,
+              "all_option_label": "All",
+              "search_threshold": 10
             }
           },
           "practice": {
@@ -1541,14 +1282,17 @@
               "widget": "select",
               "multiple_selection": true,
               "group": "activity_profile",
-              "group_order": 20
+              "group_order": 20,
+              "include_all_option": true,
+              "all_option_label": "All",
+              "search_threshold": 10
             }
           },
           "institutions": {
             "kind": "index",
             "index_field_name": "institutions_search.keyword",
             "filter": {
-              "size": 10,
+              "size": 100,
               "order": {
                 "_key": "asc"
               },
@@ -1559,8 +1303,10 @@
               "support_query_operator": false,
               "widget": "lookup",
               "multiple_selection": true,
-              "group": "institution",
-              "group_order": 40
+              "group": "affiliation",
+              "group_order": 40,
+              "include_all_option": true,
+              "all_option_label": "All"
             },
             "lookup": {
               "index_name": "lookup_institution_v2",
@@ -1588,7 +1334,10 @@
               "widget": "select",
               "multiple_selection": true,
               "group": "activity_profile",
-              "group_order": 20
+              "group_order": 20,
+              "include_all_option": true,
+              "all_option_label": "All",
+              "search_threshold": 10
             }
           },
           "cities": {
@@ -1598,15 +1347,19 @@
               "size": 100,
               "order": {
                 "_key": "asc"
-              }
+              },
+              "use": false
             },
             "settings": {
               "label": "City",
               "support_query_operator": false,
-              "widget": "select",
+              "widget": "lookup",
               "multiple_selection": true,
               "group": "location",
-              "group_order": 50
+              "group_order": 50,
+              "lookup_use_data_source_values": true,
+              "include_all_option": true,
+              "all_option_label": "All"
             }
           },
           "states": {
@@ -1624,7 +1377,10 @@
               "widget": "select",
               "multiple_selection": true,
               "group": "location",
-              "group_order": 50
+              "group_order": 50,
+              "include_all_option": true,
+              "all_option_label": "All",
+              "search_threshold": 10
             }
           },
           "regions": {
@@ -1642,14 +1398,17 @@
               "widget": "select",
               "multiple_selection": true,
               "group": "location",
-              "group_order": 50
+              "group_order": 50,
+              "include_all_option": true,
+              "all_option_label": "All",
+              "search_threshold": 10
             }
           },
           "directory_type": {
             "kind": "index",
             "index_field_name": "directory_type",
             "filter": {
-              "size": 20,
+              "size": 100,
               "order": {
                 "_key": "asc"
               }
@@ -1660,7 +1419,10 @@
               "widget": "select",
               "multiple_selection": true,
               "group": "activity_profile",
-              "group_order": 20
+              "group_order": 20,
+              "include_all_option": true,
+              "all_option_label": "All",
+              "search_threshold": 10
             }
           },
           "thematic_level_2": {
@@ -1677,15 +1439,18 @@
               "support_query_operator": false,
               "widget": "select",
               "multiple_selection": true,
-              "group": "thematic_scope",
-              "group_order": 30
+              "group": "thematic",
+              "group_order": 30,
+              "include_all_option": true,
+              "all_option_label": "All",
+              "search_threshold": 10
             }
           },
           "start_date_year": {
             "kind": "index",
             "index_field_name": "start_date_year",
             "filter": {
-              "size": 100,
+              "size": 200,
               "order": {
                 "_key": "desc"
               }
@@ -1695,8 +1460,11 @@
               "support_query_operator": false,
               "widget": "select",
               "multiple_selection": true,
-              "group": "timeline",
-              "group_order": 10
+              "group": "document",
+              "group_order": 10,
+              "include_all_option": true,
+              "all_option_label": "All",
+              "search_threshold": 10
             }
           },
           "document_publication_year_range": {
@@ -1719,7 +1487,7 @@
                 "start": "2019",
                 "end": "2025"
               },
-              "group": "timeline",
+              "group": "document",
               "group_order": 10,
               "multiple_selection": false
             }
@@ -1771,10 +1539,10 @@
         "forms": {
           "search": {
             "group_labels": {
-              "timeline": "Timeline",
+              "document": "Document",
               "activity_profile": "Activity Profile",
-              "thematic_scope": "Thematic Scope",
-              "institution": "Institution",
+              "thematic": "Thematic",
+              "affiliation": "Affiliation",
               "location": "Location"
             },
             "fields": [
@@ -1796,10 +1564,10 @@
           "indicator": {
             "group_labels": {
               "graph_options": "Graph Options",
-              "timeline": "Timeline",
+              "document": "Document",
               "activity_profile": "Activity Profile",
-              "thematic_scope": "Thematic Scope",
-              "institution": "Institution",
+              "thematic": "Thematic",
+              "affiliation": "Affiliation",
               "location": "Location"
             },
             "fields": [
@@ -1827,14 +1595,14 @@
     "model": "search_gateway.datasource",
     "pk": 3,
     "fields": {
-      "index_name": "journal_metrics_by_*",
-      "display_name": "Journal Metrics",
+      "index_name": "journal_thematic_metrics",
+      "display_name": "Journal Thematic Metrics",
       "source_fields": [],
       "field_settings": {
         "fields": {
           "country": {
             "kind": "index",
-            "index_field_name": "journal_country",
+            "index_field_name": "journal.country",
             "filter": {
               "size": 500,
               "order": {
@@ -1843,17 +1611,21 @@
             },
             "settings": {
               "widget": "select",
-              "multiple_selection": false,
+              "multiple_selection": true,
               "label": "Country",
-              "group": "journal_identity",
-              "group_order": 20
+              "group": "source",
+              "group_order": 20,
+              "support_query_operator": false,
+              "include_all_option": true,
+              "all_option_label": "All",
+              "search_threshold": 10
             }
           },
           "journal_title": {
             "kind": "index",
-            "index_field_name": "journal_title",
+            "index_field_name": "journal.title",
             "filter": {
-              "size": 1,
+              "size": 100,
               "order": {
                 "_key": "asc"
               },
@@ -1861,10 +1633,13 @@
             },
             "settings": {
               "widget": "lookup",
-              "multiple_selection": false,
+              "multiple_selection": true,
               "label": "Journal",
-              "group": "journal_identity",
-              "group_order": 20
+              "group": "source",
+              "group_order": 20,
+              "support_query_operator": false,
+              "include_all_option": true,
+              "all_option_label": "All"
             },
             "lookup": {
               "index_name": "lookup_source_v2",
@@ -1877,9 +1652,9 @@
           },
           "journal_issn": {
             "kind": "index",
-            "index_field_name": "journal_issn",
+            "index_field_name": "journal.issn",
             "filter": {
-              "size": 1,
+              "size": 100,
               "order": {
                 "_key": "asc"
               },
@@ -1887,10 +1662,14 @@
             },
             "settings": {
               "widget": "lookup",
-              "multiple_selection": false,
+              "multiple_selection": true,
               "label": "ISSN",
-              "group": "journal_identity",
-              "group_order": 20
+              "group": "source",
+              "group_order": 20,
+              "support_query_operator": false,
+              "include_all_option": true,
+              "all_option_label": "All",
+              "hidden_in_form": true
             },
             "lookup": {
               "index_name": "lookup_source_v2",
@@ -1903,7 +1682,7 @@
           },
           "journal_id": {
             "kind": "index",
-            "index_field_name": "journal_id",
+            "index_field_name": "journal.id",
             "filter": {
               "size": 1,
               "order": {
@@ -1921,9 +1700,9 @@
           },
           "publisher_name": {
             "kind": "index",
-            "index_field_name": "journal_publisher",
+            "index_field_name": "journal.publisher",
             "filter": {
-              "size": 1,
+              "size": 100,
               "order": {
                 "_key": "asc"
               },
@@ -1931,10 +1710,13 @@
             },
             "settings": {
               "widget": "lookup",
-              "multiple_selection": false,
+              "multiple_selection": true,
               "label": "Publisher",
-              "group": "journal_identity",
-              "group_order": 20
+              "group": "source",
+              "group_order": 20,
+              "support_query_operator": false,
+              "include_all_option": true,
+              "all_option_label": "All"
             },
             "lookup": {
               "index_name": "lookup_publisher_v2",
@@ -1949,7 +1731,7 @@
           },
           "collection": {
             "kind": "index",
-            "index_field_name": "scielo_collection",
+            "index_field_name": "journal.collection",
             "filter": {
               "size": 100,
               "order": {
@@ -1958,15 +1740,20 @@
             },
             "settings": {
               "widget": "select",
-              "multiple_selection": false,
+              "multiple_selection": true,
               "label": "SciELO Collection",
-              "group": "journal_identity",
-              "group_order": 20
+              "group": "coverage",
+              "group_order": 0,
+              "support_query_operator": false,
+              "include_all_option": true,
+              "all_option_label": "All",
+              "search_threshold": 10,
+              "display_transform": "scielo_collection"
             }
           },
           "collection_name": {
             "kind": "index",
-            "index_field_name": "scielo_collection_name",
+            "index_field_name": "journal.collection",
             "filter": {
               "size": 1,
               "order": {
@@ -1985,7 +1772,7 @@
           },
           "collection_acronym": {
             "kind": "index",
-            "index_field_name": "scielo_collection_acronym",
+            "index_field_name": "journal.collection",
             "filter": {
               "size": 1,
               "order": {
@@ -2004,7 +1791,7 @@
           },
           "category_level": {
             "kind": "index",
-            "index_field_name": "category_level",
+            "index_field_name": "category.level",
             "filter": {
               "size": 50,
               "order": {
@@ -2041,7 +1828,7 @@
           },
           "category_id": {
             "kind": "index",
-            "index_field_name": "category_id",
+            "index_field_name": "category.id",
             "filter": {
               "size": 1000,
               "order": {
@@ -2060,7 +1847,8 @@
               "lookup_use_data_source_values": true,
               "default_value": "Social Sciences",
               "group": "ranking",
-              "group_order": 0
+              "group_order": 0,
+              "support_query_operator": false
             },
             "lookup": {
               "index_name": "lookup_topic_v2",
@@ -2094,7 +1882,7 @@
           },
           "is_scielo": {
             "kind": "index",
-            "index_field_name": "is_scielo",
+            "index_field_name": "classification.indexes.scielo",
             "filter": {
               "transform": {
                 "type": "boolean"
@@ -2109,13 +1897,14 @@
               "multiple_selection": false,
               "label": "Is SciELO",
               "display_transform": "boolean",
-              "group": "indexing_coverage",
-              "group_order": 30
+              "group": "indexing",
+              "group_order": 30,
+              "support_query_operator": false
             }
           },
           "is_scopus": {
             "kind": "index",
-            "index_field_name": "is_scopus",
+            "index_field_name": "classification.indexes.scopus",
             "filter": {
               "transform": {
                 "type": "boolean"
@@ -2130,13 +1919,14 @@
               "multiple_selection": false,
               "label": "Is Scopus",
               "display_transform": "boolean",
-              "group": "indexing_coverage",
-              "group_order": 30
+              "group": "indexing",
+              "group_order": 30,
+              "support_query_operator": false
             }
           },
           "is_wos": {
             "kind": "index",
-            "index_field_name": "is_wos",
+            "index_field_name": "classification.indexes.wos",
             "filter": {
               "transform": {
                 "type": "boolean"
@@ -2151,13 +1941,14 @@
               "multiple_selection": false,
               "label": "Is WoS",
               "display_transform": "boolean",
-              "group": "indexing_coverage",
-              "group_order": 30
+              "group": "indexing",
+              "group_order": 30,
+              "support_query_operator": false
             }
           },
           "is_doaj": {
             "kind": "index",
-            "index_field_name": "is_doaj",
+            "index_field_name": "classification.indexes.doaj",
             "filter": {
               "transform": {
                 "type": "boolean"
@@ -2172,13 +1963,14 @@
               "multiple_selection": false,
               "label": "Is DOAJ",
               "display_transform": "boolean",
-              "group": "indexing_coverage",
-              "group_order": 30
+              "group": "indexing",
+              "group_order": 30,
+              "support_query_operator": false
             }
           },
           "is_journal_oa": {
             "kind": "index",
-            "index_field_name": "is_journal_oa",
+            "index_field_name": "classification.indexes.journal_oa",
             "filter": {
               "transform": {
                 "type": "boolean"
@@ -2193,13 +1985,14 @@
               "multiple_selection": false,
               "label": "Is Open Access",
               "display_transform": "boolean",
-              "group": "publishing_model",
-              "group_order": 25
+              "group": "coverage",
+              "group_order": 10,
+              "support_query_operator": false
             }
           },
           "is_openalex": {
             "kind": "index",
-            "index_field_name": "is_openalex",
+            "index_field_name": "classification.indexes.openalex",
             "filter": {
               "transform": {
                 "type": "boolean"
@@ -2214,13 +2007,36 @@
               "multiple_selection": false,
               "label": "Is OpenAlex",
               "display_transform": "boolean",
-              "group": "indexing_coverage",
-              "group_order": 30
+              "group": "indexing",
+              "group_order": 30,
+              "support_query_operator": false
+            }
+          },
+          "is_qualis": {
+            "kind": "index",
+            "index_field_name": "classification.indexes.qualis",
+            "filter": {
+              "transform": {
+                "type": "boolean"
+              },
+              "size": 2,
+              "order": {
+                "_key": "asc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Is Qualis",
+              "display_transform": "boolean",
+              "group": "indexing",
+              "group_order": 30,
+              "support_query_operator": false
             }
           },
           "is_journal_multilingual": {
             "kind": "index",
-            "index_field_name": "is_journal_multilingual",
+            "index_field_name": "classification.indexes.multilingual",
             "filter": {
               "transform": {
                 "type": "boolean"
@@ -2235,13 +2051,14 @@
               "multiple_selection": false,
               "label": "Is Multilingual",
               "display_transform": "boolean",
-              "group": "publishing_model",
-              "group_order": 25
+              "group": "source",
+              "group_order": 20,
+              "support_query_operator": false
             }
           },
           "journal_publications_count": {
             "kind": "index",
-            "index_field_name": "journal_publications_count",
+            "index_field_name": "journal_metrics.publications_count",
             "filter": {
               "use": false,
               "size": 1,
@@ -2256,7 +2073,7 @@
           },
           "journal_citations_total": {
             "kind": "index",
-            "index_field_name": "journal_citations_total",
+            "index_field_name": "journal_metrics.citations.total",
             "filter": {
               "use": false,
               "size": 1,
@@ -2271,7 +2088,7 @@
           },
           "journal_citations_mean": {
             "kind": "index",
-            "index_field_name": "journal_citations_mean",
+            "index_field_name": "journal_metrics.citations.mean.all_time",
             "filter": {
               "use": false,
               "size": 1,
@@ -2286,7 +2103,7 @@
           },
           "journal_citations_mean_window_2y": {
             "kind": "index",
-            "index_field_name": "journal_citations_mean_window_2y",
+            "index_field_name": "journal_metrics.citations.mean.window_2y",
             "filter": {
               "use": false,
               "size": 1,
@@ -2301,7 +2118,7 @@
           },
           "journal_citations_mean_window_3y": {
             "kind": "index",
-            "index_field_name": "journal_citations_mean_window_3y",
+            "index_field_name": "journal_metrics.citations.mean.window_3y",
             "filter": {
               "use": false,
               "size": 1,
@@ -2316,7 +2133,7 @@
           },
           "journal_citations_mean_window_5y": {
             "kind": "index",
-            "index_field_name": "journal_citations_mean_window_5y",
+            "index_field_name": "journal_metrics.citations.mean.window_5y",
             "filter": {
               "use": false,
               "size": 1,
@@ -2329,9 +2146,9 @@
               "multiple_selection": true
             }
           },
-          "journal_impact_normalized": {
+          "journal_impact_cohort": {
             "kind": "index",
-            "index_field_name": "journal_impact_cohort",
+            "index_field_name": "journal_metrics.impact_cohort.all_time",
             "filter": {
               "use": false,
               "size": 1,
@@ -2344,9 +2161,9 @@
               "multiple_selection": true
             }
           },
-          "journal_impact_normalized_window_2y": {
+          "journal_impact_cohort_window_2y": {
             "kind": "index",
-            "index_field_name": "journal_impact_cohort_window_2y",
+            "index_field_name": "journal_metrics.impact_cohort.window_2y",
             "filter": {
               "use": false,
               "size": 1,
@@ -2359,9 +2176,9 @@
               "multiple_selection": true
             }
           },
-          "journal_impact_normalized_window_3y": {
+          "journal_impact_cohort_window_3y": {
             "kind": "index",
-            "index_field_name": "journal_impact_cohort_window_3y",
+            "index_field_name": "journal_metrics.impact_cohort.window_3y",
             "filter": {
               "use": false,
               "size": 1,
@@ -2374,9 +2191,9 @@
               "multiple_selection": true
             }
           },
-          "journal_impact_normalized_window_5y": {
+          "journal_impact_cohort_window_5y": {
             "kind": "index",
-            "index_field_name": "journal_impact_cohort_window_5y",
+            "index_field_name": "journal_metrics.impact_cohort.window_5y",
             "filter": {
               "use": false,
               "size": 1,
@@ -2391,7 +2208,7 @@
           },
           "top_1pct_all_time_publications_share_pct": {
             "kind": "index",
-            "index_field_name": "top_1pct_all_time_publications_share_pct",
+            "index_field_name": "top_percentiles.p1.all_time.publications_share_pct",
             "filter": {
               "use": false,
               "size": 1,
@@ -2406,7 +2223,7 @@
           },
           "top_5pct_all_time_publications_share_pct": {
             "kind": "index",
-            "index_field_name": "top_5pct_all_time_publications_share_pct",
+            "index_field_name": "top_percentiles.p5.all_time.publications_share_pct",
             "filter": {
               "use": false,
               "size": 1,
@@ -2421,7 +2238,7 @@
           },
           "top_10pct_all_time_publications_share_pct": {
             "kind": "index",
-            "index_field_name": "top_10pct_all_time_publications_share_pct",
+            "index_field_name": "top_percentiles.p10.all_time.publications_share_pct",
             "filter": {
               "use": false,
               "size": 1,
@@ -2436,7 +2253,7 @@
           },
           "top_50pct_all_time_publications_share_pct": {
             "kind": "index",
-            "index_field_name": "top_50pct_all_time_publications_share_pct",
+            "index_field_name": "top_percentiles.p50.all_time.publications_share_pct",
             "filter": {
               "use": false,
               "size": 1,
@@ -2594,15 +2411,105 @@
               "group": "ranking",
               "group_order": 0
             }
+          },
+          "global_field_normalized_impact": {
+            "kind": "index",
+            "index_field_name": "global_hierarchical_article_normalized_impact_mean",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": true
+            }
+          },
+          "global_field_normalized_impact_median": {
+            "kind": "index",
+            "index_field_name": "global_hierarchical_article_normalized_impact_median",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": true
+            }
+          },
+          "global_consistency_score": {
+            "kind": "index",
+            "index_field_name": "global_hierarchical_article_share_consensus_top_10pct",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": true
+            }
+          },
+          "global_total_publications": {
+            "kind": "index",
+            "index_field_name": "global_total_publications",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": true
+            }
+          },
+          "global_total_citations": {
+            "kind": "index",
+            "index_field_name": "global_total_citations",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": true
+            }
+          },
+          "global_num_observations": {
+            "kind": "index",
+            "index_field_name": "global_num_observations",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": true
+            }
           }
         },
         "forms": {
           "journal_metrics": {
             "group_labels": {
               "ranking": "Ranking",
-              "journal_identity": "Journal Identity",
-              "publishing_model": "Publishing Model",
-              "indexing_coverage": "Indexing / Coverage"
+              "coverage": "Coverage",
+              "source": "Source",
+              "indexing": "Indexing"
             },
             "panel_groups": [
               "ranking"
@@ -2614,17 +2521,581 @@
               "ranking_metric",
               "minimum_publications",
               "limit",
+              "collection",
+              "is_journal_oa",
               "country",
               "publisher_name",
-              "collection",
               "journal_title",
-              "is_journal_oa",
               "is_journal_multilingual",
               "is_scielo",
               "is_scopus",
               "is_wos",
               "is_doaj",
-              "is_openalex"
+              "is_openalex",
+              "is_qualis"
+            ]
+          }
+        }
+      },
+      "metric_config": {
+        "journal": {
+          "forms": {
+            "thematic": "journal_metrics",
+            "global": "journal_metrics_global"
+          },
+          "related_global_data_source": "journal_global_metrics",
+          "profile_query_params": [
+            "collection",
+            "publication_year",
+            "category_level",
+            "category_id"
+          ],
+          "profile_passthrough_params": [
+            "collection"
+          ]
+        },
+        "navigation": {
+          "analysis_units": [
+            {
+              "value": "document",
+              "label": "Document",
+              "url_context_key": "indicator_home_url"
+            },
+            {
+              "value": "source",
+              "label": "Source",
+              "url_context_key": "indicator_home_url"
+            },
+            {
+              "value": "journal_thematic_metrics",
+              "label": "Journal Thematic Metrics",
+              "url_context_key": "journal_thematic_url",
+              "return_to_source": true,
+              "target_data_source": "journal_thematic_metrics"
+            },
+            {
+              "value": "journal_global_metrics",
+              "label": "Journal Global Metrics",
+              "url_context_key": "journal_global_url",
+              "target_data_source": "journal_global_metrics"
+            }
+          ]
+        },
+        "displays": {
+          "ranking": {
+            "configuration_keys": [
+              "publication_year",
+              "ranking_metric",
+              "limit",
+              "category_level",
+              "category_id",
+              "minimum_publications"
+            ],
+            "columns": [
+              {
+                "field": "__rank__",
+                "label": "Rank",
+                "decimals": null
+              },
+              {
+                "field": "ranking_metric",
+                "ranking_metric": true,
+                "decimals": 1
+              },
+              {
+                "field": "title",
+                "label": "Journal",
+                "link_profile": true,
+                "decimals": null
+              },
+              {
+                "field": "issn",
+                "label": "ISSN",
+                "decimals": null
+              },
+              {
+                "field": "country",
+                "label": "Country",
+                "decimals": null
+              },
+              {
+                "field": "publisher_name",
+                "label": "Publisher",
+                "decimals": null
+              },
+              {
+                "field": "is_journal_oa",
+                "transform": "boolean",
+                "decimals": null
+              },
+              {
+                "field": "publication_year",
+                "decimals": null
+              },
+              {
+                "field": "journal_publications_count",
+                "label": "Publications",
+                "decimals": 0
+              },
+              {
+                "field": "journal_citations_total",
+                "label": "Total Citations",
+                "decimals": 0
+              },
+              {
+                "field": "journal_citations_mean",
+                "label": "Mean Citations",
+                "decimals": 1
+              },
+              {
+                "field": "journal_impact_cohort",
+                "label": "Cohort Impact (Total)",
+                "decimals": 1
+              },
+              {
+                "field": "top_10pct_all_time_publications_share_pct",
+                "label": "Top 10% Share",
+                "decimals": 1
+              }
+            ]
+          },
+          "profile": {
+            "header_attributes": [
+              {
+                "field": "collection",
+                "label": "Collection",
+                "display": "collection"
+              },
+              {
+                "field": "country",
+                "label": "Country"
+              },
+              {
+                "field": "publisher_name",
+                "label": "Publisher"
+              }
+            ],
+            "kpis": [
+              {
+                "field": "journal_publications_count",
+                "label": "Publications",
+                "decimals": 0
+              },
+              {
+                "field": "journal_citations_total",
+                "label": "Total Citations",
+                "decimals": 0
+              },
+              {
+                "field": "journal_citations_mean",
+                "label": "Citations Mean",
+                "decimals": 2
+              },
+              {
+                "field": "journal_impact_cohort",
+                "label": "Impact Cohort",
+                "decimals": 2
+              }
+            ],
+            "global_kpis": [
+              {
+                "field": "global_field_normalized_impact",
+                "label": "Global Normalized Impact",
+                "decimals": 2
+              },
+              {
+                "field": "global_field_normalized_impact_median",
+                "label": "Normalized Impact (Median)",
+                "decimals": 2
+              },
+              {
+                "field": "global_consistency_score",
+                "label": "Consistency Score",
+                "decimals": 2
+              },
+              {
+                "field": "global_total_publications",
+                "label": "Total Publications",
+                "decimals": 0
+              },
+              {
+                "field": "global_num_observations",
+                "label": "Observations",
+                "decimals": 0
+              }
+            ],
+            "badges": {
+              "attributes": [
+                {
+                  "field": "is_journal_oa",
+                  "label": "Is Open Access"
+                },
+                {
+                  "field": "is_journal_multilingual",
+                  "label": "Is Multilingual"
+                }
+              ],
+              "indexing": [
+                {
+                  "field": "is_scielo",
+                  "label": "SciELO"
+                },
+                {
+                  "field": "is_scopus",
+                  "label": "Scopus"
+                },
+                {
+                  "field": "is_wos",
+                  "label": "WoS"
+                },
+                {
+                  "field": "is_doaj",
+                  "label": "DOAJ"
+                },
+                {
+                  "field": "is_openalex",
+                  "label": "OpenAlex"
+                },
+                {
+                  "field": "is_qualis",
+                  "label": "Qualis"
+                }
+              ]
+            },
+            "timeseries": [
+              {
+                "chart_id": "journal-profile-output-chart",
+                "title": {
+                  "pt": "Publicações e Total de Citações por Ano",
+                  "en": "Publications and Total Citations per Year"
+                },
+                "grid": {
+                  "right": 116
+                },
+                "toolbox_types": [
+                  "line",
+                  "bar"
+                ],
+                "y_axes": [
+                  {
+                    "label": {
+                      "pt": "Publicações",
+                      "en": "Publications"
+                    },
+                    "decimals": 0
+                  },
+                  {
+                    "label": {
+                      "pt": "Citações",
+                      "en": "Citations"
+                    },
+                    "decimals": 0
+                  }
+                ],
+                "series": [
+                  {
+                    "key": "journal_publications_count_per_year",
+                    "field": "journal_publications_count",
+                    "label": {
+                      "pt": "Publicações",
+                      "en": "Publications"
+                    },
+                    "type": "bar",
+                    "decimals": 0
+                  },
+                  {
+                    "key": "journal_citations_total_per_year",
+                    "field": "journal_citations_total",
+                    "label": {
+                      "pt": "Total de Citações",
+                      "en": "Total Citations"
+                    },
+                    "type": "line",
+                    "y_axis": 1,
+                    "decimals": 0
+                  }
+                ]
+              },
+              {
+                "chart_id": "journal-profile-impact-chart",
+                "title": {
+                  "pt": "Impacto de Coorte e Média de Citações por Ano",
+                  "en": "Cohort Impact and Mean Citations per Year"
+                },
+                "grid": {
+                  "bottom": 80
+                },
+                "toolbox_types": [
+                  "line",
+                  "bar"
+                ],
+                "y_axes": [
+                  {
+                    "label": {
+                      "pt": "Impacto",
+                      "en": "Impact"
+                    },
+                    "decimals": 2
+                  }
+                ],
+                "series": [
+                  {
+                    "key": "journal_impact_cohort_per_year",
+                    "field": "journal_impact_cohort",
+                    "label": "Cohort Impact (Total)",
+                    "type": "line",
+                    "decimals": 2
+                  },
+                  {
+                    "key": "journal_impact_cohort_window_2y_per_year",
+                    "field": "journal_impact_cohort_window_2y",
+                    "label": "Cohort Impact (2 years)",
+                    "type": "line",
+                    "decimals": 2
+                  },
+                  {
+                    "key": "journal_impact_cohort_window_3y_per_year",
+                    "field": "journal_impact_cohort_window_3y",
+                    "label": "Cohort Impact (3 years)",
+                    "type": "line",
+                    "decimals": 2
+                  },
+                  {
+                    "key": "journal_impact_cohort_window_5y_per_year",
+                    "field": "journal_impact_cohort_window_5y",
+                    "label": "Cohort Impact (5 years)",
+                    "type": "line",
+                    "decimals": 2
+                  },
+                  {
+                    "key": "journal_citations_mean_per_year",
+                    "field": "journal_citations_mean",
+                    "label": {
+                      "pt": "Média de Citações",
+                      "en": "Mean Citations"
+                    },
+                    "type": "line",
+                    "decimals": 2
+                  }
+                ]
+              },
+              {
+                "chart_id": "journal-profile-top-share-chart",
+                "title": {
+                  "pt": "Participação de Publicações Top (%) por Ano",
+                  "en": "Top Publications Share (%) per Year"
+                },
+                "toolbox_types": [
+                  "line",
+                  "bar"
+                ],
+                "y_axes": [
+                  {
+                    "label": "%",
+                    "decimals": 2
+                  }
+                ],
+                "series": [
+                  {
+                    "key": "top_1pct_all_time_publications_share_pct_per_year",
+                    "field": "top_1pct_all_time_publications_share_pct",
+                    "label": "Top 1%",
+                    "type": "line",
+                    "decimals": 2,
+                    "is_percent": true
+                  },
+                  {
+                    "key": "top_5pct_all_time_publications_share_pct_per_year",
+                    "field": "top_5pct_all_time_publications_share_pct",
+                    "label": "Top 5%",
+                    "type": "line",
+                    "decimals": 2,
+                    "is_percent": true
+                  },
+                  {
+                    "key": "top_10pct_all_time_publications_share_pct_per_year",
+                    "field": "top_10pct_all_time_publications_share_pct",
+                    "label": "Top 10%",
+                    "type": "line",
+                    "decimals": 2,
+                    "is_percent": true
+                  },
+                  {
+                    "key": "top_50pct_all_time_publications_share_pct_per_year",
+                    "field": "top_50pct_all_time_publications_share_pct",
+                    "label": "Top 50%",
+                    "type": "line",
+                    "decimals": 2,
+                    "is_percent": true
+                  }
+                ]
+              }
+            ],
+            "category_charts": [
+              {
+                "chart_id": "journal-profile-category-radar",
+                "data_key": "category_publications_spider",
+                "field": "publications_total",
+                "label": {
+                  "pt": "Publicações",
+                  "en": "Publications"
+                },
+                "decimals": 0
+              },
+              {
+                "chart_id": "journal-profile-category-citations-total-radar",
+                "data_key": "category_publications_spider",
+                "field": "citations_total",
+                "label": {
+                  "pt": "Total de Citações",
+                  "en": "Total Citations"
+                },
+                "decimals": 0
+              },
+              {
+                "chart_id": "journal-profile-category-citations-mean-radar",
+                "data_key": "category_publications_spider",
+                "field": "citations_mean",
+                "label": {
+                  "pt": "Média de Citações",
+                  "en": "Mean Citations"
+                },
+                "decimals": 1
+              }
+            ],
+            "global_timeseries": [
+              {
+                "key": "total_publications",
+                "field": "global_total_publications"
+              },
+              {
+                "key": "total_citations",
+                "field": "global_total_citations"
+              },
+              {
+                "key": "num_observations",
+                "field": "global_num_observations"
+              },
+              {
+                "key": "field_normalized_impact",
+                "field": "global_field_normalized_impact"
+              },
+              {
+                "key": "field_normalized_impact_median",
+                "field": "global_field_normalized_impact_median"
+              },
+              {
+                "key": "consistency_score",
+                "field": "global_consistency_score"
+              }
+            ],
+            "global_timeseries_charts": [
+              {
+                "chart_id": "journal-profile-global-output-chart",
+                "title": {
+                  "pt": "Publicações e Citações - Global",
+                  "en": "Publications and Citations - Global"
+                },
+                "grid": {
+                  "right": 116
+                },
+                "toolbox_types": [
+                  "line",
+                  "bar"
+                ],
+                "y_axes": [
+                  {
+                    "label": {
+                      "pt": "Publicações",
+                      "en": "Publications"
+                    },
+                    "decimals": 0
+                  },
+                  {
+                    "label": {
+                      "pt": "Citações",
+                      "en": "Citations"
+                    },
+                    "decimals": 0
+                  }
+                ],
+                "series": [
+                  {
+                    "key": "total_publications",
+                    "field": "global_total_publications",
+                    "label": {
+                      "pt": "Total de Publicações",
+                      "en": "Total Publications"
+                    },
+                    "type": "bar",
+                    "decimals": 0
+                  },
+                  {
+                    "key": "total_citations",
+                    "field": "global_total_citations",
+                    "label": {
+                      "pt": "Total de Citações",
+                      "en": "Total Citations"
+                    },
+                    "type": "line",
+                    "y_axis": 1,
+                    "decimals": 0
+                  }
+                ]
+              },
+              {
+                "chart_id": "journal-profile-global-impact-chart",
+                "title": {
+                  "pt": "Indicadores de Impacto - Global",
+                  "en": "Impact Indicators - Global"
+                },
+                "grid": {
+                  "right": 116
+                },
+                "toolbox_types": [
+                  "line"
+                ],
+                "y_axes": [
+                  {
+                    "label": {
+                      "pt": "Impacto",
+                      "en": "Impact"
+                    },
+                    "decimals": 2
+                  },
+                  {
+                    "label": {
+                      "pt": "Consistência",
+                      "en": "Consistency"
+                    },
+                    "decimals": 2
+                  }
+                ],
+                "series": [
+                  {
+                    "key": "field_normalized_impact",
+                    "field": "global_field_normalized_impact",
+                    "label": "Field Norm. Impact",
+                    "type": "line",
+                    "decimals": 2
+                  },
+                  {
+                    "key": "field_normalized_impact_median",
+                    "field": "global_field_normalized_impact_median",
+                    "label": "Norm. Impact (Median)",
+                    "type": "line",
+                    "decimals": 2
+                  },
+                  {
+                    "key": "consistency_score",
+                    "field": "global_consistency_score",
+                    "label": "Consistency Score",
+                    "type": "line",
+                    "y_axis": 1,
+                    "decimals": 2
+                  }
+                ]
+              }
             ]
           }
         }
@@ -2635,7 +3106,7 @@
     "model": "search_gateway.datasource",
     "pk": 4,
     "fields": {
-      "index_name": "journal_metrics_global_*",
+      "index_name": "journal_global_metrics",
       "display_name": "Journal Global Metrics",
       "source_fields": [],
       "field_settings": {
@@ -2645,7 +3116,9 @@
             "index_field_name": "journal_id",
             "filter": {
               "size": 1,
-              "order": { "_key": "asc" }
+              "order": {
+                "_key": "asc"
+              }
             },
             "settings": {
               "widget": "select",
@@ -2656,44 +3129,45 @@
               "group_order": 20
             }
           },
-          "journal_title": {
+          "publication_year": {
             "kind": "index",
-            "index_field_name": "journal_title",
+            "index_field_name": "publication_year",
             "filter": {
-              "size": 1,
-              "order": { "_key": "asc" },
-              "use": false
+              "size": 200,
+              "order": {
+                "_key": "desc"
+              }
             },
             "settings": {
-              "widget": "lookup",
+              "widget": "year",
               "multiple_selection": false,
-              "label": "Journal",
-              "group": "journal_identity",
-              "group_order": 20
-            },
-            "lookup": {
-              "index_name": "lookup_source_v2",
-              "search_field": "label_search",
-              "sort_field": "size",
-              "source_value_field": "label",
-              "source_label_field": "label",
-              "size": 10
+              "label": "Publication Year",
+              "input_type": "text",
+              "default_value": "2020",
+              "group": "ranking",
+              "group_order": 0
             }
           },
           "journal_issn": {
             "kind": "index",
             "index_field_name": "journal_issn",
             "filter": {
-              "size": 1,
-              "order": { "_key": "asc" },
+              "size": 100,
+              "order": {
+                "_key": "asc"
+              },
               "use": false
             },
             "settings": {
               "widget": "lookup",
-              "multiple_selection": false,
+              "multiple_selection": true,
               "label": "ISSN",
-              "group": "journal_identity",
-              "group_order": 20
+              "group": "source",
+              "group_order": 20,
+              "support_query_operator": false,
+              "include_all_option": true,
+              "all_option_label": "All",
+              "hidden_in_form": true
             },
             "lookup": {
               "index_name": "lookup_source_v2",
@@ -2704,35 +3178,54 @@
               "size": 10
             }
           },
-          "country": {
+          "journal_title": {
             "kind": "index",
-            "index_field_name": "journal_country",
+            "index_field_name": "journal_title",
             "filter": {
-              "size": 500,
-              "order": { "_key": "asc" }
+              "size": 100,
+              "order": {
+                "_key": "asc"
+              },
+              "use": false
             },
             "settings": {
-              "widget": "select",
-              "multiple_selection": false,
-              "label": "Country",
-              "group": "journal_identity",
-              "group_order": 20
+              "widget": "lookup",
+              "multiple_selection": true,
+              "label": "Journal",
+              "group": "source",
+              "group_order": 20,
+              "support_query_operator": false,
+              "include_all_option": true,
+              "all_option_label": "All"
+            },
+            "lookup": {
+              "index_name": "lookup_source_v2",
+              "search_field": "label_search",
+              "sort_field": "size",
+              "source_value_field": "label",
+              "source_label_field": "label",
+              "size": 10
             }
           },
           "publisher_name": {
             "kind": "index",
             "index_field_name": "journal_publisher",
             "filter": {
-              "size": 1,
-              "order": { "_key": "asc" },
+              "size": 100,
+              "order": {
+                "_key": "asc"
+              },
               "use": false
             },
             "settings": {
               "widget": "lookup",
-              "multiple_selection": false,
+              "multiple_selection": true,
               "label": "Publisher",
-              "group": "journal_identity",
-              "group_order": 20
+              "group": "source",
+              "group_order": 20,
+              "support_query_operator": false,
+              "include_all_option": true,
+              "all_option_label": "All"
             },
             "lookup": {
               "index_name": "lookup_publisher_v2",
@@ -2745,175 +3238,1383 @@
               "size": 10
             }
           },
+          "country": {
+            "kind": "index",
+            "index_field_name": "journal_country",
+            "filter": {
+              "size": 500,
+              "order": {
+                "_key": "asc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": true,
+              "label": "Country",
+              "group": "source",
+              "group_order": 20,
+              "support_query_operator": false,
+              "include_all_option": true,
+              "all_option_label": "All",
+              "search_threshold": 10
+            }
+          },
           "collection": {
             "kind": "index",
             "index_field_name": "scielo_collection",
             "filter": {
               "size": 100,
-              "order": { "_key": "asc" }
+              "order": {
+                "_key": "asc"
+              }
             },
             "settings": {
               "widget": "select",
-              "multiple_selection": false,
+              "multiple_selection": true,
               "label": "SciELO Collection",
-              "group": "journal_identity",
-              "group_order": 20
+              "group": "coverage",
+              "group_order": 0,
+              "support_query_operator": false,
+              "include_all_option": true,
+              "all_option_label": "All",
+              "search_threshold": 10,
+              "display_transform": "scielo_collection"
             }
           },
-          "publication_year": {
+          "scielo_thematic_areas": {
             "kind": "index",
-            "index_field_name": "publication_year",
+            "index_field_name": "scielo_thematic_areas",
             "filter": {
-              "size": 200,
-              "order": { "_key": "desc" }
+              "use": true,
+              "size": 100,
+              "order": {
+                "_key": "desc"
+              }
             },
             "settings": {
-              "widget": "year",
-              "multiple_selection": false,
-              "label": "Publication Year",
-              "input_type": "text",
-              "default_value": "2020",
-              "group": "ranking",
-              "group_order": 0
+              "widget": "select",
+              "multiple_selection": true,
+              "label": "SciELO Thematic Areas",
+              "group": "coverage",
+              "group_order": 0,
+              "support_query_operator": false,
+              "include_all_option": true,
+              "all_option_label": "All",
+              "search_threshold": 10
             }
           },
           "is_scielo": {
             "kind": "index",
-            "index_field_name": "is_scielo_global",
+            "index_field_name": "is_scielo",
             "filter": {
-              "transform": { "type": "boolean" },
+              "use": true,
               "size": 2,
-              "order": { "_key": "asc" }
+              "order": {
+                "_key": "asc"
+              },
+              "transform": {
+                "type": "boolean"
+              }
             },
             "settings": {
               "widget": "select",
               "multiple_selection": false,
               "label": "Is SciELO",
+              "group": "coverage",
+              "group_order": 0,
               "display_transform": "boolean",
-              "group": "indexing_coverage",
-              "group_order": 30
+              "support_query_operator": false
             }
           },
           "is_scopus": {
             "kind": "index",
-            "index_field_name": "is_scopus_global",
+            "index_field_name": "is_scopus",
             "filter": {
-              "transform": { "type": "boolean" },
+              "use": true,
               "size": 2,
-              "order": { "_key": "asc" }
+              "order": {
+                "_key": "asc"
+              },
+              "transform": {
+                "type": "boolean"
+              }
             },
             "settings": {
               "widget": "select",
               "multiple_selection": false,
               "label": "Is Scopus",
+              "group": "coverage",
+              "group_order": 0,
               "display_transform": "boolean",
-              "group": "indexing_coverage",
-              "group_order": 30
+              "support_query_operator": false
             }
           },
           "is_wos": {
             "kind": "index",
-            "index_field_name": "is_wos_global",
+            "index_field_name": "is_wos",
             "filter": {
-              "transform": { "type": "boolean" },
+              "use": true,
               "size": 2,
-              "order": { "_key": "asc" }
+              "order": {
+                "_key": "asc"
+              },
+              "transform": {
+                "type": "boolean"
+              }
             },
             "settings": {
               "widget": "select",
               "multiple_selection": false,
               "label": "Is WoS",
+              "group": "coverage",
+              "group_order": 0,
               "display_transform": "boolean",
-              "group": "indexing_coverage",
-              "group_order": 30
+              "support_query_operator": false
             }
           },
-          "is_doaj": {
+          "is_openalex": {
             "kind": "index",
-            "index_field_name": "is_doaj_global",
+            "index_field_name": "is_openalex",
             "filter": {
-              "transform": { "type": "boolean" },
+              "use": true,
               "size": 2,
-              "order": { "_key": "asc" }
+              "order": {
+                "_key": "asc"
+              },
+              "transform": {
+                "type": "boolean"
+              }
             },
             "settings": {
               "widget": "select",
               "multiple_selection": false,
-              "label": "Is DOAJ",
+              "label": "Is OpenAlex",
+              "group": "coverage",
+              "group_order": 0,
               "display_transform": "boolean",
-              "group": "indexing_coverage",
-              "group_order": 30
+              "support_query_operator": false
+            }
+          },
+          "is_qualis": {
+            "kind": "index",
+            "index_field_name": "is_qualis",
+            "filter": {
+              "use": true,
+              "size": 2,
+              "order": {
+                "_key": "asc"
+              },
+              "transform": {
+                "type": "boolean"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Is Qualis",
+              "group": "coverage",
+              "group_order": 0,
+              "display_transform": "boolean",
+              "support_query_operator": false
             }
           },
           "is_journal_oa": {
             "kind": "index",
-            "index_field_name": "is_journal_oa_global",
+            "index_field_name": "is_journal_oa",
             "filter": {
-              "transform": { "type": "boolean" },
+              "use": true,
               "size": 2,
-              "order": { "_key": "asc" }
+              "order": {
+                "_key": "asc"
+              },
+              "transform": {
+                "type": "boolean"
+              }
             },
             "settings": {
               "widget": "select",
               "multiple_selection": false,
               "label": "Is Open Access",
-              "display_transform": "boolean",
               "group": "publishing_model",
-              "group_order": 25
+              "group_order": 25,
+              "display_transform": "boolean",
+              "support_query_operator": false
             }
           },
           "is_journal_multilingual": {
             "kind": "index",
-            "index_field_name": "is_journal_multilingual_global",
+            "index_field_name": "is_journal_multilingual",
             "filter": {
-              "transform": { "type": "boolean" },
+              "use": true,
               "size": 2,
-              "order": { "_key": "asc" }
+              "order": {
+                "_key": "asc"
+              },
+              "transform": {
+                "type": "boolean"
+              }
             },
             "settings": {
               "widget": "select",
               "multiple_selection": false,
               "label": "Is Multilingual",
-              "display_transform": "boolean",
               "group": "publishing_model",
-              "group_order": 25
+              "group_order": 25,
+              "display_transform": "boolean",
+              "support_query_operator": false
             }
-          },
-          "global_field_normalized_impact": {
-            "kind": "index",
-            "index_field_name": "global_field_normalized_impact",
-            "filter": { "use": false, "size": 1, "order": { "_key": "desc" } },
-            "settings": { "widget": "select", "multiple_selection": true }
-          },
-          "global_field_normalized_impact_median": {
-            "kind": "index",
-            "index_field_name": "global_field_normalized_impact_median",
-            "filter": { "use": false, "size": 1, "order": { "_key": "desc" } },
-            "settings": { "widget": "select", "multiple_selection": true }
-          },
-          "global_consistency_score": {
-            "kind": "index",
-            "index_field_name": "global_consistency_score",
-            "filter": { "use": false, "size": 1, "order": { "_key": "desc" } },
-            "settings": { "widget": "select", "multiple_selection": true }
-          },
-          "global_total_publications": {
-            "kind": "index",
-            "index_field_name": "global_total_publications",
-            "filter": { "use": false, "size": 1, "order": { "_key": "desc" } },
-            "settings": { "widget": "select", "multiple_selection": true }
-          },
-          "global_total_citations": {
-            "kind": "index",
-            "index_field_name": "global_total_citations",
-            "filter": { "use": false, "size": 1, "order": { "_key": "desc" } },
-            "settings": { "widget": "select", "multiple_selection": true }
           },
           "global_num_observations": {
             "kind": "index",
             "index_field_name": "global_num_observations",
-            "filter": { "use": false, "size": 1, "order": { "_key": "desc" } },
-            "settings": { "widget": "select", "multiple_selection": true }
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Observations",
+              "group": "global_volume",
+              "group_order": 40
+            }
+          },
+          "global_num_observations_excluded": {
+            "kind": "index",
+            "index_field_name": "global_num_observations_excluded",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Excluded Observations",
+              "group": "global_volume",
+              "group_order": 40
+            }
+          },
+          "global_num_categories": {
+            "kind": "index",
+            "index_field_name": "global_num_categories",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Categories",
+              "group": "global_volume",
+              "group_order": 40
+            }
+          },
+          "global_total_publications": {
+            "kind": "index",
+            "index_field_name": "global_total_publications",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Total Publications",
+              "group": "global_volume",
+              "group_order": 40
+            }
+          },
+          "global_total_citations": {
+            "kind": "index",
+            "index_field_name": "global_total_citations",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Total Citations",
+              "group": "global_volume",
+              "group_order": 40
+            }
+          },
+          "global_field_normalized_impact": {
+            "kind": "index",
+            "index_field_name": "global_hierarchical_article_normalized_impact_mean",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Hierarchical Article Impact Mean",
+              "group": "global_volume",
+              "group_order": 40
+            }
+          },
+          "global_field_normalized_impact_median": {
+            "kind": "index",
+            "index_field_name": "global_hierarchical_article_normalized_impact_median",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Hierarchical Article Impact Median",
+              "group": "global_volume",
+              "group_order": 40
+            }
+          },
+          "global_consistency_score": {
+            "kind": "index",
+            "index_field_name": "global_hierarchical_article_share_consensus_top_10pct",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Top 10% Share",
+              "group": "global_volume",
+              "group_order": 40
+            }
+          },
+          "global_hierarchical_article_normalized_impact_median": {
+            "kind": "index",
+            "index_field_name": "global_hierarchical_article_normalized_impact_median",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Hierarchical Article Impact Median",
+              "group": "global_hierarchical_article",
+              "group_order": 40
+            }
+          },
+          "global_hierarchical_article_normalized_impact_mean": {
+            "kind": "index",
+            "index_field_name": "global_hierarchical_article_normalized_impact_mean",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Hierarchical Article Impact Mean",
+              "group": "global_hierarchical_article",
+              "group_order": 40
+            }
+          },
+          "global_hierarchical_article_normalized_impact_q1": {
+            "kind": "index",
+            "index_field_name": "global_hierarchical_article_normalized_impact_q1",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Hierarchical Article Impact Q1",
+              "group": "global_hierarchical_article",
+              "group_order": 40
+            }
+          },
+          "global_hierarchical_article_normalized_impact_q3": {
+            "kind": "index",
+            "index_field_name": "global_hierarchical_article_normalized_impact_q3",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Hierarchical Article Impact Q3",
+              "group": "global_hierarchical_article",
+              "group_order": 40
+            }
+          },
+          "global_hierarchical_article_normalized_impact_std": {
+            "kind": "index",
+            "index_field_name": "global_hierarchical_article_normalized_impact_std",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Hierarchical Article Impact Std.",
+              "group": "global_hierarchical_article",
+              "group_order": 40
+            }
+          },
+          "global_hierarchical_article_share_above_1": {
+            "kind": "index",
+            "index_field_name": "global_hierarchical_article_share_above_1",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Share Above 1",
+              "group": "global_hierarchical_article",
+              "group_order": 40
+            }
+          },
+          "global_hierarchical_article_share_consensus_top_10pct": {
+            "kind": "index",
+            "index_field_name": "global_hierarchical_article_share_consensus_top_10pct",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Top 10% Share",
+              "group": "global_hierarchical_article",
+              "group_order": 40
+            }
+          },
+          "global_hierarchical_article_count_total": {
+            "kind": "index",
+            "index_field_name": "global_hierarchical_article_count_total",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Global Hierarchical Article Count Total",
+              "group": "global_hierarchical_article",
+              "group_order": 40
+            }
+          },
+          "global_hierarchical_article_count_included": {
+            "kind": "index",
+            "index_field_name": "global_hierarchical_article_count_included",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Global Hierarchical Article Count Included",
+              "group": "global_hierarchical_article",
+              "group_order": 40
+            }
+          },
+          "global_hierarchical_article_share_all_4_levels": {
+            "kind": "index",
+            "index_field_name": "global_hierarchical_article_share_all_4_levels",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Global Hierarchical Article Share All 4 Levels",
+              "group": "global_hierarchical_article",
+              "group_order": 40
+            }
+          },
+          "global_hierarchical_article_share_partial_hierarchy": {
+            "kind": "index",
+            "index_field_name": "global_hierarchical_article_share_partial_hierarchy",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Global Hierarchical Article Share Partial Hierarchy",
+              "group": "global_hierarchical_article",
+              "group_order": 40
+            }
+          },
+          "global_hierarchical_article_share_topic_available": {
+            "kind": "index",
+            "index_field_name": "global_hierarchical_article_share_topic_available",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Global Hierarchical Article Share Topic Available",
+              "group": "global_hierarchical_article",
+              "group_order": 40
+            }
+          },
+          "global_hierarchical_article_baseline_min_count": {
+            "kind": "index",
+            "index_field_name": "global_hierarchical_article_baseline_min_count",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Global Hierarchical Article Baseline Min Count",
+              "group": "global_hierarchical_article",
+              "group_order": 40
+            }
+          },
+          "global_hierarchical_article_weight_effective_domain": {
+            "kind": "index",
+            "index_field_name": "global_hierarchical_article_weight_effective_domain",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Global Hierarchical Article Weight Effective Domain",
+              "group": "global_hierarchical_article",
+              "group_order": 40
+            }
+          },
+          "global_hierarchical_article_weight_effective_field": {
+            "kind": "index",
+            "index_field_name": "global_hierarchical_article_weight_effective_field",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Global Hierarchical Article Weight Effective Field",
+              "group": "global_hierarchical_article",
+              "group_order": 40
+            }
+          },
+          "global_hierarchical_article_weight_effective_subfield": {
+            "kind": "index",
+            "index_field_name": "global_hierarchical_article_weight_effective_subfield",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Global Hierarchical Article Weight Effective Subfield",
+              "group": "global_hierarchical_article",
+              "group_order": 40
+            }
+          },
+          "global_hierarchical_article_weight_effective_topic": {
+            "kind": "index",
+            "index_field_name": "global_hierarchical_article_weight_effective_topic",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Global Hierarchical Article Weight Effective Topic",
+              "group": "global_hierarchical_article",
+              "group_order": 40
+            }
+          },
+          "global_hierarchical_multi_article_normalized_impact_median": {
+            "kind": "index",
+            "index_field_name": "global_hierarchical_multi_article_normalized_impact_median",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Multi Article Impact Median",
+              "group": "global_hierarchical_multi_article",
+              "group_order": 40
+            }
+          },
+          "global_hierarchical_multi_article_normalized_impact_mean": {
+            "kind": "index",
+            "index_field_name": "global_hierarchical_multi_article_normalized_impact_mean",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Multi Article Impact Mean",
+              "group": "global_hierarchical_multi_article",
+              "group_order": 40
+            }
+          },
+          "global_hierarchical_multi_article_count_total": {
+            "kind": "index",
+            "index_field_name": "global_hierarchical_multi_article_count_total",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Global Hierarchical Multi Article Count Total",
+              "group": "global_hierarchical_multi_article",
+              "group_order": 40
+            }
+          },
+          "global_hierarchical_multi_article_count_included": {
+            "kind": "index",
+            "index_field_name": "global_hierarchical_multi_article_count_included",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Global Hierarchical Multi Article Count Included",
+              "group": "global_hierarchical_multi_article",
+              "group_order": 40
+            }
+          },
+          "global_hierarchical_multi_article_avg_categories_domain": {
+            "kind": "index",
+            "index_field_name": "global_hierarchical_multi_article_avg_categories_domain",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Global Hierarchical Multi Article Avg Categories Domain",
+              "group": "global_hierarchical_multi_article",
+              "group_order": 40
+            }
+          },
+          "global_hierarchical_multi_article_avg_categories_field": {
+            "kind": "index",
+            "index_field_name": "global_hierarchical_multi_article_avg_categories_field",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Global Hierarchical Multi Article Avg Categories Field",
+              "group": "global_hierarchical_multi_article",
+              "group_order": 40
+            }
+          },
+          "global_hierarchical_multi_article_avg_categories_subfield": {
+            "kind": "index",
+            "index_field_name": "global_hierarchical_multi_article_avg_categories_subfield",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Global Hierarchical Multi Article Avg Categories Subfield",
+              "group": "global_hierarchical_multi_article",
+              "group_order": 40
+            }
+          },
+          "global_hierarchical_multi_article_avg_categories_topic": {
+            "kind": "index",
+            "index_field_name": "global_hierarchical_multi_article_avg_categories_topic",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Global Hierarchical Multi Article Avg Categories Topic",
+              "group": "global_hierarchical_multi_article",
+              "group_order": 40
+            }
+          },
+          "profile_best_impact": {
+            "kind": "index",
+            "index_field_name": "profile_best_impact",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Best Category Impact",
+              "group": "global_profile",
+              "group_order": 40
+            }
+          },
+          "profile_worst_impact": {
+            "kind": "index",
+            "index_field_name": "profile_worst_impact",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Worst Category Impact",
+              "group": "global_profile",
+              "group_order": 40
+            }
+          },
+          "profile_impact_range": {
+            "kind": "index",
+            "index_field_name": "profile_impact_range",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Category Impact Range",
+              "group": "global_profile",
+              "group_order": 40
+            }
+          },
+          "profile_categories_above_1": {
+            "kind": "index",
+            "index_field_name": "profile_categories_above_1",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Profile Categories Above 1",
+              "group": "global_profile",
+              "group_order": 40
+            }
+          },
+          "profile_categories_equal_1": {
+            "kind": "index",
+            "index_field_name": "profile_categories_equal_1",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Profile Categories Equal 1",
+              "group": "global_profile",
+              "group_order": 40
+            }
+          },
+          "profile_categories_below_1": {
+            "kind": "index",
+            "index_field_name": "profile_categories_below_1",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Profile Categories Below 1",
+              "group": "global_profile",
+              "group_order": 40
+            }
+          },
+          "profile_pct_categories_above_1": {
+            "kind": "index",
+            "index_field_name": "profile_pct_categories_above_1",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "% Categories Above 1",
+              "group": "global_profile",
+              "group_order": 40
+            }
+          },
+          "global_field_normalized_impact_window_2y": {
+            "kind": "index",
+            "index_field_name": "global_field_normalized_impact_window_2y",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Global Field Normalized Impact Window 2Y",
+              "group": "global_windows",
+              "group_order": 40
+            }
+          },
+          "global_field_normalized_impact_unweighted_window_2y": {
+            "kind": "index",
+            "index_field_name": "global_field_normalized_impact_unweighted_window_2y",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Global Field Normalized Impact Unweighted Window 2Y",
+              "group": "global_windows",
+              "group_order": 40
+            }
+          },
+          "global_field_normalized_impact_median_window_2y": {
+            "kind": "index",
+            "index_field_name": "global_field_normalized_impact_median_window_2y",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Global Field Normalized Impact Median Window 2Y",
+              "group": "global_windows",
+              "group_order": 40
+            }
+          },
+          "global_num_observations_window_2y": {
+            "kind": "index",
+            "index_field_name": "global_num_observations_window_2y",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Global Num Observations Window 2Y",
+              "group": "global_windows",
+              "group_order": 40
+            }
+          },
+          "global_hierarchical_article_normalized_impact_median_window_2y": {
+            "kind": "index",
+            "index_field_name": "global_hierarchical_article_normalized_impact_median_window_2y",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Global Hierarchical Article Normalized Impact Median Window 2Y",
+              "group": "global_hierarchical_article",
+              "group_order": 40
+            }
+          },
+          "global_hierarchical_article_normalized_impact_mean_window_2y": {
+            "kind": "index",
+            "index_field_name": "global_hierarchical_article_normalized_impact_mean_window_2y",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Global Hierarchical Article Normalized Impact Mean Window 2Y",
+              "group": "global_hierarchical_article",
+              "group_order": 40
+            }
+          },
+          "global_hierarchical_article_share_above_1_window_2y": {
+            "kind": "index",
+            "index_field_name": "global_hierarchical_article_share_above_1_window_2y",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Global Hierarchical Article Share Above 1 Window 2Y",
+              "group": "global_hierarchical_article",
+              "group_order": 40
+            }
+          },
+          "global_hierarchical_article_share_consensus_top_10pct_window_2y": {
+            "kind": "index",
+            "index_field_name": "global_hierarchical_article_share_consensus_top_10pct_window_2y",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Global Hierarchical Article Share Consensus Top 10Pct Window 2Y",
+              "group": "global_hierarchical_article",
+              "group_order": 40
+            }
+          },
+          "global_field_normalized_impact_window_3y": {
+            "kind": "index",
+            "index_field_name": "global_field_normalized_impact_window_3y",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Global Field Normalized Impact Window 3Y",
+              "group": "global_windows",
+              "group_order": 40
+            }
+          },
+          "global_field_normalized_impact_unweighted_window_3y": {
+            "kind": "index",
+            "index_field_name": "global_field_normalized_impact_unweighted_window_3y",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Global Field Normalized Impact Unweighted Window 3Y",
+              "group": "global_windows",
+              "group_order": 40
+            }
+          },
+          "global_field_normalized_impact_median_window_3y": {
+            "kind": "index",
+            "index_field_name": "global_field_normalized_impact_median_window_3y",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Global Field Normalized Impact Median Window 3Y",
+              "group": "global_windows",
+              "group_order": 40
+            }
+          },
+          "global_num_observations_window_3y": {
+            "kind": "index",
+            "index_field_name": "global_num_observations_window_3y",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Global Num Observations Window 3Y",
+              "group": "global_windows",
+              "group_order": 40
+            }
+          },
+          "global_hierarchical_article_normalized_impact_median_window_3y": {
+            "kind": "index",
+            "index_field_name": "global_hierarchical_article_normalized_impact_median_window_3y",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Global Hierarchical Article Normalized Impact Median Window 3Y",
+              "group": "global_hierarchical_article",
+              "group_order": 40
+            }
+          },
+          "global_hierarchical_article_normalized_impact_mean_window_3y": {
+            "kind": "index",
+            "index_field_name": "global_hierarchical_article_normalized_impact_mean_window_3y",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Global Hierarchical Article Normalized Impact Mean Window 3Y",
+              "group": "global_hierarchical_article",
+              "group_order": 40
+            }
+          },
+          "global_hierarchical_article_share_above_1_window_3y": {
+            "kind": "index",
+            "index_field_name": "global_hierarchical_article_share_above_1_window_3y",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Global Hierarchical Article Share Above 1 Window 3Y",
+              "group": "global_hierarchical_article",
+              "group_order": 40
+            }
+          },
+          "global_hierarchical_article_share_consensus_top_10pct_window_3y": {
+            "kind": "index",
+            "index_field_name": "global_hierarchical_article_share_consensus_top_10pct_window_3y",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Global Hierarchical Article Share Consensus Top 10Pct Window 3Y",
+              "group": "global_hierarchical_article",
+              "group_order": 40
+            }
+          },
+          "global_field_normalized_impact_window_5y": {
+            "kind": "index",
+            "index_field_name": "global_field_normalized_impact_window_5y",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Global Field Normalized Impact Window 5Y",
+              "group": "global_windows",
+              "group_order": 40
+            }
+          },
+          "global_field_normalized_impact_unweighted_window_5y": {
+            "kind": "index",
+            "index_field_name": "global_field_normalized_impact_unweighted_window_5y",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Global Field Normalized Impact Unweighted Window 5Y",
+              "group": "global_windows",
+              "group_order": 40
+            }
+          },
+          "global_field_normalized_impact_median_window_5y": {
+            "kind": "index",
+            "index_field_name": "global_field_normalized_impact_median_window_5y",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Global Field Normalized Impact Median Window 5Y",
+              "group": "global_windows",
+              "group_order": 40
+            }
+          },
+          "global_num_observations_window_5y": {
+            "kind": "index",
+            "index_field_name": "global_num_observations_window_5y",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Global Num Observations Window 5Y",
+              "group": "global_windows",
+              "group_order": 40
+            }
+          },
+          "global_hierarchical_article_normalized_impact_median_window_5y": {
+            "kind": "index",
+            "index_field_name": "global_hierarchical_article_normalized_impact_median_window_5y",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Global Hierarchical Article Normalized Impact Median Window 5Y",
+              "group": "global_hierarchical_article",
+              "group_order": 40
+            }
+          },
+          "global_hierarchical_article_normalized_impact_mean_window_5y": {
+            "kind": "index",
+            "index_field_name": "global_hierarchical_article_normalized_impact_mean_window_5y",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Global Hierarchical Article Normalized Impact Mean Window 5Y",
+              "group": "global_hierarchical_article",
+              "group_order": 40
+            }
+          },
+          "global_hierarchical_article_share_above_1_window_5y": {
+            "kind": "index",
+            "index_field_name": "global_hierarchical_article_share_above_1_window_5y",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Global Hierarchical Article Share Above 1 Window 5Y",
+              "group": "global_hierarchical_article",
+              "group_order": 40
+            }
+          },
+          "global_hierarchical_article_share_consensus_top_10pct_window_5y": {
+            "kind": "index",
+            "index_field_name": "global_hierarchical_article_share_consensus_top_10pct_window_5y",
+            "filter": {
+              "use": false,
+              "size": 1,
+              "order": {
+                "_key": "desc"
+              }
+            },
+            "settings": {
+              "widget": "select",
+              "multiple_selection": false,
+              "label": "Global Hierarchical Article Share Consensus Top 10Pct Window 5Y",
+              "group": "global_hierarchical_article",
+              "group_order": 40
+            }
           },
           "ranking_metric": {
             "kind": "control",
@@ -2926,32 +4627,47 @@
               "static_options": [
                 {
                   "value": "global_field_normalized_impact",
-                  "label": "Global Normalized Impact (Total)",
-                  "group": "Impact"
+                  "label": "Hierarchical Article Impact Mean",
+                  "group": "Official V3"
                 },
                 {
                   "value": "global_field_normalized_impact_median",
-                  "label": "Global Normalized Impact (Median)",
-                  "group": "Impact"
+                  "label": "Hierarchical Article Impact Median",
+                  "group": "Official V3"
                 },
                 {
                   "value": "global_consistency_score",
-                  "label": "Consistency Score",
-                  "group": "Impact"
+                  "label": "Top 10% Share",
+                  "group": "Official V3"
+                },
+                {
+                  "value": "global_hierarchical_article_share_above_1",
+                  "label": "Share Above 1",
+                  "group": "Official V3"
                 },
                 {
                   "value": "global_total_publications",
                   "label": "Total Publications",
-                  "group": "Publications"
+                  "group": "Volume"
                 },
                 {
                   "value": "global_total_citations",
                   "label": "Total Citations",
-                  "group": "Citations"
+                  "group": "Volume"
+                },
+                {
+                  "value": "global_num_categories",
+                  "label": "Categories",
+                  "group": "Volume"
+                },
+                {
+                  "value": "global_hierarchical_multi_article_normalized_impact_mean",
+                  "label": "Multi Article Impact Mean",
+                  "group": "Experimental V4"
                 }
               ],
               "default_value": "global_field_normalized_impact",
-              "help_text": "Global Normalized Impact ranks journals by their field-normalized citation impact across all categories.",
+              "help_text": "Ranks journals by global article-level impact metrics from the enriched journal metrics CSV.",
               "group": "ranking",
               "group_order": 0
             }
@@ -2965,13 +4681,34 @@
               "widget": "select",
               "multiple_selection": false,
               "static_options": [
-                { "value": "10",   "label": "10"   },
-                { "value": "25",   "label": "25"   },
-                { "value": "50",   "label": "50"   },
-                { "value": "100",  "label": "100"  },
-                { "value": "200",  "label": "200"  },
-                { "value": "500",  "label": "500"  },
-                { "value": "1000", "label": "1000" }
+                {
+                  "value": "10",
+                  "label": "10"
+                },
+                {
+                  "value": "25",
+                  "label": "25"
+                },
+                {
+                  "value": "50",
+                  "label": "50"
+                },
+                {
+                  "value": "100",
+                  "label": "100"
+                },
+                {
+                  "value": "200",
+                  "label": "200"
+                },
+                {
+                  "value": "500",
+                  "label": "500"
+                },
+                {
+                  "value": "1000",
+                  "label": "1000"
+                }
               ],
               "default_value": "100",
               "group": "ranking",
@@ -2983,25 +4720,139 @@
           "journal_metrics_global": {
             "group_labels": {
               "ranking": "Ranking",
-              "journal_identity": "Journal Identity",
-              "publishing_model": "Publishing Model",
-              "indexing_coverage": "Indexing / Coverage"
+              "coverage": "Coverage",
+              "source": "Source",
+              "publishing_model": "Publishing Model"
             },
-            "panel_groups": ["ranking"],
+            "panel_groups": [
+              "ranking"
+            ],
             "fields": [
               "publication_year",
               "ranking_metric",
               "limit",
-              "country",
-              "publisher_name",
               "collection",
-              "journal_title",
-              "is_journal_oa",
-              "is_journal_multilingual",
+              "scielo_thematic_areas",
               "is_scielo",
               "is_scopus",
               "is_wos",
-              "is_doaj"
+              "is_openalex",
+              "is_qualis",
+              "country",
+              "publisher_name",
+              "journal_title",
+              "is_journal_oa",
+              "is_journal_multilingual"
+            ]
+          }
+        }
+      },
+      "metric_config": {
+        "journal": {
+          "forms": {
+            "global": "journal_metrics_global"
+          }
+        },
+        "navigation": {
+          "analysis_units": [
+            {
+              "value": "document",
+              "label": "Document",
+              "url_context_key": "indicator_home_url"
+            },
+            {
+              "value": "source",
+              "label": "Source",
+              "url_context_key": "indicator_home_url"
+            },
+            {
+              "value": "journal_thematic_metrics",
+              "label": "Journal Thematic Metrics",
+              "url_context_key": "journal_thematic_url",
+              "return_to_source": true,
+              "target_data_source": "journal_thematic_metrics"
+            },
+            {
+              "value": "journal_global_metrics",
+              "label": "Journal Global Metrics",
+              "url_context_key": "journal_global_url",
+              "target_data_source": "journal_global_metrics"
+            }
+          ]
+        },
+        "displays": {
+          "ranking": {
+            "configuration_keys": [
+              "publication_year",
+              "ranking_metric",
+              "limit"
+            ],
+            "columns": [
+              {
+                "field": "__rank__",
+                "label": "Rank",
+                "decimals": null
+              },
+              {
+                "field": "ranking_metric",
+                "ranking_metric": true,
+                "decimals": 2
+              },
+              {
+                "field": "title",
+                "label": "Journal",
+                "link_profile": true,
+                "decimals": null
+              },
+              {
+                "field": "issn",
+                "label": "ISSN",
+                "decimals": null
+              },
+              {
+                "field": "country",
+                "label": "Country",
+                "decimals": null
+              },
+              {
+                "field": "publisher_name",
+                "label": "Publisher",
+                "decimals": null
+              },
+              {
+                "field": "is_journal_oa",
+                "transform": "boolean",
+                "decimals": null
+              },
+              {
+                "field": "publication_year",
+                "decimals": null
+              },
+              {
+                "field": "global_total_publications",
+                "label": "Total Publications",
+                "decimals": 0
+              },
+              {
+                "field": "global_total_citations",
+                "label": "Total Citations",
+                "decimals": 0
+              },
+              {
+                "field": "global_num_observations",
+                "label": "Observations",
+                "decimals": 0
+              },
+              {
+                "field": "global_num_categories",
+                "label": "Categories",
+                "decimals": 0
+              },
+              {
+                "field": "global_consistency_score",
+                "label": "Top 10% Share",
+                "decimals": 2
+              }
             ]
           }
         }
