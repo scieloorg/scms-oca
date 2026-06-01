@@ -9,6 +9,7 @@ from taggit.managers import TaggableManager
 from tempfile import TemporaryDirectory
 from zipfile import ZipFile
 
+from django.apps import apps
 from django.conf import settings
 from django.db import models
 from django.db.models import Q
@@ -926,7 +927,43 @@ class ChartBasePage(Page):
         abstract = True
 
     def get_indicator_nav_urls(self):
-        return {"indicator_home_url": self.url}
+        urls = {"indicator_home_url": self.url}
+        navigation = (self.data_source.metric_config_schema or {}).get("navigation") or {}
+
+        for unit in navigation.get("analysis_units") or []:
+            if not isinstance(unit, dict):
+                continue
+            url_key = str(unit.get("url_context_key") or "").strip()
+            target_data_source = str(unit.get("target_data_source") or "").strip()
+            if not url_key or url_key in urls or not target_data_source:
+                continue
+            urls[url_key] = self.get_data_source_page_url(target_data_source)
+
+        return urls
+
+    def get_data_source_page_url(self, index_name):
+        DataSource = apps.get_model("search_gateway", "DataSource")
+        data_source = DataSource.objects.filter(index_name=index_name).first()
+        if not data_source:
+            return ""
+
+        for model in apps.get_models():
+            if not isinstance(model, type) or not issubclass(model, Page):
+                continue
+            if model._meta.abstract or not any(field.name == "data_source" for field in model._meta.get_fields()):
+                continue
+
+            qs = model.objects.filter(live=True, data_source=data_source)
+            if getattr(self, "locale_id", None):
+                localized = qs.filter(locale_id=self.locale_id).first()
+                if localized:
+                    return localized.url
+
+            page = qs.first()
+            if page:
+                return page.url
+
+        return ""
 
     def build_analysis_unit_options(self, study_unit):
         navigation = (self.data_source.metric_config_schema or {}).get("navigation") or {}
