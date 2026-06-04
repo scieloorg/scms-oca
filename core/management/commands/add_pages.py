@@ -2,7 +2,8 @@ import json
 import slugify
 
 from django.core.management.base import BaseCommand
-from wagtail.models import Site, Locale
+from django.core.exceptions import ObjectDoesNotExist
+from wagtail.models import Page, Site, Locale
 
 from freepage.models import FreePage
 from observation.models import ObservationPage
@@ -254,7 +255,22 @@ class Command(BaseCommand):
     def remember_page(self, page_key, locale, page):
         self.pages_by_key[(page_key, locale.language_code)] = page
 
+    def get_specific_page(self, page):
+        try:
+            page = page.specific
+        except ObjectDoesNotExist:
+            return None
+
+        if page.__class__ is Page:
+            return None
+
+        return page
+
     def apply_publish_state(self, page, publish):
+        page = self.get_specific_page(page)
+        if page is None:
+            return None
+
         if publish:
             if not page.live:
                 page.save_revision().publish()
@@ -362,6 +378,9 @@ class Command(BaseCommand):
 
         sibling = parent.get_children().specific().filter(locale=locale, slug=slug).first()
         if sibling:
+            sibling = self.get_specific_page(sibling)
+            if sibling is None:
+                return None
             if getattr(sibling, "data_source_id", None) != ds.pk:
                 sibling.data_source = ds
                 sibling.save()
@@ -427,6 +446,9 @@ class Command(BaseCommand):
 
         sibling = parent.get_children().specific().filter(locale=locale, slug=slug).first()
         if sibling:
+            sibling = self.get_specific_page(sibling)
+            if sibling is None:
+                return None
             if ds and getattr(sibling, "data_source_id", None) != ds.pk:
                 sibling.data_source = ds
                 sibling.save()
@@ -490,6 +512,9 @@ class Command(BaseCommand):
 
         sibling = parent.get_children().specific().filter(locale=locale, slug=slug).first()
         if sibling:
+            sibling = self.get_specific_page(sibling)
+            if sibling is None:
+                return None
             changed = False
             if ds and getattr(sibling, 'data_source_id', None) != ds.pk:
                 sibling.data_source = ds
@@ -556,6 +581,9 @@ class Command(BaseCommand):
 
         sibling = parent.get_children().specific().filter(locale=locale, slug=slug).first()
         if sibling:
+            sibling = self.get_specific_page(sibling)
+            if sibling is None:
+                return None
             if ds and getattr(sibling, 'data_source_id', None) != ds.pk:
                 sibling.data_source = ds
                 sibling.save()
@@ -627,6 +655,9 @@ class Command(BaseCommand):
 
         sibling = parent.get_children().specific().filter(locale=locale, slug=slug).first()
         if sibling:
+            sibling = self.get_specific_page(sibling)
+            if sibling is None:
+                return None
             # Only update if it's the correct page type
             if not isinstance(sibling, DocumentChartPage):
                 self.stdout.write(self.style.WARNING(
@@ -712,6 +743,9 @@ class Command(BaseCommand):
 
         sibling = parent.get_children().specific().filter(locale=locale, slug=slug).first()
         if sibling:
+            sibling = self.get_specific_page(sibling)
+            if sibling is None:
+                return None
             if not isinstance(sibling, JournalProfilePage):
                 self.stdout.write(self.style.WARNING(
                     f"Sibling with slug '{slug}' exists but is {type(sibling).__name__}, not JournalProfilePage. Skipping."
@@ -796,6 +830,9 @@ class Command(BaseCommand):
 
         sibling = parent.get_children().specific().filter(locale=locale, slug=slug).first()
         if sibling:
+            sibling = self.get_specific_page(sibling)
+            if sibling is None:
+                return None
             # Only update if it's the correct page type
             if not isinstance(sibling, SourceChartPage):
                 self.stdout.write(self.style.WARNING(
