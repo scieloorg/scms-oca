@@ -92,7 +92,7 @@ class Migration(migrations.Migration):
                             ("document", "Document"),
                             ("source", "Source"),
                         ],
-                        default="source",
+                        default="document",
                         help_text="Study unit for data aggregation.",
                         max_length=50,
                         verbose_name="Study Unit",
