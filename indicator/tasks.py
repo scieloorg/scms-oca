@@ -1,3 +1,7 @@
+"""
+DEPRECATED: This class will be removed in a future version.
+"""
+
 import json
 import logging
 

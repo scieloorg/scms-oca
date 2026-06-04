@@ -1,0 +1,423 @@
+{% extends "base.html" %}
+{% load static %}
+{% load i18n %}
+{% load indicator_filters %}
+{% get_current_language as CURRENT_LANGUAGE %}
+
+
+{% block title %}
+  {% trans "Journal Profile" %}{% if journal_title or journal_issn %} | {% firstof journal_title journal_issn %}{% endif %}
+{% endblock title %}
+
+{% block body_class %}{{ block.super }} journal-profile-body{% endblock %}
+
+{% block content %}
+<section id="content" class="journal-profile-page">
+  <div class="container">
+    <div class="journal-profile-page__header">
+      <h1 class="journal-profile-page__title">{% trans "Journal Profile" %}</h1>
+      <div class="journal-profile-page__context">
+        <h2 class="journal-profile-page__headline" id="journal-profile-header-title">
+          <a href="?journal={{ journal_issn|escape }}" class="text-decoration-none" style="color: inherit;">{% firstof journal_title journal_issn %}</a>
+        </h2>
+        {% if profile_header_attributes %}
+        <div class="journal-profile-page__attributes" id="journal-profile-header-meta">
+          {% for attribute in profile_header_attributes %}
+          <span class="journal-profile-attribute">
+            <span class="journal-profile-attribute__icon" aria-hidden="true">
+              {% if attribute.label|lower == "issn" %}
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/></svg>
+              {% elif attribute.label|lower == "country" %}
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+              {% elif attribute.label|lower == "publisher" %}
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+              {% else %}
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+              {% endif %}
+            </span>
+            <span class="journal-profile-attribute__label">{{ attribute.label }}</span>
+            <span class="journal-profile-attribute__value" title="{{ attribute.value }}">{{ attribute.value }}</span>
+          </span>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    {% if error %}
+    <div class="alert alert-warning shadow-sm mb-3" role="alert">
+      {{ error }}
+    </div>
+    {% endif %}
+
+    {% if filters_error %}
+    <div class="alert alert-warning shadow-sm mb-3" role="alert">
+      {{ filters_error }}
+    </div>
+    {% endif %}
+
+    {% if profile_data or global_snapshot %}
+    <div class="journal-profile-tabs">
+      <div class="journal-profile-tabs__nav" role="tablist">
+        {% if global_snapshot %}
+        <button type="button" class="journal-profile-tabs__tab journal-profile-tabs__tab--active" role="tab" aria-selected="true" data-tab="global">
+          <span class="journal-profile-tabs__tab-icon" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>
+          </span>
+          <span class="journal-profile-tabs__tab-title">{% trans "Journal Global Metrics" %}</span>
+        </button>
+        {% endif %}
+        <button type="button" class="journal-profile-tabs__tab{% if not global_snapshot %} journal-profile-tabs__tab--active{% endif %}" role="tab" aria-selected="{% if not global_snapshot %}true{% else %}false{% endif %}" data-tab="category">
+          <span class="journal-profile-tabs__tab-icon" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
+          </span>
+          <span class="journal-profile-tabs__tab-title">{% trans "Journal Thematic Metrics" %}</span>
+        </button>
+      </div>
+
+      {% if global_snapshot %}
+      <div class="journal-profile-tabs__panel journal-profile-tabs__panel--active" data-panel="global">
+        <p class="journal-profile-tabs__intro">
+          {% trans "Global metrics summarize the journal across all fields." %}
+        </p>
+
+        <form method="get" action="{{ request.path }}" class="journal-profile-settings-bar">
+          <input type="hidden" name="journal" value="{{ journal_issn|escape }}">
+          <input type="hidden" name="_tab" value="global">
+          {% for key, value in profile_passthrough_filters.items %}
+          <input type="hidden" name="{{ key }}" value="{{ value }}">
+          {% endfor %}
+          <div class="journal-profile-settings-bar__field">
+            <label class="journal-profile-settings-bar__label" for="global-publication-year-select">{% trans "Publication Year" %}</label>
+            <select id="global-publication-year-select" class="journal-profile-settings-bar__select" name="publication_year">
+              {% for year_option in global_year_options %}
+              <option value="{{ year_option }}" {% if selected_global_publication_year == year_option %}selected{% endif %}>{{ year_option }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <button type="submit" class="journal-profile-settings-bar__submit">{% trans "Apply" %}</button>
+        </form>
+
+        <div class="journal-profile-section-heading journal-profile-section-heading--enhanced">
+          <div class="d-flex align-items-center gap-2">
+            <span class="journal-profile-section-heading__icon" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><path d="M8 11h6"/><path d="M11 8v6"/></svg>
+            </span>
+            <div>
+              <div class="journal-profile-grid-title journal-profile-grid-title--summary">{% trans "Summary" %}</div>
+              <div class="journal-profile-section-heading__subtitle">{% trans "Key global indicators for the selected publication year" %}</div>
+            </div>
+          </div>
+          <div class="journal-profile-identity-bar">
+            {% if selected_global_publication_year %}
+            <span class="journal-profile-identity-bar__item">
+              <span class="journal-profile-identity-bar__icon" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              </span>
+              <span class="journal-profile-identity-bar__label">{% trans "Publication Year" %}</span>
+              <span class="journal-profile-identity-bar__value journal-profile-identity-bar__value--active">{{ selected_global_publication_year }}</span>
+            </span>
+            {% endif %}
+            {% for badge in global_badges.attributes %}
+            <span class="journal-profile-identity-bar__item">
+              <span class="journal-profile-identity-bar__icon" aria-hidden="true">
+                {% if "access" in badge.label|lower or "open" in badge.label|lower %}
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 019.9-1"/></svg>
+                {% elif "lingual" in badge.label|lower or "language" in badge.label|lower %}
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+                {% else %}
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+                {% endif %}
+              </span>
+              <span class="journal-profile-identity-bar__label">{{ badge.label }}</span>
+              <span class="journal-profile-identity-bar__value {% if badge.active %}journal-profile-identity-bar__value--active{% else %}journal-profile-identity-bar__value--inactive{% endif %}">
+                {% if badge.active %}{% trans "Yes" %}{% else %}{% trans "No" %}{% endif %}
+              </span>
+            </span>
+            {% endfor %}
+            {% for badge in global_badges.indexing %}
+            <span class="journal-profile-identity-bar__item">
+              <span class="journal-profile-identity-bar__icon" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+              </span>
+              <span class="journal-profile-identity-bar__label">{{ badge.label }}</span>
+              <span class="journal-profile-identity-bar__value {% if badge.active %}journal-profile-identity-bar__value--active{% else %}journal-profile-identity-bar__value--inactive{% endif %}">
+                {% if badge.active %}{% trans "Yes" %}{% else %}{% trans "No" %}{% endif %}
+              </span>
+            </span>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="row g-2" id="journal-profile-global-kpis">
+          {% for kpi in global_kpis %}
+          <div class="col-6 col-xl-2">
+            <div class="journal-kpi">
+              <div class="journal-kpi__label">{{ kpi.label }}</div>
+              <div class="journal-kpi__value">{{ kpi.value }}</div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        <hr class="journal-profile-divider">
+        <div class="journal-profile-section-heading journal-profile-section-heading--enhanced journal-profile-chart-group__header">
+          <div class="d-flex align-items-center gap-2">
+            <span class="journal-profile-section-heading__icon" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            </span>
+            <div>
+              <div class="journal-profile-grid-title journal-profile-grid-title--summary">{% trans "Time Series" %}</div>
+              <div class="journal-profile-section-heading__subtitle">{% trans "Global indicators over all available publication years" %}</div>
+            </div>
+          </div>
+        </div>
+        <div class="row g-3 journal-profile-charts-grid">
+          <div class="col-12 col-xl-6">
+            <div class="journal-profile-chart-card journal-profile-chart-card--accent-brand">
+              <div class="journal-profile-global-chart" id="journal-profile-global-output-chart"></div>
+            </div>
+          </div>
+          <div class="col-12 col-xl-6">
+            <div class="journal-profile-chart-card journal-profile-chart-card--accent-sky">
+              <div class="journal-profile-global-chart" id="journal-profile-global-impact-chart"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+      <div class="journal-profile-tabs__panel{% if not global_snapshot %} journal-profile-tabs__panel--active{% endif %}" data-panel="category">
+        <p class="journal-profile-tabs__intro">
+          {% trans "Thematic metrics compare the journal within a selected scope." %}
+        </p>
+
+        <form
+          id="journal-profile-controls-form"
+          method="get"
+          action="{{ profile_form_action|default:request.path }}"
+          class="journal-profile-settings-bar"
+          data-profile-timeseries-url="{{ profile_timeseries_url }}"
+          data-profile-data-source="{{ profile_data_source|escape }}"
+          data-profile-journal-issn="{{ journal_issn|escape }}">
+          <input type="hidden" name="journal" value="{{ journal_issn|escape }}">
+          {% for key, value in profile_passthrough_filters.items %}
+          <input type="hidden" name="{{ key }}" value="{{ value }}">
+          {% endfor %}
+          <div class="journal-profile-settings-bar__field">
+            <label class="journal-profile-settings-bar__label" for="journal-profile-publication-year-select">{% trans "Publication Year" %}</label>
+            <select id="journal-profile-publication-year-select" class="journal-profile-settings-bar__select" name="publication_year">
+              {% for year_option in profile_year_options %}
+              <option value="{{ year_option }}" {% if selected_publication_year == year_option %}selected{% endif %}>{{ year_option }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="journal-profile-settings-bar__field">
+            <label class="journal-profile-settings-bar__label" for="journal-profile-category-level-select">{% trans "Scope Level" %}</label>
+            <select id="journal-profile-category-level-select" class="journal-profile-settings-bar__select" name="category_level" data-profile-category-level>
+              {% if not profile_category_level_options %}
+              <option value="{{ selected_category_level }}" selected>{{ selected_category_level|ui_value:"category_level" }}</option>
+              {% endif %}
+              {% for option in profile_category_level_options %}
+              <option value="{{ option }}" {% if selected_category_level == option|stringformat:'s' %}selected{% endif %}>{{ option|ui_value:"category_level" }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="journal-profile-settings-bar__field">
+            <label class="journal-profile-settings-bar__label" for="journal-profile-category-select">{% trans "Thematic Scope" %}</label>
+            <select id="journal-profile-category-select" class="journal-profile-settings-bar__select" name="category_id" data-profile-category-id>
+              {% for category_option in profile_category_options %}
+              <option value="{{ category_option }}" {% if selected_category_id == category_option %}selected{% endif %}>{{ category_option|ui_value:"category_id" }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <button type="submit" class="journal-profile-settings-bar__submit" data-profile-submit>{% trans "Apply" %}</button>
+        </form>
+
+        {% if profile_data %}
+        <div class="journal-profile-section-heading journal-profile-section-heading--enhanced">
+          <div class="d-flex align-items-center gap-2">
+            <span class="journal-profile-section-heading__icon" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><path d="M8 11h6"/><path d="M11 8v6"/></svg>
+            </span>
+            <div>
+              <div class="journal-profile-grid-title journal-profile-grid-title--summary">{% trans "Summary" %}</div>
+              <div class="journal-profile-section-heading__subtitle">{% trans "Key metrics for the selected scope and publication year" %}</div>
+            </div>
+          </div>
+          <div class="journal-profile-identity-bar">
+            {% if selected_publication_year %}
+            <span class="journal-profile-identity-bar__item">
+              <span class="journal-profile-identity-bar__icon" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              </span>
+              <span class="journal-profile-identity-bar__label">{% trans "Publication Year" %}</span>
+              <span class="journal-profile-identity-bar__value journal-profile-identity-bar__value--active">{{ selected_publication_year }}</span>
+            </span>
+            {% endif %}
+            {% if selected_category_level %}
+            <span class="journal-profile-identity-bar__item">
+              <span class="journal-profile-identity-bar__icon" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 22 8.5 12 15 2 8.5 12 2"/><line x1="12" y1="15" x2="12" y2="22"/></svg>
+              </span>
+              <span class="journal-profile-identity-bar__label">{% trans "Scope Level" %}</span>
+              <span class="journal-profile-identity-bar__value journal-profile-identity-bar__value--active">{{ selected_category_level|ui_value:"category_level" }}</span>
+            </span>
+            {% endif %}
+            {% if selected_category_id %}
+            <span class="journal-profile-identity-bar__item">
+              <span class="journal-profile-identity-bar__icon" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
+              </span>
+              <span class="journal-profile-identity-bar__label">{% trans "Thematic Scope" %}</span>
+              <span class="journal-profile-identity-bar__value journal-profile-identity-bar__value--active">{{ selected_category_id|ui_value:"category_id" }}</span>
+            </span>
+            {% endif %}
+          </div>
+        </div>
+        <div class="row g-2" id="journal-profile-kpis">
+          {% for kpi in profile_kpis %}
+          <div class="col-6 col-xl-2">
+            <div class="journal-kpi">
+              <div class="journal-kpi__label">{{ kpi.label }}</div>
+              <div class="journal-kpi__value">{{ kpi.value }}</div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        <hr class="journal-profile-divider">
+        <div class="journal-profile-chart-group">
+          <div class="journal-profile-section-heading journal-profile-section-heading--enhanced journal-profile-chart-group__header">
+            <div class="d-flex align-items-center gap-2">
+              <span class="journal-profile-section-heading__icon" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              </span>
+              <div>
+                <div class="journal-profile-grid-title journal-profile-grid-title--summary">{% trans "Time Series by Scope" %}</div>
+                <div class="journal-profile-section-heading__subtitle">{% trans "Annual evolution of production volume, impact and elite classification of the journal" %}</div>
+              </div>
+            </div>
+            <div class="journal-profile-identity-bar">
+              {% if selected_category_level %}
+              <span class="journal-profile-identity-bar__item">
+                <span class="journal-profile-identity-bar__icon" aria-hidden="true">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 22 8.5 12 15 2 8.5 12 2"/><line x1="12" y1="15" x2="12" y2="22"/></svg>
+                </span>
+                <span class="journal-profile-identity-bar__label">{% trans "Scope Level" %}</span>
+                <span class="journal-profile-identity-bar__value journal-profile-identity-bar__value--active">{{ selected_category_level|ui_value:"category_level" }}</span>
+              </span>
+              {% endif %}
+              {% if selected_category_id %}
+              <span class="journal-profile-identity-bar__item">
+                <span class="journal-profile-identity-bar__icon" aria-hidden="true">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
+                </span>
+                <span class="journal-profile-identity-bar__label">{% trans "Thematic Scope" %}</span>
+                <span class="journal-profile-identity-bar__value journal-profile-identity-bar__value--active">{{ selected_category_id|ui_value:"category_id" }}</span>
+              </span>
+              {% endif %}
+            </div>
+          </div>
+          <div class="row g-3 journal-profile-charts-grid">
+            <div class="col-12 col-xl-6">
+              <div class="journal-profile-chart-card journal-profile-chart-card--accent-brand">
+                <div class="journal-profile-chart" id="journal-profile-output-chart"></div>
+              </div>
+            </div>
+            <div class="col-12 col-xl-6">
+              <div class="journal-profile-chart-card journal-profile-chart-card--accent-sky">
+                <div class="journal-profile-chart" id="journal-profile-impact-chart"></div>
+              </div>
+            </div>
+            <div class="col-12 col-xl-6">
+              <div class="journal-profile-chart-card journal-profile-chart-card--accent-amber">
+                <div class="journal-profile-chart" id="journal-profile-top-share-chart"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <hr class="journal-profile-divider">
+        <div class="journal-profile-chart-group">
+          <div class="journal-profile-section-heading journal-profile-section-heading--enhanced journal-profile-chart-group__header">
+            <div class="d-flex align-items-center gap-2">
+              <span class="journal-profile-section-heading__icon" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+              </span>
+              <div>
+                <div class="journal-profile-grid-title journal-profile-grid-title--summary">{% trans "Comparison by Scope" %}</div>
+                <div class="journal-profile-section-heading__subtitle">{% trans "Distribution of the journal across categories for the selected year" %}</div>
+              </div>
+            </div>
+            <div class="journal-profile-identity-bar">
+              {% if selected_publication_year %}
+              <span class="journal-profile-identity-bar__item">
+                <span class="journal-profile-identity-bar__icon" aria-hidden="true">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                </span>
+                <span class="journal-profile-identity-bar__label">{% trans "Publication Year" %}</span>
+                <span class="journal-profile-identity-bar__value journal-profile-identity-bar__value--active">{{ selected_publication_year }}</span>
+              </span>
+              {% endif %}
+              {% if selected_category_level %}
+              <span class="journal-profile-identity-bar__item">
+                <span class="journal-profile-identity-bar__icon" aria-hidden="true">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 22 8.5 12 15 2 8.5 12 2"/><line x1="12" y1="15" x2="12" y2="22"/></svg>
+                </span>
+                <span class="journal-profile-identity-bar__label">{% trans "Scope Level" %}</span>
+                <span class="journal-profile-identity-bar__value journal-profile-identity-bar__value--active">{{ selected_category_level|ui_value:"category_level" }}</span>
+              </span>
+              {% endif %}
+            </div>
+          </div>
+          <div class="row g-3 journal-profile-charts-grid">
+            <div class="col-12 col-xl-6">
+              <div class="journal-profile-chart-card journal-profile-chart-card--accent-brand">
+                <div class="journal-profile-chart" id="journal-profile-category-radar"></div>
+              </div>
+            </div>
+            <div class="col-12 col-xl-6">
+              <div class="journal-profile-chart-card journal-profile-chart-card--accent-sky">
+                <div class="journal-profile-chart" id="journal-profile-category-citations-total-radar"></div>
+              </div>
+            </div>
+            <div class="col-12 col-xl-6">
+              <div class="journal-profile-chart-card journal-profile-chart-card--accent-purple">
+                <div class="journal-profile-chart" id="journal-profile-category-citations-mean-radar"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+
+    {{ profile_data|json_script:"journal-profile-data" }}
+    {{ profile_timeseries_charts|json_script:"journal-profile-timeseries-charts" }}
+    {{ profile_category_charts|json_script:"journal-profile-category-charts" }}
+    {{ global_timeseries_charts|json_script:"journal-profile-global-charts" }}
+    {% if global_timeseries %}
+    {{ global_timeseries|json_script:"journal-profile-global-data" }}
+    {% endif %}
+  </div>
+</section>
+
+<div
+  id="journal-profile-config"
+  data-number-locale="{{ CURRENT_LANGUAGE|default:request.LANGUAGE_CODE|escape }}">
+</div>
+{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'search_gateway/css/custom.css' %}">
+  <link rel="stylesheet" href="{% static 'indicator/css/custom.css' %}">
+  <link rel="stylesheet" href="{% static 'indicator_journal/css/journal.css' %}">
+{% endblock %}
+
+{% block inline_javascript %}
+  <script src="{% static 'js/echarts/echarts.min.js' %}"></script>
+  <script src="{% static 'search_gateway/js/helpers.js' %}"></script>
+  <script src="{% static 'indicator/js/charts.js' %}?v=2"></script>
+  <script src="{% static 'indicator_journal/js/journal_profile.js' %}"></script>
+{% endblock %}

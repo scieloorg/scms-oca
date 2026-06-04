@@ -1,3 +1,7 @@
+"""
+DEPRECATED: This class will be removed in a future version.
+"""
+
 from wagtail_modeladmin.helpers import PermissionHelper
 
 MUST_BE_MODERATE = "must_be_moderate"

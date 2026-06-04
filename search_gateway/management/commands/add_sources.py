@@ -40,6 +40,7 @@ class Command(BaseCommand):
                 "display_name": fields.get("display_name", ""),
                 "source_fields": fields.get("source_fields", []),
                 "field_settings": fields.get("field_settings", {}),
+                "metric_config": fields.get("metric_config", {}),
             }
             _, created = DataSource.objects.update_or_create(
                 index_name=index_name,

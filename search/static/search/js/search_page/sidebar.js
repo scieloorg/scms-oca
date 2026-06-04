@@ -79,8 +79,8 @@
             global.SearchGatewayFilterForm.resetForm(form);
           } else {
             form.reset();
+            this.ctx.resultsApi.applyFiltersAjax();
           }
-          this.ctx.resultsApi.applyFiltersAjax();
         });
       }
 

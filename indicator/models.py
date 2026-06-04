@@ -2,41 +2,62 @@ import json
 import logging
 import os
 import secrets
+import warnings
+
 from datetime import datetime
+from taggit.managers import TaggableManager
 from tempfile import TemporaryDirectory
 from zipfile import ZipFile
 
+from django.apps import apps
 from django.conf import settings
 from django.db import models
 from django.db.models import Q
 from django.dispatch.dispatcher import receiver
 from django.utils.text import slugify
-from django.utils.translation import gettext_lazy as _
-from taggit.managers import TaggableManager
+from django.utils.translation import get_language, gettext_lazy as _
 from wagtail.admin.panels import FieldPanel
+from wagtail.fields import RichTextField
+from wagtail.models import Page
 from wagtailautocomplete.edit_handlers import AutocompletePanel
 
 from core.models import CommonControlField, Source
 from core.utils import utils
+from indicator.metrics.config import ComputedMetric, MetricGroup, PhysicalMetric
 from institution.models import Institution
 from location.models import Location
+from search_gateway.filter_ui import build_data_source_form_payload, render_filter_sidebar
+from search_gateway.request_filters import extract_applied_filters
 from usefulmodels.models import ActionAndPractice, ThematicArea
+
 
 from . import choices
 from .forms import IndicatorDirectoryForm
 from .permission_helper import MUST_BE_MODERATE
 
 
-class GetOrCreateCrontabScheduleError(Exception): ...
+class GetOrCreateCrontabScheduleError(Exception):
+    pass
+    """
+    DEPRECATED: This class will be removed in a future version.
+    """
 
 
-class CreateIndicatorRecordError(Exception): ...
-
+class CreateIndicatorRecordError(Exception):
+    """
+    DEPRECATED: This class will be removed in a future version.
+    """
+    pass
 
 class IndicatorFile(models.Model):
     """
-    This class store a file .zip with the raw data to indicator.
+    DEPRECATED: This class will be removed in a future version.
     """
+
+    class Meta:
+        ordering = ("id",)
+        verbose_name = _("Indicator File (DEPRECATED)")
+        verbose_name_plural = _("Indicator Files (DEPRECATED)")
 
     name = models.CharField(_("File name"), max_length=1024, null=False, blank=False)
     label = models.CharField(_("Label"), max_length=1024, null=True, blank=True)
@@ -45,15 +66,20 @@ class IndicatorFile(models.Model):
     is_dynamic_data = models.BooleanField(
         _("Dynamic Data"), default=False, null=True, blank=True
     )
-    
+
     autocomplete_search_field = "name"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        warnings.warn(
+            "IndicatorFile is deprecated. Use SearchGateway to fetch data from OpenSearch index.",
+            DeprecationWarning,
+            stacklevel=2
+        )
 
     def extension(self):
         name, extension = os.path.splitext(self.raw_data.name)
         return extension
-
-    class Meta:
-        ordering = ("id",)
 
     def autocomplete_label(self):
         return str(self)
@@ -68,6 +94,8 @@ class IndicatorFile(models.Model):
 @receiver(models.signals.post_delete, sender=IndicatorFile)
 def auto_delete_file_on_delete(sender, instance, **kwargs):
     """
+    DEPRECATED: This class will be removed in a future version.
+
     Deletes file from filesystem
     when corresponding `IndicatorFile` object is deleted.
     """
@@ -79,6 +107,8 @@ def auto_delete_file_on_delete(sender, instance, **kwargs):
 @receiver(models.signals.pre_save, sender=IndicatorFile)
 def auto_delete_file_on_change(sender, instance, **kwargs):
     """
+    DEPRECATED: This class will be removed in a future version.
+
     Deletes old file from filesystem
     when corresponding `IndicatorFile` object is updated
     with new file.
@@ -99,12 +129,74 @@ def auto_delete_file_on_change(sender, instance, **kwargs):
 
 @receiver(models.signals.post_delete, sender=IndicatorFile)
 def delete_file(sender, instance, *args, **kwargs):
-    """Deletes image files on `post_delete`"""
+    """Deletes image files on `post_delete`
+    DEPRECATED: This class will be removed in a future version.
+    """
     if instance.raw_data:
         utils.delete_file(instance.raw_data.path)
 
 
 class Indicator(CommonControlField):
+    """
+    DEPRECATED: This class will be removed in a future version.
+    """
+
+    class Meta:
+        permissions = (
+            (MUST_BE_MODERATE, _("Must be moderated")),
+            ("can_edit_record_status", _("Can edit record_status")),
+            ("can_edit_action_and_practice", _("Can edit action_and_practice")),
+            ("can_edit_link", _("Can edit link")),
+            ("can_edit_measurement", _("Can edit measurement")),
+            ("can_edit_object_name", _("Can edit object_name")),
+            ("can_edit_category", _("Can edit category")),
+            ("can_edit_context", _("Can edit context")),
+            ("can_edit_scope", _("Can edit scope")),
+            ("can_edit_seq", _("Can edit seq")),
+            ("can_edit_source", _("Can edit source")),
+            ("can_edit_start_date_year", _("Can edit start_date_year")),
+            ("can_edit_end_date_year", _("Can edit end_date_year")),
+            ("can_edit_validity", _("Can edit validity")),
+            ("can_edit_code", _("Can edit code")),
+            ("can_edit_thematic_areas", _("Can edit thematic_areas")),
+            ("can_edit_locations", _("Can edit locations")),
+            ("can_edit_raw_datas", _("Can edit raw_datas")),
+            ("can_edit_summarized", _("Can edit summarized")),
+            ("can_edit_link_to_data", _("Can edit link to data")),
+            ("can_edit_link_to_graphic", _("Can edit link do graphic")),
+            ("can_edit_notes", _("Can edit notes")),
+        )
+        indexes = [
+            models.Index(fields=["action_and_practice"]),
+            models.Index(fields=["code"]),
+            models.Index(fields=["slug"]),
+            models.Index(fields=["end_date_year"]),
+            models.Index(fields=["link"]),
+            models.Index(fields=["measurement"]),
+            models.Index(fields=["posterior_record"]),
+            models.Index(fields=["previous_record"]),
+            models.Index(fields=["record_status"]),
+            models.Index(fields=["object_name"]),
+            models.Index(fields=["category"]),
+            # models.Index(fields=["context"]),
+            # models.Index(fields=["scope"]),
+            # models.Index(fields=["seq"]),
+            models.Index(fields=["source"]),
+            models.Index(fields=["start_date_year"]),
+            models.Index(fields=["title"]),
+            models.Index(fields=["validity"]),
+        ]
+        verbose_name = _("Indicator (DEPRECATED)")
+        verbose_name_plural = _("Indicators (DEPRECATED)")
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        warnings.warn(
+            "Indicator model is deprecated. Use Wagtail Pages instead: "
+            "DocumentChartPage, SourceChartPage, IndicatorByCategoryPage, etc.",
+            DeprecationWarning,
+            stacklevel=2
+        )
     title = models.CharField(_("Title"), max_length=255, null=False, blank=False)
     description = models.TextField(
         _("Description"), max_length=1000, null=True, blank=True
@@ -318,52 +410,6 @@ class Indicator(CommonControlField):
                     if not self.creator.is_staff and self.record_status == "PUBLISHED"
                     else None
                 )
-
-    class Meta:
-        permissions = (
-            (MUST_BE_MODERATE, _("Must be moderated")),
-            ("can_edit_record_status", _("Can edit record_status")),
-            ("can_edit_action_and_practice", _("Can edit action_and_practice")),
-            ("can_edit_link", _("Can edit link")),
-            ("can_edit_measurement", _("Can edit measurement")),
-            ("can_edit_object_name", _("Can edit object_name")),
-            ("can_edit_category", _("Can edit category")),
-            ("can_edit_context", _("Can edit context")),
-            ("can_edit_scope", _("Can edit scope")),
-            ("can_edit_seq", _("Can edit seq")),
-            ("can_edit_source", _("Can edit source")),
-            ("can_edit_start_date_year", _("Can edit start_date_year")),
-            ("can_edit_end_date_year", _("Can edit end_date_year")),
-            ("can_edit_validity", _("Can edit validity")),
-            ("can_edit_code", _("Can edit code")),
-            ("can_edit_thematic_areas", _("Can edit thematic_areas")),
-            ("can_edit_locations", _("Can edit locations")),
-            ("can_edit_raw_datas", _("Can edit raw_datas")),
-            ("can_edit_summarized", _("Can edit summarized")),
-            ("can_edit_link_to_data", _("Can edit link to data")),
-            ("can_edit_link_to_graphic", _("Can edit link do graphic")),
-            ("can_edit_notes", _("Can edit notes")),
-        )
-        indexes = [
-            models.Index(fields=["action_and_practice"]),
-            models.Index(fields=["code"]),
-            models.Index(fields=["slug"]),
-            models.Index(fields=["end_date_year"]),
-            models.Index(fields=["link"]),
-            models.Index(fields=["measurement"]),
-            models.Index(fields=["posterior_record"]),
-            models.Index(fields=["previous_record"]),
-            models.Index(fields=["record_status"]),
-            models.Index(fields=["object_name"]),
-            models.Index(fields=["category"]),
-            # models.Index(fields=["context"]),
-            # models.Index(fields=["scope"]),
-            # models.Index(fields=["seq"]),
-            models.Index(fields=["source"]),
-            models.Index(fields=["start_date_year"]),
-            models.Index(fields=["title"]),
-            models.Index(fields=["validity"]),
-        ]
 
     panels = [
         FieldPanel("title"),
@@ -801,6 +847,21 @@ class Indicator(CommonControlField):
 
 
 class IndicatorData(models.Model):
+    """
+    DEPRECATED: This class will be removed in a future version.
+    """
+
+    class Meta:
+        verbose_name = _("Indicator Data (DEPRECATED)")
+        verbose_name_plural = _("Indicator Data (DEPRECATED)")
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        warnings.warn(
+            "IndicatorData is deprecated. Use SearchGateway to fetch real-time data from OpenSearch.",
+            DeprecationWarning,
+            stacklevel=2
+        )
 
     name = models.CharField(_("Name"), max_length=255, null=False, blank=False)
 
@@ -826,3 +887,248 @@ class IndicatorData(models.Model):
 
     def __str__(self):
         return str("%s") % (self.source)
+
+
+class ChartBasePage(Page):
+    is_creatable = True
+
+    data_source = models.ForeignKey(
+        "search_gateway.DataSource",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        help_text=_("OpenSearch data source linked to this chart."),
+    )
+
+    intro = RichTextField(
+        blank=True,
+        help_text=_("Introductory text displayed above the charts.")
+    )
+
+    study_unit = models.CharField(
+        _("Study Unit"),
+        max_length=50,
+        choices=[
+            ("document", _("Document")),
+            ("source", _("Source")),
+        ],
+        default="document",
+        help_text=_("Study unit for data aggregation."),
+    )
+
+    content_panels = Page.content_panels + [
+        FieldPanel("data_source"),
+        FieldPanel("study_unit"),
+        FieldPanel("intro"),
+    ]
+
+    class Meta:
+        abstract = True
+
+    def get_indicator_nav_urls(self):
+        urls = {"indicator_home_url": self.url}
+        navigation = (self.data_source.metric_config_schema or {}).get("navigation") or {}
+
+        for unit in navigation.get("analysis_units") or []:
+            if not isinstance(unit, dict):
+                continue
+            url_key = str(unit.get("url_context_key") or "").strip()
+            target_data_source = str(unit.get("target_data_source") or "").strip()
+            if not url_key or url_key in urls or not target_data_source:
+                continue
+            urls[url_key] = self.get_data_source_page_url(target_data_source)
+
+        return urls
+
+    def get_data_source_page_url(self, index_name):
+        DataSource = apps.get_model("search_gateway", "DataSource")
+        data_source = DataSource.objects.filter(index_name=index_name).first()
+        if not data_source:
+            return ""
+
+        for model in apps.get_models():
+            if not isinstance(model, type) or not issubclass(model, Page):
+                continue
+            if model._meta.abstract or not any(field.name == "data_source" for field in model._meta.get_fields()):
+                continue
+
+            qs = model.objects.filter(live=True, data_source=data_source)
+            if getattr(self, "locale_id", None):
+                localized = qs.filter(locale_id=self.locale_id).first()
+                if localized:
+                    return localized.url
+
+            page = qs.first()
+            if page:
+                return page.url
+
+        return ""
+
+    def build_analysis_unit_options(self, study_unit):
+        navigation = (self.data_source.metric_config_schema or {}).get("navigation") or {}
+        configured_units = navigation.get("analysis_units") or []
+        if not configured_units:
+            configured_units = [
+                {"value": key, "label": key.replace("_", " ").title()}
+                for key in (self.data_source.metric_config_schema.get("study_units") or {})
+            ]
+
+        url_context = self.get_indicator_nav_urls()
+        options = []
+        for unit in configured_units:
+            if not isinstance(unit, dict) or unit.get("enabled", True) is False:
+                continue
+            value = str(unit.get("value") or "").strip()
+            if not value:
+                continue
+            label = unit.get("label")
+            if isinstance(label, dict):
+                lang = (get_language() or "pt").split("-")[0]
+                label = label.get(lang) or label.get("pt") or label.get("en")
+            url_key = str(unit.get("url_context_key") or "").strip()
+            options.append({
+                "value": value,
+                "label": label or value.replace("_", " ").title(),
+                "url": url_context.get(url_key, ""),
+                "selected": value == study_unit,
+                "return_to_source": bool(unit.get("return_to_source")),
+            })
+        return options
+
+    def get_context(self, request, *args, **kwargs):
+        context = super().get_context(request, *args, **kwargs)
+        if not self.data_source:
+            return context
+
+        data_source_name = self.data_source.index_name
+
+        applied_filters = extract_applied_filters(
+            request.GET, self.data_source, form_key="indicator"
+        )
+
+        breakdown_payload = build_data_source_form_payload(
+            self.data_source,
+            form_key="indicator",
+            applied_filters=applied_filters,
+            include_fields=["breakdown_variable"],
+        )
+        breakdown_field = None
+        for group in breakdown_payload.get("form_groups") or []:
+            fields = group.get("fields") or []
+            if fields:
+                breakdown_field = fields[0]
+                break
+
+        sidebar_payload = render_filter_sidebar(
+            request,
+            data_source=self.data_source,
+            form_key="indicator",
+            applied_filters=applied_filters,
+            exclude_fields=["breakdown_variable"],
+            sidebar_form_id="indicator-filter-form",
+            sidebar_form_method="post",
+            submit_id="menu-submit",
+            reset_id="menu-reset",
+            reset_type="button",
+        )
+
+        metric_config = self.data_source.metric_config_schema or {}
+        study_units = metric_config.get("study_units") or {}
+        study_unit = request.GET.get("study_unit") or self.study_unit or "document"
+        if study_unit not in study_units and study_units:
+            study_unit = next(iter(study_units.keys()))
+
+        displays = metric_config.get("displays") or {}
+        charts_config = displays.get("charts") or {}
+
+        group_config = study_units.get(study_unit) or {}
+        metric_group = MetricGroup.from_config(
+            group_key=study_unit,
+            group_dict=group_config,
+        )
+
+        lang = get_language() or "pt"
+        charts = []
+        chart_items = sorted(
+            charts_config.items(),
+            key=lambda item: (item[1].get("order", 999), item[0]),
+        )
+        for chart_id, cfg in chart_items:
+            chart_study_units = cfg.get("study_units")
+            if isinstance(chart_study_units, str):
+                chart_study_units = [chart_study_units]
+            if chart_study_units and study_unit not in set(chart_study_units):
+                continue
+
+            title_dict = cfg.get("title") or {}
+            title = title_dict.get(lang) or title_dict.get("pt") or chart_id
+
+            charts.append({
+                "id": chart_id,
+                "title": title,
+                "is_relative": False,
+            })
+
+            metric_keys = cfg.get("metrics") or cfg.get("metric")
+            if isinstance(metric_keys, str):
+                metric_keys = [metric_keys]
+            metric_keys = [key for key in (metric_keys or []) if key]
+
+            is_relative_supported = True
+            for key in metric_keys:
+                metric_def = metric_group.get_metric(key)
+                if metric_def:
+                    if isinstance(metric_def, ComputedMetric):
+                        is_relative_supported = False
+                        break
+                    if isinstance(metric_def, PhysicalMetric) and metric_def.agg == "avg":
+                        is_relative_supported = False
+                        break
+
+            if is_relative_supported:
+                charts.append({
+                    "id": f"{chart_id}_share",
+                    "title": f"{title} (%)",
+                    "is_relative": True,
+                })
+
+        analysis_unit_options = self.build_analysis_unit_options(study_unit)
+
+        context.update({
+            "data_source": data_source_name,
+            "data_source_name": data_source_name,
+            "data_source_display_name": self.data_source.display_name,
+            "applied_filters": applied_filters,
+            "indicator_sidebar_html": sidebar_payload["form_html"],
+            "indicator_breakdown_field": breakdown_field,
+            "indicator_has_study_unit_control": bool(analysis_unit_options),
+            "analysis_unit_options": analysis_unit_options,
+            "study_unit": study_unit,
+            "charts": charts,
+        })
+        context.update(self.get_indicator_nav_urls())
+        context["applied_filters_json"] = json.dumps(context["applied_filters"])
+        return context
+
+
+class DocumentChartPage(ChartBasePage):
+    template = "indicator.html"
+
+    parent_page_types = ["freepage.FreePage"]
+    subpage_types = []
+
+    class Meta:
+        verbose_name = _("Document Chart Page")
+        verbose_name_plural = _("Document Chart Pages")
+
+
+class SourceChartPage(ChartBasePage):
+    template = "indicator.html"
+
+    parent_page_types = ["freepage.FreePage"]
+    subpage_types = []
+
+    class Meta:
+        verbose_name = _("Source Chart Page")
+        verbose_name_plural = _("Source Chart Pages")

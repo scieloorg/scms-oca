@@ -1,3 +1,7 @@
+"""
+DEPRECATED: This module will be removed in a future version.
+"""
+
 from itertools import product
 import logging
 

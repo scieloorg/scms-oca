@@ -1,3 +1,9 @@
+import warnings
+warnings.warn(
+    "indicator.scripts is deprecated.",
+    DeprecationWarning,
+    stacklevel=2
+)
 import datetime
 import gzip
 import logging

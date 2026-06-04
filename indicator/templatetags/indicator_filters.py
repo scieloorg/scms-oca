@@ -1,68 +1,45 @@
 from django import template
 from django.utils.translation import gettext as _
 
-from indicator.journal_metrics.data_source import JOURNAL_METRICS_DATA_SOURCE
-from search_gateway.transforms import apply_transform
+from search_gateway.transforms import apply_display_transform
 
 register = template.Library()
 
 
-@register.filter
-def stz_filter(value):
+def _format_display_value(value):
     if not value:
         return value
-    
-    # Convert boolean strings to Yes/No
-    if str(value).lower() == 'true':
-        return 'Yes'
-    elif str(value).lower() == 'false':
-        return 'No'
-    
-    # Words that should remain in UPPERCASE
-    uppercase_words = {
-        'cwts', 'sjr', 'snip', 'issn', 'apc', 'usd', 'sdg', 'doi', 'api', 'url', 'id'
-    }
-    
-    # Words that should remain in lowercase (prepositions, articles, conjunctions)
-    lowercase_words = {
-        # English
-        'a', 'an', 'and', 'as', 'at', 'but', 'by', 'for', 'from', 'in', 
-        'into', 'of', 'on', 'or', 'the', 'to', 'with', 'is', 'are', 'vs',
-        # Portuguese
-        'o', 'a', 'os', 'as', 'um', 'uma', 'uns', 'umas',
-        'do', 'da', 'dos', 'das', 'de', 'em', 'no', 'na', 'nos', 'nas',
-        'ao', 'à', 'aos', 'às', 'por', 'para', 'com', 'sem', 'sob', 'sobre'
-    }
-    
-    # Replace underscores with spaces
-    words = value.replace('_', ' ').split()
-    
-    # Apply casing rules
-    result = []
 
+    normalized = str(value).strip()
+    if normalized.lower() == "true":
+        return _("Yes")
+    if normalized.lower() == "false":
+        return _("No")
+
+    uppercase_words = {
+        "cwts", "sjr", "snip", "issn", "apc", "usd", "sdg", "doi", "api", "url", "id",
+    }
+    lowercase_words = {
+        "a", "an", "and", "as", "at", "but", "by", "for", "from", "in",
+        "into", "of", "on", "or", "the", "to", "with", "is", "are", "vs",
+        "o", "os", "um", "uma", "uns", "umas",
+        "do", "da", "dos", "das", "de", "em", "no", "na", "nos", "nas",
+        "ao", "à", "aos", "às", "por", "para", "com", "sem", "sob", "sobre",
+    }
+
+    words = normalized.replace("_", " ").split()
+    result = []
     for i, word in enumerate(words):
         word_lower = word.lower()
-        
-        # First word is always capitalized (unless it's an acronym)
-        if i == 0:
-            if word_lower in uppercase_words:
-                result.append(word.upper())
-            else:
-                result.append(word.capitalize())
 
-        # Check if word should be uppercase (acronyms)
-        elif word_lower in uppercase_words:
+        if word_lower in uppercase_words:
             result.append(word.upper())
-
-        # Check if word should be lowercase (prepositions)
-        elif word_lower in lowercase_words:
+        elif i > 0 and word_lower in lowercase_words:
             result.append(word_lower)
-
-        # Capitalize other words
         else:
             result.append(word.capitalize())
-    
-    return ' '.join(result)
+
+    return " ".join(result)
 
 
 @register.filter
@@ -75,60 +52,26 @@ def get_attr(obj, attr_name):
 
 
 @register.filter
-def ui_label(field_key):
-    """Map known filter keys to translated UI labels (Journal Metrics + Indicators)."""
-    if not field_key:
-        return field_key
-
-    key = str(field_key).strip()
-    mapping = {
-        "publication_year": _("Publication Year"),
-        "year": _("Publication Year"),
-        "ranking_metric": _("Ranking metric"),
-        "limit": _("Number of results"),
-        "minimum_publications": _("Minimum publications"),
-        "journal_title": _("Journal"),
-        "journal_issn": _("ISSN"),
-        "publisher_name": _("Publisher"),
-        "publisher": _("Publisher"),
-        "country": _("Country"),
-        "collection": _("SciELO Collection"),
-        "is_journal_oa": _("Is Open Access"),
-        "category_level": _("Category Type"),
-        "category_id": _("Category"),
-        "scope": _("Scope"),
-        "source_index_open_alex": _("Indexed in"),
-        "source_type": _("Source Type"),
-        "source_name": _("Source"),
-        "funder": _("Funder"),
-    }
-
-    return mapping.get(key, stz_filter(key))
-
-
-@register.filter
 def ui_value(value, field_key=None):
-    """Translate known coded values for a given field."""
     if value is None:
         return value
 
     raw = str(value).strip()
 
-    # Common boolean strings.
     if raw.lower() == "true":
         return _("Yes")
     if raw.lower() == "false":
         return _("No")
 
     if not field_key:
-        return stz_filter(raw)
+        return _format_display_value(raw)
 
     key = str(field_key).strip()
 
-    if key in ("ranking_metric", "metric", "category_level", "category_type"):
-        transform_field = "ranking_metric" if key in ("ranking_metric", "metric") else "category_level"
-        transformed_value = apply_transform(JOURNAL_METRICS_DATA_SOURCE, transform_field, raw)
+    if key in ("category_level", "category_type", "boolean"):
+        transform_type = "boolean" if key == "boolean" else "category_level"
+        transformed_value = apply_display_transform(transform_type, raw)
         if transformed_value not in (None, "") and transformed_value != raw:
             return transformed_value
 
-    return stz_filter(raw)
+    return _format_display_value(raw)

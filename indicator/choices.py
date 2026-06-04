@@ -1,3 +1,7 @@
+"""
+DEPRECATED: This class will be removed in a future version.
+"""
+
 from django.utils.translation import gettext as _
 
 
@@ -40,7 +44,6 @@ open_access = (
 )
 
 
-# Valores no unpaywall para `genre`
 COMMUNICATION_OBJECTS = (
     ("", _("NOT APPLICABLE")),
     ("book", _("Book")),

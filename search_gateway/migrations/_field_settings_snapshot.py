@@ -221,7 +221,7 @@ def _normalize_widget_name(widget_name, *, transform_type=None, has_lookup=False
         return "lookup"
     if normalized_widget in {"input", "string"}:
         return "text"
-    if transform_type == "year_range":
+    if transform_type in {"year_range", "date_year_range"}:
         return "range"
     return "select"
 
@@ -604,11 +604,11 @@ def _build_social_fields(legacy_fields):
         "document_publication_year_range",
         {
             "kind": "index",
-            "index_field_name": "creation_year",
+            "index_field_name": "created",
             "filter": {
                 "use": False,
                 "transform": {
-                    "type": "year_range",
+                    "type": "date_year_range",
                     "sources": [
                         "document_publication_year_start",
                         "document_publication_year_end",

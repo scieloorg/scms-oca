@@ -22,7 +22,6 @@
       if (!window.localStorage) return;
       window.localStorage.setItem(STORAGE_KEY, hidden ? '1' : '0');
     } catch (error) {
-      // Ignore storage errors (private mode, blocked cookies, etc.)
     }
   }
 
@@ -64,7 +63,6 @@
   }
 
   function dispatchResizeSoon() {
-    // Resize charts/tables after the layout changes.
     window.requestAnimationFrame(() => {
       window.setTimeout(() => {
         window.dispatchEvent(new Event('resize'));
@@ -129,7 +127,6 @@
 
     document.addEventListener('indicator:filters-ready', handleReady, { once: true });
 
-    // Fallback in case the page doesn't dispatch the event.
     window.setTimeout(handleReady, 10000);
 
     window.addEventListener('resize', () => {
