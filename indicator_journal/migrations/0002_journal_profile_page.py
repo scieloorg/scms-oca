@@ -55,4 +55,16 @@ class Migration(migrations.Migration):
             },
             bases=("wagtailcore.page",),
         ),
+        migrations.RemoveField(
+            model_name="indicatorbycategorypage",
+            name="default_category_level",
+        ),
+        migrations.RemoveField(
+            model_name="indicatorbycategorypage",
+            name="default_publication_year",
+        ),
+        migrations.RemoveField(
+            model_name="indicatorbycategorypage",
+            name="default_ranking_metric",
+        ),
     ]
