@@ -1,3 +1,9 @@
+import warnings
+warnings.warn(
+    "indicator.scripts is deprecated.",
+    DeprecationWarning,
+    stacklevel=2
+)
 from infrastructure_directory.models import InfrastructureDirectory
 from event_directory.models import EventDirectory
 from education_directory.models import EducationDirectory

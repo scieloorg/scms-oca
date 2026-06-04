@@ -1,3 +1,10 @@
+import warnings
+warnings.warn(
+    "indicator.scripts is deprecated.",
+    DeprecationWarning,
+    stacklevel=2
+)
+
 import os
 from tempfile import TemporaryDirectory
 from zipfile import ZipFile

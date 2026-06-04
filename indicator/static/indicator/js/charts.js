@@ -1,7 +1,5 @@
-// Namespace to avoid polluting the global scope
 const Indicators = {};
 
-// Builds a tooltip configuration
 function buildTooltip(overrides) {
     return {
         confine: true,
@@ -11,7 +9,6 @@ function buildTooltip(overrides) {
     };
 }
 
-// Builds a grid configuration
 function buildGrid(overrides) {
     return {
         top: 86,
@@ -23,7 +20,6 @@ function buildGrid(overrides) {
     };
 }
 
-// Builds the chart toolbox
 function buildToolbox(magicTypes, dataViewOptions = {}) {
   const feature = {
     dataView: {
@@ -50,7 +46,6 @@ function buildToolbox(magicTypes, dataViewOptions = {}) {
   };
 }
 
-// Builds the chart legend
 function buildLegend(keys, overrides) {
     if (!Array.isArray(keys) || !keys.length) return null;
 
@@ -449,7 +444,6 @@ function buildBreakdownTooltipFormatter(forcePercentAxis = false) {
     };
 }
 
-// Ensures old chart instances are destroyed
 function destroyChartInstance(container) {
     if (container && container._chartInstance) {
         container._chartInstance.dispose();
@@ -457,31 +451,12 @@ function destroyChartInstance(container) {
     }
 }
 
-// Clears the charts container and destroys chart instances
 function clearGraphsContainer() {
-    const chartDivs = [
-        'periodicals-chart-div',
-        'docs-chart-div',
-        'citations-chart-div',
-        'citations-per-doc-chart-div',
-        'cited-docs-chart-div',
-        'pct-cited-docs-chart-div',
-        'periodicals-share-chart-div',
-        'docs-share-chart-div',
-        'citations-share-chart-div',
-        'citations-per-doc-share-chart-div',
-        'cited-docs-share-chart-div',
-        'pct-cited-docs-share-chart-div',
-    ];
-
-    chartDivs.forEach(divId => {
-        const div = document.getElementById(divId);
+    document.querySelectorAll('.indicator-chart-canvas').forEach(canvas => {
+        destroyChartInstance(canvas);
+        const div = document.getElementById(`${canvas.id}-div`);
         if (div) {
             div.classList.add('d-none');
-            const chart = document.getElementById(divId.replace('-div', ''));
-            if (chart) {
-                destroyChartInstance(chart);
-            }
         }
     });
 
@@ -491,11 +466,9 @@ function clearGraphsContainer() {
     }
 }
 
-// Initializes a new chart instance
 function initChartInstance(container) {
     if (!container) return null;
 
-    // Ensures the previous instance is cleaned up
     destroyChartInstance(container);
 
     const chart = echarts.init(container);
@@ -504,26 +477,12 @@ function initChartInstance(container) {
     return chart;
 }
 
-/**
- * Renders a chart based on the provided data and series type.
- * @param {object} options - The options for rendering the chart.
- * @param {string} options.chartId - The ID of the chart container element.
- * @param {string} options.chartDivId - The ID of the chart div container element.
- * @param {object} options.data - The indicator data received from the API.
- * @param {string} options.seriesType - The type of series to render ('Documents', 'Citations', 'Citations per Document').
- * @param {string} options.title - The title of the chart.
- * @param {string} options.subtitle - Optional secondary title (e.g., breakdown description).
- * @param {boolean} options.disableBreakdown - Forces single-series rendering even when breakdown is selected.
- * @param {boolean} options.forcePercentAxis - Forces y-axis percentage labels.
- */
 Indicators.renderChart = function({
     chartId,
     chartDivId,
     data,
-    seriesType,
     title,
     subtitle,
-    disableBreakdown = false,
     forcePercentAxis = false,
 }) {
     const chartContainer = document.getElementById(chartId);
@@ -532,87 +491,10 @@ Indicators.renderChart = function({
     const chartContainerParent = document.getElementById(chartDivId);
     if (!chartContainerParent) return false;
 
-    const chartType = 'bar';
-    const hasBreakdown = !!(data.breakdown_variable && !disableBreakdown);
-    const relativeMetrics = data.relative_metrics || {};
-
-    let series;
-    if (hasBreakdown) {
-        if (seriesType === 'Citations per Document') {
-            const docSeries = data.series.filter(s => s.name.endsWith('(Documents)'));
-            const citSeries = data.series.filter(s => s.name.endsWith('(Citations)'));
-
-            series = docSeries.map(ds => {
-                const cs = citSeries.find(cs => cs.name.replace(' (Citations)', '') === ds.name.replace(' (Documents)', ''));
-                const cpdData = ds.data.map((ndocs, i) => {
-                    const citations = cs && Array.isArray(cs.data) ? cs.data[i] : 0;
-                    return ndocs > 0 ? (citations / ndocs).toFixed(2) : 0;
-                });
-                let seriesName = ds.name.replace(' (Documents)', '');
-                return { name: seriesName, type: chartType, data: cpdData, stack: 'total' };
-            });
-        } else {
-            series = data.series
-                .filter(s => s.name.endsWith(`(${seriesType})`))
-                .map(s => {
-                    let seriesName = s.name.replace(` (${seriesType})`, '');
-                    return { ...s, name: seriesName, type: chartType, stack: 'total' };
-                });
-        }
-    } else {
-        if (seriesType === 'Periodicals') {
-            series = [{ name: gettext('Unique Sources'), type: chartType, data: data.nperiodicals_per_year || [] }];
-        } else if (seriesType === 'Documents per Periodical') {
-            series = [{ name: gettext('Documents per Source'), type: chartType, data: data.docs_per_periodical_per_year || [] }];
-        } else if (seriesType === 'Citations per Periodical') {
-            series = [{ name: gettext('Citations per Source'), type: chartType, data: data.citations_per_periodical_per_year || [] }];
-        } else if (seriesType === 'Cited Documents per Periodical') {
-            series = [{ name: gettext('Cited Documents per Source'), type: chartType, data: data.cited_docs_per_periodical_per_year || [] }];
-        } else if (seriesType === 'Percent Periodicals With Cited Docs') {
-            series = [{ name: gettext('% Sources With ≥1 Cited Document'), type: chartType, data: data.percent_periodicals_with_cited_docs_per_year || [] }];
-        } else if (seriesType === 'Periodicals Share') {
-            series = [{ name: gettext('Unique Sources Share (%)'), type: chartType, data: relativeMetrics.periodicals_share_pct_per_year || [] }];
-        } else if (seriesType === 'Documents per Source Share') {
-            series = [{ name: gettext('Documents per Source (share %)'), type: chartType, data: relativeMetrics.docs_per_source_share_pct_per_year || [] }];
-        } else if (seriesType === 'Citations per Source Share') {
-            series = [{ name: gettext('Citations per Source (share %)'), type: chartType, data: relativeMetrics.citations_per_source_share_pct_per_year || [] }];
-        } else if (seriesType === 'Cited Documents per Source Share') {
-            series = [{ name: gettext('Cited Documents per Source (share %)'), type: chartType, data: relativeMetrics.cited_docs_per_source_share_pct_per_year || [] }];
-        } else if (seriesType === 'Percent Sources With Cited Docs Share') {
-            series = [{ name: gettext('% Sources With ≥1 Cited Document Share (%)'), type: chartType, data: relativeMetrics.pct_sources_with_cited_docs_share_pct_per_year || [] }];
-        } else if (seriesType === 'Cited Documents') {
-            series = [{ name: gettext('Cited Documents'), type: chartType, data: data.docs_with_citations_per_year || [] }];
-        } else if (seriesType === 'Documents') {
-            series = [{ name: gettext('Documents'), type: chartType, data: data.ndocs_per_year }];
-        } else if (seriesType === 'Citations') {
-            series = [{ name: gettext('Citations'), type: chartType, data: data.total_citations_per_year }];
-        } else if (seriesType === 'Documents Share') {
-            series = [{ name: gettext('Documents Share (%)'), type: chartType, data: relativeMetrics.docs_share_pct_per_year || [] }];
-        } else if (seriesType === 'Citations Share') {
-            series = [{ name: gettext('Citations Share (%)'), type: chartType, data: relativeMetrics.citations_share_pct_per_year || [] }];
-        } else if (seriesType === 'Citations per Document') {
-            const cpdData = data.ndocs_per_year.map((ndocs, i) => {
-                return ndocs > 0 ? (data.total_citations_per_year[i] / ndocs).toFixed(4) : 0;
-            });
-            series = [{ name: gettext('Citations per Document'), type: chartType, data: cpdData }];
-        } else if (seriesType === 'Citations per Document Share') {
-            series = [{ name: gettext('Citations per Document Share (%)'), type: chartType, data: relativeMetrics.citations_per_doc_share_pct_per_year || [] }];
-        } else if (seriesType === 'Percent Docs With Citations') {
-            series = [{ name: gettext('% Docs With ≥1 Citation'), type: chartType, data: data.percent_docs_with_citations_per_year || [] }];
-        } else if (seriesType === 'Cited Documents Share') {
-            series = [{ name: gettext('Cited Documents Share (%)'), type: chartType, data: relativeMetrics.cited_docs_share_pct_per_year || [] }];
-        } else if (seriesType === 'Percent Docs With Citations Share') {
-            series = [{ name: gettext('% Docs With ≥1 Citation Share (%)'), type: chartType, data: relativeMetrics.pct_docs_with_citations_share_pct_per_year || [] }];
-        }
-    }
-
-    series = series || [];
-    if (hasBreakdown) {
-        series = series.filter(s => hasAnyNonZeroValue(s?.data));
-    }
-
+    const series = data.series || [];
     const years = Array.isArray(data.years) ? data.years : [];
     const hasData = years.length > 0 && hasNonZeroSeriesData(series);
+
     if (!hasData) {
         chartContainerParent.classList.add('d-none');
         destroyChartInstance(chartContainer);
@@ -628,12 +510,13 @@ Indicators.renderChart = function({
     const subtitleLineCount = wrappedSubtitle ? wrappedSubtitle.split('\n').length : 0;
     const subtitleHeight = subtitleLineCount ? (18 + ((subtitleLineCount - 1) * 14)) : 0;
     const gridTop = Math.max(86, 86 + ((titleLineCount - 1) * 16) + subtitleHeight);
+
+    const hasBreakdown = !!data.breakdown_variable;
     const dataViewSeries = hasBreakdown
-        ? series
-            .slice()
-            .sort((a, b) => getSeriesTotal(b?.data) - getSeriesTotal(a?.data))
+        ? series.slice().sort((a, b) => getSeriesTotal(b?.data) - getSeriesTotal(a?.data))
         : series;
     const legendNames = dataViewSeries.map(s => s.name);
+
     const tooltipOptions = hasBreakdown
         ? buildTooltip({
             trigger: 'axis',
@@ -683,7 +566,12 @@ Indicators.renderChart = function({
                 axisLabel: { formatter: '{value}%' }
             }
             : { type: 'value' },
-        series: series,
+        series: series.map(s => ({
+            name: s.name,
+            type: s.type || 'bar',
+            data: s.data,
+            stack: s.stack || undefined,
+        })),
         legend: buildLegend(
             legendNames,
             hasBreakdown ? { left: 0, right: 'auto' } : undefined,
@@ -691,31 +579,139 @@ Indicators.renderChart = function({
     };
 
     chartObj.setOption(chartOpts, true);
+    chartObj.resize();
     return true;
 }
 
-// Handle window resize to adjust charts
 window.addEventListener('resize', () => {
-    [
-        'periodicals-chart',
-        'docs-chart',
-        'citations-chart',
-        'citations-per-doc-chart',
-        'cited-docs-chart',
-        'pct-cited-docs-chart',
-        'periodicals-share-chart',
-        'docs-share-chart',
-        'citations-share-chart',
-        'citations-per-doc-share-chart',
-        'cited-docs-share-chart',
-        'pct-cited-docs-share-chart',
-    ].forEach(id => {
-        const el = document.getElementById(id);
-        if (el && el._chartInstance) {
-            el._chartInstance.resize();
+    document.querySelectorAll('.indicator-chart-canvas').forEach(el => {
+        const instance = echarts.getInstanceByDom(el) || el._chartInstance;
+        if (instance) {
+            instance.resize();
         }
     });
 });
 
-// Exporting Indicators namespace
+Indicators.renderCustomChart = function({
+    chartId,
+    chartDivId,
+    data,
+    title,
+    xLabel,
+    yLabel
+}) {
+    const chartContainer = document.getElementById(chartId);
+    if (!chartContainer) return false;
+
+    const chartContainerParent = document.getElementById(chartDivId);
+    if (!chartContainerParent) return false;
+
+    let chart = echarts.getInstanceByDom(chartContainer);
+    if (!chart) {
+        chart = echarts.init(chartContainer);
+        chartContainer._chartInstance = chart;
+    }
+
+    const isPie = data.chart_type === 'pie' || (data.datasets && data.datasets.some(d => d.type === 'pie'));
+
+    let option;
+    if (isPie) {
+        const pieData = [];
+        const labels = data.labels || [];
+        const seriesData = data.datasets && data.datasets[0] ? (data.datasets[0].data || []) : [];
+
+        labels.forEach((label, index) => {
+            pieData.push({
+                value: seriesData[index] || 0,
+                name: label
+            });
+        });
+
+        option = {
+            title: {
+                text: title,
+                left: 'center',
+                textStyle: {
+                    fontSize: 14,
+                    fontWeight: 'bold',
+                    color: '#333'
+                }
+            },
+            tooltip: {
+                trigger: 'item',
+                formatter: '{a} <br/>{b} : {c}% ({d}%)'
+            },
+            legend: {
+                orient: 'horizontal',
+                bottom: '0',
+                data: labels
+            },
+            series: [
+                {
+                    name: title,
+                    type: 'pie',
+                    radius: '55%',
+                    center: ['50%', '50%'],
+                    data: pieData,
+                    emphasis: {
+                        itemStyle: {
+                            shadowBlur: 10,
+                            shadowOffsetX: 0,
+                            shadowColor: 'rgba(0, 0, 0, 0.5)'
+                        }
+                    }
+                }
+            ]
+        };
+    } else {
+        option = {
+            title: {
+                text: title,
+                left: 'center',
+                textStyle: {
+                    fontSize: 14,
+                    fontWeight: 'bold',
+                    color: '#333'
+                }
+            },
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: { type: 'shadow' }
+            },
+            legend: {
+                data: data.datasets.map(d => d.label || d.name),
+                top: 25
+            },
+            grid: {
+                left: '3%',
+                right: '4%',
+                bottom: '10%',
+                top: '20%',
+                containLabel: true
+            },
+            xAxis: {
+                type: 'category',
+                data: data.labels,
+                name: xLabel,
+                nameLocation: 'middle',
+                nameGap: 25
+            },
+            yAxis: {
+                type: 'value',
+                name: yLabel
+            },
+            series: data.datasets.map(d => ({
+                name: d.label || d.name,
+                type: d.type || 'bar',
+                data: d.data
+            }))
+        };
+    }
+
+    chart.setOption(option, true);
+    chartContainerParent.classList.remove('d-none');
+    chart.resize();
+    return true;
+};
+
 window.Indicators = Indicators;

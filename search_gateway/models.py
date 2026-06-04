@@ -293,6 +293,14 @@ class DataSource(models.Model):
             "Shape canônico: {fields: {...}, forms: {...}}."
         ),
     )
+    metric_config = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text=_(
+            "Configuração de métricas dinâmicas. "
+            "Shape canônico: {groups: {...}, displays: {...}}."
+        ),
+    )
 
     panels = [
         FieldPanel("index_name"),
@@ -300,6 +308,16 @@ class DataSource(models.Model):
         FieldPanel("source_fields"),
         FieldPanel(
             "field_settings",
+            widget=JSONEditorWidget(
+                options={
+                    "mode": "code",
+                    "modes": ["code", "tree"],
+                    "search": True,
+                }
+            ),
+        ),
+        FieldPanel(
+            "metric_config",
             widget=JSONEditorWidget(
                 options={
                     "mode": "code",
@@ -323,11 +341,16 @@ class DataSource(models.Model):
             "display_name": self.display_name,
             "source_fields": self.source_fields or [],
             "field_settings": self.field_settings_schema,
+            "metric_config": self.metric_config_schema,
         }
 
     @property
     def field_settings_schema(self):
         return self.field_settings or {"fields": {}, "forms": {}}
+
+    @property
+    def metric_config_schema(self):
+        return self.metric_config or {"groups": {}, "displays": {}}
 
     @property
     def fields_schema(self):

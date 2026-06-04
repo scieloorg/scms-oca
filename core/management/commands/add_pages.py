@@ -2,13 +2,15 @@ import json
 import slugify
 
 from django.core.management.base import BaseCommand
-from wagtail.models import Site, Locale
+from django.core.exceptions import ObjectDoesNotExist
+from wagtail.models import Page, Site, Locale
 
 from freepage.models import FreePage
 from observation.models import ObservationPage
 from search.models import SearchPage
 from search_gateway.models import DataSource
-from indicator_journal.models import IndicatorByCategoryPage, IndicatorGlobalPage
+from indicator_journal.models import IndicatorByCategoryPage, IndicatorGlobalPage, JournalProfilePage
+from indicator.models import DocumentChartPage, SourceChartPage
 
 
 PAGE_TYPE_FREE_PAGE = "FreePage"
@@ -16,6 +18,9 @@ PAGE_TYPE_SEARCH_PAGE = "SearchPage"
 PAGE_TYPE_OBSERVATION_PAGE = "ObservationPage"
 PAGE_TYPE_INDICATOR_CATEGORY_PAGE = "IndicatorByCategoryPage"
 PAGE_TYPE_INDICATOR_GLOBAL_PAGE = "IndicatorGlobalPage"
+PAGE_TYPE_JOURNAL_PROFILE_PAGE = "JournalProfilePage"
+PAGE_TYPE_DOCUMENT_CHART_PAGE = "DocumentChartPage"
+PAGE_TYPE_SOURCE_CHART_PAGE = "SourceChartPage"
 HOME_PAGE_TITLES = {
     "pt-BR": "Início",
     "en": "Home",
@@ -37,7 +42,7 @@ class Command(BaseCommand):
         try:
             with open(path, "r", encoding="utf-8") as f:
                 return json.load(f)
-            
+
         except FileNotFoundError:
             self.stdout.write(self.style.ERROR(f"Arquivo não encontrado: {path}"))
             return None
@@ -183,9 +188,6 @@ class Command(BaseCommand):
                 data_source_name=p_datasource,
                 page_key=p_key,
                 publish=p_publish,
-                default_category_level=page.get("default_category_level", ""),
-                default_publication_year=page.get("default_publication_year", ""),
-                default_ranking_metric=page.get("default_ranking_metric", ""),
             )
 
         if p_type == PAGE_TYPE_INDICATOR_GLOBAL_PAGE:
@@ -197,6 +199,44 @@ class Command(BaseCommand):
                 data_source_name=p_datasource,
                 page_key=p_key,
                 publish=p_publish,
+            )
+
+        if p_type == PAGE_TYPE_JOURNAL_PROFILE_PAGE:
+            return self.create_journalprofilepage(
+                parent=parent,
+                title=p_title,
+                slug=p_slug,
+                locale=locale,
+                data_source_name=p_datasource,
+                page_key=p_key,
+                publish=p_publish,
+                show_global_metrics=page.get("show_global_metrics", False),
+            )
+
+        if p_type == PAGE_TYPE_DOCUMENT_CHART_PAGE:
+            return self.create_documentchartpage(
+                parent=parent,
+                title=p_title,
+                slug=p_slug,
+                locale=locale,
+                data_source_name=p_datasource,
+                page_key=p_key,
+                publish=p_publish,
+                study_unit=page.get("study_unit", "document"),
+                intro=page.get("intro", ""),
+            )
+
+        if p_type == PAGE_TYPE_SOURCE_CHART_PAGE:
+            return self.create_sourcechartpage(
+                parent=parent,
+                title=p_title,
+                slug=p_slug,
+                locale=locale,
+                data_source_name=p_datasource,
+                page_key=p_key,
+                publish=p_publish,
+                study_unit=page.get("study_unit", "source"),
+                intro=page.get("intro", ""),
             )
 
         self.stdout.write(self.style.ERROR(f"Tipo de página inválido: {p_type}"))
@@ -215,7 +255,22 @@ class Command(BaseCommand):
     def remember_page(self, page_key, locale, page):
         self.pages_by_key[(page_key, locale.language_code)] = page
 
+    def get_specific_page(self, page):
+        try:
+            page = page.specific
+        except ObjectDoesNotExist:
+            return None
+
+        if page.__class__ is Page:
+            return None
+
+        return page
+
     def apply_publish_state(self, page, publish):
+        page = self.get_specific_page(page)
+        if page is None:
+            return None
+
         if publish:
             if not page.live:
                 page.save_revision().publish()
@@ -302,6 +357,9 @@ class Command(BaseCommand):
                 if translated.title != title:
                     translated.title = title
                     changed = True
+                if getattr(translated, "data_source_id", None) != ds.pk:
+                    translated.data_source = ds
+                    changed = True
                 if changed:
                     translated.save()
                     if publish:
@@ -320,6 +378,12 @@ class Command(BaseCommand):
 
         sibling = parent.get_children().specific().filter(locale=locale, slug=slug).first()
         if sibling:
+            sibling = self.get_specific_page(sibling)
+            if sibling is None:
+                return None
+            if getattr(sibling, "data_source_id", None) != ds.pk:
+                sibling.data_source = ds
+                sibling.save()
             self.remember_page(page_key, locale, sibling)
             return self.apply_publish_state(sibling, publish)
 
@@ -361,6 +425,9 @@ class Command(BaseCommand):
                 if translated.title != title:
                     translated.title = title
                     changed = True
+                if ds and getattr(translated, "data_source_id", None) != ds.pk:
+                    translated.data_source = ds
+                    changed = True
                 if changed:
                     translated.save()
                     if publish:
@@ -379,6 +446,12 @@ class Command(BaseCommand):
 
         sibling = parent.get_children().specific().filter(locale=locale, slug=slug).first()
         if sibling:
+            sibling = self.get_specific_page(sibling)
+            if sibling is None:
+                return None
+            if ds and getattr(sibling, "data_source_id", None) != ds.pk:
+                sibling.data_source = ds
+                sibling.save()
             self.remember_page(page_key, locale, sibling)
             return self.apply_publish_state(sibling, publish)
 
@@ -394,7 +467,7 @@ class Command(BaseCommand):
         self.remember_page(page_key, locale, p_obj)
         return p_obj
 
-    def create_indicatorcategorypage(self, parent, title, slug, locale, data_source_name, page_key, publish=True, default_category_level="", default_publication_year="", default_ranking_metric=""):
+    def create_indicatorcategorypage(self, parent, title, slug, locale, data_source_name, page_key, publish=True):
         existing = self.get_page_from_memory(page_key, locale)
         if existing:
             return self.apply_publish_state(existing, publish)
@@ -421,15 +494,6 @@ class Command(BaseCommand):
                 if ds and getattr(translated, 'data_source_id', None) != ds.pk:
                     translated.data_source = ds
                     changed = True
-                if default_category_level and translated.default_category_level != default_category_level:
-                    translated.default_category_level = default_category_level
-                    changed = True
-                if default_publication_year and translated.default_publication_year != default_publication_year:
-                    translated.default_publication_year = default_publication_year
-                    changed = True
-                if default_ranking_metric and translated.default_ranking_metric != default_ranking_metric:
-                    translated.default_ranking_metric = default_ranking_metric
-                    changed = True
                 if changed:
                     translated.save()
                     if publish:
@@ -441,9 +505,6 @@ class Command(BaseCommand):
             p_obj.title = title
             p_obj.slug = slug
             p_obj.data_source = ds
-            p_obj.default_category_level = default_category_level
-            p_obj.default_publication_year = default_publication_year
-            p_obj.default_ranking_metric = default_ranking_metric
             self.apply_publish_state(p_obj, publish)
 
             self.remember_page(page_key, locale, p_obj)
@@ -451,18 +512,12 @@ class Command(BaseCommand):
 
         sibling = parent.get_children().specific().filter(locale=locale, slug=slug).first()
         if sibling:
+            sibling = self.get_specific_page(sibling)
+            if sibling is None:
+                return None
             changed = False
             if ds and getattr(sibling, 'data_source_id', None) != ds.pk:
                 sibling.data_source = ds
-                changed = True
-            if default_category_level and sibling.default_category_level != default_category_level:
-                sibling.default_category_level = default_category_level
-                changed = True
-            if default_publication_year and sibling.default_publication_year != default_publication_year:
-                sibling.default_publication_year = default_publication_year
-                changed = True
-            if default_ranking_metric and sibling.default_ranking_metric != default_ranking_metric:
-                sibling.default_ranking_metric = default_ranking_metric
                 changed = True
             if changed:
                 sibling.save()
@@ -474,9 +529,6 @@ class Command(BaseCommand):
             slug=slug,
             data_source=ds,
             locale=locale,
-            default_category_level=default_category_level,
-            default_publication_year=default_publication_year,
-            default_ranking_metric=default_ranking_metric,
         )
         parent.add_child(instance=p_obj)
         self.apply_publish_state(p_obj, publish)
@@ -529,6 +581,9 @@ class Command(BaseCommand):
 
         sibling = parent.get_children().specific().filter(locale=locale, slug=slug).first()
         if sibling:
+            sibling = self.get_specific_page(sibling)
+            if sibling is None:
+                return None
             if ds and getattr(sibling, 'data_source_id', None) != ds.pk:
                 sibling.data_source = ds
                 sibling.save()
@@ -539,6 +594,273 @@ class Command(BaseCommand):
             title=title,
             slug=slug,
             data_source=ds,
+            locale=locale,
+        )
+        parent.add_child(instance=p_obj)
+        self.apply_publish_state(p_obj, publish)
+
+        self.remember_page(page_key, locale, p_obj)
+        return p_obj
+
+    def create_documentchartpage(self, parent, title, slug, locale, data_source_name, page_key, publish=True, study_unit="document", intro=""):
+        existing = self.get_page_from_memory(page_key, locale)
+        if existing:
+            return self.apply_publish_state(existing, publish)
+
+        ds = None
+        if data_source_name:
+            ds = DataSource.objects.filter(index_name=data_source_name).first()
+            if not ds:
+                self.stdout.write(self.style.ERROR(f"DataSource não encontrado para {page_key}: {data_source_name}"))
+                return None
+
+        base_page = self.get_page_from_memory(page_key)
+
+        if base_page:
+            translated = base_page.get_translation_or_none(locale)
+            if translated:
+                changed = False
+                if translated.slug != slug:
+                    translated.slug = slug
+                    changed = True
+                if translated.title != title:
+                    translated.title = title
+                    changed = True
+                if ds and getattr(translated, 'data_source_id', None) != ds.pk:
+                    translated.data_source = ds
+                    changed = True
+                if study_unit and translated.study_unit != study_unit:
+                    translated.study_unit = study_unit
+                    changed = True
+                if intro and str(translated.intro) != intro:
+                    translated.intro = intro
+                    changed = True
+                if changed:
+                    translated.save()
+                    if publish:
+                        translated.save_revision().publish()
+                self.remember_page(page_key, locale, translated)
+                return self.apply_publish_state(translated, publish)
+
+            p_obj = base_page.copy_for_translation(locale)
+            p_obj.title = title
+            p_obj.slug = slug
+            p_obj.data_source = ds
+            p_obj.study_unit = study_unit
+            p_obj.intro = intro
+            self.apply_publish_state(p_obj, publish)
+
+            self.remember_page(page_key, locale, p_obj)
+            return p_obj
+
+        sibling = parent.get_children().specific().filter(locale=locale, slug=slug).first()
+        if sibling:
+            sibling = self.get_specific_page(sibling)
+            if sibling is None:
+                return None
+            # Only update if it's the correct page type
+            if not isinstance(sibling, DocumentChartPage):
+                self.stdout.write(self.style.WARNING(
+                    f"Sibling with slug '{slug}' exists but is {type(sibling).__name__}, not DocumentChartPage. Skipping."
+                ))
+                return None
+
+            changed = False
+            if ds and getattr(sibling, 'data_source_id', None) != ds.pk:
+                sibling.data_source = ds
+                changed = True
+            if study_unit and getattr(sibling, 'study_unit', None) != study_unit:
+                sibling.study_unit = study_unit
+                changed = True
+            if intro and str(getattr(sibling, 'intro', '')) != intro:
+                sibling.intro = intro
+                changed = True
+            if changed:
+                sibling.save()
+            self.remember_page(page_key, locale, sibling)
+            return self.apply_publish_state(sibling, publish)
+
+        p_obj = DocumentChartPage(
+            title=title,
+            slug=slug,
+            data_source=ds,
+            study_unit=study_unit,
+            intro=intro,
+            locale=locale,
+        )
+        parent.add_child(instance=p_obj)
+        self.apply_publish_state(p_obj, publish)
+
+        self.remember_page(page_key, locale, p_obj)
+        return p_obj
+
+    def create_journalprofilepage(self, parent, title, slug, locale, data_source_name, page_key, publish=True, show_global_metrics=False):
+        existing = self.get_page_from_memory(page_key, locale)
+        if existing:
+            return self.apply_publish_state(existing, publish)
+
+        ds = None
+        if data_source_name:
+            ds = DataSource.objects.filter(index_name=data_source_name).first()
+            if not ds:
+                self.stdout.write(self.style.ERROR(f"DataSource não encontrado para {page_key}: {data_source_name}"))
+                return None
+
+        base_page = self.get_page_from_memory(page_key)
+
+        if base_page:
+            translated = base_page.get_translation_or_none(locale)
+            if translated:
+                changed = False
+                if translated.slug != slug:
+                    translated.slug = slug
+                    changed = True
+                if translated.title != title:
+                    translated.title = title
+                    changed = True
+                if ds and getattr(translated, "data_source_id", None) != ds.pk:
+                    translated.data_source = ds
+                    changed = True
+                if getattr(translated, "show_global_metrics", False) != show_global_metrics:
+                    translated.show_global_metrics = show_global_metrics
+                    changed = True
+                if changed:
+                    translated.save()
+                    if publish:
+                        translated.save_revision().publish()
+                self.remember_page(page_key, locale, translated)
+                return self.apply_publish_state(translated, publish)
+
+            p_obj = base_page.copy_for_translation(locale)
+            p_obj.title = title
+            p_obj.slug = slug
+            p_obj.data_source = ds
+            p_obj.show_global_metrics = show_global_metrics
+            self.apply_publish_state(p_obj, publish)
+
+            self.remember_page(page_key, locale, p_obj)
+            return p_obj
+
+        sibling = parent.get_children().specific().filter(locale=locale, slug=slug).first()
+        if sibling:
+            sibling = self.get_specific_page(sibling)
+            if sibling is None:
+                return None
+            if not isinstance(sibling, JournalProfilePage):
+                self.stdout.write(self.style.WARNING(
+                    f"Sibling with slug '{slug}' exists but is {type(sibling).__name__}, not JournalProfilePage. Skipping."
+                ))
+                return None
+
+            changed = False
+            if ds and getattr(sibling, "data_source_id", None) != ds.pk:
+                sibling.data_source = ds
+                changed = True
+            if getattr(sibling, "show_global_metrics", False) != show_global_metrics:
+                sibling.show_global_metrics = show_global_metrics
+                changed = True
+            if changed:
+                sibling.save()
+            self.remember_page(page_key, locale, sibling)
+            return self.apply_publish_state(sibling, publish)
+
+        p_obj = JournalProfilePage(
+            title=title,
+            slug=slug,
+            data_source=ds,
+            show_global_metrics=show_global_metrics,
+            locale=locale,
+        )
+        parent.add_child(instance=p_obj)
+        self.apply_publish_state(p_obj, publish)
+
+        self.remember_page(page_key, locale, p_obj)
+        return p_obj
+
+    def create_sourcechartpage(self, parent, title, slug, locale, data_source_name, page_key, publish=True, study_unit="source", intro=""):
+        existing = self.get_page_from_memory(page_key, locale)
+        if existing:
+            return self.apply_publish_state(existing, publish)
+
+        ds = None
+        if data_source_name:
+            ds = DataSource.objects.filter(index_name=data_source_name).first()
+            if not ds:
+                self.stdout.write(self.style.ERROR(f"DataSource não encontrado para {page_key}: {data_source_name}"))
+                return None
+
+        base_page = self.get_page_from_memory(page_key)
+
+        if base_page:
+            translated = base_page.get_translation_or_none(locale)
+            if translated:
+                changed = False
+                if translated.slug != slug:
+                    translated.slug = slug
+                    changed = True
+                if translated.title != title:
+                    translated.title = title
+                    changed = True
+                if ds and getattr(translated, 'data_source_id', None) != ds.pk:
+                    translated.data_source = ds
+                    changed = True
+                if study_unit and translated.study_unit != study_unit:
+                    translated.study_unit = study_unit
+                    changed = True
+                if intro and str(translated.intro) != intro:
+                    translated.intro = intro
+                    changed = True
+                if changed:
+                    translated.save()
+                    if publish:
+                        translated.save_revision().publish()
+                self.remember_page(page_key, locale, translated)
+                return self.apply_publish_state(translated, publish)
+
+            p_obj = base_page.copy_for_translation(locale)
+            p_obj.title = title
+            p_obj.slug = slug
+            p_obj.data_source = ds
+            p_obj.study_unit = study_unit
+            p_obj.intro = intro
+            self.apply_publish_state(p_obj, publish)
+
+            self.remember_page(page_key, locale, p_obj)
+            return p_obj
+
+        sibling = parent.get_children().specific().filter(locale=locale, slug=slug).first()
+        if sibling:
+            sibling = self.get_specific_page(sibling)
+            if sibling is None:
+                return None
+            # Only update if it's the correct page type
+            if not isinstance(sibling, SourceChartPage):
+                self.stdout.write(self.style.WARNING(
+                    f"Sibling with slug '{slug}' exists but is {type(sibling).__name__}, not SourceChartPage. Skipping."
+                ))
+                return None
+
+            changed = False
+            if ds and getattr(sibling, 'data_source_id', None) != ds.pk:
+                sibling.data_source = ds
+                changed = True
+            if study_unit and getattr(sibling, 'study_unit', None) != study_unit:
+                sibling.study_unit = study_unit
+                changed = True
+            if intro and str(getattr(sibling, 'intro', '')) != intro:
+                sibling.intro = intro
+                changed = True
+            if changed:
+                sibling.save()
+            self.remember_page(page_key, locale, sibling)
+            return self.apply_publish_state(sibling, publish)
+
+        p_obj = SourceChartPage(
+            title=title,
+            slug=slug,
+            data_source=ds,
+            study_unit=study_unit,
+            intro=intro,
             locale=locale,
         )
         parent.add_child(instance=p_obj)

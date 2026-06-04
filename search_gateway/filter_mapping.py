@@ -87,15 +87,19 @@ def _build_year_range_values(start_value, end_value, *, min_year=None, max_year=
     if start_year is None and end_year is None:
         return []
 
+    effective_min = DEFAULT_YEAR_MIN if min_year is None else min_year
+    effective_max = DEFAULT_YEAR_MAX if max_year is None else max_year
+
     if start_year is None:
-        start_year = end_year
+        start_year = effective_min
     if end_year is None:
-        end_year = start_year
+        end_year = effective_max
 
     if start_year > end_year:
         start_year, end_year = end_year, start_year
 
     return list(range(start_year, end_year + 1))
+
 
 
 def _map_transformed_filter(field_name, field_info, filters):

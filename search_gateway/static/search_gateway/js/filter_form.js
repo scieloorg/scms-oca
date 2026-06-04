@@ -1694,6 +1694,7 @@
       initBooleanToggleFields(form);
       syncMetaStateFromDom(form);
       commitAppliedFilters(form);
+      dispatchFiltersChanged(form, { reason: 'reset' });
       delete form.dataset.sgInternalReset;
     });
   }

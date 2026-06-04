@@ -27,31 +27,58 @@
       "title": "Indicadores",
       "type": "FreePage",
       "publish": false,
+      "slug": "indicadores",
       "children": [
         {
-          "key": "indicators_global",
-          "title": "Global",
-          "type": "IndicatorGlobalPage",
-          "slug": "global",
-          "data_source": "journal_metrics_global_*"
-        },
-        {
-          "key": "indicators_scientific_production",
-          "title": "Produção Científica",
-          "type": "IndicatorByCategoryPage",
+          "key": "indicators_scientific_production_document",
+          "title": "Produção Científica - Documentos",
+          "type": "DocumentChartPage",
           "slug": "producao-cientifica",
           "data_source": "silver_scientific_production",
-          "default_category_level": "field",
-          "default_ranking_metric": "document_count"
+          "study_unit": "document",
+          "intro": "<p>Visualize métricas e indicadores da produção científica baseada em documentos.</p>"
+        },
+        {
+          "key": "indicators_scientific_production_source",
+          "title": "Produção Científica - Fontes",
+          "type": "SourceChartPage",
+          "slug": "fontes-cientificas",
+          "data_source": "silver_scientific_production",
+          "study_unit": "source",
+          "intro": "<p>Visualize métricas e indicadores baseados em fontes/publicações.</p>"
+        },
+        {
+          "key": "indicators_journal_thematic_metrics",
+          "title": "Métricas Temáticas de Periódicos",
+          "type": "IndicatorByCategoryPage",
+          "slug": "metricas-tematicas-periodicos",
+          "data_source": "journal_thematic_metrics",
+          "intro": "<p>Análise temática de periódicos por área do conhecimento.</p>",
+          "children": [
+            {
+              "key": "indicators_journal_profile",
+              "title": "Perfil de Periódico",
+              "type": "JournalProfilePage",
+              "slug": "perfil-periodico",
+              "data_source": "journal_thematic_metrics",
+              "show_global_metrics": true
+            }
+          ]
+        },
+        {
+          "key": "indicators_journal_global_metrics",
+          "title": "Métricas Globais de Periódicos",
+          "type": "IndicatorGlobalPage",
+          "slug": "metricas-globais-periodicos",
+          "data_source": "journal_global_metrics",
+          "intro": "<p>Métricas globais comparativas de periódicos científicos.</p>"
         },
         {
           "key": "indicators_social_production",
           "title": "Produção Social",
-          "type": "IndicatorByCategoryPage",
+          "type": "FreePage",
           "slug": "producao-social",
-          "data_source": "social_production",
-          "default_category_level": "field",
-          "default_ranking_metric": "document_count"
+          "intro": "<p>Visualize métricas e indicadores da produção social.</p>"
         }
       ]
     },
@@ -65,13 +92,15 @@
           "key": "observation_scientific_production",
           "title": "Produção Científica",
           "type": "ObservationPage",
-          "slug": "producao-cientifica"
+          "slug": "producao-cientifica",
+          "data_source": "silver_scientific_production"
         },
         {
           "key": "observation_social_production",
           "title": "Produção Social",
           "type": "ObservationPage",
-          "slug": "producao-social"
+          "slug": "producao-social",
+          "data_source": "social_production"
         }
       ]
     },
@@ -157,31 +186,58 @@
       "title": "Indicators",
       "type": "FreePage",
       "publish": false,
+      "slug": "indicators",
       "children": [
         {
-          "key": "indicators_global",
-          "title": "Global",
-          "type": "IndicatorGlobalPage",
-          "slug": "global",
-          "data_source": "journal_metrics_global_*"
-        },
-        {
-          "key": "indicators_scientific_production",
-          "title": "Scientific Production",
-          "type": "IndicatorByCategoryPage",
+          "key": "indicators_scientific_production_document",
+          "title": "Scientific Production - Documents",
+          "type": "DocumentChartPage",
           "slug": "scientific-production",
           "data_source": "silver_scientific_production",
-          "default_category_level": "field",
-          "default_ranking_metric": "document_count"
+          "study_unit": "document",
+          "intro": "<p>View metrics and indicators for document-based scientific production.</p>"
+        },
+        {
+          "key": "indicators_scientific_production_source",
+          "title": "Scientific Production - Sources",
+          "type": "SourceChartPage",
+          "slug": "scientific-sources",
+          "data_source": "silver_scientific_production",
+          "study_unit": "source",
+          "intro": "<p>View metrics and indicators for source-based scientific production.</p>"
+        },
+        {
+          "key": "indicators_journal_thematic_metrics",
+          "title": "Journal Thematic Metrics",
+          "type": "IndicatorByCategoryPage",
+          "slug": "journal-thematic-metrics",
+          "data_source": "journal_thematic_metrics",
+          "intro": "<p>Thematic analysis of journals by knowledge area.</p>",
+          "children": [
+            {
+              "key": "indicators_journal_profile",
+              "title": "Journal Profile",
+              "type": "JournalProfilePage",
+              "slug": "journal-profile",
+              "data_source": "journal_thematic_metrics",
+              "show_global_metrics": true
+            }
+          ]
+        },
+        {
+          "key": "indicators_journal_global_metrics",
+          "title": "Journal Global Metrics",
+          "type": "IndicatorGlobalPage",
+          "slug": "journal-global-metrics",
+          "data_source": "journal_global_metrics",
+          "intro": "<p>Global comparative metrics for scientific journals.</p>"
         },
         {
           "key": "indicators_social_production",
           "title": "Social Production",
-          "type": "IndicatorByCategoryPage",
+          "type": "FreePage",
           "slug": "social-production",
-          "data_source": "social_production",
-          "default_category_level": "field",
-          "default_ranking_metric": "document_count"
+          "intro": "<p>View metrics and indicators for social production.</p>"
         }
       ]
     },
@@ -195,13 +251,15 @@
           "key": "observation_scientific_production",
           "title": "Scientific Production",
           "type": "ObservationPage",
-          "slug": "scientific-production"
+          "slug": "scientific-production",
+          "data_source": "silver_scientific_production"
         },
         {
           "key": "observation_social_production",
           "title": "Social Production",
           "type": "ObservationPage",
-          "slug": "social-production"
+          "slug": "social-production",
+          "data_source": "social_production"
         }
       ]
     },
@@ -287,31 +345,58 @@
       "title": "Indicadores",
       "type": "FreePage",
       "publish": false,
+      "slug": "indicadores",
       "children": [
         {
-          "key": "indicators_global",
-          "title": "Global",
-          "type": "IndicatorGlobalPage",
-          "slug": "global",
-          "data_source": "journal_metrics_global_*"
-        },
-        {
-          "key": "indicators_scientific_production",
-          "title": "Producción Científica",
-          "type": "IndicatorByCategoryPage",
+          "key": "indicators_scientific_production_document",
+          "title": "Producción Científica - Documentos",
+          "type": "DocumentChartPage",
           "slug": "produccion-cientifica",
           "data_source": "silver_scientific_production",
-          "default_category_level": "field",
-          "default_ranking_metric": "document_count"
+          "study_unit": "document",
+          "intro": "<p>Visualice métricas e indicadores de la producción científica basada en documentos.</p>"
+        },
+        {
+          "key": "indicators_scientific_production_source",
+          "title": "Producción Científica - Fuentes",
+          "type": "SourceChartPage",
+          "slug": "fuentes-cientificas",
+          "data_source": "silver_scientific_production",
+          "study_unit": "source",
+          "intro": "<p>Visualice métricas e indicadores basados en fuentes/publicaciones.</p>"
+        },
+        {
+          "key": "indicators_journal_thematic_metrics",
+          "title": "Métricas Temáticas de Revistas",
+          "type": "IndicatorByCategoryPage",
+          "slug": "metricas-tematicas-revistas",
+          "data_source": "journal_thematic_metrics",
+          "intro": "<p>Análisis temático de revistas por área del conocimiento.</p>",
+          "children": [
+            {
+              "key": "indicators_journal_profile",
+              "title": "Perfil de Revista",
+              "type": "JournalProfilePage",
+              "slug": "perfil-revista",
+              "data_source": "journal_thematic_metrics",
+              "show_global_metrics": true
+            }
+          ]
+        },
+        {
+          "key": "indicators_journal_global_metrics",
+          "title": "Métricas Globales de Revistas",
+          "type": "IndicatorGlobalPage",
+          "slug": "metricas-globales-revistas",
+          "data_source": "journal_global_metrics",
+          "intro": "<p>Métricas globales comparativas de revistas científicas.</p>"
         },
         {
           "key": "indicators_social_production",
           "title": "Producción Social",
-          "type": "IndicatorByCategoryPage",
+          "type": "FreePage",
           "slug": "produccion-social",
-          "data_source": "social_production",
-          "default_category_level": "field",
-          "default_ranking_metric": "document_count"
+          "intro": "<p>Visualice métricas e indicadores de la producción social.</p>"
         }
       ]
     },
@@ -325,13 +410,15 @@
           "key": "observation_scientific_production",
           "title": "Producción Científica",
           "type": "ObservationPage",
-          "slug": "produccion-cientifica"
+          "slug": "produccion-cientifica",
+          "data_source": "silver_scientific_production"
         },
         {
           "key": "observation_social_production",
           "title": "Producción Social",
           "type": "ObservationPage",
-          "slug": "produccion-social"
+          "slug": "produccion-social",
+          "data_source": "social_production"
         }
       ]
     },

@@ -128,6 +128,12 @@ def _field_prefers_descending_year_options(field, widget, field_label):
 
 
 def _sort_options_for_display(field, widget, field_label, options):
+    if getattr(field, "display_transform", None) == "scielo_collection":
+        return sorted(
+            options or [],
+            key=lambda option: clean_text(option.get("label")).casefold(),
+        )
+
     if not _field_prefers_descending_year_options(field, widget, field_label):
         return options
 

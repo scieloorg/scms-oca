@@ -1,3 +1,7 @@
+"""
+DEPRECATED: This module will be removed in a future version.
+"""
+
 import logging
 from datetime import datetime
 

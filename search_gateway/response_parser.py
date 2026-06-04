@@ -59,13 +59,22 @@ def parse_search_item_response(response, data_source, field_name):
 
 def parse_filters_response(response, data_source):
     field_settings = data_source.get_field_settings_dict()
-    return {
+    parsed = {
         agg_name: [
             _transform_bucket(field_settings, agg_name, bucket)
             for bucket in _get_agg_buckets(response, agg_name)
         ]
         for agg_name in response.get("aggregations", {})
     }
+    for field_name, options in parsed.items():
+        transform_type = (
+            (field_settings.get(field_name, {}) or {})
+            .get("settings", {})
+            .get("display_transform")
+        )
+        if transform_type == "scielo_collection":
+            options.sort(key=lambda option: clean_text(option.get("label")).casefold())
+    return parsed
 
 
 def parse_terms_agg_keys(response, agg_name):

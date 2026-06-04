@@ -29,12 +29,13 @@
   <link rel="stylesheet" href="{% static 'search_gateway/css/custom.css' %}">
   <link rel="stylesheet" href="{% static 'search_gateway/css/filter_sidebar.css' %}">
   <link rel="stylesheet" href="{% static 'indicator/css/custom.css' %}">
+  <link rel="stylesheet" href="{% static 'indicator_journal/css/journal.css' %}">
 {% endblock %}
 
 {% block inline_javascript %}
   <script src="{% static 'search_gateway/js/helpers.js' %}"></script>
   <script src="{% static 'search_gateway/js/filter_form.js' %}"></script>
-  <script src="{% static 'indicator/js/menu.js' %}"></script>
+  <script src="{% static 'indicator/js/menu.js' %}?v=2"></script>
   <script src="{% static 'indicator/js/layout.js' %}"></script>
-  <script src="{% static 'indicator/js/journal_metrics_filters.js' %}"></script>
+  <script src="{% static 'indicator_journal/js/journal_metrics_filters.js' %}"></script>
 {% endblock %}
