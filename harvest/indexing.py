@@ -7,36 +7,38 @@ import logging
 from django.conf import settings
 from django.utils import timezone
 
-from etl.models import EtlPipelineConfig
-from etl.services import enqueue_etl_item
 from search_gateway.client import get_opensearch_client
 
+from .bronze_transform import transform_after_indexing
 from .exception_logs import ExceptionContext
-from .models import HarvestStatus
+from .models import HarvestStatus, IndexStatus
 from .utils import source_hash
 
 logger = logging.getLogger(__name__)
 
 
-def _get_index_name(model_name=None, instance=None, type_data=None):
+def get_index_name(model_name=None, instance=None, type_data=None):
     if instance is not None and not model_name:
         model_name = instance.__class__.__name__
+
     if not model_name:
         return None
+
     if model_name == "HarvestedSciELOData":
         effective_type = type_data or getattr(instance, "type_data", None)
         index = {
             "dataset":  getattr(
-                settings, "OPENSEARCH_INDEX_RAW_SCIELO_DATA_DATASET", None
+                settings, "OS_INDEX_RAW_SCIELO_DATA_DATASET", None
             ),
             "dataverse": getattr(
-                settings, "OPENSEARCH_INDEX_RAW_SCIELO_DATA_DATAVERSE", None
+                settings, "OS_INDEX_RAW_SCIELO_DATA_DATAVERSE", None
             )
         }
         return index.get(effective_type, None)
+    
     return {
-        "HarvestedPreprint": getattr(settings, "OPENSEARCH_INDEX_RAW_PREPRINT", None),
-        "HarvestedBooks": getattr(settings, "OPENSEARCH_INDEX_RAW_BOOK", None),
+        "HarvestedPreprint": getattr(settings, "OS_INDEX_RAW_PREPRINT", None),
+        "HarvestedBooks": getattr(settings, "OS_INDEX_RAW_BOOK", None),
     }.get(model_name)
 
 
@@ -60,9 +62,23 @@ def index_harvested_raw_data(model, index_name=None, only_success=True, refresh=
     queryset = model.objects.all()
     if status_filter:
         queryset = queryset.filter(harvest_status__in=status_filter)
+
+    queryset = queryset.exclude(index_status=IndexStatus.SUCCESS)
+
     for obj in queryset.iterator():
-        index_name = _get_index_name(model_name=model.__name__, instance=obj)
+        index_name = get_index_name(model_name=model.__name__, instance=obj)
         index_harvested_instance(instance=obj, index_name=index_name, refresh=False)
+
+        if obj.index_status == IndexStatus.SUCCESS and obj.raw_data:
+            try:
+                transform_after_indexing(instance=obj, model_name=model.__name__)
+            except Exception as exc:
+                logger.warning(
+                    "Falha na transformação bronze %s (%s): %s",
+                    model.__name__,
+                    obj.identifier,
+                    exc,
+                )
 
 
 def index_harvested_instance(instance, index_name=None, refresh=False):
@@ -74,10 +90,12 @@ def index_harvested_instance(instance, index_name=None, refresh=False):
         log_model=instance.harvest_error_log.model,
         fk_field=_get_error_log_fk_field(instance),
     )
+
     client = get_opensearch_client()
     if client is None:
         logger.warning("OpenSearch client não configurado.")
         return
+    
     if not index_name:
         logger.warning(
             f"Index name não configurado para {instance.__class__.__name__} ({instance.identifier})."
@@ -99,13 +117,8 @@ def index_harvested_instance(instance, index_name=None, refresh=False):
             },
             refresh=False,
         )
-        if EtlPipelineConfig.objects.select_for_source(index_name, instance.raw_data):
-            enqueue_etl_item(
-                source_index=index_name,
-                external_id=instance.identifier,
-                source_payload=instance.raw_data,
-            )
         instance.mark_as_indexed(index_name=index_name)
+
     except Exception as exc:
         logger.warning(
             f"Falha ao indexar em {index_name} {instance.__class__.__name__} ({instance.identifier}): {exc}"
@@ -119,14 +132,16 @@ def index_harvested_instance(instance, index_name=None, refresh=False):
 
 
 def delete_harvested_document(model_name, identifier, refresh=False):
-    index_name = _get_index_name(model_name=model_name)
+    index_name = get_index_name(model_name=model_name)
     if not index_name:
         logger.warning(f"Index name não configurado para {model_name}.")
         return
+
     client = get_opensearch_client()
     if client is None:
         logger.warning("OpenSearch client não configurado.")
         return
+
     try:
         logging.info(f"Removendo documento {identifier} do indice {index_name}")
         client.delete(index=index_name, id=identifier, refresh=refresh)
