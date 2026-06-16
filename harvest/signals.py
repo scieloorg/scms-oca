@@ -5,11 +5,11 @@ from django.dispatch import receiver
 
 from .bronze_transform import transform_after_indexing
 from .indexing import (
-    _get_index_name,
+    get_index_name,
     delete_harvested_document,
     index_harvested_instance,
 )
-from .models import HarvestedBooks, HarvestedPreprint, HarvestedSciELOData
+from .models import HarvestedBooks, HarvestedPreprint, HarvestedSciELOData, IndexStatus
 
 logger = logging.getLogger(__name__)
 
@@ -18,6 +18,7 @@ def _store_previous_raw_data(instance):
     if not instance.pk:
         instance._raw_data_before = None
         return
+
     instance._raw_data_before = (
         instance.__class__.objects.filter(pk=instance.pk)
         .values_list("raw_data", flat=True)
@@ -34,19 +35,28 @@ def _should_index_raw_data(instance, created, update_fields):
                 instance.identifier,
             )
         return False
+
     if created:
         return True
+
     if update_fields is not None:
         return "raw_data" in update_fields
+
     if hasattr(instance, "_raw_data_before"):
-        return instance._raw_data_before != instance.raw_data
+        if instance._raw_data_before != instance.raw_data:
+            return True
+    
+    if hasattr(instance, "index_status") and instance.index_status in (IndexStatus.PENDING, IndexStatus.FAILED):
+        return True
+
     return False
 
 
 def _index_if_raw_data_saved(instance, created, update_fields):
     if not _should_index_raw_data(instance, created, update_fields):
         return
-    index_name = _get_index_name(
+
+    index_name = get_index_name(
         model_name=instance.__class__.__name__,
         instance=instance,
     )
@@ -54,7 +64,7 @@ def _index_if_raw_data_saved(instance, created, update_fields):
 
     model_name = instance.__class__.__name__
     try:
-        if instance.raw_data:
+        if instance.index_status == IndexStatus.SUCCESS and instance.raw_data:
             transform_after_indexing(instance=instance, model_name=model_name)
     except Exception as exc:
         logger.warning(
@@ -92,7 +102,7 @@ def track_books_raw_data(sender, instance, **kwargs):
 
 @receiver(post_delete, sender=HarvestedBooks)
 def delete_books_on_delete(sender, instance, **kwargs):
-    index_name = _get_index_name(model_name=instance.__class__.__name__)
+    index_name = get_index_name(model_name=instance.__class__.__name__)
     if not index_name:
         return
     delete_harvested_document(
