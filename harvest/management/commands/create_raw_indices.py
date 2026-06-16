@@ -46,14 +46,14 @@ class Command(BaseCommand):
 
         indices = {
             "HarvestedPreprint": getattr(
-                settings, "OPENSEARCH_INDEX_RAW_PREPRINT", None
+                settings, "OS_INDEX_RAW_PREPRINT", None
             ),
-            "HarvestedBooks": getattr(settings, "OPENSEARCH_INDEX_RAW_BOOK", None),
+            "HarvestedBooks": getattr(settings, "OS_INDEX_RAW_BOOK", None),
             "HarvestedSciELOData(dataset)": getattr(
-                settings, "OPENSEARCH_INDEX_RAW_SCIELO_DATA_DATASET", None
+                settings, "OS_INDEX_RAW_SCIELO_DATA_DATASET", None
             ),
             "HarvestedSciELOData(dataverse)": getattr(
-                settings, "OPENSEARCH_INDEX_RAW_SCIELO_DATA_DATAVERSE", None
+                settings, "OS_INDEX_RAW_SCIELO_DATA_DATAVERSE", None
             ),
         }
         force = options["force"]
