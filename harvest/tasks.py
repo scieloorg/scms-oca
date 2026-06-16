@@ -18,8 +18,9 @@ from harvest.harvests.harvest_books import (
 )
 from harvest.harvests.harvest_data import harvest_data, harvest_single_scielo_data
 from harvest.harvests.harvest_preprint import harvest_preprint
-from harvest.indexing import index_harvested_instance
+from harvest.indexing import index_harvested_instance, index_harvested_raw_data
 
+from .bronze_transform import reconcile_missing_bronze_etl
 from .models import (
     HarvestedBooks,
     HarvestedPreprint,
@@ -36,15 +37,21 @@ ENDPOINT_PREPRINT = getattr(settings, "ENDPOINT_OAI_PMH_PREPRINT", None)
 
 
 @celery_app.task(name="Harvest data preprint")
-def harvest_preprint_in_endpoint_oai_pmh(username, user_id=None, reprocess=None, url=None, verify=True):
-    latest_preprint = None
+def harvest_preprint_in_endpoint_oai_pmh(username, user_id=None, reprocess=None, from_date=None, url=None, verify=True):
     user = User.objects.get(username=username)
+    
     url = ENDPOINT_PREPRINT
-    if not reprocess:
+
+    if from_date is None and not reprocess:
         latest_preprint = HarvestedPreprint.get_latest_preprint()
-    from_date = latest_preprint.datestamp.date().__str__() if latest_preprint else None
-    logging.info(f"Coleta a partir da data {from_date}")
-    recs = service_oai_pmh_scythe(url=url, from_date=from_date, verify=verify)
+        from_date = latest_preprint.datestamp.date().__str__() if latest_preprint else None
+    
+    if from_date:
+        logging.info(f"Coleta a partir da data {from_date}")
+    else:
+        logging.info("Coletando todos os registros")
+
+    recs = service_oai_pmh_scythe(url=url, from_date=from_date, verify=verify)    
     harvest_preprint(recs=recs, user=user)
 
 
@@ -164,7 +171,6 @@ def retry_failed_preprints_oai_pmh(username, user_id=None, url=None, verify=True
         harvest_preprint(recs=[rec], user=user)
 
 
-
 @celery_app.task(name="Retry failed books")
 def retry_failed_books(username, user_id=None, db_name="scielobooks_1a", headers=None):
     failed_books = HarvestedBooks.objects.filter(
@@ -235,3 +241,22 @@ def apply_global_metrics_upload_to_silver(
         harvest_index=harvest_index,
         silver_index=silver_index,
     )
+
+
+@celery_app.task(name="Reconcile harvest pipeline")
+def reconcile_harvest_pipeline(document_type, user_id=None):
+    DOCUMENT_TYPE_TO_DOCUMENT_MODEL = {
+        "book": HarvestedBooks,
+        "data": HarvestedSciELOData,
+        "preprint": HarvestedPreprint,
+    }
+
+    document_model = DOCUMENT_TYPE_TO_DOCUMENT_MODEL.get(document_type)
+    if not document_model:
+        logging.error("Reconciliação não foi executada. document_type %s inválido. "
+                      "Valores possíveis são: book, data, preprint.",
+                      document_type)
+        return
+
+    index_harvested_raw_data(document_model)
+    reconcile_missing_bronze_etl(document_model)
