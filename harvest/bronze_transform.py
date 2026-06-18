@@ -247,7 +247,7 @@ def reconcile_missing_bronze_etl(document_model):
 
     bronze_indices = set(
         TransformationScript.objects.filter(
-            harvest_model__startswith=model_name,
+            harvest_model=model_name,
             is_active=True,
         ).values_list("dest_index", flat=True)
     )
