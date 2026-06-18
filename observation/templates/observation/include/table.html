@@ -2,13 +2,26 @@
 {% load i18n %}
 {# Table card fragment - included in search_page search_content #}
 <div class="observation-card">
-  <div class="mb-3">
-    <label class="form-label" for="observation-dimension-select">{% firstof observation_dimension_select_label _("Select an observation table") %}</label>
-    <select id="observation-dimension-select" class="form-select">
-      {% for dimension in observation_dimensions %}
-      <option value="{{ dimension.slug }}" {% if dimension.slug == observation_default_dimension.slug %}selected{% endif %}>{{ dimension.menu_label }}</option>
-      {% endfor %}
-    </select>
+  <div class="mb-3 observation-dimension-selectors">
+    <div class="observation-dimension-selectors-row">
+      {% if observation_has_dimension_levels %}
+      <div class="observation-dimension-selector-field observation-dimension-selector-field--level">
+        <label class="form-label" for="observation-dimension-level-select">{% trans "Level" %}</label>
+        <select id="observation-dimension-level-select" class="form-select">
+          <option value="documentos" selected>{{ observation_dimension_level_labels.documentos }}</option>
+          <option value="periodicos">{{ observation_dimension_level_labels.periodicos }}</option>
+        </select>
+      </div>
+      {% endif %}
+      <div class="observation-dimension-selector-field observation-dimension-selector-field--dimension">
+        <label class="form-label" for="observation-dimension-select">{% firstof observation_dimension_select_label _("Select an observation table") %}</label>
+        <select id="observation-dimension-select" class="form-select">
+          {% for dimension in observation_dimensions %}
+          <option value="{{ dimension.slug }}" {% if dimension.slug == observation_default_dimension.slug %}selected{% endif %}>{{ dimension.menu_label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
   </div>
 
   <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-2">
@@ -24,7 +37,7 @@
   </div>
 
   <p class="text-muted small mb-2">{% trans "Use the detail icon next to country name. Use row checkboxes and then Compare selected." %}</p>
-  <div class="observation-chart-meta">{% trans "Processing date" %}: 2026-03-17 | {% trans "Scope" %}: OpenAlex</div>
+  <div class="observation-chart-meta">{% trans "Processing date" %}: 2026-03-17</div>
 
   <ul class="nav nav-tabs mt-3" id="observation-content-tabs" role="tablist">
     <li class="nav-item" role="presentation">

@@ -119,6 +119,10 @@ def parse_aggregation_response(response, parse_config):
 
     row_buckets = _get_agg_buckets(response, row_agg_name)
     col_keys = set()
+    value_metric = parse_config.get("value_metric") or "documents"
+    journal_value_agg = parse_config.get("journal_value_agg_name") or "unique_journals"
+    grand_total_agg = parse_config.get("grand_total_agg_name") or "grand_total_journals"
+
     for rb in row_buckets:
         for cb in (rb.get(col_agg_name) or {}).get("buckets", []) or []:
             key = cb.get("key")
@@ -149,12 +153,25 @@ def parse_aggregation_response(response, parse_config):
             ck = cb.get("key")
             if ck is None:
                 continue
-            values[str(ck)] = cb.get("doc_count", 0)
+            if value_metric == "journals":
+                values[str(ck)] = int(
+                    ((cb.get(journal_value_agg) or {}).get("value")) or 0
+                )
+            else:
+                values[str(ck)] = cb.get("doc_count", 0)
         rows.append({"key": raw_key, "label": label, "values": values})
 
-    grand_total = _hits_total_value(response)
-    if grand_total is None:
-        grand_total = sum(rb.get("doc_count", 0) for rb in row_buckets)
+    if value_metric == "journals":
+        grand_total = int(
+            (
+                (response.get("aggregations") or {}).get(grand_total_agg) or {}
+            ).get("value")
+            or 0
+        )
+    else:
+        grand_total = _hits_total_value(response)
+        if grand_total is None:
+            grand_total = sum(rb.get("doc_count", 0) for rb in row_buckets)
 
     return {
         "columns": columns,

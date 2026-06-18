@@ -23,6 +23,7 @@
 {{ filter_metadata|json_script:"filter-metadata-data" }}
 {{ observation_dimensions|json_script:"observation-dimensions-data" }}
 {{ observation_default_dimension|json_script:"observation-default-dimension-data" }}
+{{ observation_dimension_level_labels|json_script:"observation-dimension-level-labels-data" }}
 {{ searchable_fields|json_script:"searchable-fields-data" }}
 <script src="{% static 'observation/js/search_page.js' %}"></script>
 <script src="{% static 'observation/js/table.js' %}"></script>
@@ -41,6 +42,9 @@
         observationPageId: '{{ observation_page_id|default_if_none:""|escapejs }}',
         dimensions: JSON.parse(document.getElementById('observation-dimensions-data').textContent),
         defaultDimension: JSON.parse(document.getElementById('observation-default-dimension-data').textContent),
+        hasDimensionLevels: {{ observation_has_dimension_levels|yesno:"true,false" }},
+        dimensionLevelLabels: JSON.parse(document.getElementById('observation-dimension-level-labels-data').textContent),
+        defaultDimensionLevel: 'documentos',
         searchableFields: JSON.parse(document.getElementById('searchable-fields-data').textContent).map(function (item) {
             return { value: item[0], label: item[1] };
         }),

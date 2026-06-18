@@ -6,6 +6,34 @@
   padding: 14px;
 }
 
+.observation-dimension-selectors-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px 16px;
+}
+
+.observation-dimension-selector-field {
+  flex: 1 1 220px;
+  min-width: 0;
+}
+
+.observation-dimension-selector-field--level {
+  flex: 0 1 200px;
+}
+
+.observation-dimension-selector-field--dimension {
+  flex: 1 1 280px;
+}
+
+.observation-dimension-selector-field .form-label {
+  margin-bottom: 0.25rem;
+}
+
+.observation-dimension-selector-field .form-select {
+  width: 100%;
+}
+
 .observation-title {
   font-size: 28px;
   font-weight: 700;

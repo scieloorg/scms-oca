@@ -141,12 +141,7 @@ TRANSLATIONS = {
         "Brazil - Social Production - Country - Documents - Subarea": (
             "Brasil - Produção Social - País - Documentos - Subárea"
         ),
-        (
-            "Select an observation table on the evolution of scientific production by:"
-        ): (
-            "Selecione uma tabela de observação sobre a evolução da produção "
-            "científica por:"
-        ),
+        "Select an observation table:": "Selecione uma tabela de observação:",
         "Select an observation table on social production in Brazil by:": (
             "Selecione uma tabela de observação sobre a produção social no Brasil por:"
         ),
@@ -158,6 +153,57 @@ TRANSLATIONS = {
         "Classification": "Classificação",
         "Area": "Área",
         "Subarea": "Subárea",
+        "Level": "Nível",
+        "Documents": "Documentos",
+        "Journals": "Periódicos",
+        "Indexed In (OpenAlex)": "Indexed In (OpenAlex)",
+        "Indexed In (SciELO)": "Indexed In (SciELO)",
+        "SciELO Collection": "Coleção SciELO",
+        "Scope": "Escopo",
+        (
+            "Evolution of scientific production - World - number of journals by "
+            "Indexed In (OpenAlex)"
+        ): (
+            "Evolução da produção científica - Mundo - número de periódicos por "
+            "Indexed In (OpenAlex)"
+        ),
+        (
+            "Evolution of scientific production - World - number of journals by "
+            "Indexed In (SciELO)"
+        ): (
+            "Evolução da produção científica - Mundo - número de periódicos por "
+            "Indexed In (SciELO)"
+        ),
+        (
+            "Evolution of scientific production - World - number of journals by "
+            "SciELO Collection"
+        ): (
+            "Evolução da produção científica - Mundo - número de periódicos por "
+            "Coleção SciELO"
+        ),
+        (
+            "Evolution of scientific production - World - number of journals by Scope"
+        ): (
+            "Evolução da produção científica - Mundo - número de periódicos por Escopo"
+        ),
+        (
+            "Evolution of scientific production - World - number of journals by Publisher"
+        ): (
+            "Evolução da produção científica - Mundo - número de periódicos por Editora"
+        ),
+        (
+            "Evolution of scientific production - World - number of journals by Source Type"
+        ): (
+            "Evolução da produção científica - Mundo - número de periódicos por "
+            "Tipo de Fonte"
+        ),
+        (
+            "Evolution of scientific production - World - number of journals by "
+            "Source Country"
+        ): (
+            "Evolução da produção científica - Mundo - número de periódicos por "
+            "País de Origem"
+        ),
     },
     "pt": {
         "Affiliation - Region of the World": "Afiliação - Região do Mundo",
@@ -293,12 +339,7 @@ TRANSLATIONS = {
         "Brazil - Social Production - Country - Documents - Subarea": (
             "Brasil - Produção Social - País - Documentos - Subárea"
         ),
-        (
-            "Select an observation table on the evolution of scientific production by:"
-        ): (
-            "Selecione uma tabela de observação sobre a evolução da produção "
-            "científica por:"
-        ),
+        "Select an observation table:": "Selecione uma tabela de observação:",
         "Select an observation table on social production in Brazil by:": (
             "Selecione uma tabela de observação sobre a produção social no Brasil por:"
         ),
@@ -310,6 +351,57 @@ TRANSLATIONS = {
         "Classification": "Classificação",
         "Area": "Área",
         "Subarea": "Subárea",
+        "Level": "Nível",
+        "Documents": "Documentos",
+        "Journals": "Periódicos",
+        "Indexed In (OpenAlex)": "Indexed In (OpenAlex)",
+        "Indexed In (SciELO)": "Indexed In (SciELO)",
+        "SciELO Collection": "Coleção SciELO",
+        "Scope": "Escopo",
+        (
+            "Evolution of scientific production - World - number of journals by "
+            "Indexed In (OpenAlex)"
+        ): (
+            "Evolução da produção científica - Mundo - número de periódicos por "
+            "Indexed In (OpenAlex)"
+        ),
+        (
+            "Evolution of scientific production - World - number of journals by "
+            "Indexed In (SciELO)"
+        ): (
+            "Evolução da produção científica - Mundo - número de periódicos por "
+            "Indexed In (SciELO)"
+        ),
+        (
+            "Evolution of scientific production - World - number of journals by "
+            "SciELO Collection"
+        ): (
+            "Evolução da produção científica - Mundo - número de periódicos por "
+            "Coleção SciELO"
+        ),
+        (
+            "Evolution of scientific production - World - number of journals by Scope"
+        ): (
+            "Evolução da produção científica - Mundo - número de periódicos por Escopo"
+        ),
+        (
+            "Evolution of scientific production - World - number of journals by Publisher"
+        ): (
+            "Evolução da produção científica - Mundo - número de periódicos por Editora"
+        ),
+        (
+            "Evolution of scientific production - World - number of journals by Source Type"
+        ): (
+            "Evolução da produção científica - Mundo - número de periódicos por "
+            "Tipo de Fonte"
+        ),
+        (
+            "Evolution of scientific production - World - number of journals by "
+            "Source Country"
+        ): (
+            "Evolução da produção científica - Mundo - número de periódicos por "
+            "País de Origem"
+        ),
     },
     "es": {
         "Affiliation - Region of the World": "Afiliación - Región del mundo",
@@ -450,12 +542,7 @@ TRANSLATIONS = {
         "Brazil - Social Production - Country - Documents - Subarea": (
             "Brasil - Producción Social - País - Documentos - Subárea"
         ),
-        (
-            "Select an observation table on the evolution of scientific production by:"
-        ): (
-            "Seleccione una tabla de observación sobre la evolución de la producción "
-            "científica por:"
-        ),
+        "Select an observation table:": "Seleccione una tabla de observación:",
         "Select an observation table on social production in Brazil by:": (
             "Seleccione una tabla de observación sobre la producción social en Brasil por:"
         ),
@@ -467,6 +554,59 @@ TRANSLATIONS = {
         "Classification": "Clasificación",
         "Area": "Área",
         "Subarea": "Subárea",
+        "Level": "Nivel",
+        "Documents": "Documentos",
+        "Journals": "Revistas",
+        "Indexed In (OpenAlex)": "Indexed In (OpenAlex)",
+        "Indexed In (SciELO)": "Indexed In (SciELO)",
+        "SciELO Collection": "Colección SciELO",
+        "Scope": "Alcance",
+        (
+            "Evolution of scientific production - World - number of journals by "
+            "Indexed In (OpenAlex)"
+        ): (
+            "Evolución de la producción científica - Mundo - número de revistas por "
+            "Indexed In (OpenAlex)"
+        ),
+        (
+            "Evolution of scientific production - World - number of journals by "
+            "Indexed In (SciELO)"
+        ): (
+            "Evolución de la producción científica - Mundo - número de revistas por "
+            "Indexed In (SciELO)"
+        ),
+        (
+            "Evolution of scientific production - World - number of journals by "
+            "SciELO Collection"
+        ): (
+            "Evolución de la producción científica - Mundo - número de revistas por "
+            "Colección SciELO"
+        ),
+        (
+            "Evolution of scientific production - World - number of journals by Scope"
+        ): (
+            "Evolución de la producción científica - Mundo - número de revistas por "
+            "Alcance"
+        ),
+        (
+            "Evolution of scientific production - World - number of journals by Publisher"
+        ): (
+            "Evolución de la producción científica - Mundo - número de revistas por "
+            "Editorial"
+        ),
+        (
+            "Evolution of scientific production - World - number of journals by Source Type"
+        ): (
+            "Evolución de la producción científica - Mundo - número de revistas por "
+            "Tipo de fuente"
+        ),
+        (
+            "Evolution of scientific production - World - number of journals by "
+            "Source Country"
+        ): (
+            "Evolución de la producción científica - Mundo - número de revistas por "
+            "País de origen"
+        ),
     },
 }
 
@@ -477,6 +617,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         locale_root = Path(__file__).resolve().parents[3] / "locale"
         updated = 0
+        added = 0
 
         for locale_code, catalog in TRANSLATIONS.items():
             po_path = locale_root / locale_code / "LC_MESSAGES" / "django.po"
@@ -485,16 +626,23 @@ class Command(BaseCommand):
                 continue
 
             po = polib.pofile(str(po_path))
-            for entry in po:
-                msgid = entry.msgid
-                if msgid not in catalog:
-                    continue
-                entry.msgstr = catalog[msgid]
+            for msgid, msgstr in catalog.items():
+                entry = po.find(msgid)
+                if entry is None:
+                    entry = polib.POEntry(msgid=msgid, msgstr=msgstr)
+                    po.append(entry)
+                    added += 1
+                else:
+                    entry.msgstr = msgstr
+                    updated += 1
                 if "fuzzy" in entry.flags:
                     entry.flags.remove("fuzzy")
-                updated += 1
 
             po.save(str(po_path))
             self.stdout.write(self.style.SUCCESS(f"Updated {po_path}"))
 
-        self.stdout.write(self.style.SUCCESS(f"Applied {updated} translation(s)."))
+        self.stdout.write(
+            self.style.SUCCESS(
+                f"Applied {updated} translation update(s), added {added} new entry(ies)."
+            )
+        )
