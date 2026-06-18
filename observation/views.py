@@ -19,6 +19,11 @@ from django.utils.translation import gettext as _
 from django.views.decorators.http import require_GET
 
 from observation.models import ObservationPage
+from observation.dimension_groups import (
+    dimension_value_metric,
+    normalize_dimension_level,
+    resolve_journal_cardinality_field,
+)
 from search_gateway.filter_mapping import get_mapped_filters
 from search_gateway.query import build_bool_query_from_search_params
 from search_gateway.request_filters import (
@@ -43,17 +48,125 @@ def _get_index_name(request):
     )
 
 
-def _build_nested_terms_aggs(*, row_field, col_field, row_size, col_size):
-    return {
+def _build_nested_terms_aggs(
+    *,
+    row_field,
+    col_field,
+    row_size,
+    col_size,
+    value_metric="documents",
+    journal_field=None,
+):
+    col_agg = {"terms": {"field": col_field, "size": col_size}}
+    if value_metric == "journals" and journal_field:
+        col_agg["aggs"] = {
+            "unique_journals": {
+                "cardinality": {
+                    "field": journal_field,
+                    "precision_threshold": 40000,
+                }
+            }
+        }
+    aggs = {
         "by_row": {
             "terms": {"field": row_field, "size": row_size},
             "aggs": {
-                "by_col": {
-                    "terms": {"field": col_field, "size": col_size},
-                },
+                "by_col": col_agg,
             },
         },
     }
+    if value_metric == "journals" and journal_field:
+        aggs["grand_total_journals"] = {
+            "cardinality": {
+                "field": journal_field,
+                "precision_threshold": 40000,
+            }
+        }
+    return aggs
+
+
+def _cell_count_from_bucket(bucket, value_metric):
+    if value_metric == "journals":
+        return int(((bucket.get("unique_journals") or {}).get("value")) or 0)
+    return int(bucket.get("doc_count") or 0)
+
+
+def _dimension_level_from_source(query_source):
+    if hasattr(query_source, "get"):
+        raw = query_source.get("dimension_level")
+    else:
+        raw = None
+    return normalize_dimension_level(raw)
+
+
+def _resolve_value_metric(dimension, query_source):
+    slug = (dimension or {}).get("slug") or ""
+    level = _dimension_level_from_source(query_source)
+    return dimension_value_metric(slug, level), level
+
+
+def _estimate_grand_total_journals(
+    service,
+    *,
+    query_text,
+    query_clauses,
+    selected_filters,
+    journal_field,
+):
+    if not journal_field:
+        return 0
+    try:
+        mapped_filters = get_mapped_filters(selected_filters or {}, service.field_settings)
+        bool_query = build_bool_query_from_search_params(
+            query_text=query_text if not query_clauses else None,
+            query_clauses=query_clauses if query_clauses else None,
+            filters=mapped_filters,
+        )
+        response = service.client.search(
+            index=service.index_name,
+            body={
+                "size": 0,
+                "query": {"bool": bool_query},
+                "aggs": {
+                    "grand_total_journals": {
+                        "cardinality": {
+                            "field": journal_field,
+                            "precision_threshold": 40000,
+                        }
+                    }
+                },
+            },
+            request_cache=True,
+            request_timeout=service.request_timeout,
+        )
+        return int(
+            (
+                ((response.get("aggregations") or {}).get("grand_total_journals") or {}).get(
+                    "value"
+                )
+            )
+            or 0
+        )
+    except Exception:
+        logger.exception(
+            "Observation table: failed to estimate grand_total_journals for field %s",
+            journal_field,
+        )
+        return 0
+
+
+def _composite_col_agg(col_field, col_size, value_metric, journal_field):
+    col_agg = {"terms": {"field": col_field, "size": col_size}}
+    if value_metric == "journals" and journal_field:
+        col_agg["aggs"] = {
+            "unique_journals": {
+                "cardinality": {
+                    "field": journal_field,
+                    "precision_threshold": 40000,
+                }
+            }
+        }
+    return col_agg
 
 
 def _expand_agg_field_candidates(candidates):
@@ -88,11 +201,20 @@ def _resolve_observation_dimension(request):
         page = ObservationPage.objects.get(id=int(page_id))
     except (ObservationPage.DoesNotExist, TypeError, ValueError):
         return None
+    dimension = None
     if dimension_slug:
         for item in page.get_dimensions_config():
             if item.get("slug") == dimension_slug:
-                return item
-    return page.get_default_dimension_config()
+                dimension = dict(item)
+                break
+    if dimension is None:
+        dimension = dict(page.get_default_dimension_config() or {})
+    if not dimension:
+        return None
+    value_metric, level = _resolve_value_metric(dimension, request.GET)
+    dimension["value_metric"] = value_metric
+    dimension["dimension_level"] = level
+    return dimension
 
 
 def _parse_query_clauses_from_source(source):
@@ -305,14 +427,22 @@ def _build_dimension_table_result(query_source, service, dimension):
         dimension.get("col_bucket_size")
         or col_cfg.get("filter", {}).get("size", 300)
     )
+    value_metric = dimension.get("value_metric") or _resolve_value_metric(
+        dimension, query_source
+    )[0]
+    journal_field = None
+    if value_metric == "journals":
+        journal_field = resolve_journal_cardinality_field(field_settings)
     parse_config = {
         "row_agg_name": "by_row",
         "col_agg_name": "by_col",
         "row_field_name": row_field_name,
+        "value_metric": value_metric,
     }
     row_transform = row_cfg.get("settings", {}).get("display_transform")
     if row_transform:
         parse_config["row_display_transform"] = row_transform
+
     def _run_aggregation(row_index_field, col_index_field):
         if not row_index_field or not col_index_field:
             return {"columns": [], "rows": [], "grand_total": 0}
@@ -321,6 +451,8 @@ def _build_dimension_table_result(query_source, service, dimension):
             col_field=col_index_field,
             row_size=row_size,
             col_size=col_size,
+            value_metric=value_metric,
+            journal_field=journal_field,
         )
         return service.search_aggregation(
             aggs=aggs,
@@ -415,6 +547,12 @@ def _build_dimension_table_result_all_rows(
         dimension.get("col_bucket_size")
         or col_cfg.get("filter", {}).get("size", 300)
     )
+    value_metric = dimension.get("value_metric") or _resolve_value_metric(
+        dimension, query_source
+    )[0]
+    journal_field = None
+    if value_metric == "journals":
+        journal_field = resolve_journal_cardinality_field(field_settings)
 
     mapped_filters = get_mapped_filters(selected_filters or {}, service.field_settings)
     bool_query = build_bool_query_from_search_params(
@@ -461,7 +599,12 @@ def _build_dimension_table_result_all_rows(
                         "by_row": {
                             "composite": composite,
                             "aggs": {
-                                "by_col": {"terms": {"field": col_field, "size": col_size}},
+                                "by_col": _composite_col_agg(
+                                    col_field,
+                                    col_size,
+                                    value_metric,
+                                    journal_field,
+                                ),
                             },
                         }
                     }
@@ -492,10 +635,11 @@ def _build_dimension_table_result_all_rows(
                             ck = cb.get("key")
                             if ck is None:
                                 continue
-                            values[str(ck)] = cb.get("doc_count", 0)
+                            values[str(ck)] = _cell_count_from_bucket(cb, value_metric)
                             col_keys.add(ck)
                         rows.append({"key": raw_key, "label": label, "values": values})
-                        grand_total += int(rb.get("doc_count") or 0)
+                        if value_metric != "journals":
+                            grand_total += int(rb.get("doc_count") or 0)
                         processed_rows += 1
                     if callable(progress_callback):
                         progress_callback(processed_rows)
@@ -513,6 +657,14 @@ def _build_dimension_table_result_all_rows(
                 raise
 
             columns = [str(c) for c in sorted(col_keys, key=_col_sort_key)]
+            if value_metric == "journals" and journal_field:
+                grand_total = _estimate_grand_total_journals(
+                    service,
+                    query_text=text_search,
+                    query_clauses=query_clauses,
+                    selected_filters=selected_filters,
+                    journal_field=journal_field,
+                )
             candidate_result = {"columns": columns, "rows": rows, "grand_total": grand_total}
             if rows:
                 used_pair = (row_field, col_field)
@@ -983,6 +1135,12 @@ def _run_chunked_export_async(*, batch_job_id, dimension, query_source, index_na
             dimension.get("col_bucket_size")
             or col_cfg.get("filter", {}).get("size", 300)
         )
+        value_metric = dimension.get("value_metric") or _resolve_value_metric(
+            dimension, query_source
+        )[0]
+        journal_field = None
+        if value_metric == "journals":
+            journal_field = resolve_journal_cardinality_field(field_settings)
 
         row_candidates = []
         for candidate in [configured_row_field, row_field_name, "author_country_codes", "country"]:
@@ -1039,7 +1197,12 @@ def _run_chunked_export_async(*, batch_job_id, dimension, query_source, index_na
                             "by_row": {
                                 "composite": composite,
                                 "aggs": {
-                                    "by_col": {"terms": {"field": col_field, "size": col_size}},
+                                    "by_col": _composite_col_agg(
+                                        col_field,
+                                        col_size,
+                                        value_metric,
+                                        journal_field,
+                                    ),
                                 },
                             }
                         },
@@ -1062,7 +1225,7 @@ def _run_chunked_export_async(*, batch_job_id, dimension, query_source, index_na
                             ck = cb.get("key")
                             if ck is None:
                                 continue
-                            values[str(ck)] = cb.get("doc_count", 0)
+                            values[str(ck)] = _cell_count_from_bucket(cb, value_metric)
                         buffer_rows.append({"key": raw_key, "label": raw_key, "values": values})
                         if len(buffer_rows) >= split_size:
                             chunk_rows = builtins.list(buffer_rows[:split_size])

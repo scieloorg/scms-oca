@@ -3,13 +3,21 @@
 from django.utils.translation import gettext
 from django.utils.translation import gettext_lazy as _
 
+from observation.dimension_groups import (
+    LEVEL_PERIODICOS,
+    dimension_value_metric,
+    normalize_dimension_level,
+)
+
 _COMMON_KPI = _("Documents")
+_COMMON_JOURNAL_KPI = _("Journals")
 _COMMON_COL = _("Year")
 _COMMON_VALUE = _("Documents")
+_COMMON_JOURNAL_VALUE = _("Journals")
 
-OBSERVATION_SELECT_LABEL_SCIENTIFIC = _(
-    "Select an observation table on the evolution of scientific production by:"
-)
+OBSERVATION_LEVEL_SELECT_LABEL = _("Level")
+
+OBSERVATION_SELECT_LABEL_SCIENTIFIC = _("Select an observation table:")
 OBSERVATION_SELECT_LABEL_SOCIAL = _(
     "Select an observation table on social production in Brazil by:"
 )
@@ -164,6 +172,37 @@ DIMENSION_I18N = {
             "Evolution of scientific production - World - number of documents by Funder"
         ),
     },
+    "documents-by-indexed-in": {
+        "menu_label": _("Indexed In (OpenAlex)"),
+        "row_label": _("Indexed In (OpenAlex)"),
+        "table_title": _(
+            "Evolution of scientific production - World - number of journals by "
+            "Indexed In (OpenAlex)"
+        ),
+    },
+    "documents-by-scielo-indexed-in": {
+        "menu_label": _("Indexed In (SciELO)"),
+        "row_label": _("Indexed In (SciELO)"),
+        "table_title": _(
+            "Evolution of scientific production - World - number of journals by "
+            "Indexed In (SciELO)"
+        ),
+    },
+    "documents-by-scielo-collection": {
+        "menu_label": _("SciELO Collection"),
+        "row_label": _("SciELO Collection"),
+        "table_title": _(
+            "Evolution of scientific production - World - number of journals by "
+            "SciELO Collection"
+        ),
+    },
+    "documents-by-scope": {
+        "menu_label": _("Scope"),
+        "row_label": _("Scope"),
+        "table_title": _(
+            "Evolution of scientific production - World - number of journals by Scope"
+        ),
+    },
     "documents-by-events": {
         "menu_label": _("Events"),
         "row_label": _("Types"),
@@ -225,6 +264,26 @@ DIMENSION_I18N = {
     },
 }
 
+# Journal-metric titles for shared slugs when level = Periódicos.
+DIMENSION_JOURNAL_I18N = {
+    "documents-by-publisher": {
+        "table_title": _(
+            "Evolution of scientific production - World - number of journals by Publisher"
+        ),
+    },
+    "documents-by-source-type": {
+        "table_title": _(
+            "Evolution of scientific production - World - number of journals by Source Type"
+        ),
+    },
+    "documents-by-source-country": {
+        "table_title": _(
+            "Evolution of scientific production - World - number of journals by "
+            "Source Country"
+        ),
+    },
+}
+
 _LABEL_FIELDS = (
     "menu_label",
     "table_title",
@@ -250,13 +309,14 @@ def fallback_dimension_for_index(index_name):
     return localize_dimension(dict(spec))
 
 
-def localize_dimension(dimension):
+def localize_dimension(dimension, level=None):
     """Apply gettext to display fields for the active request locale."""
     if not dimension:
         return dimension
 
     localized = dict(dimension)
     slug = localized.get("slug") or ""
+    level = normalize_dimension_level(level or localized.get("dimension_level"))
     spec = DIMENSION_I18N.get(slug)
 
     if spec:
@@ -266,10 +326,23 @@ def localize_dimension(dimension):
         localized.setdefault("kpi_label", gettext(_COMMON_KPI))
         localized.setdefault("col_label", gettext(_COMMON_COL))
         localized.setdefault("value_label", gettext(_COMMON_VALUE))
-        return localized
+    else:
+        for field in _LABEL_FIELDS:
+            value = localized.get(field)
+            if isinstance(value, str) and value.strip():
+                localized[field] = gettext(value)
 
-    for field in _LABEL_FIELDS:
-        value = localized.get(field)
-        if isinstance(value, str) and value.strip():
-            localized[field] = gettext(value)
+    if level == LEVEL_PERIODICOS and dimension_value_metric(slug, level) == "journals":
+        journal_spec = DIMENSION_JOURNAL_I18N.get(slug, {})
+        if journal_spec.get("table_title"):
+            localized["table_title"] = gettext(journal_spec["table_title"])
+        localized["kpi_label"] = gettext(_COMMON_JOURNAL_KPI)
+        localized["value_label"] = gettext(_COMMON_JOURNAL_VALUE)
+
+    localized["dimension_level"] = level
+    localized["value_metric"] = dimension_value_metric(slug, level)
     return localized
+
+
+def localize_dimension_for_level(dimension, level):
+    return localize_dimension(dimension, level=level)

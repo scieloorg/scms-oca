@@ -2013,9 +2013,8 @@ msgstr "Locations"
 msgid "Documents"
 msgstr "Documents"
 
-msgid ""
-"Select an observation table on the evolution of scientific production by:"
-msgstr ""
+msgid "Select an observation table:"
+msgstr "Select an observation table:"
 
 #, fuzzy
 #| msgid "Select an observation table"

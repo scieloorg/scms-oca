@@ -14,9 +14,18 @@ from search_gateway.models import DataSource
 from search_gateway.request_filters import extract_applied_filters
 from search_gateway.service import SearchGatewayService
 
+from observation.dimension_groups import (
+    LEVEL_DOCUMENTOS,
+    LEVEL_PERIODICOS,
+    dimension_levels_for_slug,
+    dimension_value_metric,
+    observation_dimension_level_labels,
+    observation_has_dimension_levels,
+)
 from observation.dimension_i18n import (
     fallback_dimension_for_index,
     localize_dimension,
+    localize_dimension_for_level,
     observation_dimension_select_label,
 )
 
@@ -79,24 +88,50 @@ class ObservationPage(Page):
     def _serialize_dimensions(self, source_page):
         dimensions = []
         for item in source_page.dimensions.all():
-            dimensions.append(
-                localize_dimension(
-                    {
-                        "slug": item.slug,
-                        "menu_label": item.menu_label,
-                        "row_field_name": item.row_field_name,
-                        "col_field_name": item.col_field_name,
-                        "row_bucket_size": item.row_bucket_size,
-                        "col_bucket_size": item.col_bucket_size,
-                        "table_title": item.table_title,
-                        "kpi_label": item.kpi_label,
-                        "row_label": item.row_label,
-                        "col_label": item.col_label,
-                        "value_label": item.value_label,
-                        "is_default": item.is_default,
-                    }
-                )
-            )
+            payload = {
+                "slug": item.slug,
+                "menu_label": item.menu_label,
+                "row_field_name": item.row_field_name,
+                "col_field_name": item.col_field_name,
+                "row_bucket_size": item.row_bucket_size,
+                "col_bucket_size": item.col_bucket_size,
+                "table_title": item.table_title,
+                "kpi_label": item.kpi_label,
+                "row_label": item.row_label,
+                "col_label": item.col_label,
+                "value_label": item.value_label,
+                "is_default": item.is_default,
+                "dimension_levels": dimension_levels_for_slug(item.slug),
+                "value_metric": dimension_value_metric(item.slug, LEVEL_DOCUMENTOS),
+            }
+            localized = localize_dimension(payload, level=LEVEL_DOCUMENTOS)
+            levels = localized.get("dimension_levels") or [LEVEL_DOCUMENTOS]
+            if LEVEL_DOCUMENTOS in levels:
+                localized["documentos_labels"] = {
+                    field: localized.get(field)
+                    for field in (
+                        "menu_label",
+                        "table_title",
+                        "row_label",
+                        "kpi_label",
+                        "col_label",
+                        "value_label",
+                    )
+                }
+            if LEVEL_DOCUMENTOS not in levels or len(levels) > 1:
+                periodicos = localize_dimension_for_level(payload, LEVEL_PERIODICOS)
+                localized["periodicos_labels"] = {
+                    field: periodicos.get(field)
+                    for field in (
+                        "menu_label",
+                        "table_title",
+                        "row_label",
+                        "kpi_label",
+                        "col_label",
+                        "value_label",
+                    )
+                }
+            dimensions.append(localized)
         return dimensions
 
     def get_dimensions_config(self):
@@ -140,6 +175,13 @@ class ObservationPage(Page):
                 "observation_dimension_select_label": observation_dimension_select_label(
                     data_source.index_name if data_source else ""
                 ),
+                "observation_has_dimension_levels": observation_has_dimension_levels(
+                    data_source.index_name if data_source else ""
+                ),
+                "observation_dimension_level_labels": {
+                    key: gettext(label)
+                    for key, label in observation_dimension_level_labels().items()
+                },
             }
         )
 
@@ -201,6 +243,13 @@ class ObservationPage(Page):
                     "observation_dimension_select_label": observation_dimension_select_label(
                         data_source.index_name
                     ),
+                    "observation_has_dimension_levels": observation_has_dimension_levels(
+                        data_source.index_name
+                    ),
+                    "observation_dimension_level_labels": {
+                        key: gettext(label)
+                        for key, label in observation_dimension_level_labels().items()
+                    },
                 }
             )
         except Exception as exc:

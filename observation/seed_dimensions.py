@@ -5,6 +5,9 @@ from observation.models import ObservationDimension
 SCIENTIFIC_TABLE_TITLE_PREFIX = (
     "Evolution of scientific production - World - number of documents by "
 )
+SCIENTIFIC_JOURNAL_TABLE_TITLE_PREFIX = (
+    "Evolution of scientific production - World - number of journals by "
+)
 SOCIAL_TABLE_TITLE_PREFIX = "Brazil - Social Production - Country - Documents - "
 
 DIMENSION_SPECS_BY_INDEX = {
@@ -140,6 +143,46 @@ DIMENSION_SPECS_BY_INDEX = {
             "table_title": f"{SCIENTIFIC_TABLE_TITLE_PREFIX}Funder",
             "row_label": "Funder",
             "row_field_candidates": ["funder", "funders"],
+            "is_default": False,
+        },
+        {
+            "slug": "documents-by-indexed-in",
+            "menu_label": "Indexed In (OpenAlex)",
+            "table_title": f"{SCIENTIFIC_JOURNAL_TABLE_TITLE_PREFIX}Indexed In (OpenAlex)",
+            "row_label": "Indexed In (OpenAlex)",
+            "row_field_candidates": ["source_indexed_in"],
+            "kpi_label": "Journals",
+            "value_label": "Journals",
+            "is_default": False,
+        },
+        {
+            "slug": "documents-by-scielo-indexed-in",
+            "menu_label": "Indexed In (SciELO)",
+            "table_title": f"{SCIENTIFIC_JOURNAL_TABLE_TITLE_PREFIX}Indexed In (SciELO)",
+            "row_label": "Indexed In (SciELO)",
+            "row_field_candidates": ["source_scielo_indexed_in"],
+            "kpi_label": "Journals",
+            "value_label": "Journals",
+            "is_default": False,
+        },
+        {
+            "slug": "documents-by-scielo-collection",
+            "menu_label": "SciELO Collection",
+            "table_title": f"{SCIENTIFIC_JOURNAL_TABLE_TITLE_PREFIX}SciELO Collection",
+            "row_label": "SciELO Collection",
+            "row_field_candidates": ["collection"],
+            "kpi_label": "Journals",
+            "value_label": "Journals",
+            "is_default": False,
+        },
+        {
+            "slug": "documents-by-scope",
+            "menu_label": "Scope",
+            "table_title": f"{SCIENTIFIC_JOURNAL_TABLE_TITLE_PREFIX}Scope",
+            "row_label": "Scope",
+            "row_field_candidates": ["scope"],
+            "kpi_label": "Journals",
+            "value_label": "Journals",
             "is_default": False,
         },
     ],
@@ -319,10 +362,10 @@ def seed_observation_page_dimensions(page, *, stdout=None, style=None):
             "row_bucket_size": 500,
             "col_bucket_size": 300,
             "table_title": spec["table_title"],
-            "kpi_label": "Documents",
+            "kpi_label": spec.get("kpi_label", "Documents"),
             "row_label": spec["row_label"],
             "col_label": "Year",
-            "value_label": "Documents",
+            "value_label": spec.get("value_label", "Documents"),
             "is_default": False,
         }
         ObservationDimension.objects.update_or_create(

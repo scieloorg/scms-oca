@@ -16,6 +16,52 @@
     });
   }
 
+  function hasDimensionLevels() {
+    const config = window.searchPageConfig || {};
+    return Boolean(config.hasDimensionLevels);
+  }
+
+  function getActiveDimensionLevel() {
+    const config = window.searchPageConfig || {};
+    const level = String(config.activeDimensionLevel || config.defaultDimensionLevel || "documentos").trim();
+    return level === "periodicos" ? "periodicos" : "documentos";
+  }
+
+  function setActiveDimensionLevel(level) {
+    const config = window.searchPageConfig || {};
+    config.activeDimensionLevel = level === "periodicos" ? "periodicos" : "documentos";
+  }
+
+  function getDimensionsForLevel(level) {
+    const normalizedLevel = level === "periodicos" ? "periodicos" : "documentos";
+    return getDimensions().filter(function (item) {
+      const levels = Array.isArray(item.dimension_levels) ? item.dimension_levels : ["documentos"];
+      return levels.indexOf(normalizedLevel) >= 0;
+    }).sort(function (a, b) {
+      if (normalizedLevel !== "periodicos") {
+        return 0;
+      }
+      return String(a.menu_label || "").localeCompare(String(b.menu_label || ""), undefined, { sensitivity: "base" });
+    });
+  }
+
+  function getDimensionWithLevelLabels(dimension, level) {
+    const item = Object.assign({}, dimension || {});
+    const normalizedLevel = level === "periodicos" ? "periodicos" : "documentos";
+    const labelKey = normalizedLevel === "periodicos" ? "periodicos_labels" : "documentos_labels";
+    const levelLabels = item[labelKey];
+    if (levelLabels && typeof levelLabels === "object") {
+      Object.keys(levelLabels).forEach(function (field) {
+        if (levelLabels[field]) {
+          item[field] = levelLabels[field];
+        }
+      });
+    }
+    item.dimension_level = normalizedLevel;
+    item.value_metric = normalizedLevel === "periodicos" ? "journals" : "documents";
+    return item;
+  }
+
   function getDimensions() {
     const config = window.searchPageConfig || {};
     return Array.isArray(config.dimensions) ? config.dimensions : [];
@@ -23,19 +69,50 @@
 
   function getDefaultDimension() {
     const config = window.searchPageConfig || {};
-    return config.defaultDimension || getDimensions()[0] || {};
+    const level = getActiveDimensionLevel();
+    const levelDimensions = getDimensionsForLevel(level);
+    const configuredDefault = config.defaultDimension || {};
+    const match = levelDimensions.find(function (item) {
+      return item.slug === configuredDefault.slug;
+    });
+    return match || levelDimensions[0] || configuredDefault || getDimensions()[0] || {};
   }
 
   function getActiveDimension() {
     const config = window.searchPageConfig || {};
-    const dimensions = getDimensions();
+    const levelDimensions = getDimensionsForLevel(getActiveDimensionLevel());
     const slug = config.activeDimensionSlug || (getDefaultDimension().slug || "");
-    return dimensions.find(function (item) { return item.slug === slug; }) || getDefaultDimension();
+    const match = levelDimensions.find(function (item) { return item.slug === slug; });
+    const dimension = match || getDefaultDimension();
+    return getDimensionWithLevelLabels(dimension, getActiveDimensionLevel());
   }
 
   function setActiveDimension(slug) {
     const config = window.searchPageConfig || {};
     config.activeDimensionSlug = slug;
+  }
+
+  function refreshDimensionSelect() {
+    const $dimensionSelect = $("#observation-dimension-select");
+    if (!$dimensionSelect.length) return;
+    const level = getActiveDimensionLevel();
+    const dimensions = getDimensionsForLevel(level);
+    const activeSlug = getActiveDimension().slug || "";
+    $dimensionSelect.empty();
+    dimensions.forEach(function (item) {
+      const labels = getDimensionWithLevelLabels(item, level);
+      const option = document.createElement("option");
+      option.value = item.slug;
+      option.textContent = labels.menu_label || item.slug;
+      if (item.slug === activeSlug) {
+        option.selected = true;
+      }
+      $dimensionSelect.append(option);
+    });
+    if (!$dimensionSelect.val() && dimensions.length) {
+      $dimensionSelect.val(dimensions[0].slug);
+      setActiveDimension(dimensions[0].slug);
+    }
   }
 
   function applyDimensionLabels() {
@@ -69,6 +146,7 @@
     if (config.dataSourceName) params.append("index_name", config.dataSourceName);
     if (config.observationPageId) params.append("page_id", config.observationPageId);
     if (dimension && dimension.slug) params.append("dimension_slug", dimension.slug);
+    if (hasDimensionLevels()) params.append("dimension_level", getActiveDimensionLevel());
 
     const searchInput = document.querySelector('.advanced-search-row[data-row-index="0"] .search-text-input');
     const fallbackSearch = searchInput ? String(searchInput.value || "").trim() : "";
@@ -1401,7 +1479,7 @@
           '<thead class="table-light"><tr><th>' + rowLabel + '</th>' + thCells + '</tr></thead>' +
           '<tbody>' + rowsHtml + '</tbody></table></div>' +
         '<div class="observation-detail-chart-wrap">' +
-          '<div class="observation-chart-meta">' + _t("Processing date") + ': 2026-03-17 | ' + _t("Scope") + ': OpenAlex</div>' +
+          '<div class="observation-chart-meta">' + _t("Processing date") + ': 2026-03-17</div>' +
           '<div class="observation-detail-chart-head"><strong>' + _t("Evolution comparison by year") + '</strong><button type="button" id="download-comparison-chart-btn" class="btn btn-outline-secondary btn-sm">' + _t("Download chart") + '</button></div>' +
           '<canvas id="comparison-chart" width="900" height="260"></canvas>' +
           '<div id="comparison-chart-insights" class="observation-comparison-insights"></div></div>'
@@ -1503,7 +1581,7 @@
           yearCells +
           '<div class="col-12">' +
             '<div class="observation-detail-chart-wrap">' +
-              '<div class="observation-chart-meta">' + _t("Processing date") + ': 2026-03-17 | ' + _t("Scope") + ': OpenAlex</div>' +
+              '<div class="observation-chart-meta">' + _t("Processing date") + ': 2026-03-17</div>' +
               '<div class="observation-detail-chart-head"><strong>' + _format(_t("Evolution by %(label)s"), { label: colLabel }) + '</strong>' +
               '<button type="button" id="download-detail-chart-btn" class="btn btn-outline-secondary btn-sm observation-chart-download-btn">' + _t("Download chart") + '</button></div>' +
               '<canvas id="country-detail-chart" width="560" height="220"></canvas>' +
@@ -1525,6 +1603,22 @@
   if (typeof jQuery !== "undefined" && typeof jQuery.fn.DataTable !== "undefined") {
     window.loadAndInitObservationTable = loadAndInitObservationTable;
     jQuery(function () {
+      if (hasDimensionLevels()) {
+        setActiveDimensionLevel(getActiveDimensionLevel());
+        refreshDimensionSelect();
+        const $levelSelect = $("#observation-dimension-level-select");
+        if ($levelSelect.length) {
+          $levelSelect.val(getActiveDimensionLevel());
+          $levelSelect.off("change.observationDimensionLevel").on("change.observationDimensionLevel", function () {
+            setActiveDimensionLevel(String($(this).val() || "documentos"));
+            refreshDimensionSelect();
+            const selectedSlug = String($("#observation-dimension-select").val() || "").trim();
+            if (selectedSlug) setActiveDimension(selectedSlug);
+            applyDimensionLabels();
+            loadAndInitObservationTable();
+          });
+        }
+      }
       const defaultDimension = getDefaultDimension();
       if (defaultDimension && defaultDimension.slug) {
         setActiveDimension(defaultDimension.slug);
@@ -1534,9 +1628,11 @@
         $dimensionSelect.off("change.observationDimension").on("change.observationDimension", function () {
           const selectedSlug = String($(this).val() || "").trim();
           setActiveDimension(selectedSlug);
+          applyDimensionLabels();
           loadAndInitObservationTable();
         });
       }
+      applyDimensionLabels();
       loadAndInitObservationTable();
       initObservationExports();
     });
