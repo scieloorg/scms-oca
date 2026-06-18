@@ -15,7 +15,7 @@ from search_gateway.service import SearchGatewayService
 from .models import SearchPage
 
 
-def _render_results_fragments(request, results_data, *, has_citations_field=False):
+def _render_results_fragments(request, results_data, has_citations_field=False):
     context = {
         "results_data": results_data, 
         "has_citations_field": has_citations_field
