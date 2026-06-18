@@ -5,11 +5,14 @@ Utiliza scripts Painless configurados via interface.
 import json
 import logging
 
+from django.db.models import Exists, OuterRef
 from django.utils import timezone
-from etl.models import EtlPipelineConfig
+
+from etl.models import EtlItemProcess, EtlPipelineConfig
 from etl.services import enqueue_etl_item
 from search_gateway.client import get_opensearch_client
 
+from .models import TransformationScript, HarvestStatus, IndexStatus
 from .utils import source_hash
 
 logger = logging.getLogger(__name__)
@@ -214,8 +217,6 @@ def transform_after_indexing(instance, model_name):
     Returns:
         Dict com status e mensagem da operação
     """
-    from .models import TransformationScript
-
     harvest_model_key = model_name
     if model_name == "HarvestedSciELOData":
         type_data = getattr(instance, "type_data", None)
@@ -239,3 +240,37 @@ def transform_after_indexing(instance, model_name):
         return {"status": "error", "message": "Instância em identifiesr; não é possível transformar."}
 
     return transform_document(script, instance.identifier)
+
+
+def reconcile_missing_bronze_etl(document_model):
+    model_name = document_model.__name__
+
+    bronze_indices = set(
+        TransformationScript.objects.filter(
+            harvest_model=model_name,
+            is_active=True,
+        ).values_list("dest_index", flat=True)
+    )
+    if not bronze_indices:
+        logger.info("Reconciliação. Fase 2. Não há script para transformar raw em bronze para %s.", model_name)
+        return
+    
+    indexed_qs = document_model.objects.filter(
+        harvest_status=HarvestStatus.SUCCESS,
+        index_status=IndexStatus.SUCCESS,
+    ).exclude(raw_data={})
+
+    has_etl = EtlItemProcess.objects.filter(
+        source_index__in=bronze_indices,
+        external_id=OuterRef("identifier"),
+    )
+
+    missing_qs = indexed_qs.filter(~Exists(has_etl))
+    
+    logger.info("Reconciliação. Fase 2. %s: %d sem ETL", model_name, missing_qs.count())
+    for obj in missing_qs.iterator():
+        try:
+            transform_after_indexing(instance=obj, model_name=model_name)
+        except Exception as exc:
+            logger.warning("Reconcialiação. Fase 2. Falha ao criar ETL para documento do tipo %s (%s): %s",
+                            model_name, obj.identifier, exc)

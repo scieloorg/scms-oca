@@ -47,7 +47,7 @@ class HarvestedPreprintViewSet(SnippetViewSet):
     add_to_admin_menu = False
     add_view_class = CommonControlFieldCreateView
     edit_view_class = CommonControlFieldEditView
-    list_display = ("identifier", "harvest_status", "datestamp", "created")
+    list_display = ("identifier", "harvest_status", "index_status", "datestamp", "created")
     search_fields = ("identifier", "source_url")
     list_filter = ("harvest_status", "index_status")
     ordering = ("-created",)
@@ -60,7 +60,7 @@ class HarvestedSciELODataViewSet(SnippetViewSet):
     add_to_admin_menu = False
     add_view_class = CommonControlFieldCreateView
     edit_view_class = CommonControlFieldEditView
-    list_display = ("identifier", "harvest_status", "datestamp", "created")
+    list_display = ("identifier", "harvest_status", "index_status", "datestamp", "created")
     search_fields = ("identifier", "source_url")
     list_filter = ("harvest_status", "index_status", "type_data")
     ordering = ("-created",)
@@ -73,7 +73,7 @@ class HarvestedBooksViewSet(SnippetViewSet):
     add_to_admin_menu = False
     add_view_class = CommonControlFieldCreateView
     edit_view_class = CommonControlFieldEditView
-    list_display = ("identifier", "type_data", "harvest_status", "datestamp", "created")
+    list_display = ("identifier", "type_data", "harvest_status", "index_status", "datestamp", "created")
     search_fields = ("identifier", "source_url")
     list_filter = ("harvest_status", "index_status", "type_data")
     ordering = ("-created",)
