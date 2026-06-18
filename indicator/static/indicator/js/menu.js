@@ -368,9 +368,51 @@ function updateSearchButtonTotal(total) {
   el.textContent = typeof total === 'number' ? total.toLocaleString() : total;
 }
 
+function initGoToSearchButton() {
+  const btn = document.getElementById('indicator-go-to-search');
+  if (!btn) return;
+
+  btn.addEventListener('click', (event) => {
+    event.preventDefault();
+
+    const searchUrl = (btn.dataset.searchUrl || '').trim();
+    if (!searchUrl) return;
+
+    const menuForm = document.getElementById('indicator-filter-form');
+    const filters = menuForm && window.SearchGatewayFilterForm
+      ? window.SearchGatewayFilterForm.serializeForm(menuForm)
+      : {};
+
+    const scopeFromUrl = getScopeFilterFromUrl();
+    const existingScope = filters.scope;
+    const hasScopeInFilters = Array.isArray(existingScope)
+      ? existingScope.some(v => String(v || '').trim())
+      : !!String(existingScope || '').trim();
+    if (!hasScopeInFilters && scopeFromUrl) {
+      filters.scope = scopeFromUrl;
+    }
+
+    delete filters.breakdown_variable;
+
+    const params = new URLSearchParams();
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value == null || value === '') return;
+      if (Array.isArray(value)) {
+        value.forEach(v => { if (v != null && v !== '') params.append(key, v); });
+      } else {
+        params.append(key, value);
+      }
+    });
+
+    const query = params.toString();
+    window.open(query ? `${searchUrl}?${query}` : searchUrl, '_blank');
+  });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   initIndicatorControlBarSelects();
   initScopeControls();
+  initGoToSearchButton();
 });
 
 if (typeof window !== 'undefined' && typeof window.gettext !== 'function') {
