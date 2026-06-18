@@ -26,6 +26,7 @@ from core.utils import utils
 from indicator.metrics.config import ComputedMetric, MetricGroup, PhysicalMetric
 from institution.models import Institution
 from location.models import Location
+from search.models import SearchPage
 from search_gateway.filter_ui import build_data_source_form_payload, render_filter_sidebar
 from search_gateway.request_filters import extract_applied_filters
 from usefulmodels.models import ActionAndPractice, ThematicArea
@@ -926,6 +927,19 @@ class ChartBasePage(Page):
     class Meta:
         abstract = True
 
+    def get_search_page_url(self):
+        qs = SearchPage.objects.filter(live=True, data_source=self.data_source)
+
+        if getattr(self, "locale_id", None):
+            localized = qs.filter(locale_id=self.locale_id).first()
+
+            if localized:
+                return localized.url
+
+        page = qs.first()
+
+        return page.url if page else ""
+
     def get_indicator_nav_urls(self):
         urls = {"indicator_home_url": self.url}
         navigation = (self.data_source.metric_config_schema or {}).get("navigation") or {}
@@ -1106,6 +1120,7 @@ class ChartBasePage(Page):
             "analysis_unit_options": analysis_unit_options,
             "study_unit": study_unit,
             "charts": charts,
+            "search_page_url": self.get_search_page_url(),
         })
         context.update(self.get_indicator_nav_urls())
         context["applied_filters_json"] = json.dumps(context["applied_filters"])
