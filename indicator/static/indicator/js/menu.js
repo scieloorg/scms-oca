@@ -310,6 +310,14 @@ function initIndicatorForm(dataSource, studyUnit) {
 
       clearAppliedFiltersContainer();
       renderChartsContainer(data, dataSource, studyUnit, formData.get('csrfmiddlewaretoken'));
+
+      const firstChart = Array.isArray(data.charts) && data.charts.find(c => !c.is_relative);
+      if (firstChart) {
+        const total = (firstChart.series || []).reduce(
+          (sum, s) => sum + (s.data || []).reduce((a, b) => a + (Number(b) || 0), 0), 0
+        );
+        updateSearchButtonTotal(total);
+      }
     })
     .catch(error => {
       console.error('Error:', error);
@@ -352,6 +360,12 @@ function initIndicatorForm(dataSource, studyUnit) {
   } else {
     window.setTimeout(triggerInitialRender, 250);
   }
+}
+
+function updateSearchButtonTotal(total) {
+  const el = document.getElementById('indicator-search-total');
+  if (!el) return;
+  el.textContent = typeof total === 'number' ? total.toLocaleString() : total;
 }
 
 document.addEventListener('DOMContentLoaded', () => {
