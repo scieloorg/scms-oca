@@ -78,6 +78,23 @@
     </div>
   </div>
 
+  {% if search_page_url and study_unit == "document" %}
+    <div class="indicator-controls-bar__search-section">
+      <div class="indicator-controls-bar__section-title indicator-controls-bar__section-title--label">{% trans "Total documents" %}</div>
+      <div class="indicator-controls-bar__search-total-row">
+        <span class="indicator-controls-bar__search-total" id="indicator-search-total">&mdash;</span>
+        <button
+          type="button"
+          id="indicator-go-to-search"
+          class="indicator-controls-bar__search-icon"
+          data-search-url="{{ search_page_url }}"
+          title="{% trans 'Search documents with current filters' %}"
+          aria-label="{% trans 'Search documents' %}"
+        ></button>
+      </div>
+    </div>
+  {% endif %}
+
   {% if indicator_config_fields %}
       <div
         class="indicator-controls-bar__config"
@@ -87,7 +104,7 @@
       >
       <div class="indicator-controls-bar__config-head">
         <div class="indicator-controls-bar__config-intro">
-          <div class="indicator-controls-bar__section-title indicator-controls-bar__config-title">{% trans "Ranking setup" %}</div>
+          <div class="indicator-controls-bar__section-title indicator-controls-bar__section-title--label indicator-controls-bar__config-title">{% trans "Ranking setup" %}</div>
           <p class="indicator-controls-bar__config-text">
             {% trans "Configuration values that shape the ranking before the lateral filters refine the result set." %}
           </p>
