@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-19 16:04+0000\n"
+"POT-Creation-Date: 2026-06-22 12:32+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -344,7 +344,7 @@ msgid "Español"
 msgstr "Espanhol"
 
 msgid "File not informed."
-msgstr ""
+msgstr "Arquivo não informado."
 
 msgid "Validation error"
 msgstr "Erro de validação"
@@ -448,21 +448,14 @@ msgstr ""
 "target=\"_blank\">https://github.com/scieloorg/scms-"
 "oca/wiki/Campos#pr%C3%A1tica</a>"
 
-#, fuzzy
-#| msgid ""
-#| "Título do item, veja exemplo em: <a "
-#| "href=\"https://github.com/scieloorg/scms-oca/wiki/Campos#title\" "
-#| "target=\"_blank\">https://github.com/scieloorg/scms-"
-#| "oca/wiki/Campos#title</a>"
 msgid ""
 "Determine qual a ação dessa prática: <a "
 "href=\"https://github.com/scieloorg/scms-oca/wiki/Campos#pr%C3%A1tica\" "
 "target=\"_blank\">https://github.com/scieloorg/scms-oca/wiki/Campos#acao</a>"
 msgstr ""
-"Título do item, veja exemplo em: <a "
-"href=\"https://github.com/scieloorg/scms-oca/wiki/Campos#title\" "
-"target=\"_blank\">https://github.com/scieloorg/scms-"
-"oca/wiki/Campos#title</a>"
+"Determine qual a ação dessa prática: <a "
+"href=\"https://github.com/scieloorg/scms-oca/wiki/Campos#pr%C3%A1tica\" "
+"target=\"_blank\">https://github.com/scieloorg/scms-oca/wiki/Campos#acao</a>"
 
 msgid ""
 "Classificação referente ao item registrado. Veja exemplo em: <a "
@@ -512,24 +505,16 @@ msgstr ""
 "target=\"_blank\">https://github.com/scieloorg/scms-"
 "oca/wiki/Campos#institui%C3%A7%C3%A3o-contribuidora</a>"
 
-#, fuzzy
-#| msgid ""
-#| "Nome da instituição que contribuiu. Veja exemplo em: <a "
-#| "href=\"https://github.com/scieloorg/scms-"
-#| "oca/wiki/Campos#institui%C3%A7%C3%A3o-contribuidora\" "
-#| "target=\"_blank\">https://github.com/scieloorg/scms-"
-#| "oca/wiki/Campos#institui%C3%A7%C3%A3o-contribuidora</a>"
 msgid ""
 "Indique a disponibilidade: <a href=\"https://github.com/scieloorg/scms-"
 "oca/wiki/Campos#institui%C3%A7%C3%A3o-contribuidora\" "
 "target=\"_blank\">https://github.com/scieloorg/scms-"
 "oca/wiki/Campos#disponibilidade</a>"
 msgstr ""
-"Nome da instituição que contribuiu. Veja exemplo em: <a "
-"href=\"https://github.com/scieloorg/scms-"
+"Indique a disponibilidade: <a href=\"https://github.com/scieloorg/scms-"
 "oca/wiki/Campos#institui%C3%A7%C3%A3o-contribuidora\" "
 "target=\"_blank\">https://github.com/scieloorg/scms-"
-"oca/wiki/Campos#institui%C3%A7%C3%A3o-contribuidora</a>"
+"oca/wiki/Campos#disponibilidade</a>"
 
 msgid "Creation date"
 msgstr "Data de criação"
@@ -544,18 +529,22 @@ msgid "Updater"
 msgstr "Atualizador"
 
 msgid "Embed"
-msgstr ""
+msgstr "Incorporado"
 
 msgid "Embed content for the page, such as an iframe or other embed code."
 msgstr ""
+"Conteúdo incorporado à página, como um iframe ou outro código de "
+"incorporação."
 
 msgid "Set only embed"
-msgstr ""
+msgstr "Exibir apenas incorporação"
 
 msgid ""
 "If checked, the page will only display the embed content without the body "
 "text."
 msgstr ""
+"Se marcado, a página exibirá apenas o conteúdo incorporado, sem o texto do "
+"corpo."
 
 msgid "Source Name"
 msgstr "Nome da Fonte"
@@ -791,7 +780,7 @@ msgstr ""
 " endereço de e-mail</a>."
 
 msgid "Pular para o conteúdo principal"
-msgstr ""
+msgstr "Pular para o conteúdo principal"
 
 msgid "View the release notes"
 msgstr "Ver as notas de versão"
@@ -827,25 +816,19 @@ msgid "Create your superuser first!"
 msgstr "Crie seu superusuário primeiro!"
 
 msgid "Breadcrumb"
-msgstr ""
+msgstr "Caminho de navegação"
 
-#, fuzzy
-#| msgid "Data Scope"
 msgid "Início"
-msgstr "Escopo dos dados"
+msgstr "Início"
 
-#, fuzzy
-#| msgid " em prol de Ciência Aberta"
 msgid "Observatório de Ciência Aberta"
-msgstr " em prol de Ciência Aberta"
+msgstr "Observatório de Ciência Aberta"
 
-#, fuzzy
-#| msgid "Selecionar página"
 msgid "Selecionar idioma"
-msgstr "Selecionar página"
+msgstr "Selecionar idioma"
 
 msgid "Aplicar idioma"
-msgstr ""
+msgstr "Aplicar idioma"
 
 msgid "Welcome to the administrative area of "
 msgstr "Bem-vindo à área administrativa do "
@@ -878,7 +861,7 @@ msgid "Sources"
 msgstr "Fontes"
 
 msgid "Menu"
-msgstr ""
+msgstr "Menu"
 
 msgid "Indicatores"
 msgstr "Indicadores"
@@ -1021,10 +1004,8 @@ msgstr "Pode editar contribuição institucional"
 msgid "Can edit notes"
 msgstr "Pode editar notas"
 
-#, fuzzy
-#| msgid "Can edit validity"
 msgid "Can edit availability"
-msgstr "Pode editar validade"
+msgstr "Pode editar disponibilidade"
 
 msgid "Link"
 msgstr "Link"
@@ -1102,92 +1083,91 @@ msgstr "Download de Exemplo CSV"
 msgid "Novo conteúdo para moderação - %s"
 msgstr "Novo conteúdo para moderação - %s"
 
+#, python-brace-format
+msgid "Import error: {ex}{line_suffix}"
+msgstr "Erro de importação: {ex}{line_suffix}"
+
 msgid "File imported successfully!"
 msgstr "Arquivo importado com sucesso!"
 
 msgid "Reset to pending"
-msgstr ""
+msgstr "Redefinir para pendente"
 
 msgid "Reset selected ETL items to pending"
-msgstr ""
+msgstr "Redefinir itens de ETL selecionados para pendentes"
 
 #, python-format
 msgid "%(count)d ETL item reset to pending."
 msgid_plural "%(count)d ETL items reset to pending."
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%(count)d item de ETL redefinido para pendente."
+msgstr[1] "%(count)d itens de ETL redefinidos para pendentes."
 
 msgid "ETL Pipeline Config"
-msgstr ""
+msgstr "Configuração de Pipeline de ETL"
 
 msgid "ETL Pipeline Configs"
-msgstr ""
+msgstr "Configurações de Pipeline de ETL"
 
 #, python-format
 msgid "Reset this ETL item to pending?"
 msgid_plural "Reset these %(counter)s ETL items to pending?"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Redefinir este item de ETL para pendente?"
+msgstr[1] "Redefinir estes %(counter)s itens de ETL para pendentes?"
 
 msgid "You do not have permission to reset these ETL items."
-msgstr ""
+msgstr "Você não tem permissão para redefinir estes itens de ETL."
 
 msgid "Yes, reset to pending"
-msgstr ""
+msgstr "Sim, redefinir para pendente"
 
 msgid "No, go back"
-msgstr ""
+msgstr "Não, voltar"
 
-#, fuzzy
-#| msgid "Book"
 msgid "Books"
-msgstr "Livro"
+msgstr "Livros"
 
-#, fuzzy
-#| msgid "Book Chapter"
 msgid "Book Chapters"
-msgstr "Capítulo de Livro"
+msgstr "Capítulos de Livro"
 
 msgid "Preprints"
-msgstr ""
+msgstr "Preprints"
 
-#, fuzzy
-#| msgid "Dataset"
 msgid "Datasets"
-msgstr "Conjunto de Dados"
+msgstr "Conjuntos de dados"
 
 #, python-format
 msgid ""
 "Já existe uma task em execução para '%(doc_type)s'. Aguarde a conclusão."
 msgstr ""
+"Já existe uma task em execução para '%(doc_type)s'. Aguarde a conclusão."
 
 msgid "ETL Summary"
-msgstr ""
+msgstr "Resumo de ETL"
 
 msgid "Home"
-msgstr ""
+msgstr "Início"
 
 #, python-format
 msgid "%(count)s failed item(s) of type '%(doc_type)s' reset to pending."
 msgstr ""
+"%(count)s item(s) com falha do tipo '%(doc_type)s' redefinido(s) para "
+"pendente."
 
 #, python-format
 msgid "%(count)s failed item(s) marked for retry."
-msgstr ""
+msgstr "%(count)s item(s) com falha marcado(s) para nova tentativa."
 
-#, fuzzy
-#| msgid "Processing date"
 msgid "Processing Items"
-msgstr "Data de processamento"
+msgstr "Itens em processamento"
 
 msgid "Pipeline Configs"
-msgstr ""
+msgstr "Configurações de Pipeline"
 
 msgid "Summary"
-msgstr ""
+msgstr "Resumo"
 
 msgid "ETL"
-msgstr ""
+msgstr "ETL"
 
 msgid "encontro"
 msgstr "encontro"
@@ -1217,222 +1197,239 @@ msgid "Dissemination Data Upload"
 msgstr "Upload de Dados de Disseminação"
 
 msgid "Pendente"
-msgstr ""
+msgstr "Pendente"
 
-#, fuzzy
-#| msgid "congresso"
 msgid "Em Progresso"
-msgstr "congresso"
+msgstr "Em Progresso"
 
-#, fuzzy
-#| msgid "congresso"
 msgid "Sucesso"
-msgstr "congresso"
+msgstr "Sucesso"
 
 msgid "Falhou"
-msgstr ""
+msgstr "Falhou"
+
+msgid "Arquivo"
+msgstr "Arquivo"
+
+msgid "Arquivo CSV ou XLSX com dados de métricas globais."
+msgstr "Arquivo CSV ou XLSX com dados de métricas globais."
+
+msgid "Processado"
+msgstr "Processado"
+
+msgid "Indica se o arquivo já foi processado com sucesso."
+msgstr "Indica se o arquivo já foi processado com sucesso."
+
+msgid "Arquivo de métricas globais"
+msgstr "Arquivo de métricas globais"
+
+msgid "Arquivos de métricas globais"
+msgstr "Arquivos de métricas globais"
+
+msgid "Envie um arquivo com extensão .csv ou .xlsx."
+msgstr "Envie um arquivo com extensão .csv ou .xlsx."
+
+msgid "O arquivo enviado está vazio."
+msgstr "O arquivo enviado está vazio."
 
 msgid "ID Externo"
-msgstr ""
+msgstr "ID Externo"
 
 msgid "Identificador único do registro no sistema externo"
-msgstr ""
+msgstr "Identificador único do registro no sistema externo"
 
 msgid "URL da Fonte"
-msgstr ""
+msgstr "URL da Fonte"
 
-#, fuzzy
-#| msgid "Dados computados"
 msgid "Dados Brutos"
-msgstr "Dados computados"
+msgstr "Dados Brutos"
 
 msgid "Dados completos retornados pelo endpoint"
-msgstr ""
+msgstr "Dados completos retornados pelo endpoint"
 
-#, fuzzy
-#| msgid "Saúde Coletiva"
 msgid "Status da Coleta"
-msgstr "Saúde Coletiva"
+msgstr "Status da Coleta"
 
-#, fuzzy
-#| msgid "Data de criação"
 msgid "Status da Indexação"
-msgstr "Data de criação"
+msgstr "Status da Indexação"
 
-#, fuzzy
-#| msgid "tipo de registro"
 msgid "Data do registro"
-msgstr "tipo de registro"
+msgstr "Data do registro"
 
 msgid "Última Tentativa de Coleta"
-msgstr ""
+msgstr "Última Tentativa de Coleta"
 
 # Indicator / Journal Metrics terminology (manual additions)
-#, fuzzy
-#| msgid "Indexed in"
 msgid "Indexado em"
 msgstr "Indexado em"
 
 msgid "Nome do Índice"
-msgstr ""
+msgstr "Nome do Índice"
 
 msgid "Nome do índice no OpenSearch onde foi indexado"
-msgstr ""
+msgstr "Nome do índice no OpenSearch onde foi indexado"
 
 msgid "Dados de preprint puro"
-msgstr ""
+msgstr "Dados de preprint puro"
 
 msgid "Dados de preprint"
-msgstr ""
+msgstr "Dados de preprint"
 
-#, fuzzy
-#| msgid "Link to the data"
 msgid "Tipo de data"
-msgstr "Link para os dados"
+msgstr "Tipo de data"
 
-#, fuzzy
-#| msgid "Monograph"
 msgid "Part ou Monograph"
-msgstr "Monografia"
+msgstr "Parte ou Monografia"
 
 msgid "Monograph relacionado quando o tipo for Part"
-msgstr ""
+msgstr "Monografia relacionada quando o tipo for Part"
 
-#, fuzzy
-#| msgid "Frequência"
 msgid "Última sequência"
-msgstr "Frequência"
+msgstr "Última sequência"
 
 msgid "Sequência do _changes processada para este registro"
-msgstr ""
+msgstr "Sequência do _changes processada para este registro"
 
 msgid "Dados de Scielo Books"
-msgstr ""
+msgstr "Dados do SciELO Books"
 
-#, fuzzy
-#| msgid "Conjunto de dados"
 msgid "Tipo de dado"
-msgstr "Conjunto de dados"
+msgstr "Tipo de dado"
 
 msgid "dataset ou dataverse"
-msgstr ""
+msgstr "dataset ou dataverse"
 
 msgid "Dados de Scielo Data"
-msgstr ""
+msgstr "Dados do SciELO Data"
 
 msgid "Dados de Scielo"
-msgstr ""
+msgstr "Dados do SciELO"
 
 msgid "Campo com Erro"
-msgstr ""
+msgstr "Campo com Erro"
 
 msgid "Nome do campo que causou o erro, se aplicável"
-msgstr ""
+msgstr "Nome do campo que causou o erro, se aplicável"
 
-#, fuzzy
-#| msgid "Institution Type"
 msgid "Exception Type"
-msgstr "Tipo de Instituição"
+msgstr "Tipo de Exceção"
 
 msgid "Mensagem de Erro"
-msgstr ""
+msgstr "Mensagem de Erro"
 
 msgid "Descrição detalhada do erro"
-msgstr ""
+msgstr "Descrição detalhada do erro"
 
 msgid "Traceback do Erro"
-msgstr ""
+msgstr "Traceback do Erro"
 
 msgid "Stack trace completo do erro (para debugging)"
-msgstr ""
+msgstr "Stack trace completo do erro (para debugging)"
 
 msgid "Erro Resolvido"
-msgstr ""
+msgstr "Erro Resolvido"
 
 msgid "Indica se o erro foi resolvido"
-msgstr ""
+msgstr "Indica se o erro foi resolvido"
 
-#, fuzzy
-#| msgid "Entrada de referência"
 msgid "Data de ocorrência"
-msgstr "Entrada de referência"
+msgstr "Data de ocorrência"
 
-#, fuzzy
-#| msgid "Posted Content"
 msgid "Dados de Contexto"
-msgstr "Conteúdo Publicado"
+msgstr "Dados de Contexto"
 
 msgid "Informações adicionais sobre o contexto do erro"
-msgstr ""
+msgstr "Informações adicionais sobre o contexto do erro"
 
 msgid "Resolvido em"
-msgstr ""
+msgstr "Resolvido em"
 
 msgid "Quando o erro foi resolvido"
-msgstr ""
+msgstr "Quando o erro foi resolvido"
 
 msgid "Nome"
-msgstr ""
+msgstr "Nome"
 
 msgid "Nome identificador do script de transformação"
-msgstr ""
+msgstr "Nome identificador do script de transformação"
 
 msgid "Descrição"
 msgstr "Descrição"
 
 msgid "Descrição do que este script faz"
-msgstr ""
+msgstr "Descrição do que este script faz"
 
 msgid "Índice de Origem"
-msgstr ""
+msgstr "Índice de Origem"
 
 msgid "Nome do índice OpenSearch de origem (ex: raw_scielo_book)"
-msgstr ""
+msgstr "Nome do índice OpenSearch de origem (ex: raw_scielo_book)"
 
 msgid "Índice de Destino"
-msgstr ""
+msgstr "Índice de Destino"
 
 msgid "Nome do índice OpenSearch de destino (ex: bronze_scielo_books)"
-msgstr ""
+msgstr "Nome do índice OpenSearch de destino (ex: bronze_scielo_books)"
 
 msgid "Query JSON"
-msgstr ""
+msgstr "Query JSON"
 
 msgid ""
 "Query JSON para selecionar documentos. Use {{identifier}} como placeholder "
 "para o ID do documento."
 msgstr ""
+"Query JSON para selecionar documentos. Use {{identifier}} como placeholder "
+"para o ID do documento."
 
 msgid "Script Painless"
-msgstr ""
+msgstr "Script Painless"
 
 msgid ""
 "Script Painless para transformação dos dados. Acesse os dados brutos via "
 "ctx._source.raw_data"
 msgstr ""
+"Script Painless para transformação dos dados. Acesse os dados brutos via "
+"ctx._source.raw_data"
 
 msgid "Ativo"
-msgstr ""
+msgstr "Ativo"
 
 msgid "Se desativado, a transformação não será executada"
-msgstr ""
+msgstr "Se desativado, a transformação não será executada"
 
 msgid "Modelo de Coleta"
-msgstr ""
+msgstr "Modelo de Coleta"
 
 msgid "Modelo de coleta associado a este script para transformação automática"
 msgstr ""
+"Modelo de coleta associado a este script para transformação automática"
 
-#, fuzzy
-#| msgid "disciplina de graduação"
 msgid "Script de Transformação"
-msgstr "disciplina de graduação"
+msgstr "Script de Transformação"
 
 msgid "Scripts de Transformação"
-msgstr ""
+msgstr "Scripts de Transformação"
+
+msgid "Preprint"
+msgstr "Preprint"
+
+msgid "SciELO Data"
+msgstr "SciELO Data"
+
+msgid "Arquivos de Métricas Globais"
+msgstr "Arquivos de Métricas Globais"
+
+msgid "Harvest"
+msgstr "Coleta"
+
+msgid "Aplicar métricas globais"
+msgstr "Aplicar métricas globais"
+
+msgid "Aplicar métricas globais no índice silver"
+msgstr "Aplicar métricas globais no índice silver"
 
 msgid "Executar Transformação"
-msgstr ""
+msgstr "Executar Transformação"
 
 msgid "WORK IN PROGRESS"
 msgstr "EM ANDAMENTO"
@@ -1444,7 +1441,7 @@ msgid "OUTDATED"
 msgstr "DESATUALIZADO"
 
 msgid "NOT"
-msgstr "NÃO"
+msgstr "NOT"
 
 msgid "YES"
 msgstr "SIM"
@@ -1515,41 +1512,22 @@ msgstr "Brasil"
 msgid "ações de {}"
 msgstr "ações de {}"
 
+#, python-brace-format
+msgid ""
+"Gerado automaticamente usando dados coletados e registrados manualmente por "
+"{contribution}"
+msgstr ""
+"Gerado automaticamente usando dados coletados e registrados manualmente por "
+"{contribution}"
+
 msgid "Geração de indicadores de ações"
 msgstr "Geração de indicadores de ações"
 
-msgid "ISSN"
-msgstr "ISSN"
+msgid "Indicator File (DEPRECATED)"
+msgstr "Arquivo de Indicador (DESCONTINUADO)"
 
-msgid "Publications"
-msgstr "Publicações"
-
-msgid "Total Citations"
-msgstr "Citações totais"
-
-msgid "Mean Citations"
-msgstr "Média de citações"
-
-msgid "Cohort Impact (Total)"
-msgstr "Impacto por Coorte (Total)"
-
-msgid "Top 10% Share"
-msgstr "Participação no Top 10%"
-
-msgid "Is Multilingual"
-msgstr "É multilíngue"
-
-#, fuzzy, python-format
-#| msgid "Error executing search: %s"
-msgid "Error loading filters: %s"
-msgstr "Erro ao executar busca: %s"
-
-#, python-format
-msgid "Error executing search: %s"
-msgstr "Erro ao executar busca: %s"
-
-msgid "SciELO Collection"
-msgstr "Coleção SciELO"
+msgid "Indicator Files (DEPRECATED)"
+msgstr "Arquivos de Indicador (DESCONTINUADO)"
 
 msgid "File name"
 msgstr "Nome do arquivo"
@@ -1562,48 +1540,6 @@ msgstr "Arquivo JSONL Zip"
 
 msgid "Dynamic Data"
 msgstr "Dados Dinâmicos"
-
-msgid "Record validity"
-msgstr "Validade do registro"
-
-msgid "Previous Record"
-msgstr "Registro Anterior"
-
-msgid "Posterior Record"
-msgstr "Registro Posterior"
-
-msgid "Sequential number"
-msgstr "Número sequencial"
-
-msgid "Indicator File"
-msgstr "Arquivo de Indicador"
-
-msgid "Scope"
-msgstr "Escopo"
-
-msgid "Measurement"
-msgstr "Medição"
-
-msgid "Code"
-msgstr "Código"
-
-msgid "Observation"
-msgstr "Observação"
-
-msgid "Categoria"
-msgstr "Categoria"
-
-msgid "Contexto"
-msgstr "Contexto"
-
-msgid "Link to graphic"
-msgstr "Link para gráfico"
-
-msgid "Link to the data"
-msgstr "Link para os dados"
-
-msgid "Name of the contributing institution, default=SciELO."
-msgstr "Nome da instituição contribuidora, padrão=SciELO."
 
 msgid "Can edit action_and_practice"
 msgstr "Pode editar ação e prática"
@@ -1650,6 +1586,54 @@ msgstr "Pode editar link para dados"
 msgid "Can edit link do graphic"
 msgstr "Pode editar link do gráfico"
 
+msgid "Indicator (DEPRECATED)"
+msgstr "Indicador (DESCONTINUADO)"
+
+msgid "Indicators (DEPRECATED)"
+msgstr "Indicadores (DESCONTINUADO)"
+
+msgid "Record validity"
+msgstr "Validade do registro"
+
+msgid "Previous Record"
+msgstr "Registro Anterior"
+
+msgid "Posterior Record"
+msgstr "Registro Posterior"
+
+msgid "Sequential number"
+msgstr "Número sequencial"
+
+msgid "Indicator File"
+msgstr "Arquivo de Indicador"
+
+msgid "Scope"
+msgstr "Escopo"
+
+msgid "Measurement"
+msgstr "Medição"
+
+msgid "Code"
+msgstr "Código"
+
+msgid "Observation"
+msgstr "Observação"
+
+msgid "Categoria"
+msgstr "Categoria"
+
+msgid "Contexto"
+msgstr "Contexto"
+
+msgid "Link to graphic"
+msgstr "Link para gráfico"
+
+msgid "Link to the data"
+msgstr "Link para os dados"
+
+msgid "Name of the contributing institution, default=SciELO."
+msgstr "Nome da instituição contribuidora, padrão=SciELO."
+
 msgid "Número"
 msgstr "Número"
 
@@ -1662,14 +1646,44 @@ msgstr "de"
 msgid "por"
 msgstr "por"
 
+msgid "Indicator Data (DEPRECATED)"
+msgstr "Dados do Indicador (DESCONTINUADO)"
+
 msgid "Data Type"
 msgstr "Tipo de Dados"
 
-#, fuzzy, python-format
-#| msgid "Agendado %s %s às %s:%s prioridade: %s"
+msgid "OpenSearch data source linked to this chart."
+msgstr "Fonte de dados do OpenSearch vinculada a este gráfico."
+
+msgid "Introductory text displayed above the charts."
+msgstr "Texto introdutório exibido acima dos gráficos."
+
+msgid "Study Unit"
+msgstr "Unidade de Estudo"
+
+msgid "Document"
+msgstr "Documento"
+
+msgid "Study unit for data aggregation."
+msgstr "Unidade de estudo para agregação de dados."
+
+msgid "Document Chart Page"
+msgstr "Página de Gráfico de Documento"
+
+msgid "Document Chart Pages"
+msgstr "Páginas de Gráfico de Documento"
+
+msgid "Source Chart Page"
+msgstr "Página de Gráfico de Fonte"
+
+msgid "Source Chart Pages"
+msgstr "Páginas de Gráfico de Fonte"
+
+#, python-format
 msgid ""
 "Agendado %(name)s %(day)s às %(hour)s:%(minute)s prioridade: %(priority)s"
-msgstr "Agendado %s %s às %s:%s prioridade: %s"
+msgstr ""
+"Agendado %(name)s %(day)s às %(hour)s:%(minute)s prioridade: %(priority)s"
 
 msgid "Unable to get_or_create_crontab_schedule {} {} {} {} {}"
 msgstr "Não foi possível obter ou criar crontab_schedule {} {} {} {} {}"
@@ -1685,6 +1699,10 @@ msgstr "APC"
 
 msgid "artigos científicos"
 msgstr "artigos científicos"
+
+#, python-brace-format
+msgid "Gerado automaticamente usando dados provenientes de {sources}"
+msgstr "Gerado automaticamente usando dados provenientes de {sources}"
 
 msgid "Geração de indicadores de artigos científicos"
 msgstr "Geração de indicadores de artigos científicos"
@@ -1718,17 +1736,20 @@ msgstr "Selecione uma opção"
 msgid "Study unit"
 msgstr "Unidade de estudo"
 
-msgid "Document"
-msgstr "Documento"
-
-msgid "Journal Metrics"
-msgstr "Métricas de periódicos"
-
 msgid "Show filters"
 msgstr "Mostrar filtros"
 
 msgid "Hide filters"
 msgstr "Ocultar filtros"
+
+msgid "Total documents"
+msgstr "Total de documentos"
+
+msgid "Search documents with current filters"
+msgstr "Buscar documentos com os filtros atuais"
+
+msgid "Search documents"
+msgstr "Buscar documentos"
 
 msgid "Ranking setup"
 msgstr "Configuração do ranking"
@@ -1740,53 +1761,115 @@ msgstr ""
 "Valores de configuração que definem o ranking antes que os filtros laterais "
 "refinem o conjunto de resultados."
 
-msgid "Journal Profile"
-msgstr "Perfil do periódico"
-
-msgid "Ranking Controls"
-msgstr "Controles de ranking"
-
-msgid "Publication Year"
-msgstr "Ano de Publicação"
-
-msgid "Category Type"
-msgstr "Tipo de categoria"
-
-msgid "Category"
-msgstr "Categoria"
-
-msgid "Update"
-msgstr "Atualizar"
-
-msgid "Analytical Summary"
-msgstr "Síntese analítica"
-
-msgid "Journal Attributes"
-msgstr "Atributos do periódico"
-
-msgid "Indexing"
-msgstr "Indexação"
-
-msgid "Time Series in Selected Category"
-msgstr "Série temporal na categoria selecionada"
-
-msgid "Category Comparison in Selected Year"
-msgstr "Comparação entre categorias no ano selecionado"
-
 msgid ""
 "Note: study units Document and Source are still in data backfill. Some "
 "results may be partial for now. Data will be complete soon."
 msgstr "ATENÇÃO: dados em processamento, resultados podem estar parciais."
 
-msgid "Rank"
-msgstr "Ranking"
+msgid "Yes"
+msgstr "Sim"
+
+msgid "No"
+msgstr "Não"
 
 #, python-format
-msgid "Top 10%% Share"
-msgstr "Participação Top 10%%"
+msgid "Error loading filters: %s"
+msgstr "Erro ao carregar filtros: %s"
+
+#, python-format
+msgid "Error executing search: %s"
+msgstr "Erro ao executar busca: %s"
+
+msgid "Fonte de dados do OpenSearch vinculada a este indicador."
+msgstr "Fonte de dados do OpenSearch vinculada a este indicador."
+
+msgid "Texto de introdução."
+msgstr "Texto de introdução."
+
+msgid "DataSource with journal metrics."
+msgstr "Fonte de dados (DataSource) com métricas de periódicos."
+
+msgid ""
+"Enable the Global Metrics tab on the profile page. Only turn on when the "
+"global index is ready."
+msgstr ""
+"Habilitar a aba de Métricas Globais na página de perfil. Ative apenas quando"
+" o índice global estiver pronto."
+
+msgid "Journal Profile Page"
+msgstr "Página de Perfil do Periódico"
+
+msgid "Journal Profile Pages"
+msgstr "Páginas de Perfil do Periódico"
 
 msgid "Open journal page"
 msgstr "Abrir página do periódico"
+
+msgid ""
+"Select filters and click Apply to load the global journal metrics ranking."
+msgstr ""
+"Selecione os filtros e clique em Aplicar para carregar o ranking de métricas"
+" globais de periódicos."
+
+msgid ""
+"Global Normalized Impact ranks journals by their field-normalized citation "
+"impact across all categories and year."
+msgstr ""
+"O Impacto Normalizado Global classifica os periódicos pelo seu impacto de "
+"citação normalizado por área em todas as categorias e anos."
+
+msgid "Journal Profile"
+msgstr "Perfil do periódico"
+
+msgid "Journal Global Metrics"
+msgstr "Métricas Globais de Periódico"
+
+msgid "Journal Thematic Metrics"
+msgstr "Métricas Temáticas de Periódico"
+
+msgid "Global metrics summarize the journal across all fields."
+msgstr "As métricas globais resumem o periódico em todas as áreas."
+
+msgid "Publication Year"
+msgstr "Ano de Publicação"
+
+msgid "Key global indicators for the selected publication year"
+msgstr "Principais indicadores globais para o ano de publicação selecionado"
+
+msgid "Time Series"
+msgstr "Série Temporal"
+
+msgid "Global indicators over all available publication years"
+msgstr "Indicadores globais de todos os anos de publicação disponíveis"
+
+msgid "Thematic metrics compare the journal within a selected scope."
+msgstr ""
+"As métricas temáticas comparam o periódico dentro de um escopo selecionado."
+
+msgid "Scope Level"
+msgstr "Nível do Escopo"
+
+msgid "Thematic Scope"
+msgstr "Escopo temático"
+
+msgid "Key metrics for the selected scope and publication year"
+msgstr "Principais métricas para o escopo e ano de publicação selecionado"
+
+msgid "Time Series by Scope"
+msgstr "Série Temporal por Escopo"
+
+msgid ""
+"Annual evolution of production volume, impact and elite classification of "
+"the journal"
+msgstr ""
+"Evolução anual do volume de produção, impacto e classificação de elite do "
+"periódico"
+
+msgid "Comparison by Scope"
+msgstr "Comparação por Escopo"
+
+msgid "Distribution of the journal across categories for the selected year"
+msgstr "Distribuição do periódico pelas categorias para o ano selecionado"
 
 msgid "Select filters and click Filtrar to load the journal metrics ranking."
 msgstr ""
@@ -1801,92 +1884,6 @@ msgstr ""
 "O Impacto por Coorte classifica periódicos pelas citações recebidas por "
 "documentos publicados no ano e na categoria selecionados, considerando "
 "janelas (2, 3, 5 anos) ou o acumulado total."
-
-msgid "Aggregation Mode"
-msgstr "Modo de Agregação"
-
-msgid "Ranking metric"
-msgstr "Métrica de ranking"
-
-msgid "Number of results"
-msgstr "Número de resultados"
-
-msgid "Minimum publications"
-msgstr "Publicações mínimas"
-
-# Indicator / Journal Metrics terminology (manual additions)
-msgid "Indexed in"
-msgstr "Indexado em"
-
-msgid "Source Type"
-msgstr "Tipo de Fonte"
-
-msgid "Funder"
-msgstr "Financiador"
-
-msgid "Yes"
-msgstr "Sim"
-
-msgid "No"
-msgstr "Não"
-
-msgid "APPLY"
-msgstr "APLICAR"
-
-msgid "Indicator"
-msgstr "Indicador"
-
-msgid "Indicator Data"
-msgstr "Dados de Indicador"
-
-#, fuzzy
-#| msgid "Fonte de dados OpenSearch associada a esta página de busca."
-msgid "Fonte de dados do OpenSearch vinculada a este indicador."
-msgstr "Fonte de dados OpenSearch associada a esta página de busca."
-
-#, fuzzy
-#| msgid "Diretório de Educação"
-msgid "Texto de introdução."
-msgstr "Diretório de Educação"
-
-msgid "Ex: field, subfield, topic, domain"
-msgstr ""
-
-msgid "Ano de publicação padrão (ex: 2024)"
-msgstr ""
-
-msgid "Métrica de ranking padrão"
-msgstr ""
-
-msgid "Data source not configured for this page."
-msgstr ""
-
-#, fuzzy
-#| msgid "Publications"
-msgid "Total Publications"
-msgstr "Publicações"
-
-msgid "Consistency Score"
-msgstr ""
-
-#, fuzzy
-#| msgid "Observation"
-msgid "Observations"
-msgstr "Observação"
-
-#, fuzzy
-#| msgid ""
-#| "Select filters and click Filtrar to load the journal metrics ranking."
-msgid ""
-"Select filters and click Apply to load the global journal metrics ranking."
-msgstr ""
-"Selecione os filtros e clique em Filtrar para carregar o ranking de métricas"
-" de periódicos."
-
-msgid ""
-"Global Normalized Impact ranks journals by their field-normalized citation "
-"impact across all categories and year."
-msgstr ""
 
 msgid "Portal"
 msgstr "Portal"
@@ -1926,6 +1923,9 @@ msgstr "Data"
 
 msgid "Infrastructure Data Upload"
 msgstr "Upload de Dados de Infraestrutura"
+
+msgid "Import error: {ex}, Line: {line + 2}"
+msgstr "Erro de importação: {ex}, Linha: {line + 2}"
 
 msgid "agência de apoio à pesquisa"
 msgstr "agência de apoio à pesquisa"
@@ -2004,6 +2004,9 @@ msgstr "Parâmetro user_id obrigatório."
 msgid "Instutition"
 msgstr "Instituição"
 
+msgid "ISSN"
+msgstr "ISSN"
+
 msgid "ISSN_L"
 msgstr "ISSN_L"
 
@@ -2031,8 +2034,6 @@ msgstr "Documentos"
 msgid "Select an observation table:"
 msgstr "Selecione uma tabela de observação:"
 
-#| msgid ""
-#| "Select an observation table on the evolution of scientific production by:"
 msgid "Select an observation table on social production in Brazil by:"
 msgstr ""
 "Selecione uma tabela de observação sobre a produção social no Brasil por:"
@@ -2053,22 +2054,22 @@ msgstr ""
 "Evolução da produção científica - Mundo - número de documentos por Afiliação"
 " - Região do Mundo"
 
-msgid "Affiliation – Country"
+msgid "Affiliation \\u2013 Country"
 msgstr "Afiliação – País"
 
 msgid ""
 "Evolution of scientific production - World - number of documents by "
-"Affiliation – Country"
+"Affiliation \\u2013 Country"
 msgstr ""
 "Evolução da produção científica - Mundo - número de documentos por Afiliação"
 " – País"
 
-msgid "Affiliation – Institution"
+msgid "Affiliation \\u2013 Institution"
 msgstr "Afiliação – Instituição"
 
 msgid ""
 "Evolution of scientific production - World - number of documents by "
-"Affiliation – Institution"
+"Affiliation \\u2013 Institution"
 msgstr ""
 "Evolução da produção científica - Mundo - número de documentos por Afiliação"
 " – Instituição"
@@ -2084,12 +2085,12 @@ msgid ""
 msgstr ""
 "Evolução da produção científica - Mundo - número de documentos por Periódico"
 
-msgid "Thematic área"
+msgid "Thematic \\u00e1rea"
 msgstr "Área temática"
 
 msgid ""
 "Evolution of scientific production - World - number of documents by Thematic"
-" área"
+" \\u00e1rea"
 msgstr ""
 "Evolução da produção científica - Mundo - número de documentos por Área "
 "temática"
@@ -2150,6 +2151,9 @@ msgstr ""
 "Evolução da produção científica - Mundo - número de documentos por Tipo de "
 "acesso"
 
+msgid "Source Type"
+msgstr "Tipo de Fonte"
+
 msgid ""
 "Evolution of scientific production - World - number of documents by Source "
 "Type"
@@ -2167,11 +2171,49 @@ msgstr ""
 "Evolução da produção científica - Mundo - número de documentos por País da "
 "fonte"
 
+msgid "Funder"
+msgstr "Financiador"
+
 msgid ""
 "Evolution of scientific production - World - number of documents by Funder"
 msgstr ""
 "Evolução da produção científica - Mundo - número de documentos por "
 "Financiador"
+
+msgid "Indexed In (OpenAlex)"
+msgstr "Indexado em (OpenAlex)"
+
+msgid ""
+"Evolution of scientific production - World - number of journals by Indexed "
+"In (OpenAlex)"
+msgstr ""
+"Evolução da produção científica - Mundo - número de periódicos por Indexado "
+"em (OpenAlex)"
+
+msgid "Indexed In (SciELO)"
+msgstr "Indexado em (SciELO)"
+
+msgid ""
+"Evolution of scientific production - World - number of journals by Indexed "
+"In (SciELO)"
+msgstr ""
+"Evolução da produção científica - Mundo - número de periódicos por Indexado "
+"em (SciELO)"
+
+msgid "SciELO Collection"
+msgstr "Coleção SciELO"
+
+msgid ""
+"Evolution of scientific production - World - number of journals by SciELO "
+"Collection"
+msgstr ""
+"Evolução da produção científica - Mundo - número de periódicos por Coleção "
+"SciELO"
+
+msgid ""
+"Evolution of scientific production - World - number of journals by Scope"
+msgstr ""
+"Evolução da produção científica - Mundo - número de periódicos por Escopo"
 
 msgid "Events"
 msgstr "Eventos"
@@ -2230,8 +2272,27 @@ msgstr "Subárea"
 msgid "Brazil - Social Production - Country - Documents - Subarea"
 msgstr "Brasil - Produção Social - País - Documentos - Subárea"
 
-msgid "All"
+msgid ""
+"Evolution of scientific production - World - number of journals by Publisher"
 msgstr ""
+"Evolução da produção científica - Mundo - número de periódicos por Editora"
+
+msgid ""
+"Evolution of scientific production - World - number of journals by Source "
+"Type"
+msgstr ""
+"Evolução da produção científica - Mundo - número de periódicos por Tipo de "
+"Fonte"
+
+msgid ""
+"Evolution of scientific production - World - number of journals by Source "
+"Country"
+msgstr ""
+"Evolução da produção científica - Mundo - número de periódicos por País de "
+"Origem"
+
+msgid "All"
+msgstr "Todos"
 
 msgid "Data Source"
 msgstr "Fonte de Dados"
@@ -2239,82 +2300,78 @@ msgstr "Fonte de Dados"
 msgid "Fonte de dados OpenSearch associada a esta página de busca."
 msgstr "Fonte de dados OpenSearch associada a esta página de busca."
 
-#, fuzzy
-#| msgid "Division"
 msgid "Dimensions"
-msgstr "Colégio"
+msgstr "Dimensões"
 
 msgid "Slug"
-msgstr ""
+msgstr "Slug"
 
 msgid "Unique identifier for this dimension in this page."
-msgstr ""
+msgstr "Identificador único para esta dimensão nesta página."
 
 msgid "Menu label"
-msgstr ""
+msgstr "Rótulo do menu"
 
 msgid ""
 "Short label shown in the dimension selector (e.g. Institution, Events)."
 msgstr ""
+"Rótulo curto exibido no seletor de dimensão (ex: Instituição, Eventos)."
 
-#, fuzzy
-#| msgid "File name"
 msgid "Row field name"
-msgstr "Nome do arquivo"
+msgstr "Nome do campo de linha"
 
 msgid ""
 "DataSource field key used as row dimension (e.g. country, institution)."
 msgstr ""
+"Chave do campo da fonte de dados (DataSource) usada como dimensão de linha "
+"(ex: país, instituição)."
 
 msgid "Column field name"
-msgstr ""
+msgstr "Nome do campo da coluna"
 
 msgid "DataSource field key used as column dimension."
 msgstr ""
+"Chave do campo da fonte de dados (DataSource) usada como dimensão de coluna."
 
 msgid "Row bucket size"
-msgstr ""
+msgstr "Tamanho do bucket da linha"
 
 msgid "Column bucket size"
-msgstr ""
+msgstr "Tamanho do bucket da coluna"
 
-#, fuzzy
-#| msgid "Journal title"
 msgid "Table title"
-msgstr "Título do periódico"
+msgstr "Título da tabela"
 
 msgid ""
 "Full title displayed above the table and KPI; can be longer than the menu "
 "label."
 msgstr ""
+"Título completo exibido acima da tabela e do KPI; pode ser mais longo do que"
+" o rótulo do menu."
 
 msgid "KPI label"
-msgstr ""
+msgstr "Rótulo do KPI"
 
 msgid "Row label"
-msgstr ""
+msgstr "Rótulo da linha"
 
 msgid "Column label"
-msgstr ""
+msgstr "Rótulo da coluna"
 
 msgid "Value label"
-msgstr ""
+msgstr "Rótulo do valor"
 
 msgid "Default dimension"
-msgstr ""
+msgstr "Dimensão padrão"
 
 msgid "If checked, this dimension is selected when the page loads."
-msgstr ""
+msgstr "Se marcado, esta dimensão será selecionada quando a página carregar."
 
-#, fuzzy
-#| msgid "Observation"
 msgid "Observation dimension"
-msgstr "Observação"
+msgstr "Dimensão de observação"
 
-#, fuzzy
-#| msgid "Observation"
 msgid "Observation dimensions"
-msgstr "Observação"
+msgstr "Dimensões de observação"
 
 msgid ""
 "Use the detail icon next to country name. Use row checkboxes and then "
@@ -2384,64 +2441,54 @@ msgstr "Fechar"
 msgid "Country comparison"
 msgstr "Comparação de países"
 
-#, fuzzy
-#| msgid "Loading table data..."
 msgid "Preparing CSV data..."
-msgstr "Carregando dados da tabela..."
+msgstr "Preparando dados CSV..."
 
 #, python-format
 msgid "Collecting rows for single CSV... %(rows)s"
-msgstr ""
+msgstr "Coletando linhas para CSV único... %(rows)s"
 
 msgid "Formatting CSV..."
-msgstr ""
+msgstr "Formatando CSV..."
 
 msgid "Row"
-msgstr ""
+msgstr "Linha"
 
-#, fuzzy
-#| msgid "Error Message"
 msgid "Message"
-msgstr "Mensagem de Erro"
+msgstr "Mensagem"
 
 msgid "No data returned for selected dimension and filters"
-msgstr ""
+msgstr "Nenhum dado retornado para a dimensão e filtros selecionados"
 
 #, python-format
 msgid "Generating CSV... %(processed)s/%(total)s"
-msgstr ""
+msgstr "Gerando CSV... %(processed)s/%(total)s"
 
 #, python-format
 msgid "CSV ready (%(rows)s rows)"
-msgstr ""
+msgstr "CSV pronto (%(rows)s linhas)"
 
-#, fuzzy
-#| msgid "Division"
 msgid "Dimension"
-msgstr "Colégio"
+msgstr "Dimensão"
 
-#, fuzzy
-#| msgid "No category data available"
 msgid "No data available for export"
-msgstr "Nenhum dado de categoria disponível"
+msgstr "Nenhum dado disponível para exportação"
 
-#, fuzzy
-#| msgid "Totals"
 msgid "Total"
-msgstr "Totais"
+msgstr "Total"
 
 msgid "No documents returned for selected dimension and filters"
-msgstr ""
+msgstr "Nenhum documento retornado para a dimensão e filtros selecionados"
 
 #, python-format
 msgid "Generating CSV files... %(processed)s/%(total)s"
-msgstr ""
+msgstr "Gerando arquivos CSV... %(processed)s/%(total)s"
 
 msgid "All CSV files are ready"
-msgstr ""
+msgstr "Todos os arquivos CSV estão prontos"
 
 msgid "Starting backend export..."
-msgstr ""
+msgstr "Iniciando exportação em segundo plano..."
 
 msgid "promoção"
 msgstr "promoção"
@@ -2563,6 +2610,9 @@ msgstr "Data da coleta"
 msgid "Resource Type"
 msgstr "Tipo de Recurso"
 
+msgid "Update"
+msgstr "Atualizar"
+
 msgid "Error Type"
 msgstr "Tipo de Erro"
 
@@ -2631,32 +2681,40 @@ msgid "Articles Directory"
 msgstr "Diretório de Artigos"
 
 msgid "Use AND, OR ou NOT para combinar termos na busca avançada."
-msgstr ""
+msgstr "Use AND, OR ou NOT para combinar termos na busca avançada."
 
 msgid "A busca avançada contém aspas sem fechamento."
-msgstr ""
+msgstr "A busca avançada contém aspas sem fechamento."
+
+#, python-brace-format
+msgid "Campo desconhecido na busca avançada: {field_name}"
+msgstr "Campo desconhecido na busca avançada: {field_name}"
+
+#, python-brace-format
+msgid "Informe um termo após o campo {field_name}."
+msgstr "Informe um termo após o campo {field_name}."
 
 #, python-format
 msgid "Operador %(operator)s em posição inválida."
-msgstr ""
+msgstr "Operador %(operator)s em posição inválida."
 
 msgid "Informe um termo após o operador NOT."
-msgstr ""
+msgstr "Informe um termo após o operador NOT."
 
 msgid "A busca avançada contém parênteses vazios."
-msgstr ""
+msgstr "A busca avançada contém parênteses vazios."
 
 msgid "A busca avançada contém parêntese de fechamento sem abertura."
-msgstr ""
+msgstr "A busca avançada contém parêntese de fechamento sem abertura."
 
 msgid "A busca avançada contém uma expressão incompleta antes de ')'."
-msgstr ""
+msgstr "A busca avançada contém uma expressão incompleta antes de ')'."
 
 msgid "A busca avançada contém parênteses sem fechamento."
-msgstr ""
+msgstr "A busca avançada contém parênteses sem fechamento."
 
 msgid "A busca avançada termina com uma expressão incompleta."
-msgstr ""
+msgstr "A busca avançada termina com uma expressão incompleta."
 
 msgid "Todos"
 msgstr "Todos"
@@ -2851,121 +2909,104 @@ msgid "Série"
 msgstr "Série"
 
 msgid "Todos os campos"
-msgstr ""
+msgstr "Todos os campos"
 
-#, fuzzy
-#| msgid "Capítulo"
 msgid "Título"
-msgstr "Capítulo"
+msgstr "Título"
 
 msgid "DOI, ISBN, identificadores"
-msgstr ""
+msgstr "DOI, ISBN, identificadores"
 
 msgid "Autores"
-msgstr ""
+msgstr "Autores"
 
 msgid "BibTeX"
-msgstr ""
+msgstr "BibTeX"
 
-#, fuzzy
-#| msgid "Reference data"
 msgid "Reference Manager"
-msgstr "Dados de referência"
+msgstr "Gerenciador de Referências"
 
 msgid "CSV"
-msgstr ""
+msgstr "CSV"
 
 msgid "Vancouver"
-msgstr ""
+msgstr "Vancouver"
 
 msgid "American Psychological Association"
-msgstr ""
+msgstr "American Psychological Association"
 
-#, fuzzy
-#| msgid "Cited Documents (≥1 citation)"
 msgid "Could not map documents to citations."
-msgstr "Documentos citados (≥1 citação)"
+msgstr "Não foi possível mapear documentos para citações."
 
 msgid "Could not generate BibTeX for the selection."
-msgstr ""
+msgstr "Não foi possível gerar o BibTeX para a seleção."
 
 msgid "Unsupported export format."
-msgstr ""
+msgstr "Formato de exportação não suportado."
+
+msgid "Untitled"
+msgstr "Sem título"
 
 msgid "Citation style is not available on the server."
-msgstr ""
+msgstr "O estilo de citação não está disponível no servidor."
 
 msgid "An unexpected error occurred."
-msgstr ""
+msgstr "Ocorreu um erro inesperado."
 
-#, fuzzy
-#| msgid "Param user_id is required."
 msgid "Style name is required."
-msgstr "O parâmetro user_id é obrigatório."
+msgstr "O nome do estilo é obrigatório."
 
 msgid "Invalid JSON body."
-msgstr ""
+msgstr "Corpo JSON inválido."
 
 msgid "Invalid payload."
-msgstr ""
+msgstr "Payload inválido."
+
+#, python-brace-format
+msgid "Invalid document entry at index {index}."
+msgstr "Entrada de documento inválida no índice {index}."
 
 msgid "Each document must have a source object."
-msgstr ""
+msgstr "Cada documento deve ter um objeto fonte."
 
 msgid "Field documents must be a non-empty list."
-msgstr ""
+msgstr "O campo documents deve ser uma lista não vazia."
 
-#, fuzzy
-#| msgid "Citar"
 msgid "Como citar"
-msgstr "Citar"
+msgstr "Como citar"
 
-#, fuzzy
-#| msgid "Fechado"
 msgid "Fechar"
-msgstr "Fechado"
+msgstr "Fechar"
 
 msgid "Outros formatos de citação e exportação:"
-msgstr ""
+msgstr "Outros formatos de citação e exportação:"
 
-#, fuzzy
-#| msgid "Selecione uma opção"
 msgid "Selecione um formato de citação…"
-msgstr "Selecione uma opção"
+msgstr "Selecione um formato de citação…"
 
 msgid "Buscar formato…"
-msgstr ""
+msgstr "Buscar formato…"
 
-#, fuzzy
-#| msgid "Data de criação"
 msgid "Filtrar formatos de citação"
-msgstr "Data de criação"
+msgstr "Filtrar formatos de citação"
 
 msgid "Lista baseada nos estilos CSL instalados no servidor."
-msgstr ""
+msgstr "Lista baseada nos estilos CSL instalados no servidor."
 
-#, fuzzy
-#| msgid "Ano de criação"
 msgid "Copiar citação"
-msgstr "Ano de criação"
+msgstr "Copiar citação"
 
 msgid "Copiar"
-msgstr ""
+msgstr "Copiar"
 
-#, fuzzy
-#| msgid "Campo de busca"
 msgid "Modo de busca"
-msgstr "Campo de busca"
+msgstr "Modo de busca"
 
-#, fuzzy
-#| msgid "Campo de busca"
 msgid "Campos"
-msgstr "Campo de busca"
+msgstr "Campos"
 
-#, fuzzy
-#| msgid "Busca avançada"
 msgid "Avançada"
-msgstr "Busca avançada"
+msgstr "Avançada"
 
 msgid "Mostrar filtros"
 msgstr "Mostrar filtros"
@@ -2977,10 +3018,10 @@ msgid "Operador lógico"
 msgstr "Operador lógico"
 
 msgid "AND"
-msgstr "E"
+msgstr "AND"
 
 msgid "OR"
-msgstr "OU"
+msgstr "OR"
 
 msgid "Campo de busca"
 msgstr "Campo de busca"
@@ -2991,38 +3032,30 @@ msgstr "Termos de pesquisa..."
 msgid "Remover"
 msgstr "Remover"
 
-#, fuzzy
-#| msgid "resultado encontrado"
 msgid "Nenhum resultado encontrado"
-msgstr "resultado encontrado"
+msgstr "Nenhum resultado encontrado"
 
 msgid ""
 "Não encontramos itens que correspondam aos termos e filtros aplicados nesta "
 "busca."
 msgstr ""
+"Não encontramos itens que correspondam aos termos e filtros aplicados nesta "
+"busca."
 
 msgid "Paginação dos resultados"
 msgstr "Paginação dos resultados"
 
-#, fuzzy
-#| msgid "Selecionar página"
 msgid "Primeira página"
-msgstr "Selecionar página"
+msgstr "Primeira página"
 
-#, fuzzy
-#| msgid "Página"
 msgid "Página anterior"
-msgstr "Página"
+msgstr "Página anterior"
 
-#, fuzzy
-#| msgid "Próxima"
 msgid "Próxima página"
-msgstr "Próxima"
+msgstr "Próxima página"
 
-#, fuzzy
-#| msgid "Frequência"
 msgid "Última página"
-msgstr "Frequência"
+msgstr "Última página"
 
 msgid "Mostrando"
 msgstr "Mostrando"
@@ -3034,11 +3067,11 @@ msgid ""
 "Por questões de performance, o sistema exibe apenas os primeiros 10.000 "
 "registros. Use os filtros laterais para encontrar resultados específicos."
 msgstr ""
+"Por questões de performance, o sistema exibe apenas os primeiros 10.000 "
+"registros. Use os filtros laterais para encontrar resultados específicos."
 
-#, fuzzy
-#| msgid "Exportar"
 msgid "Exportar CSV"
-msgstr "Exportar"
+msgstr "Exportar CSV"
 
 msgid "Citar"
 msgstr "Citar"
@@ -3059,7 +3092,7 @@ msgid "Open access"
 msgstr "Acesso aberto"
 
 msgid "Pages"
-msgstr ""
+msgstr "Páginas"
 
 msgid "Citations"
 msgstr "Citações"
@@ -3068,34 +3101,32 @@ msgid "Subjects"
 msgstr "Área temática"
 
 msgid "Alias"
-msgstr ""
+msgstr "Alias"
 
 msgid "IDs"
-msgstr ""
+msgstr "IDs"
 
-#, fuzzy
-#| msgid "Contexto"
 msgid "Contacts"
-msgstr "Contexto"
+msgstr "Contatos"
 
 msgid "SciELO Preprint ID"
-msgstr ""
+msgstr "ID de Preprint SciELO"
 
 msgid "Registro"
 msgstr "Registro"
 
 #, python-format
 msgid "ORCID de %(name)s"
-msgstr ""
+msgstr "ORCID de %(name)s"
 
 msgid "ORCID do autor"
-msgstr ""
+msgstr "ORCID do autor"
 
 msgid "Exibir:"
 msgstr "Exibir:"
 
 msgid "Selecionar número de resultados por página"
-msgstr ""
+msgstr "Selecionar número de resultados por página"
 
 msgid "Ordenar por:"
 msgstr "Ordenar por:"
@@ -3107,7 +3138,7 @@ msgid "Mais recentes"
 msgstr "Mais recentes"
 
 msgid "Mais antigos"
-msgstr ""
+msgstr "Mais antigos"
 
 msgid "Mais citados"
 msgstr "Mais citados"
@@ -3124,128 +3155,109 @@ msgstr "selecionado"
 msgid "selecionados"
 msgstr "selecionados"
 
-#, fuzzy, python-format
-#| msgid "Ordenar resultados"
+#, python-format
 msgid "Selecionar resultado %(number)s"
-msgstr "Ordenar resultados"
+msgstr "Selecionar resultado %(number)s"
 
-#, fuzzy
-#| msgid "resultados"
 msgid "Resultados da busca"
-msgstr "resultados"
+msgstr "Resultados da busca"
 
 msgid "Ex: title: &quot;Ciência Aberta&quot; AND publication_year: 2025"
-msgstr ""
+msgstr "Ex: title: &quot;Ciência Aberta&quot; AND publication_year: 2025"
 
 msgid "Ajuda na sintaxe"
-msgstr ""
+msgstr "Ajuda na sintaxe"
 
 msgid "Pesquisar"
 msgstr "Pesquisar"
 
-#, fuzzy
-#| msgid "Operador lógico"
 msgid "Operadores Lógicos"
-msgstr "Operador lógico"
+msgstr "Operadores Lógicos"
 
 msgid "Intersecção (ambos os termos)"
-msgstr ""
+msgstr "Intersecção (ambos os termos)"
 
 msgid "União (um ou outro termo)"
-msgstr ""
+msgstr "União (um ou outro termo)"
 
 msgid "Exclusão de termo específico"
-msgstr ""
+msgstr "Exclusão de termo específico"
 
 msgid "Busca por frase exata"
-msgstr ""
+msgstr "Busca por frase exata"
 
 msgid "Identificadores de Campos"
-msgstr ""
+msgstr "Identificadores de Campos"
 
 msgid "DOCUMENTO"
-msgstr ""
+msgstr "DOCUMENTO"
 
-#, fuzzy
-#| msgid "Total Documents"
 msgid "Título do documento"
-msgstr "Total de documentos"
+msgstr "Título do documento"
 
 msgid "Resumo"
-msgstr ""
+msgstr "Resumo"
 
 msgid "Palavras-chave"
-msgstr ""
+msgstr "Palavras-chave"
 
 msgid "Acesso aberto (true/false)"
-msgstr ""
+msgstr "Acesso aberto (true/false)"
 
-#, fuzzy
-#| msgid "Ano de criação"
 msgid "Ano de publicação"
-msgstr "Ano de criação"
+msgstr "Ano de publicação"
 
 msgid "Código DOI"
-msgstr ""
+msgstr "Código DOI"
 
-#, fuzzy
-#| msgid "Artigo de periódico"
 msgid "ISSN de periódico"
-msgstr "Artigo de periódico"
+msgstr "ISSN de periódico"
 
-#, fuzzy
-#| msgid "Parte de livro"
 msgid "ISBN de livro"
-msgstr "Parte de livro"
+msgstr "ISBN de livro"
 
 msgid "AUTORIA E INSTITUIÇÃO"
-msgstr ""
+msgstr "AUTORIA E INSTITUIÇÃO"
 
 msgid "Autor do documento"
-msgstr ""
+msgstr "Autor do documento"
 
-#, fuzzy
-#| msgid "instituição"
 msgid "Nome da instituição"
-msgstr "instituição"
+msgstr "Nome da instituição"
 
-#, fuzzy
-#| msgid "instituição"
 msgid "País da instituição"
-msgstr "instituição"
+msgstr "País da instituição"
 
 msgid "FONTE"
-msgstr ""
+msgstr "FONTE"
 
 msgid "Nome do periódico ou livro"
-msgstr ""
+msgstr "Nome do periódico ou livro"
 
-#, fuzzy
-#| msgid "Publicado"
 msgid "Casa publicadora"
-msgstr "Publicado"
+msgstr "Editora"
 
-#, fuzzy
-#| msgid "Link to the data"
 msgid "Tipo de fonte"
-msgstr "Link para os dados"
+msgstr "Tipo de fonte"
 
 msgid "FINANCIAMENTO"
-msgstr ""
+msgstr "FINANCIAMENTO"
 
 msgid "Nome do financiador"
-msgstr ""
+msgstr "Nome do financiador"
 
 msgid "Nome do prêmio ou bolsa"
-msgstr ""
+msgstr "Nome do prêmio ou bolsa"
 
 msgid "Exemplo de Construção"
-msgstr ""
+msgstr "Exemplo de Construção"
 
 msgid ""
 "Dica: Combine múltiplos campos para refinar os seus resultados. Use aspas "
 "para termos compostos."
 msgstr ""
+"Dica: Combine múltiplos campos para refinar os seus resultados. Use aspas "
+"para termos compostos."
 
 msgid "Adicionar campo"
 msgstr "Adicionar campo"
@@ -3254,7 +3266,7 @@ msgid "Limpar"
 msgstr "Limpar"
 
 msgid "Search..."
-msgstr ""
+msgstr "Buscar..."
 
 msgid "Nome do índice no OpenSearch"
 msgstr "Nome do índice no OpenSearch"
@@ -3269,26 +3281,66 @@ msgid ""
 "Configuração completa dos filtros e formulários. Shape canônico: {fields: "
 "{...}, forms: {...}}."
 msgstr ""
+"Configuração completa dos filtros e formulários. Shape canônico: {fields: "
+"{...}, forms: {...}}."
+
+msgid ""
+"Configuração de métricas dinâmicas. Shape canônico: {groups: {...}, "
+"displays: {...}}."
+msgstr ""
+"Configuração de métricas dinâmicas. Shape canônico: {groups: {...}, "
+"displays: {...}}."
 
 msgid "Data Sources"
 msgstr "Fontes de Dados"
 
-#, fuzzy
-#| msgid "Date"
-msgid "De"
-msgstr "Data"
+msgid "Metric preview"
+msgstr "Visualização de métricas"
 
-msgid "Ano inicial"
-msgstr ""
+msgid "Index"
+msgstr "Índice"
+
+msgid "Metric fields"
+msgstr "Campos de métricas"
+
+msgid "Metric"
+msgstr "Métrica"
+
+msgid "Aggregation"
+msgstr "Agregação"
+
+msgid "Configured field"
+msgstr "Campo configurado"
+
+msgid "Resolved OpenSearch field"
+msgstr "Campo resolvido do OpenSearch"
+
+msgid "Status"
+msgstr "Status"
+
+msgid "Chart data sample"
+msgstr "Amostra de dados do gráfico"
+
+msgid "Sample"
+msgstr "Amostra"
+
+msgid "No chart data returned."
+msgstr "Nenhum dado de gráfico retornado."
+
+msgid "De"
+msgstr "De"
+
+msgid "Start year"
+msgstr "Ano de início"
 
 msgid "Até"
-msgstr ""
+msgstr "Até"
 
-msgid "Ano final"
-msgstr ""
+msgid "End year"
+msgstr "Ano de fim"
 
 msgid "Refinar busca"
-msgstr ""
+msgstr "Refinar busca"
 
 msgid "LIMPAR"
 msgstr "LIMPAR"
@@ -3296,13 +3348,137 @@ msgstr "LIMPAR"
 msgid "FILTRAR"
 msgstr "FILTRAR"
 
-#, fuzzy
-#| msgid "Filtros aplicados"
 msgid "Filtros selecionados"
-msgstr "Filtros aplicados"
+msgstr "Filtros selecionados"
 
 msgid "Topic"
 msgstr "Tópico"
+
+msgid "Argentina"
+msgstr "Argentina"
+
+msgid "Bolivia"
+msgstr "Bolívia"
+
+msgid "Chile"
+msgstr "Chile"
+
+msgid "Science and Culture"
+msgstr "Ciência e Cultura"
+
+msgid "Colombia"
+msgstr "Colômbia"
+
+msgid "Costa Rica"
+msgstr "Costa Rica"
+
+msgid "Cuba"
+msgstr "Cuba"
+
+msgid "Dominican Republic"
+msgstr "República Dominicana"
+
+msgid "Ecuador"
+msgstr "Equador"
+
+msgid "Spain"
+msgstr "Espanha"
+
+msgid "Mexico"
+msgstr "México"
+
+msgid "Peru"
+msgstr "Peru"
+
+msgid "Portugal"
+msgstr "Portugal"
+
+msgid "Paraguay"
+msgstr "Paraguai"
+
+msgid "PEPSIC"
+msgstr "PEPSIC"
+
+msgid "REVENF"
+msgstr "REVENF"
+
+msgid "RevTur"
+msgstr "RevTur"
+
+msgid "Brazil"
+msgstr "Brasil"
+
+msgid "Public Health"
+msgstr "Saúde Pública"
+
+msgid "Social Sciences"
+msgstr "Ciências Sociais"
+
+msgid "South Africa"
+msgstr "África do Sul"
+
+msgid "Uruguay"
+msgstr "Uruguai"
+
+msgid "Venezuela"
+msgstr "Venezuela"
+
+msgid "West Indies"
+msgstr "Índias Ocidentais"
+
+msgid "ArXiv"
+msgstr "ArXiv"
+
+msgid "Crossref"
+msgstr "Crossref"
+
+msgid "Datacite"
+msgstr "DataCite"
+
+msgid "PubMed"
+msgstr "PubMed"
+
+msgid "Diamond"
+msgstr "Diamante"
+
+msgid "Article"
+msgstr "Artigo"
+
+msgid "Book chapter"
+msgstr "Capítulo de livro"
+
+msgid "LibGuides"
+msgstr "LibGuides"
+
+msgid "Peer review"
+msgstr "Revisão por pares"
+
+msgid "Reference entry"
+msgstr "Entrada de referência"
+
+msgid "Retraction"
+msgstr "Retratação"
+
+msgid "Software"
+msgstr "Software"
+
+msgid "Supplementary material"
+msgstr "Material suplementar"
+
+msgid "Book series"
+msgstr "Série de livros"
+
+msgid "Conference"
+msgstr "Conferência"
+
+msgid "eBook platform"
+msgstr "Plataforma de eBook"
+
+msgid "IGSN Catalog"
+msgstr "Catálogo IGSN"
+
+msgid "Repository"
+msgstr "Repositório"
 
 msgid "Ciências da Vida"
 msgstr "Ciências da Vida"
@@ -3520,981 +3696,41 @@ msgstr "Ações"
 msgid "Useful Models"
 msgstr "Modelos Úteis"
 
-msgid "Indexed In (OpenAlex)"
-msgstr "Indexed In (OpenAlex)"
+msgid "Thematic"
+msgstr "Temático"
 
-msgid "Indexed In (SciELO)"
-msgstr "Indexed In (SciELO)"
+msgid "Affiliation & Funding"
+msgstr "Afiliação e Financiamento"
 
-msgid ""
-"Evolution of scientific production - World - number of journals by Indexed "
-"In (OpenAlex)"
-msgstr ""
-"Evolução da produção científica - Mundo - número de periódicos por Indexed "
-"In (OpenAlex)"
+msgid "Sustainable Development Goals"
+msgstr "Objetivos de Desenvolvimento Sustentável"
 
-msgid ""
-"Evolution of scientific production - World - number of journals by Indexed "
-"In (SciELO)"
-msgstr ""
-"Evolução da produção científica - Mundo - número de periódicos por Indexed "
-"In (SciELO)"
+msgid "Institution Name"
+msgstr "Nome da Instituição"
 
-msgid ""
-"Evolution of scientific production - World - number of journals by SciELO "
-"Collection"
-msgstr ""
-"Evolução da produção científica - Mundo - número de periódicos por Coleção "
-"SciELO"
+msgid "Affiliation Country"
+msgstr "País de Afiliação"
 
-msgid ""
-"Evolution of scientific production - World - number of journals by Scope"
-msgstr ""
-"Evolução da produção científica - Mundo - número de periódicos por Escopo"
+msgid "Funder Name"
+msgstr "Nome do Financiador"
 
-msgid ""
-"Evolution of scientific production - World - number of journals by Publisher"
-msgstr ""
-"Evolução da produção científica - Mundo - número de periódicos por Editora"
+msgid "Metrics"
+msgstr "Métricas"
 
-msgid ""
-"Evolution of scientific production - World - number of journals by Source "
-"Type"
-msgstr ""
-"Evolução da produção científica - Mundo - número de periódicos por Tipo de "
-"Fonte"
+msgid "Citation Count"
+msgstr "Contagem de Citações"
 
-msgid ""
-"Evolution of scientific production - World - number of journals by Source "
-"Country"
-msgstr ""
-"Evolução da produção científica - Mundo - número de periódicos por País de "
-"Origem"
+msgid "Reference Count"
+msgstr "Contagem de Referências"
 
-#~ msgid "Busca"
-#~ msgstr "Busca"
+msgid "Author Count"
+msgstr "Contagem de Autores"
 
-#~ msgid "Gráficos"
-#~ msgstr "Gráficos"
+msgid "Publisher Name"
+msgstr "Nome da Editora"
 
-#~ msgid "Comitê"
-#~ msgstr "Comitê"
+msgid "Breakdown Variable"
+msgstr "Variável de Detalhamento"
 
-#~ msgid "Notícias"
-#~ msgstr "Notícias"
-
-#~ msgid "Menu Secundário"
-#~ msgstr "Menu Secundário"
-
-#~ msgid "Sobre"
-#~ msgstr "Sobre"
-
-#~ msgid "Sobre o OCABr"
-#~ msgstr "Sobre o OCABr"
-
-#~ msgid "Observação"
-#~ msgstr "Observação"
-
-#~ msgid "Produção Científica"
-#~ msgstr "Produção Científica"
-
-#~ msgid "Produção Social"
-#~ msgstr "Produção Social"
-
-#~ msgid "Directory Fields"
-#~ msgstr "Campos do diretório"
-
-#, fuzzy
-#~ msgid "Vlidation error"
-#~ msgstr "Erro de validação"
-
-#, fuzzy, python-format
-#~ msgid "Vlidation error: %s"
-#~ msgstr "Erro de validação: %s"
-
-#, python-format
-#~ msgid "Unknown Practice, line: %s"
-#~ msgstr "Prática desconhecida, linha: %s"
-
-#, fuzzy, python-format
-#~ msgid "Import error: %(error)s, Line: %(line)s"
-#~ msgstr "Erro na importação: %s, Linha: %s"
-
-#, python-brace-format
-#~ msgid ""
-#~ "Gerado automaticamente usando dados coletados e registrados manualmente por "
-#~ "{contribution}"
-#~ msgstr ""
-#~ "Gerado automaticamente usando dados coletados e registrados manualmente por "
-#~ "{contribution}"
-
-#, python-brace-format
-#~ msgid "Gerado automaticamente usando dados provenientes de {sources}"
-#~ msgstr "Gerado automaticamente usando dados provenientes de {sources}"
-
-#~ msgid "Generate scientific indicator"
-#~ msgstr "Gerar indicador científico"
-
-#~ msgid "Ranking Configuration"
-#~ msgstr "Configuração do ranking"
-
-#~ msgid "Ranking"
-#~ msgstr "Ranking"
-
-#~ msgid "Cohort Impact"
-#~ msgstr "Impacto por Coorte"
-
-#~ msgid "Cohort Impact (2 years)"
-#~ msgstr "Impacto por Coorte (2 anos)"
-
-#~ msgid "Cohort Impact (3 years)"
-#~ msgstr "Impacto por Coorte (3 anos)"
-
-#~ msgid "Cohort Impact (5 years)"
-#~ msgstr "Impacto por Coorte (5 anos)"
-
-#~ msgid "Mean Citations (2 years)"
-#~ msgstr "Média de citações (2 anos)"
-
-#~ msgid "Mean Citations (3 years)"
-#~ msgstr "Média de citações (3 anos)"
-
-#~ msgid "Mean Citations (5 years)"
-#~ msgstr "Média de citações (5 anos)"
-
-#, python-format
-#~ msgid "Top 1%% Publications Share"
-#~ msgstr "Participação Top 1%% (publicações)"
-
-#, python-format
-#~ msgid "Top 5%% Publications Share"
-#~ msgstr "Participação Top 5%% (publicações)"
-
-#, python-format
-#~ msgid "Top 10%% Publications Share"
-#~ msgstr "Participação Top 10%% (publicações)"
-
-#, python-format
-#~ msgid "Top 50%% Publications Share"
-#~ msgstr "Participação Top 50%% (publicações)"
-
-#~ msgid "Filters"
-#~ msgstr "Filtros"
-
-#~ msgid "Journal Identity"
-#~ msgstr "Identificação do periódico"
-
-#~ msgid "Collection"
-#~ msgstr "Coleção"
-
-#~ msgid "Field"
-#~ msgstr "Área"
-
-#~ msgid "Indexing / Coverage"
-#~ msgstr "Indexação / Cobertura"
-
-#~ msgid "Is SciELO"
-#~ msgstr "É SciELO"
-
-#~ msgid "Select an option"
-#~ msgstr "Selecione uma opção"
-
-#~ msgid "Is Scopus"
-#~ msgstr "Indexado no Scopus"
-
-#~ msgid "Is WoS"
-#~ msgstr "Indexado na WoS"
-
-#~ msgid "Is DOAJ"
-#~ msgstr "Indexado no DOAJ"
-
-#~ msgid "Is OpenAlex"
-#~ msgstr "Indexado no OpenAlex"
-
-#~ msgid "Any value"
-#~ msgstr "Qualquer valor"
-
-# Placeholders (select2 / inline JS in templates)
-#~ msgid "Select a country"
-#~ msgstr "Selecione um país"
-
-#~ msgid "Select a collection"
-#~ msgstr "Selecione uma coleção"
-
-#~ msgid "Select a SciELO collection"
-#~ msgstr "Selecione uma coleção SciELO"
-
-#~ msgid "Select a category type"
-#~ msgstr "Selecione um tipo de categoria"
-
-#~ msgid "Select a ranking metric"
-#~ msgstr "Selecione uma métrica de ranking"
-
-#~ msgid "Select a value"
-#~ msgstr "Selecione um valor"
-
-#~ msgid "Type journal name..."
-#~ msgstr "Digite o nome do periódico..."
-
-#~ msgid "Type ISSN..."
-#~ msgstr "Digite o ISSN..."
-
-#~ msgid "Type publisher name..."
-#~ msgstr "Digite o nome da editora..."
-
-#~ msgid "Select a category id"
-#~ msgstr "Selecione uma categoria"
-
-#~ msgid "Graph Options"
-#~ msgstr "Opções de Gráfico"
-
-#~ msgid "Breakdown Variable"
-#~ msgstr "Variável de Desagregação"
-
-#~ msgid "Source Identity"
-#~ msgstr "Identificação da fonte"
-
-#~ msgid "Click to activate not operator"
-#~ msgstr "Clique para ativar operador de negação"
-
-#~ msgid "Document Core"
-#~ msgstr "Dados do documento"
-
-#~ msgid "Publication Year Start"
-#~ msgstr "Ano de Publicação Inicial"
-
-#~ msgid "Start"
-#~ msgstr "Início"
-
-#~ msgid "Publication Year End"
-#~ msgstr "Ano de Publicação Final"
-
-#~ msgid "End"
-#~ msgstr "Fim"
-
-#~ msgid "Funding"
-#~ msgstr "Financiamento"
-
-#~ msgid "Author Affiliation"
-#~ msgstr "Afiliação do Autor"
-
-#~ msgid "Country Query Operator"
-#~ msgstr "Operador de Consulta de País"
-
-#~ msgid "Select a breakdown variable"
-#~ msgstr "Selecione uma variável de desagregação"
-
-#~ msgid "Select a language"
-#~ msgstr "Selecione um idioma"
-
-#~ msgid "Select an open access status"
-#~ msgstr "Selecione um status de acesso aberto"
-
-#~ msgid "Select an access type"
-#~ msgstr "Selecione um tipo de acesso"
-
-#~ msgid "Search for a country"
-#~ msgstr "Busque um país"
-
-#~ msgid "Select a document type"
-#~ msgstr "Selecione um tipo de documento"
-
-#~ msgid "Select source indexes"
-#~ msgstr "Selecione indexadores"
-
-#~ msgid "Select a source type"
-#~ msgstr "Selecione um tipo de fonte"
-
-#~ msgid "Select a domain"
-#~ msgstr "Selecione um domínio"
-
-#~ msgid "Select a field"
-#~ msgstr "Selecione uma área"
-
-#~ msgid "Select a subfield"
-#~ msgstr "Selecione uma subárea"
-
-#~ msgid "Select a topic"
-#~ msgstr "Selecione um tópico"
-
-#~ msgid "Search for an institution"
-#~ msgstr "Busque uma instituição"
-
-#~ msgid "Search for an ISSN"
-#~ msgstr "Busque um ISSN"
-
-#~ msgid "Search for a funder"
-#~ msgstr "Busque um financiador"
-
-#~ msgid "Search for a publisher"
-#~ msgstr "Busque uma casa publicadora"
-
-#~ msgid "Search for a primary source (journal, book, conference, etc.)"
-#~ msgstr "Busque uma fonte principal (periódico, livro, conferência etc.)"
-
-#~ msgid "Select a variable"
-#~ msgstr "Selecione uma variável"
-
-#~ msgid "Directory Type"
-#~ msgstr "Tipo de Diretório"
-
-#~ msgid "State (Brazil)"
-#~ msgstr "Estado (Brasil)"
-
-#~ msgid "City (Brazil)"
-#~ msgstr "Cidade (Brasil)"
-
-#~ msgid "Start typing to search..."
-#~ msgstr "Comece a digitar para buscar..."
-
-#~ msgid "Select directory types"
-#~ msgstr "Selecione tipos de diretório"
-
-#~ msgid "Select types"
-#~ msgstr "Selecione tipos"
-
-#~ msgid "Select actions"
-#~ msgstr "Selecione ações"
-
-#~ msgid "Select classifications"
-#~ msgstr "Selecione classificações"
-
-#~ msgid "Select practices"
-#~ msgstr "Selecione práticas"
-
-#~ msgid "Select institutions"
-#~ msgstr "Selecione instituições"
-
-#~ msgid "Select regions"
-#~ msgstr "Selecione regiões"
-
-#~ msgid "Select cities"
-#~ msgstr "Selecione cidades"
-
-#~ msgid "Select states (Brazil)"
-#~ msgstr "Selecione estados (Brasil)"
-
-#~ msgid "Select cities (Brazil)"
-#~ msgstr "Selecione cidades (Brasil)"
-
-#~ msgid "Reset"
-#~ msgstr "Redefinir"
-
-#~ msgid "Ranking Overview"
-#~ msgstr "Visão geral do ranking"
-
-#~ msgid "Metric"
-#~ msgstr "Métrica"
-
-#~ msgid "Applied Filters"
-#~ msgstr "Filtros Aplicados"
-
-#~ msgid "Click the journal name to open the periodical profile and charts."
-#~ msgstr "Clique no nome do periódico para abrir o perfil e os gráficos."
-
-#~ msgid "Open journal profile"
-#~ msgstr "Abrir perfil do periódico"
-
-#~ msgid "Journal Profile and Charts"
-#~ msgstr "Perfil do periódico e gráficos"
-
-#~ msgid "Loading journal profile..."
-#~ msgstr "Carregando perfil do periódico..."
-
-#~ msgid "Selection Controls"
-#~ msgstr "Controles de seleção"
-
-#~ msgid "Selected Category"
-#~ msgstr "Categoria selecionada"
-
-#~ msgid "Category Comparison"
-#~ msgstr "Comparação entre categorias"
-
-#~ msgid "Historical series for the journal in the selected category."
-#~ msgstr "Séries históricas do periódico na categoria selecionada."
-
-#~ msgid "Comparison across categories for the selected year and category type."
-#~ msgstr ""
-#~ "Comparação entre categorias para o ano e o tipo de categoria selecionados."
-
-#~ msgid "Visualizations"
-#~ msgstr "Visualizações"
-
-#~ msgid "Indicators and journal attributes for the selected year and category."
-#~ msgstr ""
-#~ "Indicadores e atributos do periódico para o ano e a categoria selecionados."
-
-#~ msgid "Copy"
-#~ msgstr "Copiar"
-
-#~ msgid "Collection code"
-#~ msgstr "Código da coleção"
-
-#~ msgid "Journal profile"
-#~ msgstr "Perfil do periódico"
-
-#~ msgid "Multilingual"
-#~ msgstr "Multilíngue"
-
-#~ msgid "Charts"
-#~ msgstr "Gráficos"
-
-#~ msgid ""
-#~ "Select filters and click Generate to load journal metrics ranking and "
-#~ "profile charts."
-#~ msgstr ""
-#~ "Selecione os filtros e clique em Gerar para carregar o ranking de métricas "
-#~ "de periódicos e os gráficos do perfil."
-
-#~ msgid "Data Scope"
-#~ msgstr "Escopo dos dados"
-
-#~ msgid "All scopes"
-#~ msgstr "Todos os escopos"
-
-#~ msgid "Filtros"
-#~ msgstr "Filtros"
-
-#~ msgid "Diretórios"
-#~ msgstr "Diretórios"
-
-#~ msgid "Atenção"
-#~ msgstr "Atenção"
-
-#~ msgid "Dados computados"
-#~ msgstr "Dados computados"
-
-#~ msgid "Gráfico texturizado e modo escuro"
-#~ msgstr "Gráfico texturizado e modo escuro"
-
-#~ msgid "Gráfico modo escuro"
-#~ msgstr "Gráfico modo escuro"
-
-#~ msgid "Gráfico"
-#~ msgstr "Gráfico"
-
-#~ msgid "Digite sua pesquisa..."
-#~ msgstr "Digite sua pesquisa..."
-
-#~ msgid "Buscar"
-#~ msgstr "Buscar"
-
-#~ msgid "Help"
-#~ msgstr "Ajuda"
-
-#~ msgid "registros encontrados para o termo"
-#~ msgstr "registros encontrados para o termo"
-
-#~ msgid "Tempo da pesquisa"
-#~ msgstr "Tempo da pesquisa"
-
-#~ msgid "milisegundos"
-#~ msgstr "milissegundos"
-
-#~ msgid "0 registros encontrados para o termo"
-#~ msgstr "0 registros encontrados para o termo"
-
-#~ msgid "Ordenar por"
-#~ msgstr "Ordenar por"
-
-#~ msgid "Por âmbito geográfico"
-#~ msgstr "Por âmbito geográfico"
-
-#~ msgid "Por âmbito temático"
-#~ msgstr "Por âmbito temático"
-
-#~ msgid "Ordem descrecente de criação"
-#~ msgstr "Ordem decrescente de criação"
-
-#~ msgid "Relevância"
-#~ msgstr "Relevância"
-
-#~ msgid "Visualizar"
-#~ msgstr "Visualizar"
-
-#~ msgid "Itens por página"
-#~ msgstr "Itens por página"
-
-#~ msgid ""
-#~ "O valor do campo página não pode ser maior que a quantidade atual de "
-#~ "páginas."
-#~ msgstr ""
-#~ "O valor do campo página não pode ser maior que a quantidade atual de "
-#~ "páginas."
-
-#~ msgid "O valor do campo página deve ser maior que 0."
-#~ msgstr "O valor do campo página deve ser maior que 0."
-
-#~ msgid "N°"
-#~ msgstr "Nº"
-
-#, fuzzy
-#~ msgid "Data de inserção do registro"
-#~ msgstr "tipo de registro"
-
-#~ msgid "organization"
-#~ msgstr "organização"
-
-#~ msgid "resultado(s) encontrado(s)"
-#~ msgstr "resultado(s) encontrado(s)"
-
-#~ msgid "resultado"
-#~ msgstr "resultado"
-
-#~ msgid "Data of the OCABr Observatory"
-#~ msgstr "Dados do Observatório OCABr"
-
-#~ msgid "Busca:"
-#~ msgstr "Busca:"
-
-#~ msgid "Filtros ativos:"
-#~ msgstr "Filtros ativos:"
-
-#~ msgid "Carregando..."
-#~ msgstr "Carregando..."
-
-#~ msgid "resultados encontrados"
-#~ msgstr "resultados encontrados"
-
-#~ msgid "Nenhum resultado encontrado. Tente ajustar sua busca ou filtros."
-#~ msgstr "Nenhum resultado encontrado. Tente ajustar sua busca ou filtros."
-
-#~ msgid "Tipo"
-#~ msgstr "Tipo"
-
-#~ msgid "Instituições"
-#~ msgstr "Instituições"
-
-#~ msgid "Localização"
-#~ msgstr "Localização"
-
-#~ msgid "Prática"
-#~ msgstr "Prática"
-
-#~ msgid "Ação"
-#~ msgstr "Ação"
-
-#~ msgid "Classificação"
-#~ msgstr "Classificação"
-
-#~ msgid "Áreas Temáticas"
-#~ msgstr "Áreas Temáticas"
-
-#~ msgid "Evolução anual da"
-#~ msgstr "Evolução anual da"
-
-#~ msgid "distribuição da produção científica"
-#~ msgstr "distribuição da produção científica"
-
-#~ msgid "por "
-#~ msgstr "por "
-
-#~ msgid " no "
-#~ msgstr " no "
-
-#~ msgid "Distribuição"
-#~ msgstr "Distribuição"
-
-#~ msgid "da produção científica"
-#~ msgstr "da produção científica"
-
-#~ msgid "Evolução da"
-#~ msgstr "Evolução da"
-
-#~ msgid "ação"
-#~ msgstr "ação"
-
-#~ msgid "de "
-#~ msgstr "de "
-
-#, fuzzy
-#~ msgid "Scientific Production - Bronze"
-#~ msgstr "Produção Científica - Brasil"
-
-#~ msgid "Publication Year Range"
-#~ msgstr "Intervalo de Ano de Publicação"
-
-#~ msgid "Cited by Count"
-#~ msgstr "Contagem de Citações"
-
-#~ msgid "Scientific Production - Brazil"
-#~ msgstr "Produção Científica - Brasil"
-
-#~ msgid "Scientific Production - SciELO Network"
-#~ msgstr "Produção Científica - Rede SciELO"
-
-#~ msgid "Social Production"
-#~ msgstr "Produção Social"
-
-#~ msgid "Publication year start"
-#~ msgstr "Ano de publicação inicial"
-
-#~ msgid "Publication year end"
-#~ msgstr "Ano de publicação final"
-
-#~ msgid "Pratice"
-#~ msgstr "Prática"
-
-#~ msgid "Thematic Level"
-#~ msgstr "Nível Temático"
-
-#~ msgid "Subject"
-#~ msgstr "Assunto"
-
-#, fuzzy
-#~ msgid "Thematic level 0"
-#~ msgstr "Nível Temático"
-
-#, fuzzy
-#~ msgid "Thematic level 1"
-#~ msgstr "Nível Temático"
-
-#, fuzzy
-#~ msgid "Thematic level 2"
-#~ msgstr "Nível Temático"
-
-#~ msgid "Other Filters"
-#~ msgstr "Outros Filtros"
-
-#~ msgid "Português"
-#~ msgstr "Português"
-
-#~ msgid "Language Query Operator"
-#~ msgstr "Operador de Consulta de Idioma"
-
-#~ msgid "Primary Source"
-#~ msgstr "Fonte"
-
-#~ msgid "Source Index (OpenAlex)"
-#~ msgstr "Índice de Origem (OpenAlex)"
-
-#~ msgid "Source Index (SciELO)"
-#~ msgstr "Índice de Origem (SciELO)"
-
-#~ msgid "Subject Area Level 0"
-#~ msgstr "Área Temática Nível 0"
-
-#~ msgid "Subject Area Level 1"
-#~ msgstr "Área Temática Nível 1"
-
-#~ msgid "Subject Area Level 2"
-#~ msgstr "Área Temática Nível 2"
-
-#~ msgid "Year Founded"
-#~ msgstr "Ano de Fundação"
-
-#~ msgid "Select a Year"
-#~ msgstr "Selecione um Ano"
-
-#~ msgid "SciELO"
-#~ msgstr "SciELO"
-
-#~ msgid "Collection (SciELO)"
-#~ msgstr "Coleção (SciELO)"
-
-#~ msgid "Metric Year"
-#~ msgstr "Ano da Métrica"
-
-#~ msgid "Scimago Best Quartile"
-#~ msgstr "Melhor Quartil Scimago"
-
-#~ msgid "OpenAlex Total Docs 2024 > 5"
-#~ msgstr "OpenAlex Total de Docs 2024 > 5"
-
-#~ msgid "Citations / Doc. (2 years)"
-#~ msgstr "Citações / Doc. (2 anos)"
-
-#~ msgid "Estimated APC (USD)"
-#~ msgstr "APC Estimado (USD)"
-
-#~ msgid "Estimated Value (USD)"
-#~ msgstr "Valor Estimado (USD)"
-
-#, python-format
-#~ msgid "%% Female"
-#~ msgstr "%% Feminino"
-
-#~ msgid "Overton"
-#~ msgstr "Overton"
-
-#~ msgid "SDG"
-#~ msgstr "ODS"
-
-#~ msgid "SJR"
-#~ msgstr "SJR"
-
-#~ msgid "Total Docs"
-#~ msgstr "Total de Docs"
-
-#~ msgid "Argentina"
-#~ msgstr "Argentina"
-
-#~ msgid "Bolivia"
-#~ msgstr "Bolívia"
-
-#~ msgid "Brazil"
-#~ msgstr "Brasil"
-
-#~ msgid "Chile"
-#~ msgstr "Chile"
-
-#~ msgid "Colombia"
-#~ msgstr "Colômbia"
-
-#~ msgid "Costa Rica"
-#~ msgstr "Costa Rica"
-
-#~ msgid "Cuba"
-#~ msgstr "Cuba"
-
-#~ msgid "Dominican Republic"
-#~ msgstr "República Dominicana"
-
-#~ msgid "Ecuador"
-#~ msgstr "Equador"
-
-#~ msgid "Mexico"
-#~ msgstr "México"
-
-#~ msgid "Peru"
-#~ msgstr "Peru"
-
-#~ msgid "Paraguay"
-#~ msgstr "Paraguai"
-
-#~ msgid "Spain"
-#~ msgstr "Espanha"
-
-#~ msgid "South Africa"
-#~ msgstr "África do Sul"
-
-#~ msgid "Uruguay"
-#~ msgstr "Uruguai"
-
-#~ msgid "Venezuela"
-#~ msgstr "Venezuela"
-
-#~ msgid "West Indies"
-#~ msgstr "Índias Ocidentais"
-
-#~ msgid "Science and Culture"
-#~ msgstr "Ciência e Cultura"
-
-#~ msgid "PEPSIC"
-#~ msgstr "PEPSIC"
-
-#~ msgid "Public Health"
-#~ msgstr "Saúde Pública"
-
-#~ msgid "REVENF"
-#~ msgstr "REVENF"
-
-#~ msgid "CWTS SNIP"
-#~ msgstr "CWTS SNIP"
-
-#~ msgid "Scimago SJR"
-#~ msgstr "Scimago SJR"
-
-#~ msgid "Scimago Citations / Doc. (2 Years)"
-#~ msgstr "Scimago Citações / Doc. (2 Anos)"
-
-#~ msgid "Scimago Total Citations (3 Years)"
-#~ msgstr "Scimago Citações Totais (3 Anos)"
-
-#~ msgid "SciELO Total Docs"
-#~ msgstr "SciELO Total de Docs"
-
-#~ msgid "Scimago Total Docs"
-#~ msgstr "Scimago Total de Docs"
-
-#, python-format
-#~ msgid "Scimago %% Female"
-#~ msgstr "Scimago %% Feminino"
-
-#~ msgid "Scimago Estimated APC (USD)"
-#~ msgstr "Scimago APC Estimado (USD)"
-
-#~ msgid "Scimago Estimated Value (USD)"
-#~ msgstr "Scimago Valor Estimado (USD)"
-
-#~ msgid "Scimago Overton"
-#~ msgstr "Scimago Overton"
-
-#~ msgid "Scimago SDG"
-#~ msgstr "Scimago ODS"
-
-#~ msgid "World"
-#~ msgstr "Mundo"
-
-#~ msgid "SciELO Network"
-#~ msgstr "Rede SciELO"
-
-#, python-format
-#~ msgid "Import error: %s, Line: %s"
-#~ msgstr "Erro na importação: %s, Linha: %s"
-
-#~ msgid "Híbrido"
-#~ msgstr "Híbrido"
-
-# template
-#~ msgid "Scientific Production"
-#~ msgstr "Produção Científica"
-
-#~ msgid "Actions, events and infrastructure"
-#~ msgstr "Ações, eventos e infraestrutura"
-
-#~ msgid "Type to filter"
-#~ msgstr "Digite para filtrar"
-
-#~ msgid "Creation year"
-#~ msgstr "Ano de criação"
-
-#~ msgid "Registration year"
-#~ msgstr "Ano de registro"
-
-#~ msgid "Support type"
-#~ msgstr "Tipo de apoio"
-
-#~ msgid "articles, preprints, datasets, books"
-#~ msgstr "artigos, preprints, datasets, livros"
-
-#~ msgid "Publishing Model"
-#~ msgstr "Modelo editorial"
-
-#~ msgid "Timeline"
-#~ msgstr "Linha do tempo"
-
-#~ msgid "Activity Profile"
-#~ msgstr "Perfil da atividade"
-
-#~ msgid "Thematic Scope"
-#~ msgstr "Escopo temático"
-
-#~ msgid "Document Identity"
-#~ msgstr "Identidade do documento"
-
-#~ msgid "Source Coverage"
-#~ msgstr "Cobertura da fonte"
-
-#~ msgid "APLICAR"
-#~ msgstr "APLICAR"
-
-#~ msgid "Remove filter"
-#~ msgstr "Remover filtro"
-
-#~ msgid "Error loading results. Try again."
-#~ msgstr "Erro ao carregar resultados. Tente novamente."
-
-#~ msgid "No results found. Try adjusting your search or filters."
-#~ msgstr "Nenhum resultado encontrado. Tente ajustar sua busca ou seus filtros."
-
-#~ msgid "Anterior"
-#~ msgstr "Anterior"
-
-#~ msgid "Acessar"
-#~ msgstr "Acessar"
-
-#~ msgid "Ano de registro"
-#~ msgstr "Ano de registro"
-
-#~ msgid "Organization"
-#~ msgstr "Organização"
-
-#~ msgid "Primary Topic"
-#~ msgstr "Tópico principal"
-
-#~ msgid "Publication"
-#~ msgstr "Publicação"
-
-#~ msgid "Publications and Total Citations per Year"
-#~ msgstr "Publicações e citações totais por ano"
-
-#~ msgid "Cohort Impact and Mean Citations per Year"
-#~ msgstr "Impacto de coorte e média de citações por ano"
-
-#~ msgid "Top Publications Share (%) per Year"
-#~ msgstr "Participação das publicações de topo (%) por ano"
-
-#~ msgid "by"
-#~ msgstr "por"
-
-#~ msgid "by Category"
-#~ msgstr "por categoria"
-
-#~ msgid "per Year"
-#~ msgstr "por ano"
-
-#~ msgid "% Documents With ≥1 Citation"
-#~ msgstr "% de documentos com ≥1 citação"
-
-#~ msgid "% Documents With ≥1 Citation Share (%)"
-#~ msgstr "Participação de % de documentos com ≥1 citação (%)"
-
-#~ msgid "% Sources With ≥1 Cited Document"
-#~ msgstr "% de fontes com ≥1 documento citado"
-
-#~ msgid "% Sources With ≥1 Cited Document Share (%)"
-#~ msgstr "Participação de % de fontes com ≥1 documento citado (%)"
-
-#~ msgid "Avg Citations per Source"
-#~ msgstr "Média de citações por fonte"
-
-#~ msgid "Avg Cited Documents per Source"
-#~ msgstr "Média de documentos citados por fonte"
-
-#~ msgid "Avg Documents per Source"
-#~ msgstr "Média de documentos por fonte"
-
-#~ msgid "Citations Share (%)"
-#~ msgstr "Participação de citações (%)"
-
-#~ msgid "Citations per Document"
-#~ msgstr "Citações por documento"
-
-#~ msgid "Citations per Document Share (%)"
-#~ msgstr "Participação de citações por documento (%)"
-
-#~ msgid "Citations per Source Share (%)"
-#~ msgstr "Participação de citações por fonte (%)"
-
-#~ msgid "Cited Documents Share (%)"
-#~ msgstr "Participação de documentos citados (%)"
-
-#~ msgid "Cited Documents per Source Share (%)"
-#~ msgstr "Participação de documentos citados por fonte (%)"
-
-#~ msgid "Documents Share (%)"
-#~ msgstr "Participação de documentos (%)"
-
-#~ msgid "Documents per Source Share (%)"
-#~ msgstr "Participação de documentos por fonte (%)"
-
-#~ msgid "Filtered vs Total (%)"
-#~ msgstr "Filtrado vs total (%)"
-
-#~ msgid "Per year, filtered vs total baseline"
-#~ msgstr "Por ano, filtrado vs linha de base total"
-
-#~ msgid "Error loading indicator data."
-#~ msgstr "Erro ao carregar os dados do indicador."
-
-#~ msgid "Unexpected response while loading indicator data."
-#~ msgstr "Resposta inesperada ao carregar os dados do indicador."
-
-#~ msgid "Top 1%"
-#~ msgstr "Top 1%"
-
-#~ msgid "Top 5%"
-#~ msgstr "Top 5%"
-
-#~ msgid "Top 10%"
-#~ msgstr "Top 10%"
-
-#~ msgid "Top 50%"
-#~ msgstr "Top 50%"
-
-#~ msgid "Unique Sources"
-#~ msgstr "Fontes únicas"
-
-#~ msgid "Unique Sources Share (%)"
-#~ msgstr "Participação de fontes únicas (%)"
+msgid "Coverage"
+msgstr "Cobertura"
