@@ -842,24 +842,40 @@
           "analysis_units": [
             {
               "value": "document",
-              "label": "Document",
+              "label": {
+                "en": "Document",
+                "pt": "Documento",
+                "es": "Documento"
+              },
               "url_context_key": "indicator_home_url"
             },
             {
               "value": "source",
-              "label": "Source",
+              "label": {
+                "en": "Source",
+                "pt": "Fonte",
+                "es": "Fuente"
+              },
               "url_context_key": "indicator_home_url"
             },
             {
               "value": "journal_thematic_metrics",
-              "label": "Journal Thematic Metrics",
+              "label": {
+                "en": "Journal Thematic Metrics",
+                "pt": "Métricas Temáticas de Periódico",
+                "es": "Métricas temáticas de revista"
+              },
               "url_context_key": "journal_thematic_url",
               "return_to_source": true,
               "target_data_source": "journal_thematic_metrics"
             },
             {
               "value": "journal_global_metrics",
-              "label": "Journal Global Metrics",
+              "label": {
+                "en": "Journal Global Metrics",
+                "pt": "Métricas Globais de Periódico",
+                "es": "Métricas globales de revista"
+              },
               "url_context_key": "journal_global_url",
               "enabled": false,
               "target_data_source": "journal_global_metrics"
@@ -2559,24 +2575,40 @@
           "analysis_units": [
             {
               "value": "document",
-              "label": "Document",
+              "label": {
+                "en": "Document",
+                "pt": "Documento",
+                "es": "Documento"
+              },
               "url_context_key": "indicator_home_url"
             },
             {
               "value": "source",
-              "label": "Source",
+              "label": {
+                "en": "Source",
+                "pt": "Fonte",
+                "es": "Fuente"
+              },
               "url_context_key": "indicator_home_url"
             },
             {
               "value": "journal_thematic_metrics",
-              "label": "Journal Thematic Metrics",
+              "label": {
+                "en": "Journal Thematic Metrics",
+                "pt": "Métricas Temáticas de Periódico",
+                "es": "Métricas temáticas de revista"
+              },
               "url_context_key": "journal_thematic_url",
               "return_to_source": true,
               "target_data_source": "journal_thematic_metrics"
             },
             {
               "value": "journal_global_metrics",
-              "label": "Journal Global Metrics",
+              "label": {
+                "en": "Journal Global Metrics",
+                "pt": "Métricas Globais de Periódico",
+                "es": "Métricas globales de revista"
+              },
               "url_context_key": "journal_global_url",
               "enabled": false,
               "target_data_source": "journal_global_metrics"
@@ -4759,24 +4791,40 @@
           "analysis_units": [
             {
               "value": "document",
-              "label": "Document",
+              "label": {
+                "en": "Document",
+                "pt": "Documento",
+                "es": "Documento"
+              },
               "url_context_key": "indicator_home_url"
             },
             {
               "value": "source",
-              "label": "Source",
+              "label": {
+                "en": "Source",
+                "pt": "Fonte",
+                "es": "Fuente"
+              },
               "url_context_key": "indicator_home_url"
             },
             {
               "value": "journal_thematic_metrics",
-              "label": "Journal Thematic Metrics",
+              "label": {
+                "en": "Journal Thematic Metrics",
+                "pt": "Métricas Temáticas de Periódico",
+                "es": "Métricas temáticas de revista"
+              },
               "url_context_key": "journal_thematic_url",
               "return_to_source": true,
               "target_data_source": "journal_thematic_metrics"
             },
             {
               "value": "journal_global_metrics",
-              "label": "Journal Global Metrics",
+              "label": {
+                "en": "Journal Global Metrics",
+                "pt": "Métricas Globais de Periódico",
+                "es": "Métricas globales de revista"
+              },
               "url_context_key": "journal_global_url",
               "enabled": false,
               "target_data_source": "journal_global_metrics"

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-20 21:17+0000\n"
+"POT-Creation-Date: 2026-06-22 12:32+0000\n"
 "PO-Revision-Date: 2026-01-26 15:40-0300\n"
 "Last-Translator: Gemini\n"
 "Language-Team: Portuguese (Brazil)\n"
@@ -17,57 +17,14 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
-# journal_metrics.js / charts.js / journal_profile.html (manual additions)
-msgid "Category Type"
-msgstr "Tipo de categoria"
-
-msgid "Ranking Controls"
-msgstr "Controles de ranking"
-
-msgid "Journal Attributes"
-msgstr "Atributos do periódico"
-
-msgid "Category"
-msgstr "Categoria"
-
-msgid "Year"
-msgstr "Ano"
-
 msgid "Data"
 msgstr "Dados"
-
-msgid "Copy"
-msgstr "Copiar"
-
-msgid "Analytical Summary"
-msgstr "Síntese analítica"
-
-msgid "SciELO Collection"
-msgstr "Coleção SciELO"
-
-msgid "Publisher"
-msgstr "Editora"
-
-msgid "Indicators and journal attributes for the selected year and category."
-msgstr "Indicadores e atributos do periódico para o ano e a categoria selecionados."
-
-msgid "Any value"
-msgstr "Qualquer valor"
 
 msgid "Close"
 msgstr "Fechar"
 
-msgid "Domain"
-msgstr "Domínio"
-
-msgid "Field"
-msgstr "Área"
-
-msgid "Subfield"
-msgstr "Subárea"
-
-msgid "Topic"
-msgstr "Tópico"
+msgid "Copy"
+msgstr "Copiar"
 
 msgid "Copied"
 msgstr "Copiado"
@@ -75,451 +32,41 @@ msgstr "Copiado"
 msgid "Copy failed"
 msgstr "Falha ao copiar"
 
-msgid "ISSN"
-msgstr "ISSN"
-
 msgid "No data available"
 msgstr "Nenhum dado disponível"
+
+msgid "Year"
+msgstr "Ano"
 
 msgid "No non-zero values"
 msgstr "Nenhum valor diferente de zero"
 
-msgid "Select a country"
-msgstr "Selecione um país"
-
-msgid "Select a collection"
-msgstr "Selecione uma coleção"
-
-msgid "Select a category type"
-msgstr "Selecione um tipo de categoria"
-
-msgid "Select a ranking metric"
-msgstr "Selecione uma métrica de ranking"
-
-msgid "Select a value"
-msgstr "Selecione um valor"
-
-msgid "Type journal name..."
-msgstr "Digite o nome do periódico..."
-
-msgid "Type ISSN..."
-msgstr "Digite o ISSN..."
-
-msgid "Type publisher name..."
-msgstr "Digite o nome da editora..."
-
-msgid "Select a category id"
-msgstr "Selecione uma categoria"
-
-msgid "Type to search..."
-msgstr "Digite para pesquisar..."
-
-#: indicator/static/indicator/js/button.js:85
-msgid "Start typing to search..."
-msgstr "Comece a digitar para pesquisar..."
-
-#: indicator/static/indicator/js/charts.js:214
-#: indicator/static/indicator/js/menu.js:228
-msgid "Unique Sources"
-msgstr "Fontes únicas"
-
-# charts.js / journal_metrics.js (manual additions)
-#: indicator/static/indicator/js/charts.js:216
-msgid "Documents per Source"
-msgstr "Documentos por fonte"
-
-#: indicator/static/indicator/js/charts.js:218
-msgid "Citations per Source"
-msgstr "Citações por fonte"
-
-#: indicator/static/indicator/js/charts.js:220
-msgid "Cited Documents per Source"
-msgstr "Documentos citados por fonte"
-
-#: indicator/static/indicator/js/charts.js:222
-#: indicator/static/indicator/js/menu.js:264
-msgid "% Sources With ≥1 Cited Document"
-msgstr "% de fontes com ≥1 documento citado"
-
-#: indicator/static/indicator/js/charts.js:224
-#: indicator/static/indicator/js/menu.js:338
-msgid "Unique Sources Share (%)"
-msgstr "Participação de fontes únicas (%)"
-
-#: indicator/static/indicator/js/charts.js:226
-msgid "Documents per Source (share %)"
-msgstr "Documentos por fonte (participação %)"
-
-#: indicator/static/indicator/js/charts.js:228
-msgid "Citations per Source (share %)"
-msgstr "Citações por fonte (participação %)"
-
-#: indicator/static/indicator/js/charts.js:230
-msgid "Cited Documents per Source (share %)"
-msgstr "Documentos citados por fonte (participação %)"
-
-#: indicator/static/indicator/js/charts.js:232
-#: indicator/static/indicator/js/menu.js:382
-msgid "% Sources With ≥1 Cited Document Share (%)"
-msgstr "Participação de fontes com ≥1 documento citado (%)"
-
-#: indicator/static/indicator/js/charts.js:234
-msgid "Cited Documents"
-msgstr "Documentos Citados"
-
-#: indicator/static/indicator/js/charts.js:236
-msgid "Documents"
-msgstr "Documentos"
-
-#: indicator/static/indicator/js/charts.js:238
-#: indicator/static/indicator/js/journal_metrics.js:209
-msgid "Citations"
-msgstr "Citações"
-
-#: indicator/static/indicator/js/charts.js:240
-#: indicator/static/indicator/js/menu.js:395
-msgid "Documents Share (%)"
-msgstr "Participação de documentos (%)"
-
-#: indicator/static/indicator/js/charts.js:242
-#: indicator/static/indicator/js/menu.js:406
-msgid "Citations Share (%)"
-msgstr "Participação de citações (%)"
-
-#: indicator/static/indicator/js/charts.js:247
-#: indicator/static/indicator/js/menu.js:294
-msgid "Citations per Document"
-msgstr "Citações por Documento"
-
-#: indicator/static/indicator/js/charts.js:249
-#: indicator/static/indicator/js/menu.js:417
-msgid "Citations per Document Share (%)"
-msgstr "Citações por documento (participação %)"
-
-#: indicator/static/indicator/js/charts.js:251
-msgid "% Docs With ≥1 Citation"
-msgstr "% de Docs com ≥1 Citação"
-
-#: indicator/static/indicator/js/charts.js:253
-#: indicator/static/indicator/js/menu.js:428
-msgid "Cited Documents Share (%)"
-msgstr "Participação de documentos citados (%)"
-
-#: indicator/static/indicator/js/charts.js:255
-msgid "% Docs With ≥1 Citation Share (%)"
-msgstr "% de documentos com ≥1 citação (participação %)"
-
-#: indicator/static/indicator/js/helpers.js:29
-msgid "GET filters has failed"
-msgstr "A obtenção (GET) dos filtros falhou"
-
-#: indicator/static/indicator/js/helpers.js:285
-msgid "Argentina"
-msgstr "Argentina"
-
-#: indicator/static/indicator/js/helpers.js:286
-msgid "Bolivia"
-msgstr "Bolívia"
-
-#: indicator/static/indicator/js/helpers.js:287
-msgid "Chile"
-msgstr "Chile"
-
-#: indicator/static/indicator/js/helpers.js:288
-msgid "Science and Culture"
-msgstr "Ciência e Cultura"
-
-#: indicator/static/indicator/js/helpers.js:289
-msgid "Colombia"
-msgstr "Colômbia"
-
-#: indicator/static/indicator/js/helpers.js:290
-msgid "Costa Rica"
-msgstr "Costa Rica"
-
-#: indicator/static/indicator/js/helpers.js:291
-msgid "Cuba"
-msgstr "Cuba"
-
-#: indicator/static/indicator/js/helpers.js:292
-msgid "Dominican Republic"
-msgstr "República Dominicana"
-
-#: indicator/static/indicator/js/helpers.js:293
-msgid "Ecuador"
-msgstr "Equador"
-
-#: indicator/static/indicator/js/helpers.js:294
-msgid "Spain"
-msgstr "Espanha"
-
-#: indicator/static/indicator/js/helpers.js:295
-msgid "Mexico"
-msgstr "México"
-
-#: indicator/static/indicator/js/helpers.js:296
-msgid "Peru"
-msgstr "Peru"
-
-#: indicator/static/indicator/js/helpers.js:297
-msgid "Portugal"
-msgstr "Portugal"
-
-#: indicator/static/indicator/js/helpers.js:298
-msgid "Paraguay"
-msgstr "Paraguai"
-
-#: indicator/static/indicator/js/helpers.js:299
-msgid "PEPSIC"
-msgstr "PEPSIC"
-
-#: indicator/static/indicator/js/helpers.js:300
-msgid "REVENF"
-msgstr "REVENF"
-
-#: indicator/static/indicator/js/helpers.js:301
-msgid "Brazil"
-msgstr "Brasil"
-
-#: indicator/static/indicator/js/helpers.js:302
-msgid "Public Health"
-msgstr "Saúde Pública"
-
-#: indicator/static/indicator/js/helpers.js:303
-msgid "South Africa"
-msgstr "África do Sul"
-
-#: indicator/static/indicator/js/helpers.js:304
-msgid "Uruguay"
-msgstr "Uruguai"
-
-#: indicator/static/indicator/js/helpers.js:305
-msgid "Venezuela"
-msgstr "Venezuela"
-
-#: indicator/static/indicator/js/helpers.js:306
-msgid "West Indies"
-msgstr "Índias Ocidentais"
-
-#: indicator/static/indicator/js/helpers.js:316
-msgid "No"
-msgstr "Não"
-
-#: indicator/static/indicator/js/helpers.js:317
-msgid "Yes"
-msgstr "Sim"
-
-#: indicator/static/indicator/js/helpers.js:442
-msgid "Publication Year"
-msgstr "Ano de Publicação"
-
-#: indicator/static/indicator/js/helpers.js:457
-msgid "Country"
-msgstr "País"
-
-#: indicator/static/indicator/js/helpers.js:465
-msgid "Document Language"
-msgstr "Idioma do Documento"
-
-#: indicator/static/indicator/js/helpers.js:480
-msgid "Search Options"
-msgstr "Opções de Busca"
-
-#: indicator/static/indicator/js/helpers.js:494
-msgid "Applied Filters"
-msgstr "Filtros Aplicados"
-
-#: indicator/static/indicator/js/helpers.js:536
-msgid "to"
-msgstr "até"
-
-#: indicator/static/indicator/js/journal_metrics.js:89
-msgid "Select a journal"
-msgstr "Selecione um periódico"
-
-#: indicator/static/indicator/js/journal_metrics.js:97
-msgid "Select a category"
-msgstr "Selecione uma categoria"
-
-#: indicator/static/indicator/js/journal_metrics.js:191
-msgid "Publications and Total Citations per Year"
-msgstr "Publicações e citações totais por ano"
-
-#: indicator/static/indicator/js/journal_metrics.js:194
-#: indicator/static/indicator/js/journal_metrics.js:208
-#: indicator/static/indicator/js/journal_metrics.js:213
-#: indicator/static/indicator/js/journal_metrics.js:463
-msgid "Publications"
-msgstr "Publicações"
-
-#: indicator/static/indicator/js/journal_metrics.js:194
-#: indicator/static/indicator/js/journal_metrics.js:218
-#: indicator/static/indicator/js/journal_metrics.js:467
-#: indicator/static/indicator/js/menu.js:284
-msgid "Total Citations"
-msgstr "Total de Citações"
-
-#: indicator/static/indicator/js/journal_metrics.js:230
-msgid "Cohort Impact and Mean Citations per Year"
-msgstr "Impacto por Coorte e média de citações por ano"
-
-#: indicator/static/indicator/js/journal_metrics.js:234
-#: indicator/static/indicator/js/journal_metrics.js:255
-msgid "Cohort Impact (Total)"
-msgstr "Impacto por Coorte (Total)"
-
-#: indicator/static/indicator/js/journal_metrics.js:235
-#: indicator/static/indicator/js/journal_metrics.js:261
-msgid "Cohort Impact (2 years)"
-msgstr "Impacto por Coorte (2 anos)"
-
-#: indicator/static/indicator/js/journal_metrics.js:236
-#: indicator/static/indicator/js/journal_metrics.js:267
-msgid "Cohort Impact (3 years)"
-msgstr "Impacto por Coorte (3 anos)"
-
-#: indicator/static/indicator/js/journal_metrics.js:237
-#: indicator/static/indicator/js/journal_metrics.js:273
-msgid "Cohort Impact (5 years)"
-msgstr "Impacto por Coorte (5 anos)"
-
-#: indicator/static/indicator/js/journal_metrics.js:238
-#: indicator/static/indicator/js/journal_metrics.js:279
-#: indicator/static/indicator/js/journal_metrics.js:471
-msgid "Mean Citations"
-msgstr "Média de citações"
-
-#: indicator/static/indicator/js/journal_metrics.js:290
-msgid "Top Publications Share (%) per Year"
-msgstr "Participação de publicações no topo (%) por ano"
-
-#: indicator/static/indicator/js/journal_metrics.js:293
-#: indicator/static/indicator/js/journal_metrics.js:309
-msgid "Top 1%"
-msgstr "Top 1%"
-
-#: indicator/static/indicator/js/journal_metrics.js:293
-#: indicator/static/indicator/js/journal_metrics.js:315
-msgid "Top 5%"
-msgstr "Top 5%"
-
-#: indicator/static/indicator/js/journal_metrics.js:293
-#: indicator/static/indicator/js/journal_metrics.js:321
-msgid "Top 10%"
-msgstr "Top 10%"
-
-#: indicator/static/indicator/js/journal_metrics.js:293
-#: indicator/static/indicator/js/journal_metrics.js:327
-msgid "Top 50%"
-msgstr "Top 50%"
-
-#: indicator/static/indicator/js/journal_metrics.js:343
-#: indicator/static/indicator/js/journal_metrics.js:361
-msgid "by Category"
-msgstr "por categoria"
-
-#: indicator/static/indicator/js/journal_metrics.js:349
-msgid "No category data available"
-msgstr "Sem dados de categoria"
-
-#: indicator/static/indicator/js/journal_metrics.js:413
-msgid "Journal profile"
-msgstr "Perfil do periódico"
-
-#: indicator/static/indicator/js/journal_metrics.js:434
-msgid "Publication year"
-msgstr "Ano de publicação"
-
-#: indicator/static/indicator/js/menu.js:55
-#: indicator/static/indicator/js/menu.js:102
-#: indicator/static/indicator/js/menu.js:128
 msgid "Error loading indicator data."
 msgstr "Erro ao carregar dados dos indicadores."
 
-#: indicator/static/indicator/js/menu.js:109
 msgid "Unexpected response while loading indicator data."
 msgstr "Resposta inesperada ao carregar dados dos indicadores."
 
-#: indicator/static/indicator/js/menu.js:219
 msgid "per Year"
 msgstr "por Ano"
 
-#: indicator/static/indicator/js/menu.js:219
 msgid "by"
 msgstr "por"
 
-# charts.js / journal_metrics.js (manual additions)
-#: indicator/static/indicator/js/menu.js:237
-msgid "Avg Documents per Source"
-msgstr "Média de documentos por fonte"
-
-#: indicator/static/indicator/js/menu.js:246
-msgid "Avg Citations per Source"
-msgstr "Média de citações por fonte"
-
-#: indicator/static/indicator/js/menu.js:255
-msgid "Avg Cited Documents per Source"
-msgstr "Média de documentos citados por fonte"
-
-#: indicator/static/indicator/js/menu.js:274
-msgid "Total Documents"
-msgstr "Total de Documentos"
-
-#: indicator/static/indicator/js/menu.js:304
-msgid "Cited Documents (≥1 citation)"
-msgstr "Documentos Citados (≥1 citação)"
-
-#: indicator/static/indicator/js/menu.js:314
-msgid "% Documents With ≥1 Citation"
-msgstr "% de Documentos com ≥1 Citação"
-
-#: indicator/static/indicator/js/menu.js:331
 msgid "Per year, filtered vs total baseline"
 msgstr "Por ano, filtrado vs total (base)"
 
-#: indicator/static/indicator/js/menu.js:349
-msgid "Documents per Source Share (%)"
-msgstr "Documentos por fonte (participação %)"
+msgid "Selecione uma opção"
+msgstr "Selecione uma opção"
 
-#: indicator/static/indicator/js/menu.js:360
-msgid "Citations per Source Share (%)"
-msgstr "Citações por fonte (participação %)"
+msgid "by Category"
+msgstr "por categoria"
 
-#: indicator/static/indicator/js/menu.js:371
-msgid "Cited Documents per Source Share (%)"
-msgstr "Documentos citados por fonte (participação %)"
+msgid "Category"
+msgstr "Categoria"
 
-#: indicator/static/indicator/js/menu.js:439
-msgid "% Documents With ≥1 Citation Share (%)"
-msgstr "% de documentos com ≥1 citação (participação %)"
-
-#~ msgid "Documents / Periodical"
-#~ msgstr "Documentos / Periódico"
-
-#~ msgid "Citations / Periodical"
-#~ msgstr "Citações / Periódico"
-
-#~ msgid "Cited Documents / Periodical"
-#~ msgstr "Documentos Citados / Periódico"
-
-#~ msgid "Avg Documents per Periodical"
-#~ msgstr "Média de Documentos por Periódico"
-
-#~ msgid "Avg Citations per Periodical"
-#~ msgstr "Média de Citações por Periódico"
-
-#~ msgid "Avg Cited Documents per Periodical"
-#~ msgstr "Média de Documentos Citados por Periódico"
-
-#~ msgid "Document Core"
-#~ msgstr "Dados do documento"
-
-#~ msgid "Funding"
-#~ msgstr "Financiamento"
-
-#~ msgid "Funder"
-#~ msgstr "Financiador"
-
+msgid "No category data available"
+msgstr "Sem dados de categoria"
 
 msgid "Type to filter"
 msgstr "Digite para filtrar"
@@ -533,201 +80,146 @@ msgstr "Nenhum resultado encontrado. Tente ajustar sua busca ou filtros."
 msgid "Filters applied"
 msgstr "Filtros aplicados"
 
-msgid "Search"
-msgstr "Busca"
+msgid "Selecione um formato de citação…"
+msgstr "Selecione um formato de citação…"
 
-#: observation/static/observation/js/table.js
-msgid "Disabled while single-file mode is enabled."
-msgstr "Desabilitado enquanto o modo de arquivo único está ativo."
+msgid "Copiar"
+msgstr "Copiar"
 
-#: observation/static/observation/js/table.js
-msgid "No export jobs yet."
-msgstr "Nenhum job de exportação ainda."
+msgid "Copiar citação"
+msgstr "Copiar citação"
 
-#: observation/static/observation/js/table.js
-msgid "Download CSV"
-msgstr "Baixar CSV"
+msgid "Copiado!"
+msgstr "Copiado!"
 
-#: observation/static/observation/js/table.js
-msgid "%(count)s files"
-msgstr "%(count)s arquivos"
+msgid "Error loading results. Try again."
+msgstr "Erro ao carregar os resultados. Tente novamente."
 
-#: observation/static/observation/js/table.js
-msgid "Dimension"
-msgstr "Dimensão"
+msgid "Selected results"
+msgstr "Resultados selecionados"
 
-#: observation/static/observation/js/table.js
-msgid "Status"
-msgstr "Status"
+msgid "selecionado"
+msgstr "selecionado"
 
-#: observation/static/observation/js/table.js
-msgid "%(processed)s/%(total)s rows"
-msgstr "%(processed)s/%(total)s linhas"
+msgid "selecionados"
+msgstr "selecionados"
 
-#: observation/static/observation/js/table.js
-msgid "Could not download CSV."
-msgstr "Não foi possível baixar o CSV."
+msgid "Mostrar filtros"
+msgstr "Mostrar filtros"
 
-#: observation/static/observation/js/table.js
-msgid "Downloaded file is empty."
-msgstr "O arquivo baixado está vazio."
+msgid "Ocultar filtros"
+msgstr "Ocultar filtros"
 
-#: observation/static/observation/js/table.js
-msgid "Status error"
-msgstr "Erro de status"
+msgid "GET filters has failed"
+msgstr "A obtenção (GET) dos filtros falhou"
 
-#: observation/static/observation/js/table.js
-msgid "Export start failed"
-msgstr "Falha ao iniciar exportação"
+msgid "Argentina"
+msgstr "Argentina"
 
-#: observation/static/observation/js/table.js
-msgid "Could not start export"
-msgstr "Não foi possível iniciar a exportação"
+msgid "Bolivia"
+msgstr "Bolívia"
 
-#: observation/static/observation/js/table.js
-msgid "Remove all saved download jobs from this browser?"
-msgstr "Remover todos os jobs de download salvos neste navegador?"
+msgid "Chile"
+msgstr "Chile"
 
-#: observation/static/observation/js/table.js
-msgid "Enable when there are at least 1000 rows."
-msgstr "Habilitar quando houver pelo menos 1000 linhas."
+msgid "Science and Culture"
+msgstr "Ciência e Cultura"
 
-#: observation/static/observation/js/table.js
-msgid "Network error"
-msgstr "Erro de rede"
+msgid "Colombia"
+msgstr "Colômbia"
 
-#: observation/static/observation/js/table.js
-msgid "Error loading table data"
-msgstr "Erro ao carregar os dados da tabela"
+msgid "Costa Rica"
+msgstr "Costa Rica"
 
-#: observation/static/observation/js/table.js
-msgid "View details"
-msgstr "Ver detalhes"
+msgid "Cuba"
+msgstr "Cuba"
 
-#: observation/static/observation/js/table.js
-msgid "Copy row"
-msgstr "Copiar linha"
+msgid "Dominican Republic"
+msgstr "República Dominicana"
 
-#: observation/static/observation/js/table.js
-msgid "Type to search %(label)s..."
-msgstr "Digite para buscar %(label)s..."
+msgid "Ecuador"
+msgstr "Equador"
 
-#: observation/static/observation/js/table.js
-msgid "Showing _START_ to _END_ of _TOTAL_"
-msgstr "Mostrando _START_ a _END_ de _TOTAL_"
+msgid "Spain"
+msgstr "Espanha"
 
-#: observation/static/observation/js/table.js
-msgid "First"
-msgstr "Primeiro"
+msgid "Mexico"
+msgstr "México"
 
-#: observation/static/observation/js/table.js
-msgid "Previous"
-msgstr "Anterior"
+msgid "Peru"
+msgstr "Peru"
 
-#: observation/static/observation/js/table.js
-msgid "Next"
-msgstr "Próximo"
+msgid "Portugal"
+msgstr "Portugal"
 
-#: observation/static/observation/js/table.js
-msgid "Last"
-msgstr "Último"
+msgid "Paraguay"
+msgstr "Paraguai"
 
-#: observation/static/observation/js/table.js
-msgid "Showing %(start)s to %(end)s of %(total)s"
-msgstr "Mostrando %(start)s a %(end)s de %(total)s"
+msgid "PEPSIC"
+msgstr "PEPSIC"
 
-#: observation/static/observation/js/table.js
-msgid "Contains"
-msgstr "Contém"
+msgid "REVENF"
+msgstr "REVENF"
 
-#: observation/static/observation/js/table.js
-msgid "Starts with"
-msgstr "Começa com"
+msgid "Brazil"
+msgstr "Brasil"
 
-#: observation/static/observation/js/table.js
-msgid "Equals"
-msgstr "Igual a"
+msgid "Public Health"
+msgstr "Saúde Pública"
 
-#: observation/static/observation/js/table.js
-msgid "Search..."
-msgstr "Buscar..."
+msgid "South Africa"
+msgstr "África do Sul"
 
-#: observation/static/observation/js/table.js
-msgid "Sort column"
-msgstr "Ordenar coluna"
+msgid "Uruguay"
+msgstr "Uruguai"
 
-#: observation/static/observation/js/table.js
-msgid "Sort ascending"
-msgstr "Ordenar crescente"
+msgid "Venezuela"
+msgstr "Venezuela"
 
-#: observation/static/observation/js/table.js
-msgid "Column options"
-msgstr "Opções da coluna"
+msgid "West Indies"
+msgstr "Índias Ocidentais"
 
-#: observation/static/observation/js/table.js
-msgid "Sort Ascending"
-msgstr "Ordem crescente"
+msgid "No"
+msgstr "Não"
 
-#: observation/static/observation/js/table.js
-msgid "Sort Descending"
-msgstr "Ordem decrescente"
+msgid "Yes"
+msgstr "Sim"
 
-#: observation/static/observation/js/table.js
-msgid "Clear sort"
-msgstr "Limpar ordenação"
+msgid "Domain"
+msgstr "Domínio"
 
-#: observation/static/observation/js/table.js
-msgid "Select at least 2 rows using the row checkboxes."
-msgstr "Selecione pelo menos 2 linhas usando as caixas de seleção das linhas."
+msgid "Field"
+msgstr "Área"
 
-#: observation/static/observation/js/table.js
-msgid "Comparison"
-msgstr "Comparação"
+msgid "Subfield"
+msgstr "Subárea"
 
-#: observation/static/observation/js/table.js
-msgid "Processing date"
-msgstr "Data de processamento"
+msgid "Topic"
+msgstr "Tópico"
 
-#: observation/static/observation/js/table.js
-msgid "Source"
-msgstr "Fonte"
+msgid "OpenAlex"
+msgstr "OpenAlex"
 
-#: observation/static/observation/js/table.js
-msgid "Evolution comparison by year"
-msgstr "Comparação de evolução por ano"
+msgid "SciELO"
+msgstr "SciELO"
 
-#: observation/static/observation/js/table.js
-msgid "Download chart"
-msgstr "Baixar gráfico"
+msgid "NOT"
+msgstr "NOT"
 
-#: observation/static/observation/js/table.js
-msgid "Select at least one row using the checkbox in the first column."
-msgstr "Selecione pelo menos uma linha usando a caixa de seleção da primeira coluna."
+msgid "Publication Year"
+msgstr "Ano de Publicação"
 
-#: observation/static/observation/js/table.js
-msgid "Details"
-msgstr "Detalhes"
+msgid "Country"
+msgstr "País"
 
-#: observation/static/observation/js/table.js
-msgid "Evolution by %(label)s"
-msgstr "Evolução por %(label)s"
+msgid "Document Language"
+msgstr "Idioma do Documento"
 
-#: observation/static/observation/js/table.js
-msgid "Peak"
-msgstr "Máximo"
+msgid "Search Options"
+msgstr "Opções de Busca"
 
-#: observation/static/observation/js/table.js
-msgid "Lowest"
-msgstr "Mínimo"
+msgid "Applied Filters"
+msgstr "Filtros Aplicados"
 
-#: observation/static/observation/js/table.js
-msgid "Average"
-msgstr "Média"
-
-#: observation/static/observation/js/table.js
-msgid "Growth (%(start)s-%(end)s)"
-msgstr "Crescimento (%(start)s-%(end)s)"
-
-#: observation/static/observation/js/table.js
-msgid "Scope"
-msgstr "Escopo"
+msgid "to"
+msgstr "até"

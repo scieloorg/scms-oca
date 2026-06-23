@@ -99,10 +99,10 @@ django_add_dimensions: ## Run manage.py add_dimensions from django container usi
 	@docker compose -f $(compose) run --rm django python manage.py add_dimensions
 
 django_makemessages: ## Run ./manage.py makemessages $(compose)
-	@docker compose -f $(compose) run --rm django python manage.py makemessages --all
+	@docker compose -f $(compose) run --rm django python manage.py makemessages --all --no-location --no-obsolete
 
 django_makemessages_js: ## Run ./manage.py makemessages for JS
-	@docker compose -f $(compose) run --rm django python manage.py makemessages --all --domain=djangojs
+	@docker compose -f $(compose) run --rm django python manage.py makemessages --all --domain=djangojs --no-location --no-obsolete
 
 django_compilemessages: ## Run ./manage.py compilemessages $(compose)
 	@docker compose -f $(compose) run --rm django python manage.py compilemessages
