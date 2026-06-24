@@ -91,6 +91,25 @@
           title="{% trans 'Search documents with current filters' %}"
           aria-label="{% trans 'Search documents' %}"
         ></button>
+        {% if content_updated_date %}
+          <div class="indicator-controls-bar__search-updated">
+            <span>{% blocktrans with d=content_updated_date|date:"Y-m-d" %}Dados atualizados em {{ d }}{% endblocktrans %}</span>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  {% endif %}
+
+  {% if study_unit == "source" %}
+    <div class="indicator-controls-bar__search-section">
+      <div class="indicator-controls-bar__section-title indicator-controls-bar__section-title--label">{% trans "Total sources" %}</div>
+      <div class="indicator-controls-bar__search-total-row">
+        <span class="indicator-controls-bar__search-total" id="indicator-search-total">&mdash;</span>
+        {% if content_updated_date %}
+          <div class="indicator-controls-bar__search-updated">
+            <span>{% blocktrans with d=content_updated_date|date:"Y-m-d" %}Dados atualizados em {{ d }}{% endblocktrans %}</span>
+          </div>
+        {% endif %}
       </div>
     </div>
   {% endif %}
@@ -177,5 +196,13 @@
         {% endfor %}
       </div>
     </div>
+  {% endif %}
+
+  {% if content_updated_date and study_unit != "source" %}
+    {% if study_unit != "document" or not search_page_url %}
+      <div class="indicator-controls-bar__search-updated">
+        <span>{% blocktrans with d=content_updated_date|date:"Y-m-d" %}Dados atualizados em {{ d }}{% endblocktrans %}</span>
+      </div>
+    {% endif %}
   {% endif %}
 </div>
