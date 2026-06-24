@@ -17,3 +17,7 @@ FRESHNESS_FIELDS = getattr(
 )
 
 
+def _date_from_etl_item():
+    """Silver merge date: end of the ETL, from EtlItemProcess.processed_at."""
+    return EtlItemProcess.objects.aggregate(value=Max("processed_at")).get("value")
+
