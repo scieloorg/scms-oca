@@ -4,6 +4,7 @@ from django.conf import settings
 
 from config import celery_app
 from search_gateway.client import get_opensearch_client
+from search_gateway.freshness import refresh_cache
 from search_gateway.lookup import DEFAULT_LOOKUPS, LOOKUP_BUILDERS
 from search_gateway.lookup.base import LookupIndexBuildService
 
@@ -44,3 +45,8 @@ def build_lookup_indices_task(
         max_items=dict(max_items or {}),
         progress=progress,
     ).run()
+
+
+@celery_app.task(name="[Freshness] Refresh data freshness cache")
+def refresh_data_freshness():
+    return refresh_cache()
