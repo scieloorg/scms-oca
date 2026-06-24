@@ -31,13 +31,16 @@ def _date_from_index_document(client, index_name):
             request_cache=True,
             ignore=[400, 404],
         )
+        
         aggregation = (response or {}).get("aggregations", {}).get("m") or {}
         value_str = aggregation.get("value_as_string")
         if value_str:
             return parse_datetime(value_str) or parse_date(value_str)
+        
         value = epoch_ms_to_datetime(aggregation.get("value"))
         if value:
             return value
+    
     return None
 
 
@@ -46,13 +49,16 @@ def _date_from_index_metadata(client, index_name):
     settings_response = client.indices.get_settings(index=index_name, ignore=[400, 404])
     if not isinstance(settings_response, dict):
         return None
+    
     newest = None
     for index_settings in settings_response.values():
         if not isinstance(index_settings, dict):
             continue
+
         raw = ((index_settings.get("settings") or {}).get("index") or {}).get("creation_date")
         value = epoch_ms_to_datetime(raw)
         if value and (newest is None or value > newest):
             newest = value
+
     return newest
 
