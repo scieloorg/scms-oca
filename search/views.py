@@ -10,15 +10,17 @@ from search_gateway.request_filters import (
     extract_applied_filters,
     normalize_option_filters,
 )
+from search_gateway.freshness import get_index_freshness
 from search_gateway.service import SearchGatewayService
 
 from .models import SearchPage
 
 
-def _render_results_fragments(request, results_data, has_citations_field=False):
+def _render_results_fragments(request, results_data, has_citations_field=False, content_updated_date=None):
     context = {
-        "results_data": results_data, 
-        "has_citations_field": has_citations_field
+        "results_data": results_data,
+        "has_citations_field": has_citations_field,
+        "content_updated_date": content_updated_date,
     }
 
     has_results = bool(results_data.get("search_results"))
@@ -78,7 +80,12 @@ def search_view_list(request):
         )
 
         has_citations_field = bool(data_source.get_field("cited_by_count_range"))
-        fragments = _render_results_fragments(request, results_data, has_citations_field=has_citations_field)
+        fragments = _render_results_fragments(
+            request,
+            results_data,
+            has_citations_field=has_citations_field,
+            content_updated_date=get_index_freshness(index_name),
+        )
 
         return JsonResponse({
             **fragments,

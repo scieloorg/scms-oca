@@ -10,6 +10,7 @@ from wagtail.models import Orderable, Page
 
 from search.models import SearchPage
 from search_gateway.filter_ui import render_filter_sidebar
+from search_gateway.freshness import get_index_freshness
 from search_gateway.models import DataSource
 from search_gateway.request_filters import extract_applied_filters
 from search_gateway.service import SearchGatewayService
@@ -184,6 +185,9 @@ class ObservationPage(Page):
                 },
             }
         )
+
+        index_name = data_source.index_name if data_source else ""
+        context["content_updated_date"] = get_index_freshness(index_name)
 
         if not data_source:
             logger.warning(

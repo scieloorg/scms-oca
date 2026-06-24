@@ -37,3 +37,20 @@ SEARCH_GATEWAY_ERROR_INDEX = _env.str(
     "SEARCH_GATEWAY_ERROR_INDEX",
     default="search_gateway_errors",
 )
+
+DATA_FRESHNESS_FIELDS = _env.list(
+    "DATA_FRESHNESS_FIELDS",
+    default=["oca_indexed_at", "updated", "created", "date"],
+)
+DATA_FRESHNESS_CACHE_KEY = _env.str(
+    "DATA_FRESHNESS_CACHE_KEY",
+    default="data_freshness:by_index",
+)
+DATA_FRESHNESS_CACHE_TTL = _env.int(
+    "DATA_FRESHNESS_CACHE_TTL",
+    default=60 * 60 * 48,
+)
+DATA_FRESHNESS_FALLBACK_DATE = _env.str(
+    "DATA_FRESHNESS_FALLBACK_DATE",
+    default="",
+)

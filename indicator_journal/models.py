@@ -13,6 +13,7 @@ from indicator_journal.metrics.config import JournalMetricConfig, JournalMetricC
 from indicator_journal.metrics.engine import JournalMetricEngine
 from indicator_journal.navigation import get_indicator_nav_urls, get_journal_profile_url
 from search_gateway.filter_ui import render_filter_sidebar
+from search_gateway.freshness import get_index_freshness
 from search_gateway.service import SearchGatewayService
 
 
@@ -84,6 +85,7 @@ class IndicatorByCategoryPage(IndicatorPage):
             "analysis_unit_options": analysis_unit_options,
             "filters_data": filters_data or {},
             "ranking_data": ranking_data,
+            "content_updated_date": get_index_freshness(data_source_name),
         })
         context.update(nav_urls)
 
@@ -191,6 +193,7 @@ class IndicatorGlobalPage(IndicatorPage):
             "indicator_config_fields": config_fields,
             "indicator_config_form_id": "global-metrics-filter-form",
             "indicator_config_submit_label": translate("APPLY"),
+            "content_updated_date": get_index_freshness(data_source_name),
         })
         context.update(nav_urls)
         context.update(

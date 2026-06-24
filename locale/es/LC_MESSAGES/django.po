@@ -3193,6 +3193,12 @@ msgstr "Ayuda en la sintaxis"
 msgid "Pesquisar"
 msgstr "Buscar"
 
+msgid "Dados atualizados em %(d)s"
+msgstr "Datos actualizados el %(d)s"
+
+msgid "Total sources"
+msgstr "Total de fuentes"
+
 msgid "Operadores Lógicos"
 msgstr "Operadores lógicos"
 

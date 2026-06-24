@@ -33,6 +33,7 @@
                 <span class="tooltiptext">{% trans "Por questões de performance, o sistema exibe apenas os primeiros 10.000 registros. Use os filtros laterais para encontrar resultados específicos." %}</span>
             </div>
         {% endif %}
+        {% if content_updated_date %}<span class="results-toolbar__updated">{% blocktrans with d=content_updated_date|date:"Y-m-d" %}Dados atualizados em {{ d }}{% endblocktrans %}</span>{% endif %}
     </div>
 
     <div class="results-toolbar__actions">

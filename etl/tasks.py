@@ -5,6 +5,7 @@ from core.utils.db import refresh_db_connections
 from etl.models import EtlItemProcess, EtlPipelineConfig, EtlResult, EtlStatus
 from etl.pipeline import OpenSearchETLPipeline
 from etl.services import backfill_input_items, process_pending_items
+from search_gateway.freshness import invalidate_freshness_cache
 
 
 @celery_app.task(name="[ETL] Process pending silver items")
@@ -134,5 +135,8 @@ def _run_pipeline_target(
     result["target"] = target_name
     result["public_alias"] = pipeline.public_alias
     result["indexed_indices"] = sorted(pipeline.indexed_index_names)
+
+    if result.get("total_indexed_docs", 0) > 0:
+        invalidate_freshness_cache()
 
     return result

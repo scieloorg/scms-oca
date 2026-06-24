@@ -28,6 +28,7 @@ from institution.models import Institution
 from location.models import Location
 from search.models import SearchPage
 from search_gateway.filter_ui import build_data_source_form_payload, render_filter_sidebar
+from search_gateway.freshness import get_index_freshness
 from search_gateway.request_filters import extract_applied_filters
 from usefulmodels.models import ActionAndPractice, ThematicArea
 
@@ -1124,6 +1125,8 @@ class ChartBasePage(Page):
         })
         context.update(self.get_indicator_nav_urls())
         context["applied_filters_json"] = json.dumps(context["applied_filters"])
+
+        context["content_updated_date"] = get_index_freshness(self.data_source.index_name)
         return context
 
 

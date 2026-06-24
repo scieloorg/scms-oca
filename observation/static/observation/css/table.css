@@ -74,8 +74,9 @@
 }
 
 .observation-chart-meta {
-  font-size: 12px;
-  color: #64748b;
+  font-size: 0.82rem;
+  line-height: 1.3;
+  color: #6b7a90;
   margin-bottom: 8px;
 }
 

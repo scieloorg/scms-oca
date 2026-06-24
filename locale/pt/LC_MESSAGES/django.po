@@ -1751,6 +1751,12 @@ msgstr "Pesquisar documentos com os filtros atuais"
 msgid "Search documents"
 msgstr "Pesquisar documentos"
 
+msgid "Dados atualizados em %(d)s"
+msgstr "Dados atualizados em %(d)s"
+
+msgid "Total sources"
+msgstr "Total de fontes"
+
 msgid "Ranking setup"
 msgstr "Configuração do ranking"
 

@@ -76,6 +76,15 @@
   border-top: 1px solid #ebf0f6;
 }
 
+.indicator-controls-bar__search-updated {
+  margin-left: auto;
+  font-size: 0.82rem;
+  line-height: 1.3;
+  color: #6b7a90;
+  text-align: right;
+  text-transform: uppercase;
+}
+
 .indicator-controls-bar__search-total-row {
   display: flex;
   align-items: center;
