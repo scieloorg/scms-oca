@@ -63,3 +63,19 @@ def _date_from_index_metadata(client, index_name):
 
     return newest
 
+
+def compute_index_freshness(index_name):
+    if not index_name:
+        return None
+
+    if index_name in (SILVER_PUBLIC_ALIAS, SILVER_INDEX_PATTERN):
+        return _date_from_etl_item() or FALLBACK_DATE
+
+    client = get_opensearch_client()
+
+    return (
+        _date_from_index_document(client, index_name)
+        or _date_from_index_metadata(client, index_name)
+        or FALLBACK_DATE
+    )
+
