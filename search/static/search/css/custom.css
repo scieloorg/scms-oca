@@ -392,6 +392,13 @@
   overflow: visible;
 }
 
+.results-toolbar__updated {
+  width: 100%;
+  font-size: 0.82rem;
+  line-height: 1.3;
+  color: #6b7a90;
+}
+
 .results-toolbar__summary {
   display: flex;
   align-items: center;
