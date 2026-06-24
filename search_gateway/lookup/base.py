@@ -115,6 +115,19 @@ class LookupBuilder:
         if cleaned:
             yield cleaned
 
+    def collect_document_metadata(self, source):
+        return {
+            "document_types": set(self.iter_clean_values(source.get("type"))),
+            "document_languages": set(self.iter_clean_values(source.get("language"))),
+            "open_access_values": set(
+                self.iter_clean_boolean_values(source.get("is_open_access"))
+            ),
+            "open_access_statuses": set(
+                self.iter_clean_values(source.get("open_access_status"))
+            ),
+        }
+
+    def count(self):
         return len(self.entries)
 
     @staticmethod
@@ -470,5 +483,3 @@ class LookupIndexBuildService:
             indexed_counts["_errors"] = error_counts
 
         return indexed_counts
-
-
