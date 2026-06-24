@@ -184,20 +184,42 @@ class SearchGatewayService:
             if field_info.get("kind") != "control"
         }
 
-    def _search_lookup_options(self, field, query_text=""):
+    @staticmethod
+    def _build_lookup_dependency_filters(lookup_config, filters):
+        dependency_filters = lookup_config.get("dependency_filters") or {}
+        if not dependency_filters or not filters:
+            return {}
+
+        lookup_filters = {}
+        for filter_name, lookup_field_name in dependency_filters.items():
+            value = filters.get(filter_name)
+            if value in (None, "", []):
+                continue
+
+            lookup_filters[lookup_field_name] = value if isinstance(value, list) else [value]
+
+        return lookup_filters
+
+    def _search_lookup_options(self, field, query_text="", filters=None):
         lookup_config = field.lookup
         source_fields = [
             lookup_config["source_value_field"],
             lookup_config["source_label_field"],
             "size",
         ]
+
+        lookup_filters = dict(lookup_config.get("filter") or {})
+        lookup_filters.update(
+            self._build_lookup_dependency_filters(lookup_config, filters or {})
+        )
+
         body = build_lookup_hits_body(
             query_text=query_text,
             search_fields=[lookup_config["search_field"]],
             size=field.get_option_limit(default=100),
             source_fields=source_fields,
             sort_field=lookup_config["sort_field"],
-            filters=lookup_config.get("filter"),
+            filters=lookup_filters,
         )
         response = self.client.search(
             index=lookup_config["index_name"],
@@ -249,7 +271,7 @@ class SearchGatewayService:
 
         if field.lookup:
             try:
-                return self._search_lookup_options(field, query_text=query_text)
+                return self._search_lookup_options(field, query_text=query_text, filters=filters)
             except Exception as exc:
                 return [], f"Error retrieving lookup options: {exc}"
 
