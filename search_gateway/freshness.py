@@ -21,3 +21,22 @@ def _date_from_etl_item():
     """Silver merge date: end of the ETL, from EtlItemProcess.processed_at."""
     return EtlItemProcess.objects.aggregate(value=Max("processed_at")).get("value")
 
+
+def _date_from_index_document(client, index_name):
+    """Latest date held in a document field of the index."""
+    for field in FRESHNESS_FIELDS:
+        response = client.search(
+            index=index_name,
+            body={"size": 0, "aggs": {"m": {"max": {"field": field}}}},
+            request_cache=True,
+            ignore=[400, 404],
+        )
+        aggregation = (response or {}).get("aggregations", {}).get("m") or {}
+        value_str = aggregation.get("value_as_string")
+        if value_str:
+            return parse_datetime(value_str) or parse_date(value_str)
+        value = epoch_ms_to_datetime(aggregation.get("value"))
+        if value:
+            return value
+    return None
+
