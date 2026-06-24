@@ -33,6 +33,10 @@ SEARCH_GATEWAY_LOOKUP_NUMBER_OF_REPLICAS = _env.int(
     "SEARCH_GATEWAY_LOOKUP_NUMBER_OF_REPLICAS",
     default=0,
 )
+SEARCH_GATEWAY_LOOKUP_SOURCE_TYPES = _env.list(
+    "SEARCH_GATEWAY_LOOKUP_SOURCE_TYPES",
+    default=["journal", "conference"],
+)
 SEARCH_GATEWAY_ERROR_INDEX = _env.str(
     "SEARCH_GATEWAY_ERROR_INDEX",
     default="search_gateway_errors",
