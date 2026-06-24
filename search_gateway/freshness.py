@@ -91,3 +91,18 @@ def refresh_cache():
 
     return data
 
+
+def get_index_freshness(index_name):
+    if not index_name:
+        return None
+    
+    cached = cache.get(CACHE_KEY)
+    if cached is not None and index_name in cached:
+        return cached.get(index_name)
+    
+    value = compute_index_freshness(index_name)
+    data = dict(cached or {})
+    data[index_name] = value
+    cache.set(CACHE_KEY, data, CACHE_TTL)
+    
+    return value
