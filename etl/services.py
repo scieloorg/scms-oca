@@ -14,7 +14,7 @@ from etl.transform.extractors import extract_isbns, extract_publication_year
 from etl.transform.normalizers import normalize_document_type_for_etl
 from harvest.utils import clean_source_payload, source_hash
 from search_gateway.opensearch import OpenSearchIndexClient
-from search_gateway.tasks import refresh_data_freshness
+from search_gateway.freshness import invalidate_freshness_cache
 
 logger = logging.getLogger(__name__)
 
@@ -300,7 +300,7 @@ def process_pending_items(
             )
 
     if any(r.get("total_indexed_docs", 0) > 0 for r in results):
-        refresh_data_freshness.delay()
+        invalidate_freshness_cache()
 
     return results
 

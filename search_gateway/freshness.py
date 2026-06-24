@@ -92,6 +92,10 @@ def refresh_cache():
     return data
 
 
+def invalidate_freshness_cache():
+    cache.delete(CACHE_KEY)
+
+
 def get_index_freshness(index_name):
     if not index_name:
         return None
