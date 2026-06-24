@@ -10,6 +10,7 @@ from wagtail.admin.panels import FieldPanel
 from wagtail.models import Page
 
 from search_gateway.filter_ui import render_filter_sidebar
+from search_gateway.freshness import get_index_freshness
 from search_gateway.models import DataSource
 from search_gateway.option_normalization import (
     normalize_positive_number,
@@ -217,6 +218,7 @@ class SearchPage(Page):
         payload = {"search_results": [], "total_results": 0} if results_data is None else results_data
         return {
             "index_name": index_name,
+            "content_updated_date": get_index_freshness(index_name),
             "searchable_fields": SEARCHABLE_FIELDS,
             "search_clauses": request_state["query_clauses"],
             "is_scientific_data_source": index_name == scientific_index,
