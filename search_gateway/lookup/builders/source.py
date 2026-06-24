@@ -1,6 +1,8 @@
 from collections.abc import Iterable
 from typing import Any
 
+from django.conf import settings
+
 from search_gateway.lookup.base import LookupBuilder, clean_text
 
 
@@ -24,6 +26,17 @@ class SourceLookupBuilder(LookupBuilder):
                 "publisher_ids": {"type": "keyword"},
             }
         )
+
+    @classmethod
+    def allowed_source_types(cls):
+        allowed_types = set()
+
+        for source_type in settings.SEARCH_GATEWAY_LOOKUP_SOURCE_TYPES:
+            cleaned = clean_text(source_type)
+            if cleaned:
+                allowed_types.add(cleaned.lower())
+
+        return allowed_types
 
     def collect(self, source: dict[str, Any], max_items: int | None = None) -> None:
         seen_values: set[str] = set()
