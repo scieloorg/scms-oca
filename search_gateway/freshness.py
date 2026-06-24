@@ -79,3 +79,15 @@ def compute_index_freshness(index_name):
         or FALLBACK_DATE
     )
 
+
+def refresh_cache():
+    data = {
+        index_name: compute_index_freshness(index_name)
+        for index_name in DataSource.objects.exclude(index_name="")
+        .values_list("index_name", flat=True)
+        .distinct()
+    }
+    cache.set(CACHE_KEY, data, CACHE_TTL)
+
+    return data
+
