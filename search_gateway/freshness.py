@@ -15,6 +15,7 @@ SILVER_INDEX_PATTERN = getattr(settings, "ETL_SILVER_INDEX_PATTERN", SILVER_PUBL
 FRESHNESS_FIELDS = getattr(
     settings, "DATA_FRESHNESS_FIELDS", ["oca_indexed_at", "updated", "created", "date"]
 )
+FALLBACK_DATE = parse_date(settings.DATA_FRESHNESS_FALLBACK_DATE)
 
 
 def _date_from_etl_item():
