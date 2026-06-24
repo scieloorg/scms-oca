@@ -97,10 +97,13 @@ def normalize_selected_values(applied_filters, field_name, default=None):
 # ---------------------------------------------------------------------------
 
 def normalize_option(option, selected_values):
+    option_count = None
+
     if isinstance(option, dict):
         value = option.get("value", option.get("key", option.get("id")))
         label = option.get("label", option.get("text", value))
         group = option.get("group")
+        option_count = option.get("option_count", option.get("size", option.get("doc_count")))
     else:
         value = option
         label = option
@@ -110,12 +113,17 @@ def normalize_option(option, selected_values):
     normalized_label = gettext(label) if isinstance(label, str) and label else label
     normalized_group = gettext(group) if isinstance(group, str) and group else group
 
-    return {
+    normalized = {
         "value": normalized_value,
         "label": normalized_label or normalized_value,
         "group": normalized_group,
         "selected": normalized_value in selected_values,
     }
+
+    if option_count is not None:
+        normalized["option_count"] = option_count
+
+    return normalized
 
 
 def normalize_options(options, selected_values):
