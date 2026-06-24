@@ -16,6 +16,14 @@
     });
   }
 
+  function contentUpdatedMeta() {
+    const text = (window.searchPageConfig || {}).contentUpdatedText;
+    if (!text) {
+      return "";
+    }
+    return '<div class="observation-chart-meta">' + text + '</div>';
+  }
+
   function hasDimensionLevels() {
     const config = window.searchPageConfig || {};
     return Boolean(config.hasDimensionLevels);
@@ -1479,7 +1487,7 @@
           '<thead class="table-light"><tr><th>' + rowLabel + '</th>' + thCells + '</tr></thead>' +
           '<tbody>' + rowsHtml + '</tbody></table></div>' +
         '<div class="observation-detail-chart-wrap">' +
-          '<div class="observation-chart-meta">' + _t("Processing date") + ': 2026-03-17</div>' +
+              contentUpdatedMeta() +
           '<div class="observation-detail-chart-head"><strong>' + _t("Evolution comparison by year") + '</strong><button type="button" id="download-comparison-chart-btn" class="btn btn-outline-secondary btn-sm">' + _t("Download chart") + '</button></div>' +
           '<canvas id="comparison-chart" width="900" height="260"></canvas>' +
           '<div id="comparison-chart-insights" class="observation-comparison-insights"></div></div>'
@@ -1581,7 +1589,7 @@
           yearCells +
           '<div class="col-12">' +
             '<div class="observation-detail-chart-wrap">' +
-              '<div class="observation-chart-meta">' + _t("Processing date") + ': 2026-03-17</div>' +
+          contentUpdatedMeta() +
               '<div class="observation-detail-chart-head"><strong>' + _format(_t("Evolution by %(label)s"), { label: colLabel }) + '</strong>' +
               '<button type="button" id="download-detail-chart-btn" class="btn btn-outline-secondary btn-sm observation-chart-download-btn">' + _t("Download chart") + '</button></div>' +
               '<canvas id="country-detail-chart" width="560" height="220"></canvas>' +

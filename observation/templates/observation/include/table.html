@@ -37,7 +37,7 @@
   </div>
 
   <p class="text-muted small mb-2">{% trans "Use the detail icon next to country name. Use row checkboxes and then Compare selected." %}</p>
-  <div class="observation-chart-meta">{% trans "Processing date" %}: 2026-03-17</div>
+  {% if content_updated_date %}<div class="observation-chart-meta">{% blocktrans with d=content_updated_date|date:"Y-m-d" %}Dados atualizados em {{ d }}{% endblocktrans %}</div>{% endif %}
 
   <ul class="nav nav-tabs mt-3" id="observation-content-tabs" role="tablist">
     <li class="nav-item" role="presentation">

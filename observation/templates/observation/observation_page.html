@@ -45,6 +45,7 @@
         hasDimensionLevels: {{ observation_has_dimension_levels|yesno:"true,false" }},
         dimensionLevelLabels: JSON.parse(document.getElementById('observation-dimension-level-labels-data').textContent),
         defaultDimensionLevel: 'documentos',
+        contentUpdatedText: '{% if content_updated_date %}{% filter escapejs %}{% blocktrans with d=content_updated_date|date:"Y-m-d" %}Dados atualizados em {{ d }}{% endblocktrans %}{% endfilter %}{% endif %}',
         searchableFields: JSON.parse(document.getElementById('searchable-fields-data').textContent).map(function (item) {
             return { value: item[0], label: item[1] };
         }),
