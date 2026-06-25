@@ -1688,7 +1688,7 @@
     form.dataset.sgInternalReset = 'true';
     form.reset();
     clearLookupInitialOptionsCache(form);
-    clearCustomFormState(form, { skipRender: true });
+    clearCustomFormState(form);
     void refreshAllFieldOptions(form).finally(() => {
       bindSelectPlaceholderState(form);
       initBooleanToggleFields(form);
