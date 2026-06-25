@@ -220,6 +220,74 @@ function initBreakdownVariableAutoSubmit(menuForm, submitButton) {
   breakdownSelect.dataset.autoSubmitBound = 'true';
 }
 
+function getIndicatorResultsCol() {
+  return document.querySelector('.indicator-results-col');
+}
+
+var indicatorLoadingOptions = {
+  overlayClass: 'indicator-results-loading',
+  innerClass: 'indicator-results-loading-inner',
+  textClass: 'indicator-results-loading-text',
+  loadingClass: 'indicator-results-col--loading',
+  message: getLoadingMessage(),
+};
+
+var indicatorLoading = createLoadingOverlay(getIndicatorResultsCol, indicatorLoadingOptions);
+
+function positionIndicatorLoadingOverlay() {
+  var col = indicatorLoading.getContainer();
+
+  if (!col) {
+    return;
+  }
+
+  var overlay = indicatorLoading.getOverlay();
+
+  if (!overlay) {
+    return;
+  }
+
+  var inner = overlay.querySelector('.indicator-results-loading-inner');
+
+  if (!inner) {
+    return;
+  }
+
+  var rect = col.getBoundingClientRect();
+
+  inner.style.left = (rect.left + rect.width / 2) + 'px';
+}
+
+var indicatorLoadingResizeBound = false;
+
+function showIndicatorLoading() {
+  var col = indicatorLoading.getContainer();
+
+  if (!col) {
+    return;
+  }
+
+  indicatorLoading.show();
+
+  positionIndicatorLoadingOverlay();
+
+  if (!indicatorLoadingResizeBound) {
+    window.addEventListener('resize', positionIndicatorLoadingOverlay);
+    indicatorLoadingResizeBound = true;
+  }
+}
+
+function hideIndicatorLoading() {
+  indicatorLoading.hide();
+}
+
+if (typeof window !== 'undefined') {
+  window.IndicatorLoading = {
+    show: showIndicatorLoading,
+    hide: hideIndicatorLoading,
+  };
+}
+
 function initIndicatorForm(dataSource, studyUnit) {
   const menuForm = document.getElementById('indicator-filter-form');
   if (!menuForm) return;
@@ -251,6 +319,7 @@ function initIndicatorForm(dataSource, studyUnit) {
   const handleFormSubmit = (event) => {
     event.preventDefault();
     submitButton.disabled = true;
+    showIndicatorLoading();
 
     const formData = new FormData(menuForm);
     const filters = window.SearchGatewayFilterForm
@@ -326,6 +395,7 @@ function initIndicatorForm(dataSource, studyUnit) {
       clearAppliedFiltersContainer();
     })
     .finally(() => {
+      hideIndicatorLoading();
       submitButton.disabled = false;
     });
   };
