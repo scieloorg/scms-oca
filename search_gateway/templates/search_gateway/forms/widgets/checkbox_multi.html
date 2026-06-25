@@ -46,9 +46,13 @@
             data-field-name="{{ field.name }}"
             data-field-widget="checkbox"
             data-multiple-selection="true"
+            {% if option.option_count is not None %}data-option-count="{{ option.option_count }}"{% endif %}
             {% if option.selected %}checked{% endif %}
           />
-          <span>{{ option.label }}</span>
+          <span class="checkbox-field__label">{{ option.label }}</span>
+          {% if option.option_count is not None %}
+            <span class="checkbox-field__count">{{ option.option_count }}</span>
+          {% endif %}
         </label>
       {% endfor %}
     {% endfor %}
