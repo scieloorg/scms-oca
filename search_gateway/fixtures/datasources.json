@@ -1500,10 +1500,27 @@
             "settings": {
               "widget": "range",
               "label": "Creation Year",
-              "default_value": {
-                "start": "2019",
-                "end": "2025"
-              },
+              "group": "document",
+              "group_order": 10,
+              "multiple_selection": false
+            }
+          },
+          "start_date_year_range": {
+            "kind": "index",
+            "index_field_name": "start_date_year",
+            "filter": {
+              "use": false,
+              "transform": {
+                "type": "year_range",
+                "sources": [
+                  "start_date_year_start",
+                  "start_date_year_end"
+                ]
+              }
+            },
+            "settings": {
+              "widget": "range",
+              "label": "Registration Year",
               "group": "document",
               "group_order": 10,
               "multiple_selection": false
@@ -1563,7 +1580,7 @@
               "location": "Location"
             },
             "fields": [
-              "publication_year",
+              "document_publication_year_range",
               "directory_type",
               "action",
               "thematic_level_0",
@@ -1575,7 +1592,7 @@
               "regions",
               "states",
               "cities",
-              "start_date_year"
+              "start_date_year_range"
             ]
           },
           "indicator": {
@@ -1589,7 +1606,7 @@
             },
             "fields": [
               "breakdown_variable",
-              "publication_year",
+              "document_publication_year_range",
               "directory_type",
               "action",
               "thematic_level_0",
@@ -1601,7 +1618,7 @@
               "regions",
               "states",
               "cities",
-              "start_date_year"
+              "start_date_year_range"
             ]
           }
         }
