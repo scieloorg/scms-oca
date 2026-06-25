@@ -1200,30 +1200,8 @@
       "source_fields": [],
       "field_settings": {
         "fields": {
-          "publication_year": {
-            "kind": "index",
-            "index_field_name": "creation_year",
-            "filter": {
-              "size": 200,
-              "order": {
-                "_key": "desc"
-              }
-            },
-            "settings": {
-              "label": "Creation Year",
-              "support_query_operator": false,
-              "widget": "select",
-              "multiple_selection": true,
-              "group": "document",
-              "group_order": 10,
-              "include_all_option": true,
-              "all_option_label": "All",
-              "search_threshold": 10
-            }
-          },
           "action": {
             "kind": "index",
-            "index_field_name": "action",
             "filter": {
               "size": 100,
               "order": {
@@ -1231,157 +1209,68 @@
               }
             },
             "settings": {
+              "group": "activity_profile",
               "label": "Action",
-              "support_query_operator": false,
               "widget": "select",
-              "multiple_selection": true,
-              "group": "activity_profile",
               "group_order": 20,
-              "include_all_option": true,
               "all_option_label": "All",
-              "search_threshold": 10
-            }
-          },
-          "thematic_level_0": {
-            "kind": "index",
-            "index_field_name": "thematic_level_0",
-            "filter": {
-              "size": 100,
-              "order": {
-                "_key": "asc"
-              }
-            },
-            "settings": {
-              "label": "Division",
-              "support_query_operator": false,
-              "widget": "select",
-              "multiple_selection": true,
-              "group": "thematic",
-              "group_order": 30,
+              "search_threshold": 10,
               "include_all_option": true,
-              "all_option_label": "All",
-              "search_threshold": 10
-            }
-          },
-          "thematic_level_1": {
-            "kind": "index",
-            "index_field_name": "thematic_level_1",
-            "filter": {
-              "size": 100,
-              "order": {
-                "_key": "asc"
-              }
-            },
-            "settings": {
-              "label": "Area",
-              "support_query_operator": false,
-              "widget": "select",
               "multiple_selection": true,
-              "group": "thematic",
-              "group_order": 30,
-              "include_all_option": true,
-              "all_option_label": "All",
-              "search_threshold": 10
-            }
-          },
-          "practice": {
-            "kind": "index",
-            "index_field_name": "practice",
-            "filter": {
-              "size": 100,
-              "order": {
-                "_key": "asc"
-              }
-            },
-            "settings": {
-              "label": "Practice",
               "support_query_operator": false,
-              "widget": "select",
-              "multiple_selection": true,
-              "group": "activity_profile",
-              "group_order": 20,
-              "include_all_option": true,
-              "all_option_label": "All",
-              "search_threshold": 10
-            }
-          },
-          "institutions": {
-            "kind": "index",
-            "index_field_name": "institutions_search.keyword",
-            "filter": {
-              "size": 100,
-              "order": {
-                "_key": "asc"
-              },
-              "use": false
+              "dependencies": [
+                "directory_type",
+                "action",
+                "thematic_level_0",
+                "thematic_level_1",
+                "thematic_level_2",
+                "classification",
+                "practice",
+                "institutions",
+                "regions",
+                "states",
+                "cities"
+              ]
             },
-            "settings": {
-              "label": "Institution",
-              "support_query_operator": false,
-              "widget": "lookup",
-              "multiple_selection": true,
-              "group": "affiliation",
-              "group_order": 40,
-              "include_all_option": true,
-              "all_option_label": "All"
-            },
-            "lookup": {
-              "index_name": "lookup_institution_v2",
-              "search_field": "label_search",
-              "sort_field": "size",
-              "value_field": "value",
-              "label_field": "label",
-              "source_value_field": "value",
-              "source_label_field": "label",
-              "size": 10
-            }
-          },
-          "classification": {
-            "kind": "index",
-            "index_field_name": "classification",
-            "filter": {
-              "size": 100,
-              "order": {
-                "_key": "asc"
-              }
-            },
-            "settings": {
-              "label": "Classification",
-              "support_query_operator": false,
-              "widget": "select",
-              "multiple_selection": true,
-              "group": "activity_profile",
-              "group_order": 20,
-              "include_all_option": true,
-              "all_option_label": "All",
-              "search_threshold": 10
-            }
+            "index_field_name": "action"
           },
           "cities": {
             "kind": "index",
-            "index_field_name": "cities",
             "filter": {
+              "use": false,
               "size": 100,
               "order": {
                 "_key": "asc"
-              },
-              "use": false
+              }
             },
             "settings": {
-              "label": "City",
-              "support_query_operator": false,
-              "widget": "lookup",
-              "multiple_selection": true,
               "group": "location",
+              "label": "City",
+              "widget": "lookup",
               "group_order": 50,
-              "lookup_use_data_source_values": true,
+              "all_option_label": "All",
               "include_all_option": true,
-              "all_option_label": "All"
-            }
+              "multiple_selection": true,
+              "support_query_operator": false,
+              "lookup_use_data_source_values": true,
+              "dependencies": [
+                "directory_type",
+                "action",
+                "thematic_level_0",
+                "thematic_level_1",
+                "thematic_level_2",
+                "classification",
+                "practice",
+                "institutions",
+                "regions",
+                "states",
+                "cities"
+              ]
+            },
+            "index_field_name": "cities"
           },
           "states": {
             "kind": "index",
-            "index_field_name": "states",
             "filter": {
               "size": 100,
               "order": {
@@ -1389,20 +1278,33 @@
               }
             },
             "settings": {
-              "label": "State",
-              "support_query_operator": false,
-              "widget": "select",
-              "multiple_selection": true,
               "group": "location",
+              "label": "State",
+              "widget": "select",
               "group_order": 50,
-              "include_all_option": true,
               "all_option_label": "All",
-              "search_threshold": 10
-            }
+              "search_threshold": 10,
+              "include_all_option": true,
+              "multiple_selection": true,
+              "support_query_operator": false,
+              "dependencies": [
+                "directory_type",
+                "action",
+                "thematic_level_0",
+                "thematic_level_1",
+                "thematic_level_2",
+                "classification",
+                "practice",
+                "institutions",
+                "regions",
+                "states",
+                "cities"
+              ]
+            },
+            "index_field_name": "states"
           },
           "regions": {
             "kind": "index",
-            "index_field_name": "regions",
             "filter": {
               "size": 100,
               "order": {
@@ -1410,20 +1312,145 @@
               }
             },
             "settings": {
-              "label": "Region",
-              "support_query_operator": false,
-              "widget": "select",
-              "multiple_selection": true,
               "group": "location",
+              "label": "Region",
+              "widget": "select",
               "group_order": 50,
-              "include_all_option": true,
               "all_option_label": "All",
-              "search_threshold": 10
-            }
+              "search_threshold": 10,
+              "include_all_option": true,
+              "multiple_selection": true,
+              "support_query_operator": false,
+              "dependencies": [
+                "directory_type",
+                "action",
+                "thematic_level_0",
+                "thematic_level_1",
+                "thematic_level_2",
+                "classification",
+                "practice",
+                "institutions",
+                "regions",
+                "states",
+                "cities"
+              ]
+            },
+            "index_field_name": "regions"
+          },
+          "practice": {
+            "kind": "index",
+            "filter": {
+              "size": 100,
+              "order": {
+                "_key": "asc"
+              }
+            },
+            "settings": {
+              "group": "activity_profile",
+              "label": "Practice",
+              "widget": "select",
+              "group_order": 20,
+              "all_option_label": "All",
+              "search_threshold": 10,
+              "include_all_option": true,
+              "multiple_selection": true,
+              "support_query_operator": false,
+              "dependencies": [
+                "directory_type",
+                "action",
+                "thematic_level_0",
+                "thematic_level_1",
+                "thematic_level_2",
+                "classification",
+                "practice",
+                "institutions",
+                "regions",
+                "states",
+                "cities"
+              ]
+            },
+            "index_field_name": "practice"
+          },
+          "institutions": {
+            "kind": "index",
+            "filter": {
+              "use": false,
+              "size": 100,
+              "order": {
+                "_key": "asc"
+              }
+            },
+            "lookup": {
+              "size": 10,
+              "index_name": "lookup_institution_v2",
+              "sort_field": "size",
+              "label_field": "label",
+              "value_field": "value",
+              "search_field": "label_search",
+              "source_label_field": "label",
+              "source_value_field": "value"
+            },
+            "settings": {
+              "group": "affiliation",
+              "label": "Institution",
+              "widget": "lookup",
+              "group_order": 40,
+              "all_option_label": "All",
+              "include_all_option": true,
+              "multiple_selection": true,
+              "support_query_operator": false,
+              "dependencies": [
+                "directory_type",
+                "action",
+                "thematic_level_0",
+                "thematic_level_1",
+                "thematic_level_2",
+                "classification",
+                "practice",
+                "institutions",
+                "regions",
+                "states",
+                "cities"
+              ]
+            },
+            "index_field_name": "institutions_search.keyword"
+          },
+          "classification": {
+            "kind": "index",
+            "filter": {
+              "size": 100,
+              "order": {
+                "_key": "asc"
+              }
+            },
+            "settings": {
+              "group": "activity_profile",
+              "label": "Classification",
+              "widget": "select",
+              "group_order": 20,
+              "all_option_label": "All",
+              "search_threshold": 10,
+              "include_all_option": true,
+              "multiple_selection": true,
+              "support_query_operator": false,
+              "dependencies": [
+                "directory_type",
+                "action",
+                "thematic_level_0",
+                "thematic_level_1",
+                "thematic_level_2",
+                "classification",
+                "practice",
+                "institutions",
+                "regions",
+                "states",
+                "cities"
+              ]
+            },
+            "index_field_name": "classification"
           },
           "directory_type": {
             "kind": "index",
-            "index_field_name": "directory_type",
             "filter": {
               "size": 100,
               "order": {
@@ -1431,41 +1458,33 @@
               }
             },
             "settings": {
-              "label": "Directory Type",
-              "support_query_operator": false,
-              "widget": "select",
-              "multiple_selection": true,
               "group": "activity_profile",
-              "group_order": 20,
-              "include_all_option": true,
-              "all_option_label": "All",
-              "search_threshold": 10
-            }
-          },
-          "thematic_level_2": {
-            "kind": "index",
-            "index_field_name": "thematic_level_2",
-            "filter": {
-              "size": 100,
-              "order": {
-                "_key": "asc"
-              }
-            },
-            "settings": {
-              "label": "Subarea",
-              "support_query_operator": false,
+              "label": "Directory Type",
               "widget": "select",
-              "multiple_selection": true,
-              "group": "thematic",
-              "group_order": 30,
-              "include_all_option": true,
+              "group_order": 20,
               "all_option_label": "All",
-              "search_threshold": 10
-            }
+              "search_threshold": 10,
+              "include_all_option": true,
+              "multiple_selection": true,
+              "support_query_operator": false,
+              "dependencies": [
+                "directory_type",
+                "action",
+                "thematic_level_0",
+                "thematic_level_1",
+                "thematic_level_2",
+                "classification",
+                "practice",
+                "institutions",
+                "regions",
+                "states",
+                "cities"
+              ]
+            },
+            "index_field_name": "directory_type"
           },
           "start_date_year": {
             "kind": "index",
-            "index_field_name": "start_date_year",
             "filter": {
               "size": 200,
               "order": {
@@ -1473,41 +1492,186 @@
               }
             },
             "settings": {
-              "label": "Registration Year",
-              "support_query_operator": false,
-              "widget": "select",
-              "multiple_selection": true,
               "group": "document",
+              "label": "Registration Year",
+              "widget": "select",
               "group_order": 10,
-              "include_all_option": true,
               "all_option_label": "All",
-              "search_threshold": 10
-            }
+              "search_threshold": 10,
+              "include_all_option": true,
+              "multiple_selection": true,
+              "support_query_operator": false
+            },
+            "index_field_name": "start_date_year"
           },
-          "document_publication_year_range": {
+          "publication_year": {
             "kind": "index",
-            "index_field_name": "creation_year",
             "filter": {
-              "use": false,
-              "transform": {
-                "type": "year_range",
-                "sources": [
-                  "document_publication_year_start",
-                  "document_publication_year_end"
-                ]
+              "size": 200,
+              "order": {
+                "_key": "desc"
               }
             },
             "settings": {
-              "widget": "range",
-              "label": "Creation Year",
               "group": "document",
+              "label": "Creation Year",
+              "widget": "select",
               "group_order": 10,
+              "all_option_label": "All",
+              "search_threshold": 10,
+              "include_all_option": true,
+              "multiple_selection": true,
+              "support_query_operator": false
+            },
+            "index_field_name": "creation_year"
+          },
+          "thematic_level_0": {
+            "kind": "index",
+            "filter": {
+              "size": 100,
+              "order": {
+                "_key": "asc"
+              }
+            },
+            "settings": {
+              "group": "thematic",
+              "label": "Division",
+              "widget": "select",
+              "group_order": 30,
+              "all_option_label": "All",
+              "search_threshold": 10,
+              "include_all_option": true,
+              "multiple_selection": true,
+              "support_query_operator": false,
+              "dependencies": [
+                "directory_type",
+                "action",
+                "thematic_level_0",
+                "thematic_level_1",
+                "thematic_level_2",
+                "classification",
+                "practice",
+                "institutions",
+                "regions",
+                "states",
+                "cities"
+              ]
+            },
+            "index_field_name": "thematic_level_0"
+          },
+          "thematic_level_1": {
+            "kind": "index",
+            "filter": {
+              "size": 100,
+              "order": {
+                "_key": "asc"
+              }
+            },
+            "settings": {
+              "group": "thematic",
+              "label": "Area",
+              "widget": "select",
+              "group_order": 30,
+              "all_option_label": "All",
+              "search_threshold": 10,
+              "include_all_option": true,
+              "multiple_selection": true,
+              "support_query_operator": false,
+              "dependencies": [
+                "directory_type",
+                "action",
+                "thematic_level_0",
+                "thematic_level_1",
+                "thematic_level_2",
+                "classification",
+                "practice",
+                "institutions",
+                "regions",
+                "states",
+                "cities"
+              ]
+            },
+            "index_field_name": "thematic_level_1"
+          },
+          "thematic_level_2": {
+            "kind": "index",
+            "filter": {
+              "size": 100,
+              "order": {
+                "_key": "asc"
+              }
+            },
+            "settings": {
+              "group": "thematic",
+              "label": "Subarea",
+              "widget": "select",
+              "group_order": 30,
+              "all_option_label": "All",
+              "search_threshold": 10,
+              "include_all_option": true,
+              "multiple_selection": true,
+              "support_query_operator": false,
+              "dependencies": [
+                "directory_type",
+                "action",
+                "thematic_level_0",
+                "thematic_level_1",
+                "thematic_level_2",
+                "classification",
+                "practice",
+                "institutions",
+                "regions",
+                "states",
+                "cities"
+              ]
+            },
+            "index_field_name": "thematic_level_2"
+          },
+          "breakdown_variable": {
+            "kind": "control",
+            "filter": {},
+            "settings": {
+              "group": "graph_options",
+              "label": "Breakdown Variable",
+              "widget": "select",
+              "allow_clear": true,
+              "group_order": 0,
+              "static_options": [
+                {
+                  "label": "Directory Type",
+                  "value": "directory_type"
+                },
+                {
+                  "label": "Action",
+                  "value": "action"
+                },
+                {
+                  "label": "Classification",
+                  "value": "classification"
+                },
+                {
+                  "label": "Practice",
+                  "value": "practice"
+                },
+                {
+                  "label": "Region",
+                  "value": "regions"
+                },
+                {
+                  "label": "State",
+                  "value": "states"
+                },
+                {
+                  "label": "City",
+                  "value": "cities"
+                }
+              ],
               "multiple_selection": false
-            }
+            },
+            "index_field_name": ""
           },
           "start_date_year_range": {
             "kind": "index",
-            "index_field_name": "start_date_year",
             "filter": {
               "use": false,
               "transform": {
@@ -1519,66 +1683,38 @@
               }
             },
             "settings": {
-              "widget": "range",
-              "label": "Registration Year",
               "group": "document",
+              "label": "Registration Year",
+              "widget": "range",
               "group_order": 10,
               "multiple_selection": false
-            }
+            },
+            "index_field_name": "start_date_year"
           },
-          "breakdown_variable": {
-            "kind": "control",
-            "index_field_name": "",
-            "filter": {},
+          "document_publication_year_range": {
+            "kind": "index",
+            "filter": {
+              "use": false,
+              "transform": {
+                "type": "year_range",
+                "sources": [
+                  "document_publication_year_start",
+                  "document_publication_year_end"
+                ]
+              }
+            },
             "settings": {
-              "label": "Breakdown Variable",
-              "widget": "select",
-              "multiple_selection": false,
-              "allow_clear": true,
-              "static_options": [
-                {
-                  "value": "directory_type",
-                  "label": "Directory Type"
-                },
-                {
-                  "value": "action",
-                  "label": "Action"
-                },
-                {
-                  "value": "classification",
-                  "label": "Classification"
-                },
-                {
-                  "value": "practice",
-                  "label": "Practice"
-                },
-                {
-                  "value": "regions",
-                  "label": "Region"
-                },
-                {
-                  "value": "states",
-                  "label": "State"
-                },
-                {
-                  "value": "cities",
-                  "label": "City"
-                }
-              ],
-              "group": "graph_options",
-              "group_order": 0
-            }
+              "group": "document",
+              "label": "Creation Year",
+              "widget": "range",
+              "group_order": 10,
+              "multiple_selection": false
+            },
+            "index_field_name": "creation_year"
           }
         },
         "forms": {
           "search": {
-            "group_labels": {
-              "document": "Document",
-              "activity_profile": "Activity Profile",
-              "thematic": "Thematic",
-              "affiliation": "Affiliation",
-              "location": "Location"
-            },
             "fields": [
               "document_publication_year_range",
               "directory_type",
@@ -1593,17 +1729,16 @@
               "states",
               "cities",
               "start_date_year_range"
-            ]
-          },
-          "indicator": {
+            ],
             "group_labels": {
-              "graph_options": "Graph Options",
               "document": "Document",
-              "activity_profile": "Activity Profile",
+              "location": "Location",
               "thematic": "Thematic",
               "affiliation": "Affiliation",
-              "location": "Location"
-            },
+              "activity_profile": "Activity Profile"
+            }
+          },
+          "indicator": {
             "fields": [
               "breakdown_variable",
               "document_publication_year_range",
@@ -1619,7 +1754,15 @@
               "states",
               "cities",
               "start_date_year_range"
-            ]
+            ],
+            "group_labels": {
+              "document": "Document",
+              "location": "Location",
+              "thematic": "Thematic",
+              "affiliation": "Affiliation",
+              "graph_options": "Graph Options",
+              "activity_profile": "Activity Profile"
+            }
           }
         }
       }
