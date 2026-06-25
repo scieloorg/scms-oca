@@ -692,3 +692,62 @@ body.modal-open .indicator-filters-toggle {
   font-size: 0.92rem;
   color: #667085;
 }
+
+.search-loading-spinner {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: search-loading-spin 0.75s linear infinite;
+  flex: 0 0 auto;
+}
+
+.search-loading-spinner--large {
+  width: 2.35rem;
+  height: 2.35rem;
+  border-width: 3px;
+  color: #2f4ea1;
+}
+
+@keyframes search-loading-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.indicator-results-col--loading {
+  position: relative;
+  min-height: 12rem;
+}
+
+.indicator-results-loading {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.indicator-results-loading[hidden] {
+  display: none;
+}
+
+.indicator-results-loading-inner {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 6;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.indicator-results-loading-text {
+  color: #60799a;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
