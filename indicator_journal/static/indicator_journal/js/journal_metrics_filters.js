@@ -135,6 +135,11 @@
     const params = buildCleanJournalMetricsQueryParams(form);
     const queryString = params.toString();
     const nextUrl = queryString ? `${action}?${queryString}` : action;
+
+    if (window.IndicatorLoading && typeof window.IndicatorLoading.show === 'function') {
+      window.IndicatorLoading.show();
+    }
+
     window.location.assign(nextUrl);
   }
 

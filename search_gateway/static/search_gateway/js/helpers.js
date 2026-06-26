@@ -660,3 +660,87 @@ function standardizeIndicatorSeriesNames(indicators) {
         });
     }
 }
+
+function getLoadingMessage() {
+    if (typeof gettext === 'function') {
+        return gettext('Loading...');
+    }
+    return 'Carregando...';
+}
+
+function createLoadingOverlay(containerOrGetter, options) {
+    var overlayClass = options.overlayClass;
+    var innerClass = options.innerClass;
+    var textClass = options.textClass;
+    var loadingClass = options.loadingClass;
+    var message = options.message;
+
+    var getContainer = typeof containerOrGetter === 'function'
+        ? containerOrGetter
+        : function () { return containerOrGetter; };
+
+    var _overlay = null;
+
+    function ensure() {
+        var container = getContainer();
+
+        if (!container || _overlay) {
+            return _overlay;
+        }
+
+        _overlay = document.createElement('div');
+
+        _overlay.className = overlayClass;
+        _overlay.hidden = true;
+        _overlay.setAttribute('role', 'status');
+        _overlay.setAttribute('aria-live', 'polite');
+
+        _overlay.innerHTML =
+            '<div class="' + innerClass + ' text-center p-4">' +
+                '<span class="search-loading-spinner search-loading-spinner--large" aria-hidden="true"></span>' +
+                '<p class="' + textClass + ' mb-0 mt-3">' + message + '</p>' +
+            '</div>';
+
+        container.appendChild(_overlay);
+
+        return _overlay;
+    }
+
+    function show() {
+        var container = getContainer();
+
+        if (!container) {
+            return;
+        }
+
+        ensure();
+
+        container.classList.add(loadingClass);
+        container.setAttribute('aria-busy', 'true');
+
+        _overlay.hidden = false;
+    }
+
+    function hide() {
+        var container = getContainer();
+
+        if (!container) {
+            return;
+        }
+
+        container.classList.remove(loadingClass);
+        container.setAttribute('aria-busy', 'false');
+
+        if (_overlay) {
+            _overlay.hidden = true;
+        }
+    }
+
+    return {
+        ensure: ensure,
+        show: show,
+        hide: hide,
+        getContainer: getContainer,
+        getOverlay: function () { return _overlay; },
+    };
+}
