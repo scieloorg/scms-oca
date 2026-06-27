@@ -555,6 +555,22 @@
   line-height: 1.4;
 }
 
+.lookup-checkbox-field__label,
+.checkbox-field__label {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.lookup-checkbox-field__count,
+.checkbox-field__count {
+  flex: 0 0 auto;
+  margin-left: auto;
+  color: var(--sg-text-muted);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.4;
+}
+
 .lookup-checkbox-field__item input,
 .checkbox-field__item input {
   margin-top: 0.2rem;

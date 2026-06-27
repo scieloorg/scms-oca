@@ -7,7 +7,7 @@ from typing import Any
 from django.conf import settings
 from opensearchpy.helpers import scan, streaming_bulk
 
-from search_gateway.option_normalization import clean_text, normalize_text
+from search_gateway.option_normalization import clean_text, normalize_boolean, normalize_text
 from search_gateway.opensearch import OpenSearchIndexClient
 
 logger = logging.getLogger(__name__)
@@ -91,7 +91,43 @@ class LookupBuilder:
                 if isinstance(item, dict):
                     yield item
 
-    def count(self) -> int:
+    @staticmethod
+    def clean_boolean_value(value):
+        normalized = normalize_boolean(value)
+        if normalized is True:
+            return "true"
+
+        if normalized is False:
+            return "false"
+
+        return ""
+
+    @classmethod
+    def iter_clean_boolean_values(cls, value):
+        if isinstance(value, (list, tuple, set)):
+            for item in value:
+                cleaned = cls.clean_boolean_value(item)
+                if cleaned:
+                    yield cleaned
+            return
+
+        cleaned = cls.clean_boolean_value(value)
+        if cleaned:
+            yield cleaned
+
+    def collect_document_metadata(self, source):
+        return {
+            "document_types": set(self.iter_clean_values(source.get("type"))),
+            "document_languages": set(self.iter_clean_values(source.get("language"))),
+            "open_access_values": set(
+                self.iter_clean_boolean_values(source.get("is_open_access"))
+            ),
+            "open_access_statuses": set(
+                self.iter_clean_values(source.get("open_access_status"))
+            ),
+        }
+
+    def count(self):
         return len(self.entries)
 
     @staticmethod
@@ -447,5 +483,3 @@ class LookupIndexBuildService:
             indexed_counts["_errors"] = error_counts
 
         return indexed_counts
-
-

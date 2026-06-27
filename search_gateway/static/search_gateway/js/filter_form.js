@@ -222,10 +222,15 @@
     (list || []).forEach(option => {
       const value = String(option?.value ?? option?.key ?? option?.id ?? '').trim();
       if (!value || seen.has(value)) return;
-      normalized.push({
+      const optionCount = option?.option_count ?? option?.size ?? option?.doc_count;
+      const normalizedOption = {
         value,
         label: String(option?.label ?? option?.text ?? value).trim(),
-      });
+      };
+      if (optionCount !== null && optionCount !== undefined && optionCount !== '') {
+        normalizedOption.option_count = optionCount;
+      }
+      normalized.push(normalizedOption);
       seen.add(value);
     });
 
@@ -256,7 +261,11 @@
     (initialOptions || []).forEach(item => {
       const value = String(item?.value || '').trim();
       if (!value || !item.checked || baseValues.has(value)) return;
-      pinned.set(value, { value, label: String(item.label || value) });
+      const pinnedOption = { value, label: String(item.label || value) };
+      if (item.option_count !== null && item.option_count !== undefined && item.option_count !== '') {
+        pinnedOption.option_count = item.option_count;
+      }
+      pinned.set(value, pinnedOption);
     });
 
     return {
@@ -346,13 +355,19 @@
     return Array.from(optionsContainer.querySelectorAll(selector))
       .map(input => {
         const value = String(input.value || '').trim();
-        const label = String(input.closest('label')?.querySelector('span')?.textContent || value).trim();
+        const label = String(
+          input.closest('label')?.querySelector('.lookup-checkbox-field__label, .checkbox-field__label')?.textContent
+          || input.closest('label')?.querySelector('span')?.textContent
+          || value
+        ).trim();
         const isAllOption = String(input.dataset.allOption || '').toLowerCase() === 'true';
+        const optionCount = input.dataset.optionCount;
         return {
           value,
           label,
           checked: !!input.checked,
           isAllOption,
+          option_count: optionCount,
         };
       })
       .filter(item => item.value || item.isAllOption);
@@ -377,11 +392,23 @@
     inputElement.checked = !!checked;
 
     const textElement = document.createElement('span');
+    textElement.className = itemClass === 'lookup-checkbox-field__item'
+      ? 'lookup-checkbox-field__label'
+      : 'checkbox-field__label';
     textElement.textContent = option.label;
 
     labelElement.setAttribute('for', inputElement.id);
     labelElement.appendChild(inputElement);
     labelElement.appendChild(textElement);
+    if (option.option_count !== null && option.option_count !== undefined && option.option_count !== '') {
+      inputElement.dataset.optionCount = option.option_count;
+      const countElement = document.createElement('span');
+      countElement.className = itemClass === 'lookup-checkbox-field__item'
+        ? 'lookup-checkbox-field__count'
+        : 'checkbox-field__count';
+      countElement.textContent = option.option_count;
+      labelElement.appendChild(countElement);
+    }
     return labelElement;
   }
 

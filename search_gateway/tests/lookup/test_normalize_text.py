@@ -1,6 +1,6 @@
 from django.test import SimpleTestCase
 
-from search_gateway.option_normalization import clean_text, normalize_text
+from search_gateway.option_normalization import clean_text, normalize_options, normalize_text
 
 
 class NormalizeTextTests(SimpleTestCase):
@@ -71,3 +71,15 @@ class NormalizeTextTests(SimpleTestCase):
                 # Normalized should preserve case
                 if any(c.isupper() for c in text):
                     self.assertTrue(any(c.isupper() for c in normalized))
+
+    def test_normalize_options_preserves_counts(self):
+        options = normalize_options(
+            [
+                {"value": "journal", "label": "Journal", "doc_count": 12},
+                {"value": "SciELO", "label": "SciELO", "size": 34},
+            ],
+            selected_values=[],
+        )
+
+        self.assertEqual(options[0]["option_count"], 12)
+        self.assertEqual(options[1]["option_count"], 34)

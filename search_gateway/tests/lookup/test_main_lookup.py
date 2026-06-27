@@ -5,6 +5,7 @@ from django.core.management.base import CommandError
 from django.test import SimpleTestCase, override_settings
 
 from search_gateway.lookup import (
+    FunderLookupBuilder,
     LOOKUP_BUILDERS,
     InstitutionLookupBuilder,
     LookupBuilder,
@@ -28,7 +29,21 @@ class LookupBuilderTests(SimpleTestCase):
     def test_publisher_accepts_missing_id_and_counts_once_per_document(self):
         builder = PublisherLookupBuilder()
         source = {
+            "indexed_in": ["doaj"],
+            "is_open_access": True,
+            "language": "pt",
+            "oca_data": {
+                "scielo": {
+                    "collection": "scl",
+                    "source": {
+                        "country_code": "BR",
+                        "indexed_in": ["scielo"],
+                    },
+                }
+            },
+            "open_access_status": "gold",
             "source": [{"type": "journal"}],
+            "type": "research-article",
             "publishers": [
                 {"name": "SciELO"},
                 {"name": "SciELO"},
@@ -43,6 +58,15 @@ class LookupBuilderTests(SimpleTestCase):
         self.assertEqual(len(actions), 1)
         self.assertEqual(actions[0]["_source"]["value"], "SciELO")
         self.assertEqual(actions[0]["_source"]["label"], "SciELO")
+        self.assertEqual(actions[0]["_source"]["source_types"], ["journal"])
+        self.assertEqual(actions[0]["_source"]["source_country_codes"], ["BR"])
+        self.assertEqual(actions[0]["_source"]["indexed_in"], ["doaj"])
+        self.assertEqual(actions[0]["_source"]["source_scielo_indexed_in"], ["scielo"])
+        self.assertEqual(actions[0]["_source"]["collections"], ["scl"])
+        self.assertEqual(actions[0]["_source"]["document_types"], ["research-article"])
+        self.assertEqual(actions[0]["_source"]["document_languages"], ["pt"])
+        self.assertEqual(actions[0]["_source"]["open_access_values"], ["true"])
+        self.assertEqual(actions[0]["_source"]["open_access_statuses"], ["gold"])
         self.assertEqual(actions[0]["_source"]["size"], 2)
 
     def test_publisher_uses_name_as_value_even_when_id_exists(self):
@@ -58,11 +82,18 @@ class LookupBuilderTests(SimpleTestCase):
 
         self.assertEqual(action["_source"]["value"], "Elsevier BV")
         self.assertEqual(action["_source"]["publisher_id"], "https://openalex.org/P1")
+        self.assertEqual(action["_source"]["source_types"], ["journal"])
 
     def test_institution_accepts_missing_id_and_sources_object_shape(self):
         builder = InstitutionLookupBuilder()
         builder.collect(
             {
+                "funders": [{"id": "https://openalex.org/F1"}],
+                "is_open_access": False,
+                "language": "en",
+                "open_access_status": "closed",
+                "sdg_names": ["Good Health and Well-being"],
+                "type": "review",
                 "authorships": [
                     {
                         "institutions": [
@@ -79,6 +110,15 @@ class LookupBuilderTests(SimpleTestCase):
         self.assertEqual(len(actions), 1)
         self.assertEqual(actions[0]["_source"]["value"], "Universidade de Sao Paulo")
         self.assertEqual(actions[0]["_source"]["country_codes"], ["BR"])
+        self.assertEqual(
+            actions[0]["_source"]["sdg_names"],
+            ["Good Health and Well-being"],
+        )
+        self.assertEqual(actions[0]["_source"]["funder_ids"], ["https://openalex.org/F1"])
+        self.assertEqual(actions[0]["_source"]["document_types"], ["review"])
+        self.assertEqual(actions[0]["_source"]["document_languages"], ["en"])
+        self.assertEqual(actions[0]["_source"]["open_access_values"], ["false"])
+        self.assertEqual(actions[0]["_source"]["open_access_statuses"], ["closed"])
         self.assertEqual(actions[0]["_source"]["size"], 1)
 
     def test_institution_uses_name_as_value_even_when_id_exists(self):
@@ -102,15 +142,108 @@ class LookupBuilderTests(SimpleTestCase):
 
     def test_source_accepts_sources_as_list_or_object(self):
         builder = SourceLookupBuilder()
-        builder.collect({"source": {"ids": {"openalex": "j1"}, "title": "Journal One", "type": "journal"}})
-        builder.collect({"source": [{"ids": {"openalex": "j1"}, "title": "Journal One", "type": "journal"}]})
+        builder.collect(
+            {
+                "indexed_in": ["doaj"],
+                "is_open_access": True,
+                "language": "pt",
+                "oca_data": {
+                    "scielo": {
+                        "collection": "scl",
+                        "source": {
+                            "country_code": "BR",
+                            "indexed_in": ["scielo"],
+                        },
+                    }
+                },
+                "open_access_status": "gold",
+                "source": {
+                    "ids": {"openalex": "j1"},
+                    "title": "Journal One",
+                    "type": "journal",
+                },
+                "publishers": [
+                    {
+                        "id": "https://openalex.org/P1",
+                        "name": "SciELO",
+                    }
+                ],
+                "type": "research-article",
+            }
+        )
+        builder.collect(
+            {
+                "source": [
+                    {
+                        "ids": {"openalex": "j1"},
+                        "title": "Journal One",
+                        "type": "journal",
+                    }
+                ]
+            }
+        )
 
         actions = list(builder.iter_actions("lookup_source"))
 
         self.assertEqual(len(actions), 1)
-        self.assertEqual(actions[0]["_source"]["value"], "j1")
+        self.assertEqual(actions[0]["_source"]["value"], "Journal One")
         self.assertEqual(actions[0]["_source"]["label"], "Journal One")
+        self.assertEqual(actions[0]["_source"]["source_id"], "j1")
+        self.assertEqual(actions[0]["_source"]["publisher_ids"], ["https://openalex.org/P1"])
+        self.assertEqual(actions[0]["_source"]["publisher_names"], ["SciELO"])
+        self.assertEqual(actions[0]["_source"]["source_country_codes"], ["BR"])
+        self.assertEqual(actions[0]["_source"]["indexed_in"], ["doaj"])
+        self.assertEqual(actions[0]["_source"]["source_scielo_indexed_in"], ["scielo"])
+        self.assertEqual(actions[0]["_source"]["collections"], ["scl"])
+        self.assertEqual(actions[0]["_source"]["document_types"], ["research-article"])
+        self.assertEqual(actions[0]["_source"]["document_languages"], ["pt"])
+        self.assertEqual(actions[0]["_source"]["open_access_values"], ["true"])
+        self.assertEqual(actions[0]["_source"]["open_access_statuses"], ["gold"])
         self.assertEqual(actions[0]["_source"]["size"], 2)
+
+    def test_funder_collects_dependency_metadata(self):
+        builder = FunderLookupBuilder()
+        builder.collect(
+            {
+                "author_country_codes": ["BR"],
+                "funders": [
+                    {
+                        "id": "https://openalex.org/F1",
+                        "name": "Fundacao de Amparo",
+                        "ror": "https://ror.org/01",
+                    },
+                    {
+                        "id": "https://openalex.org/F1",
+                        "name": "Fundacao de Amparo",
+                    },
+                ],
+                "institutions": ["Universidade de Sao Paulo"],
+                "is_open_access": True,
+                "language": "pt",
+                "open_access_status": "gold",
+                "sdg_names": ["Good Health and Well-being"],
+                "type": "research-article",
+            }
+        )
+
+        actions = list(builder.iter_actions("lookup_funder"))
+
+        self.assertEqual(len(actions), 1)
+        self.assertEqual(actions[0]["_source"]["value"], "https://openalex.org/F1")
+        self.assertEqual(actions[0]["_source"]["label"], "Fundacao de Amparo")
+        self.assertEqual(actions[0]["_source"]["country_codes"], ["BR"])
+        self.assertEqual(
+            actions[0]["_source"]["institution_names"],
+            ["Universidade de Sao Paulo"],
+        )
+        self.assertEqual(
+            actions[0]["_source"]["sdg_names"],
+            ["Good Health and Well-being"],
+        )
+        self.assertEqual(actions[0]["_source"]["document_types"], ["research-article"])
+        self.assertEqual(actions[0]["_source"]["document_languages"], ["pt"])
+        self.assertEqual(actions[0]["_source"]["open_access_values"], ["true"])
+        self.assertEqual(actions[0]["_source"]["open_access_statuses"], ["gold"])
 
 
 class LookupQueryTests(SimpleTestCase):

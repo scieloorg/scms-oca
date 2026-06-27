@@ -59,7 +59,7 @@ class Command(BaseCommand):
         default_source_index = getattr(
             settings,
             "SEARCH_GATEWAY_LOOKUP_SOURCE_INDEX",
-            getattr(settings, "OP_INDEX_SCIENTIFIC_PRODUCTION", "scientific_production"),
+            getattr(settings, "OP_INDEX_SCIENTIFIC_PRODUCTION", "silver_scientific_production"),
         )
         default_batch_size = getattr(settings, "SEARCH_GATEWAY_LOOKUP_BATCH_SIZE", 500)
         parser.add_argument(

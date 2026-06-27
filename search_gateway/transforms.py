@@ -135,7 +135,9 @@ def _get_source_type_display(value):
         "ebook platform": _("eBook platform"),
         "igsncatalog": _("IGSN Catalog"),
         "journal": _("Journal"),
+        "metadata": _("Metadata"),
         "other": _("Other"),
+        "raidregistry": _("RAID Registry"),
         "repository": _("Repository"),
     }.get(clean_text(value).lower(), value)
 

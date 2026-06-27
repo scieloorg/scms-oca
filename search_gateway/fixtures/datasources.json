@@ -27,7 +27,30 @@
               "support_query_operator": false,
               "include_all_option": true,
               "all_option_label": "All",
-              "search_threshold": 10
+              "search_threshold": 10,
+              "dependencies": [
+                "scope",
+                "source_indexed_in",
+                "source_scielo_indexed_in",
+                "collection",
+                "document_type",
+                "document_language",
+                "open_access",
+                "open_access_status",
+                "source_name",
+                "source_type",
+                "publisher",
+                "source_country",
+                "publication_year",
+                "primary_topic_domain",
+                "primary_topic_field",
+                "primary_topic_subfield",
+                "primary_topic_name",
+                "sdg",
+                "institution",
+                "country",
+                "funder"
+              ]
             }
           },
           "source_indexed_in": {
@@ -49,7 +72,30 @@
               "group_order": 0,
               "include_all_option": true,
               "all_option_label": "All",
-              "search_threshold": 10
+              "search_threshold": 10,
+              "dependencies": [
+                "scope",
+                "source_indexed_in",
+                "source_scielo_indexed_in",
+                "collection",
+                "document_type",
+                "document_language",
+                "open_access",
+                "open_access_status",
+                "source_name",
+                "source_type",
+                "publisher",
+                "source_country",
+                "publication_year",
+                "primary_topic_domain",
+                "primary_topic_field",
+                "primary_topic_subfield",
+                "primary_topic_name",
+                "sdg",
+                "institution",
+                "country",
+                "funder"
+              ]
             }
           },
           "source_scielo_indexed_in": {
@@ -70,7 +116,30 @@
               "group_order": 0,
               "include_all_option": true,
               "all_option_label": "All",
-              "search_threshold": 10
+              "search_threshold": 10,
+              "dependencies": [
+                "scope",
+                "source_indexed_in",
+                "source_scielo_indexed_in",
+                "collection",
+                "document_type",
+                "document_language",
+                "open_access",
+                "open_access_status",
+                "source_name",
+                "source_type",
+                "publisher",
+                "source_country",
+                "publication_year",
+                "primary_topic_domain",
+                "primary_topic_field",
+                "primary_topic_subfield",
+                "primary_topic_name",
+                "sdg",
+                "institution",
+                "country",
+                "funder"
+              ]
             }
           },
           "collection": {
@@ -91,7 +160,30 @@
               "search_threshold": 10,
               "display_transform": "scielo_collection",
               "group": "coverage",
-              "group_order": 0
+              "group_order": 0,
+              "dependencies": [
+                "scope",
+                "source_indexed_in",
+                "source_scielo_indexed_in",
+                "collection",
+                "document_type",
+                "document_language",
+                "open_access",
+                "open_access_status",
+                "source_name",
+                "source_type",
+                "publisher",
+                "source_country",
+                "publication_year",
+                "primary_topic_domain",
+                "primary_topic_field",
+                "primary_topic_subfield",
+                "primary_topic_name",
+                "sdg",
+                "institution",
+                "country",
+                "funder"
+              ]
             }
           },
           "publication_year": {
@@ -109,7 +201,30 @@
               "widget": "select",
               "multiple_selection": true,
               "group": "document",
-              "group_order": 10
+              "group_order": 10,
+              "dependencies": [
+                "scope",
+                "source_indexed_in",
+                "source_scielo_indexed_in",
+                "collection",
+                "document_type",
+                "document_language",
+                "open_access",
+                "open_access_status",
+                "source_name",
+                "source_type",
+                "publisher",
+                "source_country",
+                "publication_year",
+                "primary_topic_domain",
+                "primary_topic_field",
+                "primary_topic_subfield",
+                "primary_topic_name",
+                "sdg",
+                "institution",
+                "country",
+                "funder"
+              ]
             }
           },
           "document_publication_year_start": {
@@ -197,7 +312,30 @@
               "group_order": 10,
               "include_all_option": true,
               "all_option_label": "All",
-              "search_threshold": 10
+              "search_threshold": 10,
+              "dependencies": [
+                "scope",
+                "source_indexed_in",
+                "source_scielo_indexed_in",
+                "collection",
+                "document_type",
+                "document_language",
+                "open_access",
+                "open_access_status",
+                "source_name",
+                "source_type",
+                "publisher",
+                "source_country",
+                "publication_year",
+                "primary_topic_domain",
+                "primary_topic_field",
+                "primary_topic_subfield",
+                "primary_topic_name",
+                "sdg",
+                "institution",
+                "country",
+                "funder"
+              ]
             }
           },
           "document_language": {
@@ -219,7 +357,30 @@
               "group_order": 10,
               "include_all_option": true,
               "all_option_label": "All",
-              "search_threshold": 10
+              "search_threshold": 10,
+              "dependencies": [
+                "scope",
+                "source_indexed_in",
+                "source_scielo_indexed_in",
+                "collection",
+                "document_type",
+                "document_language",
+                "open_access",
+                "open_access_status",
+                "source_name",
+                "source_type",
+                "publisher",
+                "source_country",
+                "publication_year",
+                "primary_topic_domain",
+                "primary_topic_field",
+                "primary_topic_subfield",
+                "primary_topic_name",
+                "sdg",
+                "institution",
+                "country",
+                "funder"
+              ]
             }
           },
           "open_access": {
@@ -241,7 +402,30 @@
               "multiple_selection": false,
               "widget": "select",
               "group": "document",
-              "group_order": 10
+              "group_order": 10,
+              "dependencies": [
+                "scope",
+                "source_indexed_in",
+                "source_scielo_indexed_in",
+                "collection",
+                "document_type",
+                "document_language",
+                "open_access",
+                "open_access_status",
+                "source_name",
+                "source_type",
+                "publisher",
+                "source_country",
+                "publication_year",
+                "primary_topic_domain",
+                "primary_topic_field",
+                "primary_topic_subfield",
+                "primary_topic_name",
+                "sdg",
+                "institution",
+                "country",
+                "funder"
+              ]
             }
           },
           "open_access_status": {
@@ -263,7 +447,30 @@
               "group_order": 10,
               "include_all_option": true,
               "all_option_label": "All",
-              "search_threshold": 10
+              "search_threshold": 10,
+              "dependencies": [
+                "scope",
+                "source_indexed_in",
+                "source_scielo_indexed_in",
+                "collection",
+                "document_type",
+                "document_language",
+                "open_access",
+                "open_access_status",
+                "source_name",
+                "source_type",
+                "publisher",
+                "source_country",
+                "publication_year",
+                "primary_topic_domain",
+                "primary_topic_field",
+                "primary_topic_subfield",
+                "primary_topic_name",
+                "sdg",
+                "institution",
+                "country",
+                "funder"
+              ]
             }
           },
           "source_name": {
@@ -284,7 +491,30 @@
               "group": "source",
               "group_order": 20,
               "include_all_option": true,
-              "all_option_label": "All"
+              "all_option_label": "All",
+              "dependencies": [
+                "scope",
+                "source_indexed_in",
+                "source_scielo_indexed_in",
+                "collection",
+                "document_type",
+                "document_language",
+                "open_access",
+                "open_access_status",
+                "source_name",
+                "source_type",
+                "publisher",
+                "source_country",
+                "publication_year",
+                "primary_topic_domain",
+                "primary_topic_field",
+                "primary_topic_subfield",
+                "primary_topic_name",
+                "sdg",
+                "institution",
+                "country",
+                "funder"
+              ]
             },
             "lookup": {
               "index_name": "silver_lookup_source",
@@ -294,6 +524,18 @@
               "label_field": "label",
               "source_value_field": "label",
               "source_label_field": "label",
+              "dependency_filters": {
+                "document_type": "document_types",
+                "document_language": "document_languages",
+                "open_access": "open_access_values",
+                "open_access_status": "open_access_statuses",
+                "source_type": "source_type",
+                "publisher": "publisher_names",
+                "source_country": "source_country_codes",
+                "source_indexed_in": "indexed_in",
+                "source_scielo_indexed_in": "source_scielo_indexed_in",
+                "collection": "collections"
+              },
               "size": 10
             }
           },
@@ -316,7 +558,30 @@
               "group_order": 20,
               "include_all_option": true,
               "all_option_label": "All",
-              "search_threshold": 10
+              "search_threshold": 10,
+              "dependencies": [
+                "scope",
+                "source_indexed_in",
+                "source_scielo_indexed_in",
+                "collection",
+                "document_type",
+                "document_language",
+                "open_access",
+                "open_access_status",
+                "source_name",
+                "source_type",
+                "publisher",
+                "source_country",
+                "publication_year",
+                "primary_topic_domain",
+                "primary_topic_field",
+                "primary_topic_subfield",
+                "primary_topic_name",
+                "sdg",
+                "institution",
+                "country",
+                "funder"
+              ]
             }
           },
           "publisher": {
@@ -337,7 +602,30 @@
               "group": "source",
               "group_order": 20,
               "include_all_option": true,
-              "all_option_label": "All"
+              "all_option_label": "All",
+              "dependencies": [
+                "scope",
+                "source_indexed_in",
+                "source_scielo_indexed_in",
+                "collection",
+                "document_type",
+                "document_language",
+                "open_access",
+                "open_access_status",
+                "source_name",
+                "source_type",
+                "publisher",
+                "source_country",
+                "publication_year",
+                "primary_topic_domain",
+                "primary_topic_field",
+                "primary_topic_subfield",
+                "primary_topic_name",
+                "sdg",
+                "institution",
+                "country",
+                "funder"
+              ]
             },
             "lookup": {
               "index_name": "silver_lookup_publisher",
@@ -347,6 +635,18 @@
               "label_field": "label",
               "source_value_field": "value",
               "source_label_field": "label",
+              "dependency_filters": {
+                "source_name": "source_names",
+                "source_type": "source_types",
+                "source_country": "source_country_codes",
+                "source_indexed_in": "indexed_in",
+                "source_scielo_indexed_in": "source_scielo_indexed_in",
+                "collection": "collections",
+                "document_type": "document_types",
+                "document_language": "document_languages",
+                "open_access": "open_access_values",
+                "open_access_status": "open_access_statuses"
+              },
               "size": 10
             }
           },
@@ -366,7 +666,30 @@
               "widget": "select",
               "multiple_selection": true,
               "group": "source",
-              "group_order": 20
+              "group_order": 20,
+              "dependencies": [
+                "scope",
+                "source_indexed_in",
+                "source_scielo_indexed_in",
+                "collection",
+                "document_type",
+                "document_language",
+                "open_access",
+                "open_access_status",
+                "source_name",
+                "source_type",
+                "publisher",
+                "source_country",
+                "publication_year",
+                "primary_topic_domain",
+                "primary_topic_field",
+                "primary_topic_subfield",
+                "primary_topic_name",
+                "sdg",
+                "institution",
+                "country",
+                "funder"
+              ]
             }
           },
           "primary_topic_domain": {
@@ -387,7 +710,31 @@
               "group": "thematic",
               "group_order": 30,
               "include_all_option": true,
-              "all_option_label": "All"
+              "all_option_label": "All",
+              "dependencies": [
+                "scope",
+                "source_indexed_in",
+                "source_scielo_indexed_in",
+                "collection",
+                "document_type",
+                "document_language",
+                "open_access",
+                "open_access_status",
+                "source_name",
+                "source_type",
+                "publisher",
+                "source_country",
+                "publication_year",
+                "primary_topic_field",
+                "primary_topic_subfield",
+                "primary_topic_name",
+                "primary_topic_domain",
+                "sdg",
+                "institution",
+                "country",
+                "funder"
+              ],
+              "lookup_use_data_source_values": true
             },
             "lookup": {
               "index_name": "silver_lookup_topic",
@@ -423,7 +770,31 @@
               "group": "thematic",
               "group_order": 30,
               "include_all_option": true,
-              "all_option_label": "All"
+              "all_option_label": "All",
+              "dependencies": [
+                "scope",
+                "source_indexed_in",
+                "source_scielo_indexed_in",
+                "collection",
+                "document_type",
+                "document_language",
+                "open_access",
+                "open_access_status",
+                "source_name",
+                "source_type",
+                "publisher",
+                "source_country",
+                "publication_year",
+                "primary_topic_domain",
+                "primary_topic_subfield",
+                "primary_topic_name",
+                "primary_topic_field",
+                "sdg",
+                "institution",
+                "country",
+                "funder"
+              ],
+              "lookup_use_data_source_values": true
             },
             "lookup": {
               "index_name": "silver_lookup_topic",
@@ -459,7 +830,31 @@
               "group": "thematic",
               "group_order": 30,
               "include_all_option": true,
-              "all_option_label": "All"
+              "all_option_label": "All",
+              "dependencies": [
+                "scope",
+                "source_indexed_in",
+                "source_scielo_indexed_in",
+                "collection",
+                "document_type",
+                "document_language",
+                "open_access",
+                "open_access_status",
+                "source_name",
+                "source_type",
+                "publisher",
+                "source_country",
+                "publication_year",
+                "primary_topic_domain",
+                "primary_topic_field",
+                "primary_topic_name",
+                "primary_topic_subfield",
+                "sdg",
+                "institution",
+                "country",
+                "funder"
+              ],
+              "lookup_use_data_source_values": true
             },
             "lookup": {
               "index_name": "silver_lookup_topic",
@@ -495,7 +890,31 @@
               "group": "thematic",
               "group_order": 30,
               "include_all_option": true,
-              "all_option_label": "All"
+              "all_option_label": "All",
+              "dependencies": [
+                "scope",
+                "source_indexed_in",
+                "source_scielo_indexed_in",
+                "collection",
+                "document_type",
+                "document_language",
+                "open_access",
+                "open_access_status",
+                "source_name",
+                "source_type",
+                "publisher",
+                "source_country",
+                "publication_year",
+                "primary_topic_domain",
+                "primary_topic_field",
+                "primary_topic_subfield",
+                "primary_topic_name",
+                "sdg",
+                "institution",
+                "country",
+                "funder"
+              ],
+              "lookup_use_data_source_values": true
             },
             "lookup": {
               "index_name": "silver_lookup_topic",
@@ -531,7 +950,30 @@
               "group_order": 30,
               "include_all_option": true,
               "all_option_label": "All",
-              "search_threshold": 10
+              "search_threshold": 10,
+              "dependencies": [
+                "scope",
+                "source_indexed_in",
+                "source_scielo_indexed_in",
+                "collection",
+                "document_type",
+                "document_language",
+                "open_access",
+                "open_access_status",
+                "source_name",
+                "source_type",
+                "publisher",
+                "source_country",
+                "publication_year",
+                "primary_topic_domain",
+                "primary_topic_field",
+                "primary_topic_subfield",
+                "primary_topic_name",
+                "sdg",
+                "institution",
+                "country",
+                "funder"
+              ]
             }
           },
           "institution": {
@@ -552,7 +994,30 @@
               "group": "affiliation_funding",
               "group_order": 40,
               "include_all_option": true,
-              "all_option_label": "All"
+              "all_option_label": "All",
+              "dependencies": [
+                "scope",
+                "source_indexed_in",
+                "source_scielo_indexed_in",
+                "collection",
+                "document_type",
+                "document_language",
+                "open_access",
+                "open_access_status",
+                "source_name",
+                "source_type",
+                "publisher",
+                "source_country",
+                "publication_year",
+                "primary_topic_domain",
+                "primary_topic_field",
+                "primary_topic_subfield",
+                "primary_topic_name",
+                "sdg",
+                "institution",
+                "country",
+                "funder"
+              ]
             },
             "lookup": {
               "index_name": "silver_lookup_institution",
@@ -562,6 +1027,15 @@
               "label_field": "label",
               "source_value_field": "value",
               "source_label_field": "label",
+              "dependency_filters": {
+                "country": "country_codes",
+                "sdg": "sdg_names",
+                "funder": "funder_ids",
+                "document_type": "document_types",
+                "document_language": "document_languages",
+                "open_access": "open_access_values",
+                "open_access_status": "open_access_statuses"
+              },
               "size": 10
             }
           },
@@ -584,7 +1058,30 @@
               "group_order": 40,
               "include_all_option": true,
               "all_option_label": "All",
-              "search_threshold": 10
+              "search_threshold": 10,
+              "dependencies": [
+                "scope",
+                "source_indexed_in",
+                "source_scielo_indexed_in",
+                "collection",
+                "document_type",
+                "document_language",
+                "open_access",
+                "open_access_status",
+                "source_name",
+                "source_type",
+                "publisher",
+                "source_country",
+                "publication_year",
+                "primary_topic_domain",
+                "primary_topic_field",
+                "primary_topic_subfield",
+                "primary_topic_name",
+                "sdg",
+                "institution",
+                "country",
+                "funder"
+              ]
             }
           },
           "funder": {
@@ -605,7 +1102,30 @@
               "group": "affiliation_funding",
               "group_order": 40,
               "include_all_option": true,
-              "all_option_label": "All"
+              "all_option_label": "All",
+              "dependencies": [
+                "scope",
+                "source_indexed_in",
+                "source_scielo_indexed_in",
+                "collection",
+                "document_type",
+                "document_language",
+                "open_access",
+                "open_access_status",
+                "source_name",
+                "source_type",
+                "publisher",
+                "source_country",
+                "publication_year",
+                "primary_topic_domain",
+                "primary_topic_field",
+                "primary_topic_subfield",
+                "primary_topic_name",
+                "sdg",
+                "institution",
+                "country",
+                "funder"
+              ]
             },
             "lookup": {
               "index_name": "silver_lookup_funder",
@@ -615,6 +1135,15 @@
               "label_field": "label",
               "source_value_field": "value",
               "source_label_field": "label",
+              "dependency_filters": {
+                "sdg": "sdg_names",
+                "country": "country_codes",
+                "institution": "institution_names",
+                "document_type": "document_types",
+                "document_language": "document_languages",
+                "open_access": "open_access_values",
+                "open_access_status": "open_access_statuses"
+              },
               "size": 10
             }
           },
@@ -867,7 +1396,7 @@
               },
               "url_context_key": "journal_thematic_url",
               "return_to_source": true,
-              "target_data_source": "journal_thematic_metrics"
+              "target_data_source": "journal_metrics_by_*"
             },
             {
               "value": "journal_global_metrics",
@@ -878,7 +1407,7 @@
               },
               "url_context_key": "journal_global_url",
               "enabled": false,
-              "target_data_source": "journal_global_metrics"
+              "target_data_source": "journal_metrics_global_*"
             }
           ]
         },
@@ -1765,6 +2294,60 @@
             }
           }
         }
+      },
+      "metric_config": {
+        "navigation": {
+          "analysis_units": [
+            {
+              "value": "document",
+              "label": {
+                "pt": "Registro",
+                "en": "Record",
+                "es": "Registro"
+              },
+              "url_context_key": "indicator_home_url"
+            }
+          ]
+        },
+        "comparison": {
+          "enabled": false
+        },
+        "study_units": {
+          "document": {
+            "time_dimension": {
+              "field": "publication_year",
+              "agg_type": "terms"
+            },
+            "metrics": [
+              {
+                "key": "record_count",
+                "agg": "count",
+                "label": {
+                  "pt": "Registros",
+                  "en": "Records",
+                  "es": "Registros"
+                }
+              }
+            ]
+          }
+        },
+        "displays": {
+          "charts": {
+            "record_total_records": {
+              "metric": "record_count",
+              "title": {
+                "pt": "Total de Registros por Ano",
+                "en": "Total Records per Year",
+                "es": "Total de Registros por Año"
+              },
+              "type": "bar",
+              "order": 10,
+              "study_units": [
+                "document"
+              ]
+            }
+          }
+        }
       }
     }
   },
@@ -1772,7 +2355,7 @@
     "model": "search_gateway.datasource",
     "pk": 3,
     "fields": {
-      "index_name": "journal_thematic_metrics",
+      "index_name": "journal_metrics_by_*",
       "display_name": "Journal Thematic Metrics",
       "source_fields": [],
       "field_settings": {
@@ -2720,7 +3303,7 @@
             "thematic": "journal_metrics",
             "global": "journal_metrics_global"
           },
-          "related_global_data_source": "journal_global_metrics",
+          "related_global_data_source": "journal_metrics_global_*",
           "profile_query_params": [
             "collection",
             "publication_year",
@@ -2760,7 +3343,7 @@
               },
               "url_context_key": "journal_thematic_url",
               "return_to_source": true,
-              "target_data_source": "journal_thematic_metrics"
+              "target_data_source": "journal_metrics_by_*"
             },
             {
               "value": "journal_global_metrics",
@@ -2771,7 +3354,7 @@
               },
               "url_context_key": "journal_global_url",
               "enabled": false,
-              "target_data_source": "journal_global_metrics"
+              "target_data_source": "journal_metrics_global_*"
             }
           ]
         },
@@ -3300,7 +3883,7 @@
     "model": "search_gateway.datasource",
     "pk": 4,
     "fields": {
-      "index_name": "journal_global_metrics",
+      "index_name": "journal_metrics_global_*",
       "display_name": "Journal Global Metrics",
       "source_fields": [],
       "field_settings": {
@@ -4976,7 +5559,7 @@
               },
               "url_context_key": "journal_thematic_url",
               "return_to_source": true,
-              "target_data_source": "journal_thematic_metrics"
+              "target_data_source": "journal_metrics_by_*"
             },
             {
               "value": "journal_global_metrics",
@@ -4987,7 +5570,7 @@
               },
               "url_context_key": "journal_global_url",
               "enabled": false,
-              "target_data_source": "journal_global_metrics"
+              "target_data_source": "journal_metrics_global_*"
             }
           ]
         },

@@ -52,7 +52,7 @@
           "title": "Métricas Temáticas de Periódicos",
           "type": "IndicatorByCategoryPage",
           "slug": "metricas-tematicas-periodicos",
-          "data_source": "journal_thematic_metrics",
+          "data_source": "journal_metrics_by_*",
           "intro": "<p>Análise temática de periódicos por área do conhecimento.</p>",
           "children": [
             {
@@ -60,7 +60,7 @@
               "title": "Perfil de Periódico",
               "type": "JournalProfilePage",
               "slug": "perfil-periodico",
-              "data_source": "journal_thematic_metrics",
+              "data_source": "journal_metrics_by_*",
               "show_global_metrics": true
             }
           ]
@@ -70,15 +70,17 @@
           "title": "Métricas Globais de Periódicos",
           "type": "IndicatorGlobalPage",
           "slug": "metricas-globais-periodicos",
-          "data_source": "journal_global_metrics",
+          "data_source": "journal_metrics_global_*",
           "intro": "<p>Métricas globais comparativas de periódicos científicos.</p>"
         },
         {
           "key": "indicators_social_production",
           "title": "Produção Social",
-          "type": "FreePage",
+          "type": "DocumentChartPage",
           "slug": "producao-social",
-          "intro": "<p>Visualize métricas e indicadores da produção social.</p>"
+          "data_source": "social_production",
+          "study_unit": "document",
+          "intro": "<p>Visualize métricas e indicadores da produção social baseada em registros.</p>"
         }
       ]
     },
@@ -211,7 +213,7 @@
           "title": "Journal Thematic Metrics",
           "type": "IndicatorByCategoryPage",
           "slug": "journal-thematic-metrics",
-          "data_source": "journal_thematic_metrics",
+          "data_source": "journal_metrics_by_*",
           "intro": "<p>Thematic analysis of journals by knowledge area.</p>",
           "children": [
             {
@@ -219,7 +221,7 @@
               "title": "Journal Profile",
               "type": "JournalProfilePage",
               "slug": "journal-profile",
-              "data_source": "journal_thematic_metrics",
+              "data_source": "journal_metrics_by_*",
               "show_global_metrics": true
             }
           ]
@@ -229,15 +231,17 @@
           "title": "Journal Global Metrics",
           "type": "IndicatorGlobalPage",
           "slug": "journal-global-metrics",
-          "data_source": "journal_global_metrics",
+          "data_source": "journal_metrics_global_*",
           "intro": "<p>Global comparative metrics for scientific journals.</p>"
         },
         {
           "key": "indicators_social_production",
           "title": "Social Production",
-          "type": "FreePage",
+          "type": "DocumentChartPage",
           "slug": "social-production",
-          "intro": "<p>View metrics and indicators for social production.</p>"
+          "data_source": "social_production",
+          "study_unit": "document",
+          "intro": "<p>View metrics and indicators for record-based social production.</p>"
         }
       ]
     },
@@ -370,7 +374,7 @@
           "title": "Métricas Temáticas de Revistas",
           "type": "IndicatorByCategoryPage",
           "slug": "metricas-tematicas-revistas",
-          "data_source": "journal_thematic_metrics",
+          "data_source": "journal_metrics_by_*",
           "intro": "<p>Análisis temático de revistas por área del conocimiento.</p>",
           "children": [
             {
@@ -378,7 +382,7 @@
               "title": "Perfil de Revista",
               "type": "JournalProfilePage",
               "slug": "perfil-revista",
-              "data_source": "journal_thematic_metrics",
+              "data_source": "journal_metrics_by_*",
               "show_global_metrics": true
             }
           ]
@@ -388,15 +392,17 @@
           "title": "Métricas Globales de Revistas",
           "type": "IndicatorGlobalPage",
           "slug": "metricas-globales-revistas",
-          "data_source": "journal_global_metrics",
+          "data_source": "journal_metrics_global_*",
           "intro": "<p>Métricas globales comparativas de revistas científicas.</p>"
         },
         {
           "key": "indicators_social_production",
           "title": "Producción Social",
-          "type": "FreePage",
+          "type": "DocumentChartPage",
           "slug": "produccion-social",
-          "intro": "<p>Visualice métricas e indicadores de la producción social.</p>"
+          "data_source": "social_production",
+          "study_unit": "document",
+          "intro": "<p>Visualice métricas e indicadores de la producción social basada en registros.</p>"
         }
       ]
     },
