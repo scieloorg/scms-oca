@@ -1,4 +1,8 @@
+import json
+from pathlib import Path
 from unittest.mock import Mock
+
+from django.apps import apps
 
 from etl.deduplicator.helpers import can_compare, rules_for_pair
 from etl.deduplicator.openalex import OpenAlexMatcher
@@ -8,17 +12,63 @@ from etl.pipeline import OpenSearchETLPipeline
 from etl.tests.base import EtlTestCase
 
 
+FIXTURES_DIR = Path(apps.get_app_config("etl").path) / "tests" / "fixtures"
+
+
 def make_deduplicator(document_type):
-    return SciELODeduplicator(EtlPipelineConfig.objects.get_enabled_by_name(document_type).to_rules())
+    config = EtlPipelineConfig.objects.get_enabled_by_name(document_type)
+    return SciELODeduplicator(config.to_rules())
 
 
 def make_matcher(document_type):
     matcher = OpenAlexMatcher.__new__(OpenAlexMatcher)
     matcher.rules = EtlPipelineConfig.objects.get_enabled_by_name(document_type).to_rules()
+    matcher.input_openalex_index = "silver_scientific_production"
     return matcher
 
 
 class DocumentRulesTests(EtlTestCase):
+
+    _match_cases = None
+    _silver_articles = None
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls._match_cases = json.loads(
+            (FIXTURES_DIR / "openalex_match_cases.json").read_text()
+        )
+        cls._silver_articles = json.loads(
+            (FIXTURES_DIR / "silver_article_cases.json").read_text()
+        )
+
+    @staticmethod
+    def _search_response(candidates):
+        return {
+            "hits": {
+                "hits": [
+                    {"_id": candidate.get("doc_id"), "_source": candidate}
+                    for candidate in candidates
+                ]
+            }
+        }
+
+    @staticmethod
+    def _openalex_ids(indexed_ids):
+        oa = indexed_ids.get("openalex")
+        if isinstance(oa, list):
+            return oa
+        if oa:
+            return [oa]
+        return []
+
+    @classmethod
+    def _match_openalex_ids(cls, matches):
+        ids = []
+        for silver_doc, _strategy, _confidence, _validation in matches:
+            ids.extend(cls._openalex_ids(silver_doc.to_index_dict().get("ids") or {}))
+        return ids
+
     def test_can_compare_rejects_doc_type_outside_pipeline_config_rules(self):
         rules = EtlPipelineConfig.objects.get_enabled_by_name("book").to_rules()
 
