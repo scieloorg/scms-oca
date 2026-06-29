@@ -37,8 +37,8 @@ class Command(BaseCommand):
         )
         parser.add_argument(
             "--openalex-index",
-            default=settings.ETL_INPUT_OPENALEX_WORKS,
-            help="OpenAlex source index.",
+            default=settings.ETL_OPENALEX_MATCH_INDEX,
+            help="Silver OpenAlex candidate index or alias used for matching.",
         )
         parser.add_argument(
             "--log-level",
@@ -62,7 +62,7 @@ class Command(BaseCommand):
                 options["type"],
                 year=options.get("year"),
                 max_docs=options.get("max_docs"),
-                openalex_index=options.get("openalex_index") or settings.ETL_INPUT_OPENALEX_WORKS,
+                openalex_index=options.get("openalex_index") or settings.ETL_OPENALEX_MATCH_INDEX,
             )
         self.stdout.write(json.dumps(results, indent=2, sort_keys=True))
 

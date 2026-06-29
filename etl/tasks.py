@@ -39,7 +39,7 @@ def run_pipeline_targets(
     *,
     year: int | None = None,
     max_docs: int | None = None,
-    openalex_index: str = settings.ETL_INPUT_OPENALEX_WORKS,
+    openalex_index: str = settings.ETL_OPENALEX_MATCH_INDEX,
 ) -> list[dict]:
     return [
         _run_pipeline_target(
@@ -57,7 +57,7 @@ def _run_pipeline_target(
     *,
     year: int | None = None,
     max_docs: int | None = None,
-    openalex_index: str = settings.ETL_INPUT_OPENALEX_WORKS,
+    openalex_index: str = settings.ETL_OPENALEX_MATCH_INDEX,
 ) -> dict:
     pipeline_config = EtlPipelineConfig.objects.get_enabled_by_name(target_name)
 
