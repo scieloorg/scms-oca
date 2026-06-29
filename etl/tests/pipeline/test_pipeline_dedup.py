@@ -285,7 +285,6 @@ class DocumentRulesTests(EtlTestCase):
 
     def test_openalex_doi_search_uses_exact_or_prefix_queries(self):
         matcher = make_matcher("article")
-        matcher.input_openalex_index = "raw_openalex_works"
         matcher.client = Mock()
         matcher.client.client.search.return_value = {"hits": {"hits": []}}
 
@@ -307,11 +306,17 @@ class DocumentRulesTests(EtlTestCase):
             body["query"]["bool"]["filter"],
         )
         self.assertIn(
-            {"prefix": {"doi.keyword": "https://doi.org/10.1590/0034-7167.202578supl101"}},
+            {
+                "prefix": {
+                    "ids.doi": (
+                        "https://doi.org/10.1590/0034-7167.202578supl101"
+                    )
+                }
+            },
             doi_filter["should"],
         )
         self.assertIn(
-            {"term": {"doi.keyword": "10.1590/0034-7167.202578supl101"}},
+            {"term": {"ids.doi": "10.1590/0034-7167.202578supl101"}},
             doi_filter["should"],
         )
 

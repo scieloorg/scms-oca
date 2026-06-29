@@ -227,7 +227,7 @@ class OpenAlexMatcher:
             f"https://dx.doi.org/{normalized_doi}",
             f"http://dx.doi.org/{normalized_doi}",
         ]
-        fields = ["doi.keyword", "ids.doi.keyword"]
+        fields = ["ids.doi", "ids.doi_with_lang.doi"]
 
         queries: list[dict[str, Any]] = []
         for field in fields:
