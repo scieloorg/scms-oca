@@ -377,64 +377,50 @@ class DocumentRulesTests(EtlTestCase):
             body["query"]["bool"]["should"],
         )
 
-    def test_openalex_title_search_uses_source_issn_constraint(self):
+    def test_openalex_title_search_respects_source_issn_field_only(self):
         matcher = make_matcher("article")
-        matcher.input_openalex_index = "raw_openalex_works"
         matcher.client = Mock()
         matcher.client.client.search.return_value = {"hits": {"hits": []}}
 
-        matcher._search_openalex_by_title_year(
-            {
-                "publication_year": 2025,
-                "title": "Ethical dilemmas in nursing professionals' work",
-                "source_issns": ["0034-7167", "1984-0446"],
-            },
-        )
-
-        body = matcher.client.client.search.call_args.kwargs["body"]
-        self.assertNotIn("isbn", str(body).lower())
-        self.assertIn(
-            {
-                "match": {
-                    "title": {
-                        "query": "Ethical dilemmas in nursing professionals' work",
-                        "minimum_should_match": "90%",
-                        "fuzziness": "AUTO",
-                    }
+        cases = [
+            ("source_issns", ["0034-7167", "1984-0446"], True),
+            ("journal_issns", ["0034-7167", "1984-0446"], False),
+        ]
+        for field, issns, expect_should in cases:
+            with self.subTest(issn_field=field):
+                scielo_doc = {
+                    "publication_year": 2025,
+                    "title": "Ethical dilemmas in nursing professionals' work",
+                    field: issns[:],
                 }
-            },
-            body["query"]["bool"]["must"],
-        )
-        self.assertEqual(
-            body["query"]["bool"]["should"],
-            [
-                {"terms": {"source.issn.keyword": ["0034-7167", "1984-0446"]}},
-                {"terms": {"source.issns.keyword": ["0034-7167", "1984-0446"]}},
-                {"terms": {"primary_location.source.issn.keyword": ["0034-7167", "1984-0446"]}},
-                {"terms": {"primary_location.source.issns.keyword": ["0034-7167", "1984-0446"]}},
-                {"terms": {"locations.source.issn.keyword": ["0034-7167", "1984-0446"]}},
-                {"terms": {"locations.source.issns.keyword": ["0034-7167", "1984-0446"]}},
-            ],
-        )
-        self.assertEqual(body["query"]["bool"]["minimum_should_match"], 1)
+                matcher.client.client.search.reset_mock()
+                matcher._search_openalex_by_title_year(scielo_doc)
 
-    def test_openalex_title_search_ignores_non_standard_scielo_issn_fields(self):
-        matcher = make_matcher("article")
-        matcher.input_openalex_index = "raw_openalex_works"
-        matcher.client = Mock()
-        matcher.client.client.search.return_value = {"hits": {"hits": []}}
+                body = matcher.client.client.search.call_args.kwargs["body"]
 
-        matcher._search_openalex_by_title_year(
-            {
-                "publication_year": 2025,
-                "title": "Ethical dilemmas in nursing professionals' work",
-                "journal_issns": ["0034-7167", "1984-0446"],
-            },
-        )
+                self.assertNotIn("isbn", str(body).lower())
+                self.assertIn(
+                    {
+                        "match": {
+                            "title": {
+                                "query": "Ethical dilemmas in nursing professionals' work",
+                                "minimum_should_match": "90%",
+                                "fuzziness": "AUTO",
+                            }
+                        }
+                    },
+                    body["query"]["bool"]["must"],
+                )
 
-        body = matcher.client.client.search.call_args.kwargs["body"]
-        self.assertNotIn("should", body["query"]["bool"])
-        self.assertNotIn("minimum_should_match", body["query"]["bool"])
+                if expect_should:
+                    self.assertEqual(
+                        body["query"]["bool"]["should"],
+                        [{"terms": {"source.issns": issns}}],
+                    )
+                    self.assertEqual(body["query"]["bool"]["minimum_should_match"], 1)
+                else:
+                    self.assertNotIn("should", body["query"]["bool"])
+                    self.assertNotIn("minimum_should_match", body["query"]["bool"])
 
     def test_openalex_title_strategy_returns_validated_issn_match(self):
         matcher = make_matcher("article")

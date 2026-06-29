@@ -309,12 +309,7 @@ class OpenAlexMatcher:
 
     def _source_issn_queries(self, issns: list[str]) -> list[dict[str, Any]]:
         return [
-            {"terms": {"source.issn.keyword": issns}},
-            {"terms": {"source.issns.keyword": issns}},
-            {"terms": {"primary_location.source.issn.keyword": issns}},
-            {"terms": {"primary_location.source.issns.keyword": issns}},
-            {"terms": {"locations.source.issn.keyword": issns}},
-            {"terms": {"locations.source.issns.keyword": issns}},
+            {"terms": {"source.issns": issns}},
         ]
 
     def _validate_openalex_match(
