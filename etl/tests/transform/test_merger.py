@@ -199,7 +199,7 @@ class MergeTests(SimpleTestCase):
             doc_id="https://openalex.org/W1",
             type="book",
             title="OpenAlex book",
-            content_url="https://example.org/book.pdf",
+            content_url=[{"url": "https://example.org/book.pdf"}],
             content_url_with_lang=[
                 {"language": "pt", "content_url": "https://example.org/book.pdf"}
             ],
@@ -225,7 +225,10 @@ class MergeTests(SimpleTestCase):
         )
         indexed = merged.to_index_dict()
 
-        self.assertEqual(indexed["content_url"], "https://example.org/book.pdf")
+        self.assertEqual(
+            indexed["content_url"],
+            [{"url": "https://example.org/book.pdf"}],
+        )
         self.assertEqual(
             indexed["content_url_with_lang"],
             [{"language": "pt", "content_url": "https://example.org/book.pdf"}],
@@ -245,7 +248,7 @@ class MergeTests(SimpleTestCase):
             doc_id="B1",
             type="book",
             title="SciELO book",
-            content_url="https://scielo.org/book.pdf",
+            content_url=[{"url": "https://scielo.org/book.pdf"}],
             content_url_with_lang=[
                 {"language": "pt", "content_url": "https://scielo.org/book.pdf"}
             ],
@@ -268,7 +271,7 @@ class MergeTests(SimpleTestCase):
             doc_id="https://openalex.org/W1",
             type="book",
             title="OpenAlex book",
-            content_url="https://example.org/book.pdf",
+            content_url=[{"url": "https://example.org/book.pdf"}],
             content_url_with_lang=[
                 {"language": "pt", "content_url": "https://example.org/book.pdf"}
             ],
@@ -294,7 +297,13 @@ class MergeTests(SimpleTestCase):
         )
         indexed = merged.to_index_dict()
 
-        self.assertEqual(indexed["content_url"], "https://scielo.org/book.pdf")
+        self.assertEqual(
+            indexed["content_url"],
+            [
+                {"url": "https://scielo.org/book.pdf"},
+                {"url": "https://example.org/book.pdf"},
+            ],
+        )
         self.assertEqual(
             indexed["content_url_with_lang"],
             [{"language": "pt", "content_url": "https://scielo.org/book.pdf"}],
