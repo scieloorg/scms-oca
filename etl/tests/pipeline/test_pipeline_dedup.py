@@ -354,7 +354,6 @@ class DocumentRulesTests(EtlTestCase):
 
     def test_openalex_isbn_search_only_uses_bibliographic_isbn_fields(self):
         matcher = make_matcher("book")
-        matcher.input_openalex_index = "raw_openalex_works"
         matcher.client = Mock()
         matcher.client.client.search.return_value = {"hits": {"hits": []}}
 
@@ -366,11 +365,15 @@ class DocumentRulesTests(EtlTestCase):
         body = matcher.client.client.search.call_args.kwargs["body"]
         self.assertNotIn("issn", str(body).lower())
         self.assertIn(
-            {"terms": {"ids.isbn.keyword": ["9786500000001"]}},
+            {"terms": {"ids.isbn": ["9786500000001"]}},
             body["query"]["bool"]["should"],
         )
         self.assertIn(
-            {"terms": {"biblio.isbns.keyword": ["9786500000001"]}},
+            {"terms": {"parent_book.ids.isbn": ["9786500000001"]}},
+            body["query"]["bool"]["should"],
+        )
+        self.assertIn(
+            {"terms": {"biblio.isbns": ["9786500000001"]}},
             body["query"]["bool"]["should"],
         )
 

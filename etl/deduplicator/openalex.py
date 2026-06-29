@@ -245,12 +245,11 @@ class OpenAlexMatcher:
         query = {
             "bool": {
                 "should": [
-                    {"terms": {"ids.isbn.keyword": isbns}},
-                    {"terms": {"ids.isbns.keyword": isbns}},
-                    {"terms": {"ids.eisbn.keyword": isbns}},
-                    {"terms": {"ids.eisbns.keyword": isbns}},
-                    {"terms": {"biblio.isbn.keyword": isbns}},
-                    {"terms": {"biblio.isbns.keyword": isbns}},
+                    {"terms": {"ids.isbn": isbns}},
+                    {"terms": {"parent_book.ids.isbn": isbns}},
+                    {"terms": {"parent_book.ids.eisbn": isbns}},
+                    {"terms": {"biblio.isbn": isbns}},
+                    {"terms": {"biblio.isbns": isbns}},
                 ],
                 "minimum_should_match": 1,
             }
