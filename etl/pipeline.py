@@ -7,10 +7,7 @@ from typing import Any, Dict, List, Optional
 from django.conf import settings
 
 from etl.client import OpenSearchClient
-from etl.documents import (
-    RawOpenAlexInputDocument,
-    SilverDocument,
-)
+from etl.documents import SilverDocument
 from etl.mapping_silver import SILVER_MAPPING
 from etl.deduplicator.openalex import OpenAlexMatcher
 from etl.deduplicator.scielo import SciELODeduplicator
@@ -397,10 +394,7 @@ class OpenSearchETLPipeline:
                 doc_type_fn=self.pipeline_config.document_type_for_payload,
                 fallback_id_fn=self._stable_fallback_doc_id,
             )
-        elif source == "openalex":
-            return RawOpenAlexInputDocument.from_raw(raw_data)
-        else:
-            raise ValueError(f"Unknown source: {source}")
+        raise ValueError(f"Unknown source: {source}")
 
     def _index_silver_documents(
         self,
