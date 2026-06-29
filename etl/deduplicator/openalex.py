@@ -170,6 +170,20 @@ class OpenAlexMatcher:
         scielo_doc: dict[str, Any],
     ) -> dict[str, Any]:
         bool_query = query.setdefault("bool", {})
+
+        bool_query.setdefault("filter", []).append(
+            {
+                "bool": {
+                    "should": [
+                        {"exists": {"field": "ids.openalex"}},
+                        {"exists": {"field": "openalex_id"}},
+                        {"exists": {"field": "oca_data.openalex.ids"}},
+                    ],
+                    "minimum_should_match": 1,
+                }
+            }
+        )
+
         query_rules = self.rules.get("openalex_query") or {}
 
         if query_rules.get("exclude_is_xpac"):
