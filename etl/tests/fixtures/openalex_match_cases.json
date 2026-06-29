@@ -1,0 +1,456 @@
+[
+  {
+    "document_type": "article",
+    "bronze": {
+      "code": "S0034-71672025000400101",
+      "collection": "rve",
+      "type": "editorial",
+      "title": "Ethical dilemmas in nursing professionals' work",
+      "title_with_lang": [
+        {
+          "language": "en",
+          "title": "Ethical dilemmas in nursing professionals' work"
+        },
+        {
+          "language": "pt",
+          "title": "Dilemas eticos no trabalho dos profissionais de enfermagem"
+        },
+        {
+          "language": "es",
+          "title": "Dilemas eticos en el trabajo de los profesionales de enfermeria"
+        }
+      ],
+      "publication_year": "2025",
+      "language": "en",
+      "ids": {
+        "doi": "10.1590/0034-7167.202578SUPL101"
+      },
+      "journal_title": "Revista Brasileira de Enfermagem",
+      "sources": [
+        {
+          "id": "reben",
+          "title": "Revista Brasileira de Enfermagem",
+          "type": "journal",
+          "issns": [
+            "0034-7167",
+            "1984-0446"
+          ],
+          "is_open_access": true
+        }
+      ],
+      "biblio": {
+        "volume": "78",
+        "first_page": "2",
+        "last_page": "1"
+      }
+    },
+    "silver_openalex": [
+      {
+        "doc_id": "https://openalex.org/W4413978053",
+        "type": "article",
+        "title": "Dilemas eticos en el trabajo de los profesionales de enfermeria",
+        "doi": "10.1590/0034-7167.202578supl101",
+        "publication_year": 2025,
+        "language": [
+          "es"
+        ],
+        "ids": {
+          "doi": "10.1590/0034-7167.202578supl101",
+          "openalex": "https://openalex.org/W4413978053",
+          "openalex_with_lang": [
+            {
+              "language": "es",
+              "openalex": "https://openalex.org/W4413978053"
+            }
+          ]
+        },
+        "openalex_id": "https://openalex.org/W4413978053",
+        "source": {
+          "title": "Revista Brasileira de Enfermagem",
+          "type": "journal",
+          "issns": [
+            "0034-7167",
+            "1984-0446"
+          ]
+        },
+        "referenced_works": [
+          "https://openalex.org/W2008695543"
+        ],
+        "oca_data": {
+          "scope": [
+            "openalex"
+          ],
+          "openalex": {
+            "ids": [
+              "https://openalex.org/W4413978053"
+            ]
+          }
+        }
+      },
+      {
+        "doc_id": "https://openalex.org/W4413980019",
+        "type": "article",
+        "title": "Dilemas eticos no trabalho dos profissionais de enfermagem",
+        "doi": "10.1590/0034-7167.202578supl101",
+        "publication_year": 2025,
+        "language": [
+          "pt"
+        ],
+        "ids": {
+          "doi": "10.1590/0034-7167.202578supl101",
+          "openalex": "https://openalex.org/W4413980019",
+          "openalex_with_lang": [
+            {
+              "language": "pt",
+              "openalex": "https://openalex.org/W4413980019"
+            }
+          ]
+        },
+        "openalex_id": "https://openalex.org/W4413980019",
+        "source": {
+          "title": "Revista Brasileira de Enfermagem",
+          "type": "journal",
+          "issns": [
+            "0034-7167",
+            "1984-0446"
+          ]
+        },
+        "referenced_works": [
+          "https://openalex.org/W2524987811"
+        ],
+        "oca_data": {
+          "scope": [
+            "openalex"
+          ],
+          "openalex": {
+            "ids": [
+              "https://openalex.org/W4413980019"
+            ]
+          }
+        }
+      },
+      {
+        "doc_id": "https://openalex.org/W4413970134",
+        "type": "article",
+        "title": "Ethical dilemmas in nursing professionals' work",
+        "doi": "10.1590/0034-7167.202578supl101",
+        "publication_year": 2025,
+        "language": [
+          "en"
+        ],
+        "ids": {
+          "doi": "10.1590/0034-7167.202578supl101",
+          "openalex": "https://openalex.org/W4413970134",
+          "openalex_with_lang": [
+            {
+              "language": "en",
+              "openalex": "https://openalex.org/W4413970134"
+            }
+          ]
+        },
+        "openalex_id": "https://openalex.org/W4413970134",
+        "source": {
+          "title": "Revista Brasileira de Enfermagem",
+          "type": "journal",
+          "issns": [
+            "0034-7167",
+            "1984-0446"
+          ]
+        },
+        "referenced_works": [
+          "https://openalex.org/W2008695543",
+          "https://openalex.org/W2524987811"
+        ],
+        "oca_data": {
+          "scope": [
+            "openalex"
+          ],
+          "openalex": {
+            "ids": [
+              "https://openalex.org/W4413970134"
+            ]
+          }
+        }
+      }
+    ],
+    "expected": {
+      "openalex_ids": [
+        "https://openalex.org/W4413978053",
+        "https://openalex.org/W4413980019",
+        "https://openalex.org/W4413970134"
+      ],
+      "strategy": "doi",
+      "confidence": "high",
+      "merged_scope": [
+        "scielo",
+        "openalex"
+      ]
+    }
+  },
+  {
+    "document_type": "book",
+    "bronze": {
+      "id": "jgy7x",
+      "type": "book",
+      "title": "A Ciencia a Caminho da Roca",
+      "title_with_lang": [
+        {
+          "language": "pt",
+          "title": "A Ciencia a Caminho da Roca"
+        }
+      ],
+      "publication_year": "2025",
+      "language": "pt",
+      "ids": {
+        "scl_book_id": "jgy7x",
+        "doi": "https://doi.org/10.7476/9786557082379",
+        "eisbn": "9786557082379"
+      },
+      "biblio": {
+        "pages": "174"
+      }
+    },
+    "silver_openalex": [
+      {
+        "doc_id": "https://openalex.org/W4413344309",
+        "type": "book",
+        "title": "A Ciencia a Caminho da Roca",
+        "doi": "10.7476/9786557082379",
+        "publication_year": 2025,
+        "language": [
+          "pt"
+        ],
+        "ids": {
+          "doi": "10.7476/9786557082379",
+          "openalex": "https://openalex.org/W4413344309",
+          "openalex_with_lang": [
+            {
+              "language": "pt",
+              "openalex": "https://openalex.org/W4413344309"
+            }
+          ]
+        },
+        "openalex_id": "https://openalex.org/W4413344309",
+        "source": {
+          "title": "Editora FIOCRUZ eBooks",
+          "type": "book"
+        },
+        "oca_data": {
+          "scope": [
+            "openalex"
+          ],
+          "openalex": {
+            "ids": [
+              "https://openalex.org/W4413344309"
+            ]
+          }
+        }
+      }
+    ],
+    "expected": {
+      "openalex_ids": [
+        "https://openalex.org/W4413344309"
+      ],
+      "strategy": "doi",
+      "confidence": "high",
+      "merged_scope": [
+        "scielo",
+        "openalex"
+      ]
+    }
+  },
+  {
+    "document_type": "book-chapter",
+    "bronze": {
+      "id": "mbvws",
+      "type": "book-chapter",
+      "title": "O microscopio em busca da nacao",
+      "title_with_lang": [
+        {
+          "language": "pt",
+          "title": "O microscopio em busca da nacao"
+        }
+      ],
+      "publication_year": "2025",
+      "language": "pt",
+      "ids": {
+        "scl_book_id": "mbvws",
+        "doi": "https://doi.org/10.7476/9786557082379"
+      },
+      "monograph": {
+        "id": "jgy7x",
+        "title": "A Ciencia a Caminho da Roca",
+        "publication_year": "2025",
+        "language": "pt"
+      },
+      "biblio": {
+        "first_page": "53",
+        "last_page": "112"
+      }
+    },
+    "silver_openalex": [
+      {
+        "doc_id": "https://openalex.org/W4413344309",
+        "type": "book",
+        "title": "A Ciencia a Caminho da Roca",
+        "doi": "10.7476/9786557082379",
+        "publication_year": 2025,
+        "language": [
+          "pt"
+        ],
+        "ids": {
+          "doi": "10.7476/9786557082379",
+          "openalex": "https://openalex.org/W4413344309",
+          "openalex_with_lang": [
+            {
+              "language": "pt",
+              "openalex": "https://openalex.org/W4413344309"
+            }
+          ]
+        },
+        "openalex_id": "https://openalex.org/W4413344309",
+        "source": {
+          "title": "Editora FIOCRUZ eBooks",
+          "type": "book"
+        },
+        "oca_data": {
+          "scope": [
+            "openalex"
+          ],
+          "openalex": {
+            "ids": [
+              "https://openalex.org/W4413344309"
+            ]
+          }
+        }
+      }
+    ],
+    "expected": {
+      "openalex_ids": [
+        "https://openalex.org/W4413344309"
+      ],
+      "strategy": "doi",
+      "confidence": "high",
+      "merged_scope": [
+        "scielo",
+        "openalex"
+      ]
+    }
+  },
+  {
+    "document_type": "preprint",
+    "bronze": {
+      "type": "preprint",
+      "title": "Lectura investigativa en ciencias sociales mediante analisis por parrafos y hermeneusis de la presentacion de Labradores, peones y proletarios de Gabriel Salazar",
+      "title_with_lang": [
+        {
+          "language": "es",
+          "title": "Lectura investigativa en ciencias sociales mediante analisis por parrafos y hermeneusis de la presentacion de Labradores, peones y proletarios de Gabriel Salazar"
+        }
+      ],
+      "publication_year": 2025,
+      "language": "spa",
+      "ids": {
+        "scl_preprint_id": "13810",
+        "doi": "10.1590/SciELOPreprints.13810"
+      },
+      "sources": {
+        "type": "repository"
+      }
+    },
+    "silver_openalex": [
+      {
+        "doc_id": "https://openalex.org/W7105124123",
+        "type": "dataset",
+        "title": "Datos de replica: Lectura investigativa en ciencias sociales mediante analisis por parrafos y hermeneusis de la presentacion de Labradores, peones y proletarios de Gabriel Salazar",
+        "doi": "10.48331/scielodata.93k6ig",
+        "publication_year": 2025,
+        "ids": {
+          "doi": "10.48331/scielodata.93k6ig",
+          "openalex": "https://openalex.org/W7105124123"
+        },
+        "openalex_id": "https://openalex.org/W7105124123",
+        "source": {
+          "title": "SciELO - Scientific Electronic Library Online Dataverse",
+          "type": "repository"
+        },
+        "oca_data": {
+          "scope": [
+            "openalex"
+          ],
+          "openalex": {
+            "ids": [
+              "https://openalex.org/W7105124123"
+            ]
+          }
+        }
+      }
+    ],
+    "expected": {
+      "openalex_ids": [
+        "https://openalex.org/W7105124123"
+      ],
+      "strategy": "title_year_author",
+      "confidence": "medium",
+      "merged_scope": [
+        "scielo",
+        "openalex"
+      ]
+    }
+  },
+  {
+    "document_type": "dataset",
+    "bronze": {
+      "id": "14624",
+      "type": "dataset",
+      "title": "Data for: Presidential decrees and statutory legislation in the making and dismantling of Brazilian environmental policy",
+      "publication_year": 2026,
+      "language": "Portuguese",
+      "ids": {
+        "doi": "doi:10.48331/SCIELODATA.2LQGB9"
+      },
+      "sources": {
+        "type": "repository"
+      }
+    },
+    "silver_openalex": [
+      {
+        "doc_id": "https://openalex.org/W7124718903",
+        "type": "dataset",
+        "title": "Data for: Presidential decrees and statutory legislation in the making and dismantling of Brazilian environmental policy",
+        "doi": "10.48331/scielodata.2lqgb9",
+        "publication_year": 2025,
+        "ids": {
+          "doi": "10.48331/scielodata.2lqgb9",
+          "openalex": "https://openalex.org/W7124718903"
+        },
+        "openalex_id": "https://openalex.org/W7124718903",
+        "source": {
+          "title": "SciELO - Scientific Electronic Library Online Dataverse",
+          "type": "repository"
+        },
+        "oca_data": {
+          "scope": [
+            "openalex"
+          ],
+          "openalex": {
+            "ids": [
+              "https://openalex.org/W7124718903"
+            ]
+          }
+        }
+      }
+    ],
+    "expected": {
+      "openalex_ids": [
+        "https://openalex.org/W7124718903"
+      ],
+      "strategy": "doi",
+      "confidence": "high",
+      "merged_scope": [
+        "scielo",
+        "openalex"
+      ]
+    }
+  }
+]
