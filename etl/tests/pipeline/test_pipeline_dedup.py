@@ -283,6 +283,33 @@ class DocumentRulesTests(EtlTestCase):
         )
         self.assertTrue(all(match[1] == "doi" for match in matches))
 
+    def test_silver_candidate_uses_opensearch_id_as_doc_id_fallback(self):
+        matcher = make_matcher("article")
+
+        silver_doc = matcher._silver_document_from_candidate(
+            {
+                "_os_id": "silver-os-id",
+                "type": "article",
+                "publication_year": 2025,
+                "ids": {"openalex": ["https://openalex.org/W1"]},
+            }
+        )
+
+        self.assertEqual(silver_doc.doc_id, "silver-os-id")
+
+    def test_silver_candidate_uses_openalex_id_as_doc_id_fallback(self):
+        matcher = make_matcher("article")
+
+        silver_doc = matcher._silver_document_from_candidate(
+            {
+                "type": "article",
+                "publication_year": 2025,
+                "openalex_id": "https://openalex.org/W1",
+            }
+        )
+
+        self.assertEqual(silver_doc.doc_id, "https://openalex.org/W1")
+
     def test_openalex_doi_search_uses_exact_or_prefix_queries(self):
         matcher = make_matcher("article")
         matcher.client = Mock()
