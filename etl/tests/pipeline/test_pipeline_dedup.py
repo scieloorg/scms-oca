@@ -7,6 +7,7 @@ from django.apps import apps
 from etl.deduplicator.helpers import can_compare, rules_for_pair
 from etl.deduplicator.openalex import OpenAlexMatcher
 from etl.deduplicator.scielo import SciELODeduplicator
+from etl.documents import SilverDocument
 from etl.models import EtlPipelineConfig
 from etl.pipeline import OpenSearchETLPipeline
 from etl.tests.base import EtlTestCase
@@ -309,6 +310,83 @@ class DocumentRulesTests(EtlTestCase):
         )
 
         self.assertEqual(silver_doc.doc_id, "https://openalex.org/W1")
+
+    def test_first_openalex_id_reads_oca_data_ids(self):
+        matcher = make_matcher("article")
+
+        openalex_id = matcher._first_openalex_id(
+            {"oca_data": {"openalex": {"ids": ["https://openalex.org/W1"]}}}
+        )
+
+        self.assertEqual(openalex_id, "https://openalex.org/W1")
+
+    def test_openalex_dedup_prefers_openalex_id_across_silver_sources(self):
+        matcher = make_matcher("article")
+        matches = matcher._deduplicate_openalex_matches(
+            [
+                (
+                    SilverDocument(
+                        doc_id="https://openalex.org/W1",
+                        type="article",
+                        publication_year=2025,
+                        ids={"openalex": ["https://openalex.org/W1"]},
+                    ),
+                    "doi",
+                    "high",
+                    {},
+                ),
+                (
+                    SilverDocument(
+                        doc_id="S0034-71672025000400101",
+                        type="article",
+                        publication_year=2025,
+                        ids={"openalex": ["https://openalex.org/W1"]},
+                    ),
+                    "doi",
+                    "high",
+                    {},
+                ),
+            ]
+        )
+
+        self.assertEqual(len(matches), 1)
+        self.assertEqual(matches[0][0].doc_id, "https://openalex.org/W1")
+
+    def test_openalex_dedup_uses_oca_data_openalex_ids(self):
+        matcher = make_matcher("article")
+        matches = matcher._deduplicate_openalex_matches(
+            [
+                (
+                    SilverDocument(
+                        doc_id="silver-openalex-doc",
+                        type="article",
+                        publication_year=2025,
+                        oca_data={
+                            "openalex": {"ids": ["https://openalex.org/W1"]}
+                        },
+                    ),
+                    "doi",
+                    "high",
+                    {},
+                ),
+                (
+                    SilverDocument(
+                        doc_id="merged-scielo-doc",
+                        type="article",
+                        publication_year=2025,
+                        oca_data={
+                            "openalex": {"ids": ["https://openalex.org/W1"]}
+                        },
+                    ),
+                    "doi",
+                    "high",
+                    {},
+                ),
+            ]
+        )
+
+        self.assertEqual(len(matches), 1)
+        self.assertEqual(matches[0][0].doc_id, "silver-openalex-doc")
 
     def test_openalex_doi_search_uses_exact_or_prefix_queries(self):
         matcher = make_matcher("article")

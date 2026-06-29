@@ -121,12 +121,16 @@ class OpenAlexMatcher:
 
         seen = set()
         deduped = []
-        for match in matches:
-            candidate_id = match[0].get("id") or match[0].get("openalex_id")
+        for silver_doc, _strategy, _confidence, _validation in matches:
+            candidate_id = self._first_openalex_id(silver_doc.to_index_dict())
+
+            if not candidate_id:
+                candidate_id = silver_doc.doc_id
+
             if not candidate_id or candidate_id not in seen:
                 if candidate_id:
                     seen.add(candidate_id)
-                deduped.append(match)
+                deduped.append((silver_doc, _strategy, _confidence, _validation))
         return deduped
 
     def _silver_document_from_candidate(self, candidate):
@@ -140,6 +144,7 @@ class OpenAlexMatcher:
             data["doc_id"] = (
                 candidate.get("_os_id")
                 or candidate.get("openalex_id")
+                or self._first_openalex_id(candidate)
             )
 
         if not data.get("type"):
@@ -360,6 +365,45 @@ class OpenAlexMatcher:
             source["_os_id"] = hit["_id"]
 
         return source
+
+    def _first_openalex_id(self, candidate):
+        values = []
+
+        if candidate.get("openalex_id"):
+            values.append(candidate["openalex_id"])
+
+        ids = candidate.get("ids") if isinstance(candidate.get("ids"), dict) else {}
+        oa_ids = ids.get("openalex")
+
+        if isinstance(oa_ids, list):
+            values.extend(oa_ids)
+        elif oa_ids:
+            values.append(oa_ids)
+
+        oca_data = (
+            candidate.get("oca_data")
+            if isinstance(candidate.get("oca_data"), dict)
+            else {}
+        )
+
+        oca_openalex = (
+            oca_data.get("openalex")
+            if isinstance(oca_data.get("openalex"), dict)
+            else {}
+        )
+
+        oca_ids = oca_openalex.get("ids")
+
+        if isinstance(oca_ids, list):
+            values.extend(oca_ids)
+        elif oca_ids:
+            values.append(oca_ids)
+
+        for value in values:
+            if value:
+                return str(value)
+
+        return None
 
     def _validate_openalex_match(
         self,
