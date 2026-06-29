@@ -706,8 +706,10 @@ class OpenSearchETLPipeline:
         oa_ids: list[str] = []
 
         doc_dict = doc.to_index_dict()
+
         ids_field = doc_dict.get("ids", {})
         oa_field = ids_field.get("openalex") if isinstance(ids_field, dict) else None
+
         if oa_field:
             items = oa_field if isinstance(oa_field, list) else [oa_field]
             for item in items:
@@ -717,6 +719,7 @@ class OpenSearchETLPipeline:
 
         oca_data = doc_dict.get("oca_data", {})
         oca_openalex = oca_data.get("openalex", {})
+
         oca_ids_list = oca_openalex.get("ids") if isinstance(oca_openalex, dict) else None
         if oca_ids_list and isinstance(oca_ids_list, list):
             for item in oca_ids_list:

@@ -121,6 +121,7 @@ class OpenAlexMatcher:
 
         seen = set()
         deduped = []
+
         for silver_doc, _strategy, _confidence, _validation in matches:
             candidate_id = self._first_openalex_id(silver_doc.to_index_dict())
 
@@ -131,6 +132,7 @@ class OpenAlexMatcher:
                 if candidate_id:
                     seen.add(candidate_id)
                 deduped.append((silver_doc, _strategy, _confidence, _validation))
+
         return deduped
 
     def _silver_document_from_candidate(self, candidate):
@@ -273,6 +275,7 @@ class OpenAlexMatcher:
             f"https://dx.doi.org/{normalized_doi}",
             f"http://dx.doi.org/{normalized_doi}",
         ]
+
         fields = ["ids.doi", "ids.doi_with_lang.doi"]
 
         queries: list[dict[str, Any]] = []

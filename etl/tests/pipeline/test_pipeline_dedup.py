@@ -8,9 +8,11 @@ from etl.deduplicator.helpers import can_compare, rules_for_pair
 from etl.deduplicator.openalex import OpenAlexMatcher
 from etl.deduplicator.scielo import SciELODeduplicator
 from etl.documents import SilverDocument
+from etl.transform.standardizer import standardizer_for
 from etl.models import EtlPipelineConfig
 from etl.pipeline import OpenSearchETLPipeline
 from etl.tests.base import EtlTestCase
+from etl.transform.merger import SilverMerger
 
 
 FIXTURES_DIR = Path(apps.get_app_config("etl").path) / "tests" / "fixtures"
@@ -142,7 +144,9 @@ class DocumentRulesTests(EtlTestCase):
 
     def test_non_article_targets_build_unit_groups_without_deduplicator(self):
         pipeline = OpenSearchETLPipeline.__new__(OpenSearchETLPipeline)
-        pipeline.pipeline_config = EtlPipelineConfig.objects.get_for_source("bronze_scielo_preprint")
+        pipeline.pipeline_config = EtlPipelineConfig.objects.get_for_source(
+            "bronze_scielo_preprint"
+        )
         pipeline.scielo_deduplicator = Mock()
         docs = [{"id": "p1"}, {"id": "p2"}]
 
@@ -153,7 +157,9 @@ class DocumentRulesTests(EtlTestCase):
 
     def test_article_target_delegates_grouping_to_deduplicator(self):
         pipeline = OpenSearchETLPipeline.__new__(OpenSearchETLPipeline)
-        pipeline.pipeline_config = EtlPipelineConfig.objects.get_for_source("bronze_scielo_articles")
+        pipeline.pipeline_config = EtlPipelineConfig.objects.get_for_source(
+            "bronze_scielo_articles"
+        )
         pipeline.scielo_deduplicator = Mock()
         pipeline.scielo_deduplicator.find_duplicates.return_value = {0: [{"id": "a1"}]}
 
@@ -272,6 +278,47 @@ class DocumentRulesTests(EtlTestCase):
                 self.assertEqual(
                     {match[2] for match in matches},
                     {case["expected"]["confidence"]},
+                )
+
+    def test_fixture_silver_openalex_merger_keeps_explicit_trace(self):
+        for case in self._match_cases:
+            with self.subTest(document_type=case["document_type"]):
+                config = EtlPipelineConfig.objects.get_enabled_by_name(
+                    case["document_type"]
+                )
+                input_class = config.input_document_class()
+                input_doc = input_class.from_raw(
+                    case["bronze"],
+                    doc_type_fn=config.document_type_for_payload,
+                )
+                scielo_doc = standardizer_for(input_doc).run(input_doc)
+                openalex_matches = [
+                    (
+                        SilverDocument(**candidate),
+                        case["expected"]["strategy"],
+                        case["expected"]["confidence"],
+                        {},
+                    )
+                    for candidate in case["silver_openalex"]
+                ]
+
+                merged = SilverMerger().merge(
+                    scielo_docs=[scielo_doc],
+                    openalex_matches=openalex_matches,
+                )
+                indexed = merged.to_index_dict()
+
+                self.assertEqual(indexed["oca_data"]["scope"], case["expected"]["merged_scope"])
+                self.assertEqual(
+                    self._openalex_ids(indexed["ids"]),
+                    case["expected"]["openalex_ids"],
+                )
+                self.assertEqual(
+                    [
+                        item["doc_id"]
+                        for item in indexed["oca_data"]["merge_trace"]["openalex_matches"]
+                    ],
+                    case["expected"]["openalex_ids"],
                 )
 
     def test_openalex_doi_match_keeps_language_variants_with_same_normalized_doi(self):
