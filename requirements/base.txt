@@ -104,3 +104,4 @@ citeproc-py-styles==0.1.5  # https://pypi.org/project/citeproc-py-styles/ (bibte
 
 # Math analysis and formulas evaluation
 sympy==1.13.3  # https://pypi.org/project/sympy/
+tornado>=6.5.7 # not directly required, pinned by Snyk to avoid a vulnerability
