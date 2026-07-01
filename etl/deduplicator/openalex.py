@@ -123,14 +123,17 @@ class OpenAlexMatcher:
         deduped = []
 
         for silver_doc, _strategy, _confidence, _validation in matches:
-            candidate_id = self._first_openalex_id(silver_doc.to_index_dict())
+            all_ids = self._all_openalex_ids(silver_doc.to_index_dict())
 
-            if not candidate_id:
-                candidate_id = silver_doc.doc_id
+            if not all_ids and silver_doc.doc_id:
+                all_ids = {silver_doc.doc_id}
 
-            if not candidate_id or candidate_id not in seen:
-                if candidate_id:
-                    seen.add(candidate_id)
+            is_duplicate = bool(all_ids and not all_ids.isdisjoint(seen))
+
+            if all_ids:
+                seen.update(all_ids)
+
+            if not is_duplicate:
                 deduped.append((silver_doc, _strategy, _confidence, _validation))
 
         return deduped
@@ -146,7 +149,6 @@ class OpenAlexMatcher:
             data["doc_id"] = (
                 candidate.get("_os_id")
                 or candidate.get("openalex_id")
-                or self._first_openalex_id(candidate)
             )
 
         if not data.get("type"):
