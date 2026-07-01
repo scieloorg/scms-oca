@@ -73,7 +73,7 @@ ETL_INPUT_OPENALEX_WORKS = _env.str(
 )
 ETL_OPENALEX_MATCH_INDEX = _env.str(
     "ETL_OPENALEX_MATCH_INDEX",
-    default="silver_scientific_production",
+    default="silver_openalex-*",
 )
 
 # ETL silver index pattern

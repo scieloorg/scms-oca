@@ -26,7 +26,7 @@ def make_deduplicator(document_type):
 def make_matcher(document_type):
     matcher = OpenAlexMatcher.__new__(OpenAlexMatcher)
     matcher.rules = EtlPipelineConfig.objects.get_enabled_by_name(document_type).to_rules()
-    matcher.input_openalex_index = "silver_scientific_production"
+    matcher.input_openalex_index = "silver_openalex-*"
     return matcher
 
 

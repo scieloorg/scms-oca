@@ -28,7 +28,7 @@ class OpenAlexMatcher:
         opensearch_host: str | None = None,
         opensearch_port: int | None = None,
         opensearch_url: str | None = None,
-        input_openalex_index: str = "silver_scientific_production",
+        input_openalex_index: str = "silver_openalex-*",
         rules: dict | None = None,
     ):
         if rules is None:

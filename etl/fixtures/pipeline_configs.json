@@ -9,7 +9,7 @@
             "default_document_type": "article",
             "infer_document_type_from_payload": true,
             "deduplicate_scielo": true,
-            "openalex_index": "silver_scientific_production",
+            "openalex_index": "silver_openalex-*",
             "rules": {
                 "scielo_dedup_strategies": ["doi", "pid", "fuzzy"],
                 "openalex_match_strategies": ["doi", "title"],
@@ -57,7 +57,7 @@
             "default_document_type": "book",
             "infer_document_type_from_payload": true,
             "deduplicate_scielo": true,
-            "openalex_index": "silver_scientific_production",
+            "openalex_index": "silver_openalex-*",
             "rules": {
                 "scielo_dedup_strategies": ["doi", "fuzzy"],
                 "openalex_match_strategies": ["doi", "isbn", "title"],
@@ -100,7 +100,7 @@
             "default_document_type": "book-chapter",
             "infer_document_type_from_payload": true,
             "deduplicate_scielo": true,
-            "openalex_index": "silver_scientific_production",
+            "openalex_index": "silver_openalex-*",
             "rules": {
                 "scielo_dedup_strategies": ["doi", "fuzzy"],
                 "openalex_match_strategies": ["doi", "isbn", "title"],
@@ -143,7 +143,7 @@
             "default_document_type": "preprint",
             "infer_document_type_from_payload": false,
             "deduplicate_scielo": false,
-            "openalex_index": "silver_scientific_production",
+            "openalex_index": "silver_openalex-*",
             "rules": {
                 "scielo_dedup_strategies": [],
                 "openalex_match_strategies": ["doi", "title"],
@@ -186,7 +186,7 @@
             "default_document_type": "dataset",
             "infer_document_type_from_payload": false,
             "deduplicate_scielo": false,
-            "openalex_index": "silver_scientific_production",
+            "openalex_index": "silver_openalex-*",
             "rules": {
                 "scielo_dedup_strategies": [],
                 "openalex_match_strategies": ["doi"],
