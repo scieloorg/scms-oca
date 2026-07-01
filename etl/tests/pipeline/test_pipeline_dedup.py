@@ -72,6 +72,10 @@ class DocumentRulesTests(EtlTestCase):
             ids.extend(cls._openalex_ids(silver_doc.to_index_dict().get("ids") or {}))
         return ids
 
+    @staticmethod
+    def _matched_doc_ids(matches):
+        return [silver_doc.doc_id for silver_doc, *_ in matches]
+
     def test_can_compare_rejects_doc_type_outside_pipeline_config_rules(self):
         rules = EtlPipelineConfig.objects.get_enabled_by_name("book").to_rules()
 
@@ -449,8 +453,10 @@ class DocumentRulesTests(EtlTestCase):
             ]
         )
 
-        self.assertEqual(len(matches), 1)
-        self.assertEqual(matches[0][0].doc_id, "https://openalex.org/W1")
+        self.assertEqual(
+            self._matched_doc_ids(matches),
+            ["https://openalex.org/W1"],
+        )
 
     def test_openalex_dedup_uses_oca_data_openalex_ids(self):
         matcher = make_matcher("article")
@@ -485,8 +491,126 @@ class DocumentRulesTests(EtlTestCase):
             ]
         )
 
-        self.assertEqual(len(matches), 1)
-        self.assertEqual(matches[0][0].doc_id, "silver-openalex-doc")
+        self.assertEqual(self._matched_doc_ids(matches), ["silver-openalex-doc"])
+
+    def test_openalex_dedup_catches_shared_secondary_id(self):
+        matcher = make_matcher("article")
+        matches = matcher._deduplicate_openalex_matches(
+            [
+                (
+                    SilverDocument(
+                        doc_id="merged-openalex-doc",
+                        type="article",
+                        publication_year=2025,
+                        ids={
+                            "openalex": [
+                                "https://openalex.org/W1",
+                                "https://openalex.org/W2",
+                                "https://openalex.org/W3",
+                            ]
+                        },
+                    ),
+                    "doi",
+                    "high",
+                    {},
+                ),
+                (
+                    SilverDocument(
+                        doc_id="partial-openalex-doc",
+                        type="article",
+                        publication_year=2025,
+                        ids={"openalex": ["https://openalex.org/W2"]},
+                    ),
+                    "doi",
+                    "high",
+                    {},
+                ),
+            ]
+        )
+
+        self.assertEqual(self._matched_doc_ids(matches), ["merged-openalex-doc"])
+
+    def test_openalex_dedup_transitive(self):
+        matcher = make_matcher("article")
+        matches = matcher._deduplicate_openalex_matches(
+            [
+                (
+                    SilverDocument(
+                        doc_id="first-openalex-doc",
+                        type="article",
+                        publication_year=2025,
+                        ids={"openalex": ["https://openalex.org/W2"]},
+                    ),
+                    "doi",
+                    "high",
+                    {},
+                ),
+                (
+                    SilverDocument(
+                        doc_id="bridge-openalex-doc",
+                        type="article",
+                        publication_year=2025,
+                        ids={
+                            "openalex": [
+                                "https://openalex.org/W1",
+                                "https://openalex.org/W2",
+                                "https://openalex.org/W3",
+                            ]
+                        },
+                    ),
+                    "doi",
+                    "high",
+                    {},
+                ),
+                (
+                    SilverDocument(
+                        doc_id="third-openalex-doc",
+                        type="article",
+                        publication_year=2025,
+                        ids={"openalex": ["https://openalex.org/W3"]},
+                    ),
+                    "doi",
+                    "high",
+                    {},
+                ),
+            ]
+        )
+
+        self.assertEqual(self._matched_doc_ids(matches), ["first-openalex-doc"])
+
+    def test_openalex_dedup_no_shared_ids_keeps_both(self):
+        matcher = make_matcher("article")
+        matches = matcher._deduplicate_openalex_matches(
+            [
+                (
+                    SilverDocument(
+                        doc_id="first-openalex-doc",
+                        type="article",
+                        publication_year=2025,
+                        ids={"openalex": ["https://openalex.org/W1"]},
+                    ),
+                    "doi",
+                    "high",
+                    {},
+                ),
+                (
+                    SilverDocument(
+                        doc_id="second-openalex-doc",
+                        type="article",
+                        publication_year=2025,
+                        ids={"openalex": ["https://openalex.org/W2"]},
+                    ),
+                    "doi",
+                    "high",
+                    {},
+                ),
+            ]
+        )
+
+        self.assertEqual(
+            self._matched_doc_ids(matches),
+            ["first-openalex-doc", "second-openalex-doc"],
+        )
 
     def test_openalex_doi_search_uses_exact_or_prefix_queries(self):
         matcher = make_matcher("article")
