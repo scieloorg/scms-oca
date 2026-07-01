@@ -399,14 +399,26 @@ class DocumentRulesTests(EtlTestCase):
 
         self.assertEqual(silver_doc.doc_id, "https://openalex.org/W1")
 
-    def test_first_openalex_id_reads_oca_data_ids(self):
+    def test_all_openalex_ids_reads_oca_data_ids(self):
         matcher = make_matcher("article")
 
-        openalex_id = matcher._first_openalex_id(
-            {"oca_data": {"openalex": {"ids": ["https://openalex.org/W1"]}}}
+        openalex_ids = matcher._all_openalex_ids(
+            {
+                "oca_data": {
+                    "openalex": {
+                        "ids": [
+                            "https://openalex.org/W1",
+                            "https://openalex.org/W2",
+                        ]
+                    }
+                }
+            }
         )
 
-        self.assertEqual(openalex_id, "https://openalex.org/W1")
+        self.assertEqual(
+            openalex_ids,
+            {"https://openalex.org/W1", "https://openalex.org/W2"},
+        )
 
     def test_openalex_dedup_prefers_openalex_id_across_silver_sources(self):
         matcher = make_matcher("article")
