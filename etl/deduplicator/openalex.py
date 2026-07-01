@@ -369,44 +369,28 @@ class OpenAlexMatcher:
 
         return source
 
-    def _first_openalex_id(self, candidate):
-        values = []
+    def _all_openalex_ids(self, candidate: dict) -> set[str]:
+        openalex_ids = set()
 
         if candidate.get("openalex_id"):
-            values.append(candidate["openalex_id"])
+            openalex_ids.add(candidate["openalex_id"])
 
         ids = candidate.get("ids") if isinstance(candidate.get("ids"), dict) else {}
         oa_ids = ids.get("openalex")
 
         if isinstance(oa_ids, list):
-            values.extend(oa_ids)
+            openalex_ids.update(value for value in oa_ids if value)
         elif oa_ids:
-            values.append(oa_ids)
+            openalex_ids.add(oa_ids)
 
-        oca_data = (
-            candidate.get("oca_data")
-            if isinstance(candidate.get("oca_data"), dict)
-            else {}
-        )
-
-        oca_openalex = (
-            oca_data.get("openalex")
-            if isinstance(oca_data.get("openalex"), dict)
-            else {}
-        )
-
-        oca_ids = oca_openalex.get("ids")
+        oca_ids = ((candidate.get("oca_data") or {}).get("openalex") or {}).get("ids")
 
         if isinstance(oca_ids, list):
-            values.extend(oca_ids)
+            openalex_ids.update(value for value in oca_ids if value)
         elif oca_ids:
-            values.append(oca_ids)
+            openalex_ids.add(oca_ids)
 
-        for value in values:
-            if value:
-                return str(value)
-
-        return None
+        return openalex_ids
 
     def _validate_openalex_match(
         self,
