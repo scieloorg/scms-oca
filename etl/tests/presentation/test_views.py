@@ -24,8 +24,8 @@ class SummaryViewTests(EtlAdminViewTestCase):
     def test_summary_view_renders(self):
         response = self.client.get(reverse("etl_summary"))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "ETL Summary")
-        self.assertContains(response, "Book Chapters")
+        self.assertContains(response, "Resumo de ETL")
+        self.assertContains(response, "Cap\\u00edtulos de Livro")
         self.assertContains(response, "SciELO dedup")
         self.assertContains(response, "OpenAlex match")
         self.assertIn("stats", response.context)

@@ -1,0 +1,129 @@
+{
+  "es": {
+    "doc_id": "https://openalex.org/W4413978053",
+    "type": "article",
+    "title": "Dilemas eticos en el trabajo de los profesionales de enfermeria",
+    "doi": "10.1590/0034-7167.202578supl101",
+    "publication_year": 2025,
+    "language": [
+      "es"
+    ],
+    "ids": {
+      "doi": "10.1590/0034-7167.202578supl101",
+      "openalex": "https://openalex.org/W4413978053",
+      "openalex_with_lang": [
+        {
+          "language": "es",
+          "openalex": "https://openalex.org/W4413978053"
+        }
+      ]
+    },
+    "openalex_id": "https://openalex.org/W4413978053",
+    "source": {
+      "title": "Revista Brasileira de Enfermagem",
+      "type": "journal",
+      "issns": [
+        "0034-7167",
+        "1984-0446"
+      ]
+    },
+    "referenced_works": [
+      "https://openalex.org/W2008695543"
+    ],
+    "oca_data": {
+      "scope": [
+        "openalex"
+      ],
+      "openalex": {
+        "ids": [
+          "https://openalex.org/W4413978053"
+        ]
+      }
+    }
+  },
+  "pt": {
+    "doc_id": "https://openalex.org/W4413980019",
+    "type": "article",
+    "title": "Dilemas eticos no trabalho dos profissionais de enfermagem",
+    "doi": "10.1590/0034-7167.202578supl101",
+    "publication_year": 2025,
+    "language": [
+      "pt"
+    ],
+    "ids": {
+      "doi": "10.1590/0034-7167.202578supl101",
+      "openalex": "https://openalex.org/W4413980019",
+      "openalex_with_lang": [
+        {
+          "language": "pt",
+          "openalex": "https://openalex.org/W4413980019"
+        }
+      ]
+    },
+    "openalex_id": "https://openalex.org/W4413980019",
+    "source": {
+      "title": "Revista Brasileira de Enfermagem",
+      "type": "journal",
+      "issns": [
+        "0034-7167",
+        "1984-0446"
+      ]
+    },
+    "referenced_works": [
+      "https://openalex.org/W2524987811"
+    ],
+    "oca_data": {
+      "scope": [
+        "openalex"
+      ],
+      "openalex": {
+        "ids": [
+          "https://openalex.org/W4413980019"
+        ]
+      }
+    }
+  },
+  "en": {
+    "doc_id": "https://openalex.org/W4413970134",
+    "type": "article",
+    "title": "Ethical dilemmas in nursing professionals' work",
+    "doi": "10.1590/0034-7167.202578supl101",
+    "publication_year": 2025,
+    "language": [
+      "en"
+    ],
+    "ids": {
+      "doi": "10.1590/0034-7167.202578supl101",
+      "openalex": "https://openalex.org/W4413970134",
+      "openalex_with_lang": [
+        {
+          "language": "en",
+          "openalex": "https://openalex.org/W4413970134"
+        }
+      ]
+    },
+    "openalex_id": "https://openalex.org/W4413970134",
+    "source": {
+      "title": "Revista Brasileira de Enfermagem",
+      "type": "journal",
+      "issns": [
+        "0034-7167",
+        "1984-0446"
+      ]
+    },
+    "referenced_works": [
+      "https://openalex.org/W2008695543",
+      "https://openalex.org/W2524987811"
+    ],
+    "oca_data": {
+      "scope": [
+        "openalex"
+      ],
+      "openalex": {
+        "ids": [
+          "https://openalex.org/W4413970134"
+        ]
+      }
+    }
+  }
+}

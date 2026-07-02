@@ -7,10 +7,7 @@ from typing import Any, Dict, List, Optional
 from django.conf import settings
 
 from etl.client import OpenSearchClient
-from etl.documents import (
-    RawOpenAlexInputDocument,
-    SilverDocument,
-)
+from etl.documents import SilverDocument
 from etl.mapping_silver import SILVER_MAPPING
 from etl.deduplicator.openalex import OpenAlexMatcher
 from etl.deduplicator.scielo import SciELODeduplicator
@@ -166,11 +163,15 @@ class OpenSearchETLPipeline:
                     if openalex_matches:
                         result["groups_with_openalex_matches"] += 1
                         result["total_openalex_matches"] += len(openalex_matches)
+
                         oa_ids = [
-                            match[0].get("id") or match[0].get("openalex_id")
-                            for match in openalex_matches
+                            self._openalex_ids_from_silver_doc(silver_doc)
+                            for silver_doc, _strategy, _confidence, _validation in openalex_matches
                         ]
+
+                        oa_ids = [oid for items in oa_ids for oid in items]
                         oa_ids = [oid for oid in oa_ids if oid]
+
                         for doc in group:
                             if os_id := doc.get("_os_id"):
                                 result["openalex_matched_source_ids"].append(os_id)
@@ -192,28 +193,9 @@ class OpenSearchETLPipeline:
                         )
                         continue
 
-                    openalex_silver_matches = []
-                    for oa_doc, strategy, confidence, validation in openalex_matches:
-                        try:
-                            input_oa = self._build_input_document(oa_doc, source="openalex")
-                            silver_oa = standardizer_for(input_oa).run(input_oa)
-                            openalex_silver_matches.append(
-                                (
-                                    silver_oa,
-                                    strategy,
-                                    confidence,
-                                    validation
-                                )
-                            )
-
-                        except Exception as e:
-                            result["warning_messages"].append(
-                                f"OpenAlex standardization error: {e}"
-                            )
-
                     merged_doc = self.merger.merge(
                         scielo_docs=scielo_silver_docs,
-                        openalex_matches=openalex_silver_matches,
+                        openalex_matches=openalex_matches,
                     )
 
                     all_merged_docs.append(merged_doc)
@@ -412,10 +394,7 @@ class OpenSearchETLPipeline:
                 doc_type_fn=self.pipeline_config.document_type_for_payload,
                 fallback_id_fn=self._stable_fallback_doc_id,
             )
-        elif source == "openalex":
-            return RawOpenAlexInputDocument.from_raw(raw_data)
-        else:
-            raise ValueError(f"Unknown source: {source}")
+        raise ValueError(f"Unknown source: {source}")
 
     def _index_silver_documents(
         self,
@@ -727,8 +706,10 @@ class OpenSearchETLPipeline:
         oa_ids: list[str] = []
 
         doc_dict = doc.to_index_dict()
+
         ids_field = doc_dict.get("ids", {})
         oa_field = ids_field.get("openalex") if isinstance(ids_field, dict) else None
+
         if oa_field:
             items = oa_field if isinstance(oa_field, list) else [oa_field]
             for item in items:
@@ -738,6 +719,7 @@ class OpenSearchETLPipeline:
 
         oca_data = doc_dict.get("oca_data", {})
         oca_openalex = oca_data.get("openalex", {})
+
         oca_ids_list = oca_openalex.get("ids") if isinstance(oca_openalex, dict) else None
         if oca_ids_list and isinstance(oca_ids_list, list):
             for item in oca_ids_list:

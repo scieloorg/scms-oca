@@ -1,24 +1,81 @@
+import json
+from pathlib import Path
 from unittest.mock import Mock
+
+from django.apps import apps
 
 from etl.deduplicator.helpers import can_compare, rules_for_pair
 from etl.deduplicator.openalex import OpenAlexMatcher
 from etl.deduplicator.scielo import SciELODeduplicator
+from etl.documents import SilverDocument
+from etl.transform.standardizer import standardizer_for
 from etl.models import EtlPipelineConfig
 from etl.pipeline import OpenSearchETLPipeline
 from etl.tests.base import EtlTestCase
+from etl.transform.merger import SilverMerger
+
+
+FIXTURES_DIR = Path(apps.get_app_config("etl").path) / "tests" / "fixtures"
 
 
 def make_deduplicator(document_type):
-    return SciELODeduplicator(EtlPipelineConfig.objects.get_enabled_by_name(document_type).to_rules())
+    config = EtlPipelineConfig.objects.get_enabled_by_name(document_type)
+    return SciELODeduplicator(config.to_rules())
 
 
 def make_matcher(document_type):
     matcher = OpenAlexMatcher.__new__(OpenAlexMatcher)
     matcher.rules = EtlPipelineConfig.objects.get_enabled_by_name(document_type).to_rules()
+    matcher.input_openalex_index = "silver_openalex-*"
     return matcher
 
 
 class DocumentRulesTests(EtlTestCase):
+
+    _match_cases = None
+    _silver_articles = None
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls._match_cases = json.loads(
+            (FIXTURES_DIR / "openalex_match_cases.json").read_text()
+        )
+        cls._silver_articles = json.loads(
+            (FIXTURES_DIR / "silver_article_cases.json").read_text()
+        )
+
+    @staticmethod
+    def _search_response(candidates):
+        return {
+            "hits": {
+                "hits": [
+                    {"_id": candidate.get("doc_id"), "_source": candidate}
+                    for candidate in candidates
+                ]
+            }
+        }
+
+    @staticmethod
+    def _openalex_ids(indexed_ids):
+        oa = indexed_ids.get("openalex")
+        if isinstance(oa, list):
+            return oa
+        if oa:
+            return [oa]
+        return []
+
+    @classmethod
+    def _match_openalex_ids(cls, matches):
+        ids = []
+        for silver_doc, _strategy, _confidence, _validation in matches:
+            ids.extend(cls._openalex_ids(silver_doc.to_index_dict().get("ids") or {}))
+        return ids
+
+    @staticmethod
+    def _matched_doc_ids(matches):
+        return [silver_doc.doc_id for silver_doc, *_ in matches]
+
     def test_can_compare_rejects_doc_type_outside_pipeline_config_rules(self):
         rules = EtlPipelineConfig.objects.get_enabled_by_name("book").to_rules()
 
@@ -91,7 +148,9 @@ class DocumentRulesTests(EtlTestCase):
 
     def test_non_article_targets_build_unit_groups_without_deduplicator(self):
         pipeline = OpenSearchETLPipeline.__new__(OpenSearchETLPipeline)
-        pipeline.pipeline_config = EtlPipelineConfig.objects.get_for_source("bronze_scielo_preprint")
+        pipeline.pipeline_config = EtlPipelineConfig.objects.get_for_source(
+            "bronze_scielo_preprint"
+        )
         pipeline.scielo_deduplicator = Mock()
         docs = [{"id": "p1"}, {"id": "p2"}]
 
@@ -102,7 +161,9 @@ class DocumentRulesTests(EtlTestCase):
 
     def test_article_target_delegates_grouping_to_deduplicator(self):
         pipeline = OpenSearchETLPipeline.__new__(OpenSearchETLPipeline)
-        pipeline.pipeline_config = EtlPipelineConfig.objects.get_for_source("bronze_scielo_articles")
+        pipeline.pipeline_config = EtlPipelineConfig.objects.get_for_source(
+            "bronze_scielo_articles"
+        )
         pipeline.scielo_deduplicator = Mock()
         pipeline.scielo_deduplicator.find_duplicates.return_value = {0: [{"id": "a1"}]}
 
@@ -192,17 +253,86 @@ class DocumentRulesTests(EtlTestCase):
         self.assertTrue(is_valid)
         self.assertEqual(confidence, "high")
 
+    def test_fixture_silver_openalex_matcher_returns_filtered_matches(self):
+        for case in self._match_cases:
+            with self.subTest(document_type=case["document_type"]):
+                matcher = make_matcher(case["document_type"])
+                matcher.client = Mock()
+
+                if case["expected"]["strategy"] == "title_year_author":
+                    matcher.client.client.search.side_effect = [
+                        self._search_response([]),
+                        self._search_response(case["silver_openalex"]),
+                    ]
+                else:
+                    matcher.client.client.search.return_value = self._search_response(
+                        case["silver_openalex"]
+                    )
+
+                matches = matcher.find_matches([case["bronze"]], max_candidates=10)
+
+                self.assertEqual(
+                    self._match_openalex_ids(matches),
+                    case["expected"]["openalex_ids"],
+                )
+                self.assertEqual(
+                    {match[1] for match in matches},
+                    {case["expected"]["strategy"]},
+                )
+                self.assertEqual(
+                    {match[2] for match in matches},
+                    {case["expected"]["confidence"]},
+                )
+
+    def test_fixture_silver_openalex_merger_keeps_explicit_trace(self):
+        for case in self._match_cases:
+            with self.subTest(document_type=case["document_type"]):
+                config = EtlPipelineConfig.objects.get_enabled_by_name(
+                    case["document_type"]
+                )
+                input_class = config.input_document_class()
+                input_doc = input_class.from_raw(
+                    case["bronze"],
+                    doc_type_fn=config.document_type_for_payload,
+                )
+                scielo_doc = standardizer_for(input_doc).run(input_doc)
+                openalex_matches = [
+                    (
+                        SilverDocument(**candidate),
+                        case["expected"]["strategy"],
+                        case["expected"]["confidence"],
+                        {},
+                    )
+                    for candidate in case["silver_openalex"]
+                ]
+
+                merged = SilverMerger().merge(
+                    scielo_docs=[scielo_doc],
+                    openalex_matches=openalex_matches,
+                )
+                indexed = merged.to_index_dict()
+
+                self.assertEqual(indexed["oca_data"]["scope"], case["expected"]["merged_scope"])
+                self.assertEqual(
+                    self._openalex_ids(indexed["ids"]),
+                    case["expected"]["openalex_ids"],
+                )
+                self.assertEqual(
+                    [
+                        item["doc_id"]
+                        for item in indexed["oca_data"]["merge_trace"]["openalex_matches"]
+                    ],
+                    case["expected"]["openalex_ids"],
+                )
+
     def test_openalex_doi_match_keeps_language_variants_with_same_normalized_doi(self):
+        silver_docs = list(self._silver_articles.values())
+
         matcher = make_matcher("article")
-        matcher.input_openalex_index = "raw_openalex_works"
         matcher.client = Mock()
         matcher.client.client.search.return_value = {
             "hits": {
-                "hits": [
-                    {"_source": self._openalex_article("https://openalex.org/Wen", "en", "")},
-                    {"_source": self._openalex_article("https://openalex.org/Wpt", "pt", "pt")},
-                    {"_source": self._openalex_article("https://openalex.org/Wes", "es", "es")},
-                ]
+                "hits": [{"_source": doc} for doc in silver_docs]
             }
         }
 
@@ -213,9 +343,26 @@ class DocumentRulesTests(EtlTestCase):
                     "publication_year": 2025,
                     "ids": {"doi": "10.1590/0034-7167.202578SUPL101"},
                     "title_with_lang": [
-                        {"language": "en", "title": "Ethical dilemmas in nursing professionals' work"},
-                        {"language": "pt", "title": "Dilemas éticos no trabalho dos profissionais de enfermagem"},
-                        {"language": "es", "title": "Dilemas éticos en el trabajo de los profesionales de enfermería"},
+                        {
+                            "language": "en",
+                            "title": (
+                                "Ethical dilemmas in nursing professionals' work"
+                            ),
+                        },
+                        {
+                            "language": "pt",
+                            "title": (
+                                "Dilemas éticos no trabalho dos profissionais "
+                                "de enfermagem"
+                            ),
+                        },
+                        {
+                            "language": "es",
+                            "title": (
+                                "Dilemas éticos en el trabajo de los profesionales "
+                                "de enfermería"
+                            ),
+                        },
                     ],
                     "source_issns": ["0034-7167", "1984-0446"],
                 }
@@ -224,18 +371,249 @@ class DocumentRulesTests(EtlTestCase):
         )
 
         self.assertEqual(
-            {match[0]["id"] for match in matches},
-            {
-                "https://openalex.org/Wen",
-                "https://openalex.org/Wpt",
-                "https://openalex.org/Wes",
-            },
+            {match[0].openalex_id for match in matches},
+            {d["openalex_id"] for d in silver_docs},
         )
         self.assertTrue(all(match[1] == "doi" for match in matches))
 
+    def test_silver_candidate_uses_opensearch_id_as_doc_id_fallback(self):
+        matcher = make_matcher("article")
+
+        silver_doc = matcher._silver_document_from_candidate(
+            {
+                "_os_id": "silver-os-id",
+                "type": "article",
+                "publication_year": 2025,
+                "ids": {"openalex": ["https://openalex.org/W1"]},
+            }
+        )
+
+        self.assertEqual(silver_doc.doc_id, "silver-os-id")
+
+    def test_silver_candidate_uses_openalex_id_as_doc_id_fallback(self):
+        matcher = make_matcher("article")
+
+        silver_doc = matcher._silver_document_from_candidate(
+            {
+                "type": "article",
+                "publication_year": 2025,
+                "openalex_id": "https://openalex.org/W1",
+            }
+        )
+
+        self.assertEqual(silver_doc.doc_id, "https://openalex.org/W1")
+
+    def test_all_openalex_ids_reads_oca_data_ids(self):
+        matcher = make_matcher("article")
+
+        openalex_ids = matcher._all_openalex_ids(
+            {
+                "oca_data": {
+                    "openalex": {
+                        "ids": [
+                            "https://openalex.org/W1",
+                            "https://openalex.org/W2",
+                        ]
+                    }
+                }
+            }
+        )
+
+        self.assertEqual(
+            openalex_ids,
+            {"https://openalex.org/W1", "https://openalex.org/W2"},
+        )
+
+    def test_openalex_dedup_prefers_openalex_id_across_silver_sources(self):
+        matcher = make_matcher("article")
+        matches = matcher._deduplicate_openalex_matches(
+            [
+                (
+                    SilverDocument(
+                        doc_id="https://openalex.org/W1",
+                        type="article",
+                        publication_year=2025,
+                        ids={"openalex": ["https://openalex.org/W1"]},
+                    ),
+                    "doi",
+                    "high",
+                    {},
+                ),
+                (
+                    SilverDocument(
+                        doc_id="S0034-71672025000400101",
+                        type="article",
+                        publication_year=2025,
+                        ids={"openalex": ["https://openalex.org/W1"]},
+                    ),
+                    "doi",
+                    "high",
+                    {},
+                ),
+            ]
+        )
+
+        self.assertEqual(
+            self._matched_doc_ids(matches),
+            ["https://openalex.org/W1"],
+        )
+
+    def test_openalex_dedup_uses_oca_data_openalex_ids(self):
+        matcher = make_matcher("article")
+        matches = matcher._deduplicate_openalex_matches(
+            [
+                (
+                    SilverDocument(
+                        doc_id="silver-openalex-doc",
+                        type="article",
+                        publication_year=2025,
+                        oca_data={
+                            "openalex": {"ids": ["https://openalex.org/W1"]}
+                        },
+                    ),
+                    "doi",
+                    "high",
+                    {},
+                ),
+                (
+                    SilverDocument(
+                        doc_id="merged-scielo-doc",
+                        type="article",
+                        publication_year=2025,
+                        oca_data={
+                            "openalex": {"ids": ["https://openalex.org/W1"]}
+                        },
+                    ),
+                    "doi",
+                    "high",
+                    {},
+                ),
+            ]
+        )
+
+        self.assertEqual(self._matched_doc_ids(matches), ["silver-openalex-doc"])
+
+    def test_openalex_dedup_catches_shared_secondary_id(self):
+        matcher = make_matcher("article")
+        matches = matcher._deduplicate_openalex_matches(
+            [
+                (
+                    SilverDocument(
+                        doc_id="merged-openalex-doc",
+                        type="article",
+                        publication_year=2025,
+                        ids={
+                            "openalex": [
+                                "https://openalex.org/W1",
+                                "https://openalex.org/W2",
+                                "https://openalex.org/W3",
+                            ]
+                        },
+                    ),
+                    "doi",
+                    "high",
+                    {},
+                ),
+                (
+                    SilverDocument(
+                        doc_id="partial-openalex-doc",
+                        type="article",
+                        publication_year=2025,
+                        ids={"openalex": ["https://openalex.org/W2"]},
+                    ),
+                    "doi",
+                    "high",
+                    {},
+                ),
+            ]
+        )
+
+        self.assertEqual(self._matched_doc_ids(matches), ["merged-openalex-doc"])
+
+    def test_openalex_dedup_transitive(self):
+        matcher = make_matcher("article")
+        matches = matcher._deduplicate_openalex_matches(
+            [
+                (
+                    SilverDocument(
+                        doc_id="first-openalex-doc",
+                        type="article",
+                        publication_year=2025,
+                        ids={"openalex": ["https://openalex.org/W2"]},
+                    ),
+                    "doi",
+                    "high",
+                    {},
+                ),
+                (
+                    SilverDocument(
+                        doc_id="bridge-openalex-doc",
+                        type="article",
+                        publication_year=2025,
+                        ids={
+                            "openalex": [
+                                "https://openalex.org/W1",
+                                "https://openalex.org/W2",
+                                "https://openalex.org/W3",
+                            ]
+                        },
+                    ),
+                    "doi",
+                    "high",
+                    {},
+                ),
+                (
+                    SilverDocument(
+                        doc_id="third-openalex-doc",
+                        type="article",
+                        publication_year=2025,
+                        ids={"openalex": ["https://openalex.org/W3"]},
+                    ),
+                    "doi",
+                    "high",
+                    {},
+                ),
+            ]
+        )
+
+        self.assertEqual(self._matched_doc_ids(matches), ["first-openalex-doc"])
+
+    def test_openalex_dedup_no_shared_ids_keeps_both(self):
+        matcher = make_matcher("article")
+        matches = matcher._deduplicate_openalex_matches(
+            [
+                (
+                    SilverDocument(
+                        doc_id="first-openalex-doc",
+                        type="article",
+                        publication_year=2025,
+                        ids={"openalex": ["https://openalex.org/W1"]},
+                    ),
+                    "doi",
+                    "high",
+                    {},
+                ),
+                (
+                    SilverDocument(
+                        doc_id="second-openalex-doc",
+                        type="article",
+                        publication_year=2025,
+                        ids={"openalex": ["https://openalex.org/W2"]},
+                    ),
+                    "doi",
+                    "high",
+                    {},
+                ),
+            ]
+        )
+
+        self.assertEqual(
+            self._matched_doc_ids(matches),
+            ["first-openalex-doc", "second-openalex-doc"],
+        )
+
     def test_openalex_doi_search_uses_exact_or_prefix_queries(self):
         matcher = make_matcher("article")
-        matcher.input_openalex_index = "raw_openalex_works"
         matcher.client = Mock()
         matcher.client.client.search.return_value = {"hits": {"hits": []}}
 
@@ -257,24 +635,29 @@ class DocumentRulesTests(EtlTestCase):
             body["query"]["bool"]["filter"],
         )
         self.assertIn(
-            {"prefix": {"doi.keyword": "https://doi.org/10.1590/0034-7167.202578supl101"}},
+            {
+                "prefix": {
+                    "ids.doi": (
+                        "https://doi.org/10.1590/0034-7167.202578supl101"
+                    )
+                }
+            },
             doi_filter["should"],
         )
         self.assertIn(
-            {"term": {"doi.keyword": "10.1590/0034-7167.202578supl101"}},
+            {"term": {"ids.doi": "10.1590/0034-7167.202578supl101"}},
             doi_filter["should"],
         )
 
     def test_openalex_title_strategy_runs_when_doi_lookup_has_no_match(self):
         matcher = make_matcher("article")
-        matcher.input_openalex_index = "raw_openalex_works"
         matcher.client = Mock()
         matcher.client.client.search.side_effect = [
             {"hits": {"hits": []}},
             {
                 "hits": {
                     "hits": [
-                        {"_source": self._openalex_article("https://openalex.org/W1", "en", "")},
+                        {"_source": self._silver_articles["en"]},
                     ]
                 }
             },
@@ -299,7 +682,6 @@ class DocumentRulesTests(EtlTestCase):
 
     def test_openalex_isbn_search_only_uses_bibliographic_isbn_fields(self):
         matcher = make_matcher("book")
-        matcher.input_openalex_index = "raw_openalex_works"
         matcher.client = Mock()
         matcher.client.client.search.return_value = {"hits": {"hits": []}}
 
@@ -311,81 +693,70 @@ class DocumentRulesTests(EtlTestCase):
         body = matcher.client.client.search.call_args.kwargs["body"]
         self.assertNotIn("issn", str(body).lower())
         self.assertIn(
-            {"terms": {"ids.isbn.keyword": ["9786500000001"]}},
+            {"terms": {"ids.isbn": ["9786500000001"]}},
             body["query"]["bool"]["should"],
         )
         self.assertIn(
-            {"terms": {"biblio.isbns.keyword": ["9786500000001"]}},
+            {"terms": {"parent_book.ids.isbn": ["9786500000001"]}},
+            body["query"]["bool"]["should"],
+        )
+        self.assertIn(
+            {"terms": {"biblio.isbns": ["9786500000001"]}},
             body["query"]["bool"]["should"],
         )
 
-    def test_openalex_title_search_uses_source_issn_constraint(self):
+    def test_openalex_title_search_respects_source_issn_field_only(self):
         matcher = make_matcher("article")
-        matcher.input_openalex_index = "raw_openalex_works"
         matcher.client = Mock()
         matcher.client.client.search.return_value = {"hits": {"hits": []}}
 
-        matcher._search_openalex_by_title_year(
-            {
-                "publication_year": 2025,
-                "title": "Ethical dilemmas in nursing professionals' work",
-                "source_issns": ["0034-7167", "1984-0446"],
-            },
-        )
-
-        body = matcher.client.client.search.call_args.kwargs["body"]
-        self.assertNotIn("isbn", str(body).lower())
-        self.assertIn(
-            {
-                "match": {
-                    "title": {
-                        "query": "Ethical dilemmas in nursing professionals' work",
-                        "minimum_should_match": "90%",
-                        "fuzziness": "AUTO",
-                    }
+        cases = [
+            ("source_issns", ["0034-7167", "1984-0446"], True),
+            ("journal_issns", ["0034-7167", "1984-0446"], False),
+        ]
+        for field, issns, expect_should in cases:
+            with self.subTest(issn_field=field):
+                scielo_doc = {
+                    "publication_year": 2025,
+                    "title": "Ethical dilemmas in nursing professionals' work",
+                    field: issns[:],
                 }
-            },
-            body["query"]["bool"]["must"],
-        )
-        self.assertEqual(
-            body["query"]["bool"]["should"],
-            [
-                {"terms": {"source.issn.keyword": ["0034-7167", "1984-0446"]}},
-                {"terms": {"source.issns.keyword": ["0034-7167", "1984-0446"]}},
-                {"terms": {"primary_location.source.issn.keyword": ["0034-7167", "1984-0446"]}},
-                {"terms": {"primary_location.source.issns.keyword": ["0034-7167", "1984-0446"]}},
-                {"terms": {"locations.source.issn.keyword": ["0034-7167", "1984-0446"]}},
-                {"terms": {"locations.source.issns.keyword": ["0034-7167", "1984-0446"]}},
-            ],
-        )
-        self.assertEqual(body["query"]["bool"]["minimum_should_match"], 1)
+                matcher.client.client.search.reset_mock()
+                matcher._search_openalex_by_title_year(scielo_doc)
 
-    def test_openalex_title_search_ignores_non_standard_scielo_issn_fields(self):
-        matcher = make_matcher("article")
-        matcher.input_openalex_index = "raw_openalex_works"
-        matcher.client = Mock()
-        matcher.client.client.search.return_value = {"hits": {"hits": []}}
+                body = matcher.client.client.search.call_args.kwargs["body"]
 
-        matcher._search_openalex_by_title_year(
-            {
-                "publication_year": 2025,
-                "title": "Ethical dilemmas in nursing professionals' work",
-                "journal_issns": ["0034-7167", "1984-0446"],
-            },
-        )
+                self.assertNotIn("isbn", str(body).lower())
+                self.assertIn(
+                    {
+                        "match": {
+                            "title": {
+                                "query": "Ethical dilemmas in nursing professionals' work",
+                                "minimum_should_match": "90%",
+                                "fuzziness": "AUTO",
+                            }
+                        }
+                    },
+                    body["query"]["bool"]["must"],
+                )
 
-        body = matcher.client.client.search.call_args.kwargs["body"]
-        self.assertNotIn("should", body["query"]["bool"])
-        self.assertNotIn("minimum_should_match", body["query"]["bool"])
+                if expect_should:
+                    self.assertEqual(
+                        body["query"]["bool"]["should"],
+                        [{"terms": {"source.issns": issns}}],
+                    )
+                    self.assertEqual(body["query"]["bool"]["minimum_should_match"], 1)
+                else:
+                    self.assertNotIn("should", body["query"]["bool"])
+                    self.assertNotIn("minimum_should_match", body["query"]["bool"])
 
     def test_openalex_title_strategy_returns_validated_issn_match(self):
         matcher = make_matcher("article")
-        matcher.input_openalex_index = "raw_openalex_works"
         matcher.client = Mock()
         matcher.client.client.search.return_value = {
             "hits": {
                 "hits": [
-                    {"_source": self._openalex_article("https://openalex.org/W1", "en", "")},
+                    {"_source": self._silver_articles["en"]},
                 ]
             }
         }
@@ -408,12 +779,11 @@ class DocumentRulesTests(EtlTestCase):
 
     def test_openalex_title_strategy_rejects_low_title_similarity(self):
         matcher = make_matcher("article")
-        matcher.input_openalex_index = "raw_openalex_works"
         matcher.client = Mock()
         matcher.client.client.search.return_value = {
             "hits": {
                 "hits": [
-                    {"_source": self._openalex_article("https://openalex.org/W1", "en", "")},
+                    {"_source": self._silver_articles["en"]},
                 ]
             }
         }
@@ -434,12 +804,11 @@ class DocumentRulesTests(EtlTestCase):
 
     def test_openalex_issn_is_not_an_article_match_strategy(self):
         matcher = make_matcher("article")
-        matcher.input_openalex_index = "raw_openalex_works"
         matcher.client = Mock()
         matcher.client.client.search.return_value = {
             "hits": {
                 "hits": [
-                    {"_source": self._openalex_article("https://openalex.org/W1", "en", "")},
+                    {"_source": self._silver_articles["en"]},
                 ]
             }
         }
@@ -458,47 +827,36 @@ class DocumentRulesTests(EtlTestCase):
         self.assertEqual(matches, [])
         matcher.client.client.search.assert_not_called()
 
-    def test_openalex_match_skips_year_outside_configured_raw_range(self):
+    def test_openalex_match_respects_year_range_boundary(self):
         matcher = make_matcher("article")
-        matcher.input_openalex_index = "raw_openalex_works"
-        matcher.client = Mock()
-
-        matches = matcher.find_matches(
-            [
-                {
-                    "type": "article",
-                    "publication_year": 2017,
-                    "ids": {"doi": "10.1590/0034-7167.202578SUPL101"},
-                }
-            ],
-            max_candidates=3,
-        )
-
-        self.assertEqual(matches, [])
-        matcher.client.client.search.assert_not_called()
-
-    def test_openalex_match_keeps_year_adjacent_to_configured_raw_range(self):
-        matcher = make_matcher("article")
-        matcher.input_openalex_index = "raw_openalex_works"
         matcher.client = Mock()
         matcher.client.client.search.return_value = {"hits": {"hits": []}}
 
-        matcher.find_matches(
-            [
-                {
-                    "type": "article",
-                    "publication_year": 2018,
-                    "ids": {"doi": "10.1590/0034-7167.202578SUPL101"},
-                }
-            ],
-            max_candidates=3,
-        )
-
-        matcher.client.client.search.assert_called_once()
+        cases = [
+            (2017, False),
+            (2018, True),
+        ]
+        for year, expect_search in cases:
+            with self.subTest(year=year):
+                matcher.client.client.search.reset_mock()
+                matches = matcher.find_matches(
+                    [
+                        {
+                            "type": "article",
+                            "publication_year": year,
+                            "ids": {"doi": "10.1590/0034-7167.202578SUPL101"},
+                        }
+                    ],
+                    max_candidates=3,
+                )
+                if expect_search:
+                    matcher.client.client.search.assert_called_once()
+                else:
+                    self.assertEqual(matches, [])
+                    matcher.client.client.search.assert_not_called()
 
     def test_openalex_match_skips_missing_scielo_publication_year(self):
         matcher = make_matcher("article")
-        matcher.input_openalex_index = "raw_openalex_works"
         matcher.client = Mock()
 
         matches = matcher.find_matches(
@@ -513,23 +871,3 @@ class DocumentRulesTests(EtlTestCase):
 
         self.assertEqual(matches, [])
         matcher.client.client.search.assert_not_called()
-
-    def _openalex_article(self, openalex_id, language, doi_suffix):
-        titles = {
-            "en": "Ethical dilemmas in nursing professionals' work",
-            "pt": "Dilemas éticos no trabalho dos profissionais de enfermagem",
-            "es": "Dilemas éticos en el trabajo de los profesionales de enfermería",
-        }
-        return {
-            "id": openalex_id,
-            "language": language,
-            "doi": f"https://doi.org/10.1590/0034-7167.202578supl101{doi_suffix}",
-            "title": titles[language],
-            "publication_year": 2025,
-            "primary_location": {
-                "source": {
-                    "issn": ["0034-7167", "1984-0446"],
-                    "display_name": "Revista Brasileira de Enfermagem",
-                }
-            },
-        }
