@@ -4,6 +4,7 @@ import logging
 from typing import Any, Dict, List, Tuple
 
 from etl.client import OpenSearchClient
+from etl.documents import SilverDocument
 from etl.transform.normalizers import normalize_doi, normalize_text
 from etl.deduplicator.helpers import (
     calculate_similarity,
@@ -27,7 +28,7 @@ class OpenAlexMatcher:
         opensearch_host: str | None = None,
         opensearch_port: int | None = None,
         opensearch_url: str | None = None,
-        input_openalex_index: str = "raw_openalex_works",
+        input_openalex_index: str = "silver_openalex-*",
         rules: dict | None = None,
     ):
         if rules is None:
@@ -41,7 +42,7 @@ class OpenAlexMatcher:
         self,
         scielo_group: List[Dict[str, Any]],
         max_candidates: int = 10,
-    ) -> List[Tuple[Dict[str, Any], str, float, Dict[str, Any]]]:
+    ):
         if not scielo_group:
             return []
 
@@ -80,7 +81,8 @@ class OpenAlexMatcher:
 
             is_valid, confidence, validation = self._validate_openalex_match(primary, candidate)
             if is_valid:
-                matches.append((candidate, "doi", confidence, validation))
+                silver_candidate = self._silver_document_from_candidate(candidate)
+                matches.append((silver_candidate, "doi", confidence, validation))
 
         return matches
 
@@ -93,7 +95,8 @@ class OpenAlexMatcher:
         for candidate in self._search_openalex_by_isbn(isbns, primary)[:max_candidates]:
             is_valid, confidence, validation = self._validate_openalex_match(primary, candidate)
             if is_valid:
-                matches.append((candidate, "isbn", confidence, validation))
+                silver_candidate = self._silver_document_from_candidate(candidate)
+                matches.append((silver_candidate, "isbn", confidence, validation))
         return matches
 
     def _try_openalex_by_title(self, primary: dict, max_candidates: int) -> list:
@@ -108,7 +111,8 @@ class OpenAlexMatcher:
                 use_strict_validation=True,
             )
             if is_valid:
-                matches.append((candidate, "title_year_author", confidence, validation))
+                silver_candidate = self._silver_document_from_candidate(candidate)
+                matches.append((silver_candidate, "title_year_author", confidence, validation))
         return matches
 
     def _deduplicate_openalex_matches(self, matches: list) -> list:
@@ -117,13 +121,45 @@ class OpenAlexMatcher:
 
         seen = set()
         deduped = []
-        for match in matches:
-            candidate_id = match[0].get("id") or match[0].get("openalex_id")
-            if not candidate_id or candidate_id not in seen:
-                if candidate_id:
-                    seen.add(candidate_id)
-                deduped.append(match)
+
+        for silver_doc, _strategy, _confidence, _validation in matches:
+            all_ids = self._all_openalex_ids(silver_doc.to_index_dict())
+
+            if not all_ids and silver_doc.doc_id:
+                all_ids = {silver_doc.doc_id}
+
+            is_duplicate = bool(all_ids and not all_ids.isdisjoint(seen))
+
+            if all_ids:
+                seen.update(all_ids)
+
+            if not is_duplicate:
+                deduped.append((silver_doc, _strategy, _confidence, _validation))
+
         return deduped
+
+    def _silver_document_from_candidate(self, candidate):
+        data = {
+            key: value
+            for key, value in candidate.items()
+            if key in SilverDocument.__dataclass_fields__
+        }
+
+        if not data.get("doc_id"):
+            data["doc_id"] = (
+                candidate.get("_os_id")
+                or candidate.get("openalex_id")
+            )
+
+        if not data.get("type"):
+            data["type"] = candidate.get("document_type") or "article"
+
+        if not data.get("doc_id"):
+            raise ValueError(
+                "Cannot build SilverDocument from OpenAlex candidate without doc_id"
+            )
+
+        return SilverDocument(**data)
 
     def _can_search_openalex(self, scielo_doc: dict) -> bool:
         year = self._publication_year(scielo_doc)
@@ -170,6 +206,20 @@ class OpenAlexMatcher:
         scielo_doc: dict[str, Any],
     ) -> dict[str, Any]:
         bool_query = query.setdefault("bool", {})
+
+        bool_query.setdefault("filter", []).append(
+            {
+                "bool": {
+                    "should": [
+                        {"exists": {"field": "ids.openalex"}},
+                        {"exists": {"field": "openalex_id"}},
+                        {"exists": {"field": "oca_data.openalex.ids"}},
+                    ],
+                    "minimum_should_match": 1,
+                }
+            }
+        )
+
         query_rules = self.rules.get("openalex_query") or {}
 
         if query_rules.get("exclude_is_xpac"):
@@ -214,7 +264,7 @@ class OpenAlexMatcher:
                 index=self.input_openalex_index,
                 body={"query": query, "size": size},
             )
-            return [hit["_source"] for hit in response["hits"]["hits"]]
+            return [self._hit_source(hit) for hit in response["hits"]["hits"]]
         except Exception as exc:
             logger.error("Error searching OpenAlex by DOI: %s", exc)
             return []
@@ -227,7 +277,8 @@ class OpenAlexMatcher:
             f"https://dx.doi.org/{normalized_doi}",
             f"http://dx.doi.org/{normalized_doi}",
         ]
-        fields = ["doi.keyword", "ids.doi.keyword"]
+
+        fields = ["ids.doi", "ids.doi_with_lang.doi"]
 
         queries: list[dict[str, Any]] = []
         for field in fields:
@@ -245,12 +296,11 @@ class OpenAlexMatcher:
         query = {
             "bool": {
                 "should": [
-                    {"terms": {"ids.isbn.keyword": isbns}},
-                    {"terms": {"ids.isbns.keyword": isbns}},
-                    {"terms": {"ids.eisbn.keyword": isbns}},
-                    {"terms": {"ids.eisbns.keyword": isbns}},
-                    {"terms": {"biblio.isbn.keyword": isbns}},
-                    {"terms": {"biblio.isbns.keyword": isbns}},
+                    {"terms": {"ids.isbn": isbns}},
+                    {"terms": {"parent_book.ids.isbn": isbns}},
+                    {"terms": {"parent_book.ids.eisbn": isbns}},
+                    {"terms": {"biblio.isbn": isbns}},
+                    {"terms": {"biblio.isbns": isbns}},
                 ],
                 "minimum_should_match": 1,
             }
@@ -262,7 +312,7 @@ class OpenAlexMatcher:
                 index=self.input_openalex_index,
                 body={"query": query, "size": size},
             )
-            return [hit["_source"] for hit in response["hits"]["hits"]]
+            return [self._hit_source(hit) for hit in response["hits"]["hits"]]
         except Exception as exc:
             logger.error("Error searching OpenAlex by ISBN: %s", exc)
             return []
@@ -303,20 +353,46 @@ class OpenAlexMatcher:
                 index=self.input_openalex_index,
                 body={"query": query, "size": size},
             )
-            return [hit["_source"] for hit in response["hits"]["hits"]]
+            return [self._hit_source(hit) for hit in response["hits"]["hits"]]
         except Exception as exc:
             logger.error("Error searching OpenAlex by title: %s", exc)
             return []
 
     def _source_issn_queries(self, issns: list[str]) -> list[dict[str, Any]]:
         return [
-            {"terms": {"source.issn.keyword": issns}},
-            {"terms": {"source.issns.keyword": issns}},
-            {"terms": {"primary_location.source.issn.keyword": issns}},
-            {"terms": {"primary_location.source.issns.keyword": issns}},
-            {"terms": {"locations.source.issn.keyword": issns}},
-            {"terms": {"locations.source.issns.keyword": issns}},
+            {"terms": {"source.issns": issns}},
         ]
+
+    def _hit_source(self, hit):
+        source = dict(hit.get("_source") or {})
+
+        if hit.get("_id") and not source.get("_os_id"):
+            source["_os_id"] = hit["_id"]
+
+        return source
+
+    def _all_openalex_ids(self, candidate: dict) -> set[str]:
+        openalex_ids = set()
+
+        if candidate.get("openalex_id"):
+            openalex_ids.add(candidate["openalex_id"])
+
+        ids = candidate.get("ids") if isinstance(candidate.get("ids"), dict) else {}
+        oa_ids = ids.get("openalex")
+
+        if isinstance(oa_ids, list):
+            openalex_ids.update(value for value in oa_ids if value)
+        elif oa_ids:
+            openalex_ids.add(oa_ids)
+
+        oca_ids = ((candidate.get("oca_data") or {}).get("openalex") or {}).get("ids")
+
+        if isinstance(oca_ids, list):
+            openalex_ids.update(value for value in oca_ids if value)
+        elif oca_ids:
+            openalex_ids.add(oca_ids)
+
+        return openalex_ids
 
     def _validate_openalex_match(
         self,

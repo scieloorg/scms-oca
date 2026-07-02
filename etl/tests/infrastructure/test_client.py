@@ -91,7 +91,7 @@ class OpenSearchClientTests(SimpleTestCase):
         mock_client.indices.rollover.assert_called_once_with(
             alias="silver_write",
             body={
-                "conditions": {"max_size": "10gb", "max_docs": 500},
+                "conditions": {"max_size": "10gb"},
                 "settings": {"number_of_shards": 1},
                 "mappings": {"dynamic": "strict"},
             },

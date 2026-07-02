@@ -344,7 +344,7 @@ class SilverMerger:
             if oa_data.get("content_url_with_lang"):
                 openalex_content_url_with_lang.extend(oa_data["content_url_with_lang"])
             
-            if oa_data.get("content_urls"):
+            if oa_data.get("content_url"):
                 all_content_urls.extend(oa_data["content_url"])
             
             if openalex_is_open_access is None and oa_data.get("is_open_access") is not None:

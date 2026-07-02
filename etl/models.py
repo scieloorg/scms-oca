@@ -160,7 +160,7 @@ class EtlPipelineConfig(models.Model):
     deduplicate_scielo = models.BooleanField(default=False)
     openalex_index = models.CharField(
         max_length=255,
-        default=settings.ETL_INPUT_OPENALEX_WORKS,
+        default=settings.ETL_OPENALEX_MATCH_INDEX,
     )
     rules = models.JSONField(default=dict, blank=True)
 
@@ -200,7 +200,7 @@ class EtlPipelineConfig(models.Model):
         return normalize_document_type_for_etl(raw_type)
 
     def openalex_index_for(self, override: str | None = None) -> str:
-        return override or self.openalex_index or settings.ETL_INPUT_OPENALEX_WORKS
+        return override or self.openalex_index or settings.ETL_OPENALEX_MATCH_INDEX
 
     def input_document_class(self):
         input_document_classes = {
