@@ -77,3 +77,43 @@ class ScopeBreakdownLegendTests(SimpleTestCase):
             }
         }
 
+    def test_english_scope_legend_uses_display_labels(self):
+        activate("en")
+
+        data = MetricResultBuilder(self.data_source, self.metric_group).build_from_response(
+            self.openalex_scielo_response
+        )
+        adapted = MetricPresentation(self.data_source, self.metric_group).adapt_data(data, {"enabled": False})
+        series_names = [series["name"] for series in adapted["charts"][0]["series"]]
+
+        self.assertEqual(series_names, ["OpenAlex", "SciELO"])
+
+    def test_relative_scope_legend_uses_display_labels(self):
+        activate("en")
+
+        data = MetricResultBuilder(self.data_source, self.metric_group).build_from_response(
+            self.openalex_scielo_response
+        )
+        relative_metrics = {
+            "enabled": True,
+            "series": [
+                {
+                    "name": "openalex (Documentos)",
+                    "breakdown_key": "openalex",
+                    "data": [50],
+                    "type": "document_count",
+                    "metric_key": "document_count",
+                },
+                {
+                    "name": "scielo (Documentos)",
+                    "breakdown_key": "scielo",
+                    "data": [25],
+                    "type": "document_count",
+                    "metric_key": "document_count",
+                },
+            ],
+        }
+        adapted = MetricPresentation(self.data_source, self.metric_group).adapt_data(data, relative_metrics)
+        series_names = [series["name"] for series in adapted["charts"][1]["series"]]
+
+        self.assertEqual(series_names, ["OpenAlex", "SciELO"])
