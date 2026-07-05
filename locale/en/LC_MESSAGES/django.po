@@ -3726,3 +3726,24 @@ msgstr "Breakdown Variable"
 
 msgid "Coverage"
 msgstr "Coverage"
+
+msgid "All fields"
+msgstr "All fields"
+
+msgid "Subject"
+msgstr "Subject"
+
+msgid "Author"
+msgstr "Author"
+
+msgid "Identifier"
+msgstr "Identifier"
+
+msgid "Keyword"
+msgstr "Keyword"
+
+msgid "Abstract"
+msgstr "Abstract"
+
+msgid "Organization"
+msgstr "Organization"

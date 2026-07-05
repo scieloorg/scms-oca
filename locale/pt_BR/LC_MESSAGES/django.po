@@ -3740,3 +3740,24 @@ msgstr "Variável de Detalhamento"
 
 msgid "Coverage"
 msgstr "Cobertura"
+
+msgid "All fields"
+msgstr "Todos os campos"
+
+msgid "Subject"
+msgstr "Assunto"
+
+msgid "Author"
+msgstr "Autor"
+
+msgid "Identifier"
+msgstr "Identificador"
+
+msgid "Keyword"
+msgstr "Palavra-chave"
+
+msgid "Abstract"
+msgstr "Resumo"
+
+msgid "Organization"
+msgstr "Organização"
