@@ -140,7 +140,7 @@ class ResolvedField:
         return async_endpoint or ""
 
     @property
-    def searchable(self):
+    def supports_option_lookup(self):
         return self.widget_name == "lookup" or bool(self.async_endpoint)
 
     @property
@@ -236,7 +236,7 @@ class ResolvedField:
                 "group_label": group_label,
                 "group_order": group_meta.get("order", 999),
                 "resolved_widget": self.widget_name,
-                "searchable": self.searchable,
+                "supports_option_lookup": self.supports_option_lookup,
                 "async_endpoint": self.async_endpoint,
                 "preload_options": self.preload_options,
                 "dependencies": list(self.dependencies),

@@ -64,13 +64,16 @@ def _field_is_active(*, widget, value="", range_start_value="", range_end_value=
     return any(option.get("selected") for option in (options or []))
 
 
-def _field_has_visible_content(*, widget, options=None, is_active=False, searchable=False, async_endpoint=""):
+def _field_has_visible_content(*, widget, options=None, is_active=False, supports_option_lookup=False, async_endpoint=""):
     if widget in {"range", "text", "number", "year"}:
         return True
+
     if is_active:
         return True
+
     if widget == "lookup":
-        return bool(async_endpoint or searchable or options)
+        return bool(async_endpoint or supports_option_lookup or options)
+
     return bool(options)
 
 
@@ -292,7 +295,7 @@ def build_form_field_definition(field, applied_filters=None, options_by_field=No
     default_range_value = default_value if isinstance(default_value, dict) else {}
     multiple_selection = field.allows_multiple_selection
     support_query_operator = field.supports_query_operator
-    searchable = field.searchable
+    supports_option_lookup = field.supports_option_lookup
     async_endpoint = field.async_endpoint
     preload_options = field.preload_options
     dependencies = list(field.dependencies)
@@ -347,7 +350,7 @@ def build_form_field_definition(field, applied_filters=None, options_by_field=No
         "group": group_meta,
         "multiple_selection": multiple_selection,
         "support_query_operator": support_query_operator,
-        "searchable": searchable,
+        "supports_option_lookup": supports_option_lookup,
         "async_endpoint": async_endpoint,
         "preload_options": preload_options,
         "dependencies": dependencies,
@@ -361,7 +364,7 @@ def build_form_field_definition(field, applied_filters=None, options_by_field=No
             widget=widget,
             options=options,
             is_active=is_active,
-            searchable=searchable,
+            supports_option_lookup=supports_option_lookup,
             async_endpoint=async_endpoint,
         ),
         "operator_mode": (
