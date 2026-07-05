@@ -198,8 +198,9 @@ def get_mapped_filters(filters, field_settings):
     handled_fields = set()
 
     for field_name, field_info in field_settings.items():
-        if field_info.get("kind") == "control":
+        if field_info.get("kind") != "index":
             continue
+
         mapped_filter, transformed_fields = _map_transformed_filter(field_name, field_info, filters)
         handled_fields.update(transformed_fields)
         if mapped_filter:
@@ -212,8 +213,9 @@ def get_mapped_filters(filters, field_settings):
         if key not in field_settings:
             continue
         field_config = field_settings[key]
-        if field_config.get("kind") == "control":
+        if field_config.get("kind") != "index":
             continue
+
         real_field_name = field_config.get("index_field_name")
         if not real_field_name or value in (None, "", []):
             continue

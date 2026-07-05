@@ -541,6 +541,7 @@ class DataSource(models.Model):
                 "display_transform": (cfg.get("settings") or {}).get("display_transform"),
             }
             for field_name, cfg in self.fields_schema.items()
+            if cfg.get("kind") != "search"
             if (cfg.get("filter") or {}).get("transform")
             or (cfg.get("settings") or {}).get("display_transform")
         }
@@ -549,7 +550,7 @@ class DataSource(models.Model):
         return {
             field.index_field_name: field.field_name
             for field in self.get_ordered_fields(form_key=form_key)
-            if field.index_field_name
+            if field.kind != "search" and field.index_field_name
         }
 
     @classmethod

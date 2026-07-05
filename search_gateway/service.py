@@ -181,7 +181,7 @@ class SearchGatewayService:
         return {
             field_name: field_info
             for field_name, field_info in field_settings.items()
-            if field_info.get("kind") != "control"
+            if field_info.get("kind") == "index"
         }
 
     @staticmethod
