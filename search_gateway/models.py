@@ -144,6 +144,22 @@ class ResolvedField:
         return self.widget_name == "lookup" or bool(self.async_endpoint)
 
     @property
+    def field_search_enabled(self):
+        return self.kind == "search" and bool(self.ui_settings.get("field_search_enabled"))
+
+    @property
+    def field_search_order(self):
+        configured_order = self.ui_settings.get("field_search_order")
+
+        if configured_order in (None, ""):
+            return 999
+
+        try:
+            return int(configured_order)
+        except (TypeError, ValueError):
+            return 999
+
+    @property
     def help_text(self):
         return self.ui_settings.get("help_text", "")
 
@@ -363,6 +379,47 @@ class DataSource(models.Model):
     @property
     def field_settings_dict(self):
         return self.fields_schema
+
+    def _iter_search_fields(self):
+        fields = [
+            field
+            for field in self.get_ordered_fields()
+            if field.field_search_enabled and field.index_field_name
+        ]
+        return sorted(
+            fields,
+            key=lambda field: (
+                field.field_search_order,
+                field.label,
+                field.field_name,
+            ),
+        )
+
+    def get_searchable_fields(self):
+        options = [
+            (field.field_name, gettext(field.label))
+            for field in self._iter_search_fields()
+        ]
+
+        if not any(field_name == "all" for field_name, _label in options):
+            options.insert(0, ("all", gettext("Todos os campos")))
+
+        return options
+
+    def get_search_field_mapping(self):
+        mapping = {
+            field.field_name: [field.index_field_name]
+            for field in self._iter_search_fields()
+        }
+
+        if "all" not in mapping:
+            mapping["all"] = list(dict.fromkeys(
+                field_name
+                for field_names in mapping.values()
+                for field_name in field_names
+            ))
+
+        return mapping
 
     @staticmethod
     def _normalize_form_field_item(item):
