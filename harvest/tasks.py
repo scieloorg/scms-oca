@@ -11,6 +11,7 @@ from harvest.global_metrics.apply import (
 from harvest.global_metrics.process import (
     process_global_metrics_upload_file as run_process_global_metrics_upload_file,
 )
+from harvest.harvests.harvest_articles import harvest_articles
 from harvest.harvests.harvest_books import (
     harvest_books,
     harvest_single_book,
@@ -22,6 +23,7 @@ from harvest.indexing import index_harvested_instance, index_harvested_raw_data
 
 from .bronze_transform import reconcile_missing_bronze_etl
 from .models import (
+    HarvestedArticle,
     HarvestedBooks,
     HarvestedPreprint,
     HarvestedSciELOData,
@@ -39,20 +41,52 @@ ENDPOINT_PREPRINT = getattr(settings, "ENDPOINT_OAI_PMH_PREPRINT", None)
 @celery_app.task(name="Harvest data preprint")
 def harvest_preprint_in_endpoint_oai_pmh(username, user_id=None, reprocess=None, from_date=None, url=None, verify=True):
     user = User.objects.get(username=username)
-    
+
     url = ENDPOINT_PREPRINT
 
     if from_date is None and not reprocess:
         latest_preprint = HarvestedPreprint.get_latest_preprint()
         from_date = latest_preprint.datestamp.date().__str__() if latest_preprint else None
-    
+
     if from_date:
         logging.info(f"Coleta a partir da data {from_date}")
     else:
         logging.info("Coletando todos os registros")
 
-    recs = service_oai_pmh_scythe(url=url, from_date=from_date, verify=verify)    
+    recs = service_oai_pmh_scythe(url=url, from_date=from_date, verify=verify)
     harvest_preprint(recs=recs, user=user)
+
+
+@celery_app.task(name="Harvest SciELO Articles")
+def harvest_scielo_articles(
+    username,
+    user_id=None,
+    limit=100,
+    offset=0,
+    from_date=None,
+    until_date=None,
+    collection=None,
+    reprocess=False,
+):
+    user = User.objects.get(username=username)
+
+    if from_date is None and not reprocess:
+        latest_article = HarvestedArticle.get_latest_article()
+        from_date = latest_article.datestamp.date().__str__() if latest_article else None
+
+    if from_date:
+        logging.info(f"Coleta SciELO Articles a partir da data {from_date}")
+    else:
+        logging.info("Coletando todos os artigos SciELO")
+
+    harvest_articles(
+        user=user,
+        limit=limit,
+        offset=offset,
+        from_date=from_date,
+        until_date=until_date,
+        collection=collection,
+    )
 
 
 @celery_app.task(name="Harvest data SciELO Data")
