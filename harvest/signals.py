@@ -9,7 +9,7 @@ from .indexing import (
     delete_harvested_document,
     index_harvested_instance,
 )
-from .models import HarvestedBooks, HarvestedPreprint, HarvestedSciELOData, IndexStatus
+from .models import HarvestedArticle, HarvestedBooks, HarvestedPreprint, HarvestedSciELOData, IndexStatus
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +45,7 @@ def _should_index_raw_data(instance, created, update_fields):
     if hasattr(instance, "_raw_data_before"):
         if instance._raw_data_before != instance.raw_data:
             return True
-    
+
     if hasattr(instance, "index_status") and instance.index_status in (IndexStatus.PENDING, IndexStatus.FAILED):
         return True
 
@@ -80,6 +80,11 @@ def index_preprint_on_save(sender, instance, created, update_fields=None, **kwar
     _index_if_raw_data_saved(instance, created, update_fields)
 
 
+@receiver(post_save, sender=HarvestedArticle)
+def index_article_on_save(sender, instance, created, update_fields=None, **kwargs):
+    _index_if_raw_data_saved(instance, created, update_fields)
+
+
 @receiver(post_save, sender=HarvestedBooks)
 def index_books_on_save(sender, instance, created, update_fields=None, **kwargs):
     _index_if_raw_data_saved(instance, created, update_fields)
@@ -92,6 +97,11 @@ def index_scielo_data_on_save(sender, instance, created, update_fields=None, **k
 
 @receiver(pre_save, sender=HarvestedPreprint)
 def track_preprint_raw_data(sender, instance, **kwargs):
+    _store_previous_raw_data(instance)
+
+
+@receiver(pre_save, sender=HarvestedArticle)
+def track_article_raw_data(sender, instance, **kwargs):
     _store_previous_raw_data(instance)
 
 
