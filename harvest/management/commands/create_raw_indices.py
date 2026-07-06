@@ -2,12 +2,29 @@ from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 
 from harvest.indexing import index_harvested_raw_data
-from harvest.models import HarvestedBooks, HarvestedPreprint, HarvestedSciELOData
+from harvest.models import HarvestedArticle, HarvestedBooks, HarvestedPreprint, HarvestedSciELOData
 from search_gateway.client import get_opensearch_client
+
+RAW_INDEX_BODY = {
+    "settings": {
+        "number_of_shards": 1,
+        "number_of_replicas": 0,
+    },
+    "mappings": {
+        "properties": {
+            "oca_indexed_at": {"type": "date"},
+            "oca_source_hash": {"type": "text"},
+            "raw_data": {"type": "object", "enabled": False},
+        }
+    },
+}
 
 
 class Command(BaseCommand):
-    help = "Cria os índices raw no OpenSearch para preprint, books e scielo data."
+    help = (
+        "Cria os índices raw no OpenSearch (article, preprint, books, scielo data). "
+        "Use --force --index article para recriar só o índice de artigos."
+    )
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -17,13 +34,14 @@ class Command(BaseCommand):
         )
         parser.add_argument(
             "--index",
-            choices=["preprint", "books", "data", "all"],
+            choices=["article", "preprint", "books", "data", "all"],
             default=None,
             help="Indexa itens raw para o tipo escolhido.",
         )
 
     def _index_items(self, index_choice):
         model_map = {
+            "article": HarvestedArticle,
             "preprint": HarvestedPreprint,
             "books": HarvestedBooks,
             "data": HarvestedSciELOData,
@@ -45,6 +63,9 @@ class Command(BaseCommand):
             raise CommandError("OpenSearch client não configurado.")
 
         indices = {
+            "HarvestedArticle": getattr(
+                settings, "OS_INDEX_RAW_ARTICLE", None
+            ),
             "HarvestedPreprint": getattr(
                 settings, "OS_INDEX_RAW_PREPRINT", None
             ),
@@ -82,18 +103,7 @@ class Command(BaseCommand):
                 )
                 continue
 
-            client.indices.create(
-                index=index_name,
-                body={
-                    "settings": {
-                        "number_of_shards": 1,
-                        "number_of_replicas": 0,
-                    },
-                    "mappings": {
-                        "properties": {"raw_data": {"type": "object", "enabled": False}}
-                    },
-                },
-            )
+            client.indices.create(index=index_name, body=RAW_INDEX_BODY)
             self.stdout.write(
                 self.style.SUCCESS(f"{model_name}: índice criado: {index_name}.")
             )

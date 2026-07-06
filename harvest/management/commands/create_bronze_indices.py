@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 
+from harvest.mapping_bronze_articles import BRONZE_MAPPING as BRONZE_MAPPING_ARTICLES
 from harvest.mapping_bronze_books import BRONZE_MAPPING as BRONZE_MAPPING_BOOKS
 from harvest.mapping_bronze_dataset import BRONZE_MAPPING as BRONZE_MAPPING_DATASET
 from harvest.mapping_bronze_dataverse import BRONZE_MAPPING as BRONZE_MAPPING_DATAVERSE
@@ -15,6 +16,7 @@ class Command(BaseCommand):
         parser.add_argument(
             "--index",
             choices=[
+                "article",
                 "preprint",
                 "books",
                 "dataset",
@@ -30,6 +32,7 @@ class Command(BaseCommand):
             raise CommandError("OpenSearch client não configurado.")
 
         indices = {
+            "article": ("bronze_scielo_articles", BRONZE_MAPPING_ARTICLES),
             "preprint": ("bronze_scielo_preprint", BRONZE_MAPPING_PREPRINT),
             "books": ("bronze_scielo_books", BRONZE_MAPPING_BOOKS),
             "dataset": ("bronze_scielo_dataset", BRONZE_MAPPING_DATASET),
@@ -41,7 +44,9 @@ class Command(BaseCommand):
         }
 
         index_choice = options["index"]
-        self.ensure_index_exists(client=client, index_name=indices[index_choice][0], bronze_mapping=indices[index_choice][1])
+        selected_indices = {index_choice: indices[index_choice]} if index_choice else indices
+        for _name, (index_name, bronze_mapping) in selected_indices.items():
+            self.ensure_index_exists(client=client, index_name=index_name, bronze_mapping=bronze_mapping)
  
     def ensure_index_exists(self, client, index_name, bronze_mapping) -> None:
         """Create destination index with mapping if it doesn't exist."""
