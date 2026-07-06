@@ -25,6 +25,10 @@ OS_INDEX_RAW_BOOK = _env.str(
     "OS_INDEX_RAW_BOOK",
     default="raw_scielo_book",
 )
+OS_INDEX_RAW_ARTICLE = _env.str(
+    "OS_INDEX_RAW_ARTICLE",
+    default="raw_scielo_article",
+)
 OS_INDEX_RAW_SCIELO_DATA_DATASET = _env.str(
     "OS_INDEX_RAW_SCIELO_DATA_DATASET",
     default="raw_scielo_data_dataset",
@@ -39,6 +43,10 @@ OS_INDEX_RAW_SCIELO_DATA = _env.str(
 )
 
 # Harvest books, preprint, and SciELO Data settings
+ARTICLEMETA_BASE_URL = _env(
+    "ARTICLEMETA_BASE_URL",
+    default="https://articlemeta.scielo.org",
+)
 SCIELO_BOOKS_BASE_URL = _env("SCIELO_BOOKS_BASE_URL", default=None)
 SITE_SCIELO_DATA = _env("SITE_SCIELO_DATA", default="https://data.scielo.org")
 USER_AGENT = _env(
