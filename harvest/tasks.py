@@ -11,7 +11,10 @@ from harvest.global_metrics.apply import (
 from harvest.global_metrics.process import (
     process_global_metrics_upload_file as run_process_global_metrics_upload_file,
 )
-from harvest.harvests.harvest_articles import harvest_articles
+from harvest.harvests.harvest_articles import (
+    harvest_articles,
+    harvest_single_article_code,
+)
 from harvest.harvests.harvest_books import (
     harvest_books,
     harvest_single_book,
@@ -27,6 +30,7 @@ from .models import (
     HarvestedBooks,
     HarvestedPreprint,
     HarvestedSciELOData,
+    HarvestErrorLogArticle,
     HarvestErrorLogPreprint,
     HarvestStatus,
     IndexStatus,
@@ -205,6 +209,43 @@ def retry_failed_preprints_oai_pmh(username, user_id=None, url=None, verify=True
         harvest_preprint(recs=[rec], user=user)
 
 
+@celery_app.task(name="Retry failed articles")
+def retry_failed_articles(username, user_id=None):
+    user = User.objects.get(username=username)
+    failed_identifiers = set(
+        HarvestedArticle.objects.filter(harvest_status=HarvestStatus.FAILED)
+        .values_list("identifier", flat=True)
+        .iterator()
+    )
+    if not failed_identifiers:
+        logging.info("Sem artigos com falha para reprocessar.")
+        return
+
+    for identifier in failed_identifiers:
+        article = HarvestedArticle.objects.filter(identifier=identifier).first()
+        try:
+            harvest_single_article_code(code=identifier, user=user)
+        except Exception as exc:
+            if article:
+                exc_context = ExceptionContext(
+                    harvest_object=article,
+                    log_model=HarvestErrorLogArticle,
+                    fk_field="article",
+                )
+                exc_context.add_exception(
+                    exception=exc,
+                    field_name="get_article",
+                    context_data={"identifier": identifier},
+                )
+                exc_context.save_to_db()
+                exc_context.mark_status_harvest()
+            logging.warning(
+                "Falha ao buscar artigo %s via ArticleMeta: %s",
+                identifier,
+                exc,
+            )
+
+
 @celery_app.task(name="Retry failed books")
 def retry_failed_books(username, user_id=None, db_name="scielobooks_1a", headers=None):
     failed_books = HarvestedBooks.objects.filter(
@@ -237,6 +278,13 @@ def retry_failed_scielo_data(user_id=None):
 @celery_app.task(name="Reindex failed preprints")
 def reindex_failed_preprints(user_id=None):
     failed = HarvestedPreprint.objects.filter(index_status=IndexStatus.FAILED)
+    for obj in failed.iterator():
+        index_harvested_instance(instance=obj, index_name=obj.index_name)
+
+
+@celery_app.task(name="Reindex failed articles")
+def reindex_failed_articles(user_id=None):
+    failed = HarvestedArticle.objects.filter(index_status=IndexStatus.FAILED)
     for obj in failed.iterator():
         index_harvested_instance(instance=obj, index_name=obj.index_name)
 
@@ -280,6 +328,7 @@ def apply_global_metrics_upload_to_silver(
 @celery_app.task(name="Reconcile harvest pipeline")
 def reconcile_harvest_pipeline(document_type, user_id=None):
     DOCUMENT_TYPE_TO_DOCUMENT_MODEL = {
+        "article": HarvestedArticle,
         "book": HarvestedBooks,
         "data": HarvestedSciELOData,
         "preprint": HarvestedPreprint,
@@ -288,7 +337,7 @@ def reconcile_harvest_pipeline(document_type, user_id=None):
     document_model = DOCUMENT_TYPE_TO_DOCUMENT_MODEL.get(document_type)
     if not document_model:
         logging.error("Reconciliação não foi executada. document_type %s inválido. "
-                      "Valores possíveis são: book, data, preprint.",
+                      "Valores possíveis são: article, book, data, preprint.",
                       document_type)
         return
 
