@@ -39,6 +39,7 @@ class IndexStatus(models.TextChoices):
 class HarvestModelChoice(models.TextChoices):
     """Tipos de modelo de coleta para associar scripts de transformação"""
 
+    ARTICLE = "HarvestedArticle", "Article"
     PREPRINT = "HarvestedPreprint", "Preprint"
     BOOKS = "HarvestedBooks", "Books"
     SCIELO_DATA_DATASET = "HarvestedSciELOData_dataset", "SciELO Data - Dataset"
@@ -302,6 +303,24 @@ class HarvestedPreprint(BaseHarvestedData, ClusterableModel):
         )
         return latest.last_resumption_token if latest else None
 
+
+class HarvestedArticle(BaseHarvestedData, ClusterableModel):
+    """
+    Modelo para dados de artigos SciELO coletados via ArticleMeta.
+    """
+
+    class Meta:
+        verbose_name = _("Dados de artigo SciELO")
+        verbose_name_plural = _("Dados de artigos SciELO")
+
+    @classmethod
+    def get_latest_article(cls):
+        try:
+            return cls.objects.exclude(datestamp__isnull=True).latest("datestamp")
+        except cls.DoesNotExist:
+            return None
+
+
 class HarvestedBooks(BaseHarvestedData, ClusterableModel):
     type_data = models.CharField(
         _("Tipo de data"),
@@ -403,6 +422,12 @@ class BaseHarvestErrorLog(models.Model):
 class HarvestErrorLogPreprint(BaseHarvestErrorLog):
     preprint = ParentalKey(
         HarvestedPreprint, related_name="harvest_error_log", on_delete=models.CASCADE
+    )
+
+
+class HarvestErrorLogArticle(BaseHarvestErrorLog):
+    article = ParentalKey(
+        HarvestedArticle, related_name="harvest_error_log", on_delete=models.CASCADE
     )
 
 
