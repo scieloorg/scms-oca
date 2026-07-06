@@ -14,6 +14,7 @@ from wagtail.snippets.views.snippets import SnippetViewSet, SnippetViewSetGroup
 from .bronze_transform import transform_document
 from .models import (
     GlobalMetricsUploadFile,
+    HarvestedArticle,
     HarvestedBooks,
     HarvestedPreprint,
     HarvestedSciELOData,
@@ -44,6 +45,19 @@ class HarvestedPreprintViewSet(SnippetViewSet):
     model = HarvestedPreprint
     icon = "doc-full"
     menu_label = _("Preprint")
+    add_to_admin_menu = False
+    add_view_class = CommonControlFieldCreateView
+    edit_view_class = CommonControlFieldEditView
+    list_display = ("identifier", "harvest_status", "index_status", "datestamp", "created")
+    search_fields = ("identifier", "source_url")
+    list_filter = ("harvest_status", "index_status")
+    ordering = ("-created",)
+
+
+class HarvestedArticleViewSet(SnippetViewSet):
+    model = HarvestedArticle
+    icon = "doc-full"
+    menu_label = _("Articles")
     add_to_admin_menu = False
     add_view_class = CommonControlFieldCreateView
     edit_view_class = CommonControlFieldEditView
@@ -115,6 +129,7 @@ class HarvestViewSetGroup(SnippetViewSetGroup):
     menu_icon = "download"
     menu_order = 84
     items = (
+        HarvestedArticleViewSet,
         HarvestedPreprintViewSet,
         HarvestedSciELODataViewSet,
         HarvestedBooksViewSet,
