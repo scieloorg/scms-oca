@@ -66,11 +66,10 @@ class MetricPresentation:
                 for metric_def in metric_defs:
                     for s in all_series:
                         if s.get("metric_key") == metric_def.key or s.get("type") == metric_def.key:
-                            raw_name = s["breakdown_key"]
                             display_name = apply_transform(
                                 self.data_source,
                                 computed_data.get("breakdown_variable"),
-                                raw_name,
+                                s.get("breakdown_key", ""),
                             )
                             chart_series.append({
                                 "name": display_name,
@@ -118,11 +117,10 @@ class MetricPresentation:
                     for metric_def in metric_defs:
                         for s in all_rel_series:
                             if s.get("metric_key") == metric_def.key or s.get("type") == metric_def.key:
-                                raw_name = s["breakdown_key"]
                                 display_name = apply_transform(
                                     self.data_source,
                                     computed_data.get("breakdown_variable"),
-                                    raw_name,
+                                    s.get("breakdown_key", ""),
                                 )
                                 rel_series.append({
                                     "name": display_name,
