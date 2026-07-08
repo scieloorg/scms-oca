@@ -109,6 +109,14 @@ def extract_scielo_id(doc: dict[str, Any]) -> str | None:
     return ids.get("scl_preprint_id")
 
 
+def extract_scielo_document_type(doc):
+    raw_document_type = doc.get("document_type") or doc.get("type")
+    if not raw_document_type:
+        return None
+
+    return str(raw_document_type).strip().lower().replace("_", "-")
+
+
 def extract_identifiers(raw_doc: dict[str, Any]) -> dict[str, str | None]:
     identifiers: dict[str, str | None] = {}
 

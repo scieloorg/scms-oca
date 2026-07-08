@@ -7,6 +7,7 @@ from etl.transform.extractors import (
     extract_identifiers,
     extract_isbns,
     extract_issns,
+    extract_scielo_document_type,
     extract_scielo_id,
     extract_source,
     extract_titles,
@@ -47,6 +48,17 @@ class IdentifierExtractorTests(SimpleTestCase):
         self.assertEqual(extract_scielo_id({"scielo_id": "S1"}), "S1")
         self.assertEqual(extract_scielo_id({"pid_v2": "S2"}), "S2")
         self.assertEqual(extract_scielo_id({"ids": {"scl_preprint_id": "P1"}}), "P1")
+
+    def test_extract_scielo_document_type_normalizes_raw_type(self):
+        self.assertEqual(
+            extract_scielo_document_type({"document_type": " Review_Article "}),
+            "review-article",
+        )
+        self.assertEqual(
+            extract_scielo_document_type({"type": "Research_Article"}),
+            "research-article",
+        )
+        self.assertIsNone(extract_scielo_document_type({}))
 
     def test_extract_identifiers_builds_indexed_identifier_shape(self):
         identifiers = extract_identifiers(
