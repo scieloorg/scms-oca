@@ -250,8 +250,13 @@ class EtlPipelineConfig(models.Model):
         return {
             "document_type": normalize_document_type_for_etl(self.default_document_type),
             "scielo_dedup_strategies": list(rules.get("scielo_dedup_strategies", [])),
+            "scielo_dedup_allowed_types": list(
+                rules.get("scielo_dedup_allowed_types") or []
+            ),
             "openalex_match_strategies": list(rules.get("openalex_match_strategies", [])),
             "doi_requires_title_overlap": rules.get("doi_requires_title_overlap", True),
+            "doi_requires_year_match": rules.get("doi_requires_year_match", True),
+            "doi_requires_source_match": rules.get("doi_requires_source_match", True),
             "pid_requires_year_match": rules.get("pid_requires_year_match", True),
             "pid_requires_source_match": rules.get("pid_requires_source_match", False),
             "pid_requires_title_overlap": rules.get("pid_requires_title_overlap", True),
