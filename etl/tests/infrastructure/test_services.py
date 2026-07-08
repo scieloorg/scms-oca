@@ -161,3 +161,26 @@ class IncrementalEtlTests(TestCase):
         item.refresh_from_db()
         self.assertEqual(item.status, EtlStatus.SUCCESS)
         self.assertEqual(result[0]["item_count"], 1)
+
+    @patch("etl.services.log_etl_error")
+    @patch("etl.services.OpenSearchETLPipeline")
+    def test_process_pending_skips_document_type_without_enabled_config(
+        self,
+        pipeline_cls,
+        _log_etl_error,
+    ):
+        item = enqueue_etl_item(
+            source_index="bronze_scielo_articles",
+            external_id="br1",
+            source_payload={"type": "book-review", "publication_year": 2024, "title": "A"},
+        )
+        self.assertEqual(item.document_type, "book-review")
+
+        result = process_pending_items(limit=10)
+
+        item.refresh_from_db()
+        self.assertEqual(item.status, EtlStatus.SKIPPED)
+        self.assertEqual(item.result, EtlResult.SKIPPED)
+        self.assertIsNotNone(item.processed_at)
+        self.assertEqual(result, [])
+        pipeline_cls.return_value.run.assert_not_called()

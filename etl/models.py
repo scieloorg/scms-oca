@@ -82,6 +82,16 @@ class EtlPipelineConfigManager(models.Manager):
     def enabled(self):
         return self.filter(enabled=True).order_by("id")
 
+    def enabled_document_types(self):
+        return tuple(
+            dict.fromkeys(
+                self.enabled().values_list(
+                    "default_document_type",
+                    flat=True,
+                )
+            )
+        )
+
     def get_for_source(self, source_index: str, source_payload: dict | None = None):
         config = self.select_for_source(source_index, source_payload)
         if config:
@@ -198,6 +208,16 @@ class EtlPipelineConfig(models.Model):
         payload = clean_source_payload(source_payload)
         raw_type = payload.get("type") or self.default_document_type
         return normalize_document_type_for_etl(raw_type)
+
+    def can_process_payload(self, source_payload):
+        if not self.infer_document_type_from_payload:
+            return True
+
+        payload_type = self.document_type_for_payload(source_payload)
+        if payload_type == normalize_document_type_for_etl(self.default_document_type):
+            return True
+
+        return self.input_document_kind == "article"
 
     def openalex_index_for(self, override: str | None = None) -> str:
         return override or self.openalex_index or settings.ETL_OPENALEX_MATCH_INDEX

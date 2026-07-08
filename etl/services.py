@@ -12,7 +12,7 @@ from etl.models import EtlItemProcess, EtlPipelineConfig, EtlResult, EtlStatus
 from etl.pipeline import OpenSearchETLPipeline
 from etl.transform.extractors import extract_isbns, extract_publication_year
 from etl.transform.normalizers import normalize_document_type_for_etl
-from harvest.utils import clean_source_payload, source_hash
+from harvest.utils import source_hash
 from search_gateway.opensearch import OpenSearchIndexClient
 from search_gateway.freshness import invalidate_freshness_cache
 
@@ -229,11 +229,26 @@ def process_pending_items(
     if retry_failed:
         statuses.append(EtlStatus.FAILED)
 
+    enabled_document_types = EtlPipelineConfig.objects.enabled_document_types()
+
     with transaction.atomic():
         EtlItemProcess.objects.requeue_stale_processing()
 
+        unmatched = EtlItemProcess.objects.filter(status__in=statuses).exclude(
+            document_type__in=enabled_document_types
+        )
+        if document_type:
+            unmatched = unmatched.filter(document_type=document_type)
+        unmatched.update(
+            status=EtlStatus.SKIPPED,
+            result=EtlResult.SKIPPED,
+            error="No enabled pipeline config for this document type",
+            processed_at=timezone.now(),
+        )
+
         qs = EtlItemProcess.objects.select_for_update(skip_locked=True).filter(
-            status__in=statuses
+            status__in=statuses,
+            document_type__in=enabled_document_types,
         )
         if document_type:
             qs = qs.filter(document_type=document_type)
