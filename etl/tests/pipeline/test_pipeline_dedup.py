@@ -329,19 +329,19 @@ class DocumentRulesTests(EtlTestCase):
             EtlPipelineConfig.objects.get_enabled_by_name("article").to_rules()[
                 "openalex_match_strategies"
             ],
-            ["doi", "title"],
+            ["doi"],
         )
         self.assertEqual(
             EtlPipelineConfig.objects.get_enabled_by_name("book").to_rules()[
                 "openalex_match_strategies"
             ],
-            ["doi", "isbn", "title"],
+            ["doi", "isbn"],
         )
         self.assertEqual(
             EtlPipelineConfig.objects.get_enabled_by_name("book-chapter").to_rules()[
                 "openalex_match_strategies"
             ],
-            ["doi", "isbn", "title"],
+            ["doi", "isbn"],
         )
 
     def test_satellite_article_type_does_not_search_openalex(self):
@@ -368,7 +368,7 @@ class DocumentRulesTests(EtlTestCase):
     def test_non_article_targets_build_unit_groups_without_deduplicator(self):
         pipeline = OpenSearchETLPipeline.__new__(OpenSearchETLPipeline)
         pipeline.pipeline_config = EtlPipelineConfig.objects.get_for_source(
-            "bronze_scielo_preprint"
+            "bronze_scielo_preprints"
         )
         pipeline.scielo_deduplicator = Mock()
         docs = [{"id": "p1"}, {"id": "p2"}]
@@ -479,6 +479,7 @@ class DocumentRulesTests(EtlTestCase):
                 matcher.client = Mock()
 
                 if case["expected"]["strategy"] == "title_year_author":
+                    matcher.rules["openalex_match_strategies"] = ["doi", "title"]
                     matcher.client.client.search.side_effect = [
                         self._search_response([]),
                         self._search_response(case["silver_openalex"]),
@@ -870,6 +871,7 @@ class DocumentRulesTests(EtlTestCase):
 
     def test_openalex_title_strategy_runs_when_doi_lookup_has_no_match(self):
         matcher = make_matcher("article")
+        matcher.rules["openalex_match_strategies"] = ["doi", "title"]
         matcher.client = Mock()
         matcher.client.client.search.side_effect = [
             {"hits": {"hits": []}},
@@ -971,6 +973,7 @@ class DocumentRulesTests(EtlTestCase):
 
     def test_openalex_title_strategy_returns_validated_issn_match(self):
         matcher = make_matcher("article")
+        matcher.rules["openalex_match_strategies"] = ["title"]
         matcher.client = Mock()
         matcher.client.client.search.return_value = {
             "hits": {
@@ -998,6 +1001,7 @@ class DocumentRulesTests(EtlTestCase):
 
     def test_openalex_title_strategy_rejects_low_title_similarity(self):
         matcher = make_matcher("article")
+        matcher.rules["openalex_match_strategies"] = ["title"]
         matcher.client = Mock()
         matcher.client.client.search.return_value = {
             "hits": {

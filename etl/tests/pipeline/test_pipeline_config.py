@@ -162,3 +162,36 @@ class PipelineConfigDocumentTypeTests(TestCase):
         config.rules = {**config.rules, "fuzzy_min_similarity": 0.91}
 
         self.assertEqual(config.to_rules()["fuzzy_min_similarity"], 0.91)
+
+    def test_to_rules_returns_explicit_scielo_dedup_allowed_types(self):
+        config = EtlPipelineConfig(
+            name="article",
+            input_index="bronze_scielo_articles*",
+            input_document_kind="article",
+            default_document_type="article",
+            rules={
+                "scielo_dedup_allowed_types": [
+                    "article",
+                    "research-article",
+                ],
+            },
+        )
+
+        self.assertEqual(
+            config.to_rules()["scielo_dedup_allowed_types"],
+            [
+                "article",
+                "research-article",
+            ],
+        )
+
+    def test_to_rules_does_not_default_scielo_dedup_allowed_types(self):
+        config = EtlPipelineConfig(
+            name="book",
+            input_index="bronze_scielo_books",
+            input_document_kind="book",
+            default_document_type="book",
+            rules={},
+        )
+
+        self.assertEqual(config.to_rules()["scielo_dedup_allowed_types"], [])
