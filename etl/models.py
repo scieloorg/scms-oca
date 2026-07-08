@@ -386,7 +386,7 @@ class EtlItemProcessQuerySet(models.QuerySet):
 class EtlItemProcess(models.Model):
     source_index = models.CharField(max_length=255, db_index=True)
     external_id = models.CharField(max_length=255)
-    document_type = models.CharField(max_length=50, db_index=True)
+    document_type = models.CharField(max_length=50, db_index=True, verbose_name=_("ETL type"))
     publication_year = models.PositiveIntegerField(
         null=True,
         blank=True,
@@ -404,11 +404,11 @@ class EtlItemProcess(models.Model):
         choices=EtlResult.choices,
         blank=True,
     )
-    pid_v2 = models.CharField(max_length=255, blank=True, default="")
-    doi = models.CharField(max_length=500, blank=True, default="")
-    isbn = models.CharField(max_length=255, blank=True, default="")
-    preprint_id = models.CharField(max_length=255, blank=True, default="")
-    dataset_id = models.CharField(max_length=255, blank=True, default="")
+    pid_v2 = models.CharField(max_length=255, blank=True, default="", verbose_name=_("PID V2"))
+    doi = models.CharField(max_length=500, blank=True, default="", verbose_name=_("DOI"))
+    isbn = models.CharField(max_length=255, blank=True, default="", verbose_name=_("ISBN"))
+    preprint_id = models.CharField(max_length=255, blank=True, default="", verbose_name=_("Preprint ID"))
+    dataset_id = models.CharField(max_length=255, blank=True, default="", verbose_name=_("Dataset ID"))
     has_openalex_match = models.BooleanField(default=False)
     has_scielo_dedup = models.BooleanField(default=False)
     scielo_dedup_ids = models.JSONField(default=list, blank=True)
@@ -422,6 +422,7 @@ class EtlItemProcess(models.Model):
     objects = EtlItemProcessQuerySet.as_manager()
 
     class Meta:
+        verbose_name = _("ETL Item Process")
         constraints = [
             models.UniqueConstraint(
                 fields=["source_index", "external_id"],
