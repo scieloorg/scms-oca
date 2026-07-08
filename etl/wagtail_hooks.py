@@ -7,13 +7,11 @@ from wagtail.snippets.views.snippets import SnippetViewSet
 
 from etl.bulk_actions import ResetToPendingBulkAction
 from etl.models import EtlItemProcess, EtlPipelineConfig
+from etl.presentation import format_document_type_label
 from etl.views import (
-    DOCUMENT_TYPE_LABELS,
     retry_failed_by_type_view,
-    retry_failed_view,
     summary_view,
     trigger_pending_by_type_view,
-    trigger_pending_view,
 )
 
 
@@ -60,6 +58,8 @@ class EtlItemProcessViewSet(SnippetViewSet):
 
 register_snippet(EtlItemProcessViewSet)
 
+etl_item_process_viewset = EtlItemProcessViewSet()
+
 
 class EtlPipelineConfigViewSet(SnippetViewSet):
     model = EtlPipelineConfig
@@ -84,7 +84,7 @@ register_snippet(EtlPipelineConfigViewSet)
 
 class EtlMenuItem(MenuItem):
     def is_shown(self, request):
-        return EtlItemProcessViewSet().permission_policy.user_has_any_permission(
+        return etl_item_process_viewset.permission_policy.user_has_any_permission(
             request.user,
             {"add", "change", "delete", "view"},
         )
@@ -93,36 +93,40 @@ class EtlMenuItem(MenuItem):
 @hooks.register("register_admin_menu_item")
 def register_etl_menu():
     list_url = reverse("wagtailsnippets_etl_etlitemprocess:list")
-    submenu = Menu(
-        items=[
+
+    items = [
+        EtlMenuItem(
+            _("Summary"),
+            reverse("etl_summary"),
+            icon_name="tasks",
+            order=1,
+        ),
+    ]
+
+    for index, document_type in enumerate(
+        EtlPipelineConfig.objects.enabled_document_types()
+    ):
+        items.append(
             EtlMenuItem(
-                _("Summary"),
-                reverse("etl_summary"),
-                icon_name="tasks",
-                order=1,
-            ),
-            *[
-                EtlMenuItem(
-                    label,
-                    f"{list_url}?document_type={document_type}",
-                    icon_name="doc-full",
-                    order=2 + index,
-                )
-                for index, (document_type, label) in enumerate(
-                    DOCUMENT_TYPE_LABELS.items()
-                )
-            ],
-            EtlMenuItem(
-                _("Pipeline Configs"),
-                reverse("wagtailsnippets_etl_etlpipelineconfig:list"),
-                icon_name="cog",
-                order=10,
-            ),
-        ]
+                format_document_type_label(document_type),
+                f"{list_url}?document_type={document_type}",
+                icon_name="doc-full",
+                order=2 + index,
+            )
+        )
+
+    items.append(
+        EtlMenuItem(
+            _("Pipeline Configs"),
+            reverse("wagtailsnippets_etl_etlpipelineconfig:list"),
+            icon_name="cog",
+            order=100,
+        )
     )
+
     return SubmenuMenuItem(
         _("ETL"),
-        submenu,
+        Menu(items=items),
         icon_name="tasks",
         name="etl",
         order=85,
@@ -133,10 +137,8 @@ def register_etl_menu():
 def register_etl_urls():
     return [
         path("etl/summary/", summary_view, name="etl_summary"),
-        path("etl/trigger-pending/", trigger_pending_view, name="etl_trigger_pending"),
         path("etl/trigger-pending-by-type/", trigger_pending_by_type_view, name="etl_trigger_pending_by_type"),
         path("etl/retry-failed-by-type/", retry_failed_by_type_view, name="etl_retry_failed_by_type"),
-        path("etl/retry-failed/", retry_failed_view, name="etl_retry_failed"),
     ]
 
 

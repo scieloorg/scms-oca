@@ -92,6 +92,22 @@ class EtlPipelineConfigManager(models.Manager):
             )
         )
 
+    def source_index_by_document_type(self):
+        indexes = {}
+        for config in self.enabled():
+            indexes.setdefault(config.default_document_type, []).append(config.input_index)
+
+        return {
+            document_type: ", ".join(index_list)
+            for document_type, index_list in indexes.items()
+        }
+
+    def match_index_by_document_type(self):
+        return {
+            config.default_document_type: config.openalex_index_for()
+            for config in self.enabled()
+        }
+
     def get_for_source(self, source_index: str, source_payload: dict | None = None):
         config = self.select_for_source(source_index, source_payload)
         if config:
@@ -310,12 +326,6 @@ class EtlItemProcessQuerySet(models.QuerySet):
             attempts=0,
         )
 
-    def retry_failed(self, item_ids: list[int]) -> int:
-        return self.filter(
-            id__in=item_ids,
-            status=EtlStatus.FAILED,
-        ).update(status=EtlStatus.PENDING, error=None)
-
     def retry_failed_by_type(self, document_type: str) -> int:
         return self.filter(
             document_type=document_type,
@@ -351,12 +361,25 @@ class EtlItemProcessQuerySet(models.QuerySet):
             .annotate(count=models.Count("id"))
             .values_list("document_type", "count")
         )
+        source_index_by_type = {}
+        for row in (
+            self.values("document_type", "source_index")
+            .annotate(count=models.Count("id"))
+        ):
+            source_index_by_type.setdefault(
+                row["document_type"], set()
+            ).add(row["source_index"])
+        source_index_by_type = {
+            dt: ", ".join(sorted(indexes))
+            for dt, indexes in source_index_by_type.items()
+        }
         return {
             "status_counts": status_counts,
             "type_counts": type_counts,
             "type_status_counts": type_status_counts,
             "scielo_dedup_counts": scielo_dedup_counts,
             "openalex_counts": openalex_counts,
+            "source_index_by_type": source_index_by_type,
         }
 
 
