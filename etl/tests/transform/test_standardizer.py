@@ -72,6 +72,20 @@ class SciELOStandardizerTests(SimpleTestCase):
         self.assertEqual(silver.type, "article")
         self.assertEqual(silver.oca_data["scielo"]["type"], "research-article")
 
+    def test_standardizes_satellite_document_type_from_alias(self):
+        def doc_type_fn(raw):
+            return raw["type"]
+
+        bronze = SciELOArticleInputDocument.from_raw(
+            {"code": "S1", "type": "erratum", "publication_year": 2024},
+            doc_type_fn=doc_type_fn,
+        )
+
+        silver = standardizer_for(bronze).run(bronze)
+
+        self.assertEqual(silver.type, "correction")
+        self.assertEqual(silver.oca_data["scielo"]["type"], "erratum")
+
 
 class OpenAlexStandardizerTests(SimpleTestCase):
     def test_rebuilds_openalex_abstract_from_inverted_index(self):
