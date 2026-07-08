@@ -206,13 +206,13 @@ class SearchPage(Page):
         cls,
         request_state,
         *,
-        index_name="",
         search_sidebar_html="",
         results_data=None,
         advanced_search_error="",
-        has_citations_field=False,
         data_source=None,
     ):
+        index_name = data_source.index_name if data_source else ""
+        has_citations_field = bool(data_source.get_field("cited_by_count_range")) if data_source else False
         scientific_index = getattr(settings, "OP_INDEX_SCIENTIFIC_PRODUCTION", "scientific_production")
         payload = {"search_results": [], "total_results": 0} if results_data is None else results_data
         return {
@@ -276,11 +276,9 @@ class SearchPage(Page):
         context.update(
             self.build_search_template_context(
                 request_state,
-                index_name=data_source.index_name,
                 search_sidebar_html=sidebar_html,
                 results_data=results_data,
                 advanced_search_error=advanced_search_error,
-                has_citations_field=bool(data_source.get_field("cited_by_count_range")),
                 data_source=data_source,
             )
         )
