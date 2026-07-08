@@ -1,11 +1,13 @@
-from __future__ import annotations
-
 import logging
 from typing import Any, Dict, List, Tuple
 
 from etl.client import OpenSearchClient
 from etl.documents import SilverDocument
-from etl.transform.normalizers import normalize_doi, normalize_text
+from etl.transform.normalizers import (
+    normalize_document_type_for_etl,
+    normalize_doi,
+    normalize_text,
+)
 from etl.deduplicator.helpers import (
     calculate_similarity,
     select_primary_scielo_doc,
@@ -14,6 +16,7 @@ from etl.transform.extractors import (
     extract_doi,
     extract_isbns,
     extract_issns,
+    extract_scielo_document_type,
     extract_source,
     extract_titles,
 )
@@ -162,6 +165,15 @@ class OpenAlexMatcher:
         return SilverDocument(**data)
 
     def _can_search_openalex(self, scielo_doc: dict) -> bool:
+        raw_doc_type = extract_scielo_document_type(scielo_doc)
+        if not raw_doc_type:
+            return False
+
+        stz_doc_type = normalize_document_type_for_etl(raw_doc_type)
+
+        if stz_doc_type != self.rules["document_type"]:
+            return False
+
         year = self._publication_year(scielo_doc)
         if year is None:
             return False
@@ -179,8 +191,10 @@ class OpenAlexMatcher:
         try:
             if min_year is not None and upper < int(min_year):
                 return False
+
             if max_year is not None and lower > int(max_year):
                 return False
+
         except (TypeError, ValueError):
             logger.warning("Invalid OpenAlex publication year query bounds: %s", query_rules)
             return True

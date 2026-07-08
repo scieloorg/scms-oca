@@ -344,6 +344,27 @@ class DocumentRulesTests(EtlTestCase):
             ["doi", "isbn", "title"],
         )
 
+    def test_satellite_article_type_does_not_search_openalex(self):
+        matcher = make_matcher("article")
+
+        self.assertFalse(
+            matcher._can_search_openalex(
+                {"type": "correction", "publication_year": 2024}
+            )
+        )
+        self.assertTrue(
+            matcher._can_search_openalex(
+                {"type": "research-article", "publication_year": 2024}
+            )
+        )
+
+        chapter_matcher = make_matcher("book-chapter")
+        self.assertFalse(
+            chapter_matcher._can_search_openalex(
+                {"type": "book", "publication_year": 2024}
+            )
+        )
+
     def test_non_article_targets_build_unit_groups_without_deduplicator(self):
         pipeline = OpenSearchETLPipeline.__new__(OpenSearchETLPipeline)
         pipeline.pipeline_config = EtlPipelineConfig.objects.get_for_source(
