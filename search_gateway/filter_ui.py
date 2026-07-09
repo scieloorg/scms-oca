@@ -56,13 +56,6 @@ def _build_form_groups(fields, form_group_labels=None):
     return _apply_form_group_expanded_state(grouped_fields)
 
 
-def _field_is_active(*, widget, value="", range_start_value="", range_end_value="", options=None):
-    if widget == "range":
-        return range_start_value not in (None, "") or range_end_value not in (None, "")
-    if widget in {"text", "number", "year"}:
-        return value not in (None, "")
-    return any(option.get("selected") for option in (options or []))
-
 
 def _field_has_visible_content(*, widget, options=None, is_active=False, supports_option_lookup=False, async_endpoint=""):
     if widget in {"range", "text", "number", "year"}:
@@ -331,8 +324,7 @@ def build_form_field_definition(field, applied_filters=None, options_by_field=No
         clear_defaults,
     )
 
-    is_active = _field_is_active(
-        widget=widget,
+    is_active = field.is_active(
         value=selected_values[0] if selected_values else "",
         range_start_value=range_state["range_start_value"],
         range_end_value=range_state["range_end_value"],

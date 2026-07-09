@@ -208,6 +208,14 @@ class ResolvedField:
         return self.ui_settings.get("display_transform")
 
     @property
+    def is_active(self, *, value="", range_start_value="", range_end_value="", options=None):
+        if self.widget_name == "range":
+            return range_start_value not in (None, "") or range_end_value not in (None, "")
+        
+        if self.widget_name in {"text", "number", "year"}:
+            return value not in (None, "")
+        
+        return any(option.get("selected") for option in (options or []))
     def lookup_uses_data_source_values(self):
         return bool(self.ui_settings.get("lookup_use_data_source_values"))
 
