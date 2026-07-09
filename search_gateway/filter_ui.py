@@ -56,20 +56,6 @@ def _build_form_groups(fields, form_group_labels=None):
     return _apply_form_group_expanded_state(grouped_fields)
 
 
-
-def _field_has_visible_content(*, widget, options=None, is_active=False, supports_option_lookup=False, async_endpoint=""):
-    if widget in {"range", "text", "number", "year"}:
-        return True
-
-    if is_active:
-        return True
-
-    if widget == "lookup":
-        return bool(async_endpoint or supports_option_lookup or options)
-
-    return bool(options)
-
-
 def _build_boolean_toggle_options(options, selected_values):
     normalized_selected_values = {
         clean_text(value).lower()
@@ -352,8 +338,7 @@ def build_form_field_definition(field, applied_filters=None, options_by_field=No
         **range_state,
         **options_state,
         "is_active": is_active,
-        "has_visible_content": _field_has_visible_content(
-            widget=widget,
+        "has_visible_content": field.has_visible_content(
             options=options,
             is_active=is_active,
             supports_option_lookup=supports_option_lookup,

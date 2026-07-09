@@ -216,6 +216,20 @@ class ResolvedField:
             return value not in (None, "")
         
         return any(option.get("selected") for option in (options or []))
+
+    def has_visible_content(self, *, options=None, is_active=False):
+        if self.widget_name in {"range", "text", "number", "year"}:
+            return True
+        
+        if is_active:
+            return True
+        
+        if self.widget_name == "lookup":
+            return bool(self.async_endpoint or self.supports_option_lookup or options)
+        
+        return bool(options)
+
+    @property
     def lookup_uses_data_source_values(self):
         return bool(self.ui_settings.get("lookup_use_data_source_values"))
 
