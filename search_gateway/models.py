@@ -5,6 +5,8 @@ from django.utils.translation import gettext_lazy as _
 from wagtail.admin.panels import FieldPanel
 from wagtail_json_widget.widgets import JSONEditorWidget
 
+from .option_normalization import clean_text
+
 
 def _merge_field_section(base_section, override_section, *, nested_keys=()):
     if not isinstance(base_section, dict) or not isinstance(override_section, dict):
@@ -208,6 +210,17 @@ class ResolvedField:
         return self.ui_settings.get("display_transform")
 
     @property
+    def prefers_descending_year_options(self):    
+        if self.widget_name == "year":
+            return True
+        
+        normalized_name = clean_text(getattr(self, "field_name", "")).lower()
+        if normalized_name.endswith("_year"):
+            return True
+
+        normalized_label = clean_text(gettext(self.label)).lower()
+        return "year" in normalized_label
+
     def is_active(self, *, value="", range_start_value="", range_end_value="", options=None):
         if self.widget_name == "range":
             return range_start_value not in (None, "") or range_end_value not in (None, "")

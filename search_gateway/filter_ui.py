@@ -98,25 +98,14 @@ def _parse_year_option_value(option):
         return None
 
 
-def _field_prefers_descending_year_options(field, widget, field_label):
-    normalized_name = clean_text(getattr(field, "field_name", "")).lower()
-    normalized_label = clean_text(field_label).lower()
-
-    if widget == "year":
-        return True
-    if normalized_name.endswith("_year"):
-        return True
-    return "year" in normalized_label
-
-
-def _sort_options_for_display(field, widget, field_label, options):
+def _sort_options_for_display(field, options):
     if getattr(field, "display_transform", None) == "scielo_collection":
         return sorted(
             options or [],
             key=lambda option: clean_text(option.get("label")).casefold(),
         )
 
-    if not _field_prefers_descending_year_options(field, widget, field_label):
+    if not field.prefers_descending_year_options:
         return options
 
     sortable = []
@@ -246,7 +235,7 @@ def _build_field_options_state(field, selected_values, options_by_field, widget,
     raw_runtime_options = (options_by_field or {}).get(field.field_name) or []
     raw_option_source = _merge_static_and_runtime_options(static_options, raw_runtime_options)
     options = normalize_options(raw_option_source, selected_values)
-    options = _sort_options_for_display(field, widget, field_label, options)
+    options = _sort_options_for_display(field, options)
 
     boolean_toggle_options = []
     if widget == "select" and not multiple_selection:
@@ -341,8 +330,6 @@ def build_form_field_definition(field, applied_filters=None, options_by_field=No
         "has_visible_content": field.has_visible_content(
             options=options,
             is_active=is_active,
-            supports_option_lookup=supports_option_lookup,
-            async_endpoint=async_endpoint,
         ),
         "operator_mode": (
             "and_or"
