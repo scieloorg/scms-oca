@@ -21,7 +21,6 @@ def _get_language_name(code):
         return code
 
 
-@lru_cache(maxsize=512)
 def _get_country_name(code):
     try:
         if code:
@@ -33,7 +32,6 @@ def _get_country_name(code):
     return code
 
 
-@lru_cache(maxsize=128)
 def _get_boolean_display(code):
     if code in (True, 1, "true", "1"):
         return _("Yes")

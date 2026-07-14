@@ -1751,7 +1751,7 @@ msgid "Hide filters"
 msgstr "Ocultar filtros"
 
 msgid "Total documents"
-msgstr "Total de Docs"
+msgstr "Total de documentos"
 
 msgid "Search documents with current filters"
 msgstr "Buscar documentos con los filtros actuales"

@@ -42,7 +42,7 @@ class MetricResultBuilder:
             return data
 
         series = data.get("series", [])
-        breakdown_keys = data.get("breakdown_keys", [])
+        breakdown_keys = data["breakdown_raw_keys"]
 
         new_series = list(series)
         for comp_metric in self.metric_group.computed_metrics:
@@ -61,6 +61,7 @@ class MetricResultBuilder:
 
                 new_series.append({
                     "name": f"{breakdown} ({comp_metric.get_label()})",
+                    "breakdown_key": breakdown,
                     "data": computed_values,
                     "type": comp_metric.key,
                     "metric_key": comp_metric.key,
@@ -122,6 +123,7 @@ class MetricResultBuilder:
             rel_data = self._compute_relative_percent_series(s.get("data", []), aligned_baseline)
             relative_series.append({
                 "name": s.get("name"),
+                "breakdown_key": s.get("breakdown_key"),
                 "data": rel_data,
                 "type": s.get("type"),
                 "metric_key": metric_key,
@@ -179,9 +181,12 @@ class MetricResultBuilder:
 
                 series.append({
                     "name": breakdown,
+                    "breakdown_key": breakdown,
                     "data": metric_values,
                     "type": metric.key,
                 })
+
+        data["breakdown_raw_keys"] = breakdown_keys
 
         standardized_breakdown_keys = _standardize_breakdown_keys(
             breakdown_keys,
@@ -242,10 +247,14 @@ class MetricResultBuilder:
             return 0.0
 
     def _series_breakdown_name(self, series: Dict[str, Any]) -> str:
+        if series.get("breakdown_key"):
+            return series.get("breakdown_key")
+
         name = series.get("name", "")
         metric = self.metric_group.get_metric(series.get("metric_key"))
         if not metric:
             return name
+
         return name.replace(f" ({metric.get_label()})", "")
 
     def _align_series_to_years(
