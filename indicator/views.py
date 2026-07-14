@@ -3,7 +3,7 @@ import logging
 
 from django.http import HttpResponseRedirect, JsonResponse
 from django.template.loader import render_to_string
-from django.utils.translation import gettext as _
+from django.utils.translation import gettext as _, override
 from django.views.decorators.http import require_POST
 from wagtail_modeladmin.views import CreateView, EditView
 
@@ -30,8 +30,13 @@ def chart_data_view(request):
 
         filters = payload.get("filters", {})
         study_unit = payload.get("study_unit", "document")
+        language = payload.get("language") or getattr(request, "LANGUAGE_CODE", "")
 
-        data, error = get_indicator_data(data_source_name, filters, study_unit)
+        if language:
+            with override(language):
+                data, error = get_indicator_data(data_source_name, filters, study_unit)
+        else:
+            data, error = get_indicator_data(data_source_name, filters, study_unit)
 
         if error:
             logger.error(f"Error getting indicator data: {error}")

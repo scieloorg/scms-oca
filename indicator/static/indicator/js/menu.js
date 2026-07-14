@@ -344,6 +344,7 @@ function initIndicatorForm(dataSource, studyUnit) {
       chart_id: 'timeseries_documents',
       filters,
       study_unit: studyUnit,
+      language: document.documentElement.lang || '',
     };
 
     fetch('/api/v1/chart-data/', {
