@@ -56,24 +56,6 @@ def _build_form_groups(fields, form_group_labels=None):
     return _apply_form_group_expanded_state(grouped_fields)
 
 
-def _field_is_active(*, widget, value="", range_start_value="", range_end_value="", options=None):
-    if widget == "range":
-        return range_start_value not in (None, "") or range_end_value not in (None, "")
-    if widget in {"text", "number", "year"}:
-        return value not in (None, "")
-    return any(option.get("selected") for option in (options or []))
-
-
-def _field_has_visible_content(*, widget, options=None, is_active=False, searchable=False, async_endpoint=""):
-    if widget in {"range", "text", "number", "year"}:
-        return True
-    if is_active:
-        return True
-    if widget == "lookup":
-        return bool(async_endpoint or searchable or options)
-    return bool(options)
-
-
 def _build_boolean_toggle_options(options, selected_values):
     normalized_selected_values = {
         clean_text(value).lower()
@@ -116,25 +98,14 @@ def _parse_year_option_value(option):
         return None
 
 
-def _field_prefers_descending_year_options(field, widget, field_label):
-    normalized_name = clean_text(getattr(field, "field_name", "")).lower()
-    normalized_label = clean_text(field_label).lower()
-
-    if widget == "year":
-        return True
-    if normalized_name.endswith("_year"):
-        return True
-    return "year" in normalized_label
-
-
-def _sort_options_for_display(field, widget, field_label, options):
+def _sort_options_for_display(field, options):
     if getattr(field, "display_transform", None) == "scielo_collection":
         return sorted(
             options or [],
             key=lambda option: clean_text(option.get("label")).casefold(),
         )
 
-    if not _field_prefers_descending_year_options(field, widget, field_label):
+    if not field.prefers_descending_year_options:
         return options
 
     sortable = []
@@ -264,7 +235,7 @@ def _build_field_options_state(field, selected_values, options_by_field, widget,
     raw_runtime_options = (options_by_field or {}).get(field.field_name) or []
     raw_option_source = _merge_static_and_runtime_options(static_options, raw_runtime_options)
     options = normalize_options(raw_option_source, selected_values)
-    options = _sort_options_for_display(field, widget, field_label, options)
+    options = _sort_options_for_display(field, options)
 
     boolean_toggle_options = []
     if widget == "select" and not multiple_selection:
@@ -292,7 +263,7 @@ def build_form_field_definition(field, applied_filters=None, options_by_field=No
     default_range_value = default_value if isinstance(default_value, dict) else {}
     multiple_selection = field.allows_multiple_selection
     support_query_operator = field.supports_query_operator
-    searchable = field.searchable
+    supports_option_lookup = field.supports_option_lookup
     async_endpoint = field.async_endpoint
     preload_options = field.preload_options
     dependencies = list(field.dependencies)
@@ -328,8 +299,7 @@ def build_form_field_definition(field, applied_filters=None, options_by_field=No
         clear_defaults,
     )
 
-    is_active = _field_is_active(
-        widget=widget,
+    is_active = field.is_active(
         value=selected_values[0] if selected_values else "",
         range_start_value=range_state["range_start_value"],
         range_end_value=range_state["range_end_value"],
@@ -347,7 +317,7 @@ def build_form_field_definition(field, applied_filters=None, options_by_field=No
         "group": group_meta,
         "multiple_selection": multiple_selection,
         "support_query_operator": support_query_operator,
-        "searchable": searchable,
+        "supports_option_lookup": supports_option_lookup,
         "async_endpoint": async_endpoint,
         "preload_options": preload_options,
         "dependencies": dependencies,
@@ -357,12 +327,9 @@ def build_form_field_definition(field, applied_filters=None, options_by_field=No
         **range_state,
         **options_state,
         "is_active": is_active,
-        "has_visible_content": _field_has_visible_content(
-            widget=widget,
+        "has_visible_content": field.has_visible_content(
             options=options,
             is_active=is_active,
-            searchable=searchable,
-            async_endpoint=async_endpoint,
         ),
         "operator_mode": (
             "and_or"

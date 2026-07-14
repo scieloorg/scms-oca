@@ -1,6 +1,4 @@
-
 from search.advance_search import normalize_advanced_query
-from search.choices import SEARCH_FIELD_MAPPING
 
 
 def _escape_wildcard_chars(text):
@@ -248,9 +246,14 @@ def _build_advanced_query(query_text):
     }
 
 
-def _build_clause_query(field_key, query_text):
+def _build_clause_query(field_key, query_text, search_field_mapping=None):
     """Build a simple text clause for a given field without advanced syntax parsing."""
-    fields = SEARCH_FIELD_MAPPING.get(field_key, sum(SEARCH_FIELD_MAPPING.values(), []))
+    search_field_mapping = search_field_mapping or {}
+    fields = search_field_mapping.get(field_key) or search_field_mapping.get("all") or []
+
+    if not fields:
+        return {"match_none": {}}
+
     return {
         "multi_match": {
             "query": query_text,
@@ -260,7 +263,7 @@ def _build_clause_query(field_key, query_text):
     }
 
 
-def _normalize_query_clauses(query_clauses):
+def _normalize_query_clauses(query_clauses, search_field_mapping=None):
     """Return only valid clauses, with normalized operators."""
     normalized = []
 
@@ -272,7 +275,11 @@ def _normalize_query_clauses(query_clauses):
         normalized.append(
             {
                 "operator": "" if not normalized else (clause.get("operator") or "AND").upper(),
-                "query": _build_clause_query(clause.get("field") or "all", text),
+                "query": _build_clause_query(
+                    clause.get("field") or "all",
+                    text,
+                    search_field_mapping=search_field_mapping,
+                ),
             }
         )
 
@@ -313,7 +320,7 @@ def _build_or_group_query(queries):
     }
 
 
-def build_bool_from_clauses(query_clauses):
+def build_bool_from_clauses(query_clauses, search_field_mapping=None):
     """
     Build a bool query from normalized groups of clauses.
 
@@ -324,7 +331,10 @@ def build_bool_from_clauses(query_clauses):
     Then the group is appended to must or must_not according to the
     operator that precedes it.
     """
-    normalized_clauses = _normalize_query_clauses(query_clauses)
+    normalized_clauses = _normalize_query_clauses(
+        query_clauses,
+        search_field_mapping=search_field_mapping,
+    )
     if not normalized_clauses:
         return {"must": [{"match_all": {}}]}
 
@@ -374,6 +384,7 @@ def build_document_search_body(
         sort_field=None,
         sort_order="asc",
         source_fields=None,
+        search_field_mapping=None,
 ):
     """
     Builds the body for a document search query with text and filters.
@@ -397,6 +408,7 @@ def build_document_search_body(
         advanced_query=advanced_query,
         query_clauses=query_clauses,
         filters=filters,
+        search_field_mapping=search_field_mapping,
     )
 
     start = (page - 1) * page_size
@@ -422,6 +434,7 @@ def build_bool_query_from_search_params(
     advanced_query=None,
     query_clauses=None,
     filters=None,
+    search_field_mapping=None,
 ):
     """
     Bool query fragment (must / must_not / filter) shared by document search and
@@ -431,12 +444,19 @@ def build_bool_query_from_search_params(
     if advanced_query:
         bool_query = {"must": [_build_advanced_query(advanced_query)]}
     elif query_clauses:
-        bool_query = build_bool_from_clauses(query_clauses)
+        bool_query = build_bool_from_clauses(
+            query_clauses,
+            search_field_mapping=search_field_mapping,
+        )
     else:
         bool_query = {"must": []}
         if query_text:
             bool_query["must"].append(
-                _build_clause_query("all", query_text)
+                _build_clause_query(
+                    "all",
+                    query_text,
+                    search_field_mapping=search_field_mapping,
+                )
             )
         else:
             bool_query["must"].append({"match_all": {}})

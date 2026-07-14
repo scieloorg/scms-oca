@@ -120,35 +120,11 @@ translates = {
     "peer review aberto": "Peer review aberto",
 }
 
-SEARCHABLE_FIELDS = [
-    ("all", _("Todos os campos")),
-    ("title_search", _("Título")),
-    ("ids_search", _("DOI, ISBN, identificadores")),
-    ("authors_search", _("Autores")),
-    ("institutions_search", _("Instituição")),
-    ("description_search", _("Descrição")),
-]
-
 SEARCH_OPERATORS = [
     ("AND", "AND"),
     ("OR", "OR"),
     ("NOT", "NOT"),
 ]
-
-SEARCH_FIELD_MAPPING = {
-    "all": ["search_all_text"],
-    "title_search": ["title_search"],
-    "ids_search": ["ids_search"],
-    "authors_search": ["authors_search"],
-    "abstract_search": ["abstract_search"],
-    "description_search": ["description_search"],
-    "keywords_search": ["keywords_search"],
-    "subjects_search": ["subjects_search"],
-    "publishers_search": ["publishers_search"],
-    "sources_search": ["source_title_search"],
-    "source_title_search": ["source_title_search"],
-    "institutions_search": ["institutions_search"],
-}
 
 # Aliases for query_string: user-friendly name -> index field
 QUERY_STRING_FIELD_ALIASES = {

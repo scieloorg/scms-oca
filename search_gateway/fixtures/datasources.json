@@ -1287,6 +1287,86 @@
               "group": "graph_options",
               "group_order": 0
             }
+          },
+          "all": {
+            "kind": "search",
+            "index_field_name": "search_all_text",
+            "filter": {},
+            "settings": {
+              "label": "All fields",
+              "field_search_enabled": true,
+              "field_search_order": 0
+            }
+          },
+          "subjects_search": {
+            "kind": "search",
+            "index_field_name": "subjects_search",
+            "filter": {},
+            "settings": {
+              "label": "Subject",
+              "field_search_enabled": true,
+              "field_search_order": 10
+            }
+          },
+          "authors_search": {
+            "kind": "search",
+            "index_field_name": "authors_search",
+            "filter": {},
+            "settings": {
+              "label": "Author",
+              "field_search_enabled": true,
+              "field_search_order": 20
+            }
+          },
+          "description_search": {
+            "kind": "search",
+            "index_field_name": "description_search",
+            "filter": {},
+            "settings": {
+              "label": "Description",
+              "field_search_enabled": true,
+              "field_search_order": 30
+            }
+          },
+          "ids_search": {
+            "kind": "search",
+            "index_field_name": "ids_search",
+            "filter": {},
+            "settings": {
+              "label": "Identifier",
+              "field_search_enabled": true,
+              "field_search_order": 40
+            }
+          },
+          "keywords_search": {
+            "kind": "search",
+            "index_field_name": "keywords_search",
+            "filter": {},
+            "settings": {
+              "label": "Keyword",
+              "field_search_enabled": true,
+              "field_search_order": 50
+            }
+          },
+          "abstract_search": {
+            "kind": "search",
+            "index_field_name": "abstract_search",
+            "filter": {},
+            "settings": {
+              "label": "Abstract",
+              "field_search_enabled": true,
+              "field_search_order": 60
+            }
+          },
+          "title_search": {
+            "kind": "search",
+            "index_field_name": "title_search",
+            "filter": {},
+            "settings": {
+              "label": "Title",
+              "field_search_enabled": true,
+              "field_search_order": 70
+            }
           }
         },
         "forms": {
@@ -2240,6 +2320,46 @@
               "multiple_selection": false
             },
             "index_field_name": "creation_year"
+          },
+          "title_search": {
+            "kind": "search",
+            "index_field_name": "title_search",
+            "filter": {},
+            "settings": {
+              "label": "Title",
+              "field_search_enabled": true,
+              "field_search_order": 10
+            }
+          },
+          "description": {
+            "kind": "search",
+            "index_field_name": "description",
+            "filter": {},
+            "settings": {
+              "label": "Description",
+              "field_search_enabled": true,
+              "field_search_order": 20
+            }
+          },
+          "text": {
+            "kind": "search",
+            "index_field_name": "text",
+            "filter": {},
+            "settings": {
+              "label": "Text",
+              "field_search_enabled": true,
+              "field_search_order": 30
+            }
+          },
+          "organization_search": {
+            "kind": "search",
+            "index_field_name": "organization_search",
+            "filter": {},
+            "settings": {
+              "label": "Organization",
+              "field_search_enabled": true,
+              "field_search_order": 40
+            }
           }
         },
         "forms": {

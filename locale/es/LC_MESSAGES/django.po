@@ -3762,3 +3762,24 @@ msgstr "Variable de desglose"
 
 msgid "Coverage"
 msgstr "Cobertura"
+
+msgid "All fields"
+msgstr "Todos los campos"
+
+msgid "Subject"
+msgstr "Asunto"
+
+msgid "Author"
+msgstr "Autor"
+
+msgid "Identifier"
+msgstr "Identificador"
+
+msgid "Keyword"
+msgstr "Palabra clave"
+
+msgid "Abstract"
+msgstr "Resumen"
+
+msgid "Organization"
+msgstr "Organización"

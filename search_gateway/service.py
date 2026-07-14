@@ -181,7 +181,7 @@ class SearchGatewayService:
         return {
             field_name: field_info
             for field_name, field_info in field_settings.items()
-            if field_info.get("kind") != "control"
+            if field_info.get("kind") == "index"
         }
 
     @staticmethod
@@ -381,6 +381,7 @@ class SearchGatewayService:
             sort_field=sort_field,
             sort_order=sort_order,
             source_fields=self.source_fields,
+            search_field_mapping=self.data_source.get_search_field_mapping(),
         )
         try:
             res = self._search(body, request_cache=True)
@@ -422,6 +423,7 @@ class SearchGatewayService:
             advanced_query=advanced_query,
             query_clauses=query_clauses,
             filters=mapped_filters,
+            search_field_mapping=self.data_source.get_search_field_mapping(),
         )
         body = build_aggregation_body(
             query={"bool": bool_query},

@@ -5,6 +5,8 @@ from django.utils.translation import gettext_lazy as _
 from wagtail.admin.panels import FieldPanel
 from wagtail_json_widget.widgets import JSONEditorWidget
 
+from .option_normalization import clean_text
+
 
 def _merge_field_section(base_section, override_section, *, nested_keys=()):
     if not isinstance(base_section, dict) or not isinstance(override_section, dict):
@@ -140,8 +142,24 @@ class ResolvedField:
         return async_endpoint or ""
 
     @property
-    def searchable(self):
+    def supports_option_lookup(self):
         return self.widget_name == "lookup" or bool(self.async_endpoint)
+
+    @property
+    def field_search_enabled(self):
+        return self.kind == "search" and bool(self.ui_settings.get("field_search_enabled"))
+
+    @property
+    def field_search_order(self):
+        configured_order = self.ui_settings.get("field_search_order")
+
+        if configured_order in (None, ""):
+            return 999
+
+        try:
+            return int(configured_order)
+        except (TypeError, ValueError):
+            return 999
 
     @property
     def help_text(self):
@@ -192,6 +210,39 @@ class ResolvedField:
         return self.ui_settings.get("display_transform")
 
     @property
+    def prefers_descending_year_options(self):    
+        if self.widget_name == "year":
+            return True
+        
+        normalized_name = clean_text(getattr(self, "field_name", "")).lower()
+        if normalized_name.endswith("_year"):
+            return True
+
+        normalized_label = clean_text(gettext(self.label)).lower()
+        return "year" in normalized_label
+
+    def is_active(self, *, value="", range_start_value="", range_end_value="", options=None):
+        if self.widget_name == "range":
+            return range_start_value not in (None, "") or range_end_value not in (None, "")
+        
+        if self.widget_name in {"text", "number", "year"}:
+            return value not in (None, "")
+        
+        return any(option.get("selected") for option in (options or []))
+
+    def has_visible_content(self, *, options=None, is_active=False):
+        if self.widget_name in {"range", "text", "number", "year"}:
+            return True
+        
+        if is_active:
+            return True
+        
+        if self.widget_name == "lookup":
+            return bool(self.async_endpoint or self.supports_option_lookup or options)
+        
+        return bool(options)
+
+    @property
     def lookup_uses_data_source_values(self):
         return bool(self.ui_settings.get("lookup_use_data_source_values"))
 
@@ -236,7 +287,7 @@ class ResolvedField:
                 "group_label": group_label,
                 "group_order": group_meta.get("order", 999),
                 "resolved_widget": self.widget_name,
-                "searchable": self.searchable,
+                "supports_option_lookup": self.supports_option_lookup,
                 "async_endpoint": self.async_endpoint,
                 "preload_options": self.preload_options,
                 "dependencies": list(self.dependencies),
@@ -364,6 +415,47 @@ class DataSource(models.Model):
     def field_settings_dict(self):
         return self.fields_schema
 
+    def _iter_search_fields(self):
+        fields = [
+            field
+            for field in self.get_ordered_fields()
+            if field.field_search_enabled and field.index_field_name
+        ]
+        return sorted(
+            fields,
+            key=lambda field: (
+                field.field_search_order,
+                field.label,
+                field.field_name,
+            ),
+        )
+
+    def get_searchable_fields(self):
+        options = [
+            (field.field_name, gettext(field.label))
+            for field in self._iter_search_fields()
+        ]
+
+        if not any(field_name == "all" for field_name, _label in options):
+            options.insert(0, ("all", gettext("Todos os campos")))
+
+        return options
+
+    def get_search_field_mapping(self):
+        mapping = {
+            field.field_name: [field.index_field_name]
+            for field in self._iter_search_fields()
+        }
+
+        if "all" not in mapping:
+            mapping["all"] = list(dict.fromkeys(
+                field_name
+                for field_names in mapping.values()
+                for field_name in field_names
+            ))
+
+        return mapping
+
     @staticmethod
     def _normalize_form_field_item(item):
         if isinstance(item, str):
@@ -484,6 +576,7 @@ class DataSource(models.Model):
                 "display_transform": (cfg.get("settings") or {}).get("display_transform"),
             }
             for field_name, cfg in self.fields_schema.items()
+            if cfg.get("kind") != "search"
             if (cfg.get("filter") or {}).get("transform")
             or (cfg.get("settings") or {}).get("display_transform")
         }
@@ -492,7 +585,7 @@ class DataSource(models.Model):
         return {
             field.index_field_name: field.field_name
             for field in self.get_ordered_fields(form_key=form_key)
-            if field.index_field_name
+            if field.kind != "search" and field.index_field_name
         }
 
     @classmethod
