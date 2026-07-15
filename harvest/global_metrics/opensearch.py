@@ -203,7 +203,7 @@ def update_silver_group_by_query(client, silver_index, group):
     )
 
 
-def scroll_hits(client, index, body, scroll="5m"):
+def scroll_hits(client, index, body, scroll="20m"):
     response = client.search(index=index, body=body, scroll=scroll)
     scroll_id = response.get("_scroll_id")
     try:
