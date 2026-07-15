@@ -46,10 +46,7 @@ def apply_global_metrics_upload_to_silver(
     }
     unresolved_countries = set()
 
-    # Consome o scroll por completo antes de processar, para não manter o
-    # contexto de scroll aberto durante os lookups/updates (que podem exceder
-    # o keep-alive e expirar o scroll). O footprint em memória é equivalente ao
-    # set de deduplicação que iter_silver_issn_year_groups já mantém.
+
     silver_groups = list(
         iter_silver_issn_year_groups(
             client=client,
