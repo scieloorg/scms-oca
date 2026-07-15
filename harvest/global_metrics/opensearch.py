@@ -199,7 +199,7 @@ def update_silver_group_by_query(client, silver_index, group):
         index=silver_index,
         body=build_global_metrics_update_by_query_body(group),
         conflicts="proceed",
-        refresh=True,
+        refresh=False,
     )
 
 
