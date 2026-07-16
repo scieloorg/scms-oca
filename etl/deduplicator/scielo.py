@@ -210,15 +210,38 @@ class SciELODeduplicator:
         return year_left == year_right and year_left > 0
 
     def _has_matching_source(self, left_doc, right_doc):
-        issns_left = set(extract_issns(left_doc))
-        issns_right = set(extract_issns(right_doc))
-        if issns_left & issns_right:
+        document_type = self.rules["document_type"]
+        if document_type == "article":
+            return self._has_matching_source_journal(left_doc, right_doc)
+
+        return False
+
+    def _has_matching_source_journal(self, left_doc, right_doc):
+        return (
+            self._has_matching_journal_issn(left_doc, right_doc) or
+            self._has_matching_journal_title(left_doc, right_doc)
+        )
+
+    def _has_matching_journal_issn(self, left_doc, right_doc):
+        left_journal_issns = set(extract_issns(left_doc))
+        right_journal_issns = set(extract_issns(right_doc))
+
+        if left_journal_issns & right_journal_issns:
             return True
 
-        return bool(
-            left_doc.get("journal_title") == right_doc.get("journal_title")
-            and left_doc.get("journal_title")
-        )
+        return False
+
+    def _has_matching_journal_title(self, left_doc, right_doc):
+        left_journal_title = left_doc.get("journal_title")
+        right_journal_title = right_doc.get("journal_title")
+
+        if not left_journal_title or not right_journal_title:
+            return False
+
+        if left_journal_title == right_journal_title:
+            return True
+
+        return False
 
     def _has_overlapping_title(self, left_doc, right_doc):
         return bool(set(extract_titles(left_doc)) & set(extract_titles(right_doc)))

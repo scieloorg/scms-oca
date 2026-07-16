@@ -203,6 +203,31 @@ class DocumentRulesTests(EtlTestCase):
 
         self.assertEqual(len(groups), 2)
 
+    def test_article_doi_dedup_accepts_overlapping_source_issn(self):
+        deduplicator = make_deduplicator("article")
+        groups = deduplicator.find_duplicates(
+            [
+                {
+                    "type": "research-article",
+                    "title": "Same title",
+                    "publication_year": 2026,
+                    "ids": {"doi": "10.1590/1984-0462/2026/44/2025016"},
+                    "journal_title": "Revista Paulista de Pediatria",
+                    "source_issns": ["0103-0582", "1984-0462"],
+                },
+                {
+                    "type": "research-article",
+                    "title": "Same title",
+                    "publication_year": 2026,
+                    "ids": {"doi": "10.1590/1984-0462/2026/44/2025016"},
+                    "journal_title": "RPPed",
+                    "source_issns": ["1984-0462"],
+                },
+            ]
+        )
+
+        self.assertEqual(len(groups), 1)
+
     def test_article_pid_collision_requires_context_match(self):
         deduplicator = make_deduplicator("article")
         social_support_title = "Social support network, mental health and quality of life"
