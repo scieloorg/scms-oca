@@ -4,7 +4,6 @@ from unittest.mock import Mock
 
 from django.apps import apps
 
-from etl.deduplicator.helpers import can_compare, rules_for_pair
 from etl.deduplicator.openalex import OpenAlexMatcher
 from etl.deduplicator.scielo import SciELODeduplicator
 from etl.documents import SilverDocument
@@ -76,29 +75,253 @@ class DocumentRulesTests(EtlTestCase):
     def _matched_doc_ids(matches):
         return [silver_doc.doc_id for silver_doc, *_ in matches]
 
-    def test_can_compare_rejects_doc_type_outside_pipeline_config_rules(self):
-        rules = EtlPipelineConfig.objects.get_enabled_by_name("book").to_rules()
-
-        self.assertFalse(
-            can_compare(
-                {"type": "book"},
-                {"type": "book-chapter"},
-                rules,
-            )
-        )
-
-    def test_rules_for_pair_rejects_doc_type_outside_pipeline_config_rules(self):
-        rules = EtlPipelineConfig.objects.get_enabled_by_name("book").to_rules()
-
-        with self.assertRaises(ValueError):
-            rules_for_pair({"type": "book"}, {"type": "book-chapter"}, rules)
-
     def test_article_fuzzy_requires_source_match(self):
         deduplicator = make_deduplicator("article")
+        deduplicator.rules["scielo_dedup_strategies"] = ["fuzzy"]
+        deduplicator.rules["fuzzy_requires_source_match"] = True
         groups = deduplicator.find_duplicates(
             [
                 {"type": "article", "title": "Same title", "publication_year": 2024},
                 {"type": "article", "title": "Same title", "publication_year": 2024},
+            ]
+        )
+
+        self.assertEqual(len(groups), 2)
+
+    def test_article_dedup_requires_same_raw_type(self):
+        deduplicator = make_deduplicator("article")
+        groups = deduplicator.find_duplicates(
+            [
+                {
+                    "type": "research-article",
+                    "title": "Same title",
+                    "publication_year": 2024,
+                    "ids": {"doi": "10.1590/abc"},
+                },
+                {
+                    "type": "review-article",
+                    "title": "Same title",
+                    "publication_year": 2024,
+                    "ids": {"doi": "10.1590/abc"},
+                },
+            ]
+        )
+
+        self.assertEqual(len(groups), 2)
+
+    def test_article_dedup_allows_same_article_like_raw_type(self):
+        deduplicator = make_deduplicator("article")
+        groups = deduplicator.find_duplicates(
+            [
+                {
+                    "type": "research-article",
+                    "title": "Same title",
+                    "publication_year": 2024,
+                    "ids": {"doi": "10.1590/abc"},
+                    "journal_title": "Journal",
+                },
+                {
+                    "type": "research-article",
+                    "title": "Same title",
+                    "publication_year": 2024,
+                    "ids": {"doi": "10.1590/abc"},
+                    "journal_title": "Journal",
+                },
+            ]
+        )
+
+        self.assertEqual(len(groups), 1)
+
+    def test_scielo_dedup_requires_explicit_allowed_types_rule(self):
+        rules = EtlPipelineConfig.objects.get_enabled_by_name("article").to_rules()
+        rules["scielo_dedup_allowed_types"] = []
+        deduplicator = SciELODeduplicator(rules)
+        groups = deduplicator.find_duplicates(
+            [
+                {
+                    "type": "research-article",
+                    "title": "Same title",
+                    "publication_year": 2024,
+                    "ids": {"doi": "10.1590/abc"},
+                    "journal_title": "Journal",
+                },
+                {
+                    "type": "research-article",
+                    "title": "Same title",
+                    "publication_year": 2024,
+                    "ids": {"doi": "10.1590/abc"},
+                    "journal_title": "Journal",
+                },
+            ]
+        )
+
+        self.assertEqual(len(groups), 2)
+
+    def test_article_doi_dedup_requires_year_match(self):
+        deduplicator = make_deduplicator("article")
+        groups = deduplicator.find_duplicates(
+            [
+                {
+                    "type": "research-article",
+                    "title": "Same title",
+                    "publication_year": 2023,
+                    "ids": {"doi": "10.1590/abc"},
+                    "journal_title": "Journal",
+                },
+                {
+                    "type": "research-article",
+                    "title": "Same title",
+                    "publication_year": 2024,
+                    "ids": {"doi": "10.1590/abc"},
+                    "journal_title": "Journal",
+                },
+            ]
+        )
+
+        self.assertEqual(len(groups), 2)
+
+    def test_article_doi_dedup_requires_source_match(self):
+        deduplicator = make_deduplicator("article")
+        groups = deduplicator.find_duplicates(
+            [
+                {
+                    "type": "research-article",
+                    "title": "Same title",
+                    "publication_year": 2024,
+                    "ids": {"doi": "10.1590/abc"},
+                    "journal_title": "Journal A",
+                },
+                {
+                    "type": "research-article",
+                    "title": "Same title",
+                    "publication_year": 2024,
+                    "ids": {"doi": "10.1590/abc"},
+                    "journal_title": "Journal B",
+                },
+            ]
+        )
+
+        self.assertEqual(len(groups), 2)
+
+    def test_article_doi_dedup_accepts_overlapping_source_issn(self):
+        deduplicator = make_deduplicator("article")
+        groups = deduplicator.find_duplicates(
+            [
+                {
+                    "type": "research-article",
+                    "title": "Same title",
+                    "publication_year": 2026,
+                    "ids": {"doi": "10.1590/1984-0462/2026/44/2025016"},
+                    "journal_title": "Revista Paulista de Pediatria",
+                    "source_issns": ["0103-0582", "1984-0462"],
+                },
+                {
+                    "type": "research-article",
+                    "title": "Same title",
+                    "publication_year": 2026,
+                    "ids": {"doi": "10.1590/1984-0462/2026/44/2025016"},
+                    "journal_title": "RPPed",
+                    "source_issns": ["1984-0462"],
+                },
+            ]
+        )
+
+        self.assertEqual(len(groups), 1)
+
+    def test_article_pid_collision_requires_context_match(self):
+        deduplicator = make_deduplicator("article")
+        social_support_title = "Social support network, mental health and quality of life"
+        technology_assessment_title = "Health technology assessment organizations"
+        social_support_doi = "10.1590/0102-311X00165115"
+        technology_assessment_doi = "10.1590/0102-311X00022315"
+        groups = deduplicator.find_duplicates(
+            [
+                {
+                    "type": "research-article",
+                    "code": "S0102-311X2016001205008",
+                    "title": social_support_title,
+                    "publication_year": 2016,
+                    "ids": {"doi": social_support_doi},
+                    "journal_title": "Cadernos de Saúde Pública",
+                },
+                {
+                    "type": "research-article",
+                    "code": "S0102-311X2016001205008",
+                    "title": technology_assessment_title,
+                    "publication_year": 2016,
+                    "ids": {"doi": technology_assessment_doi},
+                    "journal_title": "Cadernos de Saúde Pública",
+                },
+                {
+                    "type": "research-article",
+                    "code": "S0102-311X2016001405008",
+                    "title": technology_assessment_title,
+                    "publication_year": 2016,
+                    "ids": {"doi": technology_assessment_doi},
+                    "journal_title": "Cadernos de Saúde Pública",
+                },
+                {
+                    "type": "research-article",
+                    "code": "S0102-311X2016001405008",
+                    "title": social_support_title,
+                    "publication_year": 2016,
+                    "ids": {"doi": social_support_doi},
+                    "journal_title": "Cadernos de Saúde Pública",
+                },
+            ]
+        )
+
+        self.assertEqual(len(groups), 2)
+        grouped_dois = sorted(
+            sorted({doc["ids"]["doi"] for doc in group})
+            for group in groups.values()
+        )
+        self.assertEqual(
+            grouped_dois,
+            [
+                [technology_assessment_doi],
+                [social_support_doi],
+            ],
+        )
+        self.assertEqual(sorted(len(group) for group in groups.values()), [2, 2])
+
+    def test_correction_does_not_use_internal_scielo_dedup(self):
+        deduplicator = make_deduplicator("article")
+        groups = deduplicator.find_duplicates(
+            [
+                {
+                    "type": "correction",
+                    "title": "ERRATUM",
+                    "publication_year": 2016,
+                    "ids": {"doi": "10.1590/s1980-65742016000100006a"},
+                },
+                {
+                    "type": "correction",
+                    "title": "ERRATUM",
+                    "publication_year": 2016,
+                    "ids": {"doi": "10.1590/s1980-65742016000100006a"},
+                },
+            ]
+        )
+
+        self.assertEqual(len(groups), 2)
+
+    def test_satellite_article_types_do_not_use_internal_scielo_dedup(self):
+        deduplicator = make_deduplicator("article")
+        groups = deduplicator.find_duplicates(
+            [
+                {
+                    "type": "letter",
+                    "title": "Same title",
+                    "publication_year": 2024,
+                    "ids": {"doi": "10.1590/abc"},
+                },
+                {
+                    "type": "letter",
+                    "title": "Same title",
+                    "publication_year": 2024,
+                    "ids": {"doi": "10.1590/abc"},
+                },
             ]
         )
 
@@ -131,25 +354,46 @@ class DocumentRulesTests(EtlTestCase):
             EtlPipelineConfig.objects.get_enabled_by_name("article").to_rules()[
                 "openalex_match_strategies"
             ],
-            ["doi", "title"],
+            ["doi"],
         )
         self.assertEqual(
             EtlPipelineConfig.objects.get_enabled_by_name("book").to_rules()[
                 "openalex_match_strategies"
             ],
-            ["doi", "isbn", "title"],
+            ["doi", "isbn"],
         )
         self.assertEqual(
             EtlPipelineConfig.objects.get_enabled_by_name("book-chapter").to_rules()[
                 "openalex_match_strategies"
             ],
-            ["doi", "isbn", "title"],
+            ["doi", "isbn"],
+        )
+
+    def test_satellite_article_type_does_not_search_openalex(self):
+        matcher = make_matcher("article")
+
+        self.assertFalse(
+            matcher._can_search_openalex(
+                {"type": "correction", "publication_year": 2024}
+            )
+        )
+        self.assertTrue(
+            matcher._can_search_openalex(
+                {"type": "research-article", "publication_year": 2024}
+            )
+        )
+
+        chapter_matcher = make_matcher("book-chapter")
+        self.assertFalse(
+            chapter_matcher._can_search_openalex(
+                {"type": "book", "publication_year": 2024}
+            )
         )
 
     def test_non_article_targets_build_unit_groups_without_deduplicator(self):
         pipeline = OpenSearchETLPipeline.__new__(OpenSearchETLPipeline)
         pipeline.pipeline_config = EtlPipelineConfig.objects.get_for_source(
-            "bronze_scielo_preprint"
+            "bronze_scielo_preprints"
         )
         pipeline.scielo_deduplicator = Mock()
         docs = [{"id": "p1"}, {"id": "p2"}]
@@ -260,6 +504,7 @@ class DocumentRulesTests(EtlTestCase):
                 matcher.client = Mock()
 
                 if case["expected"]["strategy"] == "title_year_author":
+                    matcher.rules["openalex_match_strategies"] = ["doi", "title"]
                     matcher.client.client.search.side_effect = [
                         self._search_response([]),
                         self._search_response(case["silver_openalex"]),
@@ -651,6 +896,7 @@ class DocumentRulesTests(EtlTestCase):
 
     def test_openalex_title_strategy_runs_when_doi_lookup_has_no_match(self):
         matcher = make_matcher("article")
+        matcher.rules["openalex_match_strategies"] = ["doi", "title"]
         matcher.client = Mock()
         matcher.client.client.search.side_effect = [
             {"hits": {"hits": []}},
@@ -752,6 +998,7 @@ class DocumentRulesTests(EtlTestCase):
 
     def test_openalex_title_strategy_returns_validated_issn_match(self):
         matcher = make_matcher("article")
+        matcher.rules["openalex_match_strategies"] = ["title"]
         matcher.client = Mock()
         matcher.client.client.search.return_value = {
             "hits": {
@@ -779,6 +1026,7 @@ class DocumentRulesTests(EtlTestCase):
 
     def test_openalex_title_strategy_rejects_low_title_similarity(self):
         matcher = make_matcher("article")
+        matcher.rules["openalex_match_strategies"] = ["title"]
         matcher.client = Mock()
         matcher.client.client.search.return_value = {
             "hits": {

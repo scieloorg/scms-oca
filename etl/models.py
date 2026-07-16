@@ -82,6 +82,32 @@ class EtlPipelineConfigManager(models.Manager):
     def enabled(self):
         return self.filter(enabled=True).order_by("id")
 
+    def enabled_document_types(self):
+        return tuple(
+            dict.fromkeys(
+                self.enabled().values_list(
+                    "default_document_type",
+                    flat=True,
+                )
+            )
+        )
+
+    def source_index_by_document_type(self):
+        indexes = {}
+        for config in self.enabled():
+            indexes.setdefault(config.default_document_type, []).append(config.input_index)
+
+        return {
+            document_type: ", ".join(index_list)
+            for document_type, index_list in indexes.items()
+        }
+
+    def match_index_by_document_type(self):
+        return {
+            config.default_document_type: config.openalex_index_for()
+            for config in self.enabled()
+        }
+
     def get_for_source(self, source_index: str, source_payload: dict | None = None):
         config = self.select_for_source(source_index, source_payload)
         if config:
@@ -199,6 +225,16 @@ class EtlPipelineConfig(models.Model):
         raw_type = payload.get("type") or self.default_document_type
         return normalize_document_type_for_etl(raw_type)
 
+    def can_process_payload(self, source_payload):
+        if not self.infer_document_type_from_payload:
+            return True
+
+        payload_type = self.document_type_for_payload(source_payload)
+        if payload_type == normalize_document_type_for_etl(self.default_document_type):
+            return True
+
+        return self.input_document_kind == "article"
+
     def openalex_index_for(self, override: str | None = None) -> str:
         return override or self.openalex_index or settings.ETL_OPENALEX_MATCH_INDEX
 
@@ -250,8 +286,13 @@ class EtlPipelineConfig(models.Model):
         return {
             "document_type": normalize_document_type_for_etl(self.default_document_type),
             "scielo_dedup_strategies": list(rules.get("scielo_dedup_strategies", [])),
+            "scielo_dedup_allowed_types": list(
+                rules.get("scielo_dedup_allowed_types") or []
+            ),
             "openalex_match_strategies": list(rules.get("openalex_match_strategies", [])),
             "doi_requires_title_overlap": rules.get("doi_requires_title_overlap", True),
+            "doi_requires_year_match": rules.get("doi_requires_year_match", True),
+            "doi_requires_source_match": rules.get("doi_requires_source_match", True),
             "pid_requires_year_match": rules.get("pid_requires_year_match", True),
             "pid_requires_source_match": rules.get("pid_requires_source_match", False),
             "pid_requires_title_overlap": rules.get("pid_requires_title_overlap", True),
@@ -284,12 +325,6 @@ class EtlItemProcessQuerySet(models.QuerySet):
             error=None,
             attempts=0,
         )
-
-    def retry_failed(self, item_ids: list[int]) -> int:
-        return self.filter(
-            id__in=item_ids,
-            status=EtlStatus.FAILED,
-        ).update(status=EtlStatus.PENDING, error=None)
 
     def retry_failed_by_type(self, document_type: str) -> int:
         return self.filter(
@@ -326,19 +361,32 @@ class EtlItemProcessQuerySet(models.QuerySet):
             .annotate(count=models.Count("id"))
             .values_list("document_type", "count")
         )
+        source_index_by_type = {}
+        for row in (
+            self.values("document_type", "source_index")
+            .annotate(count=models.Count("id"))
+        ):
+            source_index_by_type.setdefault(
+                row["document_type"], set()
+            ).add(row["source_index"])
+        source_index_by_type = {
+            dt: ", ".join(sorted(indexes))
+            for dt, indexes in source_index_by_type.items()
+        }
         return {
             "status_counts": status_counts,
             "type_counts": type_counts,
             "type_status_counts": type_status_counts,
             "scielo_dedup_counts": scielo_dedup_counts,
             "openalex_counts": openalex_counts,
+            "source_index_by_type": source_index_by_type,
         }
 
 
 class EtlItemProcess(models.Model):
     source_index = models.CharField(max_length=255, db_index=True)
     external_id = models.CharField(max_length=255)
-    document_type = models.CharField(max_length=50, db_index=True)
+    document_type = models.CharField(max_length=50, db_index=True, verbose_name=_("ETL type"))
     publication_year = models.PositiveIntegerField(
         null=True,
         blank=True,
@@ -356,11 +404,11 @@ class EtlItemProcess(models.Model):
         choices=EtlResult.choices,
         blank=True,
     )
-    pid_v2 = models.CharField(max_length=255, blank=True, default="")
-    doi = models.CharField(max_length=500, blank=True, default="")
-    isbn = models.CharField(max_length=255, blank=True, default="")
-    preprint_id = models.CharField(max_length=255, blank=True, default="")
-    dataset_id = models.CharField(max_length=255, blank=True, default="")
+    pid_v2 = models.CharField(max_length=255, blank=True, default="", verbose_name=_("PID V2"))
+    doi = models.CharField(max_length=500, blank=True, default="", verbose_name=_("DOI"))
+    isbn = models.CharField(max_length=255, blank=True, default="", verbose_name=_("ISBN"))
+    preprint_id = models.CharField(max_length=255, blank=True, default="", verbose_name=_("Preprint ID"))
+    dataset_id = models.CharField(max_length=255, blank=True, default="", verbose_name=_("Dataset ID"))
     has_openalex_match = models.BooleanField(default=False)
     has_scielo_dedup = models.BooleanField(default=False)
     scielo_dedup_ids = models.JSONField(default=list, blank=True)
@@ -374,6 +422,7 @@ class EtlItemProcess(models.Model):
     objects = EtlItemProcessQuerySet.as_manager()
 
     class Meta:
+        verbose_name = _("ETL Item Process")
         constraints = [
             models.UniqueConstraint(
                 fields=["source_index", "external_id"],

@@ -243,10 +243,7 @@ class OpenSearchETLPipeline:
         self.loaded_source_ids = set()
         docs = []
         for hit, normalized in self._scroll_hits(self.input_scielo_index, search_body):
-            if (
-                self.pipeline_config.document_type_for_payload(normalized)
-                != self.pipeline_config.default_document_type
-            ):
+            if not self.pipeline_config.can_process_payload(normalized):
                 continue
             docs.append(normalized)
             self.loaded_source_ids.update(

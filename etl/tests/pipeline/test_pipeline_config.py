@@ -84,6 +84,40 @@ class PipelineConfigDocumentTypeTests(TestCase):
         result = config.document_type_for_payload({"type": "review"})
         self.assertEqual(result, "article")
 
+    def test_article_like_aliases_are_canonicalized(self):
+        config = EtlPipelineConfig.objects.get_for_source("bronze_scielo_articles")
+
+        for raw_type in ("brief-report", "case-report", "rapid-communication"):
+            with self.subTest(raw_type=raw_type):
+                self.assertEqual(config.document_type_for_payload({"type": raw_type}), "article")
+
+    def test_satellite_article_types_are_preserved(self):
+        config = EtlPipelineConfig.objects.get_for_source("bronze_scielo_articles")
+
+        expected_types = {
+            "abstract": "abstract",
+            "book-review": "book-review",
+            "letter": "letter",
+            "editorial": "editorial",
+            "correction": "correction",
+            "erratum": "correction",
+            "addendum": "correction",
+            "news": "news",
+            "oration": "oration",
+            "press-release": "press-release",
+            "undefined": "undefined",
+            "article-commentary": "commentary",
+        }
+        for raw_type, document_type in expected_types.items():
+            with self.subTest(raw_type=raw_type):
+                self.assertEqual(config.document_type_for_payload({"type": raw_type}), document_type)
+
+    def test_article_pipeline_can_process_satellite_payloads(self):
+        config = EtlPipelineConfig.objects.get_for_source("bronze_scielo_articles")
+
+        self.assertTrue(config.can_process_payload({"type": "correction"}))
+        self.assertTrue(config.can_process_payload({"type": "letter"}))
+
     def test_article_fallback_default(self):
         result = EtlPipelineConfig.objects.get_for_source("bronze_scielo_articles").document_type_for_payload({})
         self.assertEqual(result, "article")
@@ -111,6 +145,11 @@ class PipelineConfigDocumentTypeTests(TestCase):
         result = config.document_type_for_payload({"type": "chapter"})
         self.assertEqual(result, "book-chapter")
 
+    def test_book_section_alias_is_canonicalized(self):
+        config = EtlPipelineConfig.objects.get_for_source("bronze_scielo_books", {"type": "book-section"})
+        result = config.document_type_for_payload({"type": "book-section"})
+        self.assertEqual(result, "book-chapter")
+
     def test_to_rules_rejects_invalid_strategies(self):
         config = EtlPipelineConfig.objects.get_for_source("bronze_scielo_articles")
         config.rules = {**config.rules, "scielo_dedup_strategies": ["doi", "unknown"]}
@@ -123,3 +162,36 @@ class PipelineConfigDocumentTypeTests(TestCase):
         config.rules = {**config.rules, "fuzzy_min_similarity": 0.91}
 
         self.assertEqual(config.to_rules()["fuzzy_min_similarity"], 0.91)
+
+    def test_to_rules_returns_explicit_scielo_dedup_allowed_types(self):
+        config = EtlPipelineConfig(
+            name="article",
+            input_index="bronze_scielo_articles*",
+            input_document_kind="article",
+            default_document_type="article",
+            rules={
+                "scielo_dedup_allowed_types": [
+                    "article",
+                    "research-article",
+                ],
+            },
+        )
+
+        self.assertEqual(
+            config.to_rules()["scielo_dedup_allowed_types"],
+            [
+                "article",
+                "research-article",
+            ],
+        )
+
+    def test_to_rules_does_not_default_scielo_dedup_allowed_types(self):
+        config = EtlPipelineConfig(
+            name="book",
+            input_index="bronze_scielo_books",
+            input_document_kind="book",
+            default_document_type="book",
+            rules={},
+        )
+
+        self.assertEqual(config.to_rules()["scielo_dedup_allowed_types"], [])

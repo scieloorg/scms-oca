@@ -1,30 +1,35 @@
 {% extends "wagtailadmin/generic/listing.html" %}
+{% load i18n %}
 
 {% block listing %}
 <div id="listing-results">
     <table class="listing">
         <thead>
             <tr>
-                <th>Type</th>
-                <th>Total</th>
-                <th>Pending</th>
-                <th>Processing</th>
-                <th>Success</th>
-                <th>Failed</th>
-                <th>Skipped</th>
-                <th>SciELO dedup</th>
-                <th>OpenAlex match</th>
-                <th>Actions</th>
+                <th>{% trans "ETL type" %}</th>
+                <th>{% trans "Source index" %}</th>
+                <th>{% trans "Match search index" %}</th>
+                <th>{% trans "Total" %}</th>
+                <th>{% trans "Pending" %}</th>
+                <th>{% trans "Processing" %}</th>
+                <th>{% trans "Success" %}</th>
+                <th>{% trans "Failed" %}</th>
+                <th>{% trans "Skipped" %}</th>
+                <th>{% trans "SciELO dedup" %}</th>
+                <th>{% trans "OpenAlex match" %}</th>
+                <th>{% trans "Actions" %}</th>
             </tr>
         </thead>
         <tbody>
-            {% for row in stats.by_type_rows %}
+            {% for row in stats.type_rows %}
                 <tr>
                     <td>
                         <a href="{{ list_url }}?document_type={{ row.key }}">
                             {{ row.label }}
                         </a>
                     </td>
+                    <td>{{ row.source_index }}</td>
+                    <td>{{ row.match_search_index }}</td>
                     <td>{{ row.total }}</td>
                     <td>{{ row.pending }}</td>
                     <td>{{ row.processing }}</td>
@@ -34,24 +39,28 @@
                     <td>{{ row.scielo_dedup }}</td>
                     <td>{{ row.openalex }}</td>
                     <td>
-                        <div style="display:flex; flex-direction:column; gap:4px;">
-                            <form method="post" action="{{ trigger_pending_by_type_url }}">
-                                {% csrf_token %}
-                                <input type="hidden" name="type" value="{{ row.key }}">
-                                <button type="submit" class="button button-small button-secondary" title="Process pending items for {{ row.label }}"
-                                        onclick="return confirm('Process pending items for {{ row.label|escapejs }}?')">
-                                    Run Pending
-                                </button>
-                            </form>
-                            <form method="post" action="{{ retry_failed_by_type_url }}">
-                                {% csrf_token %}
-                                <input type="hidden" name="type" value="{{ row.key }}">
-                                <button type="submit" class="button button-small button-secondary" title="Retry failed items for {{ row.label }}"
-                                        onclick="return confirm('Retry failed items for {{ row.label|escapejs }}?')">
-                                    Retry Failed
-                                </button>
-                            </form>
-                        </div>
+                        {% if row.key in stats.enabled_pipeline_document_types %}
+                            <div class="w-flex w-flex-col w-gap-2">
+                                <form method="post" action="{{ trigger_pending_by_type_url }}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="type" value="{{ row.key }}">
+                                    <button type="submit" class="button button-small button-secondary"
+                                            title="{% blocktranslate with label=row.label %}Process pending items for {{ label }}{% endblocktranslate %}"
+                                            onclick="return confirm('{% blocktranslate with label=row.label %}Process pending items for {{ label }}?{% endblocktranslate %}')">
+                                        {% trans "Run Pending" %}
+                                    </button>
+                                </form>
+                                <form method="post" action="{{ retry_failed_by_type_url }}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="type" value="{{ row.key }}">
+                                    <button type="submit" class="button button-small button-secondary"
+                                            title="{% blocktranslate with label=row.label %}Retry failed items for {{ label }}{% endblocktranslate %}"
+                                            onclick="return confirm('{% blocktranslate with label=row.label %}Retry failed items for {{ label }}?{% endblocktranslate %}')">
+                                        {% trans "Retry Failed" %}
+                                    </button>
+                                </form>
+                            </div>
+                        {% endif %}
                     </td>
                 </tr>
             {% endfor %}
