@@ -46,10 +46,15 @@ def apply_global_metrics_upload_to_silver(
     }
     unresolved_countries = set()
 
-    for silver_group in iter_silver_issn_year_groups(
-        client=client,
-        silver_index=silver_index,
-    ):
+
+    silver_groups = list(
+        iter_silver_issn_year_groups(
+            client=client,
+            silver_index=silver_index,
+        )
+    )
+
+    for silver_group in silver_groups:
         stats["silver_groups_seen"] += 1
         stats["harvest_lookups"] += 1
         group = find_global_metric_group_for_silver_group(
