@@ -74,6 +74,18 @@ BRONZE_MAPPING = {
                                     "keyword": {"type": "keyword", "ignore_above": 256}
                                 },
                             },
+                            "organization_units": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "text",
+                                        "fields": {
+                                            "keyword": {"type": "keyword", "ignore_above": 256}
+                                        },
+
+                                    }
+                                }
+                            }
                         },
                     },
                     "name": {
@@ -119,7 +131,19 @@ BRONZE_MAPPING = {
                 "type": "text",
                 "fields": {"keyword": {"type": "keyword", "ignore_above": 256}},
             },
-            "content_url": {"type": "keyword"},
+            "content_url": {
+                "type": "object",
+                "properties": {
+                    "html": {
+                        "type": "object",
+                        "dynamic": True,
+                    },
+                    "pdf": {
+                        "type": "object",
+                        "dynamic": True,
+                    },
+                },
+            },
             "countries_search": {
                 "type": "text",
                 "analyzer": "multilingual",
@@ -282,11 +306,13 @@ BRONZE_MAPPING = {
                     },
                     "title": {
                         "type": "text",
+                        "copy_to": ["title_search"],
                         "fields": {"keyword": {"type": "keyword", "ignore_above": 256}},
                     },
                 },
             },
             "type": {"type": "keyword"},
+            "legacy_type": {"type": "keyword"},
             "updated_at": {"type": "date"},
             "version": {
                 "type": "text",
