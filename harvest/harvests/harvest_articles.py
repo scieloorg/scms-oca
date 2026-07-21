@@ -228,21 +228,7 @@ def persist_article(user, identifier, article_payload):
 
 
 def parse_article_datestamp(raw_data):
-    article_data = raw_data.get("article") if isinstance(raw_data.get("article"), dict) else {}
-    value = (
-        raw_data.get("processing_date")
-        or article_data.get("processing_date")
-        or raw_data.get("updated_at")
-        or article_data.get("updated_at")
-        or raw_data.get("created_at")
-        or article_data.get("created_at")
-    )
-    if not value:
-        return None
-
-    parsed_datetime = parse_datetime(str(value))
-    if parsed_datetime:
-        return parsed_datetime if timezone.is_aware(parsed_datetime) else timezone.make_aware(parsed_datetime)
+    value = raw_data.get("processing_date") or ""
 
     parsed_date = parse_date(str(value))
     if parsed_date:
