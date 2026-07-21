@@ -87,6 +87,7 @@ class OpenSearchETLPipeline:
         )
         self.merger = SilverMerger()
         self.skipped_doc_ids = []
+        self.indexed_document_ids = []
 
     def run(
         self,
@@ -95,6 +96,7 @@ class OpenSearchETLPipeline:
         doc_ids: Optional[List[str]] = None,
     ) -> Dict[str, Any]:
         self.skipped_doc_ids = []
+        self.indexed_document_ids = []
         self.indexed_index_names = set()
 
         result = {
@@ -206,6 +208,7 @@ class OpenSearchETLPipeline:
 
             indexed_count = self._index_silver_documents(all_merged_docs)
             result["total_indexed_docs"] = indexed_count
+            result["indexed_document_ids"] = self.indexed_document_ids
             result["total_skipped_docs"] = len(self.skipped_doc_ids)
             result["skipped_doc_ids"] = self.skipped_doc_ids
 
@@ -411,6 +414,7 @@ class OpenSearchETLPipeline:
             return 0
 
         index_docs = self._prepare_silver_index_documents(docs_to_index)
+        self.indexed_document_ids = [document_id for document_id, _doc in index_docs]
         return self._write_silver_documents(index_docs)
 
     def _prepare_silver_index_documents(
