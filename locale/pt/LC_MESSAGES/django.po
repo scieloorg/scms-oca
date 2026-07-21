@@ -3,7 +3,6 @@
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
@@ -1213,10 +1212,8 @@ msgstr "Configuração de Pipeline de ETL"
 msgid "ETL Pipeline Configs"
 msgstr "Configurações de Pipeline de ETL"
 
-#, fuzzy
-#| msgid "type"
 msgid "ETL type"
-msgstr "tipo"
+msgstr "Tipo de ETL"
 
 msgid "PID V2"
 msgstr ""
@@ -1224,20 +1221,14 @@ msgstr ""
 msgid "ISBN"
 msgstr ""
 
-#, fuzzy
-#| msgid "Preprint"
 msgid "Preprint ID"
-msgstr "Preprint"
+msgstr "ID do preprint"
 
-#, fuzzy
-#| msgid "Dataset"
 msgid "Dataset ID"
-msgstr "Conjunto de Dados"
+msgstr "ID do dataset"
 
-#, fuzzy
-#| msgid "Em Progresso"
 msgid "ETL Item Process"
-msgstr "Em Progresso"
+msgstr "Processo de item ETL"
 
 #, python-format
 msgid "Reset this ETL item to pending?"
@@ -1254,10 +1245,8 @@ msgstr "Sim, redefinir para pendente"
 msgid "No, go back"
 msgstr "Não, voltar"
 
-#, fuzzy
-#| msgid "Source Name"
 msgid "Source index"
-msgstr "Nome da Fonte"
+msgstr "Índice da fonte"
 
 msgid "Match search index"
 msgstr ""
@@ -1265,18 +1254,12 @@ msgstr ""
 msgid "Total"
 msgstr "Total"
 
-#, fuzzy
-#| msgid "Proceedings"
 msgid "Pending"
-msgstr "Anais"
+msgstr "Pendente"
 
-#, fuzzy
-#| msgid "Processing date"
 msgid "Processing"
-msgstr "Data de processamento"
+msgstr "A processar"
 
-#, fuzzy
-#| msgid "Sucesso"
 msgid "Success"
 msgstr "Sucesso"
 
@@ -1286,15 +1269,11 @@ msgstr ""
 msgid "Skipped"
 msgstr ""
 
-#, fuzzy
-#| msgid "SciELO Data"
 msgid "SciELO dedup"
-msgstr "SciELO Data"
+msgstr "Deduplicação SciELO"
 
-#, fuzzy
-#| msgid "OpenAlex"
 msgid "OpenAlex match"
-msgstr "OpenAlex"
+msgstr "Correspondência OpenAlex"
 
 msgid "Actions"
 msgstr "Ações"
@@ -1321,10 +1300,9 @@ msgstr ""
 msgid "Retry Failed"
 msgstr ""
 
-#, fuzzy, python-format
-#| msgid "Invalid document entry at index {index}."
+#, python-format
 msgid "Invalid document type: %(doc_type)s"
-msgstr "Entrada de documento inválida no índice {index}."
+msgstr "Tipo de documento inválido: %(doc_type)s"
 
 #, python-format
 msgid ""
@@ -2378,9 +2356,7 @@ msgstr ""
 "Evolução da produção científica - Mundo - número de periódicos por Indexado "
 "em (OpenAlex)"
 
-#, fuzzy
-#| msgid "Indexed In (SciELO, Scopus, WoS)"
-msgid "Indexed In (SciELO)"
+msgid "Indexed In (SciELO, Scopus, WoS)"
 msgstr "Indexado em (SciELO, Scopus, WoS)"
 
 msgid ""
@@ -3652,10 +3628,8 @@ msgstr "Catálogo IGSN"
 msgid "Metadata"
 msgstr ""
 
-#, fuzzy
-#| msgid "Registro"
 msgid "RAID Registry"
-msgstr "Registro"
+msgstr "Registro RAID"
 
 msgid "Repository"
 msgstr "Repositório"

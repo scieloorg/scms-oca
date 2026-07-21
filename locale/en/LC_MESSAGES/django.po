@@ -3,7 +3,6 @@
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
@@ -1210,10 +1209,8 @@ msgstr "ETL Pipeline Config"
 msgid "ETL Pipeline Configs"
 msgstr "ETL Pipeline Configs"
 
-#, fuzzy
-#| msgid "type"
 msgid "ETL type"
-msgstr "type"
+msgstr "ETL type"
 
 msgid "PID V2"
 msgstr ""
@@ -1221,20 +1218,14 @@ msgstr ""
 msgid "ISBN"
 msgstr ""
 
-#, fuzzy
-#| msgid "Preprint"
 msgid "Preprint ID"
-msgstr "Preprint"
+msgstr "Preprint ID"
 
-#, fuzzy
-#| msgid "Dataset"
 msgid "Dataset ID"
-msgstr "Dataset"
+msgstr "Dataset ID"
 
-#, fuzzy
-#| msgid "Em Progresso"
 msgid "ETL Item Process"
-msgstr "In Progress"
+msgstr "ETL Item Process"
 
 #, python-format
 msgid "Reset this ETL item to pending?"
@@ -1251,10 +1242,8 @@ msgstr "Yes, reset to pending"
 msgid "No, go back"
 msgstr "No, go back"
 
-#, fuzzy
-#| msgid "Source Name"
 msgid "Source index"
-msgstr "Source Name"
+msgstr "Source index"
 
 msgid "Match search index"
 msgstr ""
@@ -1262,18 +1251,12 @@ msgstr ""
 msgid "Total"
 msgstr "Total"
 
-#, fuzzy
-#| msgid "Proceedings"
 msgid "Pending"
-msgstr "Proceedings"
+msgstr "Pending"
 
-#, fuzzy
-#| msgid "Processing date"
 msgid "Processing"
-msgstr "Processing date"
+msgstr "Processing"
 
-#, fuzzy
-#| msgid "Sucesso"
 msgid "Success"
 msgstr "Success"
 
@@ -1283,15 +1266,11 @@ msgstr ""
 msgid "Skipped"
 msgstr ""
 
-#, fuzzy
-#| msgid "SciELO Data"
 msgid "SciELO dedup"
-msgstr "SciELO Data"
+msgstr "SciELO dedup"
 
-#, fuzzy
-#| msgid "OpenAlex"
 msgid "OpenAlex match"
-msgstr "OpenAlex"
+msgstr "OpenAlex match"
 
 msgid "Actions"
 msgstr "Actions"
@@ -1318,10 +1297,9 @@ msgstr ""
 msgid "Retry Failed"
 msgstr ""
 
-#, fuzzy, python-format
-#| msgid "Invalid document entry at index {index}."
+#, python-format
 msgid "Invalid document type: %(doc_type)s"
-msgstr "Invalid document entry at index {index}."
+msgstr "Invalid document type: %(doc_type)s"
 
 #, python-format
 msgid ""
@@ -2368,8 +2346,8 @@ msgstr ""
 "Evolution of scientific production - World - number of journals by Indexed "
 "In (OpenAlex)"
 
-msgid "Indexed In (SciELO)"
-msgstr "Indexed In (SciELO)"
+msgid "Indexed In (SciELO, Scopus, WoS)"
+msgstr "Indexed In (SciELO, Scopus, WoS)"
 
 msgid ""
 "Evolution of scientific production - World - number of journals by Indexed "
@@ -3637,10 +3615,8 @@ msgstr "IGSN Catalog"
 msgid "Metadata"
 msgstr ""
 
-#, fuzzy
-#| msgid "Registro"
 msgid "RAID Registry"
-msgstr "Record"
+msgstr "RAID Registry"
 
 msgid "Repository"
 msgstr "Repository"
