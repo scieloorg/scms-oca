@@ -210,7 +210,7 @@ def retry_failed_preprints_oai_pmh(username, user_id=None, url=None, verify=True
 
 
 @celery_app.task(name="Retry failed articles")
-def retry_failed_articles(username, user_id=None):
+def retry_harvest_failed_articles(username, user_id=None):
     user = User.objects.get(username=username)
     failed_identifiers = set(
         HarvestedArticle.objects.filter(harvest_status=HarvestStatus.FAILED)
