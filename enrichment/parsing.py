@@ -55,4 +55,4 @@ def parse_world_regions(file_obj):
     if not mapping:
         raise ValidationError(_("O CSV não contém regiões."))
 
-    return dict(sorted(mapping.items()))
+    return mapping
