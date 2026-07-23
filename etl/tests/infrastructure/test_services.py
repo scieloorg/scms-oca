@@ -198,6 +198,43 @@ class IncrementalEtlTests(TestCase):
         apply_world_regions.assert_not_called()
 
     @patch("etl.services.log_etl_error")
+    @patch("etl.services.apply_world_regions_to_documents")
+    @patch("etl.services.apply_latest_global_metrics_to_silver")
+    @patch("etl.services.OpenSearchETLPipeline")
+    def test_world_regions_failure_marks_item_failed(
+        self,
+        pipeline_cls,
+        apply_global_metrics,
+        apply_world_regions,
+        _log_etl_error,
+    ):
+        item = enqueue_etl_item(
+            source_index="bronze_scielo_books",
+            external_id="p1",
+            source_payload={
+                "type": "book",
+                "publication_year": 2024,
+                "title": "A",
+            },
+        )
+        pipeline_cls.return_value.run.return_value = {
+            "errors": 0,
+            "total_indexed_docs": 1,
+            "indexed_document_ids": ["silver-1"],
+            "groups_with_openalex_matches": 0,
+            "total_duplicates_found": 0,
+        }
+        pipeline_cls.return_value.indexed_index_names = {"silver"}
+        pipeline_cls.return_value.loaded_source_ids = {"p1"}
+        apply_world_regions.side_effect = RuntimeError("world regions unavailable")
+
+        process_pending_items(limit=10)
+
+        item.refresh_from_db()
+        self.assertEqual(item.status, EtlStatus.FAILED)
+        apply_global_metrics.assert_called_once()
+
+    @patch("etl.services.log_etl_error")
     @patch("etl.services.OpenSearchETLPipeline")
     def test_process_pending_requeues_stale_processing_items(
         self,
