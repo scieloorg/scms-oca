@@ -1,35 +1,40 @@
-import time
+import logging
 
 from django.conf import settings
-from django.utils import timezone
+from opensearchpy.exceptions import OpenSearchException
 
-from enrichment.models import WorldRegionsStatus, WorldRegionsUpload
-from enrichment.world_regions import apply_world_regions, concrete_indices
+from enrichment.exceptions import WorldRegionsProcessingError
+from enrichment.models import WorldRegionsUpload
+from enrichment.world_regions import (
+    apply_world_regions,
+    concrete_indices,
+    wait_for_task,
+)
+
+logger = logging.getLogger(__name__)
+
+AGGREGATED_FIELDS = (
+    "total",
+    "updated",
+    "noops",
+    "version_conflicts",
+    "failures",
+    "took",
+)
+
+MAX_STORED_ERRORS = 10
 
 
-def empty_stats():
-    return {
-        "indices": [],
-        "total": 0,
-        "updated": 0,
-        "noops": 0,
-        "version_conflicts": 0,
-        "failures": 0,
-        "took": 0,
-        "errors": [],
-    }
-
-
-def task_result(index_name, task_id, response):
+def task_result(index_name, response):
     failures = response.get("failures") or []
     errors = []
-    for failure in failures[:10]:
+
+    for failure in failures[:MAX_STORED_ERRORS]:
         reason = failure.get("cause", {}).get("reason") or failure.get("reason")
         errors.append(reason or str(failure))
 
     return {
         "index": index_name,
-        "task_id": task_id,
         "total": response.get("total", 0),
         "updated": response.get("updated", 0),
         "noops": response.get("noops", 0),
@@ -40,38 +45,51 @@ def task_result(index_name, task_id, response):
     }
 
 
-def add_result(stats, result):
-    stats["indices"].append(result)
-    for field in (
-        "total",
-        "updated",
-        "noops",
-        "version_conflicts",
-        "failures",
-        "took",
-    ):
-        stats[field] += result[field]
+def summarize_results(results, errors=()):
+    stats = {
+        "indices": list(results),
+        **{field: 0 for field in AGGREGATED_FIELDS},
+        "errors": [],
+    }
 
-    stats["errors"].extend(result["errors"])
-    stats["errors"] = stats["errors"][:10]
+    for result in results:
+        for field in AGGREGATED_FIELDS:
+            stats[field] += result.get(field, 0)
+
+        stats["errors"].extend(result.get("errors") or [])
+
+    stats["errors"].extend(
+        str(error)
+        for error in errors
+        if error
+    )
+    stats["errors"] = stats["errors"][:MAX_STORED_ERRORS]
 
     return stats
 
 
-def wait_for_task(task_id, poll_interval):
-    client = get_opensearch_client()
+def record_processing_failure(
+    upload,
+    results,
+    error,
+    target_index,
+    current_index,
+    unexpected=False,
+):
+    error_type = "Erro inesperado" if unexpected else "Falha"
 
-    while True:
-        result = client.tasks.get(task_id=task_id)
-        if result.get("completed"):
-            if result.get("error"):
-                raise RuntimeError(
-                    result["error"].get("reason") or str(result["error"])
-                )
+    logger.exception(
+        "%s ao aplicar regiões mundiais: "
+        "upload_id=%s target=%s current_index=%s error=%s",
+        error_type,
+        upload.pk,
+        target_index,
+        current_index,
+        error,
+    )
 
-            return result.get("response") or {}
-
-        time.sleep(poll_interval)
+    stats = summarize_results(results, errors=(error,))
+    upload.fail_application(stats)
 
 
 def run_world_regions_upload(
@@ -81,9 +99,8 @@ def run_world_regions_upload(
     requests_per_second=None,
     poll_interval=None,
 ):
-
     upload = WorldRegionsUpload.objects.get(pk=upload_id)
-    alias = alias or settings.ETL_PUBLIC_ALIAS
+    target_index = alias or upload.target_index_name
 
     if slices is None:
         slices = getattr(settings, "WORLD_REGIONS_SLICES", "auto")
@@ -102,86 +119,56 @@ def run_world_regions_upload(
             5,
         )
 
-    stats = empty_stats()
-    upload.status = WorldRegionsStatus.APPLYING
-    upload.current_index = ""
-    upload.current_task_id = ""
-    upload.stats = stats
-    upload.started_at = timezone.now()
-    upload.finished_at = None
+    results = []
+    stats = summarize_results(results)
+    current_index = None
 
-    upload.save(
-        update_fields=[
-            "status",
-            "current_index",
-            "current_task_id",
-            "stats",
-            "started_at",
-            "finished_at",
-            "updated",
-        ]
-    )
+    upload.start_application(stats)
 
     try:
-        for index_name in concrete_indices(alias):
-            upload.current_index = index_name
-            upload.save(update_fields=["current_index", "updated"])
+        for current_index in concrete_indices(target_index):
             task_id = apply_world_regions(
-                index_name,
+                current_index,
                 upload.mapping,
                 slices=slices,
                 requests_per_second=requests_per_second,
             )
-            upload.current_task_id = task_id
-            upload.save(update_fields=["current_task_id", "updated"])
             response = wait_for_task(task_id, poll_interval)
-            
-            result = task_result(index_name, task_id, response)
-            add_result(stats, result)
-            
-            upload.stats = stats
-            upload.save(update_fields=["stats", "updated"])
-            
+            result = task_result(current_index, response)
+
+            results.append(result)
+            stats = summarize_results(results)
+            upload.update_application_stats(stats)
+
             if result["failures"] or result["version_conflicts"]:
-                raise RuntimeError(
-                    f"Falha ao aplicar regiões mundiais em {index_name}."
+                raise WorldRegionsProcessingError(
+                    f"Falha ao aplicar regiões mundiais em {current_index}: "
+                    f"{result['failures']} falha(s) e "
+                    f"{result['version_conflicts']} conflito(s) de versão."
                 )
-    except Exception as error:
-        stats["errors"].append(str(error))
-        stats["errors"] = stats["errors"][:10]
 
-        upload.status = WorldRegionsStatus.FAILED
-        upload.current_index = ""
-        upload.current_task_id = ""
-        upload.stats = stats
-        upload.finished_at = timezone.now()
-
-        upload.save(
-            update_fields=[
-                "status",
-                "current_index",
-                "current_task_id",
-                "stats",
-                "finished_at",
-                "updated",
-            ]
+    except (OpenSearchException, WorldRegionsProcessingError) as error:
+        record_processing_failure(
+            upload,
+            results,
+            error,
+            target_index,
+            current_index,
         )
         raise
 
-    upload.status = WorldRegionsStatus.APPLIED
-    upload.current_index = ""
-    upload.current_task_id = ""
-    upload.finished_at = timezone.now()
+    except Exception as error:
+        record_processing_failure(
+            upload,
+            results,
+            error,
+            target_index,
+            current_index,
+            unexpected=True,
+        )
+        raise
 
-    upload.save(
-        update_fields=[
-            "status",
-            "current_index",
-            "current_task_id",
-            "stats",
-            "finished_at",
-            "updated",
-        ]
-    )
+    stats = summarize_results(results)
+    upload.complete_application(stats)
 
     return stats
