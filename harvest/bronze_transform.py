@@ -127,7 +127,10 @@ def _run_reindex(*, body, log_prefix, error_context):
             ),
         }
     except Exception as exc:
-        logger.error(f"Erro ao transformar documento {error_context}: {exc}")
+        error_detail = getattr(exc, "info", None)
+        logger.error(
+            f"Erro ao transformar documento {error_context}: {exc}. Detalhe OpenSearch: {error_detail}"
+        )
         return {
             "status": "error",
             "message": f"Erro ao transformar documento {error_context}: {exc}",
@@ -254,7 +257,7 @@ def reconcile_missing_bronze_etl(document_model):
     if not bronze_indices:
         logger.info("Reconciliação. Fase 2. Não há script para transformar raw em bronze para %s.", model_name)
         return
-    
+
     indexed_qs = document_model.objects.filter(
         harvest_status=HarvestStatus.SUCCESS,
         index_status=IndexStatus.SUCCESS,
@@ -266,7 +269,7 @@ def reconcile_missing_bronze_etl(document_model):
     )
 
     missing_qs = indexed_qs.filter(~Exists(has_etl))
-    
+
     logger.info("Reconciliação. Fase 2. %s: %d sem ETL", model_name, missing_qs.count())
     for obj in missing_qs.iterator():
         try:

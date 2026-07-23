@@ -1,5 +1,6 @@
 import io
 import tempfile
+from datetime import datetime
 from unittest.mock import patch
 
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -14,25 +15,36 @@ from harvest.language_normalizer import (
 )
 
 from .exception_logs import ExceptionContext
-from .harvests.harvest_data import harvest_data
-from .harvests.harvest_preprint import NODES, harvest_preprint
-from .models import (
-    GlobalMetricsUploadFile,
-    HarvestedBooks,
-    HarvestedPreprint,
-    HarvestedSciELOData,
-    HarvestErrorLogBooks,
-    HarvestErrorLogPreprint,
-    HarvestErrorLogSciELOData,
-)
 from .global_metrics.constants import GLOBAL_METRICS_REQUIRED_COLUMNS
-from .global_metrics.indexing import GlobalMetricsIndexingError, index_prepared_rows, iter_file_rows
+from .global_metrics.indexing import (
+    GlobalMetricsIndexingError,
+    index_prepared_rows,
+    iter_file_rows,
+)
 from .global_metrics.opensearch import (
     build_global_metrics_update_by_query_body,
     build_harvest_metric_lookup_body,
     iter_silver_issn_year_groups,
 )
 from .global_metrics.parsing import global_metric_row_from_hit
+from .harvests.harvest_articles import (
+    fetch_article_identifiers_page,
+    harvest_articles,
+)
+from .harvests.harvest_data import harvest_data
+from .harvests.harvest_preprint import NODES, harvest_preprint
+from .indexing import get_index_name
+from .models import (
+    GlobalMetricsUploadFile,
+    HarvestedArticle,
+    HarvestedBooks,
+    HarvestedPreprint,
+    HarvestedSciELOData,
+    HarvestErrorLogArticle,
+    HarvestErrorLogBooks,
+    HarvestErrorLogPreprint,
+    HarvestErrorLogSciELOData,
+)
 from .parse_info_oai_pmh import (
     get_date,
     get_identifier_source,
@@ -517,42 +529,182 @@ class HarvestTestOAIPMH(TestCase):
         self.assertEqual(data.harvest_error_log.count(), 1)
         self.assertEqual(data.harvest_error_log.first().exception_type, "RuntimeError")
 
-    @patch("harvest.harvests.harvest_data.fetch_dataset_data")
+
+class HarvestArticlesTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create(username="article-user", password="teste")
+        self.identifier_item = {
+            "code": "S0100-879X1998000800011",
+            "collection": "scl",
+            "doi": "10.1590/S0100-879X1998000800011",
+            "processing_date": "1998-09-21",
+        }
+        self.article_payload = {
+            "code": "S0100-879X1998000800011",
+            "doi": "10.1590/S0100-879X1998000800011",
+            "collection": "scl",
+            "processing_date": "1998-09-21",
+            "publication_year": "1998",
+            "publication_date": "1998-08",
+            "title": {
+                "v100": [{"_": "Brazilian Journal of Medical and Biological Research"}],
+                "v310": [{"_": "BR"}],
+                "issns": ["1414-431X", "0100-879X"],
+            },
+            "article": {
+                "v12": [{"l": "en", "_": "High dietary calcium decreases blood pressure"}],
+                "v83": [{"l": "en", "a": "This study evaluates calcium."}],
+                "v40": [{"_": "en"}],
+                "v10": [{"n": "N.", "s": "Buassi", "_": ""}],
+                "v31": [{"_": "31"}],
+                "v32": [{"_": "8"}],
+                "v14": [{"f": "1099", "_": ""}, {"l": "1101", "_": ""}],
+                "v880": [{"_": "S0100-879X1998000800011"}],
+                "v978": [{"l": "en", "k": "calcium carbonate", "_": ""}],
+            },
+        }
+
+    @patch("harvest.harvests.harvest_articles.fetch_data")
+    def test_fetch_article_identifiers_page_uses_incremental_params(self, mock_fetch_data):
+        mock_fetch_data.return_value = {
+            "objects": [self.identifier_item],
+            "meta": {"offset": 10},
+        }
+
+        objects, meta = fetch_article_identifiers_page(
+            limit=10,
+            offset=20,
+            from_date="2024-01-01",
+            until_date="2024-01-31",
+            collection="scl",
+        )
+
+        self.assertEqual(objects, [self.identifier_item])
+        self.assertEqual(meta["offset"], 10)
+        url = mock_fetch_data.call_args.args[0]
+        self.assertIn("limit=10", url)
+        self.assertIn("offset=20", url)
+        self.assertIn("from=2024-01-01", url)
+        self.assertIn("until=2024-01-31", url)
+        self.assertIn("collection=scl", url)
+
+    @patch("harvest.signals.transform_after_indexing")
+    @patch("harvest.signals.index_harvested_instance")
+    @patch("harvest.harvests.harvest_articles.fetch_article_detail")
+    @patch("harvest.harvests.harvest_articles.fetch_article_identifiers_page")
+    def test_harvest_articles_paginates_and_persists_success(
+        self,
+        mock_fetch_page,
+        mock_fetch_detail,
+        mock_index,
+        mock_transform,
+    ):
+        mock_fetch_page.side_effect = [
+            ([self.identifier_item], {}),
+            ([], {}),
+        ]
+        mock_fetch_detail.return_value = self.article_payload
+
+        harvest_articles(user=self.user, limit=1, offset=0, from_date="1998-09-21")
+
+        self.assertEqual(mock_fetch_page.call_count, 2)
+        self.assertEqual(HarvestedArticle.objects.count(), 1)
+        article = HarvestedArticle.objects.get(identifier="S0100-879X1998000800011")
+        self.assertEqual(article.creator, self.user)
+        self.assertEqual(article.harvest_status, "success")
+        self.assertEqual(article.raw_data, self.article_payload)
+        self.assertEqual(article.datestamp.date().isoformat(), "1998-09-21")
+        mock_index.assert_called()
+
+    @patch("harvest.signals.transform_after_indexing")
+    @patch("harvest.signals.index_harvested_instance")
+    @patch("harvest.harvests.harvest_articles.fetch_article_detail")
+    @patch("harvest.harvests.harvest_articles.fetch_article_identifiers_page")
+    def test_harvest_articles_records_failed_article(
+        self,
+        mock_fetch_page,
+        mock_fetch_detail,
+        mock_index,
+        mock_transform,
+    ):
+        mock_fetch_page.side_effect = [
+            ([self.identifier_item], {}),
+            ([], {}),
+        ]
+        mock_fetch_detail.return_value = {}
+
+        harvest_articles(user=self.user, limit=1)
+
+        article = HarvestedArticle.objects.get(identifier="S0100-879X1998000800011")
+        self.assertEqual(article.harvest_status, "failed")
+        self.assertEqual(HarvestErrorLogArticle.objects.count(), 1)
+        self.assertEqual(article.harvest_error_log.first().field_name, "raw_data")
+
+    @patch("harvest.tasks.harvest_articles")
+    def test_harvest_scielo_articles_uses_latest_datestamp_incrementally(self, mock_harvest_articles):
+        HarvestedArticle.objects.create(
+            identifier="S0100-879X1998000800011",
+            creator=self.user,
+            datestamp=timezone.make_aware(datetime(2024, 5, 2)),
+        )
+
+        from .tasks import harvest_scielo_articles
+
+        harvest_scielo_articles(username=self.user.username, limit=10, offset=0)
+
+        self.assertEqual(mock_harvest_articles.call_args.kwargs["from_date"], "2024-05-02")
+        self.assertEqual(mock_harvest_articles.call_args.kwargs["limit"], 10)
+
+
+class HarvestArticleIndexingTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create(username="indexing-user", password="teste")
+
+    @override_settings(OS_INDEX_RAW_ARTICLE="raw_scielo_article_test")
+    def test_get_index_name_supports_harvested_article(self):
+        self.assertEqual(
+            get_index_name(model_name="HarvestedArticle"),
+            "raw_scielo_article_test",
+        )
+
+    @patch("harvest.signals.transform_after_indexing")
+    @patch("harvest.signals.index_harvested_instance")
+    @patch("harvest.harvests.harvest_data.fetch_dataverse_data")
     @patch("harvest.harvests.harvest_data.fetch_search_page")
     def test_harvest_data_paginates_using_total_count(
-        self, mock_fetch_search, mock_fetch_dataset
+        self, mock_fetch_search, mock_fetch_dataverse, mock_index, mock_transform
     ):
-        dataverse_item = {
+        first_dataverse_item = {
             "type": "dataverse",
             "identifier": "dv-1",
             "name": "Dataverse Test",
         }
-        dataset_item = {
-            "type": "dataset",
-            "global_id": "doi:10.5072/FK2/TEST",
-        }
-        dataset_data = {
-            "identifier": "ds-1",
-            "title": "Dataset Test",
+        second_dataverse_item = {
+            "type": "dataverse",
+            "identifier": "dv-2",
+            "name": "Dataverse Test 2",
         }
         mock_fetch_search.side_effect = [
-            ([dataverse_item, dataset_item], 2),
+            ([first_dataverse_item, second_dataverse_item], 2),
             ([], 2),
         ]
-        mock_fetch_dataset.return_value = dataset_data
+        mock_fetch_dataverse.side_effect = [
+            {"identifier": "dv-1"},
+            {"identifier": "dv-2"},
+        ]
 
         harvest_data(
             user=self.user,
-            base_url="https://data.scielo.org",
+            type="dataverse",
             per_page=2,
             start=0,
         )
 
         self.assertEqual(HarvestedSciELOData.objects.count(), 2)
         dataverse_obj = HarvestedSciELOData.objects.get(identifier="dv-1")
-        dataset_obj = HarvestedSciELOData.objects.get(identifier="ds-1")
+        second_dataverse_obj = HarvestedSciELOData.objects.get(identifier="dv-2")
         self.assertEqual(dataverse_obj.raw_data["identifier"], "dv-1")
-        self.assertEqual(dataset_obj.raw_data["identifier"], "ds-1")
+        self.assertEqual(second_dataverse_obj.raw_data["identifier"], "dv-2")
 
 
 class LanguageNormalizerTests(SimpleTestCase):

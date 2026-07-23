@@ -35,8 +35,9 @@ def get_index_name(model_name=None, instance=None, type_data=None):
             )
         }
         return index.get(effective_type, None)
-    
+
     return {
+        "HarvestedArticle": getattr(settings, "OS_INDEX_RAW_ARTICLE", None),
         "HarvestedPreprint": getattr(settings, "OS_INDEX_RAW_PREPRINT", None),
         "HarvestedBooks": getattr(settings, "OS_INDEX_RAW_BOOK", None),
     }.get(model_name)
@@ -44,6 +45,7 @@ def get_index_name(model_name=None, instance=None, type_data=None):
 
 def _get_error_log_fk_field(instance):
     return {
+        "HarvestedArticle": "article",
         "HarvestedPreprint": "preprint",
         "HarvestedBooks": "book",
         "HarvestedSciELOData": "scielo_data",
@@ -95,7 +97,7 @@ def index_harvested_instance(instance, index_name=None, refresh=False):
     if client is None:
         logger.warning("OpenSearch client não configurado.")
         return
-    
+
     if not index_name:
         logger.warning(
             f"Index name não configurado para {instance.__class__.__name__} ({instance.identifier})."

@@ -1,0 +1,527 @@
+// Transforma o dado bruto de datasets coletados do SciELO Data (indice raw)
+// no documento bronze de dataset (ver harvest/mapping_bronze_dataset.py).
+// Executado como script Painless em um _reindex do OpenSearch.
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+Long parsePublicationYear(def value) {
+  if (value == null) {
+    return null;
+  }
+  String dateStr = value.toString();
+  if (dateStr.length() < 4) {
+    return null;
+  }
+  try {
+    return Long.parseLong(dateStr.substring(0, 4));
+  } catch (Exception e) {
+    return null;
+  }
+}
+
+Map buildContentUrl(def url) {
+  if (url == null) {
+    return null;
+  }
+  Map contentUrl = new HashMap();
+  Map landingPage = new HashMap();
+  landingPage.put('url', url);
+  contentUrl.put('landing_page', landingPage);
+  return contentUrl;
+}
+
+List buildDescriptionWithLang(def description, def language) {
+  List descriptionWithLang = new ArrayList();
+  if (description == null) {
+    return descriptionWithLang;
+  }
+  Map entry = new HashMap();
+  entry.put('description', description);
+  entry.put('language', language);
+  descriptionWithLang.add(entry);
+  return descriptionWithLang;
+}
+
+List buildTitleWithLang(def title, def language) {
+  List titleWithLang = new ArrayList();
+  if (title == null) {
+    return titleWithLang;
+  }
+  Map entry = new HashMap();
+  entry.put('title', title);
+  entry.put('language', language);
+  titleWithLang.add(entry);
+  return titleWithLang;
+}
+
+List buildSubjectsWithLang(def subjects, def language) {
+  List subjectsWithLang = new ArrayList();
+  if (subjects == null || subjects.isEmpty() || language == null) {
+    return subjectsWithLang;
+  }
+  StringBuilder text = new StringBuilder();
+  for (int i = 0; i < subjects.size(); i++) {
+    if (i > 0) {
+      text.append('; ');
+    }
+    text.append(subjects.get(i).toString());
+  }
+  Map entry = new HashMap();
+  entry.put('language', language);
+  entry.put('subjects', text.toString());
+  subjectsWithLang.add(entry);
+  return subjectsWithLang;
+}
+
+String pickLanguage(def languages) {
+  if (languages == null || languages.isEmpty()) {
+    return null;
+  }
+  return languages.get(0).toString();
+}
+
+Map buildPublisherFields(def publisher) {
+  Map result = new HashMap();
+  List publishers = new ArrayList();
+  Map dataverse = new HashMap();
+
+  if (publisher == null) {
+    result.put('publishers', publishers);
+    result.put('dataverse', dataverse);
+    return result;
+  }
+
+  if (publisher instanceof Map) {
+    Map pub = new HashMap();
+    if (publisher.name != null) {
+      pub.put('name', publisher.name);
+      dataverse.put('name', publisher.name);
+    }
+    if (publisher.identifier != null) {
+      pub.put('id', publisher.identifier);
+      dataverse.put('identifier', publisher.identifier);
+    }
+    if (publisher.url != null) {
+      dataverse.put('url', publisher.url);
+    }
+    if (!pub.isEmpty()) {
+      publishers.add(pub);
+    }
+  } else {
+    Map pub = new HashMap();
+    pub.put('name', publisher);
+    publishers.add(pub);
+    dataverse.put('name', publisher);
+  }
+
+  result.put('publishers', publishers);
+  result.put('dataverse', dataverse);
+  return result;
+}
+
+Map buildLicense(def licenseRaw) {
+  Map license = new HashMap();
+  if (licenseRaw == null) {
+    return license;
+  }
+  if (licenseRaw.uri != null) {
+    license.put('url', licenseRaw.uri);
+  }
+  if (licenseRaw.name != null) {
+    license.put('name', licenseRaw.name);
+  }
+  if (licenseRaw.iconUri != null) {
+    license.put('icon_url', licenseRaw.iconUri);
+  }
+  return license;
+}
+
+List buildFiles(def filesRaw) {
+  List files = new ArrayList();
+  if (filesRaw == null) {
+    return files;
+  }
+
+  for (def fileItem : filesRaw) {
+    if (fileItem == null) {
+      continue;
+    }
+
+    Map file = new HashMap();
+    if (fileItem.label != null) {
+      file.put('label', fileItem.label);
+    }
+
+    def dataFile = fileItem.dataFile != null ? fileItem.dataFile : fileItem;
+    if (dataFile != null) {
+      if (dataFile.pidURL != null) {
+        file.put('pid_url', dataFile.pidURL);
+      } else if (dataFile.pidUrl != null) {
+        file.put('pid_url', dataFile.pidUrl);
+      }
+      if (dataFile.publicationDate != null) {
+        file.put('publication_date', dataFile.publicationDate);
+      }
+      if (dataFile.persistentId != null) {
+        file.put('ids', dataFile.persistentId);
+      }
+      if (dataFile.description != null) {
+        file.put('abstract', dataFile.description);
+      }
+    }
+
+    if (fileItem.description != null && !file.containsKey('abstract')) {
+      file.put('abstract', fileItem.description);
+    }
+
+    if (!file.isEmpty()) {
+      files.add(file);
+    }
+  }
+
+  return files;
+}
+
+void addUniqueSubject(List subjects, def value) {
+  if (value == null) {
+    return;
+  }
+  String subject = value.toString();
+  if (!subjects.contains(subject)) {
+    subjects.add(subject);
+  }
+}
+
+void addUniqueKeyword(List keywords, def value) {
+  if (value == null) {
+    return;
+  }
+  String keyword = value.toString();
+  if (!keywords.contains(keyword)) {
+    keywords.add(keyword);
+  }
+}
+
+void addUniqueLanguage(List languages, def value) {
+  if (value == null) {
+    return;
+  }
+  String language = value.toString();
+  if (!languages.contains(language)) {
+    languages.add(language);
+  }
+}
+
+Map parseCitationFields(def fields) {
+  Map parsed = new HashMap();
+  List authorships = new ArrayList();
+  List keywords = new ArrayList();
+  List subjects = new ArrayList();
+  List languages = new ArrayList();
+  Map biblio = new HashMap();
+  String title = null;
+  String description = null;
+  String landingPageUrl = null;
+
+  if (fields == null) {
+    parsed.put('authorships', authorships);
+    parsed.put('keywords', keywords);
+    parsed.put('subjects', subjects);
+    parsed.put('languages', languages);
+    parsed.put('biblio', biblio);
+    return parsed;
+  }
+
+  for (def field : fields) {
+    if (field == null) {
+      continue;
+    }
+
+    String typeName = field.typeName;
+    def value = field.value;
+
+    if (typeName == 'title') {
+      if (value != null) {
+        title = value.toString();
+      }
+    } else if (typeName == 'author') {
+      if (value != null) {
+        for (def authorData : value) {
+          if (authorData == null) {
+            continue;
+          }
+          Map authorship = new HashMap();
+          if (authorData.authorName != null && authorData.authorName.value != null) {
+            authorship.put('name', authorData.authorName.value);
+          }
+          if (authorData.authorIdentifier != null && authorData.authorIdentifier.value != null) {
+            authorship.put('orcid', authorData.authorIdentifier.value);
+          }
+          if (authorData.authorAffiliation != null && authorData.authorAffiliation.value != null) {
+            Map institution = new HashMap();
+            institution.put('name', authorData.authorAffiliation.value);
+            List institutions = new ArrayList();
+            institutions.add(institution);
+            authorship.put('institutions', institutions);
+          }
+          if (!authorship.isEmpty()) {
+            authorships.add(authorship);
+          }
+        }
+      }
+    } else if (typeName == 'dsDescription') {
+      if (value != null) {
+        for (def descriptionData : value) {
+          if (descriptionData != null
+              && descriptionData.dsDescriptionValue != null
+              && descriptionData.dsDescriptionValue.value != null
+              && description == null) {
+            description = descriptionData.dsDescriptionValue.value.toString();
+          }
+        }
+      }
+    } else if (typeName == 'subject') {
+      if (value != null) {
+        if (value instanceof List) {
+          for (def subject : value) {
+            addUniqueSubject(subjects, subject);
+          }
+        } else {
+          addUniqueSubject(subjects, value);
+        }
+      }
+    } else if (typeName == 'keyword') {
+      if (value != null) {
+        for (def keywordData : value) {
+          if (keywordData != null
+              && keywordData.keywordValue != null
+              && keywordData.keywordValue.value != null) {
+            addUniqueKeyword(keywords, keywordData.keywordValue.value);
+          }
+        }
+      }
+    } else if (typeName == 'language') {
+      if (value != null) {
+        if (value instanceof List) {
+          for (def language : value) {
+            addUniqueLanguage(languages, language);
+          }
+        } else {
+          addUniqueLanguage(languages, value);
+        }
+      }
+    } else if (typeName == 'publication') {
+      if (value != null) {
+        for (def publicationData : value) {
+          if (publicationData == null) {
+            continue;
+          }
+          if (publicationData.publicationURL != null && publicationData.publicationURL.value != null) {
+            landingPageUrl = publicationData.publicationURL.value.toString();
+          }
+        }
+      }
+    } else if (typeName == 'journalVolume') {
+      if (value != null) {
+        biblio.put('volume', value.toString());
+      }
+    } else if (typeName == 'journalIssue') {
+      if (value != null) {
+        biblio.put('issue', value.toString());
+      }
+    } else if (typeName == 'pageNumber') {
+      if (value != null) {
+        String pages = value.toString().trim();
+        if (pages.length() > 0) {
+          int dash = pages.indexOf('-');
+          if (dash > 0) {
+            String firstPage = pages.substring(0, dash).trim();
+            String lastPage = pages.substring(dash + 1).trim();
+            if (firstPage.length() > 0) {
+              biblio.put('first_page', firstPage);
+            }
+            if (lastPage.length() > 0) {
+              biblio.put('last_page', lastPage);
+            }
+          } else {
+            biblio.put('first_page', pages);
+            biblio.put('last_page', pages);
+          }
+        }
+      }
+    }
+  }
+
+  parsed.put('title', title);
+  parsed.put('description', description);
+  parsed.put('authorships', authorships);
+  parsed.put('keywords', keywords);
+  parsed.put('subjects', subjects);
+  parsed.put('languages', languages);
+  parsed.put('biblio', biblio);
+  parsed.put('landing_page_url', landingPageUrl);
+  return parsed;
+}
+
+// ---------------------------------------------------------------------------
+// Leitura da origem
+// ---------------------------------------------------------------------------
+
+def raw = ctx._source.raw_data;
+if (raw == null) {
+  ctx.op = 'noop';
+  return;
+}
+
+Map doc = new HashMap();
+Map ids = new HashMap();
+
+Map ocaData = new HashMap();
+ocaData.put('scope', 'scielo');
+doc.put('oca_data', ocaData);
+
+Map publisherFields = buildPublisherFields(raw.publisher);
+List publishers = (List) publisherFields.get('publishers');
+Map dataverse = (Map) publisherFields.get('dataverse');
+if (!publishers.isEmpty()) {
+  doc.put('publishers', publishers);
+}
+if (!dataverse.isEmpty()) {
+  doc.put('dataverse', dataverse);
+}
+
+if (raw.datasetType != null) {
+  doc.put('type', raw.datasetType);
+}
+
+Map source = new HashMap();
+source.put('is_primary', true);
+source.put('type', 'repository');
+doc.put('source', source);
+
+def latest = raw.latestVersion;
+if (latest != null) {
+  Map license = buildLicense(latest.license);
+  if (!license.isEmpty()) {
+    doc.put('license', license);
+  }
+
+  if (latest.datasetId != null) {
+    doc.put('dataset_id', latest.datasetId);
+  }
+  if (latest.createTime != null) {
+    doc.put('create_time', latest.createTime);
+  }
+  if (latest.releaseTime != null) {
+    doc.put('release_time', latest.releaseTime);
+  }
+  if (latest.citationDate != null) {
+    doc.put('citation_date', latest.citationDate);
+  }
+  if (latest.versionState != null) {
+    doc.put('version_state', latest.versionState);
+  }
+  if (latest.versionNumber != null) {
+    doc.put('version_number', latest.versionNumber);
+  }
+  if (latest.latestVersionPublishingState != null) {
+    doc.put('latest_version_publishing_state', latest.latestVersionPublishingState);
+  }
+  if (latest.publicationDate != null) {
+    doc.put('publication_date', latest.publicationDate);
+    Long publicationYear = parsePublicationYear(latest.publicationDate);
+    if (publicationYear != null) {
+      doc.put('publication_year', publicationYear);
+    }
+  }
+  if (latest.datasetPersistentId != null) {
+    ids.put('doi', latest.datasetPersistentId);
+  }
+
+  List files = buildFiles(latest.files);
+  if (!files.isEmpty()) {
+    doc.put('files', files);
+  }
+
+  def citation = latest.metadataBlocks != null ? latest.metadataBlocks.citation : null;
+  if (citation != null && citation.name != null) {
+    doc.put('citation_name', citation.name);
+  }
+
+  Map parsedCitation = parseCitationFields(citation != null ? citation.fields : null);
+  String title = parsedCitation.get('title');
+  String description = parsedCitation.get('description');
+  List authorships = (List) parsedCitation.get('authorships');
+  List keywords = (List) parsedCitation.get('keywords');
+  List subjects = (List) parsedCitation.get('subjects');
+  List languages = (List) parsedCitation.get('languages');
+  Map biblio = (Map) parsedCitation.get('biblio');
+  String landingPageUrl = parsedCitation.get('landing_page_url');
+  String language = pickLanguage(languages);
+
+  if (landingPageUrl != null) {
+    source.put('landing_page_url', landingPageUrl);
+  }
+  if (title != null) {
+    doc.put('title', title);
+    doc.put('title_with_lang', buildTitleWithLang(title, language));
+  }
+  if (description != null) {
+    doc.put('description', description);
+    doc.put('description_with_lang', buildDescriptionWithLang(description, language));
+  }
+  if (!authorships.isEmpty()) {
+    doc.put('authorships', authorships);
+  }
+  if (!subjects.isEmpty()) {
+    doc.put('subjects', subjects);
+    doc.put('subjects_with_lang', buildSubjectsWithLang(subjects, language));
+  }
+  if (!keywords.isEmpty()) {
+    doc.put('keyword', keywords);
+  }
+  if (language != null) {
+    doc.put('language', language);
+  }
+  if (!biblio.isEmpty()) {
+    doc.put('biblio', biblio);
+  }
+
+  if (latest.datasetPersistentId != null && language != null) {
+    List doiWithLang = new ArrayList();
+    Map doiEntry = new HashMap();
+    doiEntry.put('doi', latest.datasetPersistentId);
+    doiEntry.put('language', language);
+    doiWithLang.add(doiEntry);
+    ids.put('doi_with_lang', doiWithLang);
+  }
+}
+
+if (raw.persistentUrl != null) {
+  Map contentUrl = buildContentUrl(raw.persistentUrl);
+  if (contentUrl != null) {
+    doc.put('content_url', contentUrl);
+  }
+}
+
+if (raw.publicationDate != null && doc.get('publication_date') == null) {
+  doc.put('publication_date', raw.publicationDate);
+  Long publicationYear = parsePublicationYear(raw.publicationDate);
+  if (publicationYear != null) {
+    doc.put('publication_year', publicationYear);
+  }
+}
+
+if (!ids.isEmpty()) {
+  doc.put('ids', ids);
+}
+
+doc.put('source', source);
+
+// ---------------------------------------------------------------------------
+// Substitui o documento de origem pelo documento bronze.
+// ---------------------------------------------------------------------------
+ctx._source.clear();
+ctx._source.putAll(doc);

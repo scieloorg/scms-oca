@@ -1,0 +1,308 @@
+// Transforma o dado bruto de artigos coletado do ArticleMeta (indice raw)
+// no documento bronze de artigos (ver harvest/mapping_bronze_articles.py).
+// Executado como script Painless em um _reindex do OpenSearch, onde
+// ctx._source e o documento de origem e passa a ser o documento de destino.
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+// Retorna o valor escalar de um campo ArticleMeta do tipo [{"_": "valor"}].
+String getScalar(Map container, String key) {
+  if (container == null) return null;
+  def value = container.get(key);
+  if (value instanceof List) {
+    if (((List) value).isEmpty()) return null;
+    def first = ((List) value).get(0);
+    if (first instanceof Map) {
+      def underscore = ((Map) first).get("_");
+      return underscore == null ? null : underscore.toString();
+    }
+    return first == null ? null : first.toString();
+  }
+  return value == null ? null : value.toString();
+}
+
+// Escolhe, em uma lista de itens multilingues, o item do idioma desejado.
+// Se nao encontrar, devolve o primeiro item.
+Map pickByLang(def items, String lang) {
+  if (!(items instanceof List) || ((List) items).isEmpty()) return null;
+  if (lang != null) {
+    for (item in (List) items) {
+      if (item instanceof Map && lang.equals(((Map) item).get("l"))) {
+        return (Map) item;
+      }
+    }
+  }
+  return (Map) ((List) items).get(0);
+}
+
+// Converte uma data "YYYY-MM-DD" para o formato ISO usado no bronze.
+String isoDate(def value) {
+  if (value == null) return null;
+  String text = value.toString();
+  if (text.isEmpty()) return null;
+  if (text.contains("T")) return text;
+  return text + "T00:00:00.000Z";
+}
+
+// Retorna string ou null quando ausente/vazia.
+String toStringOrNull(def value) {
+  if (value == null) return null;
+  String text = value.toString();
+  return text.isEmpty() ? null : text;
+}
+
+// Adiciona chave string apenas quando houver valor.
+void putStringIfPresent(Map target, String key, def value) {
+  String text = toStringOrNull(value);
+  if (text != null) target.put(key, text);
+}
+
+// Verifica se o valor corresponde ao padrao de DOI (ex.: 10.1590/abc-123).
+boolean isDoi(String value) {
+  if (value == null) return false;
+  return /^\d{2}\.\d+\/.*/.matcher(value).matches();
+}
+
+// Extrai DOIs por idioma a partir de article.v337.
+List buildDoiWithLang(def rawDoi) {
+  List items = new ArrayList();
+  if (!(rawDoi instanceof List)) return items;
+  for (item in (List) rawDoi) {
+    if (!(item instanceof Map)) continue;
+    Map entry = (Map) item;
+    String lang = entry.get("l") == null ? null : entry.get("l").toString();
+    String doi = entry.get("d") == null ? null : entry.get("d").toString();
+    if (lang == null || lang.isEmpty() || doi == null || doi.isEmpty()) continue;
+    if (isDoi(lang) && doi.length() == 2) {
+      String swapped = lang;
+      lang = doi;
+      doi = swapped;
+    }
+    if (isDoi(doi) && lang.length() == 2) {
+      Map obj = new HashMap();
+      obj.put("language", lang);
+      obj.put("doi", doi);
+      items.add(obj);
+    }
+  }
+  return items;
+}
+
+// ---------------------------------------------------------------------------
+// Leitura da origem
+// ---------------------------------------------------------------------------
+
+Map root = ctx._source;
+if (root.get("raw_data") instanceof Map) {
+  root = (Map) root.get("raw_data");
+}
+Map article = root.get("article") instanceof Map ? (Map) root.get("article") : null;
+Map journal = root.get("title") instanceof Map ? (Map) root.get("title") : null;
+
+String primaryLang = getScalar(article, "v40");
+
+Map out = new HashMap();
+
+// type: research-article vira "article"; original_type guarda o valor bruto.
+String documentType = toStringOrNull(root.get("document_type"));
+if (documentType != null) {
+  out.put("legacy_type", documentType);
+  out.put("type", "research-article".equals(documentType) ? "article" : documentType);
+}
+
+// Identificadores basicos.
+putStringIfPresent(out, "code", root.get("code"));
+putStringIfPresent(out, "collection", root.get("collection"));
+putStringIfPresent(out, "id", root.get("id"));
+
+Map ids = new HashMap();
+putStringIfPresent(ids, "doi", root.get("doi"));
+List doiWithLang = article != null ? buildDoiWithLang(article.get("v337")) : new ArrayList();
+if (!doiWithLang.isEmpty()) ids.put("doi_with_lang", doiWithLang);
+if (!ids.isEmpty()) out.put("ids", ids);
+
+// Datas.
+String createdAt = isoDate(root.get("created_at"));
+if (createdAt != null) out.put("created_at", createdAt);
+String processingDate = isoDate(root.get("processing_date"));
+if (processingDate != null) out.put("processing_date", processingDate);
+putStringIfPresent(out, "publication_year", root.get("publication_year"));
+
+// Idioma do documento.
+putStringIfPresent(out, "language", primaryLang);
+
+// Titulos.
+String title = "";
+List titleWithLang = new ArrayList();
+if (article != null && article.get("v12") instanceof List) {
+  Map titleSel = pickByLang(article.get("v12"), primaryLang);
+  if (titleSel != null && titleSel.get("_") != null) {
+    title = titleSel.get("_").toString();
+  }
+  for (item in (List) article.get("v12")) {
+    if (!(item instanceof Map)) continue;
+    Map entry = (Map) item;
+    Map obj = new HashMap();
+    putStringIfPresent(obj, "language", entry.get("l"));
+    putStringIfPresent(obj, "title", entry.get("_"));
+    if (!obj.isEmpty()) titleWithLang.add(obj);
+  }
+}
+if (!title.isEmpty()) out.put("title", title);
+if (!titleWithLang.isEmpty()) out.put("title_with_lang", titleWithLang);
+
+// Resumos.
+String abstractText = "";
+List abstractWithLang = new ArrayList();
+if (article != null && article.get("v83") instanceof List) {
+  Map abstractSel = pickByLang(article.get("v83"), primaryLang);
+  if (abstractSel != null && abstractSel.get("a") != null) {
+    abstractText = abstractSel.get("a").toString();
+  }
+  for (item in (List) article.get("v83")) {
+    if (!(item instanceof Map)) continue;
+    Map entry = (Map) item;
+    Map obj = new HashMap();
+    putStringIfPresent(obj, "language", entry.get("l"));
+    putStringIfPresent(obj, "text", entry.get("a"));
+    if (!obj.isEmpty()) abstractWithLang.add(obj);
+  }
+}
+if (!abstractText.isEmpty()) out.put("abstract", abstractText);
+if (!abstractWithLang.isEmpty()) out.put("abstract_with_lang", abstractWithLang);
+
+// Bibliografia (volume, fasciculo e paginas).
+Map biblio = new HashMap();
+if (article != null && article.get("v14") instanceof List && !((List) article.get("v14")).isEmpty()) {
+  Map pages = (Map) ((List) article.get("v14")).get(0);
+  putStringIfPresent(biblio, "first_page", pages.get("f"));
+  putStringIfPresent(biblio, "last_page", pages.get("l"));
+}
+putStringIfPresent(biblio, "volume", article != null ? getScalar(article, "v31") : null);
+putStringIfPresent(biblio, "issue", article != null ? getScalar(article, "v32") : null);
+if (!biblio.isEmpty()) out.put("biblio", biblio);
+
+// Autoria e afiliacoes.
+List authorships = new ArrayList();
+List affiliations = article != null && article.get("v70") instanceof List
+  ? (List) article.get("v70")
+  : new ArrayList();
+if (article != null && article.get("v10") instanceof List) {
+  List authors = (List) article.get("v10");
+  for (int i = 0; i < authors.size(); i++) {
+    if (!(authors.get(i) instanceof Map)) continue;
+    Map author = (Map) authors.get(i);
+
+    String given = author.get("n") == null ? "" : author.get("n").toString();
+    String surname = author.get("s") == null ? "" : author.get("s").toString();
+
+    Map authorship = new HashMap();
+    authorship.put("name", (given + " " + surname).trim());
+    authorship.put("position", i + 1);
+    putStringIfPresent(authorship, "orcid", author.get("k"));
+
+    // Referencias de afiliacao ficam em chaves numericas ("1", "2", ...).
+    List affRefs = new ArrayList();
+    for (int k = 1; k <= 20; k++) {
+      def ref = author.get("" + k);
+      if (ref != null && ref.toString().length() > 0) affRefs.add(ref.toString());
+    }
+
+    List institutions = new ArrayList();
+    List countries = new ArrayList();
+    for (String ref : affRefs) {
+      for (aff in affiliations) {
+        if (!(aff instanceof Map)) continue;
+        Map affiliation = (Map) aff;
+        if (!ref.equals(affiliation.get("i"))) continue;
+
+        Map institution = new HashMap();
+        putStringIfPresent(institution, "city", affiliation.get("c"));
+        putStringIfPresent(institution, "name", affiliation.get("_"));
+        putStringIfPresent(institution, "state", affiliation.get("s"));
+        String country = toStringOrNull(affiliation.get("p"));
+        if (country != null) {
+          institution.put("country_code", country);
+          if (!countries.contains(country)) countries.add(country);
+        }
+        if (!institution.isEmpty()) institutions.add(institution);
+      }
+    }
+    if (!countries.isEmpty()) authorship.put("countries", countries);
+    if (!institutions.isEmpty()) authorship.put("institutions", institutions);
+    authorships.add(authorship);
+  }
+}
+if (!authorships.isEmpty()) out.put("authorships", authorships);
+
+// Codigos de pais dos autores (unicos e ordenados).
+List authorCountryCodes = new ArrayList();
+for (ship in authorships) {
+  def shipCountries = ((Map) ship).get("countries");
+  if (!(shipCountries instanceof List)) continue;
+  for (code in (List) shipCountries) {
+    if (!authorCountryCodes.contains(code)) authorCountryCodes.add(code);
+  }
+}
+if (!authorCountryCodes.isEmpty()) {
+  Collections.sort(authorCountryCodes);
+  out.put("author_country_codes", authorCountryCodes);
+}
+
+// Titulo do periodico.
+if (article != null) putStringIfPresent(out, "journal_title", getScalar(article, "v100"));
+
+// URLs de texto completo (copia fulltexts do payload bruto).
+if (root.get("fulltexts") instanceof Map && !((Map) root.get("fulltexts")).isEmpty()) {
+  out.put("content_url", root.get("fulltexts"));
+}
+
+// Acesso aberto (todo conteudo SciELO e open access).
+out.put("is_open_access", true);
+out.put("open_access_status", "oa");
+out.put("primary_source_type", "journal");
+
+// Escopo OCA.
+Map ocaData = new HashMap();
+ocaData.put("scope", "scielo");
+out.put("oca_data", ocaData);
+
+// Editora.
+String publisherName = getScalar(journal, "v480");
+if (publisherName == null) publisherName = getScalar(article, "v62");
+List publishers = new ArrayList();
+if (publisherName != null && !publisherName.isEmpty()) {
+  Map publisher = new HashMap();
+  publisher.put("name", publisherName);
+  publishers.add(publisher);
+}
+if (!publishers.isEmpty()) out.put("publishers", publishers);
+
+// Fonte (periodico).
+Map source = new HashMap();
+if (publisherName != null && !publisherName.isEmpty()) {
+  Map hostOrganization = new HashMap();
+  hostOrganization.put("name", publisherName);
+  source.put("host_organization", hostOrganization);
+}
+putStringIfPresent(source, "id", getScalar(journal, "v68"));
+source.put("is_open_access", true);
+List issns = new ArrayList();
+if (root.get("code_title") instanceof List) {
+  for (issn in (List) root.get("code_title")) {
+    if (issn != null) issns.add(issn.toString());
+  }
+}
+if (!issns.isEmpty()) source.put("issns", issns);
+if (article != null) putStringIfPresent(source, "title", getScalar(article, "v100"));
+source.put("type", "journal");
+putStringIfPresent(source, "version", root.get("version"));
+out.put("source", source);
+
+// ---------------------------------------------------------------------------
+// Substitui o documento de origem pelo documento bronze.
+// ---------------------------------------------------------------------------
+ctx._source.clear();
+ctx._source.putAll(out);

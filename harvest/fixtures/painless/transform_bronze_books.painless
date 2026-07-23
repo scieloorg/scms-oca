@@ -1,0 +1,269 @@
+// Transforma o dado bruto de livros coletado do SciELO Books (indice raw)
+// no documento bronze de livros (ver harvest/mapping_bronze_books.py).
+// Executado como script Painless em um _reindex do OpenSearch.
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+Map parseNestedList(def data) {
+  Map result = new HashMap();
+  if (data == null || !(data instanceof List)) {
+    return result;
+  }
+  for (def item : data) {
+    if (item instanceof List && item.size() == 2 && item[0] != null) {
+      result.put(item[0].toString(), item[1]);
+    }
+  }
+  return result;
+}
+
+String formatAuthorName(def name) {
+  if (name == null) {
+    return null;
+  }
+  String nameStr = name.toString();
+  int commaIndex = nameStr.indexOf(',');
+  if (commaIndex > 0) {
+    String lastName = nameStr.substring(0, commaIndex).trim();
+    String firstName = nameStr.substring(commaIndex + 1).trim();
+    return firstName + ' ' + lastName;
+  }
+  return nameStr;
+}
+
+String formatPages(def initial, def finalPage) {
+  if (initial == null && finalPage == null) {
+    return null;
+  }
+  if (initial != null && finalPage != null) {
+    if (initial.toString().equals(finalPage.toString())) {
+      return initial.toString();
+    }
+    return initial.toString() + '-' + finalPage.toString();
+  }
+  if (initial != null) {
+    return initial.toString();
+  }
+  return finalPage.toString();
+}
+
+List buildTitleWithLang(def title, def language, def translatedTitles) {
+  List titleWithLang = new ArrayList();
+  if (title != null) {
+    Map entry = new HashMap();
+    entry.put('title', title);
+    entry.put('language', language);
+    titleWithLang.add(entry);
+  }
+  if (translatedTitles != null) {
+    for (def translatedTitle : translatedTitles) {
+      if (translatedTitle != null) {
+        Map entry = new HashMap();
+        entry.put('title', translatedTitle);
+        entry.put('language', null);
+        titleWithLang.add(entry);
+      }
+    }
+  }
+  return titleWithLang;
+}
+
+List buildSynopsisWithLang(def synopsis, def language, def translatedSynopses) {
+  List synopsisWithLang = new ArrayList();
+  if (synopsis != null) {
+    Map entry = new HashMap();
+    entry.put('synopsis', synopsis);
+    entry.put('language', language);
+    synopsisWithLang.add(entry);
+  }
+  if (translatedSynopses != null) {
+    for (def translatedSynopsis : translatedSynopses) {
+      if (translatedSynopsis != null) {
+        Map entry = new HashMap();
+        entry.put('synopsis', translatedSynopsis);
+        entry.put('language', null);
+        synopsisWithLang.add(entry);
+      }
+    }
+  }
+  return synopsisWithLang;
+}
+
+List buildAuthorships(def creators) {
+  List authorships = new ArrayList();
+  if (creators == null) {
+    return authorships;
+  }
+  for (def creatorData : creators) {
+    Map creatorDict = parseNestedList(creatorData);
+    String name = formatAuthorName(creatorDict.get('full_name'));
+    if (name == null) {
+      continue;
+    }
+    Map authorship = new HashMap();
+    authorship.put('name', name);
+    if (creatorDict.get('role') != null) {
+      authorship.put('role', creatorDict.get('role'));
+    }
+    if (creatorDict.get('link_resume') != null) {
+      authorship.put('link_resume', creatorDict.get('link_resume'));
+    }
+    authorships.add(authorship);
+  }
+  return authorships;
+}
+
+// ---------------------------------------------------------------------------
+// Leitura da origem
+// ---------------------------------------------------------------------------
+
+def raw = ctx._source.raw_data;
+if (raw == null) {
+  ctx.op = 'noop';
+  return;
+}
+
+Map doc = new HashMap();
+
+Map ocaData = new HashMap();
+ocaData.put('scope', 'scielo');
+doc.put('oca_data', ocaData);
+
+String rawType = raw.TYPE;
+String docType;
+if (rawType == 'Monograph') {
+  docType = 'book';
+} else if (rawType == 'Part') {
+  docType = 'book-chapter';
+} else {
+  ctx.op = 'noop';
+  return;
+}
+doc.put('type', docType);
+
+Map source = new HashMap();
+source.put('is_primary', true);
+if (docType == 'book-chapter') {
+  source.put('type', 'book');
+}
+doc.put('source', source);
+
+doc.put('id', raw.id);
+doc.put('authorships', buildAuthorships(raw.creators));
+
+if (rawType == 'Monograph') {
+  Map serieDict = parseNestedList(raw.serie);
+  Map formatDict = parseNestedList(raw.format);
+  Map formatOut = new HashMap();
+  formatOut.put('height', formatDict.get('height'));
+  formatOut.put('width', formatDict.get('width'));
+
+  Map biblio = new HashMap();
+  biblio.put('city', raw.city);
+  def pagesValue = raw.pages;
+  if (pagesValue instanceof List) {
+    Map pagesDict = parseNestedList(pagesValue);
+    def initial = pagesDict.get('initial');
+    def finalPage = pagesDict.get('final');
+    biblio.put('pages', formatPages(initial, finalPage));
+    if (initial != null) {
+      biblio.put('first_page', initial.toString());
+    }
+    if (finalPage != null) {
+      biblio.put('last_page', finalPage.toString());
+    }
+  } else {
+    biblio.put('pages', pagesValue);
+  }
+  biblio.put('serie', serieDict.get('title'));
+  biblio.put('country', raw.country);
+  biblio.put('format', formatOut);
+  doc.put('biblio', biblio);
+
+  Map ids = new HashMap();
+  ids.put('scl_book_id', raw.id);
+  ids.put('isbn', raw.isbn);
+  ids.put('eisbn', raw.eisbn);
+  ids.put('doi', raw.doi_number);
+  ids.put('monograph', raw.id);
+
+  List bisacCodes = new ArrayList();
+  if (raw.bisac_code != null) {
+    for (def bisacItem : raw.bisac_code) {
+      if (bisacItem != null) {
+        Map codeDict = parseNestedList(bisacItem);
+        if (codeDict.get('code') != null) {
+          bisacCodes.add(codeDict.get('code'));
+        }
+      }
+    }
+  }
+  ids.put('bisac_code', bisacCodes);
+  doc.put('ids', ids);
+
+  doc.put('publication_year', raw.year);
+  doc.put('title', raw.title);
+  doc.put('title_with_lang', buildTitleWithLang(raw.title, raw.language, raw.translated_titles));
+  doc.put('language', raw.language);
+  doc.put('synopsis', raw.synopsis);
+  doc.put('synopsis_with_lang', buildSynopsisWithLang(raw.synopsis, raw.language, raw.translated_synopses));
+
+  if (raw.publisher != null) {
+    List pubs = new ArrayList();
+    Map publisher = new HashMap();
+    publisher.put('name', raw.publisher);
+    pubs.add(publisher);
+    doc.put('publishers', pubs);
+  }
+} else {
+  Map pagesDict = parseNestedList(raw.pages);
+  def initial = pagesDict.get('initial');
+  def finalPage = pagesDict.get('final');
+
+  Map biblio = new HashMap();
+  biblio.put('order', raw.order);
+  biblio.put('pages', formatPages(initial, finalPage));
+  if (initial != null) {
+    biblio.put('first_page', initial.toString());
+  }
+  if (finalPage != null) {
+    biblio.put('last_page', finalPage.toString());
+  }
+  doc.put('biblio', biblio);
+  doc.put('title', raw.title);
+  doc.put('title_with_lang', buildTitleWithLang(raw.title, raw.text_language, raw.translated_titles));
+
+  Map monograph = new HashMap();
+  monograph.put('id', raw.monograph);
+  monograph.put('title', raw.monograph_title);
+  monograph.put('authorships', buildAuthorships(raw.monograph_creators));
+  monograph.put('language', raw.monograph_language);
+  monograph.put('publishers', raw.monograph_publisher);
+  monograph.put('publication_year', raw.monograph_year);
+  doc.put('monograph', monograph);
+
+  Map ids = new HashMap();
+  ids.put('scl_book_id', raw.id);
+  ids.put('doi', raw.doi_number);
+  ids.put('isbn', raw.monograph_isbn);
+  doc.put('ids', ids);
+
+  doc.put('language', raw.text_language);
+  doc.put('publication_year', raw.monograph_year);
+
+  if (raw.monograph_publisher != null) {
+    List pubs = new ArrayList();
+    Map publisher = new HashMap();
+    publisher.put('name', raw.monograph_publisher);
+    pubs.add(publisher);
+    doc.put('publishers', pubs);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Substitui o documento de origem pelo documento bronze.
+// ---------------------------------------------------------------------------
+ctx._source.clear();
+ctx._source.putAll(doc);

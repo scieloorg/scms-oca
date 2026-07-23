@@ -8,6 +8,7 @@ class Command(BaseCommand):
     help = "Normaliza o campo language para ISO 639-1 em índices bronze."
 
     DEFAULT_INDICES = {
+        "bronze_scielo_articles",
         "bronze_scielo_books",
         "bronze_scielo_dataset",
         "bronze_scielo_preprint",
@@ -19,6 +20,7 @@ class Command(BaseCommand):
             "--index",
             choices=[
                 "all",
+                "bronze_scielo_articles",
                 "bronze_scielo_books",
                 "bronze_scielo_dataset",
                 "bronze_scielo_preprint",
