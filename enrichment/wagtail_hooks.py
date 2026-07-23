@@ -74,14 +74,14 @@ def register_world_regions_buttons(snippet, user, next_url=None):
         return
 
     yield Button(
-        _("Aplicar World Regions"),
+        _("Aplicar Regiões Mundiais"),
         reverse("enrichment_apply_world_regions", args=[snippet.pk]),
         icon_name="tasks",
         priority=20,
     )
 
     yield Button(
-        _("Ver resultados"),
+        _("Ver Resultados"),
         reverse("enrichment_world_regions_results", args=[snippet.pk]),
         icon_name="view",
         priority=30,
