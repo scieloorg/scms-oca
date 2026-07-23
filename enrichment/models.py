@@ -74,23 +74,3 @@ class WorldRegionsUpload(BaseEnrichmentUpload):
             raise ValidationError({"file": _("Envie um arquivo CSV.")})
 
         self.mapping = parse_world_regions(self.file)
-
-    @admin.display(description=_("Índices"))
-    def completed_indices(self):
-        return len(self.stats.get("indices", []))
-
-    @admin.display(description=_("Encontrados"))
-    def documents_found(self):
-        return self.stats.get("total", 0)
-
-    @admin.display(description=_("Atualizados"))
-    def documents_updated(self):
-        return self.stats.get("updated", 0)
-
-    @admin.display(description=_("No-op"))
-    def documents_noop(self):
-        return self.stats.get("noops", 0)
-
-    @admin.display(description=_("Falhas"))
-    def failures(self):
-        return self.stats.get("failures", 0)

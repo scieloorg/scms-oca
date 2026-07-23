@@ -1,7 +1,7 @@
 from django.urls import path, reverse
-from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy as _
 from wagtail import hooks
-from wagtail.admin.ui.tables import BooleanColumn
+from wagtail.admin.ui.tables import BooleanColumn, Column
 from wagtail.admin.widgets.button import Button
 from wagtail.snippets.models import register_snippet
 from wagtail.snippets.views.snippets import SnippetViewSet, SnippetViewSetGroup
@@ -19,12 +19,36 @@ class WorldRegionsUploadViewSet(SnippetViewSet):
     list_display = (
         "file",
         BooleanColumn("active", label=_("Ativo")),
-        "status",
-        "completed_indices",
-        "documents_found",
-        "documents_updated",
-        "documents_noop",
-        "failures",
+        Column(
+            "status",
+            label=_("Status"),
+            accessor=lambda upload: upload.get_status_display(),
+        ),
+        Column(
+            "completed_indices",
+            label=_("Índices"),
+            accessor=lambda upload: len(upload.stats.get("indices", [])),
+        ),
+        Column(
+            "documents_found",
+            label=_("Encontrados"),
+            accessor=lambda upload: upload.stats.get("total", 0),
+        ),
+        Column(
+            "documents_updated",
+            label=_("Atualizados"),
+            accessor=lambda upload: upload.stats.get("updated", 0),
+        ),
+        Column(
+            "documents_noop",
+            label=_("No-op"),
+            accessor=lambda upload: upload.stats.get("noops", 0),
+        ),
+        Column(
+            "failures",
+            label=_("Falhas"),
+            accessor=lambda upload: upload.stats.get("failures", 0),
+        ),
         "created",
         "updated",
     )
