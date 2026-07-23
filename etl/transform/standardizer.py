@@ -210,7 +210,7 @@ class BaseStandardizer:
     def _build_source_field(self, raw_data: dict[str, Any]) -> dict:
         source: dict[str, Any] = {}
         raw_source: dict[str, Any] = {}
-        sources = raw_data.get("sources")
+        sources = raw_data.get("source") or raw_data.get("sources")
         if sources:
             if isinstance(sources, list) and len(sources) > 0:
                 raw_source = sources[0]
