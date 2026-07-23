@@ -15,7 +15,8 @@ from search_gateway.client import get_opensearch_client
 def apply_global_metrics_upload_to_silver(
     upload_file_id,
     harvest_index=None,
-    silver_index=None
+    silver_index=None,
+    document_ids=None,
 ):
 
     upload_file = GlobalMetricsUploadFile.objects.get(pk=upload_file_id)
@@ -30,6 +31,8 @@ def apply_global_metrics_upload_to_silver(
         "silver_scientific_production",
     )
     source_file = Path(upload_file.file.name).name
+    if document_ids is not None:
+        document_ids = list(dict.fromkeys(document_ids))
 
     stats = {
         "upload_file_id": upload_file_id,
@@ -45,12 +48,14 @@ def apply_global_metrics_upload_to_silver(
         "errors": [],
     }
     unresolved_countries = set()
-
+    if document_ids:
+        client.indices.refresh(index=silver_index)
 
     silver_groups = list(
         iter_silver_issn_year_groups(
             client=client,
             silver_index=silver_index,
+            document_ids=document_ids,
         )
     )
 
@@ -73,6 +78,7 @@ def apply_global_metrics_upload_to_silver(
             client=client,
             silver_index=silver_index,
             group=group,
+            document_ids=document_ids,
         )
         stats["matches_found"] += response.get("total", 0)
         stats["updated"] += response.get("updated", 0)
@@ -86,4 +92,25 @@ def apply_global_metrics_upload_to_silver(
         f"{stats['groups_processed']} grupos, {stats['matches_found']} matches, "
         f"{stats['updated']} atualizações."
     )
+    return stats
+
+
+def apply_latest_global_metrics_to_silver(document_ids, silver_index):
+
+    upload_file = (
+        GlobalMetricsUploadFile.objects.filter(status=True)
+        .order_by("-updated")
+        .first()
+    )
+    if upload_file is None:
+        raise RuntimeError("Nenhum arquivo de métricas globais foi processado.")
+
+    stats = apply_global_metrics_upload_to_silver(
+        upload_file.pk,
+        silver_index=silver_index,
+        document_ids=document_ids,
+    )
+    if stats["errors"] or stats["version_conflicts"]:
+        raise RuntimeError("Falha ao aplicar métricas globais aos documentos do ETL.")
+
     return stats

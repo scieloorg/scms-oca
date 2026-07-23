@@ -9,14 +9,19 @@ from harvest.global_metrics.parsing import (
 from search_gateway.option_normalization import clean_text
 
 
-def iter_silver_issn_year_groups(client, silver_index):
+def iter_silver_issn_year_groups(client, silver_index, document_ids=None):
+
+    filters = [
+        {"exists": {"field": "publication_year"}},
+        {"exists": {"field": "source.issns"}},
+    ]
+    if document_ids is not None:
+        filters.append({"ids": {"values": document_ids}})
+
     body = {
         "query": {
             "bool": {
-                "filter": [
-                    {"exists": {"field": "publication_year"}},
-                    {"exists": {"field": "source.issns"}},
-                ]
+                "filter": filters
             }
         },
         "_source": ["publication_year", "source.issns"],
@@ -173,14 +178,19 @@ def global_metrics_update_script():
     """
 
 
-def build_global_metrics_update_by_query_body(group):
+def build_global_metrics_update_by_query_body(group, document_ids=None):
+
+    filters = [
+        {"term": {"publication_year": group["year"]}},
+        {"terms": {"source.issns": group["issns"]}},
+    ]
+    if document_ids is not None:
+        filters.append({"ids": {"values": document_ids}})
+
     return {
         "query": {
             "bool": {
-                "filter": [
-                    {"term": {"publication_year": group["year"]}},
-                    {"terms": {"source.issns": group["issns"]}},
-                ]
+                "filter": filters
             }
         },
         "script": {
@@ -194,10 +204,11 @@ def build_global_metrics_update_by_query_body(group):
     }
 
 
-def update_silver_group_by_query(client, silver_index, group):
+def update_silver_group_by_query(client, silver_index, group, document_ids=None):
+
     return client.update_by_query(
         index=silver_index,
-        body=build_global_metrics_update_by_query_body(group),
+        body=build_global_metrics_update_by_query_body(group, document_ids),
         conflicts="proceed",
         refresh=False,
     )

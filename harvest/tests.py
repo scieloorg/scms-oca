@@ -195,12 +195,14 @@ class GlobalMetricsUploadTaskTests(SimpleTestCase):
                 "indexed_in": {"WoS", "Scopus"},
                 "country_codes": ["BR"],
                 "countries": ["Brasil"],
-            }
+            },
+            document_ids=["silver-1"],
         )
 
         filters = body["query"]["bool"]["filter"]
         self.assertEqual(filters[0], {"term": {"publication_year": 2024}})
         self.assertEqual(filters[1], {"terms": {"source.issns": ["12345678", "1234-5678"]}})
+        self.assertEqual(filters[2], {"ids": {"values": ["silver-1"]}})
         params = body["script"]["params"]
         self.assertEqual(params["indexed_in"], ["Scopus", "WoS"])
         self.assertEqual(params["country_codes"], ["BR"])

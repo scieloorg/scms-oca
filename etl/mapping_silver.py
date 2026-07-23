@@ -89,6 +89,7 @@ SILVER_PROPERTIES = {
                         "type": "object",
                         "properties": {
                             "country_code": {"type": "keyword"},
+                            "world_region": {"type": "keyword"},
                             "indexed_in": {"type": "keyword"},
                         },
                     },
@@ -98,6 +99,12 @@ SILVER_PROPERTIES = {
                 "type": "object",
                 "properties": {
                     "ids": {"type": "keyword"},
+                    "affiliations": {
+                        "type": "object",
+                        "properties": {
+                            "world_regions": {"type": "keyword"},
+                        },
+                    },
                     "versions": {
                         "type": "nested",
                         "properties": {

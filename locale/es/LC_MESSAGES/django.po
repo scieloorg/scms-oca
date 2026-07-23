@@ -3,12 +3,11 @@
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: SCMS-OCA\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-22 12:32+0000\n"
+"POT-Creation-Date: 2026-07-21 02:03+0000\n"
 "PO-Revision-Date: 2026-02-06 13:00\n"
 "Last-Translator: GitHub Copilot <noreply@github.com>\n"
 "Language-Team: Spanish <es@li.org>\n"
@@ -358,165 +357,143 @@ msgid "File successfully validated!"
 msgstr "¡Archivo validado con éxito!"
 
 msgid ""
-"Título do item, veja exemplo em: <a "
-"href=\"https://github.com/scieloorg/scms-oca/wiki/Campos#title\" "
-"target=\"_blank\">https://github.com/scieloorg/scms-"
+"Título do item, veja exemplo em: <a href=\"https://github.com/scieloorg/scms-"
+"oca/wiki/Campos#title\" target=\"_blank\">https://github.com/scieloorg/scms-"
 "oca/wiki/Campos#title</a>"
 msgstr ""
-"Título del ítem, vea ejemplo en: <a "
-"href=\"https://github.com/scieloorg/scms-oca/wiki/Campos#title\" "
-"target=\"_blank\">https://github.com/scieloorg/scms-"
+"Título del ítem, vea ejemplo en: <a href=\"https://github.com/scieloorg/scms-"
+"oca/wiki/Campos#title\" target=\"_blank\">https://github.com/scieloorg/scms-"
 "oca/wiki/Campos#title</a>"
 
 msgid ""
-"Link URL do item específico, veja exemplo em: <a "
-"href=\"https://github.com/scieloorg/scms-oca/wiki/Campos#link\" "
-"target=\"_blank\">https://github.com/scieloorg/scms-oca/wiki/Campos#link</a>"
+"Link URL do item específico, veja exemplo em: <a href=\"https://github.com/"
+"scieloorg/scms-oca/wiki/Campos#link\" target=\"_blank\">https://github.com/"
+"scieloorg/scms-oca/wiki/Campos#link</a>"
 msgstr ""
-"Enlace URL del ítem específico, vea ejemplo en: <a "
-"href=\"https://github.com/scieloorg/scms-oca/wiki/Campos#enlace\" "
-"target=\"_blank\">https://github.com/scieloorg/scms-"
-"oca/wiki/Campos#enlace</a>"
+"Enlace URL del ítem específico, vea ejemplo en: <a href=\"https://github.com/"
+"scieloorg/scms-oca/wiki/Campos#enlace\" target=\"_blank\">https://github.com/"
+"scieloorg/scms-oca/wiki/Campos#enlace</a>"
 
 msgid ""
-"Descrição/representação do item, veja exemplo em: <a "
-"href=\"https://github.com/scieloorg/scms-"
-"oca/wiki/Campos#descri%C3%A7%C3%A3o\" "
-"target=\"_blank\">https://github.com/scieloorg/scms-"
-"oca/wiki/Campos#descri%C3%A7%C3%A3o</a>"
+"Descrição/representação do item, veja exemplo em: <a href=\"https://github."
+"com/scieloorg/scms-oca/wiki/Campos#descri%C3%A7%C3%A3o\" target=\"_blank"
+"\">https://github.com/scieloorg/scms-oca/wiki/Campos#descri%C3%A7%C3%A3o</a>"
 msgstr ""
-"Descripción/representación del ítem, vea ejemplo en: <a "
-"href=\"https://github.com/scieloorg/scms-"
-"oca/wiki/Campos#descri%C3%A7%C3%A3o\" "
-"target=\"_blank\">https://github.com/scieloorg/scms-"
-"oca/wiki/Campos#descri%C3%A7%C3%A3o</a>"
+"Descripción/representación del ítem, vea ejemplo en: <a href=\"https://"
+"github.com/scieloorg/scms-oca/wiki/Campos#descri%C3%A7%C3%A3o\" target="
+"\"_blank\">https://github.com/scieloorg/scms-oca/wiki/Campos#descri"
+"%C3%A7%C3%A3o</a>"
 
 msgid ""
 "Instituição a qual o item é subordinado (quando houver). É diferente da "
 "instituição. Veja exemplo em: <a href=\"https://github.com/scieloorg/scms-"
-"oca/wiki/Campos#origem\" "
-"target=\"_blank\">https://github.com/scieloorg/scms-"
+"oca/wiki/Campos#origem\" target=\"_blank\">https://github.com/scieloorg/scms-"
 "oca/wiki/Campos#origem</a>"
 msgstr ""
 "Institución a la cual el ítem está subordinado (cuando sea aplicable). Es "
-"diferente de la institución. Vea ejemplo en: <a "
-"href=\"https://github.com/scieloorg/scms-oca/wiki/Campos#origem\" "
-"target=\"_blank\">https://github.com/scieloorg/scms-"
-"oca/wiki/Campos#origem</a>"
+"diferente de la institución. Vea ejemplo en: <a href=\"https://github.com/"
+"scieloorg/scms-oca/wiki/Campos#origem\" target=\"_blank\">https://github.com/"
+"scieloorg/scms-oca/wiki/Campos#origem</a>"
 
 msgid ""
 "Instituição/empresa ao qual o item registrado pertence. Veja exemplo em: <a "
-"href=\"https://github.com/scieloorg/scms-"
-"oca/wiki/Campos#institui%C3%A7%C3%A3o\" "
-"target=\"_blank\">https://github.com/scieloorg/scms-"
-"oca/wiki/Campos#institui%C3%A7%C3%A3o</a>"
+"href=\"https://github.com/scieloorg/scms-oca/wiki/Campos#institui"
+"%C3%A7%C3%A3o\" target=\"_blank\">https://github.com/scieloorg/scms-oca/wiki/"
+"Campos#institui%C3%A7%C3%A3o</a>"
 msgstr ""
 "Institución/empresa a la que pertenece el ítem registrado. Vea ejemplo en: "
-"<a href=\"https://github.com/scieloorg/scms-"
-"oca/wiki/Campos#institui%C3%A7%C3%A3o\" "
-"target=\"_blank\">https://github.com/scieloorg/scms-"
-"oca/wiki/Campos#institui%C3%A7%C3%A3o</a>"
+"<a href=\"https://github.com/scieloorg/scms-oca/wiki/Campos#institui"
+"%C3%A7%C3%A3o\" target=\"_blank\">https://github.com/scieloorg/scms-oca/wiki/"
+"Campos#institui%C3%A7%C3%A3o</a>"
 
 msgid ""
 "Grandes área do conhecimento ao qual pertence o item. Veja exemplo em: <a "
-"href=\"https://github.com/scieloorg/scms-oca/wiki/Campos#%C3%A1rea-"
-"tem%C3%A1tica\" target=\"_blank\">https://github.com/scieloorg/scms-"
-"oca/wiki/Campos#%C3%A1rea-tem%C3%A1tica</a>"
+"href=\"https://github.com/scieloorg/scms-oca/wiki/Campos#%C3%A1rea-tem"
+"%C3%A1tica\" target=\"_blank\">https://github.com/scieloorg/scms-oca/wiki/"
+"Campos#%C3%A1rea-tem%C3%A1tica</a>"
 msgstr ""
 "Grandes áreas del conocimiento a las que pertenece el ítem. Vea ejemplo en: "
-"<a href=\"https://github.com/scieloorg/scms-oca/wiki/Campos#%C3%A1rea-"
-"tem%C3%A1tica\" target=\"_blank\">https://github.com/scieloorg/scms-"
-"oca/wiki/Campos#%C3%A1rea-tem%C3%A1tica</a>"
+"<a href=\"https://github.com/scieloorg/scms-oca/wiki/Campos#%C3%A1rea-tem"
+"%C3%A1tica\" target=\"_blank\">https://github.com/scieloorg/scms-oca/wiki/"
+"Campos#%C3%A1rea-tem%C3%A1tica</a>"
 
 msgid ""
-"Palavras-chaves do item. Veja exemplo em: <a "
-"href=\"https://github.com/scieloorg/scms-oca/wiki/Campos#palavras-chaves\" "
-"target=\"_blank\">https://github.com/scieloorg/scms-"
-"oca/wiki/Campos#palavras-chaves</a>"
+"Palavras-chaves do item. Veja exemplo em: <a href=\"https://github.com/"
+"scieloorg/scms-oca/wiki/Campos#palavras-chaves\" target=\"_blank\">https://"
+"github.com/scieloorg/scms-oca/wiki/Campos#palavras-chaves</a>"
 msgstr ""
-"Palabras clave del ítem. Vea ejemplo en: <a "
-"href=\"https://github.com/scieloorg/scms-oca/wiki/Campos#palavras-chaves\" "
-"target=\"_blank\">https://github.com/scieloorg/scms-"
-"oca/wiki/Campos#palavras-chaves</a>"
+"Palabras clave del ítem. Vea ejemplo en: <a href=\"https://github.com/"
+"scieloorg/scms-oca/wiki/Campos#palavras-chaves\" target=\"_blank\">https://"
+"github.com/scieloorg/scms-oca/wiki/Campos#palavras-chaves</a>"
 
 msgid ""
 "Prática da ciência aberta referente ao item registrado. Veja exemplo em: <a "
 "href=\"https://github.com/scieloorg/scms-oca/wiki/Campos#pr%C3%A1tica\" "
-"target=\"_blank\">https://github.com/scieloorg/scms-"
-"oca/wiki/Campos#pr%C3%A1tica</a>"
+"target=\"_blank\">https://github.com/scieloorg/scms-oca/wiki/Campos#pr"
+"%C3%A1tica</a>"
 msgstr ""
-"Práctica de la ciencia abierta referente al ítem registrado. Vea ejemplo en:"
-" <a href=\"https://github.com/scieloorg/scms-oca/wiki/Campos#pr%C3%A1tica\" "
-"target=\"_blank\">https://github.com/scieloorg/scms-"
-"oca/wiki/Campos#pr%C3%A1tica</a>"
+"Práctica de la ciencia abierta referente al ítem registrado. Vea ejemplo en: "
+"<a href=\"https://github.com/scieloorg/scms-oca/wiki/Campos#pr%C3%A1tica\" "
+"target=\"_blank\">https://github.com/scieloorg/scms-oca/wiki/Campos#pr"
+"%C3%A1tica</a>"
 
 msgid ""
-"Determine qual a ação dessa prática: <a "
-"href=\"https://github.com/scieloorg/scms-oca/wiki/Campos#pr%C3%A1tica\" "
-"target=\"_blank\">https://github.com/scieloorg/scms-oca/wiki/Campos#acao</a>"
+"Determine qual a ação dessa prática: <a href=\"https://github.com/scieloorg/"
+"scms-oca/wiki/Campos#pr%C3%A1tica\" target=\"_blank\">https://github.com/"
+"scieloorg/scms-oca/wiki/Campos#acao</a>"
 msgstr ""
-"Determine la acción de esta práctica: <a "
-"href=\"https://github.com/scieloorg/scms-oca/wiki/Campos#pr%C3%A1tica\" "
-"target=\"_blank\">https://github.com/scieloorg/scms-oca/wiki/Campos#acao</a>"
+"Determine la acción de esta práctica: <a href=\"https://github.com/scieloorg/"
+"scms-oca/wiki/Campos#pr%C3%A1tica\" target=\"_blank\">https://github.com/"
+"scieloorg/scms-oca/wiki/Campos#acao</a>"
 
 msgid ""
-"Classificação referente ao item registrado. Veja exemplo em: <a "
-"href=\"https://github.com/scieloorg/scms-"
-"oca/wiki/Campos#classifica%C3%A7%C3%A3o\" "
-"target=\"_blank\">https://github.com/scieloorg/scms-"
-"oca/wiki/Campos#classifica%C3%A7%C3%A3o</a>"
+"Classificação referente ao item registrado. Veja exemplo em: <a href="
+"\"https://github.com/scieloorg/scms-oca/wiki/Campos#classifica%C3%A7%C3%A3o"
+"\" target=\"_blank\">https://github.com/scieloorg/scms-oca/wiki/"
+"Campos#classifica%C3%A7%C3%A3o</a>"
 msgstr ""
-"Clasificación referente al ítem registrado. Vea ejemplo en: <a "
-"href=\"https://github.com/scieloorg/scms-"
-"oca/wiki/Campos#classifica%C3%A7%C3%A3o\" "
-"target=\"_blank\">https://github.com/scieloorg/scms-"
-"oca/wiki/Campos#classifica%C3%A7%C3%A3o</a>"
+"Clasificación referente al ítem registrado. Vea ejemplo en: <a href="
+"\"https://github.com/scieloorg/scms-oca/wiki/Campos#classifica%C3%A7%C3%A3o"
+"\" target=\"_blank\">https://github.com/scieloorg/scms-oca/wiki/"
+"Campos#classifica%C3%A7%C3%A3o</a>"
 
 msgid ""
-"Status do registro no OCABR. Veja exemplo em: <a "
-"href=\"https://github.com/scieloorg/scms-oca/wiki/Campos#status\" "
-"target=\"_blank\">https://github.com/scieloorg/scms-"
-"oca/wiki/Campos#status</a>"
+"Status do registro no OCABR. Veja exemplo em: <a href=\"https://github.com/"
+"scieloorg/scms-oca/wiki/Campos#status\" target=\"_blank\">https://github.com/"
+"scieloorg/scms-oca/wiki/Campos#status</a>"
 msgstr ""
-"Estado del registro en OCABR. Vea ejemplo en: <a "
-"href=\"https://github.com/scieloorg/scms-oca/wiki/Campos#status\" "
-"target=\"_blank\">https://github.com/scieloorg/scms-"
-"oca/wiki/Campos#status</a>"
+"Estado del registro en OCABR. Vea ejemplo en: <a href=\"https://github.com/"
+"scieloorg/scms-oca/wiki/Campos#status\" target=\"_blank\">https://github.com/"
+"scieloorg/scms-oca/wiki/Campos#status</a>"
 
 msgid ""
-"Anotações sobre o registro. Veja exemplo em: <a "
-"href=\"https://github.com/scieloorg/scms-oca/wiki/Campos#notes\" "
-"target=\"_blank\">https://github.com/scieloorg/scms-"
-"oca/wiki/Campos#notes</a>"
+"Anotações sobre o registro. Veja exemplo em: <a href=\"https://github.com/"
+"scieloorg/scms-oca/wiki/Campos#notes\" target=\"_blank\">https://github.com/"
+"scieloorg/scms-oca/wiki/Campos#notes</a>"
 msgstr ""
-"Anotaciones sobre el registro. Vea ejemplo en: <a "
-"href=\"https://github.com/scieloorg/scms-oca/wiki/Campos#notes\" "
-"target=\"_blank\">https://github.com/scieloorg/scms-"
-"oca/wiki/Campos#notes</a>"
+"Anotaciones sobre el registro. Vea ejemplo en: <a href=\"https://github.com/"
+"scieloorg/scms-oca/wiki/Campos#notes\" target=\"_blank\">https://github.com/"
+"scieloorg/scms-oca/wiki/Campos#notes</a>"
 
 msgid ""
-"Nome da instituição que contribuiu. Veja exemplo em: <a "
-"href=\"https://github.com/scieloorg/scms-"
-"oca/wiki/Campos#institui%C3%A7%C3%A3o-contribuidora\" "
-"target=\"_blank\">https://github.com/scieloorg/scms-"
-"oca/wiki/Campos#institui%C3%A7%C3%A3o-contribuidora</a>"
+"Nome da instituição que contribuiu. Veja exemplo em: <a href=\"https://"
+"github.com/scieloorg/scms-oca/wiki/Campos#institui%C3%A7%C3%A3o-contribuidora"
+"\" target=\"_blank\">https://github.com/scieloorg/scms-oca/wiki/"
+"Campos#institui%C3%A7%C3%A3o-contribuidora</a>"
 msgstr ""
-"Nombre de la institución que contribuyó. Vea ejemplo en: <a "
-"href=\"https://github.com/scieloorg/scms-"
-"oca/wiki/Campos#institui%C3%A7%C3%A3o-contribuidora\" "
-"target=\"_blank\">https://github.com/scieloorg/scms-"
-"oca/wiki/Campos#institui%C3%A7%C3%A3o-contribuidora</a>"
+"Nombre de la institución que contribuyó. Vea ejemplo en: <a href=\"https://"
+"github.com/scieloorg/scms-oca/wiki/Campos#institui%C3%A7%C3%A3o-contribuidora"
+"\" target=\"_blank\">https://github.com/scieloorg/scms-oca/wiki/"
+"Campos#institui%C3%A7%C3%A3o-contribuidora</a>"
 
 msgid ""
-"Indique a disponibilidade: <a href=\"https://github.com/scieloorg/scms-"
-"oca/wiki/Campos#institui%C3%A7%C3%A3o-contribuidora\" "
-"target=\"_blank\">https://github.com/scieloorg/scms-"
-"oca/wiki/Campos#disponibilidade</a>"
+"Indique a disponibilidade: <a href=\"https://github.com/scieloorg/scms-oca/"
+"wiki/Campos#institui%C3%A7%C3%A3o-contribuidora\" target=\"_blank\">https://"
+"github.com/scieloorg/scms-oca/wiki/Campos#disponibilidade</a>"
 msgstr ""
-"Indique la disponibilidad: <a href=\"https://github.com/scieloorg/scms-"
-"oca/wiki/Campos#institui%C3%A7%C3%A3o-contribuidora\" "
-"target=\"_blank\">https://github.com/scieloorg/scms-"
-"oca/wiki/Campos#disponibilidade</a>"
+"Indique la disponibilidad: <a href=\"https://github.com/scieloorg/scms-oca/"
+"wiki/Campos#institui%C3%A7%C3%A3o-contribuidora\" target=\"_blank\">https://"
+"github.com/scieloorg/scms-oca/wiki/Campos#disponibilidade</a>"
 
 msgid "Creation date"
 msgstr "Data de criación"
@@ -545,8 +522,8 @@ msgid ""
 "If checked, the page will only display the embed content without the body "
 "text."
 msgstr ""
-"Si está seleccionado, la página solo mostrará el contenido incrustado sin el"
-" texto del cuerpo."
+"Si está seleccionado, la página solo mostrará el contenido incrustado sin el "
+"texto del cuerpo."
 
 msgid "Source Name"
 msgstr "Nombre de la Fonte"
@@ -581,8 +558,7 @@ msgstr "Direcciones de correo electrónico"
 
 msgid "The following e-mail addresses are associated with your account:"
 msgstr ""
-"Las siguientes direcciones de correo electrónico están asociadas a su "
-"cuenta:"
+"Las siguientes direcciones de correo electrónico están asociadas a su cuenta:"
 
 msgid "Verified"
 msgstr "Verificado"
@@ -607,8 +583,7 @@ msgstr "Aviso:"
 
 msgid ""
 "You currently do not have any e-mail address set up. You should really add "
-"an e-mail address so you can receive notifications, reset your password, "
-"etc."
+"an e-mail address so you can receive notifications, reset your password, etc."
 msgstr ""
 "Actualmente no tiene ninguna dirección de correo electrónico configurada. "
 "Debe agregar una dirección de correo electrónico para poder recibir "
@@ -640,12 +615,12 @@ msgstr "Confirmar"
 
 #, python-format
 msgid ""
-"This e-mail confirmation link expired or is invalid. Please <a "
-"href=\"%(email_url)s\">issue a new e-mail confirmation request</a>."
+"This e-mail confirmation link expired or is invalid. Please <a href="
+"\"%(email_url)s\">issue a new e-mail confirmation request</a>."
 msgstr ""
 "Este enlace de confirmación de correo electrónico ha expirado o no es "
-"válido. Por favor, <a href=\"%(email_url)s\">solicite una nueva confirmación"
-" de correo electrónico</a>."
+"válido. Por favor, <a href=\"%(email_url)s\">solicite una nueva confirmación "
+"de correo electrónico</a>."
 
 msgid "Sign In"
 msgstr "Entrar"
@@ -659,19 +634,19 @@ msgid ""
 "Or, <a href=\"%(signup_url)s\">sign up</a> for a %(site_name)s account and "
 "sign in below:"
 msgstr ""
-"O, <a href=\"%(signup_url)s\">regístrese</a> para una cuenta %(site_name)s e"
-" inicie sesión a continuación:"
+"O, <a href=\"%(signup_url)s\">regístrese</a> para una cuenta %(site_name)s e "
+"inicie sesión a continuación:"
 
 msgid "or"
 msgstr "ou"
 
 #, python-format
 msgid ""
-"If you have not created an account yet, then please <a "
-"href=\"%(signup_url)s\">sign up</a> first."
+"If you have not created an account yet, then please <a href=\"%(signup_url)s"
+"\">sign up</a> first."
 msgstr ""
-"Si aún no ha creado una cuenta, por favor <a "
-"href=\"%(signup_url)s\">regístrese</a> primero."
+"Si aún no ha creado una cuenta, por favor <a href=\"%(signup_url)s"
+"\">regístrese</a> primero."
 
 msgid "Forgot Password?"
 msgstr "¿Olvidó la contraseña?"
@@ -689,11 +664,11 @@ msgid "Password Reset"
 msgstr "Restablecer contraseña"
 
 msgid ""
-"Forgotten your password? Enter your e-mail address below, and we'll send you"
-" an e-mail allowing you to reset it."
+"Forgotten your password? Enter your e-mail address below, and we'll send you "
+"an e-mail allowing you to reset it."
 msgstr ""
-"¿Olvidó su contraseña? Introduzca su dirección de correo electrónico abajo y"
-" le enviaremos un correo electrónico que le permitirá restablecerla."
+"¿Olvidó su contraseña? Introduzca su dirección de correo electrónico abajo y "
+"le enviaremos un correo electrónico que le permitirá restablecerla."
 
 msgid "Reset My Password"
 msgstr "Restablecer mi contraseña"
@@ -714,12 +689,12 @@ msgstr "Token Inválido"
 #, python-format
 msgid ""
 "The password reset link was invalid, possibly because it has already been "
-"used.  Please request a <a href=\"%(passwd_reset_url)s\">new password "
-"reset</a>."
+"used.  Please request a <a href=\"%(passwd_reset_url)s\">new password reset</"
+"a>."
 msgstr ""
 "El enlace de restablecimiento de contraseña no era válido, posiblemente "
-"porque ya se ha utilizado. Por favor, solicite un <a "
-"href=\"%(passwd_reset_url)s\">nuevo restablecimiento de contraseña</a>."
+"porque ya se ha utilizado. Por favor, solicite un <a href="
+"\"%(passwd_reset_url)s\">nuevo restablecimiento de contraseña</a>."
 
 msgid "change password"
 msgstr "cambiar contraseña"
@@ -776,13 +751,14 @@ msgid ""
 "contact us if you do not receive it within a few minutes."
 msgstr ""
 "Le hemos enviado un correo electrónico de\n"
-"verificación. Por favor, haga clic en el enlace dentro de este correo. Por favor,\n"
+"verificación. Por favor, haga clic en el enlace dentro de este correo. Por "
+"favor,\n"
 "póngase en contacto con nosotros si no lo recibe en unos minutos."
 
 #, python-format
 msgid ""
-"<strong>Note:</strong> you can still <a href=\"%(email_url)s\">change your "
-"e-mail address</a>."
+"<strong>Note:</strong> you can still <a href=\"%(email_url)s\">change your e-"
+"mail address</a>."
 msgstr ""
 "<strong>Nota:</strong> usted aún puede <a href=\"%(email_url)s\">cambiar su "
 "dirección de correo electrónico</a>."
@@ -797,13 +773,13 @@ msgid "Welcome to your SciELO Content Manager"
 msgstr "Bienvenido a su Administrador de Contenido SciELO"
 
 msgid ""
-"Please feel free to <a "
-"href=\"https://github.com/wagtail/wagtail/wiki/Slack\">join our community on"
-" Slack</a>, or get started with one of the links below."
+"Please feel free to <a href=\"https://github.com/wagtail/wagtail/wiki/Slack"
+"\">join our community on Slack</a>, or get started with one of the links "
+"below."
 msgstr ""
-"Sinta-se à vontade para <a "
-"href=\"https://github.com/wagtail/wagtail/wiki/Slack\">juntar-se à nossa "
-"comunidade no Slack</a>, ou comece con um de los links a continuación."
+"Sinta-se à vontade para <a href=\"https://github.com/wagtail/wagtail/wiki/"
+"Slack\">juntar-se à nossa comunidade no Slack</a>, ou comece con um de los "
+"links a continuación."
 
 msgid "Wagtail Documentation"
 msgstr "Documentación del Wagtail"
@@ -1098,6 +1074,132 @@ msgstr "Error de importación: {ex}{line_suffix}"
 msgid "File imported successfully!"
 msgstr "¡Archivo importado con éxito!"
 
+msgid "Pendente"
+msgstr "Pendiente"
+
+msgid "Aplicando"
+msgstr "Aplicando"
+
+msgid "Aplicado"
+msgstr "Aplicado"
+
+msgid "Falhou"
+msgstr "Fallido"
+
+msgid "Arquivo"
+msgstr "Archivo"
+
+msgid "Ativo"
+msgstr "Activo"
+
+msgid "Status"
+msgstr "Estado"
+
+msgid "Tarefa"
+msgstr "Tarea"
+
+msgid "Tarefa atual do OpenSearch"
+msgstr "Tarea actual de OpenSearch"
+
+msgid "Índice atual"
+msgstr "Índice actual"
+
+msgid "Iniciado em"
+msgstr "Iniciado en"
+
+msgid "Finalizado em"
+msgstr "Finalizado en"
+
+msgid "Criado em"
+msgstr "Creado en"
+
+msgid "Atualizado em"
+msgstr "Actualizado en"
+
+msgid "Tabela de regiões mundiais"
+msgstr "Tabla de regiones mundiales"
+
+msgid "Tabelas de regiões mundiais"
+msgstr "Tablas de regiones mundiales"
+
+msgid "Envie um arquivo CSV."
+msgstr "Envíe un archivo CSV."
+
+msgid "Índices"
+msgstr "Índices"
+
+msgid "Encontrados"
+msgstr "Encontrados"
+
+msgid "Atualizados"
+msgstr "Actualizados"
+
+msgid "No-op"
+msgstr "No-op"
+
+msgid "Falhas"
+msgstr "Fallas"
+
+msgid "O arquivo deve estar em UTF-8."
+msgstr "El archivo debe estar en UTF-8."
+
+msgid "Não foi possível identificar o delimitador do CSV."
+msgstr "No se pudo identificar el delimitador del CSV."
+
+msgid "O CSV deve conter as colunas country_code e world_region."
+msgstr "El CSV debe contener las columnas country_code y world_region."
+
+#, python-format
+msgid "Código de país inválido na linha %(line)s."
+msgstr "Código de país inválido en la línea %(line)s."
+
+#, python-format
+msgid "Região ausente na linha %(line)s."
+msgstr "Región ausente en la línea %(line)s."
+
+#, python-format
+msgid "Código de país duplicado na linha %(line)s."
+msgstr "Código de país duplicado en la línea %(line)s."
+
+msgid "O CSV não contém regiões."
+msgstr "El CSV no contiene regiones."
+
+msgid "Índice"
+msgstr "Índice"
+
+msgid "Conflitos"
+msgstr "Conflictos"
+
+msgid "Tempo"
+msgstr "Tiempo"
+
+msgid "Erros"
+msgstr "Errores"
+
+# Additions for enrichment app
+#, python-format
+msgid "Não foi possível enfileirar a aplicação: %(error)s"
+msgstr "No se pudo encolar la aplicación: %(error)s"
+
+#, python-format
+msgid "Aplicação enfileirada. Tarefa: %(task_id)s"
+msgstr "Aplicación encolada. Tarea: %(task_id)s"
+
+msgid "Resultados de World Regions"
+msgstr "Resultados de World Regions"
+
+msgid "Regiões Mundiais"
+msgstr "Regiones Mundiales"
+
+msgid "Enrichment"
+msgstr "Enriquecimiento"
+
+msgid "Aplicar World Regions"
+msgstr "Aplicar World Regions"
+
+msgid "Ver resultados"
+msgstr "Ver resultados"
+
 msgid "Reset to pending"
 msgstr "Restablecer a pendiente"
 
@@ -1116,6 +1218,24 @@ msgstr "Configuración de pipeline de ETL"
 msgid "ETL Pipeline Configs"
 msgstr "Configuraciones de pipeline de ETL"
 
+msgid "ETL type"
+msgstr "Tipo de ETL"
+
+msgid "PID V2"
+msgstr ""
+
+msgid "ISBN"
+msgstr ""
+
+msgid "Preprint ID"
+msgstr "ID del preprint"
+
+msgid "Dataset ID"
+msgstr "ID del dataset"
+
+msgid "ETL Item Process"
+msgstr "Proceso de ítem ETL"
+
 #, python-format
 msgid "Reset this ETL item to pending?"
 msgid_plural "Reset these %(counter)s ETL items to pending?"
@@ -1131,29 +1251,69 @@ msgstr "Sí, restablecer a pendiente"
 msgid "No, go back"
 msgstr "No, volver"
 
-msgid "Books"
-msgstr "Libros"
+msgid "Source index"
+msgstr "Índice de origen"
 
-msgid "Book Chapters"
-msgstr "Capítulos de libro"
+msgid "Match search index"
+msgstr ""
 
-msgid "Preprints"
-msgstr "Preprints"
+msgid "Total"
+msgstr "Totales"
 
-msgid "Datasets"
-msgstr "Conjuntos de datos"
+msgid "Pending"
+msgstr "Pendiente"
+
+msgid "Processing"
+msgstr "Procesando"
+
+msgid "Success"
+msgstr "Éxito"
+
+msgid "Failed"
+msgstr ""
+
+msgid "Skipped"
+msgstr ""
+
+msgid "SciELO dedup"
+msgstr "Deduplicación SciELO"
+
+msgid "OpenAlex match"
+msgstr "Coincidencia OpenAlex"
+
+msgid "Actions"
+msgstr "Acciones"
+
+#, python-format
+msgid "Process pending items for %(label)s"
+msgstr ""
+
+#, python-format
+msgid "Process pending items for %(label)s?"
+msgstr ""
+
+msgid "Run Pending"
+msgstr ""
+
+#, python-format
+msgid "Retry failed items for %(label)s"
+msgstr ""
+
+#, python-format
+msgid "Retry failed items for %(label)s?"
+msgstr ""
+
+msgid "Retry Failed"
+msgstr ""
+
+#, python-format
+msgid "Invalid document type: %(doc_type)s"
+msgstr "Tipo de documento inválido: %(doc_type)s"
 
 #, python-format
 msgid ""
-"Já existe uma task em execução para '%(doc_type)s'. Aguarde a conclusão."
+"A task is already running for '%(doc_type)s'. Please wait for it to finish."
 msgstr ""
-"Ya existe una tarea en ejecución para '%(doc_type)s'. Espere a que finalice."
-
-msgid "ETL Summary"
-msgstr "Resumen de ETL"
-
-msgid "Home"
-msgstr "Inicio"
 
 #, python-format
 msgid "%(count)s failed item(s) of type '%(doc_type)s' reset to pending."
@@ -1162,8 +1322,18 @@ msgstr ""
 "pendiente."
 
 #, python-format
-msgid "%(count)s failed item(s) marked for retry."
-msgstr "%(count)s elemento(s) con fallo marcado(s) para reintento."
+msgid "Could not enqueue the ETL task: %(error)s"
+msgstr ""
+
+#, python-format
+msgid "Pending ETL triggered for '%(doc_type)s'. Task ID: %(task_id)s"
+msgstr ""
+
+msgid "ETL Summary"
+msgstr "Resumen de ETL"
+
+msgid "Home"
+msgstr "Inicio"
 
 msgid "Processing Items"
 msgstr "Fecha de procesamiento"
@@ -1204,20 +1374,11 @@ msgstr "Instituciones responsables de la organización del evento."
 msgid "Dissemination Data Upload"
 msgstr "Upload de Datos de Disseminación"
 
-msgid "Pendente"
-msgstr "Pendiente"
-
 msgid "Em Progresso"
 msgstr "En progreso"
 
 msgid "Sucesso"
 msgstr "Éxito"
-
-msgid "Falhou"
-msgstr "Fallido"
-
-msgid "Arquivo"
-msgstr "Archivo"
 
 msgid "Arquivo CSV ou XLSX com dados de métricas globais."
 msgstr "Archivo CSV o XLSX con datos de métricas globales."
@@ -1393,14 +1554,11 @@ msgid "Script Painless"
 msgstr "Script Painless"
 
 msgid ""
-"Script Painless para transformação dos dados. Acesse os dados brutos via "
-"ctx._source.raw_data"
+"Script Painless para transformação dos dados. Acesse os dados brutos via ctx."
+"_source.raw_data"
 msgstr ""
 "Script Painless para transformación de datos. Acceda a los datos brutos a "
 "través de ctx._source.raw_data"
-
-msgid "Ativo"
-msgstr "Activo"
 
 msgid "Se desativado, a transformação não será executada"
 msgstr "Si está desactivado, la transformación no se ejecutará"
@@ -1423,6 +1581,9 @@ msgstr "Preprint"
 
 msgid "SciELO Data"
 msgstr "SciELO"
+
+msgid "Books"
+msgstr "Libros"
 
 msgid "Arquivos de Métricas Globais"
 msgstr "Archivos de métricas globales"
@@ -1525,8 +1686,8 @@ msgid ""
 "Gerado automaticamente usando dados coletados e registrados manualmente por "
 "{contribution}"
 msgstr ""
-"Generado automáticamente usando datos recolectados y registrados manualmente"
-" por {contribution}"
+"Generado automáticamente usando datos recolectados y registrados manualmente "
+"por {contribution}"
 
 msgid "Geração de indicadores de ações"
 msgstr "Generación de indicadores de acciones"
@@ -1732,8 +1893,8 @@ msgid ""
 "Share of the selected filters compared to the same scope/year without "
 "analytical filters."
 msgstr ""
-"Proporción de los filtros seleccionados en comparación con el mismo "
-"alcance/año sin filtros analíticos."
+"Proporción de los filtros seleccionados en comparación con el mismo alcance/"
+"año sin filtros analíticos."
 
 msgid "Apply"
 msgstr "Aplicar"
@@ -1759,6 +1920,13 @@ msgstr "Buscar documentos con los filtros actuales"
 msgid "Search documents"
 msgstr "País de nascimento"
 
+#, python-format
+msgid "Dados atualizados em %(d)s"
+msgstr "Datos actualizados el %(d)s"
+
+msgid "Total sources"
+msgstr "Total de fuentes"
+
 msgid "Ranking setup"
 msgstr "Métrica de ranking"
 
@@ -1772,8 +1940,7 @@ msgstr ""
 msgid ""
 "Note: study units Document and Source are still in data backfill. Some "
 "results may be partial for now. Data will be complete soon."
-msgstr ""
-"ATENCIÓN: datos en procesamiento; los resultados pueden ser parciales."
+msgstr "ATENCIÓN: datos en procesamiento; los resultados pueden ser parciales."
 
 msgid "Yes"
 msgstr "Sí"
@@ -1887,8 +2054,8 @@ msgstr ""
 "métricas globales de periódicos."
 
 msgid ""
-"Cohort Impact ranks journals by citations received by documents published in"
-" the selected year and category, considering windows (2y, 3y, 5y) or total "
+"Cohort Impact ranks journals by citations received by documents published in "
+"the selected year and category, considering windows (2y, 3y, 5y) or total "
 "accumulation."
 msgstr ""
 "El Impacto por cohorte clasifica revistas por las citas recibidas por "
@@ -1952,8 +2119,7 @@ msgstr "organización privada"
 msgid "organização sem fins de lucros"
 msgstr "organización sem fins de lucros"
 
-msgid ""
-"sociedade científica, associação pós-graduação, associação profissional"
+msgid "sociedade científica, associação pós-graduação, associação profissional"
 msgstr ""
 "sociedade científica, associación pós-graduación, associación profissional"
 
@@ -2046,8 +2212,7 @@ msgstr "Seleccione una tabla de observación:"
 
 msgid "Select an observation table on social production in Brazil by:"
 msgstr ""
-"Seleccione una tabla de observación sobre la producción social en Brasil "
-"por:"
+"Seleccione una tabla de observación sobre la producción social en Brasil por:"
 
 msgid "Select an observation table"
 msgstr "Seleccione una tabla de observación"
@@ -2086,8 +2251,7 @@ msgstr ""
 "Afiliación – Institución"
 
 msgid ""
-"Evolution of scientific production - World - number of documents by "
-"Publisher"
+"Evolution of scientific production - World - number of documents by Publisher"
 msgstr ""
 "Evolución de la producción científica - Mundo - número de documentos por "
 "Editorial"
@@ -2102,8 +2266,8 @@ msgid "Thematic \\u00e1rea"
 msgstr "Área temática"
 
 msgid ""
-"Evolution of scientific production - World - number of documents by Thematic"
-" \\u00e1rea"
+"Evolution of scientific production - World - number of documents by Thematic "
+"\\u00e1rea"
 msgstr ""
 "Evolución de la producción científica - Mundo - número de documentos por "
 "Área temática"
@@ -2130,8 +2294,8 @@ msgid "Document Type"
 msgstr "Tipo de Documento"
 
 msgid ""
-"Evolution of scientific production - World - number of documents by Document"
-" Type"
+"Evolution of scientific production - World - number of documents by Document "
+"Type"
 msgstr ""
 "Evolución de la producción científica - Mundo - número de documentos por "
 "Tipo de documento"
@@ -2140,8 +2304,8 @@ msgid "Document Language"
 msgstr "Idioma del Documento"
 
 msgid ""
-"Evolution of scientific production - World - number of documents by Document"
-" Language"
+"Evolution of scientific production - World - number of documents by Document "
+"Language"
 msgstr ""
 "Evolución de la producción científica - Mundo - número de documentos por "
 "Idioma del documento"
@@ -2157,7 +2321,7 @@ msgstr ""
 "Acceso abierto"
 
 msgid "Access Type"
-msgstr "Tipo de acceso"
+msgstr "Tipo de Acceso"
 
 msgid ""
 "Evolution of scientific production - World - number of documents by Access "
@@ -2167,7 +2331,7 @@ msgstr ""
 "Tipo de acceso"
 
 msgid "Source Type"
-msgstr "Tipo de fuente"
+msgstr "Tipo de Fuente"
 
 msgid ""
 "Evolution of scientific production - World - number of documents by Source "
@@ -2177,7 +2341,7 @@ msgstr ""
 "Tipo de fuente"
 
 msgid "Source Country"
-msgstr "País de la fuente"
+msgstr "País de la Fuente"
 
 msgid ""
 "Evolution of scientific production - World - number of documents by Source "
@@ -2205,8 +2369,8 @@ msgstr ""
 "Evolución de la producción científica - Mundo - número de revistas por "
 "Indexado en (OpenAlex)"
 
-msgid "Indexed In (SciELO)"
-msgstr "Indexado en (SciELO)"
+msgid "Indexed In (SciELO, Scopus, WoS)"
+msgstr "Indexado en (SciELO, Scopus, WoS)"
 
 msgid ""
 "Evolution of scientific production - World - number of journals by Indexed "
@@ -2329,8 +2493,7 @@ msgstr "Identificador único para esta dimensión en esta página."
 msgid "Menu label"
 msgstr "Etiqueta de menú"
 
-msgid ""
-"Short label shown in the dimension selector (e.g. Institution, Events)."
+msgid "Short label shown in the dimension selector (e.g. Institution, Events)."
 msgstr ""
 "Etiqueta corta que se muestra en el selector de dimensiones (p. ej., "
 "Institución, Eventos)."
@@ -2338,8 +2501,7 @@ msgstr ""
 msgid "Row field name"
 msgstr "Nombre del campo de fila"
 
-msgid ""
-"DataSource field key used as row dimension (e.g. country, institution)."
+msgid "DataSource field key used as row dimension (e.g. country, institution)."
 msgstr ""
 "Clave del campo de la fuente de datos (DataSource) usada como dimensión de "
 "fila (p. ej., país, institución)."
@@ -2399,9 +2561,6 @@ msgid ""
 msgstr ""
 "Use el icono de detalles junto al nombre del país. Use las casillas de las "
 "filas y luego Comparar seleccionados."
-
-msgid "Processing date"
-msgstr "Fecha de procesamiento"
 
 msgid "Table"
 msgstr "Tabla"
@@ -2494,9 +2653,6 @@ msgstr "Dimensión"
 
 msgid "No data available for export"
 msgstr "No hay datos disponibles para exportación"
-
-msgid "Total"
-msgstr "Totales"
 
 msgid "No documents returned for selected dimension and filters"
 msgstr ""
@@ -2930,18 +3086,6 @@ msgstr "Serie de actas"
 msgid "Série"
 msgstr "Serie"
 
-msgid "Todos os campos"
-msgstr "Todos los campos"
-
-msgid "Título"
-msgstr "Título"
-
-msgid "DOI, ISBN, identificadores"
-msgstr "DOI, ISBN, identificadores"
-
-msgid "Autores"
-msgstr "Autores"
-
 msgid "BibTeX"
 msgstr "BibTeX"
 
@@ -3193,12 +3337,6 @@ msgstr "Ayuda en la sintaxis"
 msgid "Pesquisar"
 msgstr "Buscar"
 
-msgid "Dados atualizados em %(d)s"
-msgstr "Datos actualizados el %(d)s"
-
-msgid "Total sources"
-msgstr "Total de fuentes"
-
 msgid "Operadores Lógicos"
 msgstr "Operadores lógicos"
 
@@ -3228,6 +3366,9 @@ msgstr "Resumen"
 
 msgid "Palavras-chave"
 msgstr "Palabras clave"
+
+msgid "DOI, ISBN, identificadores"
+msgstr "DOI, ISBN, identificadores"
 
 msgid "Acesso aberto (true/false)"
 msgstr "Acceso abierto (true/false)"
@@ -3322,6 +3463,9 @@ msgstr ""
 msgid "Data Sources"
 msgstr "Fuentes de datos"
 
+msgid "Todos os campos"
+msgstr "Todos los campos"
+
 msgid "Metric preview"
 msgstr "Visualización de métricas"
 
@@ -3342,9 +3486,6 @@ msgstr "Campo configurado"
 
 msgid "Resolved OpenSearch field"
 msgstr "Campo resuelto de OpenSearch"
-
-msgid "Status"
-msgstr "Estado"
 
 msgid "Chart data sample"
 msgstr "Muestra de datos de gráfico"
@@ -3504,6 +3645,12 @@ msgstr "Plataforma de eBook"
 
 msgid "IGSN Catalog"
 msgstr "Catálogo IGSN"
+
+msgid "Metadata"
+msgstr ""
+
+msgid "RAID Registry"
+msgstr "Registro RAID"
 
 msgid "Repository"
 msgstr "Repositorio"
@@ -3718,68 +3865,5 @@ msgstr "Nombre de la ación"
 msgid "Code of the action"
 msgstr "Código de la ación"
 
-msgid "Actions"
-msgstr "Acciones"
-
 msgid "Useful Models"
 msgstr "Modelos Úteis"
-
-msgid "Thematic"
-msgstr "Temático"
-
-msgid "Affiliation & Funding"
-msgstr "Afiliación y Financiación"
-
-msgid "Sustainable Development Goals"
-msgstr "Objetivos de Desarrollo Sostenible"
-
-msgid "Institution Name"
-msgstr "Nombre de la institución"
-
-msgid "Affiliation Country"
-msgstr "País de afiliación"
-
-msgid "Funder Name"
-msgstr "Nombre del financiador"
-
-msgid "Metrics"
-msgstr "Métricas"
-
-msgid "Citation Count"
-msgstr "Recuento de citas"
-
-msgid "Reference Count"
-msgstr "Recuento de referencias"
-
-msgid "Author Count"
-msgstr "Recuento de autores"
-
-msgid "Publisher Name"
-msgstr "Nombre del editor"
-
-msgid "Breakdown Variable"
-msgstr "Variable de desglose"
-
-msgid "Coverage"
-msgstr "Cobertura"
-
-msgid "All fields"
-msgstr "Todos los campos"
-
-msgid "Subject"
-msgstr "Asunto"
-
-msgid "Author"
-msgstr "Autor"
-
-msgid "Identifier"
-msgstr "Identificador"
-
-msgid "Keyword"
-msgstr "Palabra clave"
-
-msgid "Abstract"
-msgstr "Resumen"
-
-msgid "Organization"
-msgstr "Organización"

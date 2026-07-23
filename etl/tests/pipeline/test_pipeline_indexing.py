@@ -38,6 +38,7 @@ class OrchestratorAliasTests(TestCase):
         indexed_count = pipeline._index_silver_documents([doc])
 
         self.assertEqual(indexed_count, 1)
+        self.assertEqual(pipeline.indexed_document_ids, ["S001"])
         client.ensure_rollover_index.assert_called_once_with(
             index_prefix="silver_scientific_production",
             write_alias="silver_write",
@@ -47,6 +48,43 @@ class OrchestratorAliasTests(TestCase):
         client.rollover.assert_called_once()
         client.add_alias.assert_not_called()
         self.assertEqual(pipeline.indexed_index_names, {"silver_scientific_production-000001"})
+
+    @patch("etl.pipeline.standardizer_for")
+    @patch("etl.pipeline.OpenAlexMatcher")
+    @patch("etl.pipeline.SciELODeduplicator")
+    @patch("etl.pipeline.OpenSearchClient")
+    def test_indexing_defers_world_regions_until_after_global_metrics(
+        self,
+        client_cls,
+        _scielo_deduplicator_cls,
+        _openalex_matcher_cls,
+        _standardizer_for,
+    ):
+        client = Mock()
+        client.client.bulk.return_value = {"errors": False}
+        client.ensure_rollover_index.return_value = "silver_scientific_production-000001"
+        client.rollover.return_value = None
+        client_cls.return_value = client
+        pipeline = OpenSearchETLPipeline(opensearch_url="http://opensearch:9200")
+        doc = SilverDocument(
+            doc_id="S001",
+            type="article",
+            publication_year=2024,
+            author_country_codes=["BR", "JP"],
+            oca_data={
+                "scielo": {"source": {"country_code": "BR"}},
+                "openalex": {},
+            },
+        )
+
+        pipeline._index_silver_documents([doc])
+
+        indexed_document = client.client.bulk.call_args.kwargs["body"][1]
+        self.assertNotIn(
+            "world_region",
+            indexed_document["oca_data"]["scielo"]["source"],
+        )
+        self.assertNotIn("openalex", indexed_document["oca_data"])
 
     @patch("etl.pipeline.standardizer_for")
     @patch("etl.pipeline.OpenAlexMatcher")

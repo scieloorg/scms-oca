@@ -132,6 +132,7 @@ LOCAL_APPS = [
     "chart",
     "search_gateway",
     "etl",
+    "enrichment",
     "harvest",
     "observation",
     'wagtail_json_widget',
@@ -464,6 +465,7 @@ REST_FRAMEWORK = {
 # Keep app-owned environment settings exposed through django.conf.settings.
 from article.settings import *  # noqa: E402,F403
 from core.settings import *  # noqa: E402,F403
+from enrichment.settings import *  # noqa: E402,F403
 from etl.settings import *  # noqa: E402,F403
 from harvest.settings import *  # noqa: E402,F403
 from institution.settings import *  # noqa: E402,F403

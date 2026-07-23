@@ -1,0 +1,42 @@
+{% extends "wagtailadmin/generic/listing.html" %}
+{% load i18n %}
+
+{% block listing %}
+<div id="listing-results">
+    {% if stats.indices %}
+    <table class="listing">
+        <thead>
+            <tr>
+                <th>{% trans "Índice" %}</th>
+                <th>{% trans "Encontrados" %}</th>
+                <th>{% trans "Atualizados" %}</th>
+                <th>{% trans "No-op" %}</th>
+                <th>{% trans "Conflitos" %}</th>
+                <th>{% trans "Falhas" %}</th>
+                <th>{% trans "Tempo" %}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in stats.indices %}
+            <tr>
+                <td>{{ row.index }}</td>
+                <td>{{ row.total }}</td>
+                <td>{{ row.updated }}</td>
+                <td>{{ row.noops }}</td>
+                <td>{{ row.version_conflicts }}</td>
+                <td>{{ row.failures }}</td>
+                <td>{% widthratio row.took 60000 1 %} min</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+    {% if stats.errors %}
+    <h3 style="margin: 24px 0 16px 0; color: #d32f2f;">{% trans "Erros" %}</h3>
+    <ul style="margin: 0; padding-left: 20px;">
+        {% for error in stats.errors %}<li>{{ error }}</li>{% endfor %}
+    </ul>
+    {% endif %}
+</div>
+{% endblock %}

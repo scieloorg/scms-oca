@@ -7,14 +7,16 @@ from django.db import transaction
 from django.utils import timezone
 
 from core.utils.db import refresh_db_connections
+from enrichment.world_regions import apply_world_regions_to_documents
 from etl.client import OpenSearchClient
 from etl.models import EtlItemProcess, EtlPipelineConfig, EtlResult, EtlStatus
 from etl.pipeline import OpenSearchETLPipeline
 from etl.transform.extractors import extract_isbns, extract_publication_year
 from etl.transform.normalizers import normalize_document_type_for_etl
+from harvest.global_metrics.apply import apply_latest_global_metrics_to_silver
 from harvest.utils import source_hash
-from search_gateway.opensearch import OpenSearchIndexClient
 from search_gateway.freshness import invalidate_freshness_cache
+from search_gateway.opensearch import OpenSearchIndexClient
 
 logger = logging.getLogger(__name__)
 
@@ -365,6 +367,17 @@ def process_item_group(
 
     if (result.get("total_indexed_docs", 0) + result.get("total_skipped_docs", 0)) <= 0:
         raise RuntimeError(f"Pipeline did not process any silver documents (indexed+skipped=0): {result}")
+
+    document_ids = result.get("indexed_document_ids") or []
+    if document_ids:
+        result["global_metrics"] = apply_latest_global_metrics_to_silver(
+            document_ids,
+            settings.ETL_PUBLIC_ALIAS,
+        )
+        result["world_regions"] = apply_world_regions_to_documents(
+            document_ids,
+            settings.ETL_PUBLIC_ALIAS,
+        )
 
     return result
 

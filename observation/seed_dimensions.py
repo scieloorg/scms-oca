@@ -18,6 +18,7 @@ DIMENSION_SPECS_BY_INDEX = {
             "table_title": f"{SCIENTIFIC_TABLE_TITLE_PREFIX}Affiliation - Region of the World",
             "row_label": "Region of the World",
             "row_field_candidates": [
+                "affiliation_world_region",
                 "world_region",
                 "author_world_region",
                 "region",
@@ -135,6 +136,14 @@ DIMENSION_SPECS_BY_INDEX = {
             "table_title": f"{SCIENTIFIC_TABLE_TITLE_PREFIX}Source Country",
             "row_label": "Source Country",
             "row_field_candidates": ["source_country"],
+            "is_default": False,
+        },
+        {
+            "slug": "documents-by-source-region-world",
+            "menu_label": "Source - Region of the World",
+            "table_title": f"{SCIENTIFIC_TABLE_TITLE_PREFIX}Source - Region of the World",
+            "row_label": "Region of the World",
+            "row_field_candidates": ["source_world_region"],
             "is_default": False,
         },
         {

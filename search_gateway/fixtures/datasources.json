@@ -41,6 +41,7 @@
                 "source_type",
                 "publisher",
                 "source_country",
+                "source_world_region",
                 "publication_year",
                 "primary_topic_domain",
                 "primary_topic_field",
@@ -49,6 +50,7 @@
                 "sdg",
                 "institution",
                 "country",
+                "affiliation_world_region",
                 "funder"
               ]
             }
@@ -86,6 +88,7 @@
                 "source_type",
                 "publisher",
                 "source_country",
+                "source_world_region",
                 "publication_year",
                 "primary_topic_domain",
                 "primary_topic_field",
@@ -94,6 +97,7 @@
                 "sdg",
                 "institution",
                 "country",
+                "affiliation_world_region",
                 "funder"
               ]
             }
@@ -130,6 +134,7 @@
                 "source_type",
                 "publisher",
                 "source_country",
+                "source_world_region",
                 "publication_year",
                 "primary_topic_domain",
                 "primary_topic_field",
@@ -138,6 +143,7 @@
                 "sdg",
                 "institution",
                 "country",
+                "affiliation_world_region",
                 "funder"
               ]
             }
@@ -174,6 +180,7 @@
                 "source_type",
                 "publisher",
                 "source_country",
+                "source_world_region",
                 "publication_year",
                 "primary_topic_domain",
                 "primary_topic_field",
@@ -182,6 +189,7 @@
                 "sdg",
                 "institution",
                 "country",
+                "affiliation_world_region",
                 "funder"
               ]
             }
@@ -215,6 +223,7 @@
                 "source_type",
                 "publisher",
                 "source_country",
+                "source_world_region",
                 "publication_year",
                 "primary_topic_domain",
                 "primary_topic_field",
@@ -223,6 +232,7 @@
                 "sdg",
                 "institution",
                 "country",
+                "affiliation_world_region",
                 "funder"
               ]
             }
@@ -326,6 +336,7 @@
                 "source_type",
                 "publisher",
                 "source_country",
+                "source_world_region",
                 "publication_year",
                 "primary_topic_domain",
                 "primary_topic_field",
@@ -334,6 +345,7 @@
                 "sdg",
                 "institution",
                 "country",
+                "affiliation_world_region",
                 "funder"
               ]
             }
@@ -371,6 +383,7 @@
                 "source_type",
                 "publisher",
                 "source_country",
+                "source_world_region",
                 "publication_year",
                 "primary_topic_domain",
                 "primary_topic_field",
@@ -379,6 +392,7 @@
                 "sdg",
                 "institution",
                 "country",
+                "affiliation_world_region",
                 "funder"
               ]
             }
@@ -416,6 +430,7 @@
                 "source_type",
                 "publisher",
                 "source_country",
+                "source_world_region",
                 "publication_year",
                 "primary_topic_domain",
                 "primary_topic_field",
@@ -424,6 +439,7 @@
                 "sdg",
                 "institution",
                 "country",
+                "affiliation_world_region",
                 "funder"
               ]
             }
@@ -461,6 +477,7 @@
                 "source_type",
                 "publisher",
                 "source_country",
+                "source_world_region",
                 "publication_year",
                 "primary_topic_domain",
                 "primary_topic_field",
@@ -469,6 +486,7 @@
                 "sdg",
                 "institution",
                 "country",
+                "affiliation_world_region",
                 "funder"
               ]
             }
@@ -505,6 +523,7 @@
                 "source_type",
                 "publisher",
                 "source_country",
+                "source_world_region",
                 "publication_year",
                 "primary_topic_domain",
                 "primary_topic_field",
@@ -513,6 +532,7 @@
                 "sdg",
                 "institution",
                 "country",
+                "affiliation_world_region",
                 "funder"
               ]
             },
@@ -572,6 +592,7 @@
                 "source_type",
                 "publisher",
                 "source_country",
+                "source_world_region",
                 "publication_year",
                 "primary_topic_domain",
                 "primary_topic_field",
@@ -580,6 +601,7 @@
                 "sdg",
                 "institution",
                 "country",
+                "affiliation_world_region",
                 "funder"
               ]
             }
@@ -616,6 +638,7 @@
                 "source_type",
                 "publisher",
                 "source_country",
+                "source_world_region",
                 "publication_year",
                 "primary_topic_domain",
                 "primary_topic_field",
@@ -624,6 +647,7 @@
                 "sdg",
                 "institution",
                 "country",
+                "affiliation_world_region",
                 "funder"
               ]
             },
@@ -680,6 +704,7 @@
                 "source_type",
                 "publisher",
                 "source_country",
+                "source_world_region",
                 "publication_year",
                 "primary_topic_domain",
                 "primary_topic_field",
@@ -688,6 +713,53 @@
                 "sdg",
                 "institution",
                 "country",
+                "affiliation_world_region",
+                "funder"
+              ]
+            }
+          },
+          "source_world_region": {
+            "kind": "index",
+            "index_field_name": "oca_data.scielo.source.world_region",
+            "filter": {
+              "size": 30,
+              "order": {
+                "_key": "asc"
+              }
+            },
+            "settings": {
+              "label": "Source World Region",
+              "support_query_operator": false,
+              "widget": "select",
+              "multiple_selection": true,
+              "group": "source",
+              "group_order": 20,
+              "include_all_option": true,
+              "all_option_label": "All",
+              "search_threshold": 10,
+              "dependencies": [
+                "scope",
+                "source_indexed_in",
+                "source_scielo_indexed_in",
+                "collection",
+                "document_type",
+                "document_language",
+                "open_access",
+                "open_access_status",
+                "source_name",
+                "source_type",
+                "publisher",
+                "source_country",
+                "source_world_region",
+                "publication_year",
+                "primary_topic_domain",
+                "primary_topic_field",
+                "primary_topic_subfield",
+                "primary_topic_name",
+                "sdg",
+                "institution",
+                "country",
+                "affiliation_world_region",
                 "funder"
               ]
             }
@@ -724,6 +796,7 @@
                 "source_type",
                 "publisher",
                 "source_country",
+                "source_world_region",
                 "publication_year",
                 "primary_topic_field",
                 "primary_topic_subfield",
@@ -732,6 +805,7 @@
                 "sdg",
                 "institution",
                 "country",
+                "affiliation_world_region",
                 "funder"
               ],
               "lookup_use_data_source_values": true
@@ -784,6 +858,7 @@
                 "source_type",
                 "publisher",
                 "source_country",
+                "source_world_region",
                 "publication_year",
                 "primary_topic_domain",
                 "primary_topic_subfield",
@@ -792,6 +867,7 @@
                 "sdg",
                 "institution",
                 "country",
+                "affiliation_world_region",
                 "funder"
               ],
               "lookup_use_data_source_values": true
@@ -844,6 +920,7 @@
                 "source_type",
                 "publisher",
                 "source_country",
+                "source_world_region",
                 "publication_year",
                 "primary_topic_domain",
                 "primary_topic_field",
@@ -852,6 +929,7 @@
                 "sdg",
                 "institution",
                 "country",
+                "affiliation_world_region",
                 "funder"
               ],
               "lookup_use_data_source_values": true
@@ -904,6 +982,7 @@
                 "source_type",
                 "publisher",
                 "source_country",
+                "source_world_region",
                 "publication_year",
                 "primary_topic_domain",
                 "primary_topic_field",
@@ -912,6 +991,7 @@
                 "sdg",
                 "institution",
                 "country",
+                "affiliation_world_region",
                 "funder"
               ],
               "lookup_use_data_source_values": true
@@ -964,6 +1044,7 @@
                 "source_type",
                 "publisher",
                 "source_country",
+                "source_world_region",
                 "publication_year",
                 "primary_topic_domain",
                 "primary_topic_field",
@@ -972,6 +1053,7 @@
                 "sdg",
                 "institution",
                 "country",
+                "affiliation_world_region",
                 "funder"
               ]
             }
@@ -1008,6 +1090,7 @@
                 "source_type",
                 "publisher",
                 "source_country",
+                "source_world_region",
                 "publication_year",
                 "primary_topic_domain",
                 "primary_topic_field",
@@ -1016,6 +1099,7 @@
                 "sdg",
                 "institution",
                 "country",
+                "affiliation_world_region",
                 "funder"
               ]
             },
@@ -1072,6 +1156,7 @@
                 "source_type",
                 "publisher",
                 "source_country",
+                "source_world_region",
                 "publication_year",
                 "primary_topic_domain",
                 "primary_topic_field",
@@ -1080,6 +1165,53 @@
                 "sdg",
                 "institution",
                 "country",
+                "affiliation_world_region",
+                "funder"
+              ]
+            }
+          },
+          "affiliation_world_region": {
+            "kind": "index",
+            "index_field_name": "oca_data.openalex.affiliations.world_regions",
+            "filter": {
+              "size": 30,
+              "order": {
+                "_key": "asc"
+              }
+            },
+            "settings": {
+              "label": "Affiliation World Region",
+              "support_query_operator": false,
+              "widget": "select",
+              "multiple_selection": true,
+              "group": "affiliation_funding",
+              "group_order": 40,
+              "include_all_option": true,
+              "all_option_label": "All",
+              "search_threshold": 10,
+              "dependencies": [
+                "scope",
+                "source_indexed_in",
+                "source_scielo_indexed_in",
+                "collection",
+                "document_type",
+                "document_language",
+                "open_access",
+                "open_access_status",
+                "source_name",
+                "source_type",
+                "publisher",
+                "source_country",
+                "source_world_region",
+                "publication_year",
+                "primary_topic_domain",
+                "primary_topic_field",
+                "primary_topic_subfield",
+                "primary_topic_name",
+                "sdg",
+                "institution",
+                "country",
+                "affiliation_world_region",
                 "funder"
               ]
             }
@@ -1116,6 +1248,7 @@
                 "source_type",
                 "publisher",
                 "source_country",
+                "source_world_region",
                 "publication_year",
                 "primary_topic_domain",
                 "primary_topic_field",
@@ -1124,6 +1257,7 @@
                 "sdg",
                 "institution",
                 "country",
+                "affiliation_world_region",
                 "funder"
               ]
             },
@@ -1393,6 +1527,7 @@
               "source_type",
               "publisher",
               "source_country",
+              "source_world_region",
               "primary_topic_domain",
               "primary_topic_field",
               "primary_topic_subfield",
@@ -1400,6 +1535,7 @@
               "sdg",
               "institution",
               "country",
+              "affiliation_world_region",
               "funder",
               "cited_by_count_range",
               "authors_count_range",
@@ -1431,6 +1567,7 @@
               "source_type",
               "publisher",
               "source_country",
+              "source_world_region",
               "primary_topic_domain",
               "primary_topic_field",
               "primary_topic_subfield",
@@ -1438,6 +1575,7 @@
               "sdg",
               "institution",
               "country",
+              "affiliation_world_region",
               "funder",
               "cited_by_count_range",
               "authors_count_range",
