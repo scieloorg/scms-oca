@@ -1,6 +1,10 @@
+import time
+
+from django.conf import settings
+
+from enrichment.exceptions import WorldRegionsProcessingError
 from enrichment.models import WorldRegionsUpload
 from search_gateway.client import get_opensearch_client
-
 
 WORLD_REGIONS_UPDATE_SCRIPT = """
     boolean changed = false;
@@ -90,19 +94,79 @@ def apply_world_regions(
         slices=slices,
         requests_per_second=requests_per_second,
     )
-    return response["task"]
+    task_id = response.get("task")
+    if not task_id:
+        raise WorldRegionsProcessingError(
+            f"O OpenSearch não retornou uma task para o índice {index_name}."
+        )
+
+    return task_id
+
+
+def wait_for_task(task_id, poll_interval):
+    client = get_opensearch_client()
+
+    while True:
+        result = client.tasks.get(task_id=task_id)
+
+        if result.get("completed"):
+            error = result.get("error")
+            if error:
+                reason = (
+                    error.get("reason")
+                    if isinstance(error, dict)
+                    else str(error)
+                )
+                raise WorldRegionsProcessingError(reason)
+
+            return result.get("response") or {}
+
+        time.sleep(poll_interval)
 
 
 def apply_world_regions_to_documents(document_ids, alias):
-    upload = WorldRegionsUpload.objects.filter(active=True).first()
-    if not upload or not upload.mapping:
-        return
+    upload = WorldRegionsUpload.objects.filter(
+        active=True,
+        target_data_source__index_name=alias,
+    ).first()
 
-    return [
-        apply_world_regions(
+    if not upload or not upload.mapping:
+        raise WorldRegionsProcessingError(
+            f"Não há upload ativo de regiões mundiais para o índice {alias}."
+        )
+
+    slices = getattr(settings, "WORLD_REGIONS_SLICES", "auto")
+    requests_per_second = getattr(
+        settings,
+        "WORLD_REGIONS_REQUESTS_PER_SECOND",
+        -1,
+    )
+    poll_interval = getattr(
+        settings,
+        "WORLD_REGIONS_TASK_POLL_INTERVAL",
+        5,
+    )
+    results = []
+
+    for index_name in concrete_indices(alias):
+        task_id = apply_world_regions(
             index_name,
             upload.mapping,
+            slices=slices,
+            requests_per_second=requests_per_second,
             document_ids=document_ids,
         )
-        for index_name in concrete_indices(alias)
-    ]
+        response = wait_for_task(task_id, poll_interval)
+        failures = response.get("failures") or []
+        version_conflicts = response.get("version_conflicts", 0)
+
+        if failures or version_conflicts:
+            raise WorldRegionsProcessingError(
+                f"Falha ao aplicar regiões mundiais em {index_name}: "
+                f"{len(failures)} falha(s) e "
+                f"{version_conflicts} conflito(s) de versão."
+            )
+
+        results.append({"index": index_name, **response})
+
+    return results
