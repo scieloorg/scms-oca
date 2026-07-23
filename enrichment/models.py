@@ -1,12 +1,14 @@
 from pathlib import Path
 
-from django.contrib import admin
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from wagtail.admin.panels import FieldPanel
 
-from enrichment.parsing import parse_world_regions
+from core.models import CommonControlField
+from enrichment.forms import WorldRegionsUploadForm
+from enrichment.parsing import parse_world_regions_csv
 
 
 class BaseEnrichmentUpload(CommonControlField):
@@ -73,4 +75,9 @@ class WorldRegionsUpload(BaseEnrichmentUpload):
         if Path(self.file.name).suffix.lower() != ".csv":
             raise ValidationError({"file": _("Envie um arquivo CSV.")})
 
-        self.mapping = parse_world_regions(self.file)
+    def validate_and_load_mapping(self):
+        try:
+            self.mapping = parse_world_regions_csv(self.file)
+        except ValidationError as error:
+            raise ValidationError({"file": error}) from error
+
