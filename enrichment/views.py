@@ -6,7 +6,7 @@ from django.utils.translation import gettext as _
 from wagtail.admin import messages
 from wagtail.admin.auth import permission_denied, require_admin_access
 
-from enrichment.models import WorldRegionsStatus, WorldRegionsUpload
+from enrichment.models import WorldRegionsUpload
 from enrichment.tasks import apply_world_regions_upload
 
 
@@ -18,52 +18,32 @@ def apply_world_regions_view(request, upload_id):
     upload = get_object_or_404(WorldRegionsUpload, pk=upload_id)
 
     with transaction.atomic():
-        WorldRegionsUpload.objects.filter(active=True).exclude(pk=upload.pk).update(
-            active=False
-        )
-        upload.active = True
-        upload.status = WorldRegionsStatus.PENDING
-        upload.task_id = ""
-        upload.current_index = ""
-        upload.current_task_id = ""
-        upload.stats = {}
-        upload.started_at = None
-        upload.finished_at = None
-
-        upload.save(
-            update_fields=[
-                "active",
-                "status",
-                "task_id",
-                "current_index",
-                "current_task_id",
-                "stats",
-                "started_at",
-                "finished_at",
-                "updated",
-            ]
-        )
+        WorldRegionsUpload.objects.filter(
+            active=True,
+            target_data_source=upload.target_data_source,
+        ).exclude(pk=upload.pk).update(active=False)
+        upload.prepare_application()
 
     try:
         result = apply_world_regions_upload.delay(upload.pk)
     except Exception as error:
-        upload.status = WorldRegionsStatus.FAILED
-        upload.finished_at = timezone.now()
-        upload.save(update_fields=["status", "finished_at", "updated"])
+        upload.fail_application(
+            {"errors": [str(error)]}
+        )
         messages.error(
             request,
-            _("Não foi possível enfileirar a aplicação: %(error)s") % {"error": error},
+            _("Não foi possível enfileirar a aplicação: %(error)s")
+            % {"error": error},
         )
         return redirect(request.META.get("HTTP_REFERER", "/admin/"))
 
-    upload.task_id = result.id
-    upload.save(update_fields=["task_id", "updated"])
     messages.success(
         request,
-        _("Aplicação enfileirada. Tarefa: %(task_id)s") % {"task_id": result.id},
+        _("Aplicação enfileirada. Tarefa: %(task_id)s")
+        % {"task_id": result.id},
     )
 
-    return redirect(reverse("enrichment_world_regions_results", args=[upload.pk]))
+    return redirect("wagtailsnippets_enrichment_worldregionsupload:list")
 
 
 @require_admin_access
