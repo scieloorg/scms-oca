@@ -81,3 +81,59 @@ class WorldRegionsUpload(BaseEnrichmentUpload):
         except ValidationError as error:
             raise ValidationError({"file": error}) from error
 
+    def _save_application_fields(self, *fields):
+        self.save(update_fields=(*fields, "updated"))
+
+    def prepare_application(self):
+        self.active = True
+        self.status = self.WorldRegionsStatus.PENDING
+        self.stats = {}
+        self.started_at = None
+        self.finished_at = None
+
+        self._save_application_fields(
+            "active",
+            "status",
+            "stats",
+            "started_at",
+            "finished_at",
+        )
+
+    def start_application(self, stats):
+        self.status = self.WorldRegionsStatus.APPLYING
+        self.stats = stats
+        self.started_at = timezone.now()
+        self.finished_at = None
+
+        self._save_application_fields(
+            "status",
+            "stats",
+            "started_at",
+            "finished_at",
+        )
+
+    def update_application_stats(self, stats):
+        self.stats = stats
+        self._save_application_fields("stats")
+
+    def complete_application(self, stats):
+        self.status = self.WorldRegionsStatus.APPLIED
+        self.stats = stats
+        self.finished_at = timezone.now()
+
+        self._save_application_fields(
+            "status",
+            "stats",
+            "finished_at",
+        )
+
+    def fail_application(self, stats):
+        self.status = self.WorldRegionsStatus.FAILED
+        self.stats = stats
+        self.finished_at = timezone.now()
+
+        self._save_application_fields(
+            "status",
+            "stats",
+            "finished_at",
+        )
