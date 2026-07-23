@@ -116,7 +116,8 @@ class MetricResultBuilder:
                     break
 
             if not base_s:
-                aligned_baseline = [0 for _ in years]
+                baseline_vals = baseline_data.get("metrics", {}).get(metric_key) or []
+                aligned_baseline = self._align_series_to_years(years, baseline_years, baseline_vals)
             else:
                 aligned_baseline = self._align_series_to_years(years, baseline_years, base_s.get("data", []))
 
