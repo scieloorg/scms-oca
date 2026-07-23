@@ -1,0 +1,141 @@
+// Transforma o dado bruto de dataverses coletados do SciELO Data (indice raw)
+// no documento bronze de dataverse (ver harvest/mapping_bronze_dataverse.py).
+// Executado como script Painless em um _reindex do OpenSearch.
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+List buildDescriptionWithLang(def description) {
+  List descriptionWithLang = new ArrayList();
+  if (description == null) {
+    return descriptionWithLang;
+  }
+  Map entry = new HashMap();
+  entry.put('description', description);
+  entry.put('language', null);
+  descriptionWithLang.add(entry);
+  return descriptionWithLang;
+}
+
+Long parsePublicationYear(def creationDate) {
+  if (creationDate == null) {
+    return null;
+  }
+  String dateStr = creationDate.toString();
+  if (dateStr.length() < 4) {
+    return null;
+  }
+  try {
+    return Long.parseLong(dateStr.substring(0, 4));
+  } catch (Exception e) {
+    return null;
+  }
+}
+
+Map buildContentUrl(def linkUrl) {
+  if (linkUrl == null) {
+    return null;
+  }
+  Map contentUrl = new HashMap();
+  Map landingPage = new HashMap();
+  landingPage.put('url', linkUrl);
+  contentUrl.put('landing_page', landingPage);
+  return contentUrl;
+}
+
+List buildDataverseContacts(def contacts) {
+  List dataverseContacts = new ArrayList();
+  if (contacts == null) {
+    return dataverseContacts;
+  }
+  for (def contactData : contacts) {
+    if (contactData == null) {
+      continue;
+    }
+    Map contact = new HashMap();
+    contact.put('contact_email', contactData.contactEmail);
+    contact.put('display_order', contactData.displayOrder);
+    dataverseContacts.add(contact);
+  }
+  return dataverseContacts;
+}
+
+// ---------------------------------------------------------------------------
+// Leitura da origem
+// ---------------------------------------------------------------------------
+
+def raw = ctx._source.raw_data;
+if (raw == null) {
+  ctx.op = 'noop';
+  return;
+}
+
+Map doc = new HashMap();
+
+Map ocaData = new HashMap();
+ocaData.put('scope', 'scielo');
+doc.put('oca_data', ocaData);
+
+doc.put('title', raw.name);
+
+Map ids = new HashMap();
+ids.put('alias', raw.alias);
+doc.put('ids', ids);
+
+if (raw.theme != null) {
+  Map contentUrl = buildContentUrl(raw.theme.linkUrl);
+  if (contentUrl != null) {
+    doc.put('content_url', contentUrl);
+  }
+}
+
+doc.put('is_released', raw.isReleased);
+doc.put('affiliation', raw.affiliation);
+doc.put('description', raw.description);
+doc.put('description_with_lang', buildDescriptionWithLang(raw.description));
+
+if (raw.creationDate != null) {
+  doc.put('publication_date', raw.creationDate.toString());
+  Long publicationYear = parsePublicationYear(raw.creationDate);
+  if (publicationYear != null) {
+    doc.put('publication_year', publicationYear);
+  }
+}
+
+Map source = new HashMap();
+source.put('is_primary', true);
+source.put('type', 'dataverse');
+
+if (raw.alias != null) {
+  source.put('id', raw.alias);
+}
+if (raw.name != null) {
+  source.put('title', raw.name);
+}
+if (raw.theme != null && raw.theme.linkUrl != null) {
+  source.put('landing_page_url', raw.theme.linkUrl);
+}
+if (raw.affiliation != null) {
+  Map hostOrganization = new HashMap();
+  hostOrganization.put('name', raw.affiliation);
+  source.put('host_organization', hostOrganization);
+}
+if (raw.issn_l != null) {
+  source.put('issn_l', raw.issn_l);
+}
+if (raw.issns != null) {
+  source.put('issns', raw.issns);
+}
+if (raw.isOpenAccess != null) {
+  source.put('is_open_access', raw.isOpenAccess);
+}
+doc.put('source', source);
+
+doc.put('dataverse_contacts', buildDataverseContacts(raw.dataverseContacts));
+
+// ---------------------------------------------------------------------------
+// Substitui o documento de origem pelo documento bronze.
+// ---------------------------------------------------------------------------
+ctx._source.clear();
+ctx._source.putAll(doc);

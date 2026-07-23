@@ -1,0 +1,352 @@
+// Transforma o dado bruto de preprints coletados do SciELO Preprints (indice raw)
+// no documento bronze de preprint (ver harvest/mapping_bronze_preprints.py).
+// Executado como script Painless em um _reindex do OpenSearch.
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+String padZero(int number) {
+  return number < 10 ? '0' + String.valueOf(number) : String.valueOf(number);
+}
+
+String extractDoi(String text) {
+  if (text == null) {
+    return null;
+  }
+  if (text.startsWith('10.') && text.contains('/')) {
+    return text;
+  }
+  int idx = text.indexOf('/10.');
+  if (idx >= 0) {
+    return text.substring(idx + 1);
+  }
+  return null;
+}
+
+String buildAuthorName(def author) {
+  if (author == null) {
+    return null;
+  }
+  String name = '';
+  if (author.given_names != null) {
+    name = author.given_names.toString();
+  }
+  if (author.surname != null) {
+    if (name.length() > 0) {
+      name = name + ' ' + author.surname;
+    } else {
+      name = author.surname.toString();
+    }
+  }
+  return name.length() > 0 ? name : null;
+}
+
+Map buildTitleFields(def titles) {
+  Map result = new HashMap();
+  String mainTitle = null;
+  List titleWithLang = new ArrayList();
+
+  if (titles != null) {
+    for (def titleEntry : titles) {
+      if (titleEntry == null || titleEntry.text == null) {
+        continue;
+      }
+      if (mainTitle == null) {
+        mainTitle = titleEntry.text.toString();
+      }
+      Map entry = new HashMap();
+      entry.put('title', titleEntry.text);
+      entry.put('language', titleEntry.lang);
+      titleWithLang.add(entry);
+    }
+  }
+
+  result.put('title', mainTitle);
+  result.put('title_with_lang', titleWithLang);
+  return result;
+}
+
+Map buildPublisherFields(def publishersRaw) {
+  Map result = new HashMap();
+  String mainPublisher = null;
+  List publisherList = new ArrayList();
+  List publisherNames = new ArrayList();
+
+  if (publishersRaw != null) {
+    for (def publisherEntry : publishersRaw) {
+      if (publisherEntry == null || publisherEntry.text == null) {
+        continue;
+      }
+      String publisherName = publisherEntry.text.toString();
+      if (mainPublisher == null) {
+        mainPublisher = publisherName;
+      }
+      if (!publisherNames.contains(publisherName)) {
+        publisherNames.add(publisherName);
+      }
+    }
+  }
+
+  if (mainPublisher != null) {
+    Map publisher = new HashMap();
+    publisher.put('name', mainPublisher);
+    publisherList.add(publisher);
+  }
+
+  result.put('main_publisher', mainPublisher);
+  result.put('publishers', publisherList);
+  return result;
+}
+
+Map buildAbstractFields(def descriptions) {
+  Map result = new HashMap();
+  String mainAbstract = null;
+  List abstractWithLang = new ArrayList();
+
+  if (descriptions != null) {
+    for (def descriptionEntry : descriptions) {
+      if (descriptionEntry == null || descriptionEntry.text == null) {
+        continue;
+      }
+      if (mainAbstract == null) {
+        mainAbstract = descriptionEntry.text.toString();
+      }
+      Map entry = new HashMap();
+      entry.put('abstract', descriptionEntry.text);
+      entry.put('language', descriptionEntry.lang);
+      abstractWithLang.add(entry);
+    }
+  }
+
+  result.put('abstract', mainAbstract);
+  result.put('abstract_with_lang', abstractWithLang);
+  return result;
+}
+
+List buildAuthorships(def authors) {
+  List authorships = new ArrayList();
+  if (authors == null) {
+    return authorships;
+  }
+
+  int position = 0;
+  for (def author : authors) {
+    if (author == null) {
+      continue;
+    }
+    position++;
+    Map authorship = new HashMap();
+    authorship.put('position', String.valueOf(position));
+
+    String name = buildAuthorName(author);
+    if (name != null) {
+      authorship.put('name', name);
+    }
+    if (author.orcid != null) {
+      authorship.put('orcid', author.orcid);
+    }
+    if (author.lang != null) {
+      authorship.put('language', author.lang);
+    }
+    authorships.add(authorship);
+  }
+
+  return authorships;
+}
+
+Map buildSubjectsFields(def subjectsRaw) {
+  Map result = new HashMap();
+  List subjects = new ArrayList();
+  List subjectsWithLang = new ArrayList();
+
+  if (subjectsRaw != null) {
+    for (def subjectEntry : subjectsRaw) {
+      if (subjectEntry == null || subjectEntry.text == null) {
+        continue;
+      }
+      String subjectText = subjectEntry.text.toString();
+      if (!subjects.contains(subjectText)) {
+        subjects.add(subjectText);
+      }
+      Map entry = new HashMap();
+      entry.put('subjects', subjectText);
+      entry.put('language', subjectEntry.lang);
+      subjectsWithLang.add(entry);
+    }
+  }
+
+  result.put('subjects', subjects);
+  result.put('subjects_with_lang', subjectsWithLang);
+  return result;
+}
+
+Map buildRightsFields(def rightsRaw) {
+  Map result = new HashMap();
+  List rights = new ArrayList();
+  List rightsWithLang = new ArrayList();
+
+  if (rightsRaw != null) {
+    for (def rightsEntry : rightsRaw) {
+      if (rightsEntry == null || rightsEntry.text == null) {
+        continue;
+      }
+      String rightsText = rightsEntry.text.toString();
+      if (!rights.contains(rightsText)) {
+        rights.add(rightsText);
+      }
+      Map entry = new HashMap();
+      entry.put('rights', rightsText);
+      entry.put('language', rightsEntry.lang);
+      rightsWithLang.add(entry);
+    }
+  }
+
+  result.put('rights', rights);
+  result.put('rights_with_lang', rightsWithLang);
+  return result;
+}
+
+Map parseIdentifiers(def identifiers) {
+  Map ids = new HashMap();
+  String preprintId = null;
+  String doi = null;
+  String landingPageUrl = null;
+
+  if (identifiers != null) {
+    for (def identifierEntry : identifiers) {
+      if (identifierEntry == null || identifierEntry.text == null) {
+        continue;
+      }
+      String idText = identifierEntry.text.toString();
+      String foundDoi = extractDoi(idText);
+      if (foundDoi != null) {
+        doi = foundDoi;
+      }
+      if (idText.contains('SciELOPreprints.')) {
+        int idx = idText.indexOf('SciELOPreprints.');
+        preprintId = idText.substring(idx + 16);
+      } else if (idText.contains('preprint/view/')) {
+        int idx = idText.indexOf('preprint/view/');
+        preprintId = idText.substring(idx + 14);
+      }
+      if (landingPageUrl == null && idText.startsWith('http')) {
+        landingPageUrl = idText;
+      }
+    }
+  }
+
+  ids.put('scl_preprint_id', preprintId);
+  ids.put('doi', doi);
+  ids.put('landing_page_url', landingPageUrl);
+  return ids;
+}
+
+String pickLandingPageUrl(def rawSource, def landingPageFromIds) {
+  if (rawSource instanceof List && !((List) rawSource).isEmpty()) {
+    def first = ((List) rawSource).get(0);
+    if (first != null) {
+      return first.toString();
+    }
+  }
+  return landingPageFromIds;
+}
+
+// ---------------------------------------------------------------------------
+// Leitura da origem
+// ---------------------------------------------------------------------------
+
+def raw = ctx._source.raw_data;
+if (raw == null) {
+  ctx.op = 'noop';
+  return;
+}
+
+Map doc = new HashMap();
+
+Map ocaData = new HashMap();
+ocaData.put('scope', 'scielo');
+doc.put('oca_data', ocaData);
+doc.put('type', 'preprint');
+
+Map source = new HashMap();
+source.put('is_primary', true);
+source.put('type', 'repository');
+
+Map titleFields = buildTitleFields(raw.title);
+if (titleFields.get('title') != null) {
+  doc.put('title', titleFields.get('title'));
+}
+doc.put('title_with_lang', titleFields.get('title_with_lang'));
+
+Map publisherFields = buildPublisherFields(raw.publisher);
+String mainPublisher = publisherFields.get('main_publisher');
+List publishers = (List) publisherFields.get('publishers');
+if (!publishers.isEmpty()) {
+  doc.put('publishers', publishers);
+  source.put('title', mainPublisher);
+  Map hostOrganization = new HashMap();
+  hostOrganization.put('name', mainPublisher);
+  source.put('host_organization', hostOrganization);
+}
+
+Map abstractFields = buildAbstractFields(raw.description);
+if (abstractFields.get('abstract') != null) {
+  doc.put('abstract', abstractFields.get('abstract'));
+}
+doc.put('abstract_with_lang', abstractFields.get('abstract_with_lang'));
+
+doc.put('language', raw.language);
+
+if (raw.date != null) {
+  if (raw.date.year != null) {
+    doc.put('publication_year', raw.date.year);
+  }
+  if (raw.date.year != null && raw.date.month != null && raw.date.day != null) {
+    String month = padZero((int) raw.date.month);
+    String day = padZero((int) raw.date.day);
+    doc.put('publication_date', raw.date.year + '-' + month + '-' + day);
+  }
+}
+
+List authorships = buildAuthorships(raw.authors);
+if (!authorships.isEmpty()) {
+  doc.put('authorships', authorships);
+}
+
+Map subjectsContainer = buildSubjectsFields(raw.subject);
+List subjects = (List) subjectsContainer.get('subjects');
+List subjectsWithLang = (List) subjectsContainer.get('subjects_with_lang');
+if (!subjects.isEmpty()) {
+  doc.put('subjects', subjects);
+}
+if (!subjectsWithLang.isEmpty()) {
+  doc.put('subjects_with_lang', subjectsWithLang);
+}
+
+Map rightsFields = buildRightsFields(raw.rights);
+List rights = (List) rightsFields.get('rights');
+List rightsWithLang = (List) rightsFields.get('rights_with_lang');
+if (!rights.isEmpty()) {
+  doc.put('rights', rights);
+}
+if (!rightsWithLang.isEmpty()) {
+  doc.put('rights_with_lang', rightsWithLang);
+}
+
+Map ids = parseIdentifiers(raw.identifier);
+String landingPageUrl = pickLandingPageUrl(raw.source, ids.remove('landing_page_url'));
+if (landingPageUrl != null) {
+  source.put('landing_page_url', landingPageUrl);
+}
+if (!ids.isEmpty()) {
+  doc.put('ids', ids);
+}
+
+doc.put('source', source);
+
+// ---------------------------------------------------------------------------
+// Substitui o documento de origem pelo documento bronze.
+// ---------------------------------------------------------------------------
+ctx._source.clear();
+ctx._source.putAll(doc);

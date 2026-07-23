@@ -282,7 +282,11 @@ if (!publishers.isEmpty()) out.put("publishers", publishers);
 
 // Fonte (periodico).
 Map source = new HashMap();
-putStringIfPresent(source, "host_organization", publisherName);
+if (publisherName != null && !publisherName.isEmpty()) {
+  Map hostOrganization = new HashMap();
+  hostOrganization.put("name", publisherName);
+  source.put("host_organization", hostOrganization);
+}
 putStringIfPresent(source, "id", getScalar(journal, "v68"));
 source.put("is_open_access", true);
 List issns = new ArrayList();
@@ -295,9 +299,7 @@ if (!issns.isEmpty()) source.put("issns", issns);
 if (article != null) putStringIfPresent(source, "title", getScalar(article, "v100"));
 source.put("type", "journal");
 putStringIfPresent(source, "version", root.get("version"));
-List sources = new ArrayList();
-sources.add(source);
-out.put("sources", sources);
+out.put("source", source);
 
 // ---------------------------------------------------------------------------
 // Substitui o documento de origem pelo documento bronze.
