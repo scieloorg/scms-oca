@@ -17,3 +17,4 @@ django-anymail  # https://github.com/anymail/django-anymail
 # Elastic-APM  # https://pypi.org/project/elastic-apm/
 # ------------------------------------------------------------------------------
 elastic-apm==6.15.1
+django>=5.0.14 # not directly required, pinned by Snyk to avoid a vulnerability
