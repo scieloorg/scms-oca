@@ -1,6 +1,5 @@
 from .option_normalization import normalize_boolean
 
-
 DEFAULT_YEAR_MIN = 1800
 DEFAULT_YEAR_MAX = 2100
 
@@ -105,7 +104,6 @@ def _build_year_range_values(start_value, end_value, *, min_year=None, max_year=
         start_year, end_year = end_year, start_year
 
     return list(range(start_year, end_year + 1))
-
 
 
 def _map_transformed_filter(field_name, field_info, filters):
@@ -256,50 +254,6 @@ def map_filters_with_operators(filters, field_settings):
         )
 
     return mapped_items
-
-
-def get_mapped_filters(filters, field_settings):
-    """
-    Map form filter names to Elasticsearch field names.
-
-    Args:
-        filters: Dict of filters with form field names.
-        field_settings: Field settings from data source configuration.
-
-    Returns:
-        Dict with Elasticsearch field names as keys.
-    """
-    if not filters:
-        return {}
-
-    mapped_filters = {}
-    handled_fields = set()
-
-    for field_name, field_info in field_settings.items():
-        if field_info.get("kind") != "index":
-            continue
-
-        mapped_filter, transformed_fields = _map_transformed_filter(field_name, field_info, filters)
-        handled_fields.update(transformed_fields)
-        if mapped_filter:
-            real_field_name, value = mapped_filter
-            mapped_filters[real_field_name] = value
-
-    for key, value in filters.items():
-        if key in handled_fields:
-            continue
-        if key not in field_settings:
-            continue
-        field_config = field_settings[key]
-        if field_config.get("kind") != "index":
-            continue
-
-        real_field_name = field_config.get("index_field_name")
-        if not real_field_name or value in (None, "", []):
-            continue
-        mapped_filters[real_field_name] = value
-
-    return mapped_filters
 
 
 def get_index_field_candidates(index_field_name):
