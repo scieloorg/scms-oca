@@ -1,4 +1,3 @@
-from .query import query_filters
 from .option_normalization import normalize_boolean
 
 
@@ -179,24 +178,6 @@ def _map_transformed_filter(field_name, field_info, filters):
     return None, handled_fields
 
 
-def apply_search_filters_to_body(body, mapped_filters):
-    if not mapped_filters:
-        return body
-
-    original_query = body.get("query", {"match_all": {}})
-
-    body_with_filters = dict(body)
-
-    body_with_filters["query"] = {
-        "bool": {
-            "must": [original_query],
-                "filter": query_filters(mapped_filters),
-        }
-    }
-
-    return body_with_filters
-
-
 def _get_query_operator_settings(filters, field_name, field_info):
     support_operator = bool(field_info.get("settings", {}).get("support_query_operator"))
     if not support_operator:
@@ -328,12 +309,3 @@ def get_index_field_candidates(index_field_name):
     if index_field_name.endswith(".keyword"):
         return [index_field_name, index_field_name[:-8]]
     return [index_field_name, f"{index_field_name}.keyword"]
-
-
-def build_filters_body(aggs, mapped_filters=None):
-    body = {"size": 0, "aggs": aggs}
-
-    if mapped_filters:
-        body["query"] = {"bool": {"filter": query_filters(mapped_filters)}}
-
-    return body

@@ -24,7 +24,6 @@ from observation.dimension_groups import (
     normalize_dimension_level,
     resolve_journal_cardinality_field,
 )
-from search_gateway.filter_mapping import get_mapped_filters
 from search_gateway.query import build_bool_query_from_search_params
 from search_gateway.request_filters import (
     extract_applied_filters,
@@ -116,11 +115,11 @@ def _estimate_grand_total_journals(
     if not journal_field:
         return 0
     try:
-        mapped_filters = get_mapped_filters(selected_filters or {}, service.field_settings)
         bool_query = build_bool_query_from_search_params(
             query_text=query_text if not query_clauses else None,
             query_clauses=query_clauses if query_clauses else None,
-            filters=mapped_filters,
+            filters=selected_filters,
+            field_settings=service.field_settings,
         )
         response = service.client.search(
             index=service.index_name,
@@ -369,11 +368,11 @@ def _estimate_dimension_row_total(
     if not row_field:
         return 0
     try:
-        mapped_filters = get_mapped_filters(selected_filters or {}, service.field_settings)
         bool_query = build_bool_query_from_search_params(
             query_text=query_text if not query_clauses else None,
             query_clauses=query_clauses if query_clauses else None,
-            filters=mapped_filters,
+            filters=selected_filters,
+            field_settings=service.field_settings,
         )
         response = service.client.search(
             index=service.index_name,
@@ -554,11 +553,11 @@ def _build_dimension_table_result_all_rows(
     if value_metric == "journals":
         journal_field = resolve_journal_cardinality_field(field_settings)
 
-    mapped_filters = get_mapped_filters(selected_filters or {}, service.field_settings)
     bool_query = build_bool_query_from_search_params(
         query_text=text_search if not query_clauses else None,
         query_clauses=query_clauses if query_clauses else None,
-        filters=mapped_filters,
+        filters=selected_filters,
+        field_settings=service.field_settings,
     )
 
     row_transform = row_cfg.get("settings", {}).get("display_transform")
@@ -1042,11 +1041,11 @@ def _build_document_export_jobs(*, dimension, query_source, index_name, split_si
 
     jobs = []
     file_slug = (dimension.get("slug") or "dimension").strip() or "dimension"
-    mapped_filters = get_mapped_filters(selected_filters or {}, service.field_settings)
     bool_query = build_bool_query_from_search_params(
         query_text=text_search if not query_clauses else None,
         query_clauses=query_clauses if query_clauses else None,
-        filters=mapped_filters,
+        filters=selected_filters,
+        field_settings=service.field_settings,
     )
     search_body = {
         "size": split_size,
@@ -1117,11 +1116,11 @@ def _run_chunked_export_async(*, batch_job_id, dimension, query_source, index_na
         selected_filters = normalize_option_filters(applied_filters)
         query_clauses = _parse_query_clauses_from_source(query_source)
         text_search = query_source.get("search", "")
-        mapped_filters = get_mapped_filters(selected_filters or {}, service.field_settings)
         bool_query = build_bool_query_from_search_params(
             query_text=text_search if not query_clauses else None,
             query_clauses=query_clauses if query_clauses else None,
-            filters=mapped_filters,
+            filters=selected_filters,
+            field_settings=service.field_settings,
         )
 
         field_settings = data_source.field_settings_dict or {}

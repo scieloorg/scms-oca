@@ -5,12 +5,7 @@ from django.conf import settings
 from opensearchpy.exceptions import ConnectionError as OpenSearchConnectionError
 
 from .client import get_opensearch_client
-from .filter_mapping import (
-    apply_search_filters_to_body,
-    build_filters_body,
-    get_index_field_candidates,
-    get_mapped_filters,
-)
+from .filter_mapping import get_index_field_candidates
 from .filters_cache import (
     build_filters_cache_key,
     get_cached_filters,
@@ -19,23 +14,25 @@ from .filters_cache import (
 from .models import DataSource
 from .option_normalization import clean_text
 from .query import (
+    apply_search_filters_to_body,
     build_aggregation_body,
     build_bool_query_from_search_params,
     build_document_search_body,
     build_filters_aggs,
+    build_filters_body,
     build_keyword_contains_search_body,
     build_lookup_hits_body,
     build_term_search_body,
     build_unique_items_aggregation_body,
 )
+from .request_filters import build_option_filters
 from .response_parser import (
-    parse_lookup_hits,
     parse_aggregation_response,
     parse_document_search_response,
     parse_filters_response,
+    parse_lookup_hits,
     parse_search_item_response,
 )
-
 
 logger = logging.getLogger(__name__)
 
@@ -148,17 +145,17 @@ class SearchGatewayService:
         return bodies
 
     def _search_data_source_field_options(self, field, query_text="", filters=None):
-        mapped_filters = get_mapped_filters(
-            filters or {},
-            self.field_settings,
-        )
-        mapped_filters.pop(field.index_field_name, None)
+        option_filters = build_option_filters(filters, field)
         size = self._resolve_option_size(field, query_text)
 
         errors = []
         for body in self._build_field_option_bodies(field.index_field_name, query_text, size):
             try:
-                search_body = apply_search_filters_to_body(body, mapped_filters)
+                search_body = apply_search_filters_to_body(
+                    body,
+                    option_filters,
+                    self.field_settings,
+                )
                 response = self._search(search_body)
                 parsed = parse_search_item_response(
                     response,
@@ -341,8 +338,11 @@ class SearchGatewayService:
             return cached_data, None
 
         aggs = build_filters_aggs(field_settings, exclude_fields)
-        mapped_filters = get_mapped_filters(filters or {}, filter_mapping_field_settings)
-        body = build_filters_body(aggs, mapped_filters=mapped_filters)
+        body = build_filters_body(
+            aggs,
+            filters,
+            filter_mapping_field_settings,
+        )
 
         try:
             response = self._search(body)
@@ -370,12 +370,12 @@ class SearchGatewayService:
         if not self.client or not self.data_source:
             return {"search_results": [], "total_results": 0}
 
-        mapped_filters = get_mapped_filters(filters, self.field_settings)
         body = build_document_search_body(
             query_text=query_text,
             advanced_query=advanced_query,
             query_clauses=query_clauses,
-            filters=mapped_filters,
+            filters=filters,
+            field_settings=self.field_settings,
             page=page,
             page_size=page_size,
             sort_field=sort_field,
@@ -383,6 +383,7 @@ class SearchGatewayService:
             source_fields=self.source_fields,
             search_field_mapping=self.data_source.get_search_field_mapping(),
         )
+
         try:
             res = self._search(body, request_cache=True)
             parsed = parse_document_search_response(res)
@@ -390,7 +391,6 @@ class SearchGatewayService:
         except OpenSearchConnectionError:
             logger.warning("OpenSearch unavailable while searching documents", exc_info=True)
             return {"search_results": [], "total_results": 0}
-
 
     def search_aggregation(
         self,
@@ -417,18 +417,19 @@ class SearchGatewayService:
             Else: raw response["aggregations"].
         """
         field_settings = self.data_source.field_settings_dict
-        mapped_filters = get_mapped_filters(filters or {}, field_settings)
         bool_query = build_bool_query_from_search_params(
             query_text=query_text,
             advanced_query=advanced_query,
             query_clauses=query_clauses,
-            filters=mapped_filters,
+            filters=filters,
+            field_settings=field_settings,
             search_field_mapping=self.data_source.get_search_field_mapping(),
         )
         body = build_aggregation_body(
             query={"bool": bool_query},
             aggs=aggs,
         )
+
         try:
             res = self.client.search(
                 index=self.index_name,
