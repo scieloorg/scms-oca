@@ -111,3 +111,42 @@ class BooleanOperatorFilterTests(SimpleTestCase):
             must_not_clauses,
             [{"terms": {"author_country_codes": ["Brazil"]}}],
         )
+
+
+class FilterOptionsBooleanIntegrationTests(SimpleTestCase):
+    def test_field_option_fallback_applies_other_field_operator(self):
+        data_source = DataSource(
+            index_name="scientific_production",
+            field_settings={
+                "fields": FIELD_SETTINGS,
+                "forms": {"search": {"fields": ["sdg", "country"]}},
+            },
+        )
+        client = Mock()
+        client.search.return_value = {
+            "aggregations": {"unique_items": {"buckets": []}},
+        }
+        service = SearchGatewayService(index_name=data_source.index_name, client=client)
+        service.__dict__["data_source"] = data_source
+
+        options, error = service.get_field_options(
+            "country",
+            filters={
+                "sdg": ["1. No Poverty", "2. Zero Hunger"],
+                "sdg_operator": "and",
+                "country": "Brazil",
+                "country_bool_not": "true",
+            },
+        )
+
+        self.assertEqual(options, [])
+        self.assertIsNone(error)
+        bool_query = client.search.call_args.kwargs["body"]["query"]["bool"]
+        self.assertEqual(
+            bool_query["filter"],
+            [
+                {"term": {"sdg_names": "1. No Poverty"}},
+                {"term": {"sdg_names": "2. Zero Hunger"}},
+            ],
+        )
+        self.assertNotIn("must_not", bool_query)
