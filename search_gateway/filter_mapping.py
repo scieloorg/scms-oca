@@ -54,6 +54,26 @@ def _build_numeric_range_value(start_value, end_value, *, min_value=None, max_va
     return range_value
 
 
+def _build_date_year_range_value(start_value, end_value):
+    start_year = _parse_year_bound(start_value)
+    end_year = _parse_year_bound(end_value)
+
+    if start_year is None and end_year is None:
+        return {}
+
+    if start_year is not None and end_year is not None and start_year > end_year:
+        start_year, end_year = end_year, start_year
+
+    range_value = {}
+
+    if start_year is not None:
+        range_value["gte"] = f"{start_year}-01-01"
+    if end_year is not None:
+        range_value["lte"] = f"{end_year}-12-31"
+
+    return range_value
+
+
 def _parse_year_value(value, *, min_year=None, max_year=None):
     try:
         year = int(value) if value not in (None, "") else None
@@ -124,7 +144,7 @@ def _map_transformed_filter(field_name, field_info, filters):
             return (real_field_name, normalized_value), handled_fields
         return None, handled_fields
 
-    if transform_type not in {"year_range", "numeric_range"}:
+    if transform_type not in {"date_year_range", "year_range", "numeric_range"}:
         return None, set()
 
     source_names = list(transform.get("sources") or [])
@@ -135,6 +155,16 @@ def _map_transformed_filter(field_name, field_info, filters):
         return None, handled_fields
 
     settings = field_info.get("settings") or {}
+    if transform_type == "date_year_range":
+        date_range = _build_date_year_range_value(
+            filters.get(source_names[0]),
+            filters.get(source_names[1]),
+        )
+
+        if date_range:
+            return (real_field_name, date_range), handled_fields
+        return None, handled_fields
+
     if transform_type == "numeric_range":
         min_value = _parse_number_bound(settings.get("min"))
         max_value = _parse_number_bound(settings.get("max"))
