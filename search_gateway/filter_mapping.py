@@ -197,6 +197,86 @@ def apply_search_filters_to_body(body, mapped_filters):
     return body_with_filters
 
 
+def _get_query_operator_settings(filters, field_name, field_info):
+    support_operator = bool(field_info.get("settings", {}).get("support_query_operator"))
+    if not support_operator:
+        return "or", False
+
+    operator = "or" if filters.get(f"{field_name}_operator") == "or" else "and"
+    is_not = filters.get(f"{field_name}_bool_not") == "true"
+
+    return operator, is_not
+
+
+def map_filters_with_operators(filters, field_settings):
+    if not filters or not field_settings:
+        return []
+
+    mapped_items = []
+    handled_fields = set()
+
+    for field_name, field_info in field_settings.items():
+        if field_info.get("kind") != "index":
+            continue
+
+        mapped_filter, transformed_fields = _map_transformed_filter(
+            field_name,
+            field_info,
+            filters,
+        )
+        handled_fields.update(transformed_fields)
+
+        if mapped_filter:
+            operator, is_not = _get_query_operator_settings(
+                filters,
+                field_name,
+                field_info,
+            )
+            real_field_name, value = mapped_filter
+            mapped_items.append(
+                {
+                    "field": real_field_name,
+                    "value": value,
+                    "operator": operator,
+                    "is_not": is_not,
+                }
+            )
+
+    for field_name, value in filters.items():
+        if (
+            field_name in handled_fields
+            or field_name.endswith(("_operator", "_bool_not"))
+            or field_name.startswith("__")
+        ):
+            continue
+        if field_name not in field_settings:
+            continue
+
+        field_info = field_settings[field_name]
+        if field_info.get("kind") != "index":
+            continue
+
+        real_field_name = field_info.get("index_field_name")
+        if not real_field_name or value in (None, "", []):
+            continue
+
+        operator, is_not = _get_query_operator_settings(
+            filters,
+            field_name,
+            field_info,
+        )
+        mapped_items.append(
+            {
+                "field": real_field_name,
+                "value": value,
+                "operator": operator,
+                "is_not": is_not,
+            }
+        )
+
+    return mapped_items
+
+
 def get_mapped_filters(filters, field_settings):
     """
     Map form filter names to Elasticsearch field names.
