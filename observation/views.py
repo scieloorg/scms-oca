@@ -109,16 +109,17 @@ def _estimate_grand_total_journals(
     *,
     query_text,
     query_clauses,
-    selected_filters,
+    applied_filters,
     journal_field,
 ):
     if not journal_field:
         return 0
+
     try:
         bool_query = build_bool_query_from_search_params(
             query_text=query_text if not query_clauses else None,
             query_clauses=query_clauses if query_clauses else None,
-            filters=selected_filters,
+            filters=applied_filters,
             field_settings=service.field_settings,
         )
         response = service.client.search(
@@ -362,16 +363,17 @@ def _estimate_dimension_row_total(
     *,
     query_text,
     query_clauses,
-    selected_filters,
+    applied_filters,
     row_field,
 ):
     if not row_field:
         return 0
+
     try:
         bool_query = build_bool_query_from_search_params(
             query_text=query_text if not query_clauses else None,
             query_clauses=query_clauses if query_clauses else None,
-            filters=selected_filters,
+            filters=applied_filters,
             field_settings=service.field_settings,
         )
         response = service.client.search(
@@ -406,7 +408,6 @@ def _build_dimension_table_result(query_source, service, dimension):
         service.data_source,
         form_key=OBSERVATION_SEARCH_FORM_KEY,
     )
-    selected_filters = normalize_option_filters(applied_filters)
     text_search = query_source.get("search", "")
     query_clauses = _parse_query_clauses_from_source(query_source)
     field_settings = service.data_source.field_settings_dict or {}
@@ -457,7 +458,7 @@ def _build_dimension_table_result(query_source, service, dimension):
             aggs=aggs,
             query_text=text_search if not query_clauses else None,
             query_clauses=query_clauses if query_clauses else None,
-            filters=selected_filters,
+            filters=applied_filters,
             parse_config=parse_config,
         )
 
@@ -503,7 +504,7 @@ def _build_dimension_table_result(query_source, service, dimension):
         service,
         query_text=text_search,
         query_clauses=query_clauses,
-        selected_filters=selected_filters,
+        applied_filters=applied_filters,
         row_field=(used_pair[0] if used_pair else row_field),
     )
     labeled_result = _apply_lookup_labels_to_rows(
@@ -531,7 +532,6 @@ def _build_dimension_table_result_all_rows(
         service.data_source,
         form_key=OBSERVATION_SEARCH_FORM_KEY,
     )
-    selected_filters = normalize_option_filters(applied_filters)
     text_search = query_source.get("search", "")
     query_clauses = _parse_query_clauses_from_source(query_source)
     field_settings = service.data_source.field_settings_dict or {}
@@ -556,7 +556,7 @@ def _build_dimension_table_result_all_rows(
     bool_query = build_bool_query_from_search_params(
         query_text=text_search if not query_clauses else None,
         query_clauses=query_clauses if query_clauses else None,
-        filters=selected_filters,
+        filters=applied_filters,
         field_settings=service.field_settings,
     )
 
@@ -661,7 +661,7 @@ def _build_dimension_table_result_all_rows(
                     service,
                     query_text=text_search,
                     query_clauses=query_clauses,
-                    selected_filters=selected_filters,
+                    applied_filters=applied_filters,
                     journal_field=journal_field,
                 )
             candidate_result = {"columns": columns, "rows": rows, "grand_total": grand_total}
