@@ -6,7 +6,7 @@ DEFAULT_YEAR_MIN = 1800
 DEFAULT_YEAR_MAX = 2100
 
 
-def _parse_number_bound(value):
+def _parse_integer(value):
     try:
         return int(value) if value not in (None, "") else None
     except (TypeError, ValueError):
@@ -14,10 +14,7 @@ def _parse_number_bound(value):
 
 
 def _parse_numeric_value(value, *, min_value=None, max_value=None):
-    try:
-        numeric_value = int(value) if value not in (None, "") else None
-    except (TypeError, ValueError):
-        return None
+    numeric_value = _parse_integer(value)
 
     if numeric_value is None:
         return None
@@ -55,8 +52,8 @@ def _build_numeric_range_value(start_value, end_value, *, min_value=None, max_va
 
 
 def _build_date_year_range_value(start_value, end_value):
-    start_year = _parse_year_bound(start_value)
-    end_year = _parse_year_bound(end_value)
+    start_year = _parse_integer(start_value)
+    end_year = _parse_integer(end_value)
 
     if start_year is None and end_year is None:
         return {}
@@ -75,10 +72,7 @@ def _build_date_year_range_value(start_value, end_value):
 
 
 def _parse_year_value(value, *, min_year=None, max_year=None):
-    try:
-        year = int(value) if value not in (None, "") else None
-    except (TypeError, ValueError):
-        return None
+    year = _parse_integer(value)
 
     if year is None:
         return None
@@ -86,18 +80,11 @@ def _parse_year_value(value, *, min_year=None, max_year=None):
     max_year = DEFAULT_YEAR_MAX if max_year is None else max_year
     if len(str(abs(year))) != 4:
         return None
-    if min_year is not None and year < min_year:
+    if year < min_year:
         return None
-    if max_year is not None and year > max_year:
+    if year > max_year:
         return None
     return year
-
-
-def _parse_year_bound(value):
-    try:
-        return int(value) if value not in (None, "") else None
-    except (TypeError, ValueError):
-        return None
 
 
 def _build_year_range_values(start_value, end_value, *, min_year=None, max_year=None):
@@ -166,8 +153,8 @@ def _map_transformed_filter(field_name, field_info, filters):
         return None, handled_fields
 
     if transform_type == "numeric_range":
-        min_value = _parse_number_bound(settings.get("min"))
-        max_value = _parse_number_bound(settings.get("max"))
+        min_value = _parse_integer(settings.get("min"))
+        max_value = _parse_integer(settings.get("max"))
         numeric_range = _build_numeric_range_value(
             filters.get(source_names[0]),
             filters.get(source_names[1]),
@@ -178,8 +165,8 @@ def _map_transformed_filter(field_name, field_info, filters):
             return (real_field_name, numeric_range), handled_fields
         return None, handled_fields
 
-    min_year = _parse_year_bound(settings.get("min"))
-    max_year = _parse_year_bound(settings.get("max"))
+    min_year = _parse_integer(settings.get("min"))
+    max_year = _parse_integer(settings.get("max"))
 
     year_values = _build_year_range_values(
         filters.get(source_names[0]),
