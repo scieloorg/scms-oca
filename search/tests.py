@@ -1,5 +1,5 @@
 import json
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from django.contrib.contenttypes.models import ContentType
 from django.test import RequestFactory, SimpleTestCase
@@ -18,6 +18,7 @@ from .csl_json import CSLSourceExtractor
 from .models import SearchPage
 from .normalize import normalize_orcid, orcid_url
 from .ris_export import render_ris_lines
+from .views import search_view_list
 
 
 class SearchPaginationTests(SimpleTestCase):
@@ -543,3 +544,51 @@ class SearchViewBooleanFilterTests(SimpleTestCase):
         applied_filters = mock_search.call_args.args[2]
         self.assertEqual(applied_filters["sdg"], ["1", "2"])
         self.assertEqual(applied_filters["sdg_operator"], "and")
+
+    @patch("search.views.get_index_freshness", return_value=None)
+    @patch("search.views.SearchGatewayService")
+    @patch("search.views.SearchPage.search_documents_with_retry")
+    def test_search_view_list_preserves_boolean_operators(
+        self,
+        mock_search,
+        mock_service_cls,
+        _mock_freshness,
+    ):
+        data_source = DataSource(
+            index_name="scientific_production",
+            field_settings={
+                "fields": {
+                    "sdg": {
+                        "kind": "index",
+                        "index_field_name": "sdg_names",
+                        "settings": {"support_query_operator": True},
+                    },
+                    "country": {
+                        "kind": "index",
+                        "index_field_name": "country",
+                        "settings": {"support_query_operator": True},
+                    },
+                },
+                "forms": {
+                    "search": {"fields": ["sdg", "country"]},
+                },
+            },
+        )
+
+        mock_service = Mock()
+        mock_service.data_source = data_source
+        mock_service_cls.return_value = mock_service
+
+        mock_search.return_value = {"search_results": [], "total_results": 0}
+
+        request = RequestFactory().get(
+            "/search/api/search-results-list/?sdg=1&sdg=2&sdg_operator=and&country=Brazil&country_bool_not=true"
+        )
+        response = search_view_list(request)
+
+        self.assertEqual(response.status_code, 200)
+        applied_filters = mock_search.call_args[0][2]
+        self.assertEqual(applied_filters["sdg"], ["1", "2"])
+        self.assertEqual(applied_filters["sdg_operator"], "and")
+        self.assertEqual(applied_filters["country"], "Brazil")
+        self.assertEqual(applied_filters["country_bool_not"], "true")
