@@ -1,19 +1,19 @@
 import json
+from unittest.mock import patch
 
+from django.contrib.contenttypes.models import ContentType
 from django.test import RequestFactory, SimpleTestCase
 
+from search_gateway.models import DataSource
+
+from .citation.render import build_citation_items, build_csl_payload, render_bibtex
+from .citation.scientific_production import build_csl_item
+from .citation.social_production import is_social_production_document
 from .citation.views import (
     citation_custom_style_view,
     citation_preview_view,
     export_view,
 )
-from .citation.render import (
-    build_citation_items,
-    build_csl_payload,
-    render_bibtex,
-)
-from .citation.scientific_production import build_csl_item
-from .citation.social_production import is_social_production_document
 from .csl_json import CSLSourceExtractor
 from .models import SearchPage
 from .normalize import normalize_orcid, orcid_url
@@ -500,3 +500,46 @@ class SocialProductionCitationTests(SimpleTestCase):
         self.assertIn("N2  - Instituição: Universidade Exemplo", text)
         self.assertNotIn("ID  -", text)
         self.assertNotIn("sp-123", text)
+
+
+class SearchViewBooleanFilterTests(SimpleTestCase):
+    def test_initial_page_search_preserves_boolean_operators(self):
+        data_source = DataSource(
+            index_name="scientific_production",
+            field_settings={
+                "fields": {
+                    "sdg": {
+                        "kind": "index",
+                        "index_field_name": "sdg_names",
+                        "settings": {
+                            "multiple_selection": True,
+                            "support_query_operator": True,
+                        },
+                    },
+                },
+                "forms": {"search": {"fields": ["sdg"]}},
+            },
+        )
+        with patch(
+            "wagtail.models.pages.ContentType.objects.get_for_model",
+            return_value=ContentType(app_label="search", model="searchpage"),
+        ):
+            page = SearchPage(title="Search", data_source=data_source)
+        request = RequestFactory().get(
+            "/search/?sdg=1&sdg=2&sdg_operator=and"
+        )
+
+        with patch("wagtail.models.Page.get_context", return_value={}), patch.object(
+            page,
+            "render_search_filter_sidebar_html",
+            return_value="",
+        ), patch.object(
+            page,
+            "fetch_gateway_search_results",
+            return_value={"search_results": [], "total_results": 0},
+        ) as mock_search, patch("search.models.get_index_freshness", return_value=None):
+            page.get_context(request)
+
+        applied_filters = mock_search.call_args.args[2]
+        self.assertEqual(applied_filters["sdg"], ["1", "2"])
+        self.assertEqual(applied_filters["sdg_operator"], "and")

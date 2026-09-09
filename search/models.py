@@ -16,12 +16,10 @@ from search_gateway.option_normalization import (
     normalize_positive_number,
     normalize_search_result_sort,
 )
-from .advance_search import AdvancedQueryValidationError
-from search_gateway.request_filters import (
-    extract_applied_filters,
-    normalize_option_filters,
-)
+from search_gateway.request_filters import extract_applied_filters
 from search_gateway.service import SearchGatewayService
+
+from .advance_search import AdvancedQueryValidationError
 
 logger = logging.getLogger(__name__)
 
@@ -259,11 +257,10 @@ class SearchPage(Page):
             return context
 
         applied_filters = extract_applied_filters(request.GET, data_source, form_key="search")
-        selected_filters = normalize_option_filters(applied_filters)
         sidebar_html = self.render_search_filter_sidebar_html(request, data_source, applied_filters)
         advanced_search_error = ""
         try:
-            raw_results = self.fetch_gateway_search_results(data_source, request_state, selected_filters)
+            raw_results = self.fetch_gateway_search_results(data_source, request_state, applied_filters)
         except AdvancedQueryValidationError as exc:
             advanced_search_error = str(exc)
             raw_results = {"search_results": [], "total_results": 0}
