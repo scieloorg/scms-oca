@@ -6,6 +6,7 @@ from observation.views import (
     _build_dimension_table_result,
     _estimate_grand_total_journals,
 )
+from observation.views import list as observation_list_view
 from search_gateway.models import DataSource
 
 
@@ -84,6 +85,37 @@ class ObservationBooleanOperatorsTests(SimpleTestCase):
         )
 
         applied_filters = service.search_aggregation.call_args.kwargs["filters"]
+        self.assertEqual(applied_filters["sdg"], ["1", "2"])
+        self.assertEqual(applied_filters["sdg_operator"], "and")
+
+    @patch("observation.views.SearchGatewayService")
+    def test_document_list_preserves_boolean_operators(self, mock_service_cls):
+        data_source = DataSource(
+            index_name="scientific_production",
+            field_settings={
+                "fields": FakeObservationDataSource.field_settings,
+                "forms": {
+                    "search": {
+                        "fields": ["sdg", "country", "publication_year"],
+                    }
+                },
+            },
+        )
+        service = Mock()
+        service.data_source = data_source
+        service.search_documents.return_value = {
+            "search_results": [],
+            "total_results": 0,
+        }
+        mock_service_cls.return_value = service
+        request = RequestFactory().get(
+            "/observation/list/?sdg=1&sdg=2&sdg_operator=and"
+        )
+
+        response = observation_list_view(request)
+
+        self.assertEqual(response.status_code, 200)
+        applied_filters = service.search_documents.call_args.kwargs["filters"]
         self.assertEqual(applied_filters["sdg"], ["1", "2"])
         self.assertEqual(applied_filters["sdg_operator"], "and")
 

@@ -25,10 +25,7 @@ from observation.dimension_groups import (
     resolve_journal_cardinality_field,
 )
 from search_gateway.query import build_bool_query_from_search_params
-from search_gateway.request_filters import (
-    extract_applied_filters,
-    normalize_option_filters,
-)
+from search_gateway.request_filters import extract_applied_filters
 from search_gateway.service import SearchGatewayService
 
 logger = logging.getLogger(__name__)
@@ -1037,14 +1034,13 @@ def _build_document_export_jobs(*, dimension, query_source, index_name, split_si
         data_source,
         form_key=OBSERVATION_SEARCH_FORM_KEY,
     )
-    selected_filters = normalize_option_filters(applied_filters)
 
     jobs = []
     file_slug = (dimension.get("slug") or "dimension").strip() or "dimension"
     bool_query = build_bool_query_from_search_params(
         query_text=text_search if not query_clauses else None,
         query_clauses=query_clauses if query_clauses else None,
-        filters=selected_filters,
+        filters=applied_filters,
         field_settings=service.field_settings,
     )
     search_body = {
@@ -1113,13 +1109,12 @@ def _run_chunked_export_async(*, batch_job_id, dimension, query_source, index_na
             data_source,
             form_key=OBSERVATION_SEARCH_FORM_KEY,
         )
-        selected_filters = normalize_option_filters(applied_filters)
         query_clauses = _parse_query_clauses_from_source(query_source)
         text_search = query_source.get("search", "")
         bool_query = build_bool_query_from_search_params(
             query_text=text_search if not query_clauses else None,
             query_clauses=query_clauses if query_clauses else None,
-            filters=selected_filters,
+            filters=applied_filters,
             field_settings=service.field_settings,
         )
 
@@ -1355,14 +1350,14 @@ def list(request):
         data_source = service.data_source
         if not data_source:
             return JsonResponse({"error": "Invalid index_name"}, status=400)
+
         applied_filters = extract_applied_filters(
             request.GET, data_source, form_key=OBSERVATION_SEARCH_FORM_KEY
         )
-        selected_filters = normalize_option_filters(applied_filters)
         results_data = service.search_documents(
             query_text=text_search if not query_clauses else None,
             query_clauses=query_clauses,
-            filters=selected_filters,
+            filters=applied_filters,
             page=page,
             page_size=page_size,
             sort_field="publication_year",
@@ -1370,7 +1365,7 @@ def list(request):
         )
         return JsonResponse({
             "total_results": results_data.get("total_results", 0),
-            "selected_filters": selected_filters,
+            "selected_filters": applied_filters,
         })
     except Exception as e:
         logger.exception("Error in observation api_search_results_list: %s", e)
