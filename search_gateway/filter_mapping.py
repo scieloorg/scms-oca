@@ -1,12 +1,10 @@
-from .query import query_filters
 from .option_normalization import normalize_boolean
-
 
 DEFAULT_YEAR_MIN = 1800
 DEFAULT_YEAR_MAX = 2100
 
 
-def _parse_number_bound(value):
+def _parse_integer(value):
     try:
         return int(value) if value not in (None, "") else None
     except (TypeError, ValueError):
@@ -14,10 +12,7 @@ def _parse_number_bound(value):
 
 
 def _parse_numeric_value(value, *, min_value=None, max_value=None):
-    try:
-        numeric_value = int(value) if value not in (None, "") else None
-    except (TypeError, ValueError):
-        return None
+    numeric_value = _parse_integer(value)
 
     if numeric_value is None:
         return None
@@ -54,11 +49,25 @@ def _build_numeric_range_value(start_value, end_value, *, min_value=None, max_va
     return range_value
 
 
+def _build_date_year_range_value(start_value, end_value):
+    start_year = _parse_integer(start_value)
+    end_year = _parse_integer(end_value)
+
+    if start_year is not None and end_year is not None and start_year > end_year:
+        start_year, end_year = end_year, start_year
+
+    range_value = {}
+
+    if start_year is not None:
+        range_value["gte"] = f"{start_year}-01-01"
+    if end_year is not None:
+        range_value["lte"] = f"{end_year}-12-31"
+
+    return range_value
+
+
 def _parse_year_value(value, *, min_year=None, max_year=None):
-    try:
-        year = int(value) if value not in (None, "") else None
-    except (TypeError, ValueError):
-        return None
+    year = _parse_integer(value)
 
     if year is None:
         return None
@@ -66,18 +75,11 @@ def _parse_year_value(value, *, min_year=None, max_year=None):
     max_year = DEFAULT_YEAR_MAX if max_year is None else max_year
     if len(str(abs(year))) != 4:
         return None
-    if min_year is not None and year < min_year:
+    if year < min_year:
         return None
-    if max_year is not None and year > max_year:
+    if year > max_year:
         return None
     return year
-
-
-def _parse_year_bound(value):
-    try:
-        return int(value) if value not in (None, "") else None
-    except (TypeError, ValueError):
-        return None
 
 
 def _build_year_range_values(start_value, end_value, *, min_year=None, max_year=None):
@@ -99,7 +101,6 @@ def _build_year_range_values(start_value, end_value, *, min_year=None, max_year=
         start_year, end_year = end_year, start_year
 
     return list(range(start_year, end_year + 1))
-
 
 
 def _map_transformed_filter(field_name, field_info, filters):
@@ -124,7 +125,7 @@ def _map_transformed_filter(field_name, field_info, filters):
             return (real_field_name, normalized_value), handled_fields
         return None, handled_fields
 
-    if transform_type not in {"year_range", "numeric_range"}:
+    if transform_type not in {"date_year_range", "year_range", "numeric_range"}:
         return None, set()
 
     source_names = list(transform.get("sources") or [])
@@ -135,9 +136,19 @@ def _map_transformed_filter(field_name, field_info, filters):
         return None, handled_fields
 
     settings = field_info.get("settings") or {}
+    if transform_type == "date_year_range":
+        date_range = _build_date_year_range_value(
+            filters.get(source_names[0]),
+            filters.get(source_names[1]),
+        )
+
+        if date_range:
+            return (real_field_name, date_range), handled_fields
+        return None, handled_fields
+
     if transform_type == "numeric_range":
-        min_value = _parse_number_bound(settings.get("min"))
-        max_value = _parse_number_bound(settings.get("max"))
+        min_value = _parse_integer(settings.get("min"))
+        max_value = _parse_integer(settings.get("max"))
         numeric_range = _build_numeric_range_value(
             filters.get(source_names[0]),
             filters.get(source_names[1]),
@@ -148,8 +159,8 @@ def _map_transformed_filter(field_name, field_info, filters):
             return (real_field_name, numeric_range), handled_fields
         return None, handled_fields
 
-    min_year = _parse_year_bound(settings.get("min"))
-    max_year = _parse_year_bound(settings.get("max"))
+    min_year = _parse_integer(settings.get("min"))
+    max_year = _parse_integer(settings.get("max"))
 
     year_values = _build_year_range_values(
         filters.get(source_names[0]),
@@ -162,66 +173,104 @@ def _map_transformed_filter(field_name, field_info, filters):
     return None, handled_fields
 
 
-def apply_search_filters_to_body(body, mapped_filters):
-    if not mapped_filters:
-        return body
+def _get_query_operator_settings(filters, field_name, field_info):
+    support_operator = bool(field_info.get("settings", {}).get("support_query_operator"))
+    if not support_operator:
+        return "or", False
 
-    original_query = body.get("query", {"match_all": {}})
+    operator = "or" if filters.get(f"{field_name}_operator") == "or" else "and"
+    is_not = filters.get(f"{field_name}_bool_not") == "true"
 
-    body_with_filters = dict(body)
-
-    body_with_filters["query"] = {
-        "bool": {
-            "must": [original_query],
-                "filter": query_filters(mapped_filters),
-        }
-    }
-
-    return body_with_filters
+    return operator, is_not
 
 
-def get_mapped_filters(filters, field_settings):
-    """
-    Map form filter names to Elasticsearch field names.
-
-    Args:
-        filters: Dict of filters with form field names.
-        field_settings: Field settings from data source configuration.
-
-    Returns:
-        Dict with Elasticsearch field names as keys.
-    """
-    if not filters:
-        return {}
-
-    mapped_filters = {}
+def _map_transformed_filters(filters, field_settings):
+    mapped_items = []
     handled_fields = set()
 
     for field_name, field_info in field_settings.items():
         if field_info.get("kind") != "index":
             continue
 
-        mapped_filter, transformed_fields = _map_transformed_filter(field_name, field_info, filters)
+        mapped_filter, transformed_fields = _map_transformed_filter(
+            field_name,
+            field_info,
+            filters,
+        )
         handled_fields.update(transformed_fields)
+
         if mapped_filter:
+            operator, is_not = _get_query_operator_settings(
+                filters,
+                field_name,
+                field_info,
+            )
             real_field_name, value = mapped_filter
-            mapped_filters[real_field_name] = value
+            mapped_items.append(
+                {
+                    "field": real_field_name,
+                    "value": value,
+                    "operator": operator,
+                    "is_not": is_not,
+                }
+            )
 
-    for key, value in filters.items():
-        if key in handled_fields:
+    return mapped_items, handled_fields
+
+
+def _map_direct_filters(filters, field_settings, handled_fields):
+    mapped_items = []
+
+    for field_name, value in filters.items():
+        if (
+            field_name in handled_fields
+            or field_name.endswith(("_operator", "_bool_not"))
+            or field_name.startswith("__")
+        ):
             continue
-        if key not in field_settings:
-            continue
-        field_config = field_settings[key]
-        if field_config.get("kind") != "index":
+        if field_name not in field_settings:
             continue
 
-        real_field_name = field_config.get("index_field_name")
+        field_info = field_settings[field_name]
+        if field_info.get("kind") != "index":
+            continue
+
+        real_field_name = field_info.get("index_field_name")
         if not real_field_name or value in (None, "", []):
             continue
-        mapped_filters[real_field_name] = value
 
-    return mapped_filters
+        operator, is_not = _get_query_operator_settings(
+            filters,
+            field_name,
+            field_info,
+        )
+        mapped_items.append(
+            {
+                "field": real_field_name,
+                "value": value,
+                "operator": operator,
+                "is_not": is_not,
+            }
+        )
+
+    return mapped_items
+
+
+def map_filters_with_operators(filters, field_settings):
+    if not filters or not field_settings:
+        return []
+
+    mapped_transformed, handled_fields = _map_transformed_filters(
+        filters,
+        field_settings,
+    )
+    mapped_direct = _map_direct_filters(
+        filters,
+        field_settings,
+        handled_fields,
+    )
+
+    return mapped_transformed + mapped_direct
 
 
 def get_index_field_candidates(index_field_name):
@@ -231,12 +280,3 @@ def get_index_field_candidates(index_field_name):
     if index_field_name.endswith(".keyword"):
         return [index_field_name, index_field_name[:-8]]
     return [index_field_name, f"{index_field_name}.keyword"]
-
-
-def build_filters_body(aggs, mapped_filters=None):
-    body = {"size": 0, "aggs": aggs}
-
-    if mapped_filters:
-        body["query"] = {"bool": {"filter": query_filters(mapped_filters)}}
-
-    return body

@@ -1,5 +1,7 @@
 from search.advance_search import normalize_advanced_query
 
+from .filter_mapping import map_filters_with_operators
+
 
 def _escape_wildcard_chars(text):
     return text.replace("\\", "\\\\").replace("*", "\\*").replace("?", "\\?")
@@ -17,15 +19,6 @@ def build_term_clause(field_name, value):
     return {"term": {field_name: value}}
 
 
-def build_terms_clause(field_name, values):
-    if field_name in (None, ""):
-        return None
-    cleaned_values = [value for value in (values or []) if value not in (None, "")]
-    if not cleaned_values:
-        return None
-    return {"terms": {field_name: cleaned_values}}
-
-
 def build_range_clause(field_name, value):
     if field_name in (None, "") or not isinstance(value, dict):
         return None
@@ -40,33 +33,70 @@ def build_range_clause(field_name, value):
     return {"range": {field_name: range_values}}
 
 
-def query_filters(filters):
-    """
-    Build filter clauses for opensearch query.
-
-    Note: Filters should already have opensearch field names as keys
-    (i.e., already mapped from form field names).
-
-    Args:
-        filters: Dict of filters with opensearch field names as keys.
-
-    Returns:
-        List of filter clauses for the bool query.
-    """
+def build_filter_clauses(filters, field_settings):
     if not filters:
-        return []
+        return [], []
+    if field_settings is None:
+        raise ValueError("field_settings is required to build filter clauses")
 
-    filters_clauses = []
-    for f_field, f_value in filters.items():
-        if isinstance(f_value, dict):
-            clause = build_range_clause(f_field, f_value)
-        elif isinstance(f_value, list):
-            clause = build_terms_clause(f_field, f_value)
+    filter_clauses = []
+    must_not_clauses = []
+
+    for item in map_filters_with_operators(filters, field_settings):
+        field_name = item["field"]
+        filter_value = item["value"]
+        target_clauses = must_not_clauses if item["is_not"] else filter_clauses
+
+        if isinstance(filter_value, dict):
+            clauses = [build_range_clause(field_name, filter_value)]
+        elif isinstance(filter_value, list):
+            cleaned_values = [value for value in filter_value if value not in (None, "")]
+            if len(cleaned_values) > 1 and item["operator"] == "and":
+                clauses = [build_term_clause(field_name, value) for value in cleaned_values]
+            else:
+                clauses = [{"terms": {field_name: cleaned_values}}] if cleaned_values else []
         else:
-            clause = build_term_clause(f_field, f_value)
-        if clause:
-            filters_clauses.append(clause)
-    return filters_clauses
+            clauses = [build_term_clause(field_name, filter_value)]
+
+        target_clauses.extend(clause for clause in clauses if clause)
+
+    return filter_clauses, must_not_clauses
+
+
+def apply_search_filters_to_body(body, filters, field_settings):
+    if not filters:
+        return body
+
+    original_query = body.get("query", {"match_all": {}})
+    filter_clauses, must_not_clauses = build_filter_clauses(filters, field_settings=field_settings)
+
+    bool_query = {"must": [original_query]}
+    if filter_clauses:
+        bool_query["filter"] = filter_clauses
+    if must_not_clauses:
+        bool_query["must_not"] = must_not_clauses
+
+    body_with_filters = dict(body)
+    body_with_filters["query"] = {"bool": bool_query}
+
+    return body_with_filters
+
+
+def build_filters_body(aggs, filters, field_settings):
+    body = {"size": 0, "aggs": aggs}
+
+    if filters:
+        filter_clauses, must_not_clauses = build_filter_clauses(filters, field_settings)
+
+        bool_query = {}
+        if filter_clauses:
+            bool_query["filter"] = filter_clauses
+        if must_not_clauses:
+            bool_query["must_not"] = must_not_clauses
+        if bool_query:
+            body["query"] = {"bool": bool_query}
+
+    return body
 
 
 def build_unique_items_aggregation_body(field_name, aggregation_size=20):
@@ -375,16 +405,17 @@ def build_search_text_body(query_text):
 
 
 def build_document_search_body(
-        query_text=None,
-        advanced_query=None,
-        query_clauses=None,
-        filters=None,
-        page=1,
-        page_size=10,
-        sort_field=None,
-        sort_order="asc",
-        source_fields=None,
-        search_field_mapping=None,
+    query_text=None,
+    advanced_query=None,
+    query_clauses=None,
+    filters=None,
+    field_settings=None,
+    page=1,
+    page_size=10,
+    sort_field=None,
+    sort_order="asc",
+    source_fields=None,
+    search_field_mapping=None,
 ):
     """
     Builds the body for a document search query with text and filters.
@@ -393,7 +424,8 @@ def build_document_search_body(
         query_text: Text to search for (legacy, used when query_clauses is empty).
         advanced_query: Query string syntax submitted from the advanced search input.
         query_clauses: List of {operator, field, text} for advanced search.
-        filters: Dict of filters (should already be mapped to ES field names).
+        filters: Dict of filters.
+        field_settings: Optional field settings dict from DataSource.
         page: Page number (1-based).
         page_size: Number of results per page.
         sort_field: Field to sort by.
@@ -408,6 +440,7 @@ def build_document_search_body(
         advanced_query=advanced_query,
         query_clauses=query_clauses,
         filters=filters,
+        field_settings=field_settings,
         search_field_mapping=search_field_mapping,
     )
 
@@ -434,11 +467,12 @@ def build_bool_query_from_search_params(
     advanced_query=None,
     query_clauses=None,
     filters=None,
+    field_settings=None,
     search_field_mapping=None,
 ):
     """
     Bool query fragment (must / must_not / filter) shared by document search and
-    aggregations. ``filters`` must already use OpenSearch index field names.
+    aggregations.
     """
     advanced_query = (advanced_query or "").strip()
     if advanced_query:
@@ -462,7 +496,16 @@ def build_bool_query_from_search_params(
             bool_query["must"].append({"match_all": {}})
 
     if filters:
-        bool_query["filter"] = query_filters(filters)
+        filter_clauses, must_not_clauses = build_filter_clauses(
+            filters,
+            field_settings=field_settings,
+        )
+        if filter_clauses:
+            bool_query["filter"] = filter_clauses
+        if must_not_clauses:
+            if "must_not" not in bool_query:
+                bool_query["must_not"] = []
+            bool_query["must_not"].extend(must_not_clauses)
 
     return bool_query
 

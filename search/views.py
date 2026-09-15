@@ -5,14 +5,11 @@ from django.http import JsonResponse
 from django.template.loader import render_to_string
 from django.views.decorators.http import require_GET
 
-from .advance_search import AdvancedQueryValidationError
-from search_gateway.request_filters import (
-    extract_applied_filters,
-    normalize_option_filters,
-)
 from search_gateway.freshness import get_index_freshness
+from search_gateway.request_filters import extract_applied_filters
 from search_gateway.service import SearchGatewayService
 
+from .advance_search import AdvancedQueryValidationError
 from .models import SearchPage
 
 
@@ -50,6 +47,7 @@ def _render_results_fragments(request, results_data, has_citations_field=False, 
         ) if has_results else "",
     }
 
+
 @require_GET
 def search_view_list(request):
     index_name = request.GET.get(
@@ -64,12 +62,11 @@ def search_view_list(request):
         request_state = SearchPage.get_search_request_state(request, data_source=data_source)
 
         applied_filters = extract_applied_filters(request.GET, data_source, form_key="search")
-        selected_filters = normalize_option_filters(applied_filters)
 
         results_data = SearchPage.search_documents_with_retry(
             service,
             request_state,
-            selected_filters,
+            applied_filters,
         )
 
         results_data = SearchPage.current_pagination(

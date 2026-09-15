@@ -6,9 +6,6 @@ from .option_normalization import (
     normalize_filter_default_value,
 )
 
-DEFAULT_FILTER_SUFFIXES = ("_operator", "_bool_not")
-FILTER_SUFFIXES = tuple(getattr(settings, "SEARCH_GATEWAY_FILTER_SUFFIXES", DEFAULT_FILTER_SUFFIXES))
-
 DEFAULT_EXCLUDED_QUERY_KEYS = frozenset(
     {
         "csrfmiddlewaretoken",
@@ -173,7 +170,14 @@ def extract_applied_filters(source, data_source, form_key=None, extra_excluded_k
 
 def build_option_filters(applied_filters, field, excluded_filter_names=None):
     excluded_names = set(excluded_filter_names or [])
-    excluded_names.update({field.field_name, field.operator_field_name, field.bool_not_field_name})
+    excluded_names.update(
+        {
+            field.field_name,
+            field.operator_field_name,
+            field.bool_not_field_name,
+            *field.transform_sources,
+        }
+    )
 
     return normalize_option_filters(
         applied_filters,
@@ -188,6 +192,5 @@ def normalize_option_filters(applied_filters, excluded_filter_names=None):
         for key, value in (applied_filters or {}).items()
         if not str(key).startswith("__")
         and key not in excluded_filter_names
-        and not key.endswith(FILTER_SUFFIXES)
         and value not in (None, "", [])
     }

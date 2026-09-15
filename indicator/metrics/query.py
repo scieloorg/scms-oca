@@ -1,53 +1,24 @@
-from typing import Any, Dict
-from indicator import filters as indicator_filters
-from .config import MetricGroup
+from search_gateway.query import build_filter_clauses
 
 
 class MetricQuery:
-    def __init__(self, data_source: Any, metric_group: MetricGroup):
+    def __init__(self, data_source, metric_group):
         self.data_source = data_source
         self.metric_group = metric_group
 
-    def build_query(self, filters: Dict[str, Any]) -> Dict[str, Any]:
-        filters = dict(filters or {})
-
+    def build_query(self, filters):
         field_settings = self.data_source.get_field_settings_dict()
-        translated_filters = indicator_filters.translate_filter_fields(filters, field_settings)
+        filter_clauses, must_not_clauses = build_filter_clauses(
+            filters,
+            field_settings=field_settings,
+        )
 
         query_config = self.data_source.metric_config_schema.get("query") or {}
         must = list(query_config.get("must") or [])
         must_not = list(query_config.get("must_not") or [])
 
-        query_operator_fields = {
-            field_name: cfg.get("index_field_name")
-            for field_name, cfg in field_settings.items()
-            if cfg.get("settings", {}).get("support_query_operator") and cfg.get("index_field_name")
-        }
-        index_field_name_to_filter_name_map = {
-            cfg.get("index_field_name"): field_name
-            for field_name, cfg in field_settings.items()
-            if cfg.get("index_field_name")
-        }
-
-        for index_field_name, value in translated_filters.items():
-            filter_name = index_field_name_to_filter_name_map.get(index_field_name)
-            if not filter_name:
-                continue
-
-            is_not = filters.get(f"{filter_name}_bool_not") == "true"
-
-            if isinstance(value, list):
-                self._add_list(filters, filter_name, index_field_name, query_operator_fields, value, must)
-            elif isinstance(value, dict):
-                if is_not:
-                    must_not.append({"range": {index_field_name: value}})
-                else:
-                    must.append({"range": {index_field_name: value}})
-            else:
-                if is_not:
-                    self._add_term(index_field_name, value, must_not)
-                else:
-                    self._add_term(index_field_name, value, must)
+        must.extend(filter_clauses)
+        must_not.extend(must_not_clauses)
 
         query_bool = {}
         if must:
@@ -57,24 +28,7 @@ class MetricQuery:
 
         return {"bool": query_bool} if query_bool else {"match_all": {}}
 
-    def _add_list(self, filters, filter_name, qualified_index_field_name, query_operator_fields, values, must):
-        normalized_values = indicator_filters.normalize_filter_values(values)
-        if not normalized_values:
-            return
-
-        operator_value = filters.get(f"{filter_name}_operator")
-        if operator_value == "and" and filter_name in query_operator_fields:
-            for value in normalized_values:
-                self._add_term(qualified_index_field_name, value, must)
-        else:
-            must.append({"terms": {qualified_index_field_name: normalized_values}})
-
-    def _add_term(self, name, value, must):
-        if value in (None, ""):
-            return
-        must.append({"term": {name: value}})
-
-    def build_aggs(self) -> Dict[str, Any]:
+    def build_aggs(self):
         time_dim = self.metric_group.time_dimension
         time_field = self.data_source.get_index_field_name(time_dim.get("field", "publication_year"))
         agg_type = time_dim.get("agg_type", "terms")
