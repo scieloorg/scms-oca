@@ -53,9 +53,6 @@ def _build_date_year_range_value(start_value, end_value):
     start_year = _parse_integer(start_value)
     end_year = _parse_integer(end_value)
 
-    if start_year is None and end_year is None:
-        return {}
-
     if start_year is not None and end_year is not None and start_year > end_year:
         start_year, end_year = end_year, start_year
 
@@ -187,10 +184,7 @@ def _get_query_operator_settings(filters, field_name, field_info):
     return operator, is_not
 
 
-def map_filters_with_operators(filters, field_settings):
-    if not filters or not field_settings:
-        return []
-
+def _map_transformed_filters(filters, field_settings):
     mapped_items = []
     handled_fields = set()
 
@@ -220,6 +214,12 @@ def map_filters_with_operators(filters, field_settings):
                     "is_not": is_not,
                 }
             )
+
+    return mapped_items, handled_fields
+
+
+def _map_direct_filters(filters, field_settings, handled_fields):
+    mapped_items = []
 
     for field_name, value in filters.items():
         if (
@@ -254,6 +254,23 @@ def map_filters_with_operators(filters, field_settings):
         )
 
     return mapped_items
+
+
+def map_filters_with_operators(filters, field_settings):
+    if not filters or not field_settings:
+        return []
+
+    mapped_transformed, handled_fields = _map_transformed_filters(
+        filters,
+        field_settings,
+    )
+    mapped_direct = _map_direct_filters(
+        filters,
+        field_settings,
+        handled_fields,
+    )
+
+    return mapped_transformed + mapped_direct
 
 
 def get_index_field_candidates(index_field_name):
