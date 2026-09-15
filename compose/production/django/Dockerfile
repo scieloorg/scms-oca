@@ -1,4 +1,4 @@
-ARG PYTHON_VERSION=3.13-slim-bullseye
+ARG PYTHON_VERSION=3.13-slim-bookworm
 
 
 
@@ -37,8 +37,8 @@ ENV BUILD_ENV ${BUILD_ENVIRONMENT}
 
 WORKDIR ${APP_HOME}
 
-RUN addgroup --system django \
-    && adduser --system --ingroup django django
+RUN addgroup --system --gid 101 django \
+    && adduser --system --uid 101 --gid 101 django
 
 
 # Install required system dependencies
