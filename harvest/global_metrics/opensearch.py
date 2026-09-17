@@ -8,6 +8,8 @@ from etl.world_regions import world_region_for_country
 from harvest.global_metrics.parsing import (
     append_unique,
     global_metric_row_from_hit,
+    issn_terms,
+    issns_overlap,
 )
 from search_gateway.option_normalization import clean_text
 
@@ -58,6 +60,43 @@ def source_file_query(source_file):
             "minimum_should_match": 1,
         }
     }
+
+
+def get_global_metric_by_issns_and_year(client, index, issns, year):
+    """Busca métricas globais por ISSN e ano e devolve a primeira linha válida."""
+    terms = issn_terms(issns)
+    if not terms or year is None:
+        return None
+    search_terms = list(terms)
+    for term in terms:
+        append_unique(search_terms, term.replace("-", ""))
+
+    body = {
+        "query": {
+            "bool": {
+                "filter": [{"term": {"raw_data.year": year}}],
+                "should": [
+                    {"match_phrase": {"raw_data.issns": term}} for term in search_terms
+                ],
+                "minimum_should_match": 1,
+            }
+        },
+        "_source": [
+            "raw_data.issns",
+            "raw_data.year",
+            "raw_data.country",
+            "raw_data.scopus_active_in_the_year",
+            "raw_data.wos_active_in_the_year",
+            "raw_data.scielo_active_and_valid_in_the_year",
+        ],
+        "size": 100,
+    }
+    response = client.search(index=index, body=body)
+    for hit in response.get("hits", {}).get("hits", []):
+        row = global_metric_row_from_hit(hit)
+        if row and row["year"] == year and issns_overlap(row["issns"], terms):
+            return row
+    return None
 
 
 def _merge_harvest_row_into_groups(groups, row):
