@@ -8,6 +8,9 @@ from etl.pipeline import OpenSearchETLPipeline
 
 
 class WorldRegionIndexingTests(SimpleTestCase):
+    @override_settings(
+        GLOBAL_METRICS_FILE_UPLOAD_OPENSEARCH_INDEX="global_metrics_test"
+    )
     @patch("etl.pipeline.standardizer_for")
     @patch("etl.pipeline.OpenAlexMatcher")
     @patch("etl.pipeline.SciELODeduplicator")
@@ -21,6 +24,24 @@ class WorldRegionIndexingTests(SimpleTestCase):
     ):
         client = Mock()
         client.client.bulk.return_value = {"errors": False}
+        client.client.search.return_value = {
+            "hits": {
+                "hits": [
+                    {
+                        "_source": {
+                            "raw_data": {
+                                "issns": "12345678",
+                                "year": "2024",
+                                "country": "Brazil",
+                                "scopus_active_in_the_year": "1",
+                                "wos_active_in_the_year": "0",
+                                "scielo_active_and_valid_in_the_year": "1",
+                            }
+                        }
+                    }
+                ]
+            }
+        }
         client.ensure_rollover_index.return_value = (
             "silver_scientific_production-000001"
         )
@@ -40,6 +61,7 @@ class WorldRegionIndexingTests(SimpleTestCase):
             type="article",
             publication_year=2024,
             author_country_codes=["BR", "JP", "BR"],
+            source={"issns": ["1234-5678"]},
             oca_data={
                 "scielo": {"source": {"country_code": "BR"}},
                 "openalex": {},
@@ -56,6 +78,14 @@ class WorldRegionIndexingTests(SimpleTestCase):
         self.assertEqual(
             indexed["oca_data"]["openalex"]["affiliations"]["world_regions"],
             ["Eastern Asia", "South America"],
+        )
+        self.assertEqual(
+            indexed["oca_data"]["scielo"]["source"]["indexed_in"],
+            ["Scopus", "SciELO"],
+        )
+        self.assertEqual(
+            client.client.search.call_args.kwargs["index"],
+            "global_metrics_test",
         )
 
 
