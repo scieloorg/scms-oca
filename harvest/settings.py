@@ -60,3 +60,19 @@ ENDPOINT_OAI_PMH_PREPRINT = _env(
     "ENDPOINT_OAI_PMH_PREPRINT",
     default="https://preprints.scielo.org/index.php/scielo/oai",
 )
+
+# OpenAlex public snapshot (S3 via HTTPS)
+OPENALEX_SNAPSHOT_BASE_URL = _env.str(
+    "OPENALEX_SNAPSHOT_BASE_URL",
+    default="https://openalex.s3.amazonaws.com",
+)
+OPENALEX_WORKS_MANIFEST_URL = _env.str(
+    "OPENALEX_WORKS_MANIFEST_URL",
+    default=(
+        f"{OPENALEX_SNAPSHOT_BASE_URL.rstrip('/')}/data/jsonl/works/manifest.json"
+    ),
+)
+OPENALEX_PART_FETCH_TIMEOUT = _env.int(
+    "OPENALEX_PART_FETCH_TIMEOUT",
+    default=15,
+)

@@ -4,8 +4,7 @@ Modelos para coleta e armazenamento de dados de múltiplos endpoints.
 from pathlib import Path
 
 from django.core.exceptions import ValidationError
-from django.db import models
-from django.db import transaction
+from django.db import models, transaction
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from modelcluster.models import ClusterableModel
@@ -14,8 +13,8 @@ from wagtail.models import ParentalKey
 
 from core.forms import CoreAdminModelForm
 from core.models import CommonControlField
-from harvest.storage import global_metrics_upload_path, overwrite_media_storage
 from harvest.global_metrics.constants import SUPPORTED_EXTENSIONS
+from harvest.storage import global_metrics_upload_path, overwrite_media_storage
 
 
 class HarvestStatus(models.TextChoices):
@@ -44,6 +43,13 @@ class HarvestModelChoice(models.TextChoices):
     BOOK = "HarvestedBook", "Book"
     SCIELO_DATA_DATASET = "HarvestedSciELOData_dataset", "SciELO Data - Dataset"
     SCIELO_DATA_DATAVERSE = "HarvestedSciELOData_dataverse", "SciELO Data - Dataverse"
+
+
+class OpenAlexRequestKind(models.TextChoices):
+    """Tipo de requisição HTTP ao snapshot OpenAlex no S3."""
+
+    MANIFEST = "manifest", _("Manifest")
+    PART = "part", _("Part")
 
 
 class GlobalMetricsUploadFile(CommonControlField):
@@ -538,3 +544,164 @@ class TransformationScript(CommonControlField):
         return f"{self.name} ({self.source_index})"
 
     base_form_class = CoreAdminModelForm
+
+
+class OpenAlexHarvestRequest(CommonControlField, ClusterableModel):
+    """
+    Log de cada GET ao snapshot OpenAlex (manifest ou part gzip).
+    Não armazena o payload dos works, apenas URL, IDs filtrados e metadados.
+    """
+
+    base_form_class = CoreAdminModelForm
+
+    request_url = models.TextField(
+        _("URL da requisição"),
+        help_text=_("URL HTTPS efetiva do objeto no snapshot S3"),
+    )
+    request_kind = models.CharField(
+        _("Tipo de requisição"),
+        max_length=20,
+        choices=OpenAlexRequestKind.choices,
+        db_index=True,
+    )
+    updated_date = models.DateField(
+        _("Data do manifest ou da partição"),
+        blank=True,
+        null=True,
+        db_index=True,
+        help_text=_("Data do manifest ou updated_date extraída da URL da partição"),
+    )
+    publication_year_from = models.PositiveIntegerField(
+        _("Ano de publicação mínimo"),
+        default=2018,
+    )
+    is_xpac = models.BooleanField(
+        _("Filtrar is_xpac"),
+        blank=True,
+        null=True,
+        help_text=_("Quando definido, coleta apenas works com is_xpac igual a este valor"),
+        default=False
+    )
+    document_ids = models.JSONField(
+        _("IDs dos documentos"),
+        default=list,
+        blank=True,
+        help_text=_("IDs OpenAlex dos works com publication_year no filtro"),
+    )
+    result_count = models.PositiveIntegerField(
+        _("Quantidade de IDs"),
+        default=0,
+    )
+    manifest_record_count = models.PositiveIntegerField(
+        _("Record count do manifest"),
+        blank=True,
+        null=True,
+        help_text=_("files[].meta.record_count da part no manifest"),
+    )
+    harvest_status = models.CharField(
+        _("Status da Coleta"),
+        max_length=20,
+        choices=HarvestStatus.choices,
+        default=HarvestStatus.PENDING,
+        db_index=True,
+    )
+    index_status = models.CharField(
+        _("Status da Indexação"),
+        max_length=20,
+        choices=IndexStatus.choices,
+        default=IndexStatus.PENDING,
+        db_index=True,
+    )
+    requested_at = models.DateTimeField(
+        _("Requisitado em"),
+        blank=True,
+        null=True,
+        db_index=True,
+    )
+
+    panels = [
+        FieldPanel("request_url"),
+        FieldPanel("request_kind"),
+        FieldPanel("updated_date"),
+        FieldPanel("publication_year_from"),
+        FieldPanel("is_xpac"),
+        # FieldPanel("document_ids"),
+        FieldPanel("result_count"),
+        FieldPanel("manifest_record_count"),
+        FieldPanel("harvest_status"),
+        FieldPanel("index_status"),
+        FieldPanel("requested_at"),
+        InlinePanel("harvest_error_log"),
+    ]
+
+    class Meta:
+        verbose_name = _("Requisição OpenAlex")
+        verbose_name_plural = _("Requisições OpenAlex")
+        indexes = [
+            models.Index(fields=["request_kind", "harvest_status"]),
+            models.Index(fields=["request_kind", "index_status"]),
+        ]
+
+    def __str__(self):
+        return f"{self.request_kind} {self.request_url}"
+
+    def mark_as_success(self):
+        self.harvest_status = HarvestStatus.SUCCESS
+        self.save(update_fields=["harvest_status", "updated"])
+
+    def mark_as_failed(self):
+        self.harvest_status = HarvestStatus.FAILED
+        self.save(update_fields=["harvest_status", "updated"])
+
+    def mark_as_index_in_progress(self):
+        self.index_status = IndexStatus.IN_PROGRESS
+        self.save(update_fields=["index_status", "updated"])
+
+    def mark_as_indexed(self):
+        self.index_status = IndexStatus.SUCCESS
+        self.save(update_fields=["index_status", "updated"])
+
+    def mark_as_index_failed(self):
+        self.index_status = IndexStatus.FAILED
+        self.save(update_fields=["index_status", "updated"])
+
+    @classmethod
+    def get_completed_part_urls(cls):
+        return set(
+            cls.objects.filter(
+                request_kind=OpenAlexRequestKind.PART,
+                harvest_status=HarvestStatus.SUCCESS,
+            ).values_list("request_url", flat=True)
+        )
+
+    @classmethod
+    def get_incomplete_part(cls, request_url):
+        return (
+            cls.objects.filter(
+                request_kind=OpenAlexRequestKind.PART,
+                request_url=request_url,
+            )
+            .exclude(harvest_status=HarvestStatus.SUCCESS)
+            .order_by("-updated", "-pk")
+            .first()
+        )
+
+    @classmethod
+    def get_incomplete_manifest(cls, updated_date):
+        return (
+            cls.objects.filter(
+                request_kind=OpenAlexRequestKind.MANIFEST,
+                updated_date=updated_date,
+            )
+            .exclude(harvest_status=HarvestStatus.SUCCESS)
+            .order_by("-updated", "-pk")
+            .first()
+        )
+
+
+class HarvestErrorLogOpenAlex(BaseHarvestErrorLog):
+    openalex_request = ParentalKey(
+        OpenAlexHarvestRequest,
+        related_name="harvest_error_log",
+        on_delete=models.CASCADE,
+    )

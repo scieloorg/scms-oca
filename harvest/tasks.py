@@ -11,16 +11,10 @@ from harvest.global_metrics.apply import (
 from harvest.global_metrics.process import (
     process_global_metrics_upload_file as run_process_global_metrics_upload_file,
 )
-from harvest.harvesters.article import (
-    harvest_articles,
-    harvest_single_article_code,
-)
-from harvest.harvesters.book import (
-    harvest_books,
-    harvest_single_book,
-    iter_changes,
-)
+from harvest.harvesters.article import harvest_articles, harvest_single_article_code
+from harvest.harvesters.book import harvest_books, harvest_single_book, iter_changes
 from harvest.harvesters.dataset import harvest_data, harvest_single_scielo_data
+from harvest.harvesters.openalex import harvest_openalex_works
 from harvest.harvesters.preprint import harvest_preprint
 from harvest.indexing import index_harvested_instance, index_harvested_raw_data
 
@@ -90,6 +84,32 @@ def harvest_scielo_articles(
         from_date=from_date,
         until_date=until_date,
         collection=collection,
+    )
+
+
+@celery_app.task(name="Harvest OpenAlex works")
+def harvest_openalex_works_task(
+    username,
+    user_id=None,
+    publication_year_from=2018,
+    from_updated_date="2026-03-01",
+    is_xpac=False,
+    batch_size=1000,
+):
+    user = User.objects.get(username=username)
+
+    logging.info(
+        f"Iniciando coleta incremental OpenAlex snapshot, "
+        f"from_updated_date={from_updated_date}, "
+        f"publication_year>={publication_year_from}, is_xpac={is_xpac}, "
+        f"batch_size={batch_size}"
+    )
+    harvest_openalex_works(
+        user=user,
+        publication_year_from=publication_year_from,
+        from_updated_date=from_updated_date,
+        is_xpac=is_xpac,
+        batch_size=batch_size,
     )
 
 

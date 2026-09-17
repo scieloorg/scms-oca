@@ -18,6 +18,7 @@ from .models import (
     HarvestedBook,
     HarvestedPreprint,
     HarvestedSciELOData,
+    OpenAlexHarvestRequest,
     TransformationScript,
 )
 
@@ -124,6 +125,26 @@ class GlobalMetricsUploadFileViewSet(SnippetViewSet):
     ordering = ("-created",)
 
 
+class OpenAlexHarvestRequestViewSet(SnippetViewSet):
+    model = OpenAlexHarvestRequest
+    icon = "download"
+    menu_label = _("OpenAlex")
+    add_to_admin_menu = False
+    add_view_class = CommonControlFieldCreateView
+    edit_view_class = CommonControlFieldEditView
+    list_display = (
+        "request_kind",
+        "harvest_status",
+        "index_status",
+        "updated_date",
+        "result_count",
+        "requested_at",
+    )
+    search_fields = ("request_url",)
+    list_filter = ("harvest_status", "index_status", "request_kind", "updated_date")
+    ordering = ("-requested_at", "-created")
+
+
 class HarvestViewSetGroup(SnippetViewSetGroup):
     menu_label = _("Harvest")
     menu_icon = "download"
@@ -133,6 +154,7 @@ class HarvestViewSetGroup(SnippetViewSetGroup):
         HarvestedPreprintViewSet,
         HarvestedSciELODataViewSet,
         HarvestedBookViewSet,
+        OpenAlexHarvestRequestViewSet,
         TransformationScriptViewSet,
         GlobalMetricsUploadFileViewSet,
     )
