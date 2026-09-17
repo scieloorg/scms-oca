@@ -59,6 +59,30 @@ class SilverContractTests(SimpleTestCase):
             {"ids": {"openalex": ["https://openalex.org/W123"]}},
         )
 
+    def test_to_index_dict_adds_global_metrics_and_world_regions(self):
+        doc = SilverDocument(
+            doc_id="https://openalex.org/W123",
+            type="article",
+            publication_year=2024,
+            author_country_codes=["BR", "JP", "BR"],
+            oca_data={"scope": ["openalex"]},
+            global_metric={
+                "indexed_in": ["Scopus", "SciELO"],
+                "country_code": "BR",
+            },
+        )
+
+        indexed = doc.to_index_dict()
+
+        source = indexed["oca_data"]["scielo"]["source"]
+        self.assertEqual(source["indexed_in"], ["Scopus", "SciELO"])
+        self.assertEqual(source["country_code"], "BR")
+        self.assertEqual(source["world_region"], "South America")
+        self.assertEqual(
+            indexed["oca_data"]["openalex"]["affiliations"]["world_regions"],
+            ["Eastern Asia", "South America"],
+        )
+
     def test_silver_document_indexes_sdg_names_flat(self):
         doc = SilverDocument(
             doc_id="S001",
