@@ -33,6 +33,7 @@ from .global_metrics.indexing import (
 )
 from .global_metrics.opensearch import (
     build_global_metrics_update_by_query_body,
+    get_global_metric_by_issns_and_year,
     iter_harvest_metric_groups,
     source_file_query,
     update_silver_group_by_query,
@@ -168,6 +169,63 @@ class GlobalMetricsUploadTaskTests(SimpleTestCase):
         self.assertEqual(row["indexed_in"], ["Scopus", "SciELO"])
         self.assertEqual(row["country"], "Brazil")
         self.assertEqual(row["country_code"], "BR")
+
+    def test_get_global_metric_by_issns_and_year_returns_normalized_metrics(self):
+        client = MagicMock()
+        client.search.return_value = {
+            "hits": {
+                "hits": [
+                    {
+                        "_source": {
+                            "raw_data": {
+                                "issns": "12345678",
+                                "year": "2024",
+                                "country": "Brazil",
+                                "scopus_active_in_the_year": "1",
+                                "wos_active_in_the_year": "0",
+                                "scielo_active_and_valid_in_the_year": "1",
+                            }
+                        }
+                    }
+                ]
+            }
+        }
+
+        metric = get_global_metric_by_issns_and_year(
+            client=client,
+            index="global_metrics_upload_file",
+            issns=["1234-5678"],
+            year=2024,
+        )
+
+        self.assertEqual(metric["indexed_in"], ["Scopus", "SciELO"])
+        self.assertEqual(metric["country_code"], "BR")
+        search_kwargs = client.search.call_args.kwargs
+        self.assertEqual(search_kwargs["index"], "global_metrics_upload_file")
+        self.assertEqual(
+            search_kwargs["body"]["query"]["bool"]["filter"],
+            [{"term": {"raw_data.year": 2024}}],
+        )
+        self.assertEqual(
+            search_kwargs["body"]["query"]["bool"]["should"],
+            [
+                {"match_phrase": {"raw_data.issns": "1234-5678"}},
+                {"match_phrase": {"raw_data.issns": "12345678"}},
+            ],
+        )
+
+    def test_get_global_metric_by_issns_and_year_returns_none_without_hit(self):
+        client = MagicMock()
+        client.search.return_value = {"hits": {"hits": []}}
+
+        metric = get_global_metric_by_issns_and_year(
+            client=client,
+            index="global_metrics_upload_file",
+            issns=["1234-5678"],
+            year=2024,
+        )
+
+        self.assertIsNone(metric)
 
     def test_global_metrics_upload_requires_columns_used_by_processing(self):
         file_obj = io.BytesIO(
@@ -1582,6 +1640,77 @@ class HarvestOpenAlexSnapshotTests(TestCase):
         )
         self.open_search.rollover.assert_called_once()
 
+    @override_settings(
+        GLOBAL_METRICS_FILE_UPLOAD_OPENSEARCH_INDEX="global_metrics_test",
+        OPENALEX_WORKS_MANIFEST_URL=(
+            "https://openalex.s3.amazonaws.com/data/jsonl/works/manifest.json"
+        ),
+    )
+    @patch("harvest.harvesters.openalex.fetch_data")
+    def test_harvest_enriches_work_with_global_metrics(
+        self,
+        mock_fetch_data,
+    ):
+        gzip_payload = _gzip_jsonl(
+            [
+                {
+                    "id": "https://openalex.org/W2",
+                    "publication_year": 2024,
+                    "primary_location": {
+                        "source": {
+                            "display_name": "Journal",
+                            "issns": ["1234-5678"],
+                        }
+                    },
+                }
+            ]
+        )
+        _mock_fetch_payloads(
+            mock_fetch_data,
+            {
+                "date": "2026-06-25",
+                "files": [
+                    {
+                        "url": self.part_s3,
+                        "meta": {"record_count": 1},
+                    }
+                ],
+            },
+            gzip_payload,
+        )
+        self.open_search.client.search.return_value = {
+            "hits": {
+                "hits": [
+                    {
+                        "_source": {
+                            "raw_data": {
+                                "issns": "12345678",
+                                "year": "2024",
+                                "country": "Brazil",
+                                "scopus_active_in_the_year": "1",
+                                "wos_active_in_the_year": "0",
+                                "scielo_active_and_valid_in_the_year": "1",
+                            }
+                        }
+                    }
+                ]
+            }
+        }
+
+        harvest_openalex_works(
+            user=self.user,
+            from_updated_date="2026-03-01",
+            publication_year_from=2018,
+        )
+
+        indexed_source = self.open_search.client.bulk.call_args.kwargs["body"][1]
+        source_metrics = indexed_source["oca_data"]["scielo"]["source"]
+        self.assertEqual(source_metrics["indexed_in"], ["Scopus", "SciELO"])
+        self.assertEqual(source_metrics["country_code"], "BR")
+        self.assertEqual(source_metrics["world_region"], "South America")
+        search_kwargs = self.open_search.client.search.call_args.kwargs
+        self.assertEqual(search_kwargs["index"], "global_metrics_test")
+
     def test_index_openalex_batch_indexes_by_openalex_id_on_write_alias(self):
         openalex_id = "https://openalex.org/W2"
 
@@ -1601,8 +1730,8 @@ class HarvestOpenAlexSnapshotTests(TestCase):
         self.assertEqual(indexed, 1)
         self.open_search.client.search.assert_not_called()
 
-    @patch("harvest.harvesters.openalex.add_affiliation_world_regions")
-    @patch("harvest.harvesters.openalex.add_source_world_region")
+    @patch("etl.documents.add_affiliation_world_regions")
+    @patch("etl.documents.add_source_world_region")
     @patch("harvest.harvesters.openalex.fetch_data")
     def test_harvest_applies_standardization_and_region_steps_in_order(
         self,

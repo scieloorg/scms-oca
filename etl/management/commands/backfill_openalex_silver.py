@@ -9,7 +9,7 @@ from etl.documents import RawOpenAlexInputDocument
 from etl.mapping_silver import SILVER_MAPPING
 from etl.transform.normalizers import normalize_openalex_id
 from etl.transform.standardizer import OpenAlexStandardizer
-from etl.world_regions import add_affiliation_world_regions, add_source_world_region
+from harvest.global_metrics.opensearch import get_global_metric_by_issns_and_year
 from harvest.utils import clean_source_payload
 
 logger = logging.getLogger(__name__)
@@ -240,9 +240,15 @@ class Command(BaseCommand):
                         continue
 
                     if not dry_run:
+                        global_metric = get_global_metric_by_issns_and_year(
+                            client=client.client,
+                            index=settings.GLOBAL_METRICS_FILE_UPLOAD_OPENSEARCH_INDEX,
+                            issns=silver_doc.source.get("issns"),
+                            year=silver_doc.publication_year,
+                        )
+                        if global_metric:
+                            silver_doc.global_metric = global_metric
                         source = silver_doc.to_index_dict()
-                        add_source_world_region(source)
-                        add_affiliation_world_regions(source)
 
                         actions.extend(
                             [

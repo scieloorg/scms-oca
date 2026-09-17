@@ -13,8 +13,8 @@ from etl.client import OpenSearchClient
 from etl.documents import RawOpenAlexInputDocument
 from etl.mapping_silver import SILVER_MAPPING
 from etl.transform.standardizer import OpenAlexStandardizer
-from etl.world_regions import add_affiliation_world_regions, add_source_world_region
 from harvest.exception_logs import ExceptionContext
+from harvest.global_metrics.opensearch import get_global_metric_by_issns_and_year
 from harvest.harvesters.common import JSON_HEADERS
 from harvest.models import (
     HarvestErrorLogOpenAlex,
@@ -287,17 +287,23 @@ def get_or_reuse_manifest_request(
     return manifest_request
 
 
-def _transform_work(work, standardizer):
+def _transform_work(work, standardizer, client):
     input_document = RawOpenAlexInputDocument.from_raw(work)
     silver_document = standardizer.run(input_document)
-    source = silver_document.to_index_dict()
-    add_source_world_region(source)
-    add_affiliation_world_regions(source)
+
+    global_metric = get_global_metric_by_issns_and_year(
+        client=client.client,
+        index=settings.GLOBAL_METRICS_FILE_UPLOAD_OPENSEARCH_INDEX,
+        issns=silver_document.source.get("issns"),
+        year=silver_document.publication_year,
+    )
+    if global_metric:
+        silver_document.global_metric = global_metric
 
     openalex_id = silver_document.openalex_id
     if not openalex_id:
         raise ValueError("Documento OpenAlex padronizado sem openalex_id")
-    return openalex_id, source
+    return openalex_id, silver_document.to_index_dict()
 
 
 def _flush_batch(client, part_request, batch):
@@ -338,7 +344,7 @@ def _index_part_works(
         is_xpac,
     ):
         try:
-            batch.append(_transform_work(work, standardizer))
+            batch.append(_transform_work(work, standardizer, client))
         except Exception as exc:
             skipped_count += 1
             logger.warning(
