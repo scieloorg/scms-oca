@@ -93,6 +93,7 @@ class Migration(migrations.Migration):
                         blank=True,
                         help_text="Quando definido, coleta apenas works com is_xpac igual a este valor",
                         null=True,
+                        default=False,
                         verbose_name="Filtrar is_xpac",
                     ),
                 ),

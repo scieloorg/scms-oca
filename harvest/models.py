@@ -580,6 +580,7 @@ class OpenAlexHarvestRequest(CommonControlField, ClusterableModel):
         blank=True,
         null=True,
         help_text=_("Quando definido, coleta apenas works com is_xpac igual a este valor"),
+        default=False
     )
     document_ids = models.JSONField(
         _("IDs dos documentos"),
