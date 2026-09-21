@@ -122,9 +122,6 @@ def _search_global_metric_by_issns_and_year(client, index, terms, year):
     Returns:
         dict | None: Um dicionário representando a linha válida de métrica global encontrada,
                      ou None se não houver nenhum resultado válido para os critérios.
-
-    O filtro principal é o ano; nos ISSNs, cada termo é consultado como `match_phrase`.
-    O resultado é validado para conter o ano correto e sobreposição de ISSNs.
     """
     body = {
         "query": {
