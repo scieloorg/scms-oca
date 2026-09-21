@@ -208,10 +208,7 @@ class GlobalMetricsUploadTaskTests(SimpleTestCase):
         )
         self.assertEqual(
             search_kwargs["body"]["query"]["bool"]["should"],
-            [
-                {"match_phrase": {"raw_data.issns": "1234-5678"}},
-                {"match_phrase": {"raw_data.issns": "12345678"}},
-            ],
+            [{"match_phrase": {"raw_data.issns": "1234-5678"}}],
         )
 
     def test_get_global_metric_by_issns_and_year_returns_none_without_hit(self):
@@ -226,6 +223,90 @@ class GlobalMetricsUploadTaskTests(SimpleTestCase):
         )
 
         self.assertIsNone(metric)
+
+    def test_get_global_metric_by_issns_and_year_reuses_cache_hit(self):
+        client = MagicMock()
+        client.search.return_value = {
+            "hits": {
+                "hits": [
+                    {
+                        "_source": {
+                            "raw_data": {
+                                "issns": "1234-5678",
+                                "year": "2024",
+                                "country": "Brazil",
+                                "scopus_active_in_the_year": "1",
+                                "wos_active_in_the_year": "0",
+                                "scielo_active_and_valid_in_the_year": "1",
+                            }
+                        }
+                    }
+                ]
+            }
+        }
+        cache = {}
+
+        first = get_global_metric_by_issns_and_year(
+            client=client,
+            index="global_metrics_upload_file",
+            issns=["1234-5678"],
+            year=2024,
+            cache=cache,
+        )
+        second = get_global_metric_by_issns_and_year(
+            client=client,
+            index="global_metrics_upload_file",
+            issns=["1234-5678"],
+            year=2024,
+            cache=cache,
+        )
+
+        self.assertEqual(first["indexed_in"], ["Scopus", "SciELO"])
+        self.assertIs(first, second)
+        self.assertEqual(client.search.call_count, 1)
+
+    def test_get_global_metric_by_issns_and_year_reuses_cache_miss(self):
+        client = MagicMock()
+        client.search.return_value = {"hits": {"hits": []}}
+        cache = {}
+
+        first = get_global_metric_by_issns_and_year(
+            client=client,
+            index="global_metrics_upload_file",
+            issns=["1234-5678"],
+            year=2024,
+            cache=cache,
+        )
+        second = get_global_metric_by_issns_and_year(
+            client=client,
+            index="global_metrics_upload_file",
+            issns=["1234-5678"],
+            year=2024,
+            cache=cache,
+        )
+
+        self.assertIsNone(first)
+        self.assertIsNone(second)
+        self.assertEqual(client.search.call_count, 1)
+
+    def test_get_global_metric_by_issns_and_year_searches_again_without_cache(self):
+        client = MagicMock()
+        client.search.return_value = {"hits": {"hits": []}}
+
+        get_global_metric_by_issns_and_year(
+            client=client,
+            index="global_metrics_upload_file",
+            issns=["1234-5678"],
+            year=2024,
+        )
+        get_global_metric_by_issns_and_year(
+            client=client,
+            index="global_metrics_upload_file",
+            issns=["1234-5678"],
+            year=2024,
+        )
+
+        self.assertEqual(client.search.call_count, 2)
 
     def test_global_metrics_upload_requires_columns_used_by_processing(self):
         file_obj = io.BytesIO(

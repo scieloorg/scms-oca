@@ -287,7 +287,7 @@ def get_or_reuse_manifest_request(
     return manifest_request
 
 
-def _transform_work(work, standardizer, client):
+def _transform_work(work, standardizer, client, cache=None):
     input_document = RawOpenAlexInputDocument.from_raw(work)
     silver_document = standardizer.run(input_document)
 
@@ -296,6 +296,7 @@ def _transform_work(work, standardizer, client):
         index=settings.GLOBAL_METRICS_FILE_UPLOAD_OPENSEARCH_INDEX,
         issns=silver_document.source.get("issns"),
         year=silver_document.publication_year,
+        cache=cache,
     )
     if global_metric:
         silver_document.global_metric = global_metric
@@ -337,6 +338,7 @@ def _index_part_works(
     batch = []
     indexed_count = 0
     skipped_count = 0
+    cache = {}
 
     for work in iter_part_works(
         part["https_url"],
@@ -344,7 +346,7 @@ def _index_part_works(
         is_xpac,
     ):
         try:
-            batch.append(_transform_work(work, standardizer, client))
+            batch.append(_transform_work(work, standardizer, client, cache))
         except Exception as exc:
             skipped_count += 1
             logger.warning(

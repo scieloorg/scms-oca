@@ -595,6 +595,7 @@ class OpenSearchETLPipeline:
         actions = []
         chunk_docs = 0
         chunk_bytes = 0
+        cache = {}
 
         for index_id, doc in docs_to_index:
             action = {
@@ -608,6 +609,7 @@ class OpenSearchETLPipeline:
                 index=settings.GLOBAL_METRICS_FILE_UPLOAD_OPENSEARCH_INDEX,
                 issns=doc.source.get("issns"),
                 year=doc.publication_year,
+                cache=cache,
             )
             if global_metric:
                 doc.global_metric = global_metric

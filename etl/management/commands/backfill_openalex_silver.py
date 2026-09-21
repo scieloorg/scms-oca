@@ -163,6 +163,7 @@ class Command(BaseCommand):
         total_std_errors = 0
         total_idx_errors = 0
         rollovers = 0
+        cache = {}
 
         try:
             while True:
@@ -245,6 +246,7 @@ class Command(BaseCommand):
                             index=settings.GLOBAL_METRICS_FILE_UPLOAD_OPENSEARCH_INDEX,
                             issns=silver_doc.source.get("issns"),
                             year=silver_doc.publication_year,
+                            cache=cache,
                         )
                         if global_metric:
                             silver_doc.global_metric = global_metric
