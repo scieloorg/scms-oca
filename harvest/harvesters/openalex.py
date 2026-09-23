@@ -294,7 +294,7 @@ def _transform_work(work, standardizer, client, cache=None):
     global_metric = get_global_metric_by_issns_and_year(
         client=client.client,
         index=settings.GLOBAL_METRICS_FILE_UPLOAD_OPENSEARCH_INDEX,
-        issns=silver_document.source.get("issns"),
+        issns=silver_document.source.get("issns") or [],
         year=silver_document.publication_year,
         cache=cache,
     )

@@ -15,7 +15,7 @@ from harvest.global_metrics.constants import (
     GLOBAL_METRICS_CSV_DELIMITER,
     GLOBAL_METRICS_REQUIRED_COLUMNS,
 )
-from harvest.global_metrics.parsing import issn_terms
+from harvest.global_metrics.parsing import as_values, issn_terms
 from search_gateway.client import get_opensearch_client
 from search_gateway.opensearch import OpenSearchIndexClient
 
@@ -224,7 +224,7 @@ def _iter_bulk_actions(
 
 def _raw_data_for_index(raw_data):
     document = dict(raw_data)
-    document["issns"] = issn_terms(raw_data.get("issns"))
+    document["issns"] = issn_terms(as_values(raw_data.get("issns")))
     return document
 
 
@@ -299,7 +299,6 @@ def _format_bulk_error(result):
 
 
 def _index_upload_error(
-    *,
     client,
     source_file,
     source_format,

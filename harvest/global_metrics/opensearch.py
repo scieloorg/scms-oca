@@ -71,7 +71,7 @@ def get_global_metric_by_issns_and_year(client, index, issns, year, cache=None):
     Args:
         client: Cliente OpenSearch que possui o método `search`.
         index (str): Nome do índice OpenSearch no qual a busca será realizada.
-        issns (list[str]|str): Lista de ISSNs (ou único ISSN) a serem pesquisados.
+        issns (list[str]): Lista de ISSNs a serem pesquisados.
         year (int|str): Ano pelo qual filtrar os resultados.
         cache (dict, opcional): Dicionário para caching dos resultados, usando (index, year, issn normalizado) como chave.
 

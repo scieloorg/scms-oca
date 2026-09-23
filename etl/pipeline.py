@@ -607,7 +607,7 @@ class OpenSearchETLPipeline:
             global_metric = get_global_metric_by_issns_and_year(
                 client=self.client.client,
                 index=settings.GLOBAL_METRICS_FILE_UPLOAD_OPENSEARCH_INDEX,
-                issns=doc.source.get("issns"),
+                issns=doc.source.get("issns") or [],
                 year=doc.publication_year,
                 cache=cache,
             )
