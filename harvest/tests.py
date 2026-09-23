@@ -152,7 +152,7 @@ class GlobalMetricsUploadTaskTests(SimpleTestCase):
         hit = {
             "_source": {
                 "raw_data": {
-                    "issns": "12345678, 8765-4321",
+                    "issns": ["1234-5678", "8765-4321"],
                     "year": "2024",
                     "scopus_active_in_the_year": "1",
                     "wos_active_in_the_year": 0,
@@ -164,7 +164,7 @@ class GlobalMetricsUploadTaskTests(SimpleTestCase):
 
         row = global_metric_row_from_hit(hit)
 
-        self.assertEqual(row["issns"], ["12345678", "1234-5678", "8765-4321"])
+        self.assertEqual(row["issns"], ["1234-5678", "8765-4321"])
         self.assertEqual(row["year"], 2024)
         self.assertEqual(row["indexed_in"], ["Scopus", "SciELO"])
         self.assertEqual(row["country"], "Brazil")
@@ -178,7 +178,7 @@ class GlobalMetricsUploadTaskTests(SimpleTestCase):
                     {
                         "_source": {
                             "raw_data": {
-                                "issns": "12345678",
+                                "issns": ["1234-5678"],
                                 "year": "2024",
                                 "country": "Brazil",
                                 "scopus_active_in_the_year": "1",
@@ -204,11 +204,10 @@ class GlobalMetricsUploadTaskTests(SimpleTestCase):
         self.assertEqual(search_kwargs["index"], "global_metrics_upload_file")
         self.assertEqual(
             search_kwargs["body"]["query"]["bool"]["filter"],
-            [{"term": {"raw_data.year": 2024}}],
-        )
-        self.assertEqual(
-            search_kwargs["body"]["query"]["bool"]["should"],
-            [{"match_phrase": {"raw_data.issns": "1234-5678"}}],
+            [
+                {"term": {"raw_data.year": 2024}},
+                {"terms": {"raw_data.issns": ["1234-5678"]}},
+            ],
         )
 
     def test_get_global_metric_by_issns_and_year_returns_none_without_hit(self):
@@ -232,7 +231,7 @@ class GlobalMetricsUploadTaskTests(SimpleTestCase):
                     {
                         "_source": {
                             "raw_data": {
-                                "issns": "1234-5678",
+                                "issns": ["1234-5678"],
                                 "year": "2024",
                                 "country": "Brazil",
                                 "scopus_active_in_the_year": "1",
@@ -355,7 +354,7 @@ class GlobalMetricsUploadTaskTests(SimpleTestCase):
                 {
                     "_source": {
                         "raw_data": {
-                            "issns": "12345678, 8765-4321",
+                            "issns": ["1234-5678", "8765-4321"],
                             "year": "2024",
                             "scopus_active_in_the_year": "1",
                             "wos_active_in_the_year": 0,
@@ -377,7 +376,7 @@ class GlobalMetricsUploadTaskTests(SimpleTestCase):
             [group["year"] for group in groups],
             [2024, 2024],
         )
-        self.assertEqual(groups[0]["issns"], ["12345678", "1234-5678"])
+        self.assertEqual(groups[0]["issns"], ["1234-5678"])
         self.assertEqual(groups[1]["issns"], ["8765-4321"])
         self.assertEqual(groups[0]["indexed_in"], {"Scopus"})
         self.assertEqual(groups[0]["country_codes"], ["BR"])
@@ -388,7 +387,7 @@ class GlobalMetricsUploadTaskTests(SimpleTestCase):
                 {
                     "_source": {
                         "raw_data": {
-                            "issns": "1234-5678",
+                            "issns": ["1234-5678"],
                             "year": "2024",
                             "scopus_active_in_the_year": "1",
                             "wos_active_in_the_year": 0,
@@ -400,7 +399,7 @@ class GlobalMetricsUploadTaskTests(SimpleTestCase):
                 {
                     "_source": {
                         "raw_data": {
-                            "issns": "12345678",
+                            "issns": ["1234-5678"],
                             "year": "2024",
                             "scopus_active_in_the_year": 0,
                             "wos_active_in_the_year": "1",
@@ -418,7 +417,7 @@ class GlobalMetricsUploadTaskTests(SimpleTestCase):
 
         self.assertEqual(len(groups), 1)
         self.assertEqual(groups[0]["year"], 2024)
-        self.assertEqual(groups[0]["issns"], ["1234-5678", "12345678"])
+        self.assertEqual(groups[0]["issns"], ["1234-5678"])
         self.assertEqual(groups[0]["indexed_in"], {"Scopus", "WoS"})
         self.assertEqual(groups[0]["metric_rows"], 2)
 
@@ -428,7 +427,7 @@ class GlobalMetricsUploadTaskTests(SimpleTestCase):
                 {
                     "_source": {
                         "raw_data": {
-                            "issns": "1234-5678",
+                            "issns": ["1234-5678"],
                             "year": "2024",
                             "scopus_active_in_the_year": 0,
                             "wos_active_in_the_year": 0,
@@ -1765,7 +1764,7 @@ class HarvestOpenAlexSnapshotTests(TestCase):
                     {
                         "_source": {
                             "raw_data": {
-                                "issns": "12345678",
+                                "issns": ["1234-5678"],
                                 "year": "2024",
                                 "country": "Brazil",
                                 "scopus_active_in_the_year": "1",

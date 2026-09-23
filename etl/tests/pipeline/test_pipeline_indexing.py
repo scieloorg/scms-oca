@@ -30,7 +30,7 @@ class WorldRegionIndexingTests(SimpleTestCase):
                     {
                         "_source": {
                             "raw_data": {
-                                "issns": "12345678",
+                                "issns": ["1234-5678"],
                                 "year": "2024",
                                 "country": "Brazil",
                                 "scopus_active_in_the_year": "1",
