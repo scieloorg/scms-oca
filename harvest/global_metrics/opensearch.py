@@ -11,7 +11,6 @@ from harvest.global_metrics.parsing import (
     issn_terms,
     issns_overlap,
 )
-from search_gateway.option_normalization import clean_text
 
 _RETRY_DELAYS = (3**2, 3**3, 3**4, 3**5)
 
@@ -126,11 +125,10 @@ def _search_global_metric_by_issns_and_year(client, index, terms, year):
     body = {
         "query": {
             "bool": {
-                "filter": [{"term": {"raw_data.year": year}}],
-                "should": [
-                    {"match_phrase": {"raw_data.issns": term}} for term in terms
+                "filter": [
+                    {"term": {"raw_data.year": year}},
+                    {"terms": {"raw_data.issns": terms}},
                 ],
-                "minimum_should_match": 1,
             }
         },
         "_source": [

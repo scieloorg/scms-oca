@@ -54,11 +54,7 @@ def issns_overlap(first, second):
 def issn_terms(value):
     terms = []
     for item in as_values(value):
-        raw_value = clean_text(item)
-        if not raw_value:
-            continue
-        append_unique(terms, raw_value)
-        append_unique(terms, normalize_issn(raw_value))
+        append_unique(terms, normalize_issn(item))
     return terms
 
 
