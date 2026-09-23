@@ -62,7 +62,6 @@ def as_values(value):
     if value is None:
         return []
     return [item.strip() for item in re.split(r"[,;|]", value) if item.strip()]
-    return [value]
 
 
 def coerce_int(value):
