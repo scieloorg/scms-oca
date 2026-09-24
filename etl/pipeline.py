@@ -19,7 +19,7 @@ from etl.transform.normalizers import (
     normalize_text,
 )
 from etl.transform.standardizer import standardizer_for
-from etl.world_regions import add_affiliation_world_regions, add_source_world_region
+from harvest.global_metrics.opensearch import get_global_metric_by_issns_and_year
 from harvest.utils import clean_source_payload
 
 logger = logging.getLogger(__name__)
@@ -595,6 +595,7 @@ class OpenSearchETLPipeline:
         actions = []
         chunk_docs = 0
         chunk_bytes = 0
+        cache = {}
 
         for index_id, doc in docs_to_index:
             action = {
@@ -603,9 +604,16 @@ class OpenSearchETLPipeline:
                     "_id": index_id,
                 }
             }
+            global_metric = get_global_metric_by_issns_and_year(
+                client=self.client.client,
+                index=settings.GLOBAL_METRICS_FILE_UPLOAD_OPENSEARCH_INDEX,
+                issns=doc.source.get("issns") or [],
+                year=doc.publication_year,
+                cache=cache,
+            )
+            if global_metric:
+                doc.global_metric = global_metric
             source = doc.to_index_dict()
-            add_source_world_region(source)
-            add_affiliation_world_regions(source)
             action_bytes = self._bulk_action_size_bytes(action, source)
 
             if actions and (chunk_docs >= max_docs or chunk_bytes + action_bytes > max_bytes):

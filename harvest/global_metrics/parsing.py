@@ -16,7 +16,7 @@ def global_metric_row_from_hit(hit):
     if not isinstance(raw_data, dict):
         return None
 
-    issns = issn_terms(raw_data.get("issns"))
+    issns = issn_terms(raw_data.get("issns") or [])
     year = coerce_int(raw_data.get("year"))
     if not issns or year is None:
         return None
@@ -53,23 +53,15 @@ def issns_overlap(first, second):
 
 def issn_terms(value):
     terms = []
-    for item in as_values(value):
-        raw_value = clean_text(item)
-        if not raw_value:
-            continue
-        append_unique(terms, raw_value)
-        append_unique(terms, normalize_issn(raw_value))
+    for item in value:
+        append_unique(terms, normalize_issn(item))
     return terms
 
 
 def as_values(value):
     if value is None:
         return []
-    if isinstance(value, (list, tuple, set)):
-        return list(value)
-    if isinstance(value, str):
-        return [item for item in re.split(r"[,;|]", value) if item.strip()]
-    return [value]
+    return [item.strip() for item in re.split(r"[,;|]", value) if item.strip()]
 
 
 def coerce_int(value):

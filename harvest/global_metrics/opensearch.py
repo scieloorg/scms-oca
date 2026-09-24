@@ -8,8 +8,9 @@ from etl.world_regions import world_region_for_country
 from harvest.global_metrics.parsing import (
     append_unique,
     global_metric_row_from_hit,
+    issn_terms,
+    issns_overlap,
 )
-from search_gateway.option_normalization import clean_text
 
 _RETRY_DELAYS = (3**2, 3**3, 3**4, 3**5)
 
@@ -60,11 +61,99 @@ def source_file_query(source_file):
     }
 
 
+def get_global_metric_by_issns_and_year(client, index, issns, year, cache=None):
+    """
+    Busca e retorna uma linha de métricas globais baseada em uma lista de ISSNs e um ano específico.
+
+    Esta função realiza a busca por métricas globais no índice OpenSearch informado utilizando uma lista de ISSNs
+    e um valor de ano. O resultado pode ser memorizado em cache para aceleração de buscas repetidas.
+
+    Args:
+        client: Cliente OpenSearch que possui o método `search`.
+        index (str): Nome do índice OpenSearch no qual a busca será realizada.
+        issns (list[str]): Lista de ISSNs a serem pesquisados.
+        year (int|str): Ano pelo qual filtrar os resultados.
+        cache (dict, opcional): Dicionário para caching dos resultados, usando (index, year, issn normalizado) como chave.
+
+    Returns:
+        dict | None: Um dicionário representando os campos relevantes da linha de métrica global encontrada,
+                     ou None caso nenhum resultado válido seja localizado.
+    Exemplo de uso:
+        metric = get_global_metric_by_issns_and_year(
+            client=client,
+            index="global_metrics_upload_file",
+            issns=["1234-5678"],
+            year=2024,
+            cache=my_cache,
+        )
+    """
+    terms = issn_terms(issns)
+    if not terms or year is None:
+        return None
+
+    cache_keys = []
+    for term in terms:
+        issn = normalize_issn(term)
+        if not issn:
+            continue
+        key = (index, year, issn)
+        append_unique(cache_keys, key)
+        if cache is not None and key in cache:
+            return cache[key]
+
+    row = _search_global_metric_by_issns_and_year(client, index, terms, year)
+    if cache is not None:
+        cache.update(dict.fromkeys(cache_keys, row))
+    return row
+
+
+def _search_global_metric_by_issns_and_year(client, index, terms, year):
+    """
+    Executa uma busca por métricas globais no índice especificado, utilizando uma lista de ISSNs (`terms`)
+    e um ano (`year`) como filtros. Retorna a primeira linha válida encontrada, ou None se nada for encontrado.
+
+    Args:
+        client: Cliente do OpenSearch, com método `search`.
+        index (str): Nome do índice OpenSearch onde serão buscadas as métricas globais.
+        terms (list[str]): Lista de ISSNs (str) como termos de consulta.
+        year (int|str): Ano alvo da métrica global.
+
+    Returns:
+        dict | None: Um dicionário representando a linha válida de métrica global encontrada,
+                     ou None se não houver nenhum resultado válido para os critérios.
+    """
+    body = {
+        "query": {
+            "bool": {
+                "filter": [
+                    {"term": {"raw_data.year": year}},
+                    {"terms": {"raw_data.issns": terms}},
+                ],
+            }
+        },
+        "_source": [
+            "raw_data.issns",
+            "raw_data.year",
+            "raw_data.country",
+            "raw_data.scopus_active_in_the_year",
+            "raw_data.wos_active_in_the_year",
+            "raw_data.scielo_active_and_valid_in_the_year",
+        ],
+        "size": 100,
+    }
+    response = client.search(index=index, body=body)
+    for hit in response.get("hits", {}).get("hits", []):
+        row = global_metric_row_from_hit(hit)
+        if row and row["year"] == year and issns_overlap(row["issns"], terms):
+            return row
+    return None
+
+
 def _merge_harvest_row_into_groups(groups, row):
     year = row["year"]
     seen_canonical = set()
     for issn in row["issns"]:
-        canonical_issn = normalize_issn(issn) or clean_text(issn)
+        canonical_issn = normalize_issn(issn)
         if not canonical_issn or canonical_issn in seen_canonical:
             continue
         seen_canonical.add(canonical_issn)

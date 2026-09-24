@@ -9,6 +9,7 @@ from etl.transform.extractors import (
 )
 from etl.transform.normalizers import normalize_country_code, normalize_doi, normalize_language, normalize_openalex_id
 from etl.transform.utils import dict_or_empty, int_or_none
+from etl.world_regions import add_affiliation_world_regions, add_source_world_region
 
 
 @dataclass
@@ -349,6 +350,7 @@ class SilverDocument(OcaModel):
     referenced_works: list = field(default_factory=list)
     oca_data: dict = field(default_factory=dict)
     indexed_in: list = field(default_factory=list)
+    global_metric: dict = field(default_factory=dict)
 
     def __post_init__(self):
         if not self.doc_id or not isinstance(self.doc_id, str):
@@ -406,7 +408,24 @@ class SilverDocument(OcaModel):
         data.update(self._index_primary_topic())
         data.update(self._index_topics())
         data.update(self._index_apc())
+        self._index_global_metric(data)
+        self._index_world_regions(data)
         return self._clean_dict(data)
+
+    def _index_global_metric(self, data: dict) -> None:
+        if not self.global_metric:
+            return
+
+        source_metrics = (
+            data["oca_data"].setdefault("scielo", {}).setdefault("source", {})
+        )
+        source_metrics["indexed_in"] = self.global_metric["indexed_in"]
+        if country_code := self.global_metric.get("country_code"):
+            source_metrics["country_code"] = country_code
+
+    def _index_world_regions(self, data: dict) -> None:
+        add_source_world_region(data)
+        add_affiliation_world_regions(data)
 
     def _index_ids(self) -> dict:
         ids = dict(self.ids or {})
