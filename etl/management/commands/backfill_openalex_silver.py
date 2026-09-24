@@ -244,7 +244,7 @@ class Command(BaseCommand):
                         global_metric = get_global_metric_by_issns_and_year(
                             client=client.client,
                             index=settings.GLOBAL_METRICS_FILE_UPLOAD_OPENSEARCH_INDEX,
-                            issns=silver_doc.source.get("issns"),
+                            issns=silver_doc.source.get("issns") or [],
                             year=silver_doc.publication_year,
                             cache=cache,
                         )
