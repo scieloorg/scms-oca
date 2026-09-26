@@ -25,6 +25,10 @@ class Command(BaseCommand):
             ],
             help="Cria o índice bronze para o tipo escolhido. Padrão: all.",
         )
+        parser.add_argument(
+            "--name",
+            help="Nome do índice bronze a criar. Requer --index.",
+        )
 
     def handle(self, *args, **options):
         client = get_opensearch_client()
@@ -44,9 +48,17 @@ class Command(BaseCommand):
         }
 
         index_choice = options["index"]
+        custom_name = options["name"]
+        if custom_name and not index_choice:
+            raise CommandError("--name requer --index para selecionar o mapping bronze.")
+
         selected_indices = {index_choice: indices[index_choice]} if index_choice else indices
         for _name, (index_name, bronze_mapping) in selected_indices.items():
-            self.ensure_index_exists(client=client, index_name=index_name, bronze_mapping=bronze_mapping)
+            self.ensure_index_exists(
+                client=client,
+                index_name=custom_name or index_name,
+                bronze_mapping=bronze_mapping,
+            )
 
     def ensure_index_exists(self, client, index_name, bronze_mapping) -> None:
         """Create destination index with mapping if it doesn't exist."""
