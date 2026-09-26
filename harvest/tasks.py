@@ -18,7 +18,7 @@ from harvest.harvesters.openalex import harvest_openalex_works
 from harvest.harvesters.preprint import harvest_preprint
 from harvest.indexing import index_harvested_instance, index_harvested_raw_data
 
-from .bronze_transform import reconcile_missing_bronze_etl
+from .bronze_transform import reconcile_missing_bronze_etl, transform_indexed_page
 from .models import (
     HarvestedArticle,
     HarvestedBook,
@@ -176,13 +176,15 @@ def harvest_single_book_in_couchdb(
     headers=None,
 ):
     user = User.objects.get(username=username)
-    harvest_single_book(
+    harvested_obj = harvest_single_book(
         base_url=None,
         payload=payload,
         db_name=db_name,
         user=user,
         headers=headers,
     )
+    if harvested_obj and harvested_obj.is_indexed():
+        transform_indexed_page("HarvestedBook", [harvested_obj.identifier])
 
 
 @celery_app.task(name="Retry failed preprints")

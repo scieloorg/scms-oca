@@ -71,14 +71,14 @@ def _extract_changes(payload):
 
 
 def _extract_last_seq(payload):
-    """Último seq da página: last_seq/seq no JSON ou seq do último item de results."""
+    """Retorna o cursor do último item para continuar após esta página."""
     if not isinstance(payload, dict):
         return None
     results = payload.get("results")
     if isinstance(results, list) and results:
         last = results[-1]
         if isinstance(last, dict):
-            return last.get("last_seq")
+            return last.get("seq")
     return None
 
 
