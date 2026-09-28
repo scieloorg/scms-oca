@@ -1838,8 +1838,13 @@ class HarvestOpenAlexSnapshotTests(TestCase):
         search_kwargs = self.open_search.client.search.call_args.kwargs
         self.assertEqual(search_kwargs["index"], "global_metrics_test")
 
-    def test_index_openalex_batch_indexes_by_openalex_id_on_write_alias(self):
+    @patch("harvest.harvesters.openalex.requeue_etl_items_for_openalex_updates")
+    def test_index_openalex_batch_indexes_by_openalex_id_on_write_alias(
+        self,
+        requeue_items,
+    ):
         openalex_id = "https://openalex.org/W2"
+        requeue_items.return_value = 2
 
         indexed = index_openalex_batch(
             self.open_search,
@@ -1855,7 +1860,33 @@ class HarvestOpenAlexSnapshotTests(TestCase):
             },
         )
         self.assertEqual(indexed, 1)
+        requeue_items.assert_called_once_with({openalex_id})
         self.open_search.client.search.assert_not_called()
+
+    @patch("harvest.harvesters.openalex.requeue_etl_items_for_openalex_updates")
+    def test_index_openalex_batch_does_not_requeue_when_bulk_fails(
+        self,
+        requeue_items,
+    ):
+        self.open_search.client.bulk.return_value = {
+            "errors": True,
+            "items": [
+                {
+                    "index": {
+                        "status": 500,
+                        "error": {"type": "exception"},
+                    }
+                }
+            ],
+        }
+
+        with self.assertRaises(RuntimeError):
+            index_openalex_batch(
+                self.open_search,
+                [("https://openalex.org/W2", {})],
+            )
+
+        requeue_items.assert_not_called()
 
     @patch("etl.documents.add_affiliation_world_regions")
     @patch("etl.documents.add_source_world_region")
