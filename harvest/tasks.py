@@ -244,7 +244,8 @@ def retry_harvest_failed_articles(username, user_id=None):
     for identifier in failed_identifiers:
         article = HarvestedArticle.objects.filter(identifier=identifier).first()
         try:
-            harvest_single_article_code(code=identifier, user=user)
+            collection, code = identifier.split(":", 1)
+            harvest_single_article_code(code=code, collection=collection, user=user)
         except Exception as exc:
             if article:
                 exc_context = ExceptionContext(
