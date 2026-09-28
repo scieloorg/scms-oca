@@ -3,14 +3,16 @@ import io
 import json
 import tempfile
 from datetime import datetime
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, call, patch
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import SimpleTestCase, TestCase, override_settings
 from django.utils import timezone
 from lxml import etree
+from opensearchpy.exceptions import NotFoundError, TransportError
 
 from core.users.models import User
+from etl.models import EtlItemProcess
 from harvest.language_normalizer import (
     normalize_language_field,
     normalize_language_value,
@@ -20,6 +22,7 @@ from .bronze_transform import (
     _build_reindex_body,
     _refresh_source_for_page,
     _reindex_page,
+    reconcile_missing_bronze_etl,
     transform_documents_batch,
     transform_documents_page,
     transform_indexed_page,
@@ -44,6 +47,7 @@ from .global_metrics.process import process_global_metrics_upload_file
 from .harvesters.article import (
     fetch_article_identifiers_page,
     harvest_articles,
+    harvest_single_article_item,
 )
 from .harvesters.dataset import harvest_data
 from .harvesters.openalex import (
@@ -79,6 +83,11 @@ from .parse_info_oai_pmh import (
     parse_author_name,
 )
 from .storage import global_metrics_upload_path, overwrite_media_storage
+from .tasks import (
+    harvest_openalex_works_task,
+    harvest_scielo_articles,
+    retry_harvest_failed_articles,
+)
 
 
 class GlobalMetricsUploadFileTests(TestCase):
@@ -487,8 +496,6 @@ class GlobalMetricsUploadTaskTests(SimpleTestCase):
 
     @patch("harvest.global_metrics.opensearch.time.sleep")
     def test_update_silver_group_by_query_retries_on_429(self, mock_sleep):
-        from opensearchpy.exceptions import TransportError
-
         client = MagicMock()
         client.update_by_query.side_effect = [
             TransportError(429, "circuit_breaking_exception", "too large"),
@@ -527,8 +534,6 @@ class GlobalMetricsUploadTaskTests(SimpleTestCase):
         mock_sleep.assert_called_once_with(0.1)
 
     def test_wait_for_update_task_raises_when_task_is_missing(self):
-        from opensearchpy.exceptions import NotFoundError
-
         client = MagicMock()
         client.tasks.get.side_effect = NotFoundError(404, "not found", {})
 
@@ -948,15 +953,17 @@ class HarvestArticlesTest(TestCase):
 
         self.assertEqual(mock_fetch_page.call_count, 2)
         self.assertEqual(HarvestedArticle.objects.count(), 1)
-        article = HarvestedArticle.objects.get(identifier="S0100-879X1998000800011")
+        article = HarvestedArticle.objects.get(identifier="scl:S0100-879X1998000800011")
         self.assertEqual(article.creator, self.user)
         self.assertEqual(article.harvest_status, "success")
         self.assertEqual(article.raw_data, self.article_payload)
         self.assertEqual(article.datestamp.date().isoformat(), "1998-09-21")
+        self.assertIn("collection=scl", article.source_url)
+        self.assertIn("code=S0100-879X1998000800011", article.source_url)
         mock_index.assert_called()
         mock_transform_page.assert_called_once_with(
             "HarvestedArticle",
-            ["S0100-879X1998000800011"],
+            ["scl:S0100-879X1998000800011"],
         )
 
     @patch("harvest.harvesters.article.transform_indexed_page")
@@ -978,11 +985,58 @@ class HarvestArticlesTest(TestCase):
 
         harvest_articles(user=self.user, limit=1)
 
-        article = HarvestedArticle.objects.get(identifier="S0100-879X1998000800011")
+        article = HarvestedArticle.objects.get(identifier="scl:S0100-879X1998000800011")
         self.assertEqual(article.harvest_status, "failed")
         self.assertEqual(HarvestErrorLogArticle.objects.count(), 1)
         self.assertEqual(article.harvest_error_log.first().field_name, "raw_data")
         mock_transform_page.assert_not_called()
+
+    @patch("harvest.signals.index_harvested_instance")
+    @patch("harvest.harvesters.article.fetch_article_detail")
+    def test_same_code_in_different_collections_keeps_both_articles(
+        self, mock_fetch_detail, _mock_index
+    ):
+        spa_item = {**self.identifier_item, "collection": "spa"}
+        spa_payload = {**self.article_payload, "collection": "spa", "doi": "10.2/spa"}
+        mock_fetch_detail.side_effect = [self.article_payload, spa_payload]
+
+        harvest_single_article_item(self.identifier_item, self.user)
+        harvest_single_article_item(spa_item, self.user)
+
+        self.assertEqual(HarvestedArticle.objects.count(), 2)
+        scl = HarvestedArticle.objects.get(identifier="scl:S0100-879X1998000800011")
+        spa = HarvestedArticle.objects.get(identifier="spa:S0100-879X1998000800011")
+        self.assertEqual(scl.raw_data, self.article_payload)
+        self.assertEqual(spa.raw_data, spa_payload)
+        self.assertIn("collection=scl", scl.source_url)
+        self.assertIn("collection=spa", spa.source_url)
+        self.assertEqual(
+            mock_fetch_detail.call_args_list,
+            [
+                call(code=self.identifier_item["code"], collection="scl"),
+                call(code=self.identifier_item["code"], collection="spa"),
+            ],
+        )
+
+    @patch("harvest.tasks.harvest_single_article_code")
+    def test_retry_failed_articles_preserves_collection(self, mock_harvest_code):
+        code = self.identifier_item["code"]
+        for collection in ("scl", "spa"):
+            HarvestedArticle.objects.create(
+                identifier=f"{collection}:{code}",
+                creator=self.user,
+                harvest_status="failed",
+            )
+
+        retry_harvest_failed_articles(username=self.user.username)
+
+        self.assertCountEqual(
+            mock_harvest_code.call_args_list,
+            [
+                call(code=code, collection="scl", user=self.user),
+                call(code=code, collection="spa", user=self.user),
+            ],
+        )
 
     @patch("harvest.tasks.harvest_articles")
     def test_harvest_scielo_articles_uses_latest_datestamp_incrementally(self, mock_harvest_articles):
@@ -991,8 +1045,6 @@ class HarvestArticlesTest(TestCase):
             creator=self.user,
             datestamp=timezone.make_aware(datetime(2024, 5, 2)),
         )
-
-        from .tasks import harvest_scielo_articles
 
         harvest_scielo_articles(username=self.user.username, limit=10, offset=0)
 
@@ -1100,7 +1152,7 @@ class LanguageNormalizerTests(SimpleTestCase):
 class ArticleBronzeTransformTests(TestCase):
     def setUp(self):
         self.user = User.objects.create(username="bronze-article-user", password="teste")
-        self.identifier = "S0100-879X1998000800011"
+        self.identifier = "scl:S0100-879X1998000800011"
         self.source_index = "raw_scielo_article_test"
         self.dest_index = "bronze_scielo_articles_test"
         self.transform_script = "ctx._source = ctx._source.raw_data;"
@@ -1112,7 +1164,7 @@ class ArticleBronzeTransformTests(TestCase):
                 harvest_status="success",
                 index_status="success",
                 raw_data={
-                    "code": self.identifier,
+                    "code": "S0100-879X1998000800011",
                     "processing_date": "1998-09-21",
                     "article": {"v12": [{"l": "en", "_": "Title"}]},
                 },
@@ -1352,8 +1404,6 @@ class ArticleBronzeTransformTests(TestCase):
 
     @patch("harvest.bronze_transform.transform_indexed_page")
     def test_reconcile_missing_bronze_etl_transforms_in_pages(self, mock_transform_page):
-        from .bronze_transform import reconcile_missing_bronze_etl
-
         mock_transform_page.return_value = {"status": "success"}
         with patch("harvest.signals.index_harvested_instance"):
             HarvestedArticle.objects.create(
@@ -1390,9 +1440,6 @@ class ArticleBronzeTransformTests(TestCase):
 
     @patch("harvest.bronze_transform.transform_indexed_page")
     def test_reconcile_missing_bronze_etl_exits_when_empty(self, mock_transform_page):
-        from .bronze_transform import reconcile_missing_bronze_etl
-        from etl.models import EtlItemProcess
-
         EtlItemProcess.objects.create(
             source_index=self.dest_index,
             external_id=self.identifier,
@@ -2256,8 +2303,6 @@ class HarvestOpenAlexSnapshotTests(TestCase):
 
     @patch("harvest.tasks.harvest_openalex_works")
     def test_task_delegates_manifest_scan_to_harvester(self, mock_harvest):
-        from harvest.tasks import harvest_openalex_works_task
-
         harvest_openalex_works_task(
             username=self.user.username,
             publication_year_from=2018,

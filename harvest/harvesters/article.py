@@ -18,6 +18,13 @@ def _articlemeta_base_url():
     return getattr(settings, "ARTICLEMETA_BASE_URL", "https://articlemeta.scielo.org").rstrip("/")
 
 
+def article_identifier(code, collection):
+    if not code or not collection:
+        raise ValueError("Article code and collection are required.")
+
+    return f"{collection}:{code}"
+
+
 def fetch_article_identifiers_page(
     limit=100,
     offset=0,
@@ -67,7 +74,7 @@ def fetch_article_detail(code, collection=None, headers=None):
     Busca detalhes de um artigo específico na API ArticleMeta.
 
     Parâmetros:
-        code (str): Código identificador único do artigo.
+        code (str): Código do artigo, único dentro da coleção.
         collection (str ou None, opcional): Código da coleção do artigo (ex: 'scl'). Default: None.
         headers (dict ou None, opcional): Headers HTTP personalizados para a requisição. Default: None.
 
@@ -116,7 +123,9 @@ def harvest_articles(
         page_ids = []
         for item in items:
             try:
-                harvested_obj = harvest_single_article_item(item=item, user=user)
+                harvested_obj = harvest_single_article_item(
+                    item=item, user=user, collection=collection
+                )
                 if harvested_obj and harvested_obj.is_indexed():
                     page_ids.append(harvested_obj.identifier)
             except Exception as exc:
@@ -130,32 +139,37 @@ def harvest_articles(
             break
 
 
-def harvest_single_article_item(item, user):
+def harvest_single_article_item(item, user, collection=None):
     code = item.get("code")
-    if not code:
-        raise ValueError("ArticleMeta identifier item without code.")
+    collection = item.get("collection") or collection
+    article_identifier(code, collection)
 
     try:
         article_payload = fetch_article_detail(
             code=code,
-            collection=item.get("collection"),
+            collection=collection,
         )
     except Exception as exc:
         return record_article_failure(
             user=user,
-            identifier=code,
+            code=code,
+            collection=collection,
             exception=exc,
             field_name="get_article",
             context_data=item,
         )
     return persist_article(
         user=user,
-        identifier=code,
+        code=code,
+        collection=collection,
         article_payload=article_payload,
     )
 
 
-def record_article_failure(user, identifier, exception, field_name, context_data=None):
+def record_article_failure(
+    user, code, collection, exception, field_name, context_data=None
+):
+    identifier = article_identifier(code, collection)
     harvested_obj, _created = HarvestedArticle.objects.get_or_create(
         identifier=identifier,
         defaults={"creator": user},
@@ -169,18 +183,20 @@ def record_article_failure(user, identifier, exception, field_name, context_data
     exc_context.add_exception(
         exception=exception,
         field_name=field_name,
-        context_data=context_data or {"identifier": identifier},
+        context_data=context_data or {"code": code, "collection": collection},
     )
     exc_context.save_to_db()
     exc_context.mark_status_harvest()
     return harvested_obj
 
 
-def harvest_single_article_code(code, user, collection=None):
+def harvest_single_article_code(code, user, collection):
+    article_identifier(code, collection)
     article_payload = fetch_article_detail(code=code, collection=collection)
     harvested_obj = persist_article(
         user=user,
-        identifier=code,
+        code=code,
+        collection=collection,
         article_payload=article_payload,
     )
     if harvested_obj and harvested_obj.is_indexed():
@@ -188,9 +204,8 @@ def harvest_single_article_code(code, user, collection=None):
     return harvested_obj
 
 
-def persist_article(user, identifier, article_payload):
-    if not identifier:
-        raise ValueError("Article identifier is required.")
+def persist_article(user, code, collection, article_payload):
+    identifier = article_identifier(code, collection)
 
     harvested_obj, _created = HarvestedArticle.objects.get_or_create(
         identifier=identifier,
@@ -210,7 +225,7 @@ def persist_article(user, identifier, article_payload):
 
         harvested_obj.source_url = build_url(
             f"{_articlemeta_base_url()}/api/v1/article/",
-            {"code": identifier},
+            {"code": code, "collection": collection},
         )
         harvested_obj.raw_data = article_payload
         harvested_obj.datestamp = parse_article_datestamp(article_payload)
@@ -227,7 +242,7 @@ def persist_article(user, identifier, article_payload):
         exc_context.add_exception(
             exception=exc,
             field_name="raw_data",
-            context_data={"identifier": identifier},
+            context_data={"code": code, "collection": collection},
         )
 
     exc_context.save_to_db()
