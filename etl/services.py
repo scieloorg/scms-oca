@@ -4,6 +4,7 @@ from collections import defaultdict
 
 from django.conf import settings
 from django.db import transaction
+from django.db.models import Q
 from django.utils import timezone
 
 from core.utils.db import refresh_db_connections
@@ -13,10 +14,37 @@ from etl.pipeline import OpenSearchETLPipeline
 from etl.transform.extractors import extract_isbns, extract_publication_year
 from etl.transform.normalizers import normalize_document_type_for_etl
 from harvest.utils import source_hash
-from search_gateway.opensearch import OpenSearchIndexClient
 from search_gateway.freshness import invalidate_freshness_cache
+from search_gateway.opensearch import OpenSearchIndexClient
 
 logger = logging.getLogger(__name__)
+
+
+def requeue_etl_items_for_openalex_updates(openalex_ids: set[str]) -> int:
+    """Requeue SciELO ETL items previously merged with updated OpenAlex works."""
+    if not openalex_ids:
+        return 0
+
+    id_query = Q()
+    for openalex_id in openalex_ids:
+        id_query |= Q(openalex_match_ids__contains=[openalex_id])
+
+    requeued_count = (
+        EtlItemProcess.objects.filter(has_openalex_match=True)
+        .filter(id_query)
+        .exclude(status=EtlStatus.PENDING)
+        .update(
+            status=EtlStatus.PENDING,
+            result="",
+            error=None,
+            processed_at=None,
+            updated_at=timezone.now(),
+        )
+    )
+    logger.info(
+        f"Requeued {requeued_count} SciELO ETL item(s) for {len(openalex_ids)} updated OpenAlex work(s)"
+    )
+    return requeued_count
 
 
 def enqueue_etl_item(
