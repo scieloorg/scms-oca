@@ -12,6 +12,7 @@ from core.utils.utils import fetch_data
 from etl.client import OpenSearchClient
 from etl.documents import RawOpenAlexInputDocument
 from etl.mapping_silver import SILVER_MAPPING
+from etl.services import requeue_etl_items_for_openalex_updates
 from etl.transform.standardizer import OpenAlexStandardizer
 from harvest.exception_logs import ExceptionContext
 from harvest.global_metrics.opensearch import get_global_metric_by_issns_and_year
@@ -133,9 +134,11 @@ def index_openalex_batch(client, documents):
     O mesmo ``_id`` no índice de escrita substitui o documento existente.
     """
     actions = []
+    openalex_ids = set()
     write_alias = settings.ETL_OPENALEX_ONLY_WRITE_ALIAS
 
     for openalex_id, source in documents:
+        openalex_ids.add(openalex_id)
         actions.extend(
             [
                 {
@@ -160,6 +163,10 @@ def index_openalex_batch(client, documents):
             f"Falha ao indexar {len(failures)} documentos OpenAlex: {first_error}"
         )
 
+    requeued_count = requeue_etl_items_for_openalex_updates(openalex_ids)
+    logger.info(
+        f"Lote OpenAlex indexado: {len(documents)} documento(s), {requeued_count} merge(s) reenfileirado(s)"
+    )
     return len(documents)
 
 
