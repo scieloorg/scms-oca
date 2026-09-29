@@ -86,7 +86,6 @@ class MergeTests(SimpleTestCase):
             title="SciELO title",
             doi="10.1590/scielo",
             ids={"doi": "10.1590/scielo"},
-            citation_count=5,
             oca_data={"scope": ["scielo"]},
         )
         enrichment = SilverDocument(
@@ -103,7 +102,7 @@ class MergeTests(SimpleTestCase):
             openalex_matches=[(enrichment, "doi", "high", {})],
         )
 
-        self.assertEqual(merged.citation_count, 15)
+        self.assertEqual(merged.citation_count, 10)
         self.assertEqual(merged.doi, "10.1590/scielo")
         self.assertEqual(merged.ids["doi"], "10.1590/scielo")
 
@@ -112,7 +111,6 @@ class MergeTests(SimpleTestCase):
             doc_id="S1",
             type="article",
             title="SciELO title",
-            citation_count=5,
             oca_data={"scope": ["scielo"]},
         )
         openalex_first = SilverDocument(
@@ -140,8 +138,9 @@ class MergeTests(SimpleTestCase):
             openalex_matches=[(openalex_updated, "doi", "high", {})],
         )
 
-        self.assertEqual(first_merge.citation_count, 15)
-        self.assertEqual(rematch.citation_count, 25)
+        self.assertIsNone(scielo.citation_count)
+        self.assertEqual(first_merge.citation_count, 10)
+        self.assertEqual(rematch.citation_count, 20)
         self.assertEqual(rematch.doc_id, "S1")
         self.assertEqual(rematch.ids["openalex"], "https://openalex.org/W1")
 
