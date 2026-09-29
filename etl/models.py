@@ -2,6 +2,7 @@ from datetime import timedelta
 from fnmatch import fnmatch
 
 from django.conf import settings
+from django.contrib.postgres.indexes import GinIndex
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.utils import timezone
@@ -432,6 +433,11 @@ class EtlItemProcess(models.Model):
             models.Index(fields=["status"]),
             models.Index(fields=["document_type", "publication_year"]),
             models.Index(fields=["updated_at"]),
+            GinIndex(
+                fields=["openalex_match_ids"],
+                name="etl_item_oa_ids_gin",
+                condition=models.Q(has_openalex_match=True),
+            ),
         ]
 
     def __str__(self):
