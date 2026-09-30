@@ -86,7 +86,6 @@ class MergeTests(SimpleTestCase):
             title="SciELO title",
             doi="10.1590/scielo",
             ids={"doi": "10.1590/scielo"},
-            citation_count=5,
             oca_data={"scope": ["scielo"]},
         )
         enrichment = SilverDocument(
@@ -103,9 +102,107 @@ class MergeTests(SimpleTestCase):
             openalex_matches=[(enrichment, "doi", "high", {})],
         )
 
-        self.assertEqual(merged.citation_count, 15)
+        self.assertEqual(merged.citation_count, 10)
         self.assertEqual(merged.doi, "10.1590/scielo")
         self.assertEqual(merged.ids["doi"], "10.1590/scielo")
+
+    def test_rematch_replaces_openalex_citation_count_with_updated_work(self):
+        scielo = SilverDocument(
+            doc_id="S1",
+            type="article",
+            title="SciELO title",
+            oca_data={"scope": ["scielo"]},
+        )
+        openalex_first = SilverDocument(
+            doc_id="https://openalex.org/W1",
+            type="article",
+            citation_count=10,
+            openalex_id="https://openalex.org/W1",
+            oca_data={"scope": ["openalex"]},
+        )
+        openalex_updated = SilverDocument(
+            doc_id="https://openalex.org/W1",
+            type="article",
+            citation_count=20,
+            openalex_id="https://openalex.org/W1",
+            oca_data={"scope": ["openalex"]},
+        )
+        merger = SilverMerger()
+
+        first_merge = merger.merge(
+            scielo_docs=[scielo],
+            openalex_matches=[(openalex_first, "doi", "high", {})],
+        )
+        rematch = merger.merge(
+            scielo_docs=[scielo],
+            openalex_matches=[(openalex_updated, "doi", "high", {})],
+        )
+
+        self.assertIsNone(scielo.citation_count)
+        self.assertEqual(first_merge.citation_count, 10)
+        self.assertEqual(rematch.citation_count, 20)
+        self.assertEqual(rematch.doc_id, "S1")
+        self.assertEqual(rematch.ids["openalex"], "https://openalex.org/W1")
+
+    def test_rematch_replaces_openalex_sdgs_with_updated_work(self):
+        scielo = SilverDocument(
+            doc_id="S1",
+            type="article",
+            title="SciELO title",
+            sustainable_development_goals=[
+                {"id": "https://metadata.un.org/sdg/1", "display_name": "No poverty", "score": 0.5},
+            ],
+            oca_data={"scope": ["scielo"]},
+        )
+        openalex_first = SilverDocument(
+            doc_id="https://openalex.org/W1",
+            type="article",
+            openalex_id="https://openalex.org/W1",
+            sustainable_development_goals=[
+                {"id": "https://metadata.un.org/sdg/1", "display_name": "No poverty", "score": 0.6},
+                {"id": "https://metadata.un.org/sdg/3", "display_name": "Good health", "score": 0.4},
+            ],
+            oca_data={"scope": ["openalex"]},
+        )
+        openalex_updated = SilverDocument(
+            doc_id="https://openalex.org/W1",
+            type="article",
+            openalex_id="https://openalex.org/W1",
+            sustainable_development_goals=[
+                {"id": "https://metadata.un.org/sdg/1", "display_name": "No poverty", "score": 0.9},
+                {"id": "https://metadata.un.org/sdg/13", "display_name": "Climate action", "score": 0.8},
+            ],
+            oca_data={"scope": ["openalex"]},
+        )
+        merger = SilverMerger()
+
+        first_merge = merger.merge(
+            scielo_docs=[scielo],
+            openalex_matches=[(openalex_first, "doi", "high", {})],
+        )
+        rematch = merger.merge(
+            scielo_docs=[scielo],
+            openalex_matches=[(openalex_updated, "doi", "high", {})],
+        )
+
+        first_sdgs = {sdg["id"]: sdg["score"] for sdg in first_merge.sustainable_development_goals}
+        rematch_sdgs = {sdg["id"]: sdg["score"] for sdg in rematch.sustainable_development_goals}
+
+        self.assertEqual(
+            first_sdgs,
+            {
+                "https://metadata.un.org/sdg/1": 0.6,
+                "https://metadata.un.org/sdg/3": 0.4,
+            },
+        )
+        self.assertEqual(
+            rematch_sdgs,
+            {
+                "https://metadata.un.org/sdg/1": 0.9,
+                "https://metadata.un.org/sdg/13": 0.8,
+            },
+        )
+        self.assertNotIn("https://metadata.un.org/sdg/3", rematch_sdgs)
 
     def test_merge_enriches_with_openalex_referenced_works(self):
         primary = SilverDocument(

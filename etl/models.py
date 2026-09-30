@@ -2,14 +2,14 @@ from datetime import timedelta
 from fnmatch import fnmatch
 
 from django.conf import settings
+from django.contrib.postgres.indexes import GinIndex
 from django.core.exceptions import ValidationError
-from django.db import models
+from django.db import models, transaction
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from wagtail.admin.panels import FieldPanel
 from wagtail_json_widget.widgets import JSONEditorWidget
 
-from harvest.utils import clean_source_payload
 from etl.documents import (
     SciELOArticleInputDocument,
     SciELOBookInputDocument,
@@ -17,7 +17,7 @@ from etl.documents import (
     SciELOPreprintInputDocument,
 )
 from etl.transform.normalizers import normalize_document_type_for_etl
-
+from harvest.utils import clean_source_payload
 
 DOCUMENT_TYPE_CHOICES = (
     ("article", "Article"),
@@ -433,6 +433,11 @@ class EtlItemProcess(models.Model):
             models.Index(fields=["status"]),
             models.Index(fields=["document_type", "publication_year"]),
             models.Index(fields=["updated_at"]),
+            GinIndex(
+                fields=["openalex_match_ids"],
+                name="etl_item_oa_ids_gin",
+                condition=models.Q(has_openalex_match=True),
+            ),
         ]
 
     def __str__(self):
@@ -444,7 +449,24 @@ class EtlItemProcess(models.Model):
         self.error = None
         self.save(update_fields=["status", "attempts", "error", "updated_at"])
 
-    def mark_success(self, result=EtlResult.UPDATED, has_openalex_match=False, has_scielo_dedup=False, scielo_dedup_ids=None, openalex_match_ids=None, status=EtlStatus.SUCCESS, error=None):
+    @transaction.atomic
+    def mark_success(
+        self,
+        result=EtlResult.UPDATED,
+        has_openalex_match=False,
+        has_scielo_dedup=False,
+        scielo_dedup_ids=None,
+        openalex_match_ids=None,
+        status=EtlStatus.SUCCESS,
+        error=None,
+    ):
+        persisted_status = type(self).objects.select_for_update().values_list(
+            "status",
+            flat=True,
+        ).get(pk=self.pk)
+        if self.status == EtlStatus.PROCESSING and persisted_status == EtlStatus.PENDING:
+            return
+
         self.status = status
         self.result = result
         self.has_openalex_match = has_openalex_match
@@ -467,7 +489,15 @@ class EtlItemProcess(models.Model):
             ]
         )
 
+    @transaction.atomic
     def mark_failed(self, error):
+        persisted_status = type(self).objects.select_for_update().values_list(
+            "status",
+            flat=True,
+        ).get(pk=self.pk)
+        if self.status == EtlStatus.PROCESSING and persisted_status == EtlStatus.PENDING:
+            return
+
         self.status = EtlStatus.FAILED
         self.result = EtlResult.ERROR
         self.error = str(error)[:5000]

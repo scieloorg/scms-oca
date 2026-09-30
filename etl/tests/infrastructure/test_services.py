@@ -5,11 +5,82 @@ from django.test import TestCase
 from django.utils import timezone
 
 from etl.models import EtlItemProcess, EtlResult, EtlStatus
-from etl.services import enqueue_etl_item, process_pending_items
+from etl.services import (
+    enqueue_etl_item,
+    process_pending_items,
+    requeue_etl_items_for_openalex_updates,
+)
 from harvest.utils import source_hash
 
 
 class IncrementalEtlTests(TestCase):
+    def test_requeue_items_for_updated_openalex_ids(self):
+        merged = EtlItemProcess.objects.create(
+            source_index="silver_scientific_production",
+            external_id="p1",
+            document_type="article",
+            status=EtlStatus.SUCCESS,
+            result=EtlResult.MERGED,
+            has_openalex_match=True,
+            openalex_match_ids=["https://openalex.org/W1"],
+            processed_at=timezone.now(),
+            error="old error",
+        )
+        unrelated = EtlItemProcess.objects.create(
+            source_index="silver_scientific_production",
+            external_id="p2",
+            document_type="article",
+            status=EtlStatus.SUCCESS,
+            result=EtlResult.MERGED,
+            has_openalex_match=True,
+            openalex_match_ids=["https://openalex.org/W2"],
+        )
+
+        count = requeue_etl_items_for_openalex_updates(
+            {"https://openalex.org/W1"}
+        )
+
+        merged.refresh_from_db()
+        unrelated.refresh_from_db()
+        self.assertEqual(count, 1)
+        self.assertEqual(merged.status, EtlStatus.PENDING)
+        self.assertEqual(merged.result, "")
+        self.assertIsNone(merged.error)
+        self.assertIsNone(merged.processed_at)
+        self.assertEqual(merged.openalex_match_ids, ["https://openalex.org/W1"])
+        self.assertEqual(unrelated.status, EtlStatus.SUCCESS)
+
+    def test_success_does_not_overwrite_concurrent_requeue(self):
+        item = EtlItemProcess.objects.create(
+            source_index="silver_scientific_production",
+            external_id="p1",
+            document_type="article",
+            status=EtlStatus.PROCESSING,
+        )
+        EtlItemProcess.objects.filter(pk=item.pk).update(status=EtlStatus.PENDING)
+
+        item.mark_success(EtlResult.MERGED)
+
+        item.refresh_from_db()
+        self.assertEqual(item.status, EtlStatus.PENDING)
+        self.assertEqual(item.result, "")
+
+    def test_failure_does_not_overwrite_concurrent_requeue(self):
+        item = EtlItemProcess.objects.create(
+            source_index="silver_scientific_production",
+            external_id="p1",
+            document_type="article",
+            status=EtlStatus.PROCESSING,
+        )
+        EtlItemProcess.objects.filter(pk=item.pk).update(status=EtlStatus.PENDING)
+
+        item.mark_failed("outdated failure")
+
+        item.refresh_from_db()
+        self.assertEqual(item.status, EtlStatus.PENDING)
+        self.assertEqual(item.result, "")
+        self.assertIsNone(item.error)
+
     def test_source_hash_is_deterministic_and_uses_raw_data(self):
         self.assertEqual(
             source_hash({"b": 2, "a": 1}),

@@ -13,6 +13,19 @@ class SilverMerger:
         scielo_docs: list[SilverDocument],
         openalex_matches: list[tuple[SilverDocument, str, float, dict]],
     ) -> SilverDocument:
+        """
+        Realiza a fusão (merge) de um ou mais documentos SciELO com possíveis correspondências do OpenAlex.
+
+        Parâmetros:
+            scielo_docs (list[SilverDocument]): Lista de documentos SciELO a serem consolidados.
+                Deve conter pelo menos um elemento.
+            openalex_matches (list[tuple[SilverDocument, str, float, dict]]): Lista de correspondências do OpenAlex.
+                Cada tupla contém: (documento OpenAlex, chave de correspondência, score, metadados do match).
+
+        Retorna:
+            SilverDocument: Objeto resultante da fusão contendo os dados consolidados de SciELO e enriquecimentos de OpenAlex.
+
+        """
         if not scielo_docs:
             raise ValueError("At least one SciELO document is required")
 
