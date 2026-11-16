@@ -265,13 +265,19 @@ def wait_for_update_task(client, task_id, poll_interval=1):
 
 
 def build_global_metrics_update_by_query_body(group):
-    """Corpo do ``update_by_query`` para um único grupo ISSN + ano.
+    """Apply journal metrics without choosing between conflicting source countries."""
+    country_codes = group["country_codes"]
+    if len(country_codes) > 1:
+        logging.warning(
+            "Conflicting journal countries for year %s and ISSNs %s: %s. "
+            "Preserving existing document country and region.",
+            group["year"],
+            group["issns"],
+            country_codes,
+        )
+        country_codes = []
 
-    A query filtra só ``publication_year`` e os ISSNs daquele grupo. Os
-    params incluem ``indexed_in``, ``country_codes`` e a ``world_region``
-    derivada do primeiro código de país.
-    """
-    country_code = group["country_codes"][0] if group["country_codes"] else None
+    country_code = country_codes[0] if country_codes else None
 
     return {
         "query": {
@@ -287,7 +293,7 @@ def build_global_metrics_update_by_query_body(group):
             "source": global_metrics_update_script(),
             "params": {
                 "indexed_in": sorted(group["indexed_in"]),
-                "country_codes": group["country_codes"],
+                "country_codes": country_codes,
                 "world_region": world_region_for_country(country_code),
             },
         },
