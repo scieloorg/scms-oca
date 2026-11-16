@@ -383,12 +383,55 @@ class GlobalMetricsUploadTaskTests(SimpleTestCase):
         self.assertEqual(client.last_search_body["query"]["bool"]["minimum_should_match"], 1)
         self.assertEqual(
             [group["year"] for group in groups],
-            [2024, 2024],
+            [2024],
         )
-        self.assertEqual(groups[0]["issns"], ["1234-5678"])
-        self.assertEqual(groups[1]["issns"], ["8765-4321"])
+        self.assertEqual(groups[0]["issns"], ["1234-5678", "8765-4321"])
         self.assertEqual(groups[0]["indexed_in"], {"Scopus"})
         self.assertEqual(groups[0]["country_codes"], ["BR"])
+
+    def test_issn_grouping_unites_transitive_associations_with_separate_years(self):
+        client = DummyOpenSearchClient(
+            [
+                {
+                    "_source": {
+                        "raw_data": {
+                            "issns": issns,
+                            "year": year,
+                            "country": "Brazil",
+                            "scopus_active_in_the_year": scopus,
+                            "wos_active_in_the_year": wos,
+                        }
+                    }
+                }
+                for issns, year, scopus, wos in [
+                    (["1234-5678", "8765-4321"], 2024, 1, 0),
+                    (["8765-4321", "1111-2222"], 2024, 0, 1),
+                    (["1234-5678", "8765-4321"], 2025, 0, 1),
+                ]
+            ]
+        )
+
+        groups = list(
+            iter_harvest_metric_groups(client, "fixture-metrics", "metrics.csv")
+        )
+
+        self.assertEqual(len(groups), 2)
+        actual = {
+            (group["year"], issn): group["indexed_in"]
+            for group in groups
+            for issn in group["issns"]
+        }
+        self.assertEqual(
+            actual,
+            {
+                (2024, "1234-5678"): {"Scopus", "WoS"},
+                (2024, "8765-4321"): {"Scopus", "WoS"},
+                (2024, "1111-2222"): {"Scopus", "WoS"},
+                (2025, "1234-5678"): {"WoS"},
+                (2025, "8765-4321"): {"WoS"},
+            },
+        )
+        self.assertTrue(all(group["country_codes"] == ["BR"] for group in groups))
 
     def test_iter_harvest_metric_groups_merges_rows_for_same_issn_year(self):
         client = DummyOpenSearchClient(
