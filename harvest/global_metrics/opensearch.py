@@ -17,9 +17,7 @@ _RETRY_DELAYS = (3**2, 3**3, 3**4, 3**5)
 
 def iter_harvest_metric_groups(client, harvest_index, source_file):
     """Combine associated journal ISSNs transitively within each publication year."""
-    groups = {}
     body = {
-        "query": source_file_query(source_file),
         "_source": [
             "raw_data.issns",
             "raw_data.year",
@@ -31,14 +29,56 @@ def iter_harvest_metric_groups(client, harvest_index, source_file):
         "size": 10000,
     }
 
-    for hit in scroll_hits(client, harvest_index, body):
-        row = global_metric_row_from_hit(hit)
-        if not row:
-            continue
+    for year in iter_metric_years(client, harvest_index, source_file):
+        groups = {}
+        body["query"] = {
+            "bool": {
+                "filter": [
+                    source_file_query(source_file),
+                    {"term": {"raw_data.year": year}},
+                ]
+            }
+        }
 
-        _merge_harvest_row_into_groups(groups, row)
+        for hit in scroll_hits(client, harvest_index, body):
+            row = global_metric_row_from_hit(hit)
+            if not row:
+                continue
 
-    yield from _combine_journal_issn_groups(groups)
+            _merge_harvest_row_into_groups(groups, row)
+
+        yield from _combine_journal_issn_groups(groups)
+
+
+def iter_metric_years(client, harvest_index, source_file):
+    """Page distinct years so large or unexpected inputs are not silently truncated."""
+    aggregation = {
+        "size": 100,
+        "sources": [{"year": {"terms": {"field": "raw_data.year"}}}],
+    }
+
+    while True:
+        response = client.search(
+            index=harvest_index,
+            body={
+                "size": 0,
+                "query": source_file_query(source_file),
+                "aggs": {"years": {"composite": aggregation}},
+            },
+        )
+        if response.get("timed_out") or response.get("_shards", {}).get("failed", 0):
+            raise RuntimeError(
+                "Could not retrieve all publication years for global metrics."
+            )
+
+        years = response["aggregations"]["years"]
+        for bucket in years["buckets"]:
+            yield bucket["key"]["year"]
+
+        after = years.get("after_key")
+        if not after:
+            return
+        aggregation["after"] = after
 
 
 def _combine_journal_issn_groups(groups):
