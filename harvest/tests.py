@@ -517,6 +517,32 @@ class GlobalMetricsUploadTaskTests(SimpleTestCase):
         self.assertEqual(params["world_region"], "South America")
         self.assertIn("oca_data.scielo.source", body["script"]["source"])
 
+    def test_conflicting_countries_preserve_document_geography_and_report_conflict(
+        self,
+    ):
+        group = {
+            "year": 2024,
+            "issns": ["1234-5678", "8765-4321"],
+            "indexed_in": {"SciELO", "Scopus"},
+            "country_codes": ["BR", "PT"],
+        }
+
+        with self.assertLogs(level="WARNING") as logs:
+            body = build_global_metrics_update_by_query_body(group)
+
+        self.assertEqual(
+            body["script"]["params"],
+            {
+                "indexed_in": ["SciELO", "Scopus"],
+                "country_codes": [],
+                "world_region": None,
+            },
+        )
+        self.assertEqual(group["country_codes"], ["BR", "PT"])
+        self.assertIn("Conflicting journal countries", logs.output[0])
+        self.assertIn("2024", logs.output[0])
+        self.assertIn("1234-5678", logs.output[0])
+
     def test_update_silver_group_by_query_does_not_wait_for_completion(self):
         client = MagicMock()
         client.update_by_query.return_value = {"task": "task-1"}
