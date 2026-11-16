@@ -380,7 +380,8 @@ class GlobalMetricsUploadTaskTests(SimpleTestCase):
         )
 
         self.assertEqual(client.last_index, "global_metrics_upload_file")
-        self.assertEqual(client.last_search_body["query"]["bool"]["minimum_should_match"], 1)
+        source_query = client.last_search_body["query"]["bool"]["filter"][0]
+        self.assertEqual(source_query, source_file_query("metrics.csv"))
         self.assertEqual(
             [group["year"] for group in groups],
             [2024],
@@ -411,10 +412,12 @@ class GlobalMetricsUploadTaskTests(SimpleTestCase):
             ]
         )
 
-        groups = list(
-            iter_harvest_metric_groups(client, "fixture-metrics", "metrics.csv")
-        )
+        iterator = iter_harvest_metric_groups(client, "fixture-metrics", "metrics.csv")
+        first_group = next(iterator)
+        self.assertEqual(client.requested_years, [2024])
+        groups = [first_group, *iterator]
 
+        self.assertEqual(client.requested_years, [2024, 2025])
         self.assertEqual(len(groups), 2)
         actual = {
             (group["year"], issn): group["indexed_in"]
@@ -735,11 +738,29 @@ class DummyOpenSearchClient:
         self.hits = hits
         self.last_index = None
         self.last_search_body = None
+        self.requested_years = []
 
-    def search(self, index, body, scroll):
+    def search(self, index, body, scroll=None):
         self.last_index = index
         self.last_search_body = body
-        return {"_scroll_id": "scroll-1", "hits": {"hits": self.hits}}
+        if "aggs" in body:
+            years = sorted(
+                {int(hit["_source"]["raw_data"]["year"]) for hit in self.hits}
+            )
+            return {
+                "aggregations": {
+                    "years": {
+                        "buckets": [{"key": {"year": year}} for year in years],
+                    }
+                }
+            }
+
+        year = body["query"]["bool"]["filter"][1]["term"]["raw_data.year"]
+        self.requested_years.append(year)
+        hits = [
+            hit for hit in self.hits if int(hit["_source"]["raw_data"]["year"]) == year
+        ]
+        return {"_scroll_id": "scroll-1", "hits": {"hits": hits}}
 
     def scroll(self, scroll_id, scroll):
         return {"_scroll_id": scroll_id, "hits": {"hits": []}}
