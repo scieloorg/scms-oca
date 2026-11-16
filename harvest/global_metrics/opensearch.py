@@ -244,8 +244,9 @@ def update_silver_group_by_query(client, silver_index, group):
             time.sleep(delay)
 
 
-def wait_for_update_task(client, task_id, poll_interval=1):
-    """Aguarda uma task de ``update_by_query`` e devolve sua resposta."""
+def wait_for_update_task(client, task_id, poll_interval=0.05):
+    """Poll short updates promptly, backing off to avoid busy-polling long tasks."""
+    delay = poll_interval
     while True:
         try:
             result = client.tasks.get(task_id=task_id)
@@ -255,7 +256,8 @@ def wait_for_update_task(client, task_id, poll_interval=1):
             ) from exc
 
         if not result.get("completed"):
-            time.sleep(poll_interval)
+            time.sleep(delay)
+            delay = min(delay * 2, max(1, poll_interval))
             continue
         if error := result.get("error"):
             raise RuntimeError(
