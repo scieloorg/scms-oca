@@ -589,18 +589,17 @@ class GlobalMetricsUploadTaskTests(SimpleTestCase):
     @patch("harvest.global_metrics.opensearch.time.sleep")
     def test_wait_for_update_task_returns_completed_response(self, mock_sleep):
         client = MagicMock()
-        client.tasks.get.side_effect = [
-            {"completed": False},
-            {
-                "completed": True,
-                "response": {"total": 3, "updated": 2},
-            },
+        client.tasks.get.side_effect = [{"completed": False}] * 7 + [
+            {"completed": True, "response": {"total": 3, "updated": 2}},
         ]
 
-        response = wait_for_update_task(client, "t1", poll_interval=0.1)
+        response = wait_for_update_task(client, "t1")
 
         self.assertEqual(response, {"total": 3, "updated": 2})
-        mock_sleep.assert_called_once_with(0.1)
+        self.assertEqual(
+            [request.args[0] for request in mock_sleep.call_args_list],
+            [0.05, 0.1, 0.2, 0.4, 0.8, 1, 1],
+        )
 
     def test_wait_for_update_task_raises_when_task_is_missing(self):
         client = MagicMock()
