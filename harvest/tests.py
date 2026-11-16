@@ -38,6 +38,7 @@ from .global_metrics.opensearch import (
     build_global_metrics_update_by_query_body,
     get_global_metric_by_issns_and_year,
     iter_harvest_metric_groups,
+    iter_metric_years,
     source_file_query,
     update_silver_group_by_query,
     wait_for_update_task,
@@ -435,6 +436,34 @@ class GlobalMetricsUploadTaskTests(SimpleTestCase):
             },
         )
         self.assertTrue(all(group["country_codes"] == ["BR"] for group in groups))
+
+    def test_metric_years_follow_all_aggregation_pages(self):
+        client = MagicMock()
+        client.search.side_effect = [
+            {
+                "aggregations": {
+                    "years": {
+                        "buckets": [{"key": {"year": 2024}}],
+                        "after_key": {"year": 2024},
+                    }
+                }
+            },
+            {
+                "aggregations": {
+                    "years": {
+                        "buckets": [{"key": {"year": 2025}}],
+                    }
+                }
+            },
+        ]
+
+        years = list(iter_metric_years(client, "fixture-metrics", "fixture.csv"))
+
+        self.assertEqual(years, [2024, 2025])
+        self.assertEqual(client.search.call_count, 2)
+        body = client.search.call_args.kwargs["body"]
+        self.assertEqual(body["query"], source_file_query("fixture.csv"))
+        self.assertEqual(body["aggs"]["years"]["composite"]["after"], {"year": 2024})
 
     def test_iter_harvest_metric_groups_merges_rows_for_same_issn_year(self):
         client = DummyOpenSearchClient(
