@@ -38,6 +38,7 @@ from .global_metrics.opensearch import (
     build_global_metrics_update_by_query_body,
     get_global_metric_by_issns_and_year,
     iter_harvest_metric_groups,
+    iter_metric_years,
     source_file_query,
     update_silver_group_by_query,
     wait_for_update_task,
@@ -380,15 +381,89 @@ class GlobalMetricsUploadTaskTests(SimpleTestCase):
         )
 
         self.assertEqual(client.last_index, "global_metrics_upload_file")
-        self.assertEqual(client.last_search_body["query"]["bool"]["minimum_should_match"], 1)
+        source_query = client.last_search_body["query"]["bool"]["filter"][0]
+        self.assertEqual(source_query, source_file_query("metrics.csv"))
         self.assertEqual(
             [group["year"] for group in groups],
-            [2024, 2024],
+            [2024],
         )
-        self.assertEqual(groups[0]["issns"], ["1234-5678"])
-        self.assertEqual(groups[1]["issns"], ["8765-4321"])
+        self.assertEqual(groups[0]["issns"], ["1234-5678", "8765-4321"])
         self.assertEqual(groups[0]["indexed_in"], {"Scopus"})
         self.assertEqual(groups[0]["country_codes"], ["BR"])
+
+    def test_issn_grouping_unites_transitive_associations_with_separate_years(self):
+        client = DummyOpenSearchClient(
+            [
+                {
+                    "_source": {
+                        "raw_data": {
+                            "issns": issns,
+                            "year": year,
+                            "country": "Brazil",
+                            "scopus_active_in_the_year": scopus,
+                            "wos_active_in_the_year": wos,
+                        }
+                    }
+                }
+                for issns, year, scopus, wos in [
+                    (["1234-5678", "8765-4321"], 2024, 1, 0),
+                    (["8765-4321", "1111-2222"], 2024, 0, 1),
+                    (["1234-5678", "8765-4321"], 2025, 0, 1),
+                ]
+            ]
+        )
+
+        iterator = iter_harvest_metric_groups(client, "fixture-metrics", "metrics.csv")
+        first_group = next(iterator)
+        self.assertEqual(client.requested_years, [2024])
+        groups = [first_group, *iterator]
+
+        self.assertEqual(client.requested_years, [2024, 2025])
+        self.assertEqual(len(groups), 2)
+        actual = {
+            (group["year"], issn): group["indexed_in"]
+            for group in groups
+            for issn in group["issns"]
+        }
+        self.assertEqual(
+            actual,
+            {
+                (2024, "1234-5678"): {"Scopus", "WoS"},
+                (2024, "8765-4321"): {"Scopus", "WoS"},
+                (2024, "1111-2222"): {"Scopus", "WoS"},
+                (2025, "1234-5678"): {"WoS"},
+                (2025, "8765-4321"): {"WoS"},
+            },
+        )
+        self.assertTrue(all(group["country_codes"] == ["BR"] for group in groups))
+
+    def test_metric_years_follow_all_aggregation_pages(self):
+        client = MagicMock()
+        client.search.side_effect = [
+            {
+                "aggregations": {
+                    "years": {
+                        "buckets": [{"key": {"year": 2024}}],
+                        "after_key": {"year": 2024},
+                    }
+                }
+            },
+            {
+                "aggregations": {
+                    "years": {
+                        "buckets": [{"key": {"year": 2025}}],
+                    }
+                }
+            },
+        ]
+
+        years = list(iter_metric_years(client, "fixture-metrics", "fixture.csv"))
+
+        self.assertEqual(years, [2024, 2025])
+        self.assertEqual(client.search.call_count, 2)
+        body = client.search.call_args.kwargs["body"]
+        self.assertEqual(body["query"], source_file_query("fixture.csv"))
+        self.assertEqual(body["aggs"]["years"]["composite"]["after"], {"year": 2024})
 
     def test_iter_harvest_metric_groups_merges_rows_for_same_issn_year(self):
         client = DummyOpenSearchClient(
@@ -474,6 +549,32 @@ class GlobalMetricsUploadTaskTests(SimpleTestCase):
         self.assertEqual(params["world_region"], "South America")
         self.assertIn("oca_data.scielo.source", body["script"]["source"])
 
+    def test_conflicting_countries_preserve_document_geography_and_report_conflict(
+        self,
+    ):
+        group = {
+            "year": 2024,
+            "issns": ["1234-5678", "8765-4321"],
+            "indexed_in": {"SciELO", "Scopus"},
+            "country_codes": ["BR", "PT"],
+        }
+
+        with self.assertLogs(level="WARNING") as logs:
+            body = build_global_metrics_update_by_query_body(group)
+
+        self.assertEqual(
+            body["script"]["params"],
+            {
+                "indexed_in": ["SciELO", "Scopus"],
+                "country_codes": [],
+                "world_region": None,
+            },
+        )
+        self.assertEqual(group["country_codes"], ["BR", "PT"])
+        self.assertIn("Conflicting journal countries", logs.output[0])
+        self.assertIn("2024", logs.output[0])
+        self.assertIn("1234-5678", logs.output[0])
+
     def test_update_silver_group_by_query_does_not_wait_for_completion(self):
         client = MagicMock()
         client.update_by_query.return_value = {"task": "task-1"}
@@ -520,18 +621,17 @@ class GlobalMetricsUploadTaskTests(SimpleTestCase):
     @patch("harvest.global_metrics.opensearch.time.sleep")
     def test_wait_for_update_task_returns_completed_response(self, mock_sleep):
         client = MagicMock()
-        client.tasks.get.side_effect = [
-            {"completed": False},
-            {
-                "completed": True,
-                "response": {"total": 3, "updated": 2},
-            },
+        client.tasks.get.side_effect = [{"completed": False}] * 7 + [
+            {"completed": True, "response": {"total": 3, "updated": 2}},
         ]
 
-        response = wait_for_update_task(client, "t1", poll_interval=0.1)
+        response = wait_for_update_task(client, "t1")
 
         self.assertEqual(response, {"total": 3, "updated": 2})
-        mock_sleep.assert_called_once_with(0.1)
+        self.assertEqual(
+            [request.args[0] for request in mock_sleep.call_args_list],
+            [0.05, 0.1, 0.2, 0.4, 0.8, 1, 1],
+        )
 
     def test_wait_for_update_task_raises_when_task_is_missing(self):
         client = MagicMock()
@@ -667,11 +767,29 @@ class DummyOpenSearchClient:
         self.hits = hits
         self.last_index = None
         self.last_search_body = None
+        self.requested_years = []
 
-    def search(self, index, body, scroll):
+    def search(self, index, body, scroll=None):
         self.last_index = index
         self.last_search_body = body
-        return {"_scroll_id": "scroll-1", "hits": {"hits": self.hits}}
+        if "aggs" in body:
+            years = sorted(
+                {int(hit["_source"]["raw_data"]["year"]) for hit in self.hits}
+            )
+            return {
+                "aggregations": {
+                    "years": {
+                        "buckets": [{"key": {"year": year}} for year in years],
+                    }
+                }
+            }
+
+        year = body["query"]["bool"]["filter"][1]["term"]["raw_data.year"]
+        self.requested_years.append(year)
+        hits = [
+            hit for hit in self.hits if int(hit["_source"]["raw_data"]["year"]) == year
+        ]
+        return {"_scroll_id": "scroll-1", "hits": {"hits": hits}}
 
     def scroll(self, scroll_id, scroll):
         return {"_scroll_id": scroll_id, "hits": {"hits": []}}

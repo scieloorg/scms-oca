@@ -16,14 +16,8 @@ _RETRY_DELAYS = (3**2, 3**3, 3**4, 3**5)
 
 
 def iter_harvest_metric_groups(client, harvest_index, source_file):
-    """Percorre o harvest do arquivo de upload e devolve grupos ISSN + ano.
-
-    Linhas com o mesmo ano e ISSN canônico são unidas: ``indexed_in``,
-    ``country_codes`` e variantes de ISSN (print/e-ISSN).
-    """
-    groups = {}
+    """Combine associated journal ISSNs transitively within each publication year."""
     body = {
-        "query": source_file_query(source_file),
         "_source": [
             "raw_data.issns",
             "raw_data.year",
@@ -34,17 +28,88 @@ def iter_harvest_metric_groups(client, harvest_index, source_file):
         ],
         "size": 10000,
     }
-    for hit in scroll_hits(
-        client,
-        harvest_index,
-        body
-    ):
-        row = global_metric_row_from_hit(hit)
-        if not row:
-            continue
-        _merge_harvest_row_into_groups(groups, row)
 
-    yield from groups.values()
+    for year in iter_metric_years(client, harvest_index, source_file):
+        groups = {}
+        body["query"] = {
+            "bool": {
+                "filter": [
+                    source_file_query(source_file),
+                    {"term": {"raw_data.year": year}},
+                ]
+            }
+        }
+
+        for hit in scroll_hits(client, harvest_index, body):
+            row = global_metric_row_from_hit(hit)
+            if not row:
+                continue
+
+            _merge_harvest_row_into_groups(groups, row)
+
+        yield from _combine_journal_issn_groups(groups)
+
+
+def iter_metric_years(client, harvest_index, source_file):
+    """Page distinct years so large or unexpected inputs are not silently truncated."""
+    aggregation = {
+        "size": 100,
+        "sources": [{"year": {"terms": {"field": "raw_data.year"}}}],
+    }
+
+    while True:
+        response = client.search(
+            index=harvest_index,
+            body={
+                "size": 0,
+                "query": source_file_query(source_file),
+                "aggs": {"years": {"composite": aggregation}},
+            },
+        )
+        if response.get("timed_out") or response.get("_shards", {}).get("failed", 0):
+            raise RuntimeError(
+                "Could not retrieve all publication years for global metrics."
+            )
+
+        years = response["aggregations"]["years"]
+        for bucket in years["buckets"]:
+            yield bucket["key"]["year"]
+
+        after = years.get("after_key")
+        if not after:
+            return
+        aggregation["after"] = after
+
+
+def _combine_journal_issn_groups(groups):
+    """Consume connected ISSN groups without duplicating the full group dictionary."""
+    for group_key in list(groups):
+        group = groups.pop(group_key, None)
+        if group is None:
+            continue
+
+        pending_issns = list(group.pop("_journal_issns"))
+        visited = set()
+
+        while pending_issns:
+            issn = pending_issns.pop()
+            if issn in visited:
+                continue
+            visited.add(issn)
+
+            candidate = groups.pop((group["year"], issn), None)
+            if candidate is None:
+                continue
+
+            pending_issns.extend(candidate.pop("_journal_issns"))
+            group["indexed_in"].update(candidate["indexed_in"])
+            group["metric_rows"] += candidate["metric_rows"]
+
+            for field in ("issns", "country_codes", "countries", "unresolved_countries"):
+                for value in candidate[field]:
+                    append_unique(group[field], value)
+
+        yield group
 
 
 def source_file_query(source_file):
@@ -151,7 +216,9 @@ def _search_global_metric_by_issns_and_year(client, index, terms, year):
 
 def _merge_harvest_row_into_groups(groups, row):
     year = row["year"]
+    journal_issns = set(issn_terms(row["issns"]))
     seen_canonical = set()
+
     for issn in row["issns"]:
         canonical_issn = normalize_issn(issn)
         if not canonical_issn or canonical_issn in seen_canonical:
@@ -168,13 +235,18 @@ def _merge_harvest_row_into_groups(groups, row):
                 "countries": [],
                 "metric_rows": 0,
                 "unresolved_countries": [],
+                "_journal_issns": set(),
             }
             groups[(year, canonical_issn)] = group
 
+        group["_journal_issns"].update(journal_issns)
+
         group["metric_rows"] += 1
         group["indexed_in"].update(row["indexed_in"])
+
         append_unique(group["issns"], issn)
         append_unique(group["issns"], canonical_issn)
+
         append_unique(group["country_codes"], row.get("country_code"))
         append_unique(group["countries"], row.get("country"))
         if row.get("country") and not row.get("country_code"):
@@ -212,8 +284,9 @@ def update_silver_group_by_query(client, silver_index, group):
             time.sleep(delay)
 
 
-def wait_for_update_task(client, task_id, poll_interval=1):
-    """Aguarda uma task de ``update_by_query`` e devolve sua resposta."""
+def wait_for_update_task(client, task_id, poll_interval=0.05):
+    """Poll short updates promptly, backing off to avoid busy-polling long tasks."""
+    delay = poll_interval
     while True:
         try:
             result = client.tasks.get(task_id=task_id)
@@ -223,7 +296,8 @@ def wait_for_update_task(client, task_id, poll_interval=1):
             ) from exc
 
         if not result.get("completed"):
-            time.sleep(poll_interval)
+            time.sleep(delay)
+            delay = min(delay * 2, max(1, poll_interval))
             continue
         if error := result.get("error"):
             raise RuntimeError(
@@ -233,13 +307,19 @@ def wait_for_update_task(client, task_id, poll_interval=1):
 
 
 def build_global_metrics_update_by_query_body(group):
-    """Corpo do ``update_by_query`` para um único grupo ISSN + ano.
+    """Apply journal metrics without choosing between conflicting source countries."""
+    country_codes = group["country_codes"]
+    if len(country_codes) > 1:
+        logging.warning(
+            "Conflicting journal countries for year %s and ISSNs %s: %s. "
+            "Preserving existing document country and region.",
+            group["year"],
+            group["issns"],
+            country_codes,
+        )
+        country_codes = []
 
-    A query filtra só ``publication_year`` e os ISSNs daquele grupo. Os
-    params incluem ``indexed_in``, ``country_codes`` e a ``world_region``
-    derivada do primeiro código de país.
-    """
-    country_code = group["country_codes"][0] if group["country_codes"] else None
+    country_code = country_codes[0] if country_codes else None
 
     return {
         "query": {
@@ -255,7 +335,7 @@ def build_global_metrics_update_by_query_body(group):
             "source": global_metrics_update_script(),
             "params": {
                 "indexed_in": sorted(group["indexed_in"]),
-                "country_codes": group["country_codes"],
+                "country_codes": country_codes,
                 "world_region": world_region_for_country(country_code),
             },
         },
