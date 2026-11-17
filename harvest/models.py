@@ -4,7 +4,15 @@ Modelos para coleta e armazenamento de dados de múltiplos endpoints.
 from pathlib import Path
 
 from django.core.exceptions import ValidationError
-from django.db import models, transaction
+from django.db import (
+    DEFAULT_DB_ALIAS,
+    InterfaceError,
+    OperationalError,
+    close_old_connections,
+    connections,
+    models,
+    transaction,
+)
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from modelcluster.models import ClusterableModel
@@ -15,6 +23,8 @@ from core.forms import CoreAdminModelForm
 from core.models import CommonControlField
 from harvest.global_metrics.constants import SUPPORTED_EXTENSIONS
 from harvest.storage import global_metrics_upload_path, overwrite_media_storage
+
+DB_FINALIZATION_MAX_ATTEMPTS = 3
 
 
 class HarvestStatus(models.TextChoices):
@@ -149,8 +159,26 @@ class GlobalMetricsUploadFile(CommonControlField):
         return True
 
     def mark_processed(self):
+        connection = connections[self._state.db or DEFAULT_DB_ALIAS]
+        if not connection.in_atomic_block:
+            close_old_connections()
+
+        previous_status = self.status
         self.status = True
-        self.save(update_fields=["status", "updated"])
+
+        for attempt in range(1, DB_FINALIZATION_MAX_ATTEMPTS + 1):
+            try:
+                self.save(update_fields=["status", "updated"])
+                return
+            except (OperationalError, InterfaceError):
+                # A reconexão não pode recuperar uma transação em andamento.
+                if (
+                    connection.in_atomic_block
+                    or attempt == DB_FINALIZATION_MAX_ATTEMPTS
+                ):
+                    self.status = previous_status
+                    raise
+                connection.close()
 
     def save_stats(self, stats):
         self.stats = stats or {}
