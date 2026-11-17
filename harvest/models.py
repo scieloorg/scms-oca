@@ -101,6 +101,10 @@ class GlobalMetricsUploadFile(CommonControlField):
             raise ValidationError({"file": _("O arquivo enviado está vazio.")})
 
     def save(self, *args, **kwargs):
+        update_fields = kwargs.get("update_fields")
+        if update_fields is not None and "file" not in update_fields:
+            return super().save(*args, **kwargs)
+
         replaced_existing = self._reuse_existing_by_filename()
         should_process = self._should_enqueue_processing()
         if should_process or replaced_existing:
