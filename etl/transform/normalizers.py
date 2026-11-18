@@ -213,6 +213,15 @@ def normalize_country_code(country: str | None) -> str | None:
         if result:
             return result.alpha_2
 
+    normalized_name = normalize_text(country_value)
+    if not normalized_name:
+        return None
+
+    key = normalized_name.casefold()
+    index = localized_country_index()
+    if key in index:
+        return index[key]
+
     try:
         result = pycountry.countries.search_fuzzy(country_value)
         if result:
