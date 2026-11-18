@@ -1,5 +1,7 @@
+import gettext
 import re
 import unicodedata
+from functools import cache
 
 import pycountry
 from django.conf import settings
@@ -160,6 +162,37 @@ def normalize_language(language: str | None) -> str | None:
                 return language_item.alpha_2
 
     return None
+
+
+@cache
+def localized_country_index():
+    catalogs = [
+        gettext.translation(
+            "iso3166-1",
+            pycountry.LOCALES_DIR,
+            languages=[language.replace("-", "_")],
+            fallback=True,
+        )
+        for language, _ in settings.LANGUAGES
+    ]
+
+    index = {}
+    for country in pycountry.countries:
+        for attribute in ("name", "official_name", "common_name"):
+            name = getattr(country, attribute, None)
+            if not name:
+                continue
+
+            names = {catalog.gettext(name) for catalog in catalogs}
+            names.add(name)
+
+            for variant in names:
+                key = normalize_text(variant).casefold()
+                # Some catalogs use the same translated name for two countries.
+                if index.setdefault(key, country.alpha_2) != country.alpha_2:
+                    index[key] = None
+
+    return index
 
 
 def normalize_country_code(country: str | None) -> str | None:
