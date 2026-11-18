@@ -9,8 +9,8 @@ from harvest.models import GlobalMetricsUploadFile
 
 
 def process_global_metrics_upload_file(upload_file_id, index_name=None, chunk_size=None):
-    close_old_connections()
     upload_file = GlobalMetricsUploadFile.objects.get(pk=upload_file_id)
+
     if upload_file.status:
         logging.info(
             f"Arquivo de métricas globais {upload_file.pk} já foi processado; reindexação ignorada."
