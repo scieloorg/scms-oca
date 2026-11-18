@@ -146,3 +146,4 @@ class CountryNormalizerTests(SimpleTestCase):
     def test_normalize_country_code_rejects_unknown_values(self):
         self.assertIsNone(normalize_country_code("not-a-country"))
         self.assertIsNone(normalize_country_code(None))
+        self.assertIsNone(normalize_country_code("   "))

@@ -167,6 +167,8 @@ def normalize_country_code(country: str | None) -> str | None:
         return None
 
     country_value = str(country).strip()
+    if not country_value:
+        return None
 
     if len(country_value) == 2 and country_value.isalpha():
         result = pycountry.countries.get(alpha_2=country_value.upper())
