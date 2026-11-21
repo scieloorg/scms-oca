@@ -147,6 +147,9 @@ class CountryNormalizerTests(SimpleTestCase):
             ("brasil", "BR"),
             (" Espanha ", "ES"),
             ("Países Bajos", "NL"),
+            ("Brasilien", "BR"),
+            ("Brasile", "BR"),
+            ("Brésil", "BR"),
         ):
             with self.subTest(name=name):
                 self.assertEqual(normalize_country_code(name), expected)
