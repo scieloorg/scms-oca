@@ -6,6 +6,8 @@ from functools import cache
 import pycountry
 from django.conf import settings
 
+COUNTRY_TRANSLATION_LOCALES = ("pt_BR", "es", "de", "it", "fr")
+
 
 def normalize_doi(doi: str | None) -> str | None:
     if not doi:
@@ -170,10 +172,10 @@ def localized_country_index():
         gettext.translation(
             "iso3166-1",
             pycountry.LOCALES_DIR,
-            languages=[language.replace("-", "_")],
+            languages=[locale],
             fallback=True,
         )
-        for language, _ in settings.LANGUAGES
+        for locale in COUNTRY_TRANSLATION_LOCALES
     ]
 
     index = {}
