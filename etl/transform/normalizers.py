@@ -1,8 +1,12 @@
+import gettext
 import re
 import unicodedata
+from functools import cache
 
 import pycountry
 from django.conf import settings
+
+COUNTRY_TRANSLATION_LOCALES = ("pt_BR", "es", "de", "it", "fr")
 
 
 def normalize_doi(doi: str | None) -> str | None:
@@ -162,11 +166,44 @@ def normalize_language(language: str | None) -> str | None:
     return None
 
 
+@cache
+def localized_country_index():
+    catalogs = [
+        gettext.translation(
+            "iso3166-1",
+            pycountry.LOCALES_DIR,
+            languages=[locale],
+            fallback=True,
+        )
+        for locale in COUNTRY_TRANSLATION_LOCALES
+    ]
+
+    index = {}
+    for country in pycountry.countries:
+        for attribute in ("name", "official_name", "common_name"):
+            name = getattr(country, attribute, None)
+            if not name:
+                continue
+
+            names = {catalog.gettext(name) for catalog in catalogs}
+            names.add(name)
+
+            for variant in names:
+                key = normalize_text(variant).casefold()
+                # Some catalogs use the same translated name for two countries.
+                if index.setdefault(key, country.alpha_2) != country.alpha_2:
+                    index[key] = None
+
+    return index
+
+
 def normalize_country_code(country: str | None) -> str | None:
     if not country:
         return None
 
     country_value = str(country).strip()
+    if not country_value:
+        return None
 
     if len(country_value) == 2 and country_value.isalpha():
         result = pycountry.countries.get(alpha_2=country_value.upper())
@@ -177,6 +214,15 @@ def normalize_country_code(country: str | None) -> str | None:
         result = pycountry.countries.get(alpha_3=country_value.upper())
         if result:
             return result.alpha_2
+
+    normalized_name = normalize_text(country_value)
+    if not normalized_name:
+        return None
+
+    key = normalized_name.casefold()
+    index = localized_country_index()
+    if key in index:
+        return index[key]
 
     try:
         result = pycountry.countries.search_fuzzy(country_value)
