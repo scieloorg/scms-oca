@@ -2,15 +2,15 @@ import logging
 from pathlib import Path
 
 from django.conf import settings
+from django.db import InterfaceError, OperationalError, close_old_connections
 
-from harvest.global_metrics.indexing import index_file_obj
-
+from harvest.global_metrics.indexing import GlobalMetricsIndexingError, index_file_obj
+from harvest.models import GlobalMetricsUploadFile
 
 
 def process_global_metrics_upload_file(upload_file_id, index_name=None, chunk_size=None):
-    from harvest.models import GlobalMetricsUploadFile
-
     upload_file = GlobalMetricsUploadFile.objects.get(pk=upload_file_id)
+
     if upload_file.status:
         logging.info(
             f"Arquivo de métricas globais {upload_file.pk} já foi processado; reindexação ignorada."
@@ -24,6 +24,8 @@ def process_global_metrics_upload_file(upload_file_id, index_name=None, chunk_si
             "errors": [],
         }
 
+    target_index = index_name or settings.GLOBAL_METRICS_FILE_UPLOAD_OPENSEARCH_INDEX
+
     with upload_file.file.open("rb") as file_obj:
         stats = index_file_obj(
             file_obj=file_obj,
@@ -32,12 +34,29 @@ def process_global_metrics_upload_file(upload_file_id, index_name=None, chunk_si
             chunk_size=chunk_size,
         )
 
-    upload_file.mark_processed()
+    if stats.rows_read == 0 or stats.indexed != stats.rows_read:
+        raise GlobalMetricsIndexingError(
+            f"Importação incompleta do arquivo de métricas globais {upload_file.pk} em {target_index}: "
+            f"{stats.rows_read} linha(s) lida(s), {stats.indexed} indexada(s), {stats.failed} falha(s)."
+        )
+
+    try:
+        upload_file.mark_processed()
+    except (OperationalError, InterfaceError):
+        logging.exception(
+            f"Arquivo de métricas globais {upload_file.pk} indexado em {target_index} "
+            f"({stats.indexed} registros), mas falhou ao persistir status processado."
+        )
+        raise
+    finally:
+        close_old_connections()
+
     logging.info(
         f"Arquivo de métricas globais {upload_file.pk} indexado em "
-        f"{index_name or settings.GLOBAL_METRICS_FILE_UPLOAD_OPENSEARCH_INDEX}: "
+        f"{target_index}: "
         f"{stats.rows_read} linhas lidas, {stats.indexed} indexadas, {stats.failed} falhas."
     )
+
     return {
         "rows_read": stats.rows_read,
         "indexed": stats.indexed,

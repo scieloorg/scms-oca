@@ -6,6 +6,7 @@ from datetime import datetime
 from unittest.mock import MagicMock, call, patch
 
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.db import OperationalError
 from django.test import SimpleTestCase, TestCase, override_settings
 from django.utils import timezone
 from lxml import etree
@@ -31,6 +32,7 @@ from .exception_logs import ExceptionContext
 from .global_metrics.constants import GLOBAL_METRICS_REQUIRED_COLUMNS
 from .global_metrics.indexing import (
     GlobalMetricsIndexingError,
+    ImportStats,
     index_prepared_rows,
     iter_file_rows,
 )
@@ -158,6 +160,50 @@ class GlobalMetricsUploadFileTests(TestCase):
 
 
 class GlobalMetricsUploadTaskTests(SimpleTestCase):
+    @patch("harvest.global_metrics.process.index_file_obj")
+    @patch("harvest.models.GlobalMetricsUploadFile.objects.get")
+    def test_process_reconnects_without_reindexing(self, get_upload, index_file):
+        upload_file = GlobalMetricsUploadFile(
+            pk=1, file=SimpleUploadedFile("metrics.csv", b"metrics-data")
+        )
+        get_upload.return_value = upload_file
+        stats = ImportStats()
+        stats.rows_read = stats.indexed = 1
+        index_file.return_value = stats
+
+        with (
+            patch("harvest.models.connections") as connections,
+            patch(
+                "harvest.models.CommonControlField.save",
+                side_effect=[OperationalError("closed"), None],
+            ) as save,
+        ):
+            connection = connections["default"]
+            connection.in_atomic_block = False
+            process_global_metrics_upload_file(upload_file.pk)
+
+        self.assertTrue(upload_file.status)
+        self.assertEqual(save.call_count, 2)
+        connection.close.assert_called_once_with()
+        index_file.assert_called_once()
+
+    @patch("harvest.global_metrics.process.index_file_obj")
+    @patch("harvest.models.GlobalMetricsUploadFile.objects.get")
+    def test_process_keeps_empty_or_incomplete_upload_unprocessed(self, get_upload, index_file):
+        upload_file = get_upload.return_value
+        upload_file.pk = 1
+        upload_file.status = False
+        upload_file.file.name = "metrics.csv"
+        stats = ImportStats()
+        index_file.return_value = stats
+
+        for counts in ((0, 0, 0), (2, 1, 1), (2, 1, 0)):
+            stats.rows_read, stats.indexed, stats.failed = counts
+            with self.subTest(counts=counts), self.assertRaises(GlobalMetricsIndexingError):
+                process_global_metrics_upload_file(upload_file.pk)
+
+        upload_file.mark_processed.assert_not_called()
+
     def test_global_metric_row_normalizes_issns_flags_and_country(self):
         hit = {
             "_source": {
