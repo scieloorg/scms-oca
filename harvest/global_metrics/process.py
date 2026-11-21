@@ -25,36 +25,28 @@ def process_global_metrics_upload_file(upload_file_id, index_name=None, chunk_si
         }
 
     target_index = index_name or settings.GLOBAL_METRICS_FILE_UPLOAD_OPENSEARCH_INDEX
-    stats = None
+
+    with upload_file.file.open("rb") as file_obj:
+        stats = index_file_obj(
+            file_obj=file_obj,
+            file_name=Path(upload_file.file.name).name,
+            index_name=index_name,
+            chunk_size=chunk_size,
+        )
+
+    if stats.rows_read == 0 or stats.indexed != stats.rows_read:
+        raise GlobalMetricsIndexingError(
+            f"Importação incompleta do arquivo de métricas globais {upload_file.pk} em {target_index}: "
+            f"{stats.rows_read} linha(s) lida(s), {stats.indexed} indexada(s), {stats.failed} falha(s)."
+        )
 
     try:
-        with upload_file.file.open("rb") as file_obj:
-            stats = index_file_obj(
-                file_obj=file_obj,
-                file_name=Path(upload_file.file.name).name,
-                index_name=index_name,
-                chunk_size=chunk_size,
-            )
-
-        if stats.failed > 0:
-            raise GlobalMetricsIndexingError(
-                f"Falha ao indexar arquivo de métricas globais {upload_file.pk} em {target_index}: "
-                f"{stats.failed} falha(s) em {stats.rows_read} linha(s) lida(s)."
-            )
-
-        if stats.rows_read <= 0 or stats.indexed != stats.rows_read:
-            raise GlobalMetricsIndexingError(
-                f"Importação incompleta do arquivo de métricas globais {upload_file.pk} em {target_index}: "
-                f"{stats.rows_read} linha(s) lida(s), {stats.indexed} indexada(s)."
-            )
-
         upload_file.mark_processed()
     except (OperationalError, InterfaceError):
-        if stats is not None:
-            logging.exception(
-                f"Arquivo de métricas globais {upload_file.pk} indexado em {target_index} "
-                f"({stats.indexed} registros), mas falhou ao persistir status processado."
-            )
+        logging.exception(
+            f"Arquivo de métricas globais {upload_file.pk} indexado em {target_index} "
+            f"({stats.indexed} registros), mas falhou ao persistir status processado."
+        )
         raise
     finally:
         close_old_connections()
@@ -64,6 +56,7 @@ def process_global_metrics_upload_file(upload_file_id, index_name=None, chunk_si
         f"{target_index}: "
         f"{stats.rows_read} linhas lidas, {stats.indexed} indexadas, {stats.failed} falhas."
     )
+
     return {
         "rows_read": stats.rows_read,
         "indexed": stats.indexed,

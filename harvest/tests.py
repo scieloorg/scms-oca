@@ -187,6 +187,23 @@ class GlobalMetricsUploadTaskTests(SimpleTestCase):
         connection.close.assert_called_once_with()
         index_file.assert_called_once()
 
+    @patch("harvest.global_metrics.process.index_file_obj")
+    @patch("harvest.models.GlobalMetricsUploadFile.objects.get")
+    def test_process_keeps_empty_or_incomplete_upload_unprocessed(self, get_upload, index_file):
+        upload_file = get_upload.return_value
+        upload_file.pk = 1
+        upload_file.status = False
+        upload_file.file.name = "metrics.csv"
+        stats = ImportStats()
+        index_file.return_value = stats
+
+        for counts in ((0, 0, 0), (2, 1, 1), (2, 1, 0)):
+            stats.rows_read, stats.indexed, stats.failed = counts
+            with self.subTest(counts=counts), self.assertRaises(GlobalMetricsIndexingError):
+                process_global_metrics_upload_file(upload_file.pk)
+
+        upload_file.mark_processed.assert_not_called()
+
     def test_global_metric_row_normalizes_issns_flags_and_country(self):
         hit = {
             "_source": {
