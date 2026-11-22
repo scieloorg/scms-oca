@@ -141,8 +141,23 @@ class CountryNormalizerTests(SimpleTestCase):
         self.assertEqual(normalize_country_code("bra"), "BR")
 
     def test_normalize_country_code_accepts_country_names(self):
-        self.assertEqual(normalize_country_code("Brazil"), "BR")
+        for name, expected in (
+            ("Brazil", "BR"),
+            ("Brasil", "BR"),
+            ("brasil", "BR"),
+            (" Espanha ", "ES"),
+            ("Países Bajos", "NL"),
+            ("Brasilien", "BR"),
+            ("Brasile", "BR"),
+            ("Brésil", "BR"),
+        ):
+            with self.subTest(name=name):
+                self.assertEqual(normalize_country_code(name), expected)
+
+    def test_normalize_country_code_rejects_ambiguous_translation(self):
+        self.assertIsNone(normalize_country_code("República Islâmica do Paquistão"))
 
     def test_normalize_country_code_rejects_unknown_values(self):
         self.assertIsNone(normalize_country_code("not-a-country"))
         self.assertIsNone(normalize_country_code(None))
+        self.assertIsNone(normalize_country_code("   "))
